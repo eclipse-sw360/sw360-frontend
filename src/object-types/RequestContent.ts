@@ -5,8 +5,11 @@
  * License-Filename: LICENSE
  */
 
-const Home = () => {
-  return <h1>Home page</h1>
+export default interface RequestContent {
+    method: string,
+    headers: {
+        'Content-Type'?: string,
+        'Authorization'?: string
+    },
+    body: string | null
 }
-
-export default Home

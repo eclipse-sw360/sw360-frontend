@@ -5,8 +5,12 @@
  * License-Filename: LICENSE
  */
 
-const Home = () => {
-  return <h1>Home page</h1>
+enum HttpStatus {
+    OK = 200,
+    CREATED = 201,
+    BAD_REQUEST = 400,
+    UNAUTHORIZED = 401,
+    NOT_FOUND = 404,
 }
 
-export default Home
+export default HttpStatus

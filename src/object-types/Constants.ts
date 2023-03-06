@@ -5,8 +5,5 @@
  * License-Filename: LICENSE
  */
 
-const Home = () => {
-  return <h1>Home page</h1>
-}
-
-export default Home
+export const CREDENTIAL_PROVIDER : string = "credential_provider"
+export const CREDENTIALS : string = "credentials"
