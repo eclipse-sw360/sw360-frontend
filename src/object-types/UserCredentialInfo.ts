@@ -5,8 +5,7 @@
  * License-Filename: LICENSE
  */
 
-const Home = () => {
-  return <h1>Home page</h1>
+export default interface UserCredentialInfo {
+    username: string,
+    password: string
 }
-
-export default Home

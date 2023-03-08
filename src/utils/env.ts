@@ -5,8 +5,4 @@
  * License-Filename: LICENSE
  */
 
-const Home = () => {
-  return <h1>Home page</h1>
-}
-
-export default Home
+export const SW360_API_URL: string | undefined  = process.env.SW360_API_URL;
