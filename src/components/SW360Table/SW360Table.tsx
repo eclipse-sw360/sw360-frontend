@@ -12,7 +12,7 @@ import React from 'react'
 import { Grid } from 'gridjs-react'
 
 interface SW360TableProps {
-    columns?: string[]
+    columns?: any[]
     data?: any[]
     search?: boolean
     pagination?: boolean
