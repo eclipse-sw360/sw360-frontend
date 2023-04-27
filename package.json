@@ -19,6 +19,8 @@
     "dotenv": "^16.0.3",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.3",
+    "gridjs": "^6.0.6",
+    "gridjs-react": "^6.0.1",
     "next": "13.2.3",
     "next-auth": "^4.20.1",
     "next-i18next": "^13.2.2",
@@ -26,6 +28,7 @@
     "react-bootstrap": "^2.7.2",
     "react-cookie": "^4.1.1",
     "react-dom": "18.2.0",
+    "react-icons": "^4.8.0",
     "typescript": "4.9.5"
   },
   "devDependencies": {

@@ -8,16 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum HttpStatus {
-    OK = 200,
-    CREATED = 201,
-    ACCEPTED = 202,
-    MULTIPLE_STATUS = 207,
-    BAD_REQUEST = 400,
-    UNAUTHORIZED = 401,
-    NOT_FOUND = 404,
-    CONFLICT = 409,
-    INTERNAL_SERVER_ERROR = 500,
+import Spinner from 'react-bootstrap/Spinner';
+
+const PageSpinner = () => {
+  return (
+    <Spinner animation="border" style={{color: '#F7941E'}}/>
+  )
 }
 
-export default HttpStatus
+export default PageSpinner

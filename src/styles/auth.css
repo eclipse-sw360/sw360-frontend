@@ -26,17 +26,6 @@
     font-weight: bold;
 }
 
-#footer {
-    padding-bottom: 2rem;
-    padding-top: 2rem;
-    background-color: #30313F;
-    color: #FFF;
-    text-align: center;
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-}
-
 .btn-lg {
     border-radius: 0.25rem;
     font-size: 1.125rem;
