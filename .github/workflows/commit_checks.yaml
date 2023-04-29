@@ -1,0 +1,20 @@
+name: Commit Checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    name: Validade Pull Request Commits
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: webiny/action-conventional-commits@v1.1.0
+
+      - name: Check deny listed files
+        run: bash .github/deny_list.sh
