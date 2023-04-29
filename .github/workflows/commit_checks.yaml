@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: webiny/action-conventional-commits@v1.1.0
+      - uses: apache/skywalking-eyes/header@main
 
       - name: Check deny listed files
         run: bash .github/deny_list.sh

@@ -1,0 +1,48 @@
+# Copyright (C) SW360 Frontend Authors (see <https://github.com/eclipse-sw360/sw360-frontend/blob/main/NOTICE>)
+
+# SPDX-License-Identifier: EPL-2.0
+# License-Filename: LICENSE
+
+header:
+  license:
+    spdx-id: EPL-2.0
+    copyright-owner: SW360 Frontend Authors
+    copyright-year: '2023'
+    software-name: sw360-frontend
+    content: |
+      Copyright (C) SW360 Frontend Authors (see <https://github.com/eclipse-sw360/sw360-frontend/blob/main/NOTICE>)
+
+      SPDX-License-Identifier: EPL-2.0
+      License-Filename: LICENSE
+
+    pattern: |
+      Copyright (C) SW360 Frontend Authors (see <https://github.com/eclipse-sw360/sw360-frontend/blob/main/NOTICE>)
+
+      SPDX-License-Identifier: EPL-2.0
+      License-Filename: LICENSE
+
+  paths:
+    - '**'
+
+  paths-ignore:
+    - 'node_modulesw'
+    - '**/*.md'
+    - '**/testdata/**'
+    - 'LICENSE'
+    - 'NOTICE'
+    - '*.code-workspace'
+    - '**/*.diff'
+    - '**/*.svg'
+    - .prettierrc.js
+    - .eslintrc.json
+    - .gitignore
+    - .husky
+    - package.json
+
+  comment: on-failure
+
+  license-location-threshold: 80
+
+dependency:
+  files:
+    - package.json
