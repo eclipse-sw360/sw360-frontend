@@ -1,9 +1,7 @@
-/*
- * Copyright (C) TOSHIBA CORPORATION, 2023.
- * Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023.
- * SPDX-License-Identifier: EPL-2.0
- * License-Filename: LICENSE
- */
+// Copyright (C) SW360 Frontend Authors (see <https://github.com/eclipse-sw360/sw360-frontend/blob/main/NOTICE>)
+
+// SPDX-License-Identifier: EPL-2.0
+// License-Filename: LICENSE
 
 import { Html, Head, Main, NextScript } from 'next/document'
 

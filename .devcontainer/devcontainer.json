@@ -1,3 +1,8 @@
+// Copyright (C) SW360 Frontend Authors (see <https://github.com/eclipse-sw360/sw360-frontend/blob/main/NOTICE>)
+
+// SPDX-License-Identifier: EPL-2.0
+// License-Filename: LICENSE
+
 {
   "name": "SW360 Frontend",
   "build": {
@@ -29,23 +34,25 @@
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "editor.formatOnSave": true,
-        "eslint.alwaysShowStatus": true
+        "eslint.alwaysShowStatus": true,
+        "indentRainbow.colorOnWhiteSpaceOnly": true
       },
       // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
-        "2gua.rainbow-brackets",
-        "aaron-bond.better-comments",
-        "davidanson.vscode-markdownlint",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "formulahendry.auto-close-tag",
-        "formulahendry.auto-rename-tag",
-        "ms-vscode.vscode-typescript-tslint-plugin",
-        "naumovs.color-highlight",
-        "oderwat.indent-rainbow",
-        "shardulm94.trailing-spaces",
-        "VisualStudioExptTeam.vscodeintellicode"
-      ]
+		"2gua.rainbow-brackets",
+		"aaron-bond.better-comments",
+		"davidanson.vscode-markdownlint",
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"formulahendry.auto-close-tag",
+		"formulahendry.auto-rename-tag",
+		"ms-vscode.vscode-typescript-tslint-plugin",
+		"naumovs.color-highlight",
+		"oderwat.indent-rainbow",
+		"shardulm94.trailing-spaces",
+		"VisualStudioExptTeam.vscodeintellicode",
+		"ms-azuretools.vscode-docker"
+	]
     }
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
