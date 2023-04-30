@@ -1,17 +1,14 @@
-# Copyright (C) 2023 SW360 Project Authors (see <https://github.com/eclipse-sw360/sw360-frontend/NOTICE>)
-#
-# This program and the accompanying materials are made
-# available under the terms of the Eclipse Public License 2.0
-# which is available at https://www.eclipse.org/legal/epl-2.0/
-#
-# SPDX-License-Identifier: EPL-2.0
-
 #!/bin/bash
+
+# Copyright (C) SW360 Frontend Authors (see <https://github.com/eclipse-sw360/sw360-frontend/blob/main/NOTICE>)
+
+# SPDX-License-Identifier: EPL-2.0
+# License-Filename: LICENSE
 
 set -e
 
 # Check for files not intented to be present
-declare -a denyfiles=("yarn.lock")
+declare -a denyfiles=("yarn.lock" "package-lock.json" "pnpm-lock.yaml")
 declare -a denyextensions=("png" "jpg" "jpeg" "tiff")
 
 for file in "${denyfiles[@]}"; do

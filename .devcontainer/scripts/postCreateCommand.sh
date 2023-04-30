@@ -5,5 +5,10 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
+set -e
+
+# Add directory as safe
+git config --global --add safe.directory /workspaces/sw360-frontend
+
 # Install npm packages to development
 npm install
