@@ -39,6 +39,7 @@ header:
     - .husky
     - package.json
     - package-lock.json
+    - '**/common.json'
 
   comment: on-failure
 

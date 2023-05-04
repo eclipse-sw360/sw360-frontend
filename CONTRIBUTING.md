@@ -25,7 +25,7 @@ We are assuming that you have some connection to an SW360 instance to test, so a
 
 ```ini
 # sw360-frontend/.env
-SW360_API_URL = ${SW360_API_URL}   (e.g 'http://localhost:8080')
+NEXT_PUBLIC_SW360_API_URL = ${SW360_API_URL}   (e.g 'http://localhost:8080')
 NEXTAUTH_SECRET = _any string_ (next auth secret key)
 ```
 

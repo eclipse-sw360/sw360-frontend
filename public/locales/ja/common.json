@@ -1,0 +1,12 @@
+{
+  "Authentication failed. Please try again.": "認証に失敗しました。もう一度お試しください。",
+  "Create Account": "アカウントの作成",
+  "Email Address": "メールアドレス",
+  "In order to go ahead, please sign in or create a new account!": "先に進むためには、サインインするか、新しいアカウントを作成してください",
+  "Logout": "ログアウト",
+  "Password": "パスワード",
+  "Sign In": "サインイン",
+  "SW360 is an open source software project that provides both a web application and a repository to collect, organize and make available information about software components. It establishes a central hub for software components in an organization.": "SW360は、ソフトウェアコンポーネントに関する情報を収集、整理、利用可能にするためのウェブアプリケーションとリポジトリの両方を提供するオープンソースのソフトウェアプロジェクトです。SW360は、組織内のソフトウェアコンポーネントの一元化を行います。",
+  "Start": "開始",
+  "Welcome to SW360!": "SW360へようこそ！"
+}

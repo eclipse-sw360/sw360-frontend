@@ -8,17 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { createContext, useState } from 'react';
-
-export const PublicContext = createContext<any> ('');
-
-const PublicContextProvider = ({ children }: any) => {
-    const publicContextData = {
-    }
-
-    return (
-        <PublicContext.Provider value={publicContextData}>{children}</PublicContext.Provider>
-    );
+module.exports = {
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'ja', 'zh', 'vi'],
+  }
 }
-
-export default PublicContextProvider;
