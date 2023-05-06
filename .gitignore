@@ -38,3 +38,10 @@ next-env.d.ts
 
 # Diff files
 *.diff
+
+# Workspace files
+*.code-workspace
+
+# Lock files
+package-lock.json
+yarn.lock
