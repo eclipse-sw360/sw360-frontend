@@ -13,9 +13,11 @@ import Image from 'next/image'
 import Link from 'next/link';
 import Sw360Logo from '@/assets/images/sw360-logo.svg';
 import { signOut, useSession } from 'next-auth/react';
+import { useTranslation } from 'next-i18next'
 
 const PageHeader = () => {
     const { data: session } = useSession();
+    const { t } = useTranslation("common");
 
     return (
         <div className='header'>
@@ -28,9 +30,9 @@ const PageHeader = () => {
                 {session ? (
                     <div className='col'>
                         <div className='text-end'>
-                            <Link href='#' onClick={() => signOut({
-                                callbackUrl: '/auth'
-                            })}>Logout</Link>
+                            <Link href='' onClick={() => signOut({
+                                callbackUrl: '/'
+                            })}>{t('Logout')}</Link>
                         </div>
                     </div>
                 ) : <></>}

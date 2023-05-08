@@ -7,8 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+const { i18n } = require('./next-i18next.config')
+
 const nextConfig = {
-  reactStrictMode: true
+  reactStrictMode: true,
+  i18n,
 }
 
 module.exports = nextConfig

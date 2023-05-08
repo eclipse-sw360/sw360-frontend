@@ -8,19 +8,30 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import '@/styles/globals.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '@/styles/globals.css'
 import '@/styles/auth.css'
 import type { AppProps } from 'next/app'
 import Layout from '../components/layout'
-import PublicContextProvider from '../contexts/public.context';
+import { appWithTranslation } from 'next-i18next'
+import { SessionProvider } from 'next-auth/react'
 
-export default function App({ Component, pageProps }: AppProps) {
+const App = ({ Component, pageProps }: AppProps) => {
   return (
-    <PublicContextProvider>
-      <Layout session={pageProps.session}>
-        <Component {...pageProps} />
-      </Layout>
-    </PublicContextProvider>
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
   )
 }
+
+const AppWithTranslation = appWithTranslation(App);
+
+const Sw360App = (props: AppProps) => {
+  return (
+    <SessionProvider session={props.pageProps.session}>
+      <AppWithTranslation {...props} />
+    </SessionProvider>
+  )
+}
+
+export default Sw360App
