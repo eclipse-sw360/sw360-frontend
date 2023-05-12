@@ -1,0 +1,63 @@
+/*
+  Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
+  Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.card-deck {
+  margin-bottom: 1rem;
+}
+
+.card-header:first-child {
+  border-radius: calc(0.25rem - 0px) calc(0.25rem - 0px) 0 0;
+}
+
+.card-header {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-bottom: 0px solid rgba(0, 0, 0, 0.125);
+  margin-bottom: 0;
+  padding: 0.75rem 1.25rem;
+  color: #FFF;
+  background-color: #5D8EA9;
+  font-weight: bold;
+}
+
+.card-body {
+  flex: 1 1 auto;
+  min-height: 1px;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 1rem;
+  background-color: #EBF0F5;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.create-on-label {
+  display: 'inline-block';
+  width: 60% !important;
+  font-weight: bold;
+}
+
+.popup {
+  display: none;
+  position: absolute;
+  border: 1px solid black;
+  background-color: white;
+  text-align: justify;
+  width: 600px;
+  padding: 5px;
+}
+
+.info-icon:hover~.popup {
+  display: block
+}

@@ -15,4 +15,5 @@ export default interface RequestContent {
         'Authorization'?: string
     },
     body: string | null
+    signal?: any
 }
