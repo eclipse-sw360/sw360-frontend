@@ -8,6 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import Head from 'next/head'
+import { Inter } from 'next/font/google'
+import 'bootstrap/dist/css/bootstrap.css';
+import HomePage from './home'
+
 import { useState } from 'react';
 import Link from 'next/link';
 import Modal from 'react-bootstrap/Modal';

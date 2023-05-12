@@ -55,8 +55,7 @@ code {
   color: #FFF;
   text-align: center;
   width: 100%;
-  position: fixed;
-  bottom: 0;
+  margin-top: 20px;
 }
 
 .header {
@@ -79,4 +78,72 @@ code {
   width: 30px;
   margin-left: 3px;
   margin-right: 3px;
+}
+
+.table {
+  border-spacing: 0;
+  color: #272833;
+  font-size: 0.875rem;
+  margin-bottom: 0;
+  width: 100%;
+  padding: 10px;
+}
+
+.table thead  {
+  background-color: #5D8EA9;
+  color: white;
+  font-size: bold;
+}
+
+.table td, th{
+  padding: 14px !important;
+}
+
+.table thead th a {
+  border-radius: 1px;
+  color: #6b6c7e;
+  transition: box-shadow 0.15s ease-in-out;
+}
+
+.btn-toolbar .btn-group:not(:last-child) {
+  margin-right: 0.5rem;
+}
+
+.btn {
+  font-weight: bold !important;
+  border-radius: 3px !important;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
+
+.btn-secondary {
+  background-color: #fff !important;
+  border-color: #cdced9 !important;
+  color: #6b6c7e !important;
+}
+
+.btn-primary:focus {
+  background-color: #F7941E !important;
+  border-color: white !important;
+}
+
+.btn-secondary:hover {
+  color: #000 !important;
+}
+
+.gridjs-wrapper {
+  border-radius: 0px;
+}
+
+.nav-pills .nav-link.active {
+  color: white !important;
+}
+
+.link {
+  color: #F7941E;
+  text-decoration: none;
+}
+
+.dropdown-item:focus {
+  background-color: lightgray !important;
 }

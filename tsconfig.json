@@ -23,7 +23,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "strictNullChecks": false,
     "paths": {
       "@/*": ["./src/*"]
     }

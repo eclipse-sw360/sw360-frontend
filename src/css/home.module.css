@@ -1,0 +1,87 @@
+/*
+  Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.homePage{
+    margin-top: 1%;
+    min-height: calc(100vh - 30px);
+}
+
+
+.title {
+    color: #5D8EA9;
+    text-transform: uppercase;
+    font-size: medium;
+    /* padding-inline-start: 0px; */
+    /* border-bottom: 2px solid; */
+}
+
+.titleSideBar {
+    color: #5D8EA9;
+    text-transform: uppercase;
+    font-size: large;
+    margin-top: 10px;
+}
+
+.boldText{
+    margin-top: 4px;
+    margin-left: 17px;
+}
+
+.horizontalLine{
+    margin: 0 0;
+    margin-left: 14px;
+    margin-right: 14px;
+    border-top: 2px solid;
+    color: #006b99;
+}
+/* #sw360_table_col h5 {
+    border-bottom: 2px dotted;
+} */
+
+.buttonPrimary,
+.buttonPrimary:focus,
+.buttonPrimary:active,
+.buttonPrimary:hover {
+    background-color: #f28809 !important;
+    border-color: #f28809 !important;
+    color: black !important;
+}
+.buttonPrimary:hover {
+    background-color: #f28809 !important;
+    border-color: #f28809 !important;
+    color: white !important;
+}
+
+.btnOutlinePrimary {
+    border-color: #5D8EA9 !important;
+    color: #5D8EA9 !important;
+    background-color: white !important;
+}
+.btnOutlinePrimary:focus {
+    border-color: #5D8EA9 !important;
+    color: #5D8EA9 !important;
+    background-color: white !important;
+}
+.btnOutlinePrimary:active,
+.btnOutlinePrimary:hover {
+    background-color: #5D8EA9 !important;
+    color: white !important;
+}
+.refreshIcon{
+    color: rgb(66, 49, 49);
+
+}
+
+.dropDown{
+    align-items: left;
+    margin-left: 10px;
+    margin-top: 0px;
+}
