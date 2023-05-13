@@ -40,6 +40,8 @@ header:
     - package.json
     - package-lock.json
     - '**/common.json'
+    - 'defaultValues/*.json'
+    - 'mockData/*.json'
 
   comment: on-failure
 

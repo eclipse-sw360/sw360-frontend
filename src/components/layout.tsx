@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { ReactNode } from 'react';
-import PageHeader from './header'
+import PageHeader from './Navbar'
 import PageFooter from './footer'
 
 interface IProps {
