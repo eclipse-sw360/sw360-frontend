@@ -1,0 +1,74 @@
+/*
+  Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.paginationContainer {
+  display: flex;
+  list-style-type: none;
+  width: auto;
+  /* justify-content: right;
+  align-items: flex-end; */
+  padding-left: 0%;
+}
+
+.paginationContainer .paginationItem {
+  padding: 0 14px;
+  height: 32px;
+  text-align: center;
+  margin: auto 4px;
+  color: rgba(0, 0, 0, 0.87);
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  letter-spacing: 0.01071em;
+  border-radius: 16px;
+  line-height: 1.43;
+  font-size: 13px;
+  min-width: 32px;
+}
+.paginationContainer .paginationItem .dots:hover {
+  background-color: transparent;
+  cursor: default;
+}
+.paginationContainer .paginationItem:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+}
+.paginationContainer .paginationItem.selected {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+.paginationContainer .paginationItem .arrow::before {
+  position: relative;
+ /* top: 3pt;
+  Uncomment this to lower the icons as requested in comments*/
+  content: '';
+ /* By using an em scale, the arrows will size with the font */
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  border-right: 0.12em solid rgba(0, 0, 0, 0.87);
+  border-top: 0.12em solid rgba(0, 0, 0, 0.87);
+}
+.paginationContainer .paginationItem.disabled {
+  pointer-events: none;
+}
+.paginationContainer .paginationItem.disabled .arrow::before {
+  border-right: 0.12em solid rgba(0, 0, 0, 0.43);
+  border-top: 0.12em solid rgba(0, 0, 0, 0.43);
+}
+.paginationContainer .paginationItem.disabled:hover {
+  background-color: transparent;
+  cursor: default;
+}
+
+.paragraph{
+  margin-right: auto;
+  margin-top: 10px;
+}
