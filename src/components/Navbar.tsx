@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/router'
 import sw360logo from '../../public/images/logo-edited.svg'
@@ -21,9 +21,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 export default function Navbar() {
 
-    let location = useRouter();
-    useEffect(() => {
-    }, [location]);
+    const location = useRouter();
 
     const [inputValue, setInputValue] = useState('')
     const [heading, setHeading] = useState('')
@@ -45,9 +43,9 @@ export default function Navbar() {
             <div className='container-fluid pt-4 pb-2'>
                 <div className='row'>
                     <div className='col-md-4'>
-                        <a className='container' href='/'>
+                        <Link className='container' href='/'>
                             <Image src={sw360logo} height={57} width={147} alt="SW360 Logo" />
-                        </a>
+                        </Link>
                     </div>
                     <div className="col-md-5 col-md-offset-1"></div>
                     <div className='col-md-2 pt-3'>
@@ -73,20 +71,20 @@ export default function Navbar() {
                             </button>
 
                             <div className={`dropdown-menu ${navbarStyles.dropdownMenu}`}>
-                                <li><a className="dropdown-item" href="/mySites">My Sites</a></li>
-                                <li><a className="dropdown-item" href="/myProfile">My Profile</a></li>
-                                <li><a className="dropdown-item" href="/myDashboard">My Dashboard </a></li>
+                                <li><Link className="dropdown-item" href="/mySites">My Sites</Link></li>
+                                <li><Link className="dropdown-item" href="/myProfile">My Profile</Link></li>
+                                <li><Link className="dropdown-item" href="/myDashboard">My Dashboard </Link></li>
                                 <li><hr className="dropdown-divider"/></li>
-                                <li><a className="dropdown-item" href="/notifications">Notifications</a></li>
-                                <li><a className="dropdown-item" href="/sharedContent">Shared Content</a></li>
-                                <li><a className="dropdown-item" href="/mySubmissions">My Submissions</a></li>
-                                <li><a className="dropdown-item" href="/myWorkflowTasks">My Workflow Tasks</a></li>
+                                <li><Link className="dropdown-item" href="/notifications">Notifications</Link></li>
+                                <li><Link className="dropdown-item" href="/sharedContent">Shared Content</Link></li>
+                                <li><Link className="dropdown-item" href="/mySubmissions">My Submissions</Link></li>
+                                <li><Link className="dropdown-item" href="/myWorkflowTasks">My Workflow Tasks</Link></li>
                                 <li><hr className="dropdown-divider"/></li>
-                                <li><a className="dropdown-item" href="/accountSettings">Account Settings</a></li>
-                                <li><a className="dropdown-item" href="/myConnectedApplications">My Connected Applications</a></li>
-                                <li><a className="dropdown-item" href="/myOrganizations">My Organizations</a></li>
+                                <li><Link className="dropdown-item" href="/accountSettings">Account Settings</Link></li>
+                                <li><Link className="dropdown-item" href="/myConnectedApplications">My Connected Applications</Link></li>
+                                <li><Link className="dropdown-item" href="/myOrganizations">My Organizations</Link></li>
                                 <li><hr className="dropdown-divider"/></li>
-                                <li><a className="dropdown-item" href="/signOut">Sign Out</a></li>
+                                <li><Link className="dropdown-item" href="/signOut">Sign Out</Link></li>
                             </div>
                         </div>
                     </div>

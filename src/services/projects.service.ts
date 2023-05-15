@@ -19,12 +19,11 @@ export function ProjectDetails(props: any) {
     const [projData, setProjData] = useState(null);
     const getProjectData = async () => {
 
-        let fetchProjectsURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/projects?page=6&page_entries=10';
+        const fetchProjectsURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/projects?page=6&page_entries=10';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchProjectData = fetch(fetchProjectsURL, opts)
             .then((response) => {

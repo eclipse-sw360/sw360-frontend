@@ -56,7 +56,7 @@ const ComponentIndex = ({ session }: any) => {
 
 export async function getServerSideProps({ req, res, locale }: any) {
   const session: any = await getServerSession(req, res, authOptions);
-  let props: any = {
+  const props: any = {
     session: session,
     ...(await serverSideTranslations(locale, ['common'])),
   }

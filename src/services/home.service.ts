@@ -20,12 +20,11 @@ export function MyProjectData(props: any) {
     const [projDescription, setProjDescription] = useState(null);
     const getHomePageProjectData = async () => {
 
-        let myProjectFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/projects/myprojects';
+        const myProjectFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/projects/myprojects';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchProjectData = fetch(myProjectFetchURL, opts)
             .then((response) => {
@@ -37,7 +36,7 @@ export function MyProjectData(props: any) {
                 }
             })
             .then((data) => {
-                const fectProjectDetailsUrl : string = '${data._embedded.sw360:projects[0]._links.self.href}'
+                const fectProjectDetailsUrl = '${data._embedded.sw360:projects[0]._links.self.href}'
                 const fetchProjectData = fetch(fectProjectDetailsUrl, opts)
                         .then((response) => {
                             if (response.status == HttpStatus.OK) {
@@ -74,12 +73,11 @@ export function MyComponentData(props: any) {
     const [compData, setCompData] = useState(null);
     const getHomePageComponentData = async () => {
 
-        let myComponentFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/myComponents';
+        const myComponentFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/myComponents';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchComponentData = fetch(myComponentFetchURL, opts)
             .then((response) => {
@@ -108,12 +106,11 @@ export function MyTaskAssignmentData(props: any) {
     const [taskAssignmentData, setTaskAssignmentData] = useState(null);
     const getHomePageTaskAssignmentData = async () => {
 
-        let myTaskAssignmentFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/myTaskAssignments';
+        const myTaskAssignmentFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/myTaskAssignments';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchMyTaskAssignmentData = fetch(myTaskAssignmentFetchURL, opts)
             .then((response) => {
@@ -142,12 +139,11 @@ export function MyTaskSubmissionData(props: any) {
     const [taskSubmissionData, setTaskSubmissionData] = useState(null);
     const getHomePageTaskSubmissionData = async () => {
 
-        let myTaskSubmissionFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/myTaskSubmissions';
+        const myTaskSubmissionFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/myTaskSubmissions';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchMyTaskSubmissionData = fetch(myTaskSubmissionFetchURL, opts)
             .then((response) => {
@@ -176,12 +172,11 @@ export function MySubscriptionData(props: any) {
     const [mySubscriptions, setMySubscriptions] = useState(null);
     const getHomePageMySubscriptions = async () => {
 
-        let mySubscriptionsFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/mySubscriptions';
+        const mySubscriptionsFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/mySubscriptions';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchMySubscriptions = fetch(mySubscriptionsFetchURL, opts)
             .then((response) => {
@@ -210,12 +205,11 @@ export function MyRecentComponentData(props: any) {
     const [myRecentComponents, setMyRecentComponents] = useState(null);
     const getHomePageMyRecentComponents = async () => {
 
-        let myRecentComponentsFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/recentComponents';
+        const myRecentComponentsFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/recentComponents';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchMyRecentComponents = fetch(myRecentComponentsFetchURL, opts)
             .then((response) => {
@@ -244,12 +238,11 @@ export function MyRecentReleaseData(props: any) {
     const [myRecentReleases, setMyRecentReleases] = useState(null);
     const getHomePageMyRecentReleases = async () => {
 
-        let myRecentReleasesFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/releases/recentReleases';
+        const myRecentReleasesFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/releases/recentReleases';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
-        opts.headers['Access-Control-Allow-Origin'] = '*';
 
         const fetchMyRecentReleases = fetch(myRecentReleasesFetchURL, opts)
             .then((response) => {

@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 import React from 'react'
-import { countries } from 'country-list'
+import { getData } from 'country-list'
 
 export default function SelectCountryComponent() {
 
@@ -17,11 +17,11 @@ export default function SelectCountryComponent() {
             <label htmlFor="country" className="form-label fw-bold">Country</label>
             <select className="form-select" aria-label="country" id="country" defaultValue="">
                 <option value="">Select a country</option>
-                {countries.getData().map((country: any) => (
+                {getData().map((country: any) => (
                     <option key={country.code} value={country.code}>
                         {country.name}
                 </option>
-              ))}
+                ))}
             </select>
         </>
     );

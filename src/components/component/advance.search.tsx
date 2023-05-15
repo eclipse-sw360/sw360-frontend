@@ -15,9 +15,6 @@ import { useRouter } from 'next/router'
 import CommonUtils from '@/utils/common.utils'
 import { useTranslation } from 'next-i18next'
 import { FaInfoCircle } from 'react-icons/fa'
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-
 
 const ComponentAdvanceSearch = () => {
   const { t } = useTranslation('common');
@@ -38,15 +35,15 @@ const ComponentAdvanceSearch = () => {
   }
 
   const submitSearch = () => {
-    let currentUrl = new URL(window.location.href);
-    let searchUrl = new URL(currentUrl.origin + currentUrl.pathname);
+    const currentUrl = new URL(window.location.href);
+    const searchUrl = new URL(currentUrl.origin + currentUrl.pathname);
     Object.entries(searchParams).forEach(([key, value]: any) => {
       if (!CommonUtils.isNullEmptyOrUndefinedString(value)) {
         searchUrl.searchParams.append(key, value);
       }
     })
 
-    let encodedUrl = encodeURI(searchUrl.toString());
+    const encodedUrl = encodeURI(searchUrl.toString());
     router.push(encodedUrl);
   }
 

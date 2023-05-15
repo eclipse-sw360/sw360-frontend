@@ -35,6 +35,7 @@ header:
     - '**/*.svg'
     - .prettierrc.js
     - .eslintrc.json
+    - .dockerignore
     - .gitignore
     - .husky
     - package.json

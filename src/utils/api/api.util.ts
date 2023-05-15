@@ -13,7 +13,7 @@ import RequestContent from '@/object-types/RequestContent';
 
 const base = SW360_API_URL + '/resource/api';
 
-async function send({ method, path, data, token, signal } : { method: string, path: string, data: Object | null, token: string, signal?: any }): Promise<any>{
+async function send({ method, path, data, token, signal } : { method: string, path: string, data: object | null, token: string, signal?: any }): Promise<any>{
 	const request_content: RequestContent = { method, headers: {}, body: null };
 
 	if (data) {
@@ -41,11 +41,11 @@ function DELETE(path: string, token: string) {
 	return send({ method: 'DELETE', path, token, data: null });
 }
 
-function POST(path: string, data: Object, token: string) {
+function POST(path: string, data: object, token: string) {
 	return send({ method: 'POST', path, data, token });
 }
 
-function PUT(path: string, data: Object, token: string) {
+function PUT(path: string, data: object, token: string) {
 	return send({ method: 'PUT', path, data, token });
 }
 
