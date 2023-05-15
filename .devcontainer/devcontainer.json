@@ -55,7 +55,8 @@
 		"oderwat.indent-rainbow",
 		"shardulm94.trailing-spaces",
 		"VisualStudioExptTeam.vscodeintellicode",
-		"ms-azuretools.vscode-docker"
+		"ms-azuretools.vscode-docker",
+		"github.vscode-github-actions"
 	]
     }
   },
