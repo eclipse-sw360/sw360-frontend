@@ -21,7 +21,7 @@ import { Trans, useTranslation } from 'next-i18next'
 import CommonUtils from "@/utils/common.utils";
 import { useCallback } from "react";
 
-const DEFAULT_COMPONENT_INFO: Object = { name: '', _embedded: { 'sw360:releases': [] } }
+const DEFAULT_COMPONENT_INFO: object = { name: '', _embedded: { 'sw360:releases': [] } }
 
 const DeleteComponentDialog = ({ componentId, show, setShow }: any) => {
   const { data: session }: any = useSession();
@@ -44,11 +44,11 @@ const DeleteComponentDialog = ({ componentId, show, setShow }: any) => {
   }, []);
 
   const deleteComponent: any = async () => {
-    let response = await ApiUtils.DELETE(`components/${componentId}`, session.user.access_token);
+    const response = await ApiUtils.DELETE(`components/${componentId}`, session.user.access_token);
     try {
       if (response.status == HttpStatus.MULTIPLE_STATUS) {
-        let body = await response.json();
-        let deleteStatus = body[0].status;
+        const body = await response.json();
+        const deleteStatus = body[0].status;
         if (deleteStatus == HttpStatus.OK) {
           displayMessage('success', 'Delete component success!');
           setReloadPage(true);
@@ -70,9 +70,9 @@ const DeleteComponentDialog = ({ componentId, show, setShow }: any) => {
   }
 
   const fetchData: any = useCallback(async (signal: any) => {
-    let componentsResponse = await ApiUtils.GET(`components/${componentId}`, session.user.access_token, signal);
+    const componentsResponse = await ApiUtils.GET(`components/${componentId}`, session.user.access_token, signal);
     if (componentsResponse.status == HttpStatus.OK) {
-      let component = await componentsResponse.json();
+      const component = await componentsResponse.json();
       setComponent(component);
     } else if (componentsResponse.status == HttpStatus.UNAUTHORIZED) {
       signOut();

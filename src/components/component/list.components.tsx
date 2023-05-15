@@ -45,9 +45,9 @@ const ListComponentTable = ({ session }: any) => {
   }
 
   const fetchData: any = useCallback(async (queryUrl: string, signal: any) => {
-    let componentsResponse = await ApiUtils.GET(queryUrl, session.user.access_token, signal);
+    const componentsResponse = await ApiUtils.GET(queryUrl, session.user.access_token, signal);
     if (componentsResponse.status == HttpStatus.OK) {
-      let components = await componentsResponse.json();
+      const components = await componentsResponse.json();
       return components;
     } else if (componentsResponse.status == HttpStatus.UNAUTHORIZED) {
       signOut();
@@ -58,8 +58,8 @@ const ListComponentTable = ({ session }: any) => {
 
   useEffect(() => {
     setLoading(true);
-    let queryUrl = CommonUtils.createUrlWithParams('components', params);
-    let data: any = [];
+    const queryUrl = CommonUtils.createUrlWithParams('components', params);
+    const data: any = [];
 
     const parseTableRowData = (item: any) => {
       data.push([

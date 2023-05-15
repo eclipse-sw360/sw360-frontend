@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import projectPageStyles from "@/css/Projects.module.css"
+import projectPageStyles from "@/css/projects.module.css"
 import TableContent from "../../utils/table-builder/buildTables"
 import { projectTableSchema } from '../../utils/table-schema/projectTableSchema'
 import Link from "next/link"

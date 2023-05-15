@@ -17,7 +17,7 @@ import { AuthToken } from '@/object-types/AuthToken';
 
 const generateToken = async (userData: UserCredentialInfo) => {
 
-    let clientManagementURL: string = SW360_API_URL + '/authorization/client-management';
+    const clientManagementURL: string = SW360_API_URL + '/authorization/client-management';
     let credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64');
 
     const opts: RequestContent = { method: 'GET', headers: {}, body: null };
@@ -55,7 +55,7 @@ const generateToken = async (userData: UserCredentialInfo) => {
     );
 
     opts.headers['Authorization'] = `Basic ${credentials}`;
-    let authorizationURL: string = SW360_API_URL + '/authorization/oauth/token?grant_type=password&username=' + userData.username + '&password=' + userData.password;
+    const authorizationURL: string = SW360_API_URL + '/authorization/oauth/token?grant_type=password&username=' + userData.username + '&password=' + userData.password;
 
     let sw360token: AuthToken | null = null
     await fetch(authorizationURL, opts)

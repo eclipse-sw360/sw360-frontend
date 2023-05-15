@@ -12,8 +12,8 @@ import { useMemo } from 'react';
 export const DOTS = '...';
 
 const range = (start:number, end:number) => {
-  let length = end - start + 1;
-  let pageRange = Array.from({ length }, (_, idx) => idx + start);
+  const length = end - start + 1;
+  const pageRange = Array.from({ length }, (_, idx) => idx + start);
   return pageRange;
 };
 
@@ -45,21 +45,20 @@ export const usePagination = ({
       const pageRange = range(1, totalPageCount)
       if (pageRange.length == 1)
       {
-        let firstDataIndex = 1;
-        let lastDataIndex = totalCount;
+        const firstDataIndex = 1;
+        const lastDataIndex = totalCount;
         return [pageRange, [firstDataIndex, lastDataIndex]];
       }
       else if (currentPage == totalPageCount)
       {
-        let lastDataIndex = totalCount;
-        let firstDataIndex = (currentPage -1) * pageSize + 1;
+        const lastDataIndex = totalCount;
+        const firstDataIndex = (currentPage -1) * pageSize + 1;
         return [pageRange, [firstDataIndex, lastDataIndex]];
       }
-
       else
       {
-        let lastDataIndex = currentPage * pageSize;
-        let firstDataIndex = (lastDataIndex - pageSize) + 1;
+        const lastDataIndex = currentPage * pageSize;
+        const firstDataIndex = (lastDataIndex - pageSize) + 1;
         return [pageRange, [firstDataIndex, lastDataIndex]];
       }
     }
@@ -85,16 +84,16 @@ export const usePagination = ({
     let firstDataIndex = 0;
 
     if (!shouldShowLeftDots && shouldShowRightDots) {
-      let leftItemCount = 3 + (2 * siblingCount);
-      let leftRange = range(1, leftItemCount);
+      const leftItemCount = 3 + (2 * siblingCount);
+      const leftRange = range(1, leftItemCount);
       lastDataIndex = currentPage * pageSize;
       firstDataIndex = (lastDataIndex - pageSize) + 1;
       return [[...leftRange, DOTS, totalPageCount], [firstDataIndex, lastDataIndex]];
     }
 
     if (shouldShowLeftDots && !shouldShowRightDots) {
-      let rightItemCount = 3 + 2 * siblingCount;
-      let rightRange = range(
+      const rightItemCount = 3 + 2 * siblingCount;
+      const rightRange = range(
         totalPageCount - rightItemCount + 1,
         totalPageCount
       );
@@ -110,7 +109,7 @@ export const usePagination = ({
     }
 
     if (shouldShowLeftDots && shouldShowRightDots) {
-      let middleRange = range(leftSiblingIndex, rightSiblingIndex);
+      const middleRange = range(leftSiblingIndex, rightSiblingIndex);
       lastDataIndex = middleRange[1]*pageSize;
       firstDataIndex =  ((middleRange[1] - 1) * pageSize) + 1;
       return [[firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex],  [firstDataIndex, lastDataIndex]];

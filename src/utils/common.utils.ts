@@ -23,7 +23,7 @@ const isNullEmptyOrUndefinedString = (str: string) => {
 }
 
 const createUrlWithParams = (url: string, params: any) => {
-  let queryString =  Object.keys(params).map((key) => {
+  const queryString =  Object.keys(params).map((key) => {
     return [key, params[key]].map(encodeURIComponent).join('=');
   }).join("&");
   return `${url}?${queryString}`;
