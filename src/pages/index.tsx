@@ -51,16 +51,10 @@ const AuthScreen = ({ session }: any) => {
     return (
         <>
             <section className='portlet' id='portlet_sw360_portlet_welcome'>
-                <div>
-                    <div className='autofit-float autofit-row portlet-header'>
-                        <div className='autofit-col autofit-col-expand'>
-                            <h2 className='portlet-title-text'>Welcome</h2>
-                        </div>
-                        <div className='autofit-col autofit-col-end'>
-                            <div className='autofit-section'>
-                            </div>
-                        </div>
-                    </div>
+                <div     style={{
+        position: 'absolute', left: '5%', right: '5%', top: '50%',
+        transform: 'translate(0, -60%)'
+    }}>
                     <div className='portlet-content-container p-1' style={{ background: '#f1f2f5' }}>
                         <div className='portlet-body p-5'>
                             <div className='jumbotron'>

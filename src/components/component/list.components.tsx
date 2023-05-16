@@ -72,6 +72,8 @@ const ListComponentTable = ({ session }: any) => {
     const controller = new AbortController()
     const signal = controller.signal;
     fetchData(queryUrl, signal).then((components: any) => {
+      console.log("-----------------");
+      console.log(components);
       if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
         components['_embedded']['sw360:components'].forEach(parseTableRowData);
         setComponentData(data);
