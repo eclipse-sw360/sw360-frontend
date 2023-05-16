@@ -1,12 +1,12 @@
 const config = {
     semi: false,
-    tabWidth: 2,
+    tabWidth: 4,
     printWidth: 120,
     singleQuote: true,
     jsxSingleQuote: true,
-    trailingComma: 'none',
+    trailingComma: 'es5',
     arrowParens: 'always',
-    endOfLine: 'auto'
+    endOfLine: 'auto',
 }
 
 module.exports = config
