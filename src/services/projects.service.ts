@@ -10,7 +10,7 @@
 import { useEffect, useState } from "react";
 import RequestContent from "@/object-types/RequestContent";
 import HttpStatus from "@/object-types/enums/HttpStatus";
-import { NEXT_PUBLIC_SW360_API_BASE_URL, AUTH_TOKEN } from "@/utils/env";
+import { SW360_API_URL, AUTH_TOKEN } from "@/utils/env";
 
 
 // Fetch project data at project page
@@ -19,7 +19,7 @@ export function ProjectDetails(props: any) {
     const [projData, setProjData] = useState(null);
     const getProjectData = async () => {
 
-        const fetchProjectsURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/projects?page=6&page_entries=10';
+        const fetchProjectsURL: string = SW360_API_URL + '/projects?page=6&page_entries=10';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';

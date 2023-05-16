@@ -9,6 +9,5 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export const SW360_API_URL: string | undefined  = process.env.NEXT_PUBLIC_SW360_API_URL;
-export const NEXT_PUBLIC_SW360_API_BASE_URL: string | undefined  = process.env.NEXT_PUBLIC_SW360_API_BASE_URL;
+export const SW360_API_URL: string | undefined  = process.env.SW360_API_URL;
 export const AUTH_TOKEN : string | undefined  = process.env.AUTH_TOKEN;
