@@ -44,12 +44,7 @@
 	padding: 5px;
 	/* border-end-end-radius: 3px; */
 }
-.profileImage:hover {
-	border-radius: 50%;
-	border: 5px solid orange;
-	padding: 2px;
-    opacity: .7;
-}
+
 .dropdownMenu{
 	border-style:groove;
 }

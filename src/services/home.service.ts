@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { NEXT_PUBLIC_SW360_API_BASE_URL, AUTH_TOKEN } from '@/utils/env';
+import { SW360_API_URL, AUTH_TOKEN } from '@/utils/env';
 import RequestContent from '@/object-types/RequestContent';
 import HttpStatus from '@/object-types/enums/HttpStatus';
 import { useEffect, useState } from 'react'
@@ -20,7 +20,7 @@ export function MyProjectData(props: any) {
     const [projDescription, setProjDescription] = useState(null);
     const getHomePageProjectData = async () => {
 
-        const myProjectFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/projects/myprojects';
+        const myProjectFetchURL: string = SW360_API_URL + '/projects/myprojects';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
@@ -73,7 +73,7 @@ export function MyComponentData(props: any) {
     const [compData, setCompData] = useState(null);
     const getHomePageComponentData = async () => {
 
-        const myComponentFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/myComponents';
+        const myComponentFetchURL: string = SW360_API_URL + '/components/myComponents';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
@@ -106,7 +106,7 @@ export function MyTaskAssignmentData(props: any) {
     const [taskAssignmentData, setTaskAssignmentData] = useState(null);
     const getHomePageTaskAssignmentData = async () => {
 
-        const myTaskAssignmentFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/myTaskAssignments';
+        const myTaskAssignmentFetchURL: string = SW360_API_URL + '/myTaskAssignments';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
@@ -139,7 +139,7 @@ export function MyTaskSubmissionData(props: any) {
     const [taskSubmissionData, setTaskSubmissionData] = useState(null);
     const getHomePageTaskSubmissionData = async () => {
 
-        const myTaskSubmissionFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/myTaskSubmissions';
+        const myTaskSubmissionFetchURL: string = SW360_API_URL + '/myTaskSubmissions';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
@@ -172,7 +172,7 @@ export function MySubscriptionData(props: any) {
     const [mySubscriptions, setMySubscriptions] = useState(null);
     const getHomePageMySubscriptions = async () => {
 
-        const mySubscriptionsFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/mySubscriptions';
+        const mySubscriptionsFetchURL: string = SW360_API_URL + '/components/mySubscriptions';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
@@ -205,7 +205,7 @@ export function MyRecentComponentData(props: any) {
     const [myRecentComponents, setMyRecentComponents] = useState(null);
     const getHomePageMyRecentComponents = async () => {
 
-        const myRecentComponentsFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/components/recentComponents';
+        const myRecentComponentsFetchURL: string = SW360_API_URL + '/components/recentComponents';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
@@ -238,7 +238,7 @@ export function MyRecentReleaseData(props: any) {
     const [myRecentReleases, setMyRecentReleases] = useState(null);
     const getHomePageMyRecentReleases = async () => {
 
-        const myRecentReleasesFetchURL: string = NEXT_PUBLIC_SW360_API_BASE_URL + '/releases/recentReleases';
+        const myRecentReleasesFetchURL: string = SW360_API_URL + '/releases/recentReleases';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';

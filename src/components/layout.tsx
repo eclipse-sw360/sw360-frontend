@@ -9,8 +9,8 @@
 // License-Filename: LICENSE
 
 import { ReactNode } from 'react';
-import PageHeader from './Navbar'
-import PageFooter from './footer'
+import PageHeader from './header'
+import PageFooter from './Footer'
 
 interface IProps {
   children: ReactNode,

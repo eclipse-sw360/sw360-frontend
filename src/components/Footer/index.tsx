@@ -11,13 +11,15 @@
 
 import Link from 'next/link'
 import React from 'react'
-import styles from '../css/footer.module.css'
 import 'bootstrap/dist/css/bootstrap.css';
 
-export default function Footer() {
+import styles from '@/css/footer.module.css'
+
+
+function Footer() {
     return (
         <>
-            <footer className= "footer--pin text-center text-white" style={{ "backgroundColor": "#30313F", position: "relative", bottom: '0px', width : '100%'}}>
+            <footer className= "footer--pin text-center text-white" style={{ "backgroundColor": "#30313F", position: "absolute", bottom: '0px', width : '100%'}}>
                 <div className={`"container" ${styles.container}`}>
                     <div className={`${styles.poweredBy} "pt-3"`}>
                         Powered-by
@@ -34,3 +36,5 @@ export default function Footer() {
         </>
     )
 }
+
+export default  Footer

@@ -10,6 +10,6 @@ Several reasons pushed this move:
 
 Please read our code [Code of Conduct](./CODE_OF_CONDUCT.md) before to help with the well being of the community.
 
-For new contributors, please read the [conributing guideline](./CONTRIBUTING.md)
+For new contributors, please read the [contributing guideline](./CONTRIBUTING.md)
 
 **This project still on early pre alpha stages.**
