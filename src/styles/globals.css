@@ -122,6 +122,17 @@ code {
   color: #6b6c7e !important;
 }
 
+.btn-primary {
+  background-color: #F7941E !important;
+  border-color: #F7941E !important;
+  color: #272833 !important;
+}
+
+.btn-outline-primary {
+  border-color: #F7941E !important;
+  color: #F7941E !important;
+}
+
 .btn-primary:focus {
   background-color: #F7941E !important;
   border-color: white !important;
@@ -129,6 +140,18 @@ code {
 
 .btn-secondary:hover {
   color: #000 !important;
+}
+
+.btn-primary:hover {
+  background-color: #f28809 !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: #fffdfb !important;
+  border-color: #F7941E !important;
+  color: #F7941E !important;
 }
 
 .gridjs-wrapper {
@@ -146,4 +169,14 @@ code {
 
 .dropdown-item:focus {
   background-color: lightgray !important;
+}
+
+.loaded {
+  opacity: 1;
+  transition: all 0.2ms ease-in;
+}
+
+.loading {
+  opacity: 0;
+  transition: all 0.2ms ease-in;
 }

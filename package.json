@@ -23,7 +23,7 @@
     "gridjs-react": "^6.0.1",
     "next": "^13.4.1",
     "next-auth": "^4.20.1",
-    "next-i18next": "^13.2.2",
+    "next-intl": "^2.14.6",
     "react": "18.2.0",
     "react-bootstrap": "^2.7.2",
     "react-bootstrap-icons": "^1.10.3",
