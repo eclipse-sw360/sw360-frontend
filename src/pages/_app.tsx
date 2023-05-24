@@ -13,7 +13,7 @@ import "gridjs/dist/theme/mermaid.css";
 import '@/styles/globals.css'
 import '@/styles/auth.css'
 import type { AppProps } from 'next/app'
-import Layout from '../components/layout'
+import Layout from '@/components/Layout/Layout'
 import { appWithTranslation } from 'next-i18next'
 import { SessionProvider } from 'next-auth/react'
 

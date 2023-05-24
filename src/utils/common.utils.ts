@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Helio Chissini de Castro, 2023
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,7 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-const isNullOrUndefined = (obj: any) => {
+const isNullOrUndefined = (obj: unknown) => {
   if (obj === null || obj === undefined) {
     return true;
   }
@@ -22,11 +23,9 @@ const isNullEmptyOrUndefinedString = (str: string) => {
   return false;
 }
 
-const createUrlWithParams = (url: string, params: any) => {
-  const queryString =  Object.keys(params).map((key) => {
-    return [key, params[key]].map(encodeURIComponent).join('=');
-  }).join("&");
-  return `${url}?${queryString}`;
+const createUrlWithParams = (url: string, params: string[][]) => {
+  const queryString =  new URLSearchParams(params);
+  return `${url}?${queryString.toString()}`;
 }
 
 const CommonUtils = {

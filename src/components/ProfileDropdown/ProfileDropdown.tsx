@@ -10,13 +10,13 @@
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import Image from 'next/image'
 import sw360ProfileIcon from '@/assets/images/profile.svg'
-import navbarStyles from '@/css/navbar.module.css'
+import styles from './ProfileDropdown.module.css'
 import { useTranslation } from 'next-i18next'
 import { signOut } from 'next-auth/react';
 
 const UserProfile = (
     <Image
-        className={navbarStyles.profileImage}
+        className={styles.profileImage}
         src={sw360ProfileIcon}
         alt='Profile'
     />

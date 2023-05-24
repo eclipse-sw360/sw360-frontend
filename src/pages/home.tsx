@@ -20,7 +20,7 @@ import {
     homeMyComponentsTableSchema,
     homeMyTaskAssignmentsTableSchema,
     homeMyTaskSubmissionsTableSchema
-} from '../utils/table-schema/homePageTableSchemas'
+} from '@/utils/table-schema/homePageTableSchemas'
 import defaultHomeMyProjectsValues from
         '../../defaultValues/defaultValuesHome-MyProjects.json'
 import defaultHomeMyComponentsValues from

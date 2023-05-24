@@ -9,14 +9,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState } from 'react'
-import Image from 'next/image'
+import Image from 'next/image';
 import Link from 'next/link';
+import React, { useState } from 'react'
 
 import { useSession } from 'next-auth/react';
 
-import ProfileDropdown from '@/components/ProfileDropdown'
-import SW360Navbar from '@/components/SW360Navbar'
+import ProfileDropdown from '@/components/ProfileDropdown/ProfileDropdown'
+import SW360Navbar from '@/components/SW360Navbar/SW360Navbar'
 
 import sw360logo from '@/assets/images/sw360-logo.svg';
 
@@ -28,7 +28,7 @@ const PageHeader = () => {
         console.log("Search button is clicked !", inputValue)
     }
 
-    const getSearchedKeyword = (event:any) => {
+    const getSearchedKeyword = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
     }
 
@@ -38,7 +38,7 @@ const PageHeader = () => {
                 <div className='row'>
                     <div className='col-md-4'>
                         <Link className='container' href='/'>
-                            <Image src={sw360logo} height={57} width={147} alt="SW360 Logo" />
+                            <Image src={sw360logo} alt="SW360 Logo" height={57} width={147}/>
                         </Link>
                     </div>
                     <div className="col-md-5 col-md-offset-1"></div>

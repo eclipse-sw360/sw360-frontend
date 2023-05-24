@@ -8,19 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useState } from 'react'
+import { useState, MouseEvent } from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/router'
-import navbarStyles from '@/css/navbar.module.css'
-import 'bootstrap/dist/css/bootstrap.css';
+import navbarStyles from './SW360Navbar.module.css'
 
 function SW360Navbar() {
 
     const location = useRouter();
     const [heading, setHeading] = useState('')
 
-    const handleHeading = (event:any) => {
-        setHeading(event.target.innerText);
+    const handleHeading = (event: MouseEvent<HTMLAnchorElement>) => {
+        setHeading(event.currentTarget.innerText);
     }
 
     return (
@@ -69,6 +68,9 @@ function SW360Navbar() {
                     </div>
                 </div>
             </nav>
+            <div className={navbarStyles.headingDiv}>
+                <div>{heading}</div>
+            </div>
         </div>
     )
 }

@@ -13,23 +13,23 @@ import Link from 'next/link'
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.css';
 
-import styles from '@/css/footer.module.css'
+import styles from './Footer.module.css';
 
 
 function Footer() {
     return (
         <>
-            <footer className= "footer--pin text-center text-white" style={{ "backgroundColor": "#30313F", position: "absolute", bottom: '0px', width : '100%'}}>
+            <footer className="footer--pin text-center text-white" style={{ "backgroundColor": "#30313F", position: "absolute", bottom: '0px', width: '100%' }}>
                 <div className={`"container" ${styles.container}`}>
                     <div className={`${styles.poweredBy} "pt-3"`}>
                         Powered-by
-                        <Link className = {styles.footerHref} href="http://www.github.com/eclipse/sw360" rel="noopener noreferrer" target="_blank"> SW360</Link> |
-                        <Link className = {styles.footerHref} href="/resource/mkdocs/index.html" rel="noopener noreferrer" target="_blank"> SW360 Docs</Link>  |
-                        <Link className = {styles.footerHref} href="/resource/docs/api-guide.html" rel="noopener noreferrer" target="_blank"> REST API Docs</Link>  |
-                        <Link className = {styles.footerHref} href="https://github.com/eclipse/sw360/issues" rel="noopener noreferrer" target="_blank"> Public Issue Tracker</Link>
+                        <Link className={styles.href} href="http://www.github.com/eclipse/sw360" rel="noopener noreferrer" target="_blank"> SW360</Link> |
+                        <Link className={styles.href} href="/resource/mkdocs/index.html" rel="noopener noreferrer" target="_blank"> SW360 Docs</Link>  |
+                        <Link className={styles.href} href="/resource/docs/api-guide.html" rel="noopener noreferrer" target="_blank"> REST API Docs</Link>  |
+                        <Link className={styles.href} href="https://github.com/eclipse/sw360/issues" rel="noopener noreferrer" target="_blank"> Public Issue Tracker</Link>
                     </div>
                 </div>
-                <div className={`${styles.footerBottom}`}>
+                <div className={`${styles.bottom}`}>
                     Version: 17.0.0-SNAPSHOT | Branch: masterct (f69a224) | Build time: 2023-01-29T14:25:37Z
                 </div>
             </footer>
@@ -37,4 +37,4 @@ function Footer() {
     )
 }
 
-export default  Footer
+export default Footer

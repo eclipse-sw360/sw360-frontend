@@ -7,14 +7,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useMemo, useState } from 'react'
-import { useTable, usePagination, useSortBy, useFlexLayout } from 'react-table'
+import React, { useState } from 'react'
+import { useTable, usePagination, useSortBy, Column } from 'react-table'
 import buildTableStyles from './buildTable.module.css'
-import Pagination from '../pagination/Pagination'
+import Pagination from '@/utils/pagination/Pagination'
 
+import { TableContentProps } from "@/types/table";
 
-export default function TableContent(props: any) {
-
+export default function TableContent(props: TableContentProps) {
     const columns = props.schema;
     const data = props.data;
     const [currentPage, setCurrentPage] = useState(1)
@@ -43,7 +43,7 @@ export default function TableContent(props: any) {
                 <thead>
                     {headerGroups.map((headerGroup) => (
                         <tr {...headerGroup.getHeaderGroupProps()} key="">
-                            {headerGroup.headers.map((column: any) => (
+                            {headerGroup.headers.map((column: Column) => (
                                 <th className={buildTableStyles.tableTh} {...column.getHeaderProps(column.getSortByToggleProps())} colSpan={1}
                                     key=""
                                     style={{ width: 'auto' }}>
@@ -83,7 +83,7 @@ export default function TableContent(props: any) {
                 </tbody>
             </table>
             <Pagination className="paginationBar" totalCount={rows.length} pageSize={tableItemsPerPage}
-                onPageChange={(page: any) => setCurrentPage(page)} currentPage={currentPage} />
+                onPageChange={(page: number) => setCurrentPage(page)} currentPage={currentPage} />
         </div>
     );
 }

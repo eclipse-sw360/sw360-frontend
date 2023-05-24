@@ -1,5 +1,6 @@
 /*
   Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+  Copyright (C) Helio Chissini de Castro 2023. Part of the SW360 Frontend Project.
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -9,30 +10,31 @@
   License-Filename: LICENSE
 */
 
-.footerHref{
+.href {
     color: orange;
     text-decoration: none;
 }
 
-.footerHref:hover{
-    color:white
+.href:hover {
+    color: white
 }
 
-.poweredBy{
+.poweredBy {
     color: white;
     background-color: #30313F;
     padding-top: 17px;
 }
-.footerBottom{
+
+.bottom {
     color: white;
     display: flex;
     justify-content: center;
     margin-top: 3pt;
     background-color: #30313F;
     padding-bottom: 17px;
-
 }
-.container{
+
+.container {
     text-align: center;
     margin-top: 4px;
 }

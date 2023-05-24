@@ -35,25 +35,18 @@
 
 .dropdownToggle::after {
 	content: none;
-  }
-
-.profileImage {
-	border-radius: 70%;
-    width: 47px;
-    height: 47px;
-	padding: 5px;
-	/* border-end-end-radius: 3px; */
-}
-
-.dropdownMenu{
-	border-style:groove;
 }
 
 .headingDiv{
-	background-color: rgba(234, 232, 232, 0.704);
-}
-
-.headingContentDiv{
-	font-family:Arial, Helvetica, sans-serif;
-	align-content: left;
+	background-color: #fafafa;
+	color: rgba(0, 0, 0);
+	border-style: solid none solid none;
+	border-width: 1px;
+	border-color: #e7e7ed;
+	padding-left: 28px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
 }

@@ -1,4 +1,5 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -6,6 +7,8 @@
 
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
+
+import { CellProps } from "@/types/table";
 
 export const projectTableSchema = [
     {
@@ -17,7 +20,7 @@ export const projectTableSchema = [
         Header: "Description",
         accessor: "version",
         isSortable: true,
-        Cell: (props: any) => {
+        Cell: (props: CellProps) => {
             // const value = props?.value;
             const valueLength = props.value?.length ?? 0;
             if (valueLength > 30)
@@ -44,7 +47,7 @@ export const projectTableSchema = [
         Header: "Project Responsible",
         accessor: "visibility",
         isSortable: true,
-        Cell: (props: any) => {
+        Cell: (props: CellProps) => {
             // const value = props?.value;
             const valueLength = props.value?.length ?? 0;
             if (valueLength > 30)

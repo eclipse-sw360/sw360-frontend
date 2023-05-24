@@ -20,11 +20,7 @@ interface Props {
 
 export default function SearchVendorsModalComponent({ chooseVendor }: Props) : JSX.Element {
 
-    const [vendor, setVendor] = useState<(Vendor | null)>(null);
-
-    const chooseVendorFromTable = (v: Vendor | null): void => {
-      setVendor(v);
-    };
+    const [vendor] = useState<(Vendor | null)>(null);
 
     return(
         <>

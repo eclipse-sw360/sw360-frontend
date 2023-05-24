@@ -45,7 +45,7 @@ const Pagination = (props: any) => {
     }
   );
 
-  const nextButtonClassName = (currentPage: number, lastPage: any) => classnames(
+  const nextButtonClassName = (currentPage: number | string, lastPage: number | string) => classnames(
     {
       [paginationStyle.paginationItem]: true,
       // eslint-disable-next-line no-constant-condition
@@ -53,7 +53,7 @@ const Pagination = (props: any) => {
     }
   );
 
-  const selectedButtonClassName = (pageNumber: any, currentPage: any) => classnames(
+  const selectedButtonClassName = (pageNumber: number | string, currentPage: number | string) => classnames(
     {
       [paginationStyle.paginationItem]: true,
       // eslint-disable-next-line no-constant-condition
@@ -61,14 +61,7 @@ const Pagination = (props: any) => {
     }
   );
 
-  const paginationItemDotClassName = classnames(
-    {
-      [paginationStyle.paginationItem]: true,
-      [paginationStyle.dots]: true
-    }
-  );
-
-  const paginationRootContainerClassName = (className: any) => classnames(
+  const paginationRootContainerClassName = (className: number) => classnames(
     {
       [paginationStyle.paginationContainer]: true,
       [className]: className
