@@ -37,5 +37,5 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
             - run: |
-                  npm ci
+                  npm ci˝
                   npm run build
