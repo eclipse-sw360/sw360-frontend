@@ -42,6 +42,6 @@ next-env.d.ts
 # Workspace files
 *.code-workspace
 
-# Lock files
-package-lock.json
+# Other Lock files
 yarn.lock
+pnpm-lock.yaml
