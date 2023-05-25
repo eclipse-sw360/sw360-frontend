@@ -10,3 +10,5 @@
 
 export const CREDENTIAL_PROVIDER = "credential_provider"
 export const CREDENTIALS = "credentials"
+export const COMMON_NAMESPACE = "common"
+export const LOCALES = ['en', 'ja', 'vi', 'zh']

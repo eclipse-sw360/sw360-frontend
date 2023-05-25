@@ -40,7 +40,7 @@ header:
     - .husky
     - package.json
     - package-lock.json
-    - '**/common.json'
+    - 'messages/*.json'
     - 'defaultValues/*.json'
     - 'mockData/*.json'
 
