@@ -65,7 +65,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          target: runtime
           push: true
           load: false
           tags: |
