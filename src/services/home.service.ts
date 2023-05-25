@@ -36,7 +36,7 @@ export function MyProjectData(props: any) {
                 }
             })
             .then((data) => {
-                const fectProjectDetailsUrl = '${data._embedded.sw360:projects[0]._links.self.href}'
+                const fectProjectDetailsUrl : string = '${data._embedded.sw360:projects[0]._links.self.href}'
                 const fetchProjectData = fetch(fectProjectDetailsUrl, opts)
                         .then((response) => {
                             if (response.status == HttpStatus.OK) {
@@ -166,19 +166,19 @@ export function MyTaskSubmissionData(props: any) {
 
 }
 
-// Fetch my-subscriptions data at home page
-export function MySubscriptionData(props: any) {
+// Fetch my-subscriptions - component data at home page
+export function MySubscriptionCompData(props: any) {
 
-    const [mySubscriptions, setMySubscriptions] = useState(null);
-    const getHomePageMySubscriptions = async () => {
+    const [mySubscriptionsComp, setMySubscriptionsComp] = useState(null);
+    const getHomePageMySubscriptionsComp = async () => {
 
-        const mySubscriptionsFetchURL: string = SW360_API_URL + '/components/mySubscriptions';
+        const mySubscriptionsCompFetchURL: string = SW360_API_URL + '/components/mySubscriptions';
         const opts: RequestContent = { method: 'GET', headers: {}, body: null };
 
         opts.headers['Content-Type'] = 'application/json';
         opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
 
-        const fetchMySubscriptions = fetch(mySubscriptionsFetchURL, opts)
+        const fetchMySubscriptionsComp = fetch(mySubscriptionsCompFetchURL, opts)
             .then((response) => {
                 if (response.status == HttpStatus.OK) {
                     return response.json();
@@ -188,13 +188,46 @@ export function MySubscriptionData(props: any) {
                 }
             })
             .then((data) => {
-                setMySubscriptions(data)
-                props.onMySubscriptions(data);
+                setMySubscriptionsComp(data)
+                props.onMySubscriptionsComp(data);
             });
     }
     // Call fetchData() when component mounts
     useEffect(() => {
-        getHomePageMySubscriptions();
+        getHomePageMySubscriptionsComp();
+    }, []);
+
+}
+
+// Fetch my-subscriptions - relaeses data at home page
+export function MySubscriptionReleaseData(props: any) {
+
+    const [mySubscriptionsRelease, setMySubscriptionsRelease] = useState(null);
+    const getHomePageMySubscriptionsRelease = async () => {
+
+        const mySubscriptionsReleaseFetchURL: string = SW360_API_URL + '/releases/mySubscriptions';
+        const opts: RequestContent = { method: 'GET', headers: {}, body: null };
+
+        opts.headers['Content-Type'] = 'application/json';
+        opts.headers['Authorization'] = `Token ${AUTH_TOKEN}`;
+
+        const fetchMySubscriptionsRelease = fetch(mySubscriptionsReleaseFetchURL, opts)
+            .then((response) => {
+                if (response.status == HttpStatus.OK) {
+                    return response.json();
+                }
+                else {
+                    return null;
+                }
+            })
+            .then((data) => {
+                setMySubscriptionsRelease(data)
+                props.onMySubscriptionsRelease(data);
+            });
+    }
+    // Call fetchData() when component mounts
+    useEffect(() => {
+        getHomePageMySubscriptionsRelease();
     }, []);
 
 }

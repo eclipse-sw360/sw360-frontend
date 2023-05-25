@@ -41,7 +41,8 @@ import {MyProjectData,
         MyComponentData,
         MyTaskAssignmentData,
         MyTaskSubmissionData,
-        MySubscriptionData,
+        MySubscriptionCompData,
+        MySubscriptionReleaseData,
         MyRecentComponentData,
         MyRecentReleaseData} from '../services/home.service'
 
@@ -53,8 +54,10 @@ export default function HomePage() {
                                         defaultHomeMyTaskAssignmentsValues);
     const [taskSubmissionData, setTaskSubmissionData] = useState(
                                         defaultHomeMyTaskSubmissionsValues);
-    const [mySubscriptionsData, setMySubscriptionsData] = useState(
+    const [mySubscriptionsCompData, setMySubscriptionsCompData] = useState(
                                         defaultHomeMySubscriptionsValues);
+    const [mySubscriptionsReleaseData, setMySubscriptionsReleaseData] = useState(
+                                            defaultHomeMySubscriptionsValues);
     const [myRecentComponentsData, setMyRecentComponentsData] = useState(
                                         defaultHomeMyRecentComponentsValues);
     const [myRecentReleasesData, setMyRecentReleasesData] = useState(
@@ -65,7 +68,6 @@ export default function HomePage() {
     // Fetch my project data for my project table at home page
     const handleMyProjectData = (projData: any) => {
 
-        console.log('Data received from my-project-home-service:', projData);
         if (projData != null){
             setProjData(projData["_embedded"]["sw360:projects"]);
         }
@@ -74,7 +76,6 @@ export default function HomePage() {
     // Fetch my component data for my component table at home page
     const handleMyComponentData = (compData: any) => {
 
-        console.log('Data received from my-comp-home-service:', compData);
         if (compData != null){
             setCompData(compData["_embedded"]["sw360:components"]);
         }
@@ -83,7 +84,6 @@ export default function HomePage() {
     // Fetch my task assignment data for my task assignment table at home page
     const handleMyTaskAssignmentData = (assignmentData: any) => {
 
-        console.log('Data received from my-task-assignment-home-service:', assignmentData);
         if (assignmentData != null){
             setTaskAssignmentData(assignmentData["_embedded"]["sw360:assignments"]);
         }
@@ -92,25 +92,31 @@ export default function HomePage() {
     // Fetch my task submission data for my task submission table at home page
     const handleMyTaskSubmissionData = (taskSubmissionData: any) => {
 
-        console.log('Data received from my-task-submission-home-service:', taskSubmissionData);
         if (taskSubmissionData != null){
             setTaskSubmissionData(taskSubmissionData["_embedded"]["sw360:taskSubmissions"]);
         }
       };
 
-    // Fetch my subscriptions data at home page
-    const handleMySubscriptionsData = (mySubscriptionsData: any) => {
+    // Fetch my subscriptions - component data at home page
+    const handleMySubscriptionsCompData = (mySubscriptionsCompData: any) => {
 
-        console.log('Data received from my-subscriptions-home-service:', mySubscriptionsData);
-        if (mySubscriptionsData != null){
-            setMySubscriptionsData(mySubscriptionsData["_embedded"]["sw360:components"]);
+        if (mySubscriptionsCompData != null){
+            setMySubscriptionsCompData(mySubscriptionsCompData["_embedded"]["sw360:components"]);
+        }
+      };
+
+    // Fetch my subscriptions - releases data at home page
+    const handleMySubscriptionsReleaseData = (mySubscriptionsReleaseData: any) => {
+
+        console.log('Data received from my-subscriptions-home-service:', mySubscriptionsReleaseData);
+        if (mySubscriptionsReleaseData != null){
+            setMySubscriptionsReleaseData(mySubscriptionsReleaseData["_embedded"]["sw360:releases"]);
         }
       };
 
     // Fetch my recent components data at home page
     const handleMyRecentComponentsData = (myRecentComponentsData: any) => {
 
-        console.log('Data received from my-recent-components-home-service:', myRecentComponentsData);
         if (myRecentComponentsData != null){
             setMyRecentComponentsData(myRecentComponentsData["_embedded"]["sw360:components"]);
         }
@@ -119,7 +125,6 @@ export default function HomePage() {
     // Fetch my recent releases data at home page
     const handleMyRecentReleasesData = (myRecentReleasesData: any) => {
 
-        console.log('Data received from my-recent-releases-home-service:', myRecentReleasesData);
         if (myRecentReleasesData != null){
             setMyRecentReleasesData(myRecentReleasesData["_embedded"]["sw360:releases"]);
         }
@@ -130,7 +135,8 @@ export default function HomePage() {
     MyComponentData({ onCompData: handleMyComponentData });
     MyTaskAssignmentData({ onTaskAssignmentData: handleMyTaskAssignmentData });
     MyTaskSubmissionData({ onTaskSubmissionData: handleMyTaskSubmissionData });
-    MySubscriptionData({ onMySubscriptions: handleMySubscriptionsData });
+    MySubscriptionCompData({ onMySubscriptionsComp: handleMySubscriptionsCompData });
+    MySubscriptionReleaseData({ onMySubscriptionsRelease: handleMySubscriptionsReleaseData });
     MyRecentComponentData({ onMyRecentComponents: handleMyRecentComponentsData });
     MyRecentReleaseData({ onMyRecentReleases: handleMyRecentReleasesData });
 
@@ -276,13 +282,22 @@ export default function HomePage() {
                     <div className="mb-4">
                         <h5 className={`fw-bold ${homePageStyles.titleSideBar}`}>My Subscriptions</h5>
                         <div className="content-container">
-                            <ul style={{ listStyleType: "disc", color: "black" }}>
-                                {mySubscriptionsData.map((item) => (
-                                    <li key={""}>
-                                        <span style={{ color: "orange"}}>{item.name}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                            <h2 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>Components</h2>
+                                <ul style={{ listStyleType: "disc", color: "black" }}>
+                                    {mySubscriptionsCompData.map((item) => (
+                                        <li key={""}>
+                                            <span style={{ color: "orange"}}>{item.name}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            <h2 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>Releases</h2>
+                                <ul style={{ listStyleType: "disc", color: "black" }}>
+                                    {mySubscriptionsReleaseData.map((item) => (
+                                        <li key={""}>
+                                            <span style={{ color: "orange"}}>{item.name}</span>
+                                        </li>
+                                    ))}
+                                </ul>
                         </div>
                     </div>
                     <div className="mb-4">

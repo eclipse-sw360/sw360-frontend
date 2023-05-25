@@ -30,6 +30,13 @@
     margin-top: 10px;
 }
 
+.titleSubSideBar {
+    color: #000000;
+    text-transform: capitalize;
+    font-size: medium;
+    margin-top: 10px;
+}
+
 .boldText{
     margin-top: 4px;
     margin-left: 17px;
