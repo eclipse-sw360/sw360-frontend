@@ -8,7 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+"use client";
+
 import Link from 'next/link'
 import navbarStyles from './SW360Navbar.module.css'
 import { usePathname } from 'next/navigation'
@@ -17,6 +18,7 @@ import { LOCALES as locales } from '@/object-types/Constants';
 function SW360Navbar() {
     const pathname = usePathname();
     const isLoginPage = locales.includes(pathname.substring(1))
+    const heading = pathname.split('/').slice(-1)[0];
 
     return (
         (!isLoginPage) && <div>
@@ -64,6 +66,9 @@ function SW360Navbar() {
                     </div>
                 </div>
             </nav>
+            <div className={navbarStyles.headingDiv}>
+                <div>{heading}</div>
+            </div>
         </div>
     )
 }

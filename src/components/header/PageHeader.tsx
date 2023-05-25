@@ -14,8 +14,8 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import ProfileDropdown from '@/components/profile-dropdown/ProfileDropdown'
-import SW360Navbar from '@/components/sw360-navbar/SW360Navbar'
+import ProfileDropdown from '@/components/ProfileDropdown/ProfileDropdown'
+import SW360Navbar from '@/components/SW360Navbar/SW360Navbar'
 import sw360logo from '@/assets/images/sw360-logo.svg';
 
 const PageHeader = () => {

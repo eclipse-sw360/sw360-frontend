@@ -10,7 +10,7 @@
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import Image from 'next/image'
 import sw360ProfileIcon from '@/assets/images/profile.svg'
-import navbarStyles from '@/components/sw360-navbar/SW360Navbar.module.css'
+import navbarStyles from './ProfileDropdown.module.css'
 import { signOut } from 'next-auth/react';
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl';
