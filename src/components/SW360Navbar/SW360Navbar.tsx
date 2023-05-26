@@ -8,68 +8,91 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client";
+'use client'
 
 import Link from 'next/link'
 import navbarStyles from './SW360Navbar.module.css'
 import { usePathname } from 'next/navigation'
-import { LOCALES as locales } from '@/object-types/Constants';
+import { LOCALES as locales } from '@/object-types/Constants'
 
 function SW360Navbar() {
-    const pathname = usePathname();
+    const pathname = usePathname()
     const isLoginPage = locales.includes(pathname.substring(1))
-    const heading = pathname.split('/').slice(-1)[0];
+    const heading = pathname.split('/').slice(-1)[0].charAt(0).toUpperCase() + pathname.split('/').slice(-1)[0].slice(1)
 
     return (
-        (!isLoginPage) && <div>
-            <nav className="navbar navbar-expand-lg">
-                <div className="container-fluid">
-                    <div className={`collapse navbar-collapse ${navbarStyles.navbarCollapse}`} id="navbarSupportedContent">
-                        <ul className="navbar-nav me-auto ">
-                            <li className="nav-item mx-2">
-                                <Link className={`nav-link`} href="/home"><b>Home</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/projects"><b>Projects</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/components"><b>Components</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/licenses"><b>Licenses</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/ecc"><b>ECC</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/vulnerabilities"><b>Vulnerabilities</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/requests"><b>Requests</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/search"><b>Search</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                            <li className="nav-item mx-1">
-                                <Link className={`nav-link`} href="/preferences"><b>Preferences</b></Link>
-                                <div className={navbarStyles.underline}></div>
-                            </li>
-                        </ul>
+        !isLoginPage && (
+            <div>
+                <nav className='navbar navbar-expand-lg'>
+                    <div className='container-fluid'>
+                        <div
+                            className={`collapse navbar-collapse ${navbarStyles.navbarCollapse}`}
+                            id='navbarSupportedContent'
+                        >
+                            <ul className='navbar-nav me-auto '>
+                                <li className='nav-item mx-2'>
+                                    <Link className={`nav-link`} href='/home'>
+                                        <b>Home</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/projects'>
+                                        <b>Projects</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/components'>
+                                        <b>Components</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/licenses'>
+                                        <b>Licenses</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/ecc'>
+                                        <b>ECC</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/vulnerabilities'>
+                                        <b>Vulnerabilities</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/requests'>
+                                        <b>Requests</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/search'>
+                                        <b>Search</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                                <li className='nav-item mx-1'>
+                                    <Link className={`nav-link`} href='/preferences'>
+                                        <b>Preferences</b>
+                                    </Link>
+                                    <div className={navbarStyles.underline}></div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+                </nav>
+                <div className={navbarStyles.headingDiv}>
+                    <div>{heading}</div>
                 </div>
-            </nav>
-            <div className={navbarStyles.headingDiv}>
-                <div>{heading}</div>
             </div>
-        </div>
+        )
     )
 }
 

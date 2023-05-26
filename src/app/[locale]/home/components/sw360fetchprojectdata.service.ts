@@ -14,8 +14,7 @@ export async function sw360FetchProjectData(endpoint: string, embedded_endpoint:
         // Base data
         const data = await sw360FetchData(endpoint, embedded_endpoint)
         for (const project of data) {
-            const projectUrl: URL = new URL(project._links.self.href)
-            const response: Response = await fetch(projectUrl, {
+            const response: Response = await fetch(project._links.self.href, {
                 method: 'GET',
                 headers: commonHeaders(),
             })
