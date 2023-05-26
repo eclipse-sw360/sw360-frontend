@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { CellProps } from "@/object-types/Table";
+
 export const projectTableSchema = [
     {
         Header: "Project Name",
@@ -17,7 +19,7 @@ export const projectTableSchema = [
         Header: "Description",
         accessor: "version",
         isSortable: true,
-        Cell: (props: any) => {
+        Cell: (props: CellProps) => {
             // const value = props?.value;
             const valueLength = props.value?.length ?? 0;
             if (valueLength > 30)
@@ -44,7 +46,7 @@ export const projectTableSchema = [
         Header: "Project Responsible",
         accessor: "visibility",
         isSortable: true,
-        Cell: (props: any) => {
+        Cell: (props: CellProps) => {
             // const value = props?.value;
             const valueLength = props.value?.length ?? 0;
             if (valueLength > 30)

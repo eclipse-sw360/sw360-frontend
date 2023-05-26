@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { CellProps } from "@/object-types/Table";
+
 export const homeMyProjectsTableSchema = [
     {
         Header: "Project Name",
@@ -15,7 +17,7 @@ export const homeMyProjectsTableSchema = [
     {
         Header: "Description",
         accessor: "version",
-        Cell: (props:any) => {
+        Cell: (props: CellProps) => {
             return (<>
                 <style jsx>{`p {margin-top: 0.5rem; margin-bottom: 0.5rem;}`}</style>
                 <p>{props.value.slice(0,30)}...</p></>);}
@@ -23,7 +25,7 @@ export const homeMyProjectsTableSchema = [
     {
         Header: "Approved Releases",
         accessor: "projectType",
-        Cell: (row:any) => <div style={{ textAlign: "center" }}>{row.value}</div>
+        Cell: (row: CellProps) => <div style={{ textAlign: "center" }}>{row.value}</div>
     }
 ]
 
@@ -35,7 +37,7 @@ export const homeMyComponentsTableSchema = [
     {
         Header: "Description",
         accessor: "description",
-        Cell: (props:any) => {
+        Cell: (props: CellProps) => {
             return (<>
                 <style jsx>{`p {margin-top: 0.5rem; margin-bottom: 0.5rem;}`}</style>
                 <p>{props.value.slice(0,30)}...</p></>);}
@@ -46,7 +48,7 @@ export const homeMyTaskAssignmentsTableSchema = [
     {
         Header: "Document Name",
         accessor: "documentName",
-        Cell: (props:any) => {
+        Cell: (props: CellProps) => {
 
             return (<>
                 <style jsx>{`p {margin-top: 0.5rem; margin-bottom: 0.5rem;}`}</style>
@@ -62,7 +64,7 @@ export const homeMyTaskSubmissionsTableSchema = [
     {
         Header: "Document Name",
         accessor: "documentName",
-        Cell: (props:any) => {
+        Cell: (props: CellProps) => {
             return (<>
                 <style jsx>{`p {margin-top: 0.5rem; margin-bottom: 0.5rem;}`}</style>
                 <p>{props.value.slice(0,30)}...</p></>);}
