@@ -24,6 +24,7 @@
         "jsx": "preserve",
         "incremental": true,
         "strictNullChecks": false,
+        "typeRoots": ["node_modules/@types", "./types"],
         "paths": {
             "@/*": ["./src/*"]
         },
