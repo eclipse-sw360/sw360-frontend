@@ -26,7 +26,7 @@ const Header = () => {
         console.log('Search button is clicked !', inputValue)
     }
 
-    const getSearchedKeyword = (event: any) => {
+    const getSearchedKeyword = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value)
     }
 

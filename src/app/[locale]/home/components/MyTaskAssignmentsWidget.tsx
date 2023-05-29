@@ -14,9 +14,14 @@ import HomeTableHeader from './HomeTableHeader'
 
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-let data = [
+interface TaskAssignment {
+    name: string
+    status: string
+}
+
+let data: TaskAssignment[] = [
     {
-        documentName: 'No assigned task found',
+        name: 'No assigned task found',
         status: 'NA',
     },
 ]
@@ -25,11 +30,11 @@ const title = 'My Task Assignments'
 const columns = ['Document Name', 'Status']
 
 async function MyTaskAssignmentsWidget() {
-    const fetchData: unknown = await sw360FetchData('/myTaskAssignments')
+    const fetchData = (await sw360FetchData('/myTaskAssignments')) as TaskAssignment[]
 
     if (!fetchData === null) {
         data = fetchData.map((item) => ({
-            documentName: item.name,
+            name: item.name,
             status: item.status,
         }))
     }
@@ -37,7 +42,7 @@ async function MyTaskAssignmentsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table columns={columns} data={data} />
+            <SW360Table columns={columns} data={data.map((data) => [data.name, data.status])} />
         </div>
     )
 }
