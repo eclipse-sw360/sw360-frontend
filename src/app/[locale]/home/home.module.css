@@ -9,33 +9,38 @@
   License-Filename: LICENSE
 */
 
-.homePage{
+.homePage {
     margin-top: 1%;
     min-height: calc(100vh - 30px);
 }
 
+.tableHeader {
+    display: flex;
+    padding-right: 10px;
+    padding-top: 20px;
+}
 
 .title {
-    color: #5D8EA9;
+    color: #5d8ea9;
     text-transform: uppercase;
     font-size: medium;
-    /* padding-inline-start: 0px; */
-    /* border-bottom: 2px solid; */
+    font-weight: bold;
+    flex-grow: 1;
 }
 
 .titleSideBar {
-    color: #5D8EA9;
+    color: #5d8ea9;
     text-transform: uppercase;
     font-size: large;
     margin-top: 10px;
 }
 
-.boldText{
+.boldText {
     margin-top: 4px;
     margin-left: 17px;
 }
 
-.horizontalLine{
+.horizontalLine {
     margin: 0 0;
     margin-left: 14px;
     margin-right: 14px;
@@ -61,26 +66,22 @@
 }
 
 .btnOutlinePrimary {
-    border-color: #5D8EA9 !important;
-    color: #5D8EA9 !important;
+    border-color: #5d8ea9 !important;
+    color: #5d8ea9 !important;
     background-color: white !important;
 }
 .btnOutlinePrimary:focus {
-    border-color: #5D8EA9 !important;
-    color: #5D8EA9 !important;
+    border-color: #5d8ea9 !important;
+    color: #5d8ea9 !important;
     background-color: white !important;
 }
 .btnOutlinePrimary:active,
 .btnOutlinePrimary:hover {
-    background-color: #5D8EA9 !important;
+    background-color: #5d8ea9 !important;
     color: white !important;
 }
-.refreshIcon{
-    color: rgb(66, 49, 49);
 
-}
-
-.dropDown{
+.dropDown {
     align-items: left;
     margin-left: 10px;
     margin-top: 0px;

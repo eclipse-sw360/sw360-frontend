@@ -9,30 +9,18 @@
   License-Filename: LICENSE
 */
 
-.footerHref{
+.footerHref {
     color: orange;
     text-decoration: none;
 }
 
-.footerHref:hover{
-    color:white
+.footerHref:hover {
+    color: white;
 }
 
-.poweredBy{
+.poweredBy {
     color: white;
-    background-color: #30313F;
-    padding-top: 17px;
+    background-color: #30313f;
 }
-.footerBottom{
-    color: white;
-    display: flex;
-    justify-content: center;
-    margin-top: 3pt;
-    background-color: #30313F;
-    padding-bottom: 17px;
 
-}
-.container{
-    text-align: center;
-    margin-top: 4px;
-}
+

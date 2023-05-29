@@ -20,7 +20,6 @@ const publicPages = [
 const intlMiddleware = createIntlMiddleware({
     locales,
     defaultLocale: 'en',
-    localePrefix: 'always'
 });
 
 const authMiddleware = withAuth(
