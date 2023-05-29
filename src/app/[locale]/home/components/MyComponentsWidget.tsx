@@ -9,26 +9,32 @@
 
 import React from 'react'
 
-import SW360Table from '@/components/SW360Table/SW360Table'
 import HomeTableHeader from './HomeTableHeader'
+import SW360Table from '@/components/SW360Table/SW360Table'
 
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-let data = [
+interface Component {
+    name: string
+    description: string
+}
+
+let data: Component[] = [
     {
-        conmponentName: 'No component data to show',
+        name: 'No component data to show',
         description: 'NA',
     },
 ]
 
 const title = 'My Components'
-const columns = ['Component Name', 'Description', 'Test']
+const columns = ['Component Name', 'Description']
 
 async function MyComponentsWidget() {
-    const fetchData: unknown = await sw360FetchData('/components/mycomponents', 'components')
+    const fetchData = (await sw360FetchData('/components/mycomponents', 'components')) as Component[]
+
     if (fetchData !== null) {
-        data = fetchData.map((item: { name: any; description: any }) => ({
-            componentName: item.name,
+        data = fetchData.map((item) => ({
+            name: item.name,
             description: item.description,
         }))
     }
@@ -36,7 +42,7 @@ async function MyComponentsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table columns={columns} data={data} />
+            <SW360Table columns={columns} data={data.map((data) => [data.name, data.description])} />
         </div>
     )
 }

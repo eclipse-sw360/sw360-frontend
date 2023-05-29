@@ -14,11 +14,17 @@ import HomeTableHeader from './HomeTableHeader'
 
 import { sw360FetchProjectData } from '../home.service'
 
-let data = [
+interface Project {
+    name: string
+    description: string
+    version: string
+}
+
+let data: Project[] = [
     {
-        projectName: 'No project data to show',
+        name: 'No project data to show',
         description: 'NA',
-        approvedReleases: 'NA',
+        version: 'NA',
     },
 ]
 
@@ -26,20 +32,20 @@ const title = 'My Projects'
 const columns = ['Project Name', 'Description', 'Approved Releases']
 
 async function MyProjectsWidget() {
-    const fetchData = await sw360FetchProjectData('/projects/myprojects', 'projects')
+    const fetchData = (await sw360FetchProjectData('/projects/myprojects', 'projects')) as Project[]
 
     if (fetchData !== null) {
         data = fetchData.map((item) => ({
-            projectName: item.name,
+            name: item.name,
             description: item.description,
-            approvedReleases: item.version,
+            version: item.version,
         }))
     }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table columns={columns} data={data} />
+            <SW360Table columns={columns} data={data.map((data) => [data.name, data.description, data.version])} />
         </div>
     )
 }
