@@ -1,4 +1,5 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -20,8 +21,7 @@ export function commonHeaders(): Headers {
 // Common fetch data
 export async function sw360FetchData(endpoint: string, embedded_endpoint: string | null = null) {
     // Retrieve SW360 URL from env.ts
-    const url: URL = new URL(SW360_API_URL)
-    url.pathname = '/resource/api' + endpoint
+    const url: URL = new URL(SW360_API_URL + '/resource/api' + endpoint)
 
     try {
         // Fetch data from SW360 API
