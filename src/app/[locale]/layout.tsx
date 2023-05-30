@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-import 'gridjs/dist/theme/mermaid.css'
 import '@/styles/globals.css'
 import '@/styles/auth.css'
+import '@/styles/gridjs/sw360.css'
 import { NextAuthProvider } from '../provider'
 import React, { ReactNode } from 'react'
 import Header from '@/components/Header/Header'

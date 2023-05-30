@@ -7,34 +7,39 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Grid } from 'gridjs-react'
 import React from 'react'
 
-import styles from './SW360.module.css'
+import { Grid } from 'gridjs-react'
 
 interface SW360TableProps {
     columns?: string[]
     data?: any[]
     search?: boolean
+    pagination?: boolean
     limit?: number
+    noRecordsFound?: string
 }
 
-function SW360Table({ columns = [], data = [], search = false, limit = 5 }: SW360TableProps) {
+function SW360Table({
+    columns = [],
+    data = [],
+    search = false,
+    pagination = true,
+    limit = 5,
+    noRecordsFound = '',
+}: SW360TableProps) {
     return (
-        <div className={styles.gridjs}>
-            <Grid
-                data={data}
-                columns={columns}
-                search={search}
-                className={styles.gridjs}
-                sort={true}
-                pagination={{
-                    enabled: true,
-                    limit: limit,
-                    className: styles.pagination,
-                }}
-            />
-        </div>
+        <Grid
+            data={data}
+            columns={columns}
+            search={search}
+            sort={true}
+            pagination={{
+                enabled: { pagination },
+                limit: limit,
+            }}
+            noRecordsFound={noRecordsFound}
+        />
     )
 }
 

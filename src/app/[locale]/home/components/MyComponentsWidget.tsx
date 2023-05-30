@@ -19,15 +19,11 @@ interface Component {
     description: string
 }
 
-let data: Component[] = [
-    {
-        name: 'No component data to show',
-        description: 'NA',
-    },
-]
+let data: Component[] = []
 
 const title = 'My Components'
 const columns = ['Component Name', 'Description']
+const noRecordsFound = 'You do not own any components.'
 
 async function MyComponentsWidget() {
     const fetchData = (await sw360FetchData('/components/mycomponents', 'components')) as Component[]
@@ -42,7 +38,11 @@ async function MyComponentsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table columns={columns} data={data.map((data) => [data.name, data.description])} />
+            <SW360Table
+                columns={columns}
+                data={data.map((data) => [data.name, data.description])}
+                noRecordsFound={noRecordsFound}
+            />
         </div>
     )
 }

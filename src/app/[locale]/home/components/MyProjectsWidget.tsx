@@ -20,16 +20,11 @@ interface Project {
     version: string
 }
 
-let data: Project[] = [
-    {
-        name: 'No project data to show',
-        description: 'NA',
-        version: 'NA',
-    },
-]
+let data: Project[] = []
 
 const title = 'My Projects'
 const columns = ['Project Name', 'Description', 'Approved Releases']
+const noRecordsFound = 'No project data to show'
 
 async function MyProjectsWidget() {
     const fetchData = (await sw360FetchProjectData('/projects/myprojects', 'projects')) as Project[]
@@ -45,7 +40,11 @@ async function MyProjectsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table columns={columns} data={data.map((data) => [data.name, data.description, data.version])} />
+            <SW360Table
+                columns={columns}
+                data={data.map((data) => [data.name, data.description, data.version])}
+                noRecordsFound={noRecordsFound}
+            />
         </div>
     )
 }
