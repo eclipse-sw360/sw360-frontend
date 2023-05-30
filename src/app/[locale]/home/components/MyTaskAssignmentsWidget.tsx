@@ -19,15 +19,11 @@ interface TaskAssignment {
     status: string
 }
 
-let data: TaskAssignment[] = [
-    {
-        name: 'No assigned task found',
-        status: 'NA',
-    },
-]
+let data: TaskAssignment[] = []
 
 const title = 'My Task Assignments'
 const columns = ['Document Name', 'Status']
+const noRecordsFound = 'There are no tasks assigned to you.'
 
 async function MyTaskAssignmentsWidget() {
     const fetchData = (await sw360FetchData('/myTaskAssignments')) as TaskAssignment[]
@@ -42,7 +38,11 @@ async function MyTaskAssignmentsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table columns={columns} data={data.map((data) => [data.name, data.status])} />
+            <SW360Table
+                columns={columns}
+                data={data.map((data) => [data.name, data.status])}
+                noRecordsFound={noRecordsFound}
+            />
         </div>
     )
 }

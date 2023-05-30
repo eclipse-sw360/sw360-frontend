@@ -20,15 +20,11 @@ interface TaskSubmission {
     actions: string
 }
 
-let data: TaskSubmission[] = [
-    {
-        name: 'No assigned task found',
-        status: 'NA',
-        actions: 'NA',
-    },
-]
+let data: TaskSubmission[] = []
+
 const title = 'My Task Submissions'
 const columns = ['Document Name', 'Status', 'Actions']
+const noRecordsFound = 'You do not have any open moderation requests.'
 
 async function MyTaskSubmissionsWidget() {
     const fetchData = (await sw360FetchData('/myTaskSubmissions')) as TaskSubmission[]
@@ -43,7 +39,11 @@ async function MyTaskSubmissionsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table columns={columns} data={data.map((data) => [data.name, data.status, data.actions])} />
+            <SW360Table
+                columns={columns}
+                data={data.map((data) => [data.name, data.status, data.actions])}
+                noRecordsFound={noRecordsFound}
+            />
         </div>
     )
 }

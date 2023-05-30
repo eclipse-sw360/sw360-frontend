@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
+'use client';
 
 import styles from './home.module.css'
 import MyProjectsWidget from './components/MyProjectsWidget'
@@ -19,8 +19,6 @@ import MyTaskAssignmentsWidget from './components/MyTaskAssignmentsWidget'
 import MyTaskSubmissionsWidget from './components/MyTaskSubmissionsWidget'
 
 function HomePage() {
-    // const homeTableItemCount = 5
-
     return (
         <div className={`content-container container-fluid ${styles.homePage}`}>
             <div className='row'>
