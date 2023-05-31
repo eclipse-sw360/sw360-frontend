@@ -12,11 +12,11 @@ import React from 'react'
 import SW360Table from '@/components/SW360Table/SW360Table'
 import HomeTableHeader from './HomeTableHeader'
 
-import { sw360FetchData } from '@/utils/sw360fetchdata'
+import { sw360FetchProjectData } from './sw360fetchprojectdata.service'
 
 interface Project {
     name: string
-    projectType: string
+    description: string
     version: string
 }
 
@@ -27,12 +27,12 @@ const columns = ['Project Name', 'Description', 'Approved Releases']
 const noRecordsFound = 'No project data to show'
 
 async function MyProjectsWidget() {
-    const fetchData = (await sw360FetchData('/projects/myprojects', 'projects')) as Project[]
+    const fetchData = (await sw360FetchProjectData('/projects/myprojects', 'projects')) as Project[]
 
     if (fetchData !== null) {
         data = fetchData.map((item) => ({
             name: item.name,
-            projectType: item.projectType,
+            description: item.description,
             version: item.version,
         }))
     }
@@ -42,7 +42,7 @@ async function MyProjectsWidget() {
             <HomeTableHeader title={title} />
             <SW360Table
                 columns={columns}
-                data={data.map((data) => [data.name, data.projectType, data.version])}
+                data={data.map((item) => [item.name, item.description, item.version])}
                 noRecordsFound={noRecordsFound}
             />
         </div>

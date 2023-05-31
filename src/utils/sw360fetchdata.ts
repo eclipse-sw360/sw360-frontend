@@ -35,7 +35,7 @@ export async function sw360FetchData(endpoint: string, embedded_endpoint: string
         }
         const data = await response.json()
 
-        if (embedded_endpoint != null) {
+        if (embedded_endpoint != null || '_embedded' in data) {
             // Asembly endpoint for embedded data
             const inner: string = 'sw360:' + embedded_endpoint
             return data['_embedded'][inner]
