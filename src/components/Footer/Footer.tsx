@@ -12,13 +12,13 @@
 import Link from 'next/link'
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.css'
-
+import '@/styles/globals.css'
 import styles from './footer.module.css'
 
 function Footer() {
     return (
         <>
-            <footer>
+            <footer className='footerAlignment'>
                 <div>
                     <div className={`${styles.poweredBy} "pt-3"`}>
                         Powered-by

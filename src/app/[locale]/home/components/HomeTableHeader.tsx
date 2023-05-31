@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -17,11 +18,13 @@ interface HomeTableHeaderProps {
 }
 
 function HomeTableHeader({ title = '' }: HomeTableHeaderProps) {
-    return (
+    return (<>
         <div className={styles.tableHeader}>
             <h1 className={styles.title}>{title}</h1>
             <ArrowRepeat />
         </div>
+        <hr className={styles.horizontalLine}></hr>
+        </>
     )
 }
 

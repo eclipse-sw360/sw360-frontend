@@ -81,6 +81,13 @@ footer {
     position: absolute;
 }
 
+.footerAlignment{
+    background-color: #30313F;
+    position: relative;
+    bottom: '0px';
+    width : '100%';
+}
+
 #footer a {
     color: #f7941e !important;
     text-decoration-line: none;
