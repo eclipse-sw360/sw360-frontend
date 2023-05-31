@@ -13,14 +13,15 @@ export async function sw360FetchProjectData(endpoint: string, embedded_endpoint:
     try {
         // Base data
         const data = await sw360FetchData(endpoint, embedded_endpoint)
-        for (const project of data) {
+        const promises = data.map(async (project: any) => {
             const response: Response = await fetch(project._links.self.href, {
                 method: 'GET',
                 headers: commonHeaders(),
             })
             const projdata = await response.json()
             project['description'] = projdata['description']
-        }
+        })
+        await Promise.all(promises)
         return data
     } catch (error) {
         console.error(error)
