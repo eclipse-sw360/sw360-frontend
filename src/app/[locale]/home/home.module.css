@@ -16,6 +16,7 @@
 
 .tableHeader {
     display: flex;
+    margin-left: 5px;
     padding-right: 10px;
     padding-top: 20px;
 }
@@ -41,15 +42,10 @@
 }
 
 .horizontalLine {
-    margin: 0 0;
-    margin-left: 14px;
-    margin-right: 14px;
+    margin: 5px 5px;
     border-top: 2px solid;
     color: #006b99;
 }
-/* #sw360_table_col h5 {
-    border-bottom: 2px dotted;
-} */
 
 .buttonPrimary,
 .buttonPrimary:focus,
@@ -85,4 +81,11 @@
     align-items: left;
     margin-left: 10px;
     margin-top: 0px;
+}
+
+.titleSubSideBar {
+    color: #000000;
+    text-transform: capitalize;
+    font-size: medium;
+    margin-top: 10px;
 }

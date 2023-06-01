@@ -1,3 +1,4 @@
+// Copyright (C) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
@@ -9,7 +10,7 @@
 
 import { sw360FetchData, commonHeaders } from '@/utils/sw360fetchdata'
 
-export async function sw360FetchProjectData(endpoint: string, embedded_endpoint: string): Promise<unknown | null> {
+export async function sw360FetchCompleteData(endpoint: string, embedded_endpoint: string): Promise<unknown | null> {
     try {
         // Base data
         const data = await sw360FetchData(endpoint, embedded_endpoint)

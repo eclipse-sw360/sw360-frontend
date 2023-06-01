@@ -17,6 +17,9 @@ import MyProjectsWidget from './components/MyProjectsWidget'
 import MyComponentsWidget from './components/MyComponentsWidget'
 import MyTaskAssignmentsWidget from './components/MyTaskAssignmentsWidget'
 import MyTaskSubmissionsWidget from './components/MyTaskSubmissionsWidget'
+import MySubscriptionsWidget from './components/MySubscriptionsWidget'
+import RecentComponentsWidget from './components/RecentComponentsWidget'
+import RecentReleasesWidget from './components/RecentReleasesWidget'
 
 function HomePage() {
     return (
@@ -31,8 +34,6 @@ function HomePage() {
                             <MyComponentsWidget />
                         </div>
                     </div>
-                </div>
-                <div className='col col-md-10'>
                     <div className='row'>
                         <div className='col-sm' id='sw360_table_col'>
                             <MyTaskAssignmentsWidget />
@@ -40,6 +41,17 @@ function HomePage() {
                         <div className='col-sm' id='sw360_table_col'>
                             <MyTaskSubmissionsWidget />
                         </div>
+                    </div>
+                </div>
+                <div className='col col-md-2'>
+                    <div className='col-sm' id='sw360_table_col'>
+                        <MySubscriptionsWidget />
+                    </div>
+                    <div className='col-sm' id='sw360_table_col'>
+                        <RecentComponentsWidget />
+                    </div>
+                    <div className='col-sm' id='sw360_table_col'>
+                        <RecentReleasesWidget />
                     </div>
                 </div>
             </div>
