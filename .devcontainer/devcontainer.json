@@ -43,14 +43,12 @@
       },
       // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
-		"2gua.rainbow-brackets",
 		"aaron-bond.better-comments",
 		"davidanson.vscode-markdownlint",
 		"dbaeumer.vscode-eslint",
 		"esbenp.prettier-vscode",
 		"formulahendry.auto-close-tag",
 		"formulahendry.auto-rename-tag",
-		"ms-vscode.vscode-typescript-tslint-plugin",
 		"naumovs.color-highlight",
 		"oderwat.indent-rainbow",
 		"shardulm94.trailing-spaces",

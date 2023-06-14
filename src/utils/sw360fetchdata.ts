@@ -57,7 +57,6 @@ export async function sw360FetchData(endpoint: string, embedded_endpoint?: strin
             })
             await Promise.all(promises)
         }
-        console.log(data)
 
         return data
     } catch (error) {

@@ -10,34 +10,6 @@
   License-Filename: LICENSE
 */
 
-.card-deck {
-  margin-bottom: 1rem;
-}
-
-.card-header:first-child {
-  border-radius: calc(0.25rem - 0px) calc(0.25rem - 0px) 0 0;
-}
-
-.card-header {
-  background-color: rgba(0, 0, 0, 0.03);
-  border-bottom: 0px solid rgba(0, 0, 0, 0.125);
-  margin-bottom: 0;
-  padding: 0.75rem 1.25rem;
-  color: #FFF;
-  background-color: #5D8EA9;
-  font-weight: bold;
-}
-
-.card-body {
-  flex: 1 1 auto;
-  min-height: 1px;
-  padding-bottom: 1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 1rem;
-  background-color: #EBF0F5;
-}
-
 .label {
   font-weight: bold;
 }

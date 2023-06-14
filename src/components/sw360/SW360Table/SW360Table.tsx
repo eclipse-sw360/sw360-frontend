@@ -35,7 +35,7 @@ function SW360Table({
             search={search}
             sort={true}
             pagination={{
-                enabled: { pagination },
+                enabled: pagination,
                 limit: limit,
             }}
             noRecordsFound={noRecordsFound}

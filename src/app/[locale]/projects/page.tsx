@@ -12,8 +12,8 @@
 
 import Link from 'next/link'
 
-import SW360Table from '@/components/SW360Table/SW360Table'
-import SW360AdvancedSearch from '@/components/SW360AdvancedSearch/SW360AdvancedSearch'
+import SW360Table from '@/components/sw360/SW360Table/SW360Table'
+import AdvancedSearch from '@/components/sw360/AdvancedSearch/AdvancedSearch'
 import projectPageStyles from './projects.module.css'
 
 import { sw360FetchData } from '@/utils/sw360fetchdata'
@@ -33,7 +33,7 @@ const noRecordsFound = 'No project data to show.'
 const advancedSearch = {
     'Project Name': '',
     'Project Version': '',
-    'Project Type': ['Customer Project', 'Internal Project', 'Product', 'Service', 'InnerSource'],
+    'Project Type': ['Customer Project', 'Internal Project', 'Product', 'Service', 'Inner Source'],
     'Project Responsible (Email)': '',
     Group: ['None'],
     State: ['Active', 'PhaseOut', 'Unknown'],
@@ -55,92 +55,91 @@ async function Project() {
     }
 
     return (
-        <div className='ms-5 me-5 mt-1'>
-            <div className='row mt-2'>
-                <div className='col col-sm-3'>
-                    <SW360AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                 </div>
-                <div className='col col-sm-9'>
-                    <div className='col'>
-                        <div className='row'>
-                            <div className='col-lg-3'>
-                                <div className='btn-group d-flex mb-2' role='group' aria-label='Project Utilities'>
-                                    <Link
-                                        type='button'
-                                        className={`fw-bold btn btn-primary ${projectPageStyles['button']}`}
-                                        href='http://localhost:3000/projects/add/summary'
-                                    >
-                                        Add Project
-                                    </Link>
-                                    <button
-                                        type='button'
-                                        className={`fw-bold btn btn-light ${projectPageStyles['button-plain']}`}
-                                    >
-                                        Import SBOM
-                                    </button>
-                                </div>
-                            </div>
-                            <div className='col-lg-3'>
-                                <div className='dropdown'>
-                                    <button
-                                        className={`fw-bold btn btn-light ${projectPageStyles['button-plain']} dropdown-toggle`}
-                                        type='button'
-                                        data-bs-toggle='dropdown'
-                                        aria-expanded='false'
-                                    >
-                                        Export Spreadsheet
-                                    </button>
-                                    <ul className='dropdown-menu'>
-                                        <li>
-                                            <button type='button' className='dropdown-item'>
-                                                Projects only
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button type='button' className='dropdown-item'>
-                                                Projects with linked releases
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='row my-2'>
-                            <div className='col-xl-2 d-flex'>
-                                <p className='my-2'>show</p>
-                                <select className='form-select form-select-sm mx-2' aria-label='page size select'>
-                                    <option selected value={10}>
-                                        10
-                                    </option>
-                                    <option selected value={25}>
-                                        25
-                                    </option>
-                                    <option selected value={50}>
-                                        50
-                                    </option>
-                                    <option selected value={100}>
-                                        100
-                                    </option>
-                                </select>
-                                <p className='my-2'>entries</p>
-                            </div>
-                            <div className='col-xl-1 d-flex'>
+
+                <div className='col'>
+                    <div className='row'>
+                        <div className='col-lg-3'>
+                            <div className='btn-group d-flex mb-2' role='group' aria-label='Project Utilities'>
+                                <Link
+                                    type='button'
+                                    className={`fw-bold btn btn-primary ${projectPageStyles['button']}`}
+                                    href='http://localhost:3000/projects/add/summary'
+                                >
+                                    Add Project
+                                </Link>
                                 <button
                                     type='button'
                                     className={`fw-bold btn btn-light ${projectPageStyles['button-plain']}`}
                                 >
-                                    Print <i className='bi bi-printer'></i>
+                                    Import SBOM
                                 </button>
                             </div>
                         </div>
-                        <div className='row'>
-                            <SW360Table
-                                columns={columns}
-                                data={data.map((data) => [data.name, data.description, data.projectResponsible])}
-                                noRecordsFound={noRecordsFound}
-                                limit={limit}
-                            />
+                        <div className='col-lg-3'>
+                            <div className='dropdown'>
+                                <button
+                                    className={`fw-bold btn btn-light ${projectPageStyles['button-plain']} dropdown-toggle`}
+                                    type='button'
+                                    data-bs-toggle='dropdown'
+                                    aria-expanded='false'
+                                >
+                                    Export Spreadsheet
+                                </button>
+                                <ul className='dropdown-menu'>
+                                    <li>
+                                        <button type='button' className='dropdown-item'>
+                                            Projects only
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type='button' className='dropdown-item'>
+                                            Projects with linked releases
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
+                    </div>
+                    <div className='row my-2'>
+                        <div className='col-xl-2 d-flex'>
+                            <p className='my-2'>show</p>
+                            <select className='form-select form-select-sm mx-2' aria-label='page size select'>
+                                <option selected value={10}>
+                                    10
+                                </option>
+                                <option selected value={25}>
+                                    25
+                                </option>
+                                <option selected value={50}>
+                                    50
+                                </option>
+                                <option selected value={100}>
+                                    100
+                                </option>
+                            </select>
+                            <p className='my-2'>entries</p>
+                        </div>
+                        <div className='col-xl-1 d-flex'>
+                            <button
+                                type='button'
+                                className={`fw-bold btn btn-light ${projectPageStyles['button-plain']}`}
+                            >
+                                Print <i className='bi bi-printer'></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <SW360Table
+                            columns={columns}
+                            data={data.map((data) => [data.name, data.description, data.projectResponsible])}
+                            noRecordsFound={noRecordsFound}
+                            limit={limit}
+                        />
                     </div>
                 </div>
             </div>
