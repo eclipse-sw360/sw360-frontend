@@ -60,7 +60,6 @@ async function LicensesPage() {
     }
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        console.log(event.currentTarget.value)
         search.keyword = event.currentTarget.value
     }
 
