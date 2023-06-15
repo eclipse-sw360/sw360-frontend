@@ -360,3 +360,20 @@ th.gridjs-th:last-child {
     cursor: ew-resize;
     background-color: #9bc2f7;
 }
+
+
+.gridjs a:link {
+    text-decoration: none;
+    color: var(--sw360-primary-color);
+}
+
+.gridjs a:visited {
+    text-decoration: none;
+    color: var(--sw360-primary-color);
+}
+
+
+.gridjs a:hover {
+    text-decoration: underline;
+    color: var(--sw360-primary-background-color);
+}

@@ -18,8 +18,11 @@ export function commonHeaders(): Headers {
     return headers
 }
 
-// Common fetch data
-export async function sw360FetchData(endpoint: string, embedded_endpoint: string | null = null) {
+/**
+ * @returns a json object if sw360 provides a valid response, null otherwise
+ *
+ */
+export async function sw360FetchData(endpoint: string, embedded_endpoint?: string, details?: string[]) {
     // Retrieve SW360 URL from env.ts
     const url: URL = new URL(SW360_API_URL + '/resource/api' + endpoint)
 
@@ -33,13 +36,28 @@ export async function sw360FetchData(endpoint: string, embedded_endpoint: string
         if (response.status != HttpStatus.OK) {
             return null
         }
-        const data = await response.json()
+        let data = await response.json()
 
-        if (embedded_endpoint != null) {
+        if (embedded_endpoint != null || '_embedded' in data) {
             // Asembly endpoint for embedded data
             const inner: string = 'sw360:' + embedded_endpoint
-            return data['_embedded'][inner]
+            data = data['_embedded'][inner]
         }
+
+        if (details != null) {
+            const promises = data.map(async (data: any) => {
+                const response: Response = await fetch(data._links.self.href, {
+                    method: 'GET',
+                    headers: commonHeaders(),
+                })
+                const detailsData = await response.json()
+                details.map(async (appendDetail: string) => {
+                    data[appendDetail] = detailsData[appendDetail]
+                })
+            })
+            await Promise.all(promises)
+        }
+
         return data
     } catch (error) {
         console.error('Fail Embedded')

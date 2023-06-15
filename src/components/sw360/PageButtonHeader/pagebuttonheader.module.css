@@ -1,0 +1,15 @@
+.buttonheader-title {
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: -0.5rem;
+    font-size: 1.5rem;
+    text-align: right;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(108, 117, 125, 0.4);
+}
+
+.buttonheader-toolbar {
+    margin-bottom: 1rem;
+    align-items: center;
+}

@@ -10,7 +10,7 @@
 import React from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
-import SW360Table from '@/components/SW360Table/SW360Table'
+import SW360Table from '@/components/sw360/SW360Table/SW360Table'
 
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
