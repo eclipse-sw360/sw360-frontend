@@ -24,7 +24,7 @@ function MyComponentsWidget() {
     useEffect(() => {
         const fetchData = async () => {
             const data = await sw360FetchData('/components/mycomponents', 'components')
-            setData(data.map((item: { name: string; description: string }) => [item.name, item.description]))
+            setData(data.map((item: { name: string, description: string }) => [item.name, item.description]))
         }
         fetchData()
     }, [])

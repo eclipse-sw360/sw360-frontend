@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
@@ -16,23 +16,26 @@ import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 import HomeTableHeader from './HomeTableHeader'
 
-interface TaskSubmission {
-    name: string[]
-    status: string[]
-    actions: string[]
-}
-
-async function MyTaskSubmissionsWidget() {
+function MyTaskSubmissionsWidget() {
+    const [data, setData] = useState([])
     const t = useTranslations(COMMON_NAMESPACE)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/myTaskSubmissions')
+            setData(
+                data.map((item: { name: string; status: string; actions: string }) => [
+                    item.name,
+                    item.status,
+                    item.actions,
+                ])
+            )
+        }
+        fetchData()
+    }, [])
 
     const title = t('My Task Submissions')
     const columns = [t('Document Name'), t('Status'), t('Actions')]
-
-    let data: unknown[] = []
-    const fetchData = (await sw360FetchData('/myTaskSubmissions')) as TaskSubmission[]
-    if (!fetchData === null) {
-        data = fetchData.map((item) => [item.name, item.status, item.actions])
-    }
 
     return (
         <div>

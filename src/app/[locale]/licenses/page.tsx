@@ -72,14 +72,14 @@ function LicensesPage() {
                 <div className='col col-sm-9'>
                     <div className='col'>
                         <div className='row'>
-                            <PageButtonHeader buttons={buttons} title={`Licenses (${data.length})`} />
+                            <PageButtonHeader buttons={buttons} title={`${t('Licenses')} (${data.length})`} />
                             <div className='row mt-2'>
                                 <Table
-                                    className='grisjd-search'
                                     data={data}
                                     columns={columns}
                                     sort={true}
                                     search={search}
+                                    selector={true}
                                 />
                             </div>
                         </div>

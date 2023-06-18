@@ -11,12 +11,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Dropdown } from 'react-bootstrap'
 
-import { AdvancedSearch, Table, _ } from '@/components/sw360'
+import { AdvancedSearch, PageButtonHeader, Table, _ } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
-
-import projectPageStyles from './projects.module.css'
 
 interface ProjectType {
     name: string
@@ -25,11 +25,19 @@ interface ProjectType {
     state: string
 }
 
-async function Project() {
+function Project() {
     const [data, setData] = useState([])
+    const t = useTranslations(COMMON_NAMESPACE)
 
     const pagination = { limit: 10 }
-    const columns = ['Project Name', 'Description', 'Project Responsible', 'License Clearing', 'State', 'Actions']
+    const columns = [
+        t('Project Name'),
+        t('Description'),
+        t('Project Responsible'),
+        t('License Clearing'),
+        t('State'),
+        t('Actions'),
+    ]
     const advancedSearch = {
         'Project Name': '',
         'Project Version': '',
@@ -41,6 +49,10 @@ async function Project() {
         Tag: '',
         'Additional Data': '',
     }
+    const headerbuttons = {
+        'Add Projects': { link: '/projects/add', type: 'primary' },
+        'Import SBOM': { link: '/projects', type: 'secondary' },
+    }
 
     useEffect(() => {
         sw360FetchData('/projects?allDetails=true', 'projects').then((fetchedData) => {
@@ -48,17 +60,6 @@ async function Project() {
             setData(fetchedData as ProjectType[])
         })
     }, [])
-
-    // if (fetchData !== null) {
-    //     setData(
-    //         fetchData.map((item) => ({
-    //             name: item.name,
-    //             description: item.description,
-    //             projectResponsible: item.projectResponsible,
-    //             state: item.state,
-    //         }))
-    //     )
-    // }
 
     return (
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
@@ -69,69 +70,19 @@ async function Project() {
 
                 <div className='col'>
                     <div className='row'>
-                        <div className='col-lg-3'>
-                            <div className='btn-group d-flex mb-2' role='group' aria-label='Project Utilities'>
-                                <Link
-                                    type='button'
-                                    className={`fw-bold btn btn-primary ${projectPageStyles['button']}`}
-                                    href='http://localhost:3000/projects/add/summary'
-                                >
-                                    Add Project
-                                </Link>
-                                <button
-                                    type='button'
-                                    className={`fw-bold btn btn-light ${projectPageStyles['button-plain']}`}
-                                >
-                                    Import SBOM
-                                </button>
+                        <PageButtonHeader title={`${t('Projects')} (${data.length})`} buttons={headerbuttons}>
+                            <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
+                                <Dropdown>
+                                    <Dropdown.Toggle variant='secondary' id='project-export'>
+                                        {t('Export Spreadsheet')}
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
+                                        <Dropdown.Item>{t('Projects with linked releases')}</Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </div>
-                        </div>
-                        <div className='col-lg-3'>
-                            <div className='dropdown'>
-                                <button
-                                    className={`fw-bold btn btn-light ${projectPageStyles['button-plain']} dropdown-toggle`}
-                                    type='button'
-                                    data-bs-toggle='dropdown'
-                                    aria-expanded='false'
-                                >
-                                    Export Spreadsheet
-                                </button>
-                                <ul className='dropdown-menu'>
-                                    <li>
-                                        <button type='button' className='dropdown-item'>
-                                            Projects only
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type='button' className='dropdown-item'>
-                                            Projects with linked releases
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='row my-2'>
-                        <div className='col-xl-2 d-flex'>
-                            <p className='my-2'>show</p>
-                            <select className='form-select form-select-sm mx-2' aria-label='page size select'>
-                                <option defaultValue={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                                <option value={100}>100</option>
-                            </select>
-                            <p className='my-2'>entries</p>
-                        </div>
-                        <div className='col-xl-1 d-flex'>
-                            <button
-                                type='button'
-                                className={`fw-bold btn btn-light ${projectPageStyles['button-plain']}`}
-                            >
-                                Print <i className='bi bi-printer'></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div className='row'>
+                        </PageButtonHeader>
                         <Table
                             columns={columns}
                             data={data.map((data) => [data.name, data.description, data.projectResponsible])}

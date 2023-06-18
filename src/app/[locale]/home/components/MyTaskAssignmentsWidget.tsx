@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -17,22 +17,20 @@ import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 import HomeTableHeader from './HomeTableHeader'
 
-interface TaskAssignment {
-    name: string
-    status: string
-}
-
-async function MyTaskAssignmentsWidget() {
+function MyTaskAssignmentsWidget() {
+    const [data, setData] = useState([])
     const t = useTranslations(COMMON_NAMESPACE)
 
-    const fetchData = (await sw360FetchData('/myTaskAssignments')) as TaskAssignment[]
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/myTaskAssignments')
+            setData(data.map((item: { name: string; status: string }) => [item.name, item.status]))
+        }
+        fetchData()
+    }, [])
+
     const title = t('My Task Assignments')
     const columns = [t('Document Name'), t('Status')]
-
-    let data: unknown[] = []
-    if (!fetchData === null) {
-        data = fetchData.map((item) => [item.name, item.status])
-    }
 
     return (
         <div>

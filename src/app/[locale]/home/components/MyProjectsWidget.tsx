@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -15,32 +15,33 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Table } from '@/components/sw360'
 
 import HomeTableHeader from './HomeTableHeader'
-import { sw360FetchProjectData } from './sw360fetchprojectdata.service'
+import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-interface Project {
-    name: string
-    description: string
-    version: string
-}
-
-async function MyProjectsWidget() {
+function MyProjectsWidget() {
+    const [datat, setDatat] = useState([])
     const t = useTranslations(COMMON_NAMESPACE)
 
-    let data: unknown[] = []
-    // Fetch sw360 data
-    const fetchData = (await sw360FetchProjectData('/projects/myprojects', 'projects')) as Project[]
+    useEffect(() => {
+        const fetchData = async () => {
+            const datat = await sw360FetchData('/projects/myprojects', 'projects')
+            setDatat(
+                datat.map((item: { name: string; description: string; version: string }) => [
+                    item.name,
+                    item.description,
+                    item.version,
+                ])
+            )
+        }
+        fetchData()
+    }, [])
 
     const title = t('My Projects')
     const columns = [t('Project Name'), t('Description'), t('Approved Releases')]
 
-    if (fetchData !== null) {
-        data = fetchData.map((item) => [item.name, item.description, item.version])
-    }
-
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={data} pagination={{ limit: 5 }} />
+            <Table columns={columns} data={datat} pagination={{ limit: 5 }} selector={false} />
         </div>
     )
 }
