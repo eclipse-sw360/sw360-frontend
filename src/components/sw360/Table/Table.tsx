@@ -9,26 +9,32 @@
 
 import * as React from 'react'
 import { Component, createRef, RefObject } from 'react'
-import { Grid as Gridjs, UserConfig } from 'gridjs'
+import { Config, Grid } from 'gridjs'
+import { Form } from 'react-bootstrap'
 
 const defaultOptions = {
     pagination: { limit: 10 },
-    selector: true,
     search: false,
+    selector: true,
+    sort: true,
 }
 
-class Table extends Component<Partial<UserConfig>, unknown> {
+interface TableProps extends Partial<Config> {
+    selector?: boolean
+}
+
+class Table extends Component<TableProps, unknown> {
     private wrapper: RefObject<HTMLDivElement> = createRef()
     // Grid.js instance
-    private readonly instance: Gridjs = null
+    private readonly instance: Grid = null
 
-    constructor(props: Partial<UserConfig>) {
+    constructor(props: TableProps) {
         super(props)
 
-        this.instance = new Gridjs({ ...defaultOptions, ...props })
+        this.instance = new Grid({ ...defaultOptions, ...props })
     }
 
-    getInstance(): Gridjs {
+    getInstance(): Grid {
         return this.instance
     }
 
@@ -53,19 +59,22 @@ class Table extends Component<Partial<UserConfig>, unknown> {
         return (
             <>
                 {defaultOptions.selector && (
-                    <div className='col-xl-2 d-flex'>
-                        <p className='my-2'>Show</p>
-                        <select
-                            className='form-select form-select-sm mx-2'
-                            aria-label='page size select'
-                            onChange={this.handlePageSizeChange}
-                        >
-                            <option defaultValue={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                            <option value={100}>100</option>
-                        </select>
-                        <p className='my-2'>entries</p>
+                    <div className='col-11 mt-3 mb-3'>
+                        <div className='dataTables_length'>
+                            <span className='my-2'>Show</span>
+                            <label style={{ marginLeft: '5px', marginRight: '5px' }}>
+                                <Form.Select size='sm' onChange={this.handlePageSizeChange}>
+                                    <option defaultValue={defaultOptions.pagination.limit}>
+                                        {defaultOptions.pagination.limit}
+                                    </option>
+                                    <option value='10'>10</option>
+                                    <option value='25'>25</option>
+                                    <option value='50'>50</option>
+                                    <option value='100'>100</option>
+                                </Form.Select>
+                            </label>
+                            <span>entries</span>
+                        </div>
                     </div>
                 )}
                 <div ref={this.wrapper} />
