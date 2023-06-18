@@ -48,7 +48,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                             name={key}
                             // onChange={handleSearchParam} value={searchParams.type}
                         >
-                            <option selected></option>
+                            <option defaultValue='' />
                             {value.map((option) => (
                                 <option key={option} value={option}>
                                     {t(option)}
