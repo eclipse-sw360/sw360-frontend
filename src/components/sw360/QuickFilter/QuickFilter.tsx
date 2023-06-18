@@ -12,13 +12,10 @@ import { Form } from 'react-bootstrap'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 
+import { QuiickFilterProps } from './QuickFilter.types'
 import styles from '@/components/sw360/AdvancedSearch/advancedsearch.module.css'
 
-interface Props {
-    searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
-}
-
-function QuickFilter({ searchFunction }: Props) {
+function QuickFilter({ searchFunction }: QuiickFilterProps) {
     const t = useTranslations(COMMON_NAMESPACE)
 
     return (
