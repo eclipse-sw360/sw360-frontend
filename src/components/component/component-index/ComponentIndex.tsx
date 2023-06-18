@@ -11,17 +11,25 @@
 'use client'
 import ComponentAdvanceSearch from '@/components/component/component-advance-search/ComponentAdvanceSearch'
 import ComponentsTable from '@/components/component/components-table/ComponentsTable'
-import { ButtonGroup, Dropdown } from 'react-bootstrap'
+import { Dropdown } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types/Session'
 
+import { PageButtonHeader } from '@/components/sw360'
+
 interface Props {
     session?: Session
+    length?: number
 }
 
 const ComponentIndex = ({ session }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
+
+    const headerbuttons = {
+        'Add Component': { link: '/projects/add', type: 'primary' },
+        'Import SBOM': { link: '/projects', type: 'secondary' },
+    }
 
     return (
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
@@ -30,27 +38,19 @@ const ComponentIndex = ({ session }: Props) => {
                     <ComponentAdvanceSearch />
                 </div>
                 <div className='col'>
-                    <div className='btn-toolbar' role='toolbar'>
-                        <div className='btn-group' role='group'>
-                            <button type='button' className='btn btn-primary'>
-                                {t('Add Component')}
-                            </button>
-                            <button type='button' className='btn btn-secondary'>
-                                {t('Import SBOM')}
-                            </button>
+                    <PageButtonHeader title={`${t('Components')} (0)`} buttons={headerbuttons}>
+                        <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
+                            <Dropdown>
+                                <Dropdown.Toggle variant='secondary' id='project-export'>
+                                    {t('Export Spreadsheet')}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Dropdown.Item>{t('Components only')}</Dropdown.Item>
+                                    <Dropdown.Item>{t('Components with releases')}</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
                         </div>
-                        <Dropdown as={ButtonGroup}>
-                            <Dropdown.Toggle className='btn btn-secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Item style={{ fontSize: '15px', color: 'gray' }}>
-                                    {t('Components Only')}
-                                </Dropdown.Item>
-                                <Dropdown.Item style={{ fontSize: '15px', color: 'gray' }}>
-                                    {t('Components With Releases')}
-                                </Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </div>
+                    </PageButtonHeader>
                     <div className='row' style={{ marginBottom: '20px' }}>
                         <ComponentsTable session={session} />
                     </div>
