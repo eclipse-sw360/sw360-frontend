@@ -9,40 +9,35 @@
 
 import React from 'react'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import HomeTableHeader from './HomeTableHeader'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
+import { Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
+
+import HomeTableHeader from './HomeTableHeader'
 
 interface TaskAssignment {
     name: string
     status: string
 }
 
-let data: TaskAssignment[] = []
-
-const title = 'My Task Assignments'
-const columns = ['Document Name', 'Status']
-const noRecordsFound = 'There are no tasks assigned to you.'
-
 async function MyTaskAssignmentsWidget() {
-    const fetchData = (await sw360FetchData('/myTaskAssignments')) as TaskAssignment[]
+    const t = useTranslations(COMMON_NAMESPACE)
 
+    const fetchData = (await sw360FetchData('/myTaskAssignments')) as TaskAssignment[]
+    const title = t('My Task Assignments')
+    const columns = [t('Document Name'), t('Status')]
+
+    let data: unknown[] = []
     if (!fetchData === null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            status: item.status,
-        }))
+        data = fetchData.map((item) => [item.name, item.status])
     }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table
-                columns={columns}
-                data={data.map((data) => [data.name, data.status])}
-                noRecordsFound={noRecordsFound}
-            />
+            <Table columns={columns} data={data} />
         </div>
     )
 }

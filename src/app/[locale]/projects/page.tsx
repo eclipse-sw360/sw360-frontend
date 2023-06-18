@@ -10,13 +10,13 @@
 
 'use client'
 
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import AdvancedSearch from '@/components/sw360/AdvancedSearch/AdvancedSearch'
-import projectPageStyles from './projects.module.css'
-
+import { AdvancedSearch, Table, _ } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
+
+import projectPageStyles from './projects.module.css'
 
 interface ProjectType {
     name: string
@@ -25,34 +25,40 @@ interface ProjectType {
     state: string
 }
 
-let data: ProjectType[] = []
-
-const limit = 10
-const columns = ['Project Name', 'Description', 'Project Responsible', 'License Clearing', 'State', 'Actions']
-const noRecordsFound = 'No project data to show.'
-const advancedSearch = {
-    'Project Name': '',
-    'Project Version': '',
-    'Project Type': ['Customer Project', 'Internal Project', 'Product', 'Service', 'Inner Source'],
-    'Project Responsible (Email)': '',
-    Group: ['None'],
-    State: ['Active', 'PhaseOut', 'Unknown'],
-    'Clearing State': ['Open', 'In Progress', 'Closed'],
-    Tag: '',
-    'Additional Data': '',
-}
-
 async function Project() {
-    const fetchData = (await sw360FetchData('/projects?allDetails=true', 'projects')) as ProjectType[]
+    const [data, setData] = useState([])
 
-    if (fetchData !== null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            description: item.description,
-            projectResponsible: item.projectResponsible,
-            state: item.state,
-        }))
+    const pagination = { limit: 10 }
+    const columns = ['Project Name', 'Description', 'Project Responsible', 'License Clearing', 'State', 'Actions']
+    const advancedSearch = {
+        'Project Name': '',
+        'Project Version': '',
+        'Project Type': ['Customer Project', 'Internal Project', 'Product', 'Service', 'Inner Source'],
+        'Project Responsible (Email)': '',
+        Group: ['None'],
+        State: ['Active', 'PhaseOut', 'Unknown'],
+        'Clearing State': ['Open', 'In Progress', 'Closed'],
+        Tag: '',
+        'Additional Data': '',
     }
+
+    useEffect(() => {
+        sw360FetchData('/projects?allDetails=true', 'projects').then((fetchedData) => {
+            console.log(fetchedData)
+            setData(fetchedData as ProjectType[])
+        })
+    }, [])
+
+    // if (fetchData !== null) {
+    //     setData(
+    //         fetchData.map((item) => ({
+    //             name: item.name,
+    //             description: item.description,
+    //             projectResponsible: item.projectResponsible,
+    //             state: item.state,
+    //         }))
+    //     )
+    // }
 
     return (
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
@@ -109,18 +115,10 @@ async function Project() {
                         <div className='col-xl-2 d-flex'>
                             <p className='my-2'>show</p>
                             <select className='form-select form-select-sm mx-2' aria-label='page size select'>
-                                <option selected value={10}>
-                                    10
-                                </option>
-                                <option selected value={25}>
-                                    25
-                                </option>
-                                <option selected value={50}>
-                                    50
-                                </option>
-                                <option selected value={100}>
-                                    100
-                                </option>
+                                <option defaultValue={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
                             </select>
                             <p className='my-2'>entries</p>
                         </div>
@@ -134,11 +132,10 @@ async function Project() {
                         </div>
                     </div>
                     <div className='row'>
-                        <SW360Table
+                        <Table
                             columns={columns}
                             data={data.map((data) => [data.name, data.description, data.projectResponsible])}
-                            noRecordsFound={noRecordsFound}
-                            limit={limit}
+                            pagination={pagination}
                         />
                     </div>
                 </div>

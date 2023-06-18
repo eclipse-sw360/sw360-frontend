@@ -8,9 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
-import { Grid, _ } from 'gridjs-react'
-import Form from 'react-bootstrap/Form'
+'use client'
+
 import { useEffect, useState, useCallback } from 'react'
 import CommonUtils from '@/utils/common.utils'
 import Link from 'next/link'
@@ -24,114 +23,100 @@ import { Session } from '@/object-types/Session'
 import ReleaseLink from '@/object-types/ReleaseLink'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
 
+import { Table, _ } from '@/components/sw360'
+
 interface Props {
-  session: Session,
-  componentId: string,
+    session: Session
+    componentId: string
 }
 
 const ReleaseOverview = ({ session, componentId }: Props) => {
-  const t = useTranslations(COMMON_NAMESPACE);
-  const [data, setData] = useState([]);
-  const [pageSize, setPageSize] = useState(1);
-  const [totalRows, setTotalRows] = useState(0);
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [data, setData] = useState([])
 
-  const changePageSize = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setPageSize(parseInt(event.target.value))
-  }
-
-  const fetchData: any = useCallback(async (url: string) => {
-    const response = await ApiUtils.GET(url, session.user.access_token)
-    if (response.status == HttpStatus.OK) {
-      const data = await response.json();
-      return data;
-    } else if (response.status == HttpStatus.UNAUTHORIZED) {
-      signOut();
-    } else {
-      notFound();
-    }
-  }, [session.user.access_token])
-
-  useEffect(() => {
-    fetchData(`components/${componentId}/releases`).then((releaseLinks: any) => {
-      if (!CommonUtils.isNullOrUndefined(releaseLinks['_embedded'])
-        && !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']['sw360:releaseLinks'])) {
-        const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) =>
-          [item.name, [item.id, item.version], t(item.clearingState), t(item.clearingReport.clearingReportStatus), t(item.mainlineState), item.id])
-        setData(data)
-        setTotalRows(data.length)
-      }
-    })
-  }, []);
-
-  return (
-    <>
-      <div className='row'>
-        <div className='col-11'>
-          <div className='dataTables_length'>
-            <span>{t('Show')} </span>
-            <label style={{ marginLeft: '5px' }}>
-              <Form.Select onChange={changePageSize} size='sm'>
-                <option value='10'>10</option>
-                <option value='20'>20</option>
-                <option value={totalRows}>All</option>
-              </Form.Select>
-            </label>
-            <span> {t('entries')}</span>
-          </div>
-        </div>
-        <div className='col-1'>
-          Print
-        </div>
-      </div>
-      <div className='row'>
-        <Grid
-          data={data}
-          search={true}
-          pagination={{
-            limit: pageSize,
-          }}
-          columns={[
-            {
-              name: t('Name'),
-              sort: true
-            },
-            {
-              name: t('Version'),
-              formatter: ([id, version]: Array<string>) => _(<Link href={'/releases/detail/' + id} className='link'>{version}</Link>),
-              sort: true
-            },
-            {
-              name: t('Clearing State'),
-              sort: true
-            },
-            {
-              name: t('Clearing Report'),
-              sort: true
-            },
-            {
-              name: t('Release Mainline State'),
-              sort: true
-            },
-            {
-              name: t('Actions'),
-              formatter: (id: string) => _(<span>
-                <Link href={'/release/edit/' + id} style={{ color: 'gray', fontSize: '14px' }}><FaPencilAlt /></Link> &nbsp;
-                <FaTrashAlt style={{ color: 'gray', fontSize: '14px' }} />
-              </span>),
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                signOut()
+            } else {
+                notFound()
             }
-          ]}
+        },
+        [session.user.access_token]
+    )
 
-          style={{
-            header: {
-              display: 'block',
-              width: 'fit-content',
-              float: 'right'
+    useEffect(() => {
+        fetchData(`components/${componentId}/releases`).then((releaseLinks: any) => {
+            if (
+                !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']['sw360:releaseLinks'])
+            ) {
+                const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
+                    item.name,
+                    [item.id, item.version],
+                    t(item.clearingState),
+                    t(item.clearingReport.clearingReportStatus),
+                    t(item.mainlineState),
+                    item.id,
+                ])
+                setData(data)
             }
-          }}
-        />
-      </div>
-    </>
-  )
+        })
+    }, [])
+
+    const columns = [
+        {
+            name: t('Name'),
+            sort: true,
+        },
+        {
+            name: t('Version'),
+            formatter: ([id, version]: Array<string>) =>
+                _(
+                    <Link href={'/releases/detail/' + id} className='link'>
+                        {version}
+                    </Link>
+                ),
+            sort: true,
+        },
+        {
+            name: t('Clearing State'),
+            sort: true,
+        },
+        {
+            name: t('Clearing Report'),
+            sort: true,
+        },
+        {
+            name: t('Release Mainline State'),
+            sort: true,
+        },
+        {
+            name: t('Actions'),
+            formatter: (id: string) =>
+                _(
+                    <span>
+                        <Link href={'/release/edit/' + id} style={{ color: 'gray', fontSize: '14px' }}>
+                            <FaPencilAlt />
+                        </Link>{' '}
+                        &nbsp;
+                        <FaTrashAlt style={{ color: 'gray', fontSize: '14px' }} />
+                    </span>
+                ),
+        },
+    ]
+
+    return (
+        <>
+            <div className='row'>
+                <Table data={data} search={true} columns={columns} />
+            </div>
+        </>
+    )
 }
 
-export default ReleaseOverview;
+export default ReleaseOverview

@@ -8,42 +8,36 @@
 // License-Filename: LICENSE
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import HomeTableHeader from './HomeTableHeader'
-
+import { Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
+import HomeTableHeader from './HomeTableHeader'
+
 interface TaskSubmission {
-    name: string
-    status: string
-    actions: string
+    name: string[]
+    status: string[]
+    actions: string[]
 }
 
-let data: TaskSubmission[] = []
-
-const title = 'My Task Submissions'
-const columns = ['Document Name', 'Status', 'Actions']
-const noRecordsFound = 'You do not have any open moderation requests.'
-
 async function MyTaskSubmissionsWidget() {
+    const t = useTranslations(COMMON_NAMESPACE)
+
+    const title = t('My Task Submissions')
+    const columns = [t('Document Name'), t('Status'), t('Actions')]
+
+    let data: unknown[] = []
     const fetchData = (await sw360FetchData('/myTaskSubmissions')) as TaskSubmission[]
     if (!fetchData === null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            status: item.status,
-            actions: item.actions,
-        }))
+        data = fetchData.map((item) => [item.name, item.status, item.actions])
     }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table
-                columns={columns}
-                data={data.map((data) => [data.name, data.status, data.actions])}
-                noRecordsFound={noRecordsFound}
-            />
+            <Table columns={columns} data={data} />
         </div>
     )
 }

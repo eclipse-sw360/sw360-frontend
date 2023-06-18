@@ -9,9 +9,12 @@
 
 import React from 'react'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import HomeTableHeader from './HomeTableHeader'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
+import { Table } from '@/components/sw360'
+
+import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchProjectData } from './sw360fetchprojectdata.service'
 
 interface Project {
@@ -20,31 +23,24 @@ interface Project {
     version: string
 }
 
-let data: Project[] = []
-
-const title = 'My Projects'
-const columns = ['Project Name', 'Description', 'Approved Releases']
-const noRecordsFound = 'No project data to show'
-
 async function MyProjectsWidget() {
+    const t = useTranslations(COMMON_NAMESPACE)
+
+    let data: unknown[] = []
+    // Fetch sw360 data
     const fetchData = (await sw360FetchProjectData('/projects/myprojects', 'projects')) as Project[]
 
+    const title = t('My Projects')
+    const columns = [t('Project Name'), t('Description'), t('Approved Releases')]
+
     if (fetchData !== null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            description: item.description,
-            version: item.version,
-        }))
+        data = fetchData.map((item) => [item.name, item.description, item.version])
     }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table
-                columns={columns}
-                data={data.map((item) => [item.name, item.description, item.version])}
-                noRecordsFound={noRecordsFound}
-            />
+            <Table columns={columns} data={data} pagination={{ limit: 5 }} />
         </div>
     )
 }

@@ -7,42 +7,35 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 import HomeTableHeader from './HomeTableHeader'
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
 
+import { Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-interface Component {
-    name: string
-    description: string
-}
+function MyComponentsWidget() {
+    const [data, setData] = useState([])
+    const t = useTranslations(COMMON_NAMESPACE)
 
-let data: Component[] = []
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/components/mycomponents', 'components')
+            setData(data.map((item: { name: string; description: string }) => [item.name, item.description]))
+        }
+        fetchData()
+    }, [])
 
-const title = 'My Components'
-const columns = ['Component Name', 'Description']
-const noRecordsFound = 'You do not own any components.'
-
-async function MyComponentsWidget() {
-    const fetchData = (await sw360FetchData('/components/mycomponents', 'components')) as Component[]
-
-    if (fetchData !== null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            description: item.description,
-        }))
-    }
+    const title = t('My Components')
+    const columns = [t('Component Name'), t('Description')]
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table
-                columns={columns}
-                data={data.map((data) => [data.name, data.description])}
-                noRecordsFound={noRecordsFound}
-            />
+            <Table columns={columns} data={data} selector={false} />
         </div>
     )
 }
