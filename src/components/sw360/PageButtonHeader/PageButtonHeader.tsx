@@ -25,13 +25,11 @@ function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
             return (
                 // Button needs to link to the referenced page from props (value)
                 // and switch to the correct tab (key)
-                <div key={key} className='btn-group' role='group'>
-                    <Link href={value['link']} key={key}>
-                        <button key={key} className={`btn btn-${value['type']}`}>
-                            {t(key)}
-                        </button>
-                    </Link>
-                </div>
+                <Link href={value['link']} key={key}>
+                    <button key={key} className={`btn btn-${value['type']}`}>
+                        {t(key)}
+                    </button>
+                </Link>
             )
         })
     }
@@ -40,8 +38,10 @@ function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
         <div className={`row ${styles['buttonheader-toolbar']}`}>
             <div className='col-auto'>
                 <div className='btn-toolbar' role='toolbar'>
-                    {buttonList}
-                    {children}
+                    <div key='buttongroup' className='btn-group' role='group'>
+                        {buttonList}
+                        {children}
+                    </div>
                 </div>
             </div>
             {title && <div className={`col text-truncate ${styles['buttonheader-title']}`}>{title}</div>}
