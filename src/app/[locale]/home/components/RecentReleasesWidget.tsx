@@ -8,38 +8,35 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+
 import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-interface Release {
-
-    name: string
-}
-
-let recentReleaseData: Release[] = []
-
 const title = 'Recent Releases'
 
-async function RecentReleasesWidget() {
-    const fetchRecentReleaseData = (await sw360FetchData('/releases/recentReleases', 'releases')) as Release[]
+function RecentReleasesWidget() {
+    const [data, setData] = useState([])
 
-    if (fetchRecentReleaseData !== null) {
-        recentReleaseData = fetchRecentReleaseData.map((item) => ({
-            name: item.name
-        }))
-    }
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/releases/recentReleases', 'releases')
+            data &&
+                setData(
+                    data.map((item: { name: string }) => [
+                        <li key={''}>
+                            <span style={{ color: 'orange' }}>{item.name}</span>
+                        </li>,
+                    ])
+                )
+        }
+        fetchData()
+    }, [])
 
     return (
-        <div className="content-container">
+        <div className='content-container'>
             <HomeTableHeader title={title} />
-                <ul style={{ listStyleType: "disc", color: "black" }}>
-                    {recentReleaseData.map((item) => (
-                        <li key={""}>
-                            <span style={{ color: "orange"}}>{item.name}</span>
-                        </li>
-                    ))}
-                </ul>
+            <ul style={{ listStyleType: 'disc', color: 'black' }}>{data}</ul>
         </div>
     )
 }

@@ -8,38 +8,39 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+
 import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 interface Components {
-
     name: string
 }
 
-let recentComponentData: Components[] = []
+function RecentComponentsWidget() {
+    const [data, setData] = useState([])
 
-const title = 'Recent Components'
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/components/recentComponents', 'components')
+            data &&
+                setData(
+                    data.map((item: { name: string }) => [
+                        <li key={item.name}>
+                            <span style={{ color: 'orange' }}>{item.name}</span>
+                        </li>,
+                    ])
+                )
+        }
+        fetchData()
+    }, [])
 
-async function RecentComponentsWidget() {
-    const fetchRecentComponentData = (await sw360FetchData('/components/recentComponents', 'components')) as Components[]
-
-    if (fetchRecentComponentData !== null) {
-        recentComponentData = fetchRecentComponentData.map((item) => ({
-            name: item.name
-        }))
-    }
+    const title = 'Recent Components'
 
     return (
-        <div className="content-container">
+        <div className='content-container'>
             <HomeTableHeader title={title} />
-                <ul style={{ listStyleType: "disc", color: "black" }}>
-                    {recentComponentData.map((item) => (
-                        <li key={""}>
-                            <span style={{ color: "orange"}}>{item.name}</span>
-                        </li>
-                    ))}
-                </ul>
+            <ul style={{ listStyleType: 'disc', color: 'black' }}>{data}</ul>
         </div>
     )
 }

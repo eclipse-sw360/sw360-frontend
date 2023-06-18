@@ -14,15 +14,15 @@ import homePageStyles from '../home.module.css'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 function MySubscriptionsWidget() {
-    const [componentdata, setComponentData] = useState([])
-    const [releasedata, setReleaseData] = useState([])
+    const [componentData, setComponentData] = useState([])
+    const [releaseData, setReleaseData] = useState([])
 
     useEffect(() => {
         const fetchData = async () => {
-            const componentdata = await sw360FetchData('/components/mySubscriptions', 'components')
-            setComponentData(componentdata.map((item: { name: string }) => [item.name]))
-            const releasedata = await sw360FetchData('/releases/mySubscriptions', 'releases')
-            setReleaseData(releasedata.map((item: { name: string }) => [item.name]))
+            const componentData = await sw360FetchData('/components/mySubscriptions', 'components')
+            setComponentData(componentData.map((item: { name: string }) => [item.name]))
+            const releaseData = await sw360FetchData('/releases/mySubscriptions', 'releases')
+            setReleaseData(releaseData.map((item: { name: string }) => [item.name]))
         }
         fetchData()
     }, [])
@@ -34,7 +34,7 @@ function MySubscriptionsWidget() {
             <HomeTableHeader title={title} />
             <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>Components</h3>
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
-                {componentdata.map((item) => (
+                {componentData.map((item) => (
                     <li key={''}>
                         <span style={{ color: 'orange' }}>{item.name}</span>
                     </li>
@@ -42,7 +42,7 @@ function MySubscriptionsWidget() {
             </ul>
             <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>Releases</h3>
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
-                {releasedata.map((item) => (
+                {releaseData.map((item) => (
                     <li key={''}>
                         <span style={{ color: 'orange' }}>{item.name}</span>
                     </li>

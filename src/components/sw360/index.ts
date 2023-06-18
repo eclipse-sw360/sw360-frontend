@@ -21,4 +21,7 @@ import QuickFilter from './QuickFilter/QuickFilter'
 // Advabced search component
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 
-export { AdvancedSearch, PageButtonHeader, QuickFilter, Table, _, ReactWrapper }
+// Navvbar
+import Navbar from './Navbar/Navbar'
+
+export { AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, Table, _, ReactWrapper }

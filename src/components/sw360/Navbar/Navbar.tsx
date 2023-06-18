@@ -8,17 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
 import Link from 'next/link'
-import navbarStyles from './SW360Navbar.module.css'
+import navbarStyles from './navbar.module.css'
 import { usePathname } from 'next/navigation'
 import { LOCALES as locales } from '@/object-types/Constants'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
-function SW360Navbar() {
+function Navbar() {
     const pathname = usePathname()
     const isLoginPage = locales.includes(pathname.substring(1))
     const heading = pathname.split('/').slice(-1)[0].charAt(0).toUpperCase() + pathname.split('/').slice(-1)[0].slice(1)
+    const t = useTranslations(COMMON_NAMESPACE)
 
     return (
         !isLoginPage && (
@@ -32,55 +33,55 @@ function SW360Navbar() {
                             <ul className='navbar-nav me-auto '>
                                 <li className='nav-item mx-2'>
                                     <Link className={`nav-link`} href='/home'>
-                                        <b>Home</b>
+                                        <b>{t('Home')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/projects'>
-                                        <b>Projects</b>
+                                        <b>{t('Projects')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/components'>
-                                        <b>Components</b>
+                                        <b>{t('Components')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/licenses'>
-                                        <b>Licenses</b>
+                                        <b>{t('Licenses')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/ecc'>
-                                        <b>ECC</b>
+                                        <b>{t('ECC')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/vulnerabilities'>
-                                        <b>Vulnerabilities</b>
+                                        <b>{t('Vulnerabilities')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/requests'>
-                                        <b>Requests</b>
+                                        <b>{t('Requests')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/search'>
-                                        <b>Search</b>
+                                        <b>{t('Search')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
                                 <li className='nav-item mx-1'>
                                     <Link className={`nav-link`} href='/preferences'>
-                                        <b>Preferences</b>
+                                        <b>{t('Preferences')}</b>
                                     </Link>
                                     <div className={navbarStyles.underline}></div>
                                 </li>
@@ -96,4 +97,4 @@ function SW360Navbar() {
     )
 }
 
-export default SW360Navbar
+export default Navbar

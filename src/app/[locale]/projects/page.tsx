@@ -56,7 +56,6 @@ function Project() {
 
     useEffect(() => {
         sw360FetchData('/projects?allDetails=true', 'projects').then((fetchedData) => {
-            console.log(fetchedData)
             setData(fetchedData as ProjectType[])
         })
     }, [])

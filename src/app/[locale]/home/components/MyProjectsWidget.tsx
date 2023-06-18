@@ -18,19 +18,20 @@ import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 function MyProjectsWidget() {
-    const [datat, setDatat] = useState([])
+    const [data, setdata] = useState([])
     const t = useTranslations(COMMON_NAMESPACE)
 
     useEffect(() => {
         const fetchData = async () => {
-            const datat = await sw360FetchData('/projects/myprojects', 'projects')
-            setDatat(
-                datat.map((item: { name: string; description: string; version: string }) => [
-                    item.name,
-                    item.description,
-                    item.version,
-                ])
-            )
+            const data = await sw360FetchData('/projects/myprojects', 'projects')
+            data &&
+                setdata(
+                    data.map((item: { name: string; description: string; version: string }) => [
+                        item.name,
+                        item.description,
+                        item.version,
+                    ])
+                )
         }
         fetchData()
     }, [])
@@ -41,7 +42,7 @@ function MyProjectsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={datat} pagination={{ limit: 5 }} selector={false} />
+            <Table columns={columns} data={data} pagination={{ limit: 5 }} selector={false} />
         </div>
     )
 }
