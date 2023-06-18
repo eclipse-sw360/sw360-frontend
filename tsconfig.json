@@ -6,7 +6,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
-
 {
     "compilerOptions": {
         "target": "es5",
@@ -25,6 +24,8 @@
         "incremental": true,
         "strictNullChecks": false,
         "typeRoots": ["node_modules/@types", "./types"],
+        "sourceMap": true,
+        "allowSyntheticDefaultImports": true,
         "paths": {
             "@/*": ["./src/*"]
         },
@@ -35,5 +36,5 @@
         ]
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    "exclude": ["node_modules"]
+    "exclude": ["dist", "node_modules", "src/**/*.test.tsx", "src/**/*.stories.tsx"]
 }
