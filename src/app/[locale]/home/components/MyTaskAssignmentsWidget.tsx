@@ -7,42 +7,35 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import HomeTableHeader from './HomeTableHeader'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
+import { Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-interface TaskAssignment {
-    name: string
-    status: string
-}
+import HomeTableHeader from './HomeTableHeader'
 
-let data: TaskAssignment[] = []
+function MyTaskAssignmentsWidget() {
+    const [data, setData] = useState([])
+    const t = useTranslations(COMMON_NAMESPACE)
 
-const title = 'My Task Assignments'
-const columns = ['Document Name', 'Status']
-const noRecordsFound = 'There are no tasks assigned to you.'
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/myTaskAssignments')
+            setData(data.map((item: { name: string; status: string }) => [item.name, item.status]))
+        }
+        fetchData()
+    }, [])
 
-async function MyTaskAssignmentsWidget() {
-    const fetchData = (await sw360FetchData('/myTaskAssignments')) as TaskAssignment[]
-
-    if (!fetchData === null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            status: item.status,
-        }))
-    }
+    const title = t('My Task Assignments')
+    const columns = [t('Document Name'), t('Status')]
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table
-                columns={columns}
-                data={data.map((data) => [data.name, data.status])}
-                noRecordsFound={noRecordsFound}
-            />
+            <Table columns={columns} data={data} />
         </div>
     )
 }

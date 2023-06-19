@@ -10,12 +10,14 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ProfileDropdown from '@/components/ProfileDropdown/ProfileDropdown'
-import SW360Navbar from '@/components/SW360Navbar/SW360Navbar'
+
+import { Navbar } from '@/components/sw360'
 import sw360logo from '@/assets/images/sw360-logo.svg'
 
 const Header = () => {
@@ -76,7 +78,7 @@ const Header = () => {
             </div>
 
             <div className='row'>
-                <SW360Navbar />
+                <Navbar />
             </div>
         </div>
     )

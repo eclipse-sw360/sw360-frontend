@@ -19,7 +19,7 @@ export function commonHeaders(): Headers {
 }
 
 /**
- * @returns a json object if sw360 provides a valid response, null otherwise
+ * @returns a json object if sw360 provides a valid response
  *
  */
 export async function sw360FetchData(endpoint: string, embedded_endpoint?: string, details?: string[]) {
@@ -34,7 +34,7 @@ export async function sw360FetchData(endpoint: string, embedded_endpoint?: strin
         })
 
         if (response.status != HttpStatus.OK) {
-            return null
+            return []
         }
         let data = await response.json()
 
@@ -45,6 +45,7 @@ export async function sw360FetchData(endpoint: string, embedded_endpoint?: strin
         }
 
         if (details != null) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const promises = data.map(async (data: any) => {
                 const response: Response = await fetch(data._links.self.href, {
                     method: 'GET',

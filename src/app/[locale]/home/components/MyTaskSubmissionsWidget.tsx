@@ -7,43 +7,40 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import HomeTableHeader from './HomeTableHeader'
-
+import { Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-interface TaskSubmission {
-    name: string
-    status: string
-    actions: string
-}
+import HomeTableHeader from './HomeTableHeader'
 
-let data: TaskSubmission[] = []
+function MyTaskSubmissionsWidget() {
+    const [data, setData] = useState([])
+    const t = useTranslations(COMMON_NAMESPACE)
 
-const title = 'My Task Submissions'
-const columns = ['Document Name', 'Status', 'Actions']
-const noRecordsFound = 'You do not have any open moderation requests.'
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/myTaskSubmissions')
+            setData(
+                data.map((item: { name: string; status: string; actions: string }) => [
+                    item.name,
+                    item.status,
+                    item.actions,
+                ])
+            )
+        }
+        fetchData()
+    }, [])
 
-async function MyTaskSubmissionsWidget() {
-    const fetchData = (await sw360FetchData('/myTaskSubmissions')) as TaskSubmission[]
-    if (!fetchData === null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            status: item.status,
-            actions: item.actions,
-        }))
-    }
+    const title = t('My Task Submissions')
+    const columns = [t('Document Name'), t('Status'), t('Actions')]
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table
-                columns={columns}
-                data={data.map((data) => [data.name, data.status, data.actions])}
-                noRecordsFound={noRecordsFound}
-            />
+            <Table columns={columns} data={data} />
         </div>
     )
 }

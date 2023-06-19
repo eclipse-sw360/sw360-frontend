@@ -9,10 +9,9 @@
 // License-Filename: LICENSE
 
 import { Alert, Button } from 'react-bootstrap'
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
 import Link from 'next/link'
-import { _ } from 'gridjs-react'
 import { Form } from 'react-bootstrap'
+
 import ChangeStateDialog from './ChangeStateDialog'
 import { useState } from 'react'
 import { useCallback } from 'react'
@@ -20,11 +19,11 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import VulnerabilitiesVerificationState from '@/object-types/enums/VulnerabilitiesVerificationState'
 
-interface Props {
-    vulnerData: Array<any>
-}
+import { Table, _ } from '@/components/sw360'
 
-const noRecordsFound = 'No data available in table'
+interface Props {
+    vulnerData: Array<unknown>
+}
 
 const ComponentVulnerabilities = ({ vulnerData }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
@@ -104,7 +103,7 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
                 >
                     VULNERABILITIES
                 </h5>
-                <SW360Table columns={columns} data={data} noRecordsFound={noRecordsFound} />
+                <Table columns={columns} data={data} />
                 <Form.Group className='mb-3' controlId='createdOn'>
                     <Form.Label>
                         <b>{t('Change verification state of selected vulnerabilities to')}</b>

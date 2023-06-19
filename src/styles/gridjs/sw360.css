@@ -304,6 +304,7 @@ th.gridjs-th:last-child {
 
 .gridjs-search {
     float: left;
+    display: none;
 }
 .gridjs-search-input {
     width: 250px;

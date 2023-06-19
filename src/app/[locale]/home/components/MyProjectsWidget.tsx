@@ -7,44 +7,42 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+
+import { Table } from '@/components/sw360'
+
 import HomeTableHeader from './HomeTableHeader'
+import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-import { sw360FetchProjectData } from './sw360fetchprojectdata.service'
+function MyProjectsWidget() {
+    const [data, setdata] = useState([])
+    const t = useTranslations(COMMON_NAMESPACE)
 
-interface Project {
-    name: string
-    description: string
-    version: string
-}
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/projects/myprojects', 'projects')
+            data &&
+                setdata(
+                    data.map((item: { name: string; description: string; version: string }) => [
+                        item.name,
+                        item.description,
+                        item.version,
+                    ])
+                )
+        }
+        fetchData()
+    }, [])
 
-let data: Project[] = []
-
-const title = 'My Projects'
-const columns = ['Project Name', 'Description', 'Approved Releases']
-const noRecordsFound = 'No project data to show'
-
-async function MyProjectsWidget() {
-    const fetchData = (await sw360FetchProjectData('/projects/myprojects', 'projects')) as Project[]
-
-    if (fetchData !== null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            description: item.description,
-            version: item.version,
-        }))
-    }
+    const title = t('My Projects')
+    const columns = [t('Project Name'), t('Description'), t('Approved Releases')]
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <SW360Table
-                columns={columns}
-                data={data.map((item) => [item.name, item.description, item.version])}
-                noRecordsFound={noRecordsFound}
-            />
+            <Table columns={columns} data={data} pagination={{ limit: 5 }} selector={false} />
         </div>
     )
 }

@@ -9,9 +9,9 @@
 
 'use client'
 
-import Link from 'next/link'
+import React, { useEffect, useState, useRef } from 'react'
 
-import { _ } from 'gridjs-react'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Check2Circle, XCircle } from 'react-bootstrap-icons'
@@ -20,47 +20,47 @@ import { Check2Circle, XCircle } from 'react-bootstrap-icons'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 // SW360 Components
-import PageButtonHeader from '@/components/sw360/PageButtonHeader/PageButtonHeader'
-import QuickFilter from '@/components/sw360/QuickFilter/QuickFilter'
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import { useRef } from 'react'
-
-interface LicenseType {
-    fullName: string
-    checked: boolean
-    _links: { self: { href: string } }
-}
+import { _, PageButtonHeader, QuickFilter, Table } from '@/components/sw360'
+import { UrlObject } from 'url'
 
 const buttons = {
     'Add License': { link: '/licenses/add', type: 'primary' },
     'Export Spreadsheet': { link: '/licenses/export', type: 'secondary' },
 }
 
-async function LicensesPage() {
-    const t = useTranslations(COMMON_NAMESPACE)
-    const search = { keyword: '' }
+function LicensesPage() {
+    const [data, setData] = useState([])
+    const [search, setSearch] = useState({})
 
-    const limit = 10
-    const noRecordsFound = t('No Records Found')
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await sw360FetchData('/licenses', 'licenses')
+            setData(
+                data.map((item: { _links: { self: { href: string } }; fullName: string; checked: boolean }) => [
+                    _(<Link href={item._links.self.href}>{item._links.self.href.split('/').pop()}</Link>),
+                    item.fullName,
+                    _(
+                        <center>
+                            {item.checked ? <Check2Circle color='#287d3c' size='16' /> : <XCircle color='red' />}
+                        </center>
+                    ),
+                ])
+            )
+        }
+        fetchData()
+    }, [])
+
+    const t = useTranslations(COMMON_NAMESPACE)
+
     const columns = [
         { name: t('License Shortname'), width: '25%' },
         { name: t('License Fullname'), width: '45%' },
         { name: t('Is Checked'), width: '10%' },
         { name: t('License Type'), width: '15%' },
     ]
-    const fetchData = (await sw360FetchData('/licenses', 'licenses')) as LicenseType[]
-
-    let data: any[] = []
-    if (fetchData !== null) {
-        data = fetchData.map((item) => [
-            _(<Link href={item._links.self.href}>{item._links.self.href.split('/').pop()}</Link>),
-            item.fullName,
-            _(<center>{item.checked ? <Check2Circle color='#287d3c' size='16' /> : <XCircle color='red' />}</center>),
-        ])
-    }
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        search.keyword = event.currentTarget.value
+        setSearch({ keyword: event.currentTarget.value })
     }
 
     return (
@@ -72,13 +72,14 @@ async function LicensesPage() {
                 <div className='col col-sm-9'>
                     <div className='col'>
                         <div className='row'>
-                            <PageButtonHeader buttons={buttons} title='Licenses (0)' />
+                            <PageButtonHeader buttons={buttons} title={`${t('Licenses')} (${data.length})`} />
                             <div className='row mt-2'>
-                                <SW360Table
+                                <Table
                                     data={data}
                                     columns={columns}
-                                    limit={limit}
-                                    noRecordsFound={noRecordsFound}
+                                    sort={true}
+                                    search={search}
+                                    selector={true}
                                 />
                             </div>
                         </div>

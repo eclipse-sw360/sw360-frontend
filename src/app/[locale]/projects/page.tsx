@@ -10,12 +10,12 @@
 
 'use client'
 
-import Link from 'next/link'
+import React, { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Dropdown } from 'react-bootstrap'
 
-import SW360Table from '@/components/sw360/SW360Table/SW360Table'
-import AdvancedSearch from '@/components/sw360/AdvancedSearch/AdvancedSearch'
-import projectPageStyles from './projects.module.css'
-
+import { AdvancedSearch, PageButtonHeader, Table, _ } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 interface ProjectType {
@@ -25,34 +25,40 @@ interface ProjectType {
     state: string
 }
 
-let data: ProjectType[] = []
+function Project() {
+    const [data, setData] = useState([])
+    const t = useTranslations(COMMON_NAMESPACE)
 
-const limit = 10
-const columns = ['Project Name', 'Description', 'Project Responsible', 'License Clearing', 'State', 'Actions']
-const noRecordsFound = 'No project data to show.'
-const advancedSearch = {
-    'Project Name': '',
-    'Project Version': '',
-    'Project Type': ['Customer Project', 'Internal Project', 'Product', 'Service', 'Inner Source'],
-    'Project Responsible (Email)': '',
-    Group: ['None'],
-    State: ['Active', 'PhaseOut', 'Unknown'],
-    'Clearing State': ['Open', 'In Progress', 'Closed'],
-    Tag: '',
-    'Additional Data': '',
-}
-
-async function Project() {
-    const fetchData = (await sw360FetchData('/projects?allDetails=true', 'projects')) as ProjectType[]
-
-    if (fetchData !== null) {
-        data = fetchData.map((item) => ({
-            name: item.name,
-            description: item.description,
-            projectResponsible: item.projectResponsible,
-            state: item.state,
-        }))
+    const pagination = { limit: 10 }
+    const columns = [
+        t('Project Name'),
+        t('Description'),
+        t('Project Responsible'),
+        t('License Clearing'),
+        t('State'),
+        t('Actions'),
+    ]
+    const advancedSearch = {
+        'Project Name': '',
+        'Project Version': '',
+        'Project Type': ['Customer Project', 'Internal Project', 'Product', 'Service', 'Inner Source'],
+        'Project Responsible (Email)': '',
+        Group: ['None'],
+        State: ['Active', 'PhaseOut', 'Unknown'],
+        'Clearing State': ['Open', 'In Progress', 'Closed'],
+        Tag: '',
+        'Additional Data': '',
     }
+    const headerbuttons = {
+        'Add Projects': { link: '/projects/add', type: 'primary' },
+        'Import SBOM': { link: '/projects', type: 'secondary' },
+    }
+
+    useEffect(() => {
+        sw360FetchData('/projects?allDetails=true', 'projects').then((fetchedData) => {
+            setData(fetchedData as ProjectType[])
+        })
+    }, [])
 
     return (
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
@@ -63,82 +69,23 @@ async function Project() {
 
                 <div className='col'>
                     <div className='row'>
-                        <div className='col-lg-3'>
-                            <div className='btn-group d-flex mb-2' role='group' aria-label='Project Utilities'>
-                                <Link
-                                    type='button'
-                                    className={`fw-bold btn btn-primary ${projectPageStyles['button']}`}
-                                    href='http://localhost:3000/projects/add/summary'
-                                >
-                                    Add Project
-                                </Link>
-                                <button
-                                    type='button'
-                                    className={`fw-bold btn btn-light ${projectPageStyles['button-plain']}`}
-                                >
-                                    Import SBOM
-                                </button>
+                        <PageButtonHeader title={`${t('Projects')} (${data.length})`} buttons={headerbuttons}>
+                            <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
+                                <Dropdown>
+                                    <Dropdown.Toggle variant='secondary' id='project-export'>
+                                        {t('Export Spreadsheet')}
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
+                                        <Dropdown.Item>{t('Projects with linked releases')}</Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </div>
-                        </div>
-                        <div className='col-lg-3'>
-                            <div className='dropdown'>
-                                <button
-                                    className={`fw-bold btn btn-light ${projectPageStyles['button-plain']} dropdown-toggle`}
-                                    type='button'
-                                    data-bs-toggle='dropdown'
-                                    aria-expanded='false'
-                                >
-                                    Export Spreadsheet
-                                </button>
-                                <ul className='dropdown-menu'>
-                                    <li>
-                                        <button type='button' className='dropdown-item'>
-                                            Projects only
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type='button' className='dropdown-item'>
-                                            Projects with linked releases
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='row my-2'>
-                        <div className='col-xl-2 d-flex'>
-                            <p className='my-2'>show</p>
-                            <select className='form-select form-select-sm mx-2' aria-label='page size select'>
-                                <option selected value={10}>
-                                    10
-                                </option>
-                                <option selected value={25}>
-                                    25
-                                </option>
-                                <option selected value={50}>
-                                    50
-                                </option>
-                                <option selected value={100}>
-                                    100
-                                </option>
-                            </select>
-                            <p className='my-2'>entries</p>
-                        </div>
-                        <div className='col-xl-1 d-flex'>
-                            <button
-                                type='button'
-                                className={`fw-bold btn btn-light ${projectPageStyles['button-plain']}`}
-                            >
-                                Print <i className='bi bi-printer'></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div className='row'>
-                        <SW360Table
+                        </PageButtonHeader>
+                        <Table
                             columns={columns}
                             data={data.map((data) => [data.name, data.description, data.projectResponsible])}
-                            noRecordsFound={noRecordsFound}
-                            limit={limit}
+                            pagination={pagination}
                         />
                     </div>
                 </div>
