@@ -1,5 +1,9 @@
 {
     "common": {
+        "": "",
+        "=": "=",
+        "<=": "<=",
+        ">=": ">=",
         "Active": "Active",
         "Action": "Action",
         "Actions": "Actions",
@@ -39,6 +43,7 @@
         "Component Type": "Component Type",
         "Components Only": "Components Only",
         "Components with releases": "Components With Releases",
+        "COTS": "COTS",
         "Closed": "Closed",
         "Create Account": "Create Account",
         "Created By (Email)": "Created By (Email)",
@@ -113,6 +118,7 @@
         "Open": "Open",
         "Operating Systems": "Operating Systems",
         "Operation": "Operation",
+        "OSS": "OSS",
         "Owner Accounting Unit": "Owner Accounting Unit",
         "Owner Billing Group": "Owner Billing Group",
         "Owner Country": "Owner Country",

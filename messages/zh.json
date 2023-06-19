@@ -1,5 +1,9 @@
 {
   "common": {
+    "": "",
+    "=": "=",
+    "<=": "<=",
+    ">=": ">=",
     "APPROVED": "报告已批准",
     "Action": "操作",
     "Actions": "操作",
@@ -42,6 +46,7 @@
     "Components With Releases": "具有发行版本的组件",
     "Components only": "NOT TRANSLATED",
     "Components with releases": "NOT TRANSLATED",
+    "COTS": "COTS",
     "Create Account": "创建账户",
     "Created By (Email)": "创建者（电子邮件）",
     "Created On": "创建于",
@@ -114,6 +119,7 @@
     "Open": "NOT TRANSLATED",
     "Operating Systems": "操作系统",
     "Operation": "操作",
+    "OSS": "OSS",
     "Owner Accounting Unit": "所有者会计单元",
     "Owner Billing Group": "所有者计费组",
     "Owner Country": "所有者国家",

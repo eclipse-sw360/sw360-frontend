@@ -10,7 +10,7 @@
 
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import ComponentIndex from '@/components/component/component-index/ComponentIndex';
+import ComponentIndex from './components/ComponentIndex';
 import { Metadata } from 'next';
 import { Session } from '@/object-types/Session';
 

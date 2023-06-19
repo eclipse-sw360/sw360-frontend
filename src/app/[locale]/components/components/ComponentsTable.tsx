@@ -11,32 +11,30 @@
 'use client'
 import CommonUtils from '@/utils/common.utils'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
-import { Form } from 'react-bootstrap'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import styles from './ComponentsTable.module.css'
+import styles from '../components.module.css'
 import { signOut } from 'next-auth/react'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import PageSpinner from '@/components/common/spinner/Spinner'
+import PageSpinner from '@/components/Spinner/Spinner'
 import { useSearchParams } from 'next/navigation'
-import DeleteComponentDialog from '../delete-component-dialog/DeleteComponentDialog'
+import DeleteComponentDialog from './DeleteComponentDialog'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types/Session'
-
 import { Table, _ } from '@/components/sw360'
 
 interface Props {
     session?: Session
+    setNumberOfComponent: React.Dispatch<React.SetStateAction<number>>
 }
 
-const ComponentsTable = ({ session }: Props) => {
+const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
     const params = useSearchParams()
     const t = useTranslations(COMMON_NAMESPACE)
     const [componentData, setComponentData] = useState([])
-    const [totalRows, setTotalRows] = useState(0)
     const [loading, setLoading] = useState(true)
     const [deletingComponent, setDeletingComponent] = useState('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -73,7 +71,7 @@ const ComponentsTable = ({ session }: Props) => {
                 [item.id, item.name],
                 !CommonUtils.isNullOrUndefined(item.mainLicenseIds) ? item.mainLicenseIds : [],
                 item.componentType,
-                [item.id, item.name],
+                item.id,
             ])
         }
 
@@ -84,7 +82,7 @@ const ComponentsTable = ({ session }: Props) => {
             if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
                 components['_embedded']['sw360:components'].forEach(parseTableRowData)
                 setComponentData(data)
-                setTotalRows(data.length)
+                setNumberOfComponent(data.length)
                 setLoading(false)
             }
         })
@@ -131,7 +129,7 @@ const ComponentsTable = ({ session }: Props) => {
         },
         {
             name: t('Actions'),
-            formatter: ([id, name]: any) =>
+            formatter: (id: string) =>
                 _(
                     <span>
                         <Link href={'/components/edit/' + id} style={{ color: 'gray', fontSize: '14px' }}>

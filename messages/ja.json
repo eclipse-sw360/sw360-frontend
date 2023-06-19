@@ -1,5 +1,9 @@
 {
   "common": {
+    "": "",
+    "=": "=",
+    "<=": "<=",
+    ">=": ">=",
     "APPROVED": "承認済",
     "Action": "アクション",
     "Actions": "アクション",
@@ -42,6 +46,7 @@
     "Components With Releases": "リリースされたコンポーネント",
     "Components only": "NOT TRANSLATED",
     "Components with releases": "NOT TRANSLATED",
+    "COTS": "COTS",
     "Create Account": "アカウントの作成",
     "Created By (Email)": "Created by (Email)",
     "Created On": "作成日",
@@ -114,6 +119,7 @@
     "Open": "NOT TRANSLATED",
     "Operating Systems": "オペレーティングシステム",
     "Operation": "操作",
+    "OSS": "OSS",
     "Owner Accounting Unit": "オーナーの会計単位",
     "Owner Billing Group": "オーナーの課金グループ",
     "Owner Country": "オーナーの国",

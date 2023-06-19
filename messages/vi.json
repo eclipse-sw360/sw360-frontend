@@ -1,5 +1,9 @@
 {
   "common": {
+    "": "",
+    "=": "=",
+    "<=": "<=",
+    ">=": ">=",
     "APPROVED": "Đã chấp thuận",
     "Action": "Hành động",
     "Actions": "Hành động",
@@ -42,6 +46,7 @@
     "Components With Releases": "Các thành phần có bản phát hành",
     "Components only": "NOT TRANSLATED",
     "Components with releases": "NOT TRANSLATED",
+    "COTS": "COTS",
     "Create Account": "Tạo Tài Khoản",
     "Created By (Email)": "Được Tạo Bởi (Email)",
     "Created On": "Được Tạo Vào",
@@ -114,6 +119,7 @@
     "Open": "NOT TRANSLATED",
     "Operating Systems": "Hệ điều hành",
     "Operation": "Operation",
+    "OSS": "OSS",
     "Owner Accounting Unit": "Nhập đơn vị kế toán",
     "Owner Billing Group": "Nhập nhóm thanh toán",
     "Owner Country": "Quốc gia",
