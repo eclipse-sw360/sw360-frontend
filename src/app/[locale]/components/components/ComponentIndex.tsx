@@ -9,14 +9,13 @@
 // License-Filename: LICENSE
 
 'use client'
-import ComponentAdvanceSearch from './ComponentAdvanceSearch'
 import ComponentsTable from './ComponentsTable'
 import { Dropdown } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types/Session'
 
-import { PageButtonHeader } from '@/components/sw360'
+import { PageButtonHeader, AdvancedSearch } from '@/components/sw360'
 import { useState } from 'react'
 
 interface Props {
@@ -33,11 +32,120 @@ const ComponentIndex = ({ session }: Props) => {
         'Import SBOM': { link: '/projects', type: 'secondary' },
     }
 
+    const advancedSearch = [
+        {
+            fieldName: 'Component Name',
+            value: '',
+            paramName: 'name'
+        },
+        {
+            fieldName: 'Categories',
+            value: '',
+            paramName: 'categories'
+        },
+        {
+            fieldName: 'Component Type',
+            value: [
+                {
+                    key: 'OSS',
+                    text: 'OSS'
+                },
+                {
+                    key: 'COTS',
+                    text: 'COTS'
+                },
+                {
+                    key: 'INTERNAL',
+                    text: 'Internal'
+                },
+                {
+                    key: 'INNER_SOURCE',
+                    text: 'Inner Source'
+                },
+                {
+                    key: 'SERVICE',
+                    text: 'Service'
+                },
+                {
+                    key: 'FREESOFTWARE',
+                    text: 'Freeware'
+                },
+                {
+                    key: 'CODE_SNIPPET',
+                    text: 'Code Snippet'
+                }
+            ],
+            paramName: 'type'
+        },
+        {
+            fieldName: 'Group',
+            value: [
+                {
+                    key: 'None',
+                    text: 'None'
+                }
+            ],
+            paramName: 'group'
+        },
+        {
+            fieldName: 'Languages',
+            value: '',
+            paramName: 'languages'
+        },
+        {
+            fieldName: 'Software Platforms',
+            value: '',
+            paramName: 'softwarePlatform'
+        },
+        {
+            fieldName: 'Vendors',
+            value: '',
+            paramName: 'vendors'
+        },
+        {
+            fieldName: 'Operating Systems',
+            value: '',
+            paramName: 'operatingSystem'
+        },
+        {
+            fieldName: 'Main Licenses',
+            value: '',
+            paramName: 'mainLicenses'
+        },
+        {
+            fieldName: 'Created By (Email)',
+            value: '',
+            paramName: 'createdBy'
+        },
+        {
+            fieldName: 'Created On',
+            value: [
+                {
+                    key: 'EQUAL',
+                    text: '='
+                },
+                {
+                    key: 'LESS_THAN_OR_EQUAL_TO',
+                    text: '<='
+                },
+                {
+                    key: 'GREATER_THAN_OR_EQUAL_TO',
+                    text: '>='
+                },
+                {
+                    key: 'BETWEEN',
+                    text: 'Between'
+                }
+            ],
+            paramName: 'createdOn'
+        }
+    ]
+
     return (
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
             <div className='row'>
                 <div className='col-2 sidebar'>
-                    <ComponentAdvanceSearch />
+                    <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                 </div>
                 <div className='col'>
                     <PageButtonHeader title={`${t('Components')} (${numberOfComponent})`} buttons={headerbuttons}>
@@ -54,7 +162,7 @@ const ComponentIndex = ({ session }: Props) => {
                         </div>
                     </PageButtonHeader>
                     <div className='row' style={{ marginBottom: '20px' }}>
-                        <ComponentsTable session={session} setNumberOfComponent={setNumberOfComponent}/>
+                        <ComponentsTable session={session} setNumberOfComponent={setNumberOfComponent} />
                     </div>
                 </div>
             </div>

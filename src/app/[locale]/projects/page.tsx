@@ -38,17 +38,107 @@ function Project() {
         t('State'),
         t('Actions'),
     ]
-    const advancedSearch = {
-        'Project Name': '',
-        'Project Version': '',
-        'Project Type': ['Customer Project', 'Internal Project', 'Product', 'Service', 'Inner Source'],
-        'Project Responsible (Email)': '',
-        Group: ['None'],
-        State: ['Active', 'PhaseOut', 'Unknown'],
-        'Clearing State': ['Open', 'In Progress', 'Closed'],
-        Tag: '',
-        'Additional Data': '',
-    }
+
+    const advancedSearch = [
+        {
+            fieldName: 'Project Name',
+            value: '',
+            paramName: 'name'
+        },
+        {
+            fieldName: 'Project Version',
+            value: '',
+            paramName: 'version'
+        },
+        {
+            fieldName: 'Project Type',
+            value: [
+                {
+                    key: 'Customer Project',
+                    text: 'Customer Project'
+                },
+                {
+                    key: 'Internal Project',
+                    text: 'Internal Project'
+                },
+                {
+                    key: 'Product',
+                    text: 'Product'
+                },
+                {
+                    key: 'Service',
+                    text: 'Service'
+                },
+                {
+                    key: 'Inner Source',
+                    text: 'Inner Source'
+                }
+            ],
+            paramName: 'type'
+        },
+        {
+            fieldName: 'Project Responsible (Email)',
+            value: '',
+            paramName: 'projectResponsible'
+        },
+        {
+            fieldName: 'Group',
+            value: [
+                {
+                    key: 'None',
+                    text: 'None'
+                }
+            ],
+            paramName: 'group'
+        },
+        {
+            fieldName: 'State',
+            value:  [
+                {
+                    key: 'Active',
+                    text: 'Active'
+                },
+                {
+                    key: 'PhaseOut',
+                    text: 'PhaseOut'
+                },
+                {
+                    key: 'Unknown',
+                    text: 'Unknown'
+                }
+            ],
+            paramName: 'state'
+        },
+        {
+            fieldName: 'Clearing State',
+            value:  [
+                {
+                    key: 'Open',
+                    text: 'Open'
+                },
+                {
+                    key: 'In Progress',
+                    text: 'In Progress'
+                },
+                {
+                    key: 'Closed',
+                    text: 'Closed'
+                }
+            ],
+            paramName: 'clearingState'
+        },
+        {
+            fieldName: 'Tag',
+            value:  '',
+            paramName: 'tag'
+        },
+        {
+            fieldName: 'Additional Data',
+            value:  '',
+            paramName: 'additionalData'
+        }
+    ]
+
     const headerbuttons = {
         'Add Projects': { link: '/projects/add', type: 'primary' },
         'Import SBOM': { link: '/projects', type: 'secondary' },
