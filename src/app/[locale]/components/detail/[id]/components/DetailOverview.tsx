@@ -10,7 +10,6 @@
 
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import SideBar from '@/components/SideBar/SideBar'
 import Summary from './Summary'
 import ReleaseOverview from './ReleaseOverview'
 import Attachments from '@/components/Attachments/Attachments'
@@ -28,7 +27,7 @@ import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { LinkedVulnerability } from '@/object-types/LinkedVulnerability'
-import { PageButtonHeader } from '@/components/sw360'
+import { SideBar, PageButtonHeader } from '@/components/sw360'
 
 interface Props {
     session: Session

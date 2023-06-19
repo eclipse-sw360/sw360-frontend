@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from './ComponentAdvanceSearch.module.css'
+import styles from '../components.module.css'
 import { Form, Button } from 'react-bootstrap'
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'

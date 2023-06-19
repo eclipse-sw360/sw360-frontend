@@ -9,14 +9,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import ComponentAdvanceSearch from '@/components/component/component-advance-search/ComponentAdvanceSearch'
-import ComponentsTable from '@/components/component/components-table/ComponentsTable'
+import ComponentAdvanceSearch from './ComponentAdvanceSearch'
+import ComponentsTable from './ComponentsTable'
 import { Dropdown } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types/Session'
 
 import { PageButtonHeader } from '@/components/sw360'
+import { useState } from 'react'
 
 interface Props {
     session?: Session
@@ -25,6 +26,7 @@ interface Props {
 
 const ComponentIndex = ({ session }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
+    const [numberOfComponent, setNumberOfComponent] = useState(0)
 
     const headerbuttons = {
         'Add Component': { link: '/projects/add', type: 'primary' },
@@ -38,7 +40,7 @@ const ComponentIndex = ({ session }: Props) => {
                     <ComponentAdvanceSearch />
                 </div>
                 <div className='col'>
-                    <PageButtonHeader title={`${t('Components')} (0)`} buttons={headerbuttons}>
+                    <PageButtonHeader title={`${t('Components')} (${numberOfComponent})`} buttons={headerbuttons}>
                         <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
                             <Dropdown>
                                 <Dropdown.Toggle variant='secondary' id='project-export'>
@@ -52,7 +54,7 @@ const ComponentIndex = ({ session }: Props) => {
                         </div>
                     </PageButtonHeader>
                     <div className='row' style={{ marginBottom: '20px' }}>
-                        <ComponentsTable session={session} />
+                        <ComponentsTable session={session} setNumberOfComponent={setNumberOfComponent}/>
                     </div>
                 </div>
             </div>

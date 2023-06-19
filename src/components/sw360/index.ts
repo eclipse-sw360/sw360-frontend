@@ -24,4 +24,6 @@ import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 // Navvbar
 import Navbar from './Navbar/Navbar'
 
-export { AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, Table, _, ReactWrapper }
+import SideBar from './SideBar/SideBar'
+
+export { AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, SideBar, Table, _, ReactWrapper }
