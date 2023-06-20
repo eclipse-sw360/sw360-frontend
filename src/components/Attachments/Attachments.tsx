@@ -9,7 +9,6 @@
 // License-Filename: LICENSE
 
 import Alert from 'react-bootstrap/Alert'
-import Form from 'react-bootstrap/Form'
 import { useEffect, useState, useCallback } from 'react'
 import CommonUtils from '@/utils/common.utils'
 import { FaDownload } from 'react-icons/fa'
@@ -22,15 +21,16 @@ import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { notFound } from 'next/navigation'
 import Attachment from '@/object-types/Attachment'
-
 import { Table, _ } from '@/components/sw360'
+import DownloadService from '@/services/download.service'
 
 interface Props {
-    componentId: string
+    documentId: string
     session: Session
+    documentType: string
 }
 
-const Attachments = ({ componentId, session }: Props) => {
+const Attachments = ({ documentId, session, documentType }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [attachmentData, setAttachmentData] = useState([])
     const [totalRows, setTotalRows] = useState(0)
@@ -43,37 +43,36 @@ const Attachments = ({ componentId, session }: Props) => {
                 event.target.className = styles.expand
             }
 
-            const attachmentDetail = document.getElementById(item.sha1)
+            const attachmentDetail = document.getElementById(item.attachmentContentId)
             if (!attachmentDetail) {
                 const parent = event.target.parentElement.parentElement.parentElement
-                const html = `<td colspan="10">
-            <table class="table table-borderless">
-              <tr></tr>
-              <tbody>
-                <tr>
-                  <td>SHA1 : </td>
-                  <td>${item.sha1}</td>
-                  <td>${t('Uploaded On')} : </td>
-                  <td>${item.createdOn}</td>
-                  <td>${t('Uploaded Comment')} : </td>
-                  <td>${item.createdComment}</td>
-                </tr>
-                <tr>
-                </tr>
-                <tr>
-                  <td>${t('Checked On')} : </td>
-                  <td>${item.checkedOn}</td>
-                  <td>${t('Checked Comment')} : </td>
-                  <td>${item.checkedComment}</td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr></tr>
-              </tbody>
-            </table>
-          </td>`
+                const html =
+                `<td colspan="10">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                            <td>SHA1 : </td>
+                            <td>${item.sha1}</td>
+                            <td>${t('Uploaded On')} : </td>
+                            <td>${item.createdOn}</td>
+                            <td>${t('Uploaded Comment')} : </td>
+                            <td>${item.createdComment}</td>
+                            </tr>
+                            <tr>
+                            </tr>
+                            <tr>
+                            <td>${t('Checked On')} : </td>
+                            <td>${item.checkedOn}</td>
+                            <td>${t('Checked Comment')} : </td>
+                            <td>${item.checkedComment}</td>
+                            <td></td>
+                            <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>`
                 const tr = document.createElement('tr')
-                tr.id = item.sha1
+                tr.id = item.attachmentContentId
                 tr.innerHTML = html
 
                 parent.parentNode.insertBefore(tr, parent.nextSibling)
@@ -102,13 +101,23 @@ const Attachments = ({ componentId, session }: Props) => {
         [session.user.access_token]
     )
 
+    const downloadAttachment = (attachmentId: string, attachmentName: string) => {
+        DownloadService.download(
+            `${documentType}/${documentId}/attachments/${attachmentId}`, session, attachmentName)
+    }
+
+    const downloadBundle = () => {
+        DownloadService.download(
+            `${documentType}/${documentId}/attachments/download`, session, 'AttachmentBundle.zip')
+    }
+
     useEffect(() => {
-        fetchData(`components/${componentId}/attachments`).then((attachments: any) => {
+        fetchData(`${documentType}/${documentId}/attachments`).then((attachments: any) => {
             if (
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachments'])
+                !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
             ) {
-                const attachmentData = attachments['_embedded']['sw360:attachments'].map((item: Attachment) => [
+                const attachmentData = attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => [
                     item,
                     item.filename,
                     'n/a',
@@ -118,18 +127,20 @@ const Attachments = ({ componentId, session }: Props) => {
                     '',
                     '',
                     '',
-                    item,
+                    [item.attachmentContentId, item.filename],
                 ])
                 setAttachmentData(attachmentData)
                 setTotalRows(attachmentData.length)
             }
         })
-    }, [componentId, fetchData])
+    }, [documentId, documentType, fetchData])
 
     const columns = [
         {
-            name: _(<FaDownload className={styles['download-btn']} style={{ width: '100%' }} />),
+            name: _(<FaDownload className={styles['download-btn']} style={{ width: '100%' }} onClick={downloadBundle}/>),
             formatter: (item: any) => _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
+            sort: false,
+            width: '60px'
         },
         {
             name: t('File name'),
@@ -164,7 +175,12 @@ const Attachments = ({ componentId, session }: Props) => {
         },
         {
             name: t('Action'),
-            formatter: (item: any) => _(<FaDownload className={styles['download-btn']} style={{ width: '100%' }} />),
+            formatter: ([attachmentId, attachmentName]: Array<string>) => _
+                                    (<FaDownload className={styles['download-btn']} style={{ width: '100%' }} 
+                                     onClick={() => downloadAttachment(attachmentId, attachmentName)}
+                                    />),
+            sort: false,
+            width: '60px',
         },
     ]
 

@@ -8,13 +8,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface RequestContent {
-    method: string,
-    headers: {
-        'Content-Type'?: string,
-        'Authorization'?: string,
-        'Accept'?: string,
-    },
-    body: string | null
-    signal?: any
+enum DocumentTypes {
+  PROJECT = 'projects',
+  COMPONENT = 'components',
+  RELEASE = 'releases',
 }
+
+export default DocumentTypes
