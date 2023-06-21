@@ -200,7 +200,7 @@ export default function Summary() {
                             </div>
                         </div>
                         <div className="row mb-4">
-                            <AddAdditionalRolesComponent />
+                            <AddAdditionalRolesComponent  />
                         </div>
                         <div className="row mb-4">
                             <AddKeyValueComponent header={"External IDs"} keyName={"external id"} />

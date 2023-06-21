@@ -248,3 +248,29 @@ th {
     background-color: var(--sw360-primary-color);
     width: 100%;
 }
+
+.button-plain,
+.button-plain:focus,
+.button-plain:active {
+    border-color: #dbdce4 !important;
+    color: #6b6c7e !important;
+    background-color: white !important;
+}
+.button-plain:hover {
+    border-color: #dbdce4 !important;
+    color: black !important;
+    background-color: #f8f9fa !important;
+}
+
+.button-orange,
+.button-orange:focus,
+.button-orange:active {
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: black !important;
+}
+.button-orange:hover {
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: white !important;
+}
