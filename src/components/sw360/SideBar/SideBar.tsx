@@ -41,7 +41,8 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities }: Prop
       let numberOfIncorrect = 0
       vulnerabilities.forEach((vulnerability: LinkedVulnerability) => {
         const verificationState = vulnerability.releaseVulnerabilityRelation.verificationStateInfo.at(-1).verificationState
-        if (verificationState == VulnerabilitiesVerificationState.CHECKED || VulnerabilitiesVerificationState.NOT_CHECKED) {
+        if (verificationState == VulnerabilitiesVerificationState.CHECKED ||
+            verificationState == VulnerabilitiesVerificationState.NOT_CHECKED) {
           numberOfCheckOrUnchecked++
         } else {
           numberOfIncorrect++

@@ -45,6 +45,7 @@
         "Components with releases": "Components With Releases",
         "COTS": "COTS",
         "Closed": "Closed",
+        "Change Vulnerability Rating And Action?": "Change Vulnerability Rating And Action?",
         "Create Account": "Create Account",
         "Created By (Email)": "Created By (Email)",
         "Created by": "Created by",
@@ -114,6 +115,7 @@
         "None": "None",
         "NO_STATUS": "No status",
         "NOT_CHECKED": "Not Checked",
+        "number of the vulnerabilities were matched by": "<strong>{count}</strong> of the vulnerabilities were matched by <strong>{matchedBy}</strong>",
         "OPEN": "Open",
         "Open": "Open",
         "Operating Systems": "Operating Systems",
@@ -168,6 +170,7 @@
         "The component cannot be deleted, since it contains releases Please delete the releases first": "The component <strong>{name}</strong> cannot be deleted, since it contains <strong>{releaseCount}</strong> releases. Please delete the releases first.",
         "Tag": "Tag",
         "Title": "Title",
+        "The verification of vulnerabilities will be changed to": "The verification of <strong>{number}</strong> vulnerabilities will be changed to",
         "To": "To",
         "Total vulnerabilities": "Total vulnerabilities",
         "Type": "Type",
@@ -183,6 +186,7 @@
         "Verification": "Verification",
         "Version": "Version",
         "Vulnerabilities": "Vulnerabilities",
+        "Vulnerability matching statistics": "Vulnerability matching statistics",
         "Welcome to SW360!": "Welcome to SW360!",
         "Wiki": "Wiki"
     }

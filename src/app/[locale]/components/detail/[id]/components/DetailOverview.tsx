@@ -188,7 +188,7 @@ const DetailOverview = ({ session, componentId }: Props) => {
                             <Attachments session={session} componentId={componentId} />
                         </div>
                         <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
-                            <ComponentVulnerabilities vulnerData={vulnerData} />
+                            <ComponentVulnerabilities vulnerData={vulnerData} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
                             <div className='col'>

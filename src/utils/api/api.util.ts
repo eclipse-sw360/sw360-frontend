@@ -49,6 +49,10 @@ function PUT(path: string, data: object, token: string) {
 	return send({ method: 'PUT', path, data, token });
 }
 
-const ApiUtils = { GET, DELETE, POST, PUT };
+function PATCH(path: string, data: object, token: string) {
+	return send({ method: 'PATCH', path, data, token });
+}
+
+const ApiUtils = { GET, DELETE, POST, PUT, PATCH };
 
 export default ApiUtils
