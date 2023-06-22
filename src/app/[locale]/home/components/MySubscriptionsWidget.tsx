@@ -36,7 +36,7 @@ function MySubscriptionsWidget() {
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
                 {componentData.map((item) => (
                     <li key={''}>
-                        <span style={{ color: 'orange' }}>{item.name}</span>
+                        <span style={{ color: 'orange' }}>{item}</span>
                     </li>
                 ))}
             </ul>
@@ -44,7 +44,7 @@ function MySubscriptionsWidget() {
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
                 {releaseData.map((item) => (
                     <li key={''}>
-                        <span style={{ color: 'orange' }}>{item.name}</span>
+                        <span style={{ color: 'orange' }}>{item}</span>
                     </li>
                 ))}
             </ul>
