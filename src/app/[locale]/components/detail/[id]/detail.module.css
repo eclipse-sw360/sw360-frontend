@@ -35,3 +35,12 @@
 .btn-group:not(:last-child) {
   margin-right: 0.5rem;
 }
+
+.delete-btn {
+  color: gray;
+  font-size: 14px;
+}
+
+.delete-btn:hover {
+  cursor: pointer;
+}

@@ -22,8 +22,10 @@ import { notFound } from 'next/navigation'
 import { Session } from '@/object-types/Session'
 import ReleaseLink from '@/object-types/ReleaseLink'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
+import styles from '../detail.module.css'
 
 import { Table, _ } from '@/components/sw360'
+import DeleteReleaseModal from './DeleteReleaseModal'
 
 interface Props {
     session: Session
@@ -33,6 +35,13 @@ interface Props {
 const ReleaseOverview = ({ session, componentId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState([])
+    const [deletingRelease, setDeletingRelease] = useState('')
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+
+    const handleClickDelete = (releaseId: any) => {
+        setDeletingRelease(releaseId)
+        setDeleteModalOpen(true)
+    }
 
     const fetchData: any = useCallback(
         async (url: string) => {
@@ -104,7 +113,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                             <FaPencilAlt />
                         </Link>{' '}
                         &nbsp;
-                        <FaTrashAlt style={{ color: 'gray', fontSize: '14px' }} />
+                        <FaTrashAlt className={styles['delete-btn']} onClick={() => handleClickDelete(id)} />
                     </span>
                 ),
         },
@@ -115,6 +124,11 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
             <div className='row'>
                 <Table data={data} search={true} columns={columns} />
             </div>
+            <DeleteReleaseModal
+                releaseId={deletingRelease}
+                show={deleteModalOpen}
+                setShow={setDeleteModalOpen}
+            />
         </>
     )
 }
