@@ -19,6 +19,7 @@ import ProfileDropdown from '@/components/ProfileDropdown/ProfileDropdown'
 
 import { Navbar } from '@/components/sw360'
 import sw360logo from '@/assets/images/sw360-logo.svg'
+import searchLogo from '@/assets/icons/search.svg'
 
 const Header = () => {
     const { data: session } = useSession()
@@ -58,7 +59,8 @@ const Header = () => {
                                     id='search-addon'
                                     onClick={initiateSearch}
                                 >
-                                    <i className='fas fa-search' style={{ color: 'black' }}></i>
+                                    <Image src={searchLogo} alt='Search Icon'/>
+
                                 </button>
                             </form>
                         ) : (
