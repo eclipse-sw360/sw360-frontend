@@ -13,27 +13,79 @@ import Link from 'next/link'
 import { Form } from 'react-bootstrap'
 
 import ChangeStateDialog from './ChangeStateDialog'
-import { useState } from 'react'
-import { useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import VulnerabilitiesVerificationState from '@/object-types/enums/VulnerabilitiesVerificationState'
 
 import { Table, _ } from '@/components/sw360'
+import { LinkedVulnerability, VerificationStateInfo } from '@/object-types/LinkedVulnerability'
+import { Session } from '@/object-types/Session'
+import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
+import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
+import { FaInfoCircle } from 'react-icons/fa'
 
 interface Props {
-    vulnerData: Array<unknown>
+    vulnerData: Array<LinkedVulnerability>
+    session: Session
 }
 
-const ComponentVulnerabilities = ({ vulnerData }: Props) => {
+const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [state, setState] = useState('NOT_CHECKED')
+    const [data, setData] = useState([])
+    const [selectedVulner, setSelectedVulner] = useState<Array<any>>([])
+    const [checkAll, setCheckAll] = useState<boolean>(false)
+
+    const handleCheckBox = (index: number, checked: boolean) => {
+        const newData = Object.entries(data).map(([i, rowData]: any) => {
+            if (i == index) {
+                rowData[0] = {
+                    ...rowData[0],
+                    checked: !checked
+                }
+            }
+            return rowData;
+        })
+
+        setData(newData);
+    }
+
+    const handleCheckAll = () => {
+        const newData = Object.entries(data).map(([i, rowData]: any) => {
+            rowData[0] = {
+                ...rowData[0],
+                checked: !checkAll
+            }
+            return rowData;
+        })
+
+        setData(newData)
+        setCheckAll((prev) => !prev);
+    }
+
+    const handleClick = () => {
+        const selectingVulner = Object.entries(data).map(([index, item]: any) => {
+            if (item[0].checked === true) {
+                return {
+                    releaseId: item[0].releaseId,
+                    vulnerExternalId: item[0].vulnerExternalId,
+                    index: index
+                }
+            }
+        }).filter(element => element !== undefined)
+
+        setSelectedVulner(selectingVulner)
+        setDialogOpen(true)
+    }
 
     const columns = [
         {
-            name: _(<Form.Check type='checkbox'></Form.Check>),
-            formatter: (externalId: string) => _(<Form.Check type='checkbox'></Form.Check>),
+            name: _(<Form.Check defaultChecked={checkAll} type='checkbox' onClick={handleCheckAll}></Form.Check>),
+            formatter: ({ checked, index }: any) =>
+                _(<Form.Check defaultChecked={checked}
+                    onClick={() => handleCheckBox(index, checked)} type='checkbox'></Form.Check>),
         },
         {
             name: t('Release'),
@@ -63,27 +115,37 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
         },
         {
             name: t('Verification'),
+            formatter: (verificationStateInfos: Array<VerificationStateInfo>) =>
+                _(
+                    <VerificationTooltip verificationStateInfos={verificationStateInfos}>
+                        <FaInfoCircle style={{marginRight: '5px', color: 'gray', width: '15px', height: '15px'}}/>
+                        {t(verificationStateInfos.at(-1).verificationState)}
+                    </VerificationTooltip>
+                ),
             sort: true,
         },
         t('Action'),
     ]
 
-    const handleClick = useCallback(() => setDialogOpen(true), [])
+    useEffect(() => {
+        const mappedData = Object.entries(vulnerData).map(([index, item]: any) => [
+            {
+                index: index,
+                checked: false,
+                releaseId: item.releaseVulnerabilityRelation.releaseId,
+                vulnerExternalId: item.externalId
+            },
+            item.intReleaseName,
+            [item.externalId, item.releaseVulnerabilityRelation.vulnerabilityId],
+            item.priority,
+            item.releaseVulnerabilityRelation.matchedBy,
+            item.title,
+            item.releaseVulnerabilityRelation.verificationStateInfo,
+            item.projectAction,
+        ])
+        setData(mappedData);
+    }, [vulnerData.length])
 
-    const handleChangeState = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setState(event.target.value)
-    }
-
-    const data = Object.entries(vulnerData).map(([index, item]: any) => [
-        item.externalId,
-        item.intReleaseName,
-        [item.externalId, item.releaseVulnerabilityRelation.vulnerabilityId],
-        item.priority,
-        item.releaseVulnerabilityRelation.matchedBy,
-        item.title,
-        t(item.releaseVulnerabilityRelation.verificationStateInfo.at(-1).verificationState),
-        item.projectAction,
-    ])
 
     return (
         <div className='row'>
@@ -99,9 +161,10 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
                         borderBottom: '1px solid #5D8EA9',
                         fontSize: '1rem',
                         fontWeight: 'bold',
+                        textTransform: 'uppercase',
                     }}
                 >
-                    VULNERABILITIES
+                    {t('Vulnerabilities')}
                 </h5>
                 <Table columns={columns} data={data} />
                 <Form.Group className='mb-3' controlId='createdOn'>
@@ -110,7 +173,7 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
                     </Form.Label>
                     <Form.Select
                         size='sm'
-                        onChange={handleChangeState}
+                        onChange={(event) => setState(event.target.value)}
                         style={{
                             display: 'inline-block',
                             width: '170px',
@@ -131,18 +194,10 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
                     </Form.Select>
                     <Button onClick={handleClick}>{t('Change State')}</Button>
                 </Form.Group>
-                <h5
-                    style={{
-                        color: '#5D8EA9',
-                        borderBottom: '1px solid #5D8EA9',
-                        fontSize: '1rem',
-                        fontWeight: 'bold',
-                    }}
-                >
-                    VULNERABILITY MATCHING STATISTICS
-                </h5>
+                <VulnerabilitiesMatchingStatistics vulnerData={vulnerData} />
             </div>
-            <ChangeStateDialog show={dialogOpen} setShow={setDialogOpen} state={state} />
+            <ChangeStateDialog show={dialogOpen} setShow={setDialogOpen} state={state}
+                selectedVulner={selectedVulner} session={session} />
         </div>
     )
 }

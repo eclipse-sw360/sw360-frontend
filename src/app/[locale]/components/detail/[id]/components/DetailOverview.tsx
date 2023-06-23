@@ -28,6 +28,8 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { LinkedVulnerability } from '@/object-types/LinkedVulnerability'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import DownloadService from '@/services/download.service'
 
 interface Props {
     session: Session
@@ -81,6 +83,11 @@ const DetailOverview = ({ session, componentId }: Props) => {
         },
         [session.user.access_token]
     )
+
+    const downloadBundle = () => {
+        DownloadService.download(
+            `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`, session, 'AttachmentBundle.zip')
+    }
 
     useEffect(() => {
         fetchData(`components/${componentId}`).then((component: any) => {
@@ -142,6 +149,7 @@ const DetailOverview = ({ session, componentId }: Props) => {
                                                 id='downloadAttachmentBundle'
                                                 type='button'
                                                 className='btn btn-secondary'
+                                                onClick={downloadBundle}
                                             >
                                                 {t('Download Attachment Bundle')}
                                             </button>
@@ -185,10 +193,10 @@ const DetailOverview = ({ session, componentId }: Props) => {
                             <ReleaseOverview componentId={componentId} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments session={session} componentId={componentId} />
+                            <Attachments session={session} documentId={componentId} documentType={DocumentTypes.COMPONENT} />
                         </div>
                         <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
-                            <ComponentVulnerabilities vulnerData={vulnerData} />
+                            <ComponentVulnerabilities vulnerData={vulnerData} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
                             <div className='col'>

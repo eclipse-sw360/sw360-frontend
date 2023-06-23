@@ -31,7 +31,7 @@
 }
 
 .gridjs-container {
-    overflow: hidden;
+    overflow: visible;
     display: inline-block;
     padding: 2px;
     color: #000;
@@ -43,7 +43,7 @@
     display: block;
     position: relative;
     width: 100%;
-    z-index: 5;
+    z-index: 0;
     padding: 12px 24px;
     border-top: 1px solid #e5e7eb;
     background-color: #fff;
@@ -286,7 +286,7 @@ th.gridjs-th:last-child {
 .gridjs-wrapper {
     position: relative;
     z-index: 1;
-    overflow: auto;
+    overflow: visible;
     width: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

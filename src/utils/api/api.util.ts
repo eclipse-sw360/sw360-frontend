@@ -13,12 +13,12 @@ import RequestContent from '@/object-types/RequestContent';
 
 const base = SW360_API_URL + '/resource/api';
 
-async function send({ method, path, data, token, signal } : { method: string, path: string, data: object | null, token: string, signal?: any }): Promise<any>{
-	const request_content: RequestContent = { method, headers: {}, body: null };
+async function send({ method, path, data, token, signal }: { method: string, path: string, data: object | null, token: string, signal?: any }): Promise<any> {
+	const request_content: RequestContent = { method, headers: { Accept: 'application/*' }, body: null };
 
 	if (data) {
 		request_content.headers['Content-Type'] = 'application/json';
-		request_content['body']= JSON.stringify(data);
+		request_content['body'] = JSON.stringify(data);
 	}
 
 	if (token) {
@@ -49,6 +49,10 @@ function PUT(path: string, data: object, token: string) {
 	return send({ method: 'PUT', path, data, token });
 }
 
-const ApiUtils = { GET, DELETE, POST, PUT };
+function PATCH(path: string, data: object, token: string) {
+	return send({ method: 'PATCH', path, data, token });
+}
+
+const ApiUtils = { GET, DELETE, POST, PUT, PATCH };
 
 export default ApiUtils
