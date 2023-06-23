@@ -12,6 +12,8 @@ import React, { useState, useEffect } from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
+import defaultRecentReleases from '../../../../../defaultValues/defaultValuesHome-MyRecentReleases.json'
+
 
 const title = 'Recent Releases'
 
@@ -21,7 +23,8 @@ function RecentReleasesWidget() {
     useEffect(() => {
         const fetchData = async () => {
             const data = await sw360FetchData('/releases/recentReleases', 'releases')
-            data &&
+            if (data.length > 0)
+            {
                 setData(
                     data.map((item: { name: string }) => [
                         <li key={''}>
@@ -29,6 +32,17 @@ function RecentReleasesWidget() {
                         </li>,
                     ])
                 )
+            }
+            else
+            {
+                setData(
+                    defaultRecentReleases.map((item: { name: string }) => [
+                        <li key={''}>
+                            <span style={{ color: 'orange' }}>{item.name}</span>
+                        </li>,
+                    ])
+                )
+            }
         }
         fetchData()
     }, [])

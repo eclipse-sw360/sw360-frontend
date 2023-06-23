@@ -12,6 +12,8 @@ import React, { useEffect, useState } from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
+import defaultRecentComponents from '../../../../../defaultValues/defaultValuesHome-MyRecentComponents.json'
+
 
 interface Components {
     name: string
@@ -23,7 +25,8 @@ function RecentComponentsWidget() {
     useEffect(() => {
         const fetchData = async () => {
             const data = await sw360FetchData('/components/recentComponents', 'components')
-            data &&
+            if (data.length > 0)
+            {
                 setData(
                     data.map((item: { name: string }) => [
                         <li key={item.name}>
@@ -31,6 +34,17 @@ function RecentComponentsWidget() {
                         </li>,
                     ])
                 )
+            }
+            else
+            {
+                setData(
+                    defaultRecentComponents.map((item: { name: string }) => [
+                        <li key={item.name}>
+                            <span style={{ color: 'orange' }}>{item.name}</span>
+                        </li>,
+                    ])
+                )
+            }
         }
         fetchData()
     }, [])

@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -16,6 +17,7 @@ import { Table } from '@/components/sw360'
 
 import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
+import defaultMyProjects from '../../../../../defaultValues/defaultValuesHome-MyProjects.json'
 
 function MyProjectsWidget() {
     const [data, setdata] = useState([])
@@ -24,7 +26,8 @@ function MyProjectsWidget() {
     useEffect(() => {
         const fetchData = async () => {
             const data = await sw360FetchData('/projects/myprojects', 'projects')
-            data &&
+            if (data.length > 0)
+            {
                 setdata(
                     data.map((item: { name: string; description: string; version: string }) => [
                         item.name,
@@ -32,6 +35,18 @@ function MyProjectsWidget() {
                         item.version,
                     ])
                 )
+            }
+            else
+            {
+                setdata(
+                    defaultMyProjects.map((item: { name: string; description: string; version: string }) => [
+                        item.name,
+                        item.description,
+                        item.version,
+                    ])
+                )
+            }
+
         }
         fetchData()
     }, [])

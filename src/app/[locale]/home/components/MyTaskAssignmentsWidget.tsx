@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -14,6 +15,7 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 import { Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
+import defaultMyTaskAssignments from '../../../../../defaultValues/defaultValuesHome-MyTaskAssignments.json'
 
 import HomeTableHeader from './HomeTableHeader'
 
@@ -24,7 +26,14 @@ function MyTaskAssignmentsWidget() {
     useEffect(() => {
         const fetchData = async () => {
             const data = await sw360FetchData('/myTaskAssignments')
-            setData(data.map((item: { name: string; status: string }) => [item.name, item.status]))
+            if (data.length > 0)
+            {
+                setData(data.map((item: { name: string; status: string }) => [item.name, item.status]))
+            }
+            else
+            {
+                setData(defaultMyTaskAssignments.map((item: { name: string; status: string }) => [item.name, item.status]))
+            }
         }
         fetchData()
     }, [])

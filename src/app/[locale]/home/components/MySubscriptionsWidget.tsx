@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react'
 import HomeTableHeader from './HomeTableHeader'
 import homePageStyles from '../home.module.css'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
+import defaultMySubscriptions from '../../../../../defaultValues/defaultValuesHome-MySubscriptions.json'
 
 function MySubscriptionsWidget() {
     const [componentData, setComponentData] = useState([])
@@ -20,9 +21,23 @@ function MySubscriptionsWidget() {
     useEffect(() => {
         const fetchData = async () => {
             const componentData = await sw360FetchData('/components/mySubscriptions', 'components')
-            setComponentData(componentData.map((item: { name: string }) => [item.name]))
+            if (componentData.length > 0)
+            {
+                setComponentData(componentData.map((item: { name: string }) => [item.name]))
+            }
+            else
+            {
+                setComponentData(defaultMySubscriptions.map((item: { name: string }) => [item.name]))
+            }
             const releaseData = await sw360FetchData('/releases/mySubscriptions', 'releases')
-            setReleaseData(releaseData.map((item: { name: string }) => [item.name]))
+            if (releaseData.length > 0)
+            {
+                setReleaseData(releaseData.map((item: { name: string }) => [item.name]))
+            }
+            else
+            {
+                setReleaseData(defaultMySubscriptions.map((item: { name: string }) => [item.name]))
+            }
         }
         fetchData()
     }, [])
