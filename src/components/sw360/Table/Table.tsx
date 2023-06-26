@@ -58,7 +58,7 @@ class Table extends Component<TableProps, unknown> {
     render(): React.ReactElement {
         return (
             <>
-                {defaultOptions.selector && (
+                {this.props.selector && (
                     <div className='col-11 mt-3 mb-3'>
                         <div className='dataTables_length'>
                             <span className='my-2'>Show</span>
