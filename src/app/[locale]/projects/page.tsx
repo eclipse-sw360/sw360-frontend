@@ -176,6 +176,7 @@ function Project() {
                             columns={columns}
                             data={data.map((data) => [data.name, data.description, data.projectResponsible])}
                             pagination={pagination}
+                            selector={true}
                         />
                     </div>
                 </div>
