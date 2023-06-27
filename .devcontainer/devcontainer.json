@@ -8,61 +8,60 @@
 // License-Filename: LICENSE
 
 {
-  "name": "SW360 Frontend",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "args": {
-      "VARIANT": "19-bullseye-slim"
-    }
-  },
-  // Configure tool-specific properties.
-  "customizations": {
-    // Configure properties specific to VS Code.
-    "vscode": {
-      // Set *default* container specific settings.json values on container create.
-      "settings": {
-        "html.format.templating": true,
-        "emmet.includeLanguages": {
-          "javascript": "javascriptreact"
-        },
-        "[javascript]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[scss]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[json]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[jsonc]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "editor.formatOnSave": true,
-        "eslint.alwaysShowStatus": true,
-        "indentRainbow.colorOnWhiteSpaceOnly": true
-      },
-      // Add the IDs of extensions you want installed when the container is created.
-      "extensions": [
-		"2gua.rainbow-brackets",
-		"aaron-bond.better-comments",
-		"davidanson.vscode-markdownlint",
-		"dbaeumer.vscode-eslint",
-		"esbenp.prettier-vscode",
-		"formulahendry.auto-close-tag",
-		"formulahendry.auto-rename-tag",
-		"ms-vscode.vscode-typescript-tslint-plugin",
-		"naumovs.color-highlight",
-		"oderwat.indent-rainbow",
-		"shardulm94.trailing-spaces",
-		"VisualStudioExptTeam.vscodeintellicode",
-		"ms-azuretools.vscode-docker"
-	]
-    }
-  },
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [3000],
-  // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": ".devcontainer/scripts/postCreateCommand.sh",
-  // Set `remoteUser` to `root` to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-  "remoteUser": "devel"
+    "name": "SW360 Frontend",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "VARIANT": "19-bullseye-slim"
+        }
+    },
+    // Configure tool-specific properties.
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            // Set *default* container specific settings.json values on container create.
+            "settings": {
+                "html.format.templating": true,
+                "emmet.includeLanguages": {
+                    "javascript": "javascriptreact"
+                },
+                "[javascript]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[scss]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "[jsonc]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                },
+                "editor.formatOnSave": true,
+                "eslint.alwaysShowStatus": true,
+                "indentRainbow.colorOnWhiteSpaceOnly": true
+            },
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "aaron-bond.better-comments",
+                "davidanson.vscode-markdownlint",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "formulahendry.auto-close-tag",
+                "formulahendry.auto-rename-tag",
+                "naumovs.color-highlight",
+                "oderwat.indent-rainbow",
+                "shardulm94.trailing-spaces",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "ms-azuretools.vscode-docker",
+                "github.vscode-github-actions"
+            ]
+        }
+    },
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    "forwardPorts": [3000, 9229],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand": ".devcontainer/scripts/postCreateCommand.sh",
+    // Set `remoteUser` to `root` to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "devel"
 }

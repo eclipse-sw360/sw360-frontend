@@ -1,0 +1,12 @@
+node_modules
+.next
+.vscode
+.gitignore
+README.md
+CONTRBUTING.md
+NOTICE
+CODE_OF_CONDUCT.md
+Dockerfile
+.dockerignore
+.git
+.env

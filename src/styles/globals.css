@@ -12,71 +12,239 @@
 */
 
 body {
-  background-color: #FAFAFA;
-  color: #272833;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen-Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
-  font-size: 1rem;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  font-weight: 400;
-  line-height: 1.5;
-  margin: 0;
-  text-align: inherit;
+    background-color: #fafafa;
+    color: #272833;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+        Helvetica Neue, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+    font-size: 1rem;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 0;
+    text-align: inherit;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 :root {
-  --font-family-sans-serif: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol';
-  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
-  --font-mono: 'Fira Mono', monospace;
-  --pure-white: #ffffff;
-  --primary-color: #ffffff;
-  --secondary-color: #d0dde9;
-  --tertiary-color: #edf0f8;
-  --accent-color: #f7941e;
-  --heading-color: rgba(0, 0, 0, 0.7);
-  --text-color: #444444;
-  --background-without-opacity: rgba(255, 255, 255, 0.7);
-  --column-width: 42rem;
-  --column-margin-top: 4rem;
-}
-
-#footer {
-  padding-bottom: 2rem;
-  padding-top: 2rem;
-  background-color: #30313F;
-  color: #FFF;
-  text-align: center;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
+    --font-family-sans-serif: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
+        Cantarell, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --font-mono: 'Fira Mono', monospace;
+    --pure-white: #ffffff;
+    --primary-color: #ffffff;
+    --secondary-color: #d0dde9;
+    --tertiary-color: #edf0f8;
+    --accent-color: #f7941e;
+    --heading-color: rgba(0, 0, 0, 0.7);
+    --text-color: #444444;
+    --background-without-opacity: rgba(255, 255, 255, 0.7);
+    --column-width: 42rem;
+    --column-margin-top: 4rem;
+    --sw360-primary-background-color: #5D8EA9;
+    --sw360-primary-color: #f7941e;
 }
 
 .header {
-  padding-left: 3%;
-  padding-right: 3%;
-  padding-top: 1rem;
+    padding-left: 3%;
+    padding-right: 3%;
+    padding-top: 1rem;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+#container {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#content {
+    flex: 1;
+}
+
+/* Footer component need stay always on bottom floating */
+footer {
+    color: white;
+    background-color: #30313f;
+    text-align: center;
+    flex-shrink: 0;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    left: 0;
+    width: 100%;
+    position: absolute;
+    margin-top: 20px;
+}
+
+.footerAlignment{
+    background-color: #30313F;
+    position: relative;
+    bottom: '0px';
+    width : '100%';
 }
 
 #footer a {
-  color: #F7941E !important;
-  text-decoration-line: none;
+    color: var(--sw360-primary-color) !important;
+    text-decoration-line: none;
 }
 
 .header a {
-  color: #F7941E !important;
-  text-decoration-line: none;
+    color: var(--sw360-primary-color) !important;
+    text-decoration-line: none;
 }
 
 .flags {
-  width: 30px;
-  margin-left: 3px;
-  margin-right: 3px;
+    width: 30px;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.table {
+    border-spacing: 0;
+    color: #272833;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    width: 100%;
+    padding: 10px;
+}
+
+.table thead {
+    background-color: var(--sw360-primary-background-color);
+    color: white;
+    font-size: bold;
+}
+
+.table td,
+th {
+    padding: 14px !important;
+}
+
+.table thead th a {
+    border-radius: 1px;
+    color: #6b6c7e;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.btn-toolbar .btn-group:not(:last-child) {
+    margin-right: 0.5rem;
+}
+
+.btn {
+    font-weight: bold !important;
+    border-radius: 3px !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+.btn-secondary {
+    background-color: #fff !important;
+    border-color: #cdced9 !important;
+    color: #6b6c7e !important;
+}
+
+.btn-primary {
+    background-color: var(--sw360-primary-color) !important;
+    border-color: var(--sw360-primary-color) !important;
+    color: #272833 !important;
+}
+
+.btn-outline-primary {
+    border-color: var(--sw360-primary-color) !important;
+    color: var(--sw360-primary-color) !important;
+}
+
+.btn-primary:focus {
+    background-color: var(--sw360-primary-color) !important;
+    border-color: white !important;
+}
+
+.btn-secondary:hover {
+    color: #000 !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--sw360-primary-color) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #fffdfb !important;
+    border-color: var(--sw360-primary-color) !important;
+    color: var(--sw360-primary-color) !important;
+}
+
+.gridjs-wrapper {
+    border-radius: 0px;
+}
+
+.nav-pills .nav-link.active {
+    color: white !important;
+}
+
+.link {
+    color: var(--sw360-primary-color);
+    text-decoration: none;
+}
+
+.dropdown-item:focus {
+    background-color: lightgray !important;
+}
+
+.loaded {
+    opacity: 1;
+    transition: all 0.2ms ease-in;
+}
+
+.loading {
+    opacity: 0;
+    transition: all 0.2ms ease-in;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -12px;
+    margin-left: -12px;
+}
+
+.card-deck {
+    margin-bottom: 1rem;
+}
+
+.card-header:first-child {
+    border-radius: calc(0.25rem - 0px) calc(0.25rem - 0px) 0 0;
+    background-color: var(--sw360-primary-background-color);
+    color: #FFF;
+}
+
+.card-header {
+    border-bottom: 0px solid rgba(0, 0, 0, 0.125);
+    margin-bottom: 0;
+    padding: 0.75rem 1.25rem;
+    color: #FFF;
+    background-color: var(--sw360-primary-background-color);
+    font-weight: bold;
+}
+
+.card-body {
+    flex: 1 1 auto;
+    min-height: 1px;
+    padding-bottom: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1rem;
+    background-color: #EBF0F5;
+}
+
+.sw360-button {
+    background-color: var(--sw360-primary-color);
+    width: 100%;
 }

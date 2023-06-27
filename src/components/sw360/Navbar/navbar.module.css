@@ -1,0 +1,56 @@
+/*
+  Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.navbarCollapse ul li .underline {
+	height: 3px;
+	background-color: transparent;
+	width: 0%;
+	transition: width 0.2s, background-color 0.5s;
+	margin: 0 auto;
+}
+
+.navbarCollapse ul li:active .underline,
+.navbarCollapse ul li.selected .underline{
+	width: 100%;
+	background-color: orange !important;
+}
+
+.navbarCollapse ul li:hover .underline {
+	background-color: orange;
+	width: 100%;
+}
+
+.navbarCollapse ul li.selected div {
+	transition: none;
+	color: orange;
+}
+
+.dropdownToggle::after {
+	content: none;
+}
+
+.dropdownMenu{
+	border-style:groove;
+}
+
+.headingDiv{
+	background-color: #fafafa;
+	color: rgba(0, 0, 0);
+	border-style: solid none solid none;
+	border-width: 1px;
+	border-color: #e7e7ed;
+	padding-left: 28px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+}

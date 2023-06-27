@@ -12,7 +12,9 @@ export default interface RequestContent {
     method: string,
     headers: {
         'Content-Type'?: string,
-        'Authorization'?: string
+        'Authorization'?: string,
+        'Accept'?: string,
     },
     body: string | null
+    signal?: any
 }

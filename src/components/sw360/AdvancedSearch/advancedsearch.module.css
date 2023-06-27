@@ -1,0 +1,70 @@
+.form-control {
+    border: none;
+}
+
+.button-search,
+.button-search:focus,
+.button-search:active {
+    width: 100% !important;
+    display: block;
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: black !important;
+}
+.button-search:hover {
+    width: 100% !important;
+    display: block;
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: white !important;
+}
+
+.button,
+.button:focus,
+.button:active {
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: black !important;
+}
+.button:hover {
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: white !important;
+}
+
+.button-plain,
+.button-plain:focus,
+.button-plain:active {
+    border-color: #dbdce4 !important;
+    color: #6b6c7e !important;
+    background-color: white !important;
+}
+.button-plain:hover {
+    border-color: #dbdce4 !important;
+    color: black !important;
+    background-color: #f8f9fa !important;
+}
+
+.label {
+    font-weight: bold;
+}
+  
+.create-on-label {
+    display: 'inline-block';
+    width: 60% !important;
+    font-weight: bold;
+}
+
+.popup {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
+    background-color: white;
+    text-align: justify;
+    width: 600px;
+    padding: 5px;
+}
+
+.info-icon:hover~.popup {
+    display: block
+}
