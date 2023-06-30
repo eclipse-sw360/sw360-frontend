@@ -118,7 +118,7 @@ footer {
     padding: 10px;
 }
 
-.table thead {
+.table thead th{
     background-color: var(--sw360-primary-background-color);
     color: white;
     font-size: bold;
