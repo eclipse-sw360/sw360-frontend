@@ -24,7 +24,9 @@ import { SideBar, PageButtonHeader } from '@/components/sw360'
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
 import Link from 'next/link'
 import styles from '../detail.module.css'
+
 import Summary from './Summary'
+import LinkedReleases from './LinkedReleases'
 
 interface Props {
     session: Session
@@ -143,6 +145,9 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <Summary release={release} releaseId={releaseId} />
+                        </div>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
+                            <LinkedReleases release={release}/>
                         </div>
                     </div>
                 </div>
