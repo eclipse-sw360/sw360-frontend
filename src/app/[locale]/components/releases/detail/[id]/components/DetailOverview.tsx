@@ -27,6 +27,7 @@ import styles from '../detail.module.css'
 
 import Summary from './Summary'
 import LinkedReleases from './LinkedReleases'
+import ECCDetails from './ECCDetails'
 
 interface Props {
     session: Session
@@ -119,6 +120,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             selectedTab={selectedTab}
                             setSelectedTab={setSelectedTab}
                             tabList={tabList}
+                            eccStatus={release.eccInformation.eccStatus}
                         />
                     </div>
                     <div className='col'>
@@ -148,6 +150,9 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases release={release}/>
+                        </div>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
+                            <ECCDetails release={release}/>
                         </div>
                     </div>
                 </div>
