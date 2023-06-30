@@ -16,7 +16,7 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useState, useEffect } from 'react'
 import CommonUtils from '@/utils/common.utils'
 import Link from 'next/link'
-
+import ReleaseLink from '@/object-types/ReleaseLink'
 
 interface Props {
     release: any
@@ -31,7 +31,7 @@ const LinkedReleases = ({ release }: Props) => {
           !CommonUtils.isNullOrUndefined(release['_embedded']) &&
           !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:releaseLinks'])
       ) {
-          const data = release['_embedded']['sw360:releaseLinks'].map((item: any) => [
+          const data = release['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
               [item.name, item.version, item.id],
               t(item.releaseRelationship),
               (CommonUtils.isNullEmptyOrUndefinedArray(item.licenseIds)) ? '' : item.licenseIds.join(', '),

@@ -10,12 +10,15 @@
 
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 const ClearingInformationStatus = ({ status }: any) => {
+    const t = useTranslations(COMMON_NAMESPACE)
     return (
         (status)
-            ? <span style={{color: '#287d3c'}}><FiCheckCircle /> Yes</span> 
-            : <span style={{color: 'red'}}><CiCircleRemove /> No</span>
+            ? <span style={{color: '#287d3c'}}><FiCheckCircle /> {t('Yes')}</span> 
+            : <span style={{color: 'red'}}><CiCircleRemove /> {t('No')}</span>
     )
 }
 

@@ -9,12 +9,18 @@
 // License-Filename: LICENSE
 
 export default interface ReleaseLink {
-  id: string,
-  name: string,
-  version: string,
-  mainlineState: string,
+  id: string
+  name: string
+  version: string
+  mainlineState: string | undefined
   clearingReport: {
     clearingReportStatus: string
-  },
+  } | undefined
   clearingState: string
+  vendor: string
+  longName: string
+  releaseRelationship: string
+  hasSubreleases: boolean
+  licenseIds: Array<string> | undefined
+  accessible: boolean
 }
