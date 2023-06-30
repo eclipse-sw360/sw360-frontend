@@ -22,12 +22,15 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import DownloadService from '@/services/download.service'
 import Link from 'next/link'
 import styles from '../detail.module.css'
 
 import Summary from './Summary'
 import LinkedReleases from './LinkedReleases'
 import ECCDetails from './ECCDetails'
+import Attachments from '@/components/Attachments/Attachments'
 
 interface Props {
     session: Session
@@ -70,6 +73,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<any>(undefined)
     const [releasesSameComponent, setReleasesSameComponentt] = useState<Array<any>>([])
+    const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
 
     const fetchData: any = useCallback(
         async (url: string) => {
@@ -90,6 +94,12 @@ const DetailOverview = ({ session, releaseId }: Props) => {
         fetchData(`releases/${releaseId}`)
             .then((release: any) => {
                 setRelease(release)
+                if (
+                    !CommonUtils.isNullOrUndefined(release['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:attachments'])
+                ) {
+                    setAttachmentNumber(release['_embedded']['sw360:attachments'].length)
+                }
                 return release
             })
             .then((release: any) => {
@@ -103,7 +113,11 @@ const DetailOverview = ({ session, releaseId }: Props) => {
             })
 
     }, [releaseId])
-    
+
+    const downloadBundle = () => {
+        DownloadService.download(
+            `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`, session, 'AttachmentBundle.zip')
+    }
 
     const headerButtons = {
         'Edit release': { link: '', type: 'primary' },
@@ -143,6 +157,20 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
+                                {selectedTab === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
+                                    <div className='list-group-companion' data-belong-to='tab-Attachments'>
+                                        <div className='btn-group' role='group'>
+                                            <button
+                                                id='downloadAttachmentBundle'
+                                                type='button'
+                                                className='btn btn-secondary'
+                                                onClick={downloadBundle}
+                                            >
+                                                {t('Download Attachment Bundle')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
@@ -153,6 +181,9 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
                             <ECCDetails release={release}/>
+                        </div>
+                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
+                            <Attachments session={session} documentId={releaseId} documentType={DocumentTypes.RELEASE} />
                         </div>
                     </div>
                 </div>
