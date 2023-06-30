@@ -23,6 +23,7 @@ import { SideBar, PageButtonHeader } from '@/components/sw360'
 
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import { LinkedVulnerability } from '@/object-types/LinkedVulnerability'
 import DownloadService from '@/services/download.service'
 import Link from 'next/link'
 import styles from '../detail.module.css'
@@ -31,6 +32,7 @@ import Summary from './Summary'
 import LinkedReleases from './LinkedReleases'
 import ECCDetails from './ECCDetails'
 import Attachments from '@/components/Attachments/Attachments'
+import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 
 interface Props {
     session: Session
@@ -74,6 +76,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     const [release, setRelease] = useState<any>(undefined)
     const [releasesSameComponent, setReleasesSameComponentt] = useState<Array<any>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
+    const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
 
     const fetchData: any = useCallback(
         async (url: string) => {
@@ -112,6 +115,17 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                 })
             })
 
+        fetchData(`releases/${releaseId}/vulnerabilities`).then((vulnerabilities: any) => {
+            if (
+                vulnerabilities &&
+                !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
+            ) {
+                setVulnerData(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
+            } else {
+                setVulnerData([])
+            }
+        })
     }, [releaseId])
 
     const downloadBundle = () => {
@@ -134,6 +148,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             selectedTab={selectedTab}
                             setSelectedTab={setSelectedTab}
                             tabList={tabList}
+                            vulnerabilities={vulnerData}
                             eccStatus={release.eccInformation.eccStatus}
                         />
                     </div>
@@ -184,6 +199,9 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
                             <Attachments session={session} documentId={releaseId} documentType={DocumentTypes.RELEASE} />
+                        </div>
+                        <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
+                            <ComponentVulnerabilities vulnerData={vulnerData} session={session} />
                         </div>
                     </div>
                 </div>
