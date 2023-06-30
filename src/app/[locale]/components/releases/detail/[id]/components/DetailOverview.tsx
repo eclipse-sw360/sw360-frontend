@@ -29,6 +29,7 @@ import Link from 'next/link'
 import styles from '../detail.module.css'
 
 import Summary from './Summary'
+import ClearingDetails from './ClearingDetails'
 import LinkedReleases from './LinkedReleases'
 import ECCDetails from './ECCDetails'
 import Attachments from '@/components/Attachments/Attachments'
@@ -234,6 +235,9 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases release={release}/>
+                        </div>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
+                            <ClearingDetails release={release}/>
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
                             <ECCDetails release={release}/>
