@@ -44,3 +44,30 @@
   text-decoration: none;
   color: gray;
 }
+
+.badge-circle {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.5rem;
+  vertical-align: center;
+  margin-right: 5px;
+}
+
+.SCAN_AVAILABLE,
+.REPORT_AVAILABLE,
+.UNDER_CLEARING {
+  background-color: #b95000;
+  color: #fff;
+}
+
+.APPROVED {
+  background-color: #287d3c;
+  color: #fff;
+}
+
+.NEW_CLEARING,
+.SENT_TO_CLEARING_TOOL {
+  background-color: #da1414;
+  color: #fff;
+}

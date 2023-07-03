@@ -112,12 +112,8 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                 return release
             })
             .then((release: any) => {
-                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}`).then((component: any) => {
-                    (component) && setReleasesSameComponentt(
-                        CommonUtils.isNullOrUndefined(component['_embedded']['sw360:releases'])
-                            ? []
-                            : component['_embedded']['sw360:releases']
-                    )
+                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`).then((component: any) => {
+                    (component) && setReleasesSameComponentt(component['_embedded']['sw360:releaseLinks'])
                 })
             })
 
@@ -172,13 +168,15 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                                 <div style={{ marginLeft: '5px'}} className='btn-group' role='group'>
                                     <Dropdown>
                                         <Dropdown.Toggle variant='primary'>
+                                            <span className={`${styles['badge-circle']} ${styles[release.clearingState]}`}></span>
                                             {`${t('Version')} ${release.version}`}
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu>
                                             {
                                                 Object.entries(releasesSameComponent).map(([index, item]: any) =>
                                                     <Dropdown.Item key={index} className={styles['dropdown-item']}>
-                                                        <Link href={`components/releases/detail/${item._links.self.href.split('/').at(-1)}`}>
+                                                        <span className={`${styles['badge-circle']} ${styles[item.clearingState]}`}></span>
+                                                        <Link href={`components/releases/detail/${item.id}`}>
                                                             {`${t('Version')} ${item.version}`}
                                                         </Link>
                                                     </Dropdown.Item>)
