@@ -8,67 +8,105 @@
 // License-Filename: LICENSE
 
 import React from 'react'
-import styles from "@/css/AddKeyValue.module.css"
-import { useState } from 'react';
+import styles from '@/css/AddKeyValue.module.css'
+import { useState } from 'react'
+import { FaTrashAlt } from 'react-icons/fa'
+import { AddtionalDataType } from '@/object-types/AddtionalDataType'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
-    header: string;
-    keyName: string;
+    header: string
+    keyName: string
+    setData?: AddtionalDataType
 }
 
 interface Input {
-    key: string;
-    value: string;
+    key: string
+    value: string
 }
 
 export default function AddKeyValueComponent(props: Props) {
-
-    const [inputList, setInputList] = useState<Input[]>([]);
+    const [inputList, setInputList] = useState<Input[]>([])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const { name, value } = e.target;
-        const list: Input[] = [...inputList];
-        list[index][name as keyof Input] = value;
-        setInputList(list);
-    };
+        const { name, value } = e.target
+        const list: Input[] = [...inputList]
+        list[index][name as keyof Input] = value
+        const map = new Map<string, string>()
+        list.forEach((item) => {
+            map.set(item.key, item.value)
+        })
+        setInputList(list)
+        props.setData(map)
+    }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList];
-        list.splice(index, 1);
-        setInputList(list);
-    };
+        const list = [...inputList]
+        list.splice(index, 1)
+        setInputList(list)
+    }
 
     const handleAddClick = () => {
-        setInputList([...inputList, { key: "", value: "" }]);
-    };
+        setInputList([...inputList, { key: '', value: '' }])
+    }
 
-    return(
+    return (
         <>
-            <div className={`${styles["header"]} mb-2`}>
-                <p className="fw-bold mt-3">{props.header}</p>
+            <div className={`${styles['header']} mb-2`}>
+                <p className='fw-bold mt-3'>{props.header}</p>
             </div>
-            <div className="row">
-                {
-                    inputList.map((elem, j) => {
-                        return (
-                            <div className="row mb-2" key ="">
-                                <div className="col-lg-5">
-                                    <input name="key" value={elem.key} type="text" onChange={e => handleInputChange(e, j)} className="form-control" placeholder={`Enter ${props.keyName.toLowerCase()} key`} aria-describedby={`${props.keyName.toLowerCase()} key`} />
-                                </div>
-                                <div className="col-lg-5">
-                                    <input name="value" value={elem.value} type="text" onChange={e => handleInputChange(e, j)} className="form-control" placeholder={`Enter ${props.keyName.toLowerCase()} value`} aria-describedby={`${props.keyName.toLowerCase()} value`} />
-                                </div>
-                                <div className="col-lg-2">
-                                    <button type="button" onClick={() => handleRemoveClick(j)} className={`fw-bold btn btn-light ${styles['button-plain']}`}><i className="bi bi-trash3-fill"></i></button>
-                                </div>
+            <div className='row'>
+                {inputList.map((elem, j) => {
+                    return (
+                        <div className='row mb-2' key=''>
+                            <div className='col-lg-5'>
+                                <input
+                                    name='key'
+                                    value={elem.key}
+                                    type='text'
+                                    onChange={(e) => handleInputChange(e, j)}
+                                    className='form-control'
+                                    placeholder={`Enter ${props.keyName.toLowerCase()} key`}
+                                    required
+                                    aria-describedby={`${props.keyName.toLowerCase()} key`}
+                                />
                             </div>
-                        )
-                    })
-                }
-                <div className="col-lg-3">
-                    <button type="button" onClick={() => handleAddClick()} className={`fw-bold btn btn-light ${styles['button-plain']}`}>{`Click to add row to ${props.keyName.split(" ").map((elem) => elem[0].toUpperCase() + elem.substring(1)).join(" ")}`}</button>
+                            <div className='col-lg-5'>
+                                <input
+                                    name='value'
+                                    value={elem.value}
+                                    type='text'
+                                    onChange={(e) => handleInputChange(e, j)}
+                                    className='form-control'
+                                    placeholder={`Enter ${props.keyName.toLowerCase()} value`}
+                                    required
+                                    aria-describedby={`${props.keyName.toLowerCase()} value`}
+                                />
+                            </div>
+                            <div className='col-lg-2'>
+                                <button
+                                    type='button'
+                                    onClick={() => handleRemoveClick(j)}
+                                    className={`fw-bold btn btn-light button-plain`}
+                                >
+                                    <FaTrashAlt className="bi bi-trash3-fill" />
+                                </button>
+                            </div>
+                        </div>
+                    )
+                })}
+                <div className='col-lg-4'>
+                    <button
+                        type='button'
+                        onClick={() => handleAddClick()}
+                        className={`fw-bold btn btn-light button-plain`}
+                    >{`Click to add row to ${props.keyName
+                        .split(' ')
+                        .map((elem) => elem[0].toUpperCase() + elem.substring(1))
+                        .join(' ')}`}</button>
                 </div>
             </div>
         </>
-    );
+    )
 }

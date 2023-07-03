@@ -28,7 +28,7 @@ const ComponentIndex = ({ session }: Props) => {
     const [numberOfComponent, setNumberOfComponent] = useState(0)
 
     const headerbuttons = {
-        'Add Component': { link: '/projects/add', type: 'primary' },
+        'Add Component': { link: '/components/add', type: 'primary' },
         'Import SBOM': { link: '/projects', type: 'secondary' },
     }
 
