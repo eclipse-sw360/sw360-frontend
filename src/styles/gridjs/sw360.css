@@ -373,7 +373,6 @@ th.gridjs-th:last-child {
     color: var(--sw360-primary-color);
 }
 
-
 .gridjs a:hover {
     text-decoration: underline;
     color: var(--sw360-primary-background-color);

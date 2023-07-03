@@ -10,7 +10,9 @@
 import * as React from 'react'
 import { Component, createRef, RefObject } from 'react'
 import { Config, Grid } from 'gridjs'
-import { Form } from 'react-bootstrap'
+import { Form, Button } from 'react-bootstrap'
+import styles from './Table.module.css'
+import { HiOutlinePrinter } from 'react-icons/hi'
 
 const defaultOptions = {
     pagination: { limit: 10 },
@@ -59,7 +61,7 @@ class Table extends Component<TableProps, unknown> {
         return (
             <>
                 {defaultOptions.selector && (
-                    <div className='col-11 mt-3 mb-3'>
+                    <div className='col-11 mt-3 mb-3  d-flex justify-content-between w-100'>
                         <div className='dataTables_length'>
                             <span className='my-2'>Show</span>
                             <label style={{ marginLeft: '5px', marginRight: '5px' }}>
@@ -74,6 +76,7 @@ class Table extends Component<TableProps, unknown> {
                             </label>
                             <span>entries</span>
                         </div>
+                        <Button variant="light" className={`${styles['button-plain']}`} >< HiOutlinePrinter /> Print</Button>
                     </div>
                 )}
                 <div ref={this.wrapper} />

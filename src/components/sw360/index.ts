@@ -26,4 +26,10 @@ import Navbar from './Navbar/Navbar'
 
 import SideBar from './SideBar/SideBar'
 
-export { AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, SideBar, Table, _, ReactWrapper }
+import Actions from './ProjectsTable/Actions/Actions'
+
+import WarningModal from './ProjectsTable/WarningModal/WarningModal'
+
+import  DeleteModal from './ProjectsTable/DeleteModal/DeleteModal'
+
+export { AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, SideBar, Table, _, ReactWrapper, Actions, WarningModal, DeleteModal }

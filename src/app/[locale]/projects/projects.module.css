@@ -41,14 +41,14 @@
     color: white !important;
 }
 
-.button,
-.button:focus,
-.button:active {
+.button-orange,
+.button-orange:focus,
+.button-orange:active {
     background-color: #f28809 !important;
     border-color: #dbdce4 !important;
     color: black !important;
 }
-.button:hover {
+.button-orange:hover {
     background-color: #f28809 !important;
     border-color: #dbdce4 !important;
     color: white !important;

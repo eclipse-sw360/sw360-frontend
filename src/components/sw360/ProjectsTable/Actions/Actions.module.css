@@ -1,0 +1,9 @@
+.icon-link {
+    text-decoration: none !important;
+    color: #6c757d !important;
+}
+
+.icon-link:hover {
+    text-decoration: underline !important;
+    color: var(--sw360-primary-color) !important;
+}
