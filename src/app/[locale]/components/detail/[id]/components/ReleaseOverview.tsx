@@ -86,7 +86,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
             name: t('Version'),
             formatter: ([id, version]: Array<string>) =>
                 _(
-                    <Link href={'/releases/detail/' + id} className='link'>
+                    <Link href={'/components/releases/detail/' + id} className='link'>
                         {version}
                     </Link>
                 ),
