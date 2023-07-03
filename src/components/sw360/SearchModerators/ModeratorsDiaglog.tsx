@@ -20,6 +20,8 @@ import CommonUtils from '@/utils/common.utils'
 import SelectTableModerators from './SelectTableModerators'
 import Moderators from '@/object-types/Moderators'
 import { ModeratorsType } from '@/object-types/ModeratorsType'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     show: boolean
@@ -29,6 +31,7 @@ interface Props {
 }
 
 const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) => {
+    const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
     const [moderators, setModerators] = useState([])
     const [moderatorsResponse, setModeratorsResponse] = useState<Moderators>()
@@ -54,7 +57,6 @@ const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) 
 
     useEffect(() => {
         fetchData(`users`).then((users: any) => {
-            console.log(users)
             if (
                 !CommonUtils.isNullOrUndefined(users['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])
@@ -81,7 +83,7 @@ const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) 
     return (
         <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
             <Modal.Header closeButton>
-                <Modal.Title>Search User</Modal.Title>
+                <Modal.Title>{t('Search User')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <div className='modal-body'>
@@ -100,10 +102,10 @@ const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) 
                                 className={`fw-bold btn btn-light button-plain me-2`}
                                 onClick={searchVendor}
                             >
-                                Search
+                                {t('Search')}
                             </button>
                             <button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
-                                Reset
+                                {t('Reset')}
                             </button>
                         </div>
                     </div>
@@ -119,17 +121,17 @@ const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) 
                     className={`fw-bold btn btn-light button-plain me-2`}
                     onClick={handleCloseDialog}
                 >
-                    Close
+                    {t('Close')}
                 </Button>
                 <Button type='button' className={`fw-bold btn btn-light button-plain`}>
-                    Add User
+                    {t('Add User')}
                 </Button>
                 <Button
                     type='button'
                     className={`fw-bold btn btn-light button-orange`}
                     onClick={handleClickSelectModerators}
                 >
-                    Select User
+                    {t('Select User')}
                 </Button>
             </Modal.Footer>
         </Modal>

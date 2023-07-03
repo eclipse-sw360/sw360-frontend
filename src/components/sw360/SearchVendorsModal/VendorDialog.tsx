@@ -20,6 +20,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import CommonUtils from '@/utils/common.utils';
 import Vendor from '@/object-types/Vendor';
 import { VendorType } from '@/object-types/VendorType';
+import { useTranslations } from 'next-intl';
+import { COMMON_NAMESPACE } from '@/object-types/Constants';
 
 interface Props {
   show: boolean,
@@ -30,6 +32,7 @@ interface Props {
 
 const VendorDialog = ({ show, setShow, session, selectVendor}: Props) => {
 
+  const t = useTranslations(COMMON_NAMESPACE);
   const [data, setData] = useState();
   const [vendor, setVendor] = useState<Vendor>();
   const [vendors, setVendors] =useState([]);
@@ -78,17 +81,17 @@ const VendorDialog = ({ show, setShow, session, selectVendor}: Props) => {
       size='lg'
     >
       <Modal.Header closeButton>
-        <Modal.Title>Search Vendor</Modal.Title>
+        <Modal.Title>{t('Search Vendor')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="modal-body">
             <div className="row">
                 <div className="col-lg-8">
-                    <input type="text" className="form-control" placeholder="Enter search text..." aria-describedby="Search Vendor" />
+                    <input type="text" className="form-control" placeholder='Enter search text...' aria-describedby="Search Vendor" />
                 </div>
                 <div className="col-lg-4">
-                    <button type="button" className={`fw-bold btn btn-light button-plain me-2`} onClick={searchVendor}>Search</button>
-                    <button type="button" className={`fw-bold btn btn-light button-plain me-2`} >Reset</button>
+                    <button type="button" className={`fw-bold btn btn-light button-plain me-2`} onClick={searchVendor}>{t('Search')}</button>
+                    <button type="button" className={`fw-bold btn btn-light button-plain me-2`} >{t('Reset')}</button>
                 </div>
             </div>
             <div className="row mt-3">
@@ -97,9 +100,9 @@ const VendorDialog = ({ show, setShow, session, selectVendor}: Props) => {
         </div>
       </Modal.Body>
       <Modal.Footer className='justify-content-end' >
-        <Button type="button" data-bs-dismiss="modal" className={`fw-bold btn btn-light button-plain me-2`} onClick={handleCloseDialog}>Close</Button>
-        <Button type="button" className={`fw-bold btn btn-light button-plain`}>Add Vendor</Button>
-        <Button type="button" className={`fw-bold btn btn-light button-orange`} onClick={handleClickSelectVendor} >Select Vendor</Button>
+        <Button type="button" data-bs-dismiss="modal" className={`fw-bold btn btn-light button-plain me-2`} onClick={handleCloseDialog}>{t('Close')}</Button>
+        <Button type="button" className={`fw-bold btn btn-light button-plain`}>{t('Add Vendor')}</Button>
+        <Button type="button" className={`fw-bold btn btn-light button-orange`} onClick={handleClickSelectVendor} >{t('Select Vendor')}</Button>
       </Modal.Footer>
     </Modal>
   )

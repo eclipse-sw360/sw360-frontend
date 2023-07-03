@@ -12,6 +12,8 @@ import styles from '@/css/AddKeyValue.module.css'
 import { useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     header: string
@@ -88,7 +90,7 @@ export default function AddKeyValueComponent(props: Props) {
                                     onClick={() => handleRemoveClick(j)}
                                     className={`fw-bold btn btn-light button-plain`}
                                 >
-                                    <FaTrashAlt className='bi bi-trash3-fill'></FaTrashAlt>
+                                    <FaTrashAlt className="bi bi-trash3-fill" />
                                 </button>
                             </div>
                         </div>

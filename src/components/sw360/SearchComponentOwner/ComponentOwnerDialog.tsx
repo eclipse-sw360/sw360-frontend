@@ -20,6 +20,8 @@ import CommonUtils from '@/utils/common.utils'
 import SelectTableComponentOwner from './SelectTableComponentOwner'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import { ComponentOwnerType } from '@/object-types/ComponentOwnerType'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     show: boolean
@@ -29,6 +31,7 @@ interface Props {
 }
 
 const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }: Props) => {
+    const t = useTranslations(COMMON_NAMESPACE);
     const [data, setData] = useState()
     const [componentOwner, setComponentOwner] = useState<ComponentOwner>()
     const [users, setUsers] = useState([])
@@ -82,7 +85,7 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
     return (
         <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
             <Modal.Header closeButton>
-                <Modal.Title>Search User</Modal.Title>
+                <Modal.Title>{t('Search User')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <div className='modal-body'>
@@ -101,10 +104,10 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                                 className={`fw-bold btn btn-light button-plain me-2`}
                                 onClick={searchVendor}
                             >
-                                Search
+                                {t('Search')}
                             </button>
                             <button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
-                                Reset
+                                {t('Reset')}
                             </button>
                         </div>
                     </div>
@@ -120,17 +123,17 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                     className={`fw-bold btn btn-light button-plain me-2`}
                     onClick={handleCloseDialog}
                 >
-                    Close
+                    {t('Close')}
                 </Button>
                 <Button type='button' className={`fw-bold btn btn-light button-plain`}>
-                    Add User
+                    {t('Add User')}
                 </Button>
                 <Button
                     type='button'
                     className={`fw-bold btn btn-light button-orange`}
                     onClick={handleClickSelectComponentOwnerId}
                 >
-                    Select User
+                    {t('Select User')}
                 </Button>
             </Modal.Footer>
         </Modal>

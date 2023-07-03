@@ -9,6 +9,8 @@
 
 import React from 'react'
 import { getData } from 'country-list'
+import { useTranslations } from 'next-intl';
+import { COMMON_NAMESPACE } from '@/object-types/Constants';
 
 interface Props {
     selectCountry?: React.ChangeEventHandler<HTMLSelectElement>
@@ -16,10 +18,11 @@ interface Props {
 }
 
 export default function SelectCountryComponent(props: Props) {
+    const t = useTranslations(COMMON_NAMESPACE);
     return (
         <>
             <label htmlFor='country' className='form-label fw-bold'>
-                Owner Country
+                {t('Owner Country')}
             </label>
             <select
                 className='form-select'
@@ -30,7 +33,7 @@ export default function SelectCountryComponent(props: Props) {
                 onChange={props.selectCountry}
                 value={props.value}
             >
-                <option value=''>Select a country</option>
+                <option value=''>{t('Select a country')}</option>
                 {getData().map((country: any) => (
                     <option key={country.code} value={country.name}>
                         {country.name}

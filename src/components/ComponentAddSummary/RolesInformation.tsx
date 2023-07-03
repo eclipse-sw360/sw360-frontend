@@ -19,6 +19,8 @@ import ComponentOwnerDiaglog from '../sw360/SearchComponentOwner/ComponentOwnerD
 import SelectCountryComponent from '../SelectCountry'
 import ModeratorsDiaglog from '../sw360/SearchModerators/ModeratorsDiaglog'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 interface Props {
     session: Session
     componentPayload: ComponentPayload
@@ -27,7 +29,7 @@ interface Props {
 
 const RolesInformation = ({ session, componentPayload, setComponentPayload }: Props) => {
 
-
+    const t = useTranslations(COMMON_NAMESPACE);
     const [fullNameComponentOwner, setFullNameComponentOwner] = useState<string>()
     const [fullNameModerators, setFullNameModerators] = useState<string>()
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
@@ -79,19 +81,19 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
         <>
             <div className='row mb-4'>
                 <div className={`${styles['header']} mb-2`}>
-                    <p className='fw-bold mt-3'>Roles</p>
+                    <p className='fw-bold mt-3'> {t('Roles')}</p>
                 </div>
                 <div className='row'>
                     <div className='col-lg-4'>
                         <label htmlFor='component_owner' className='form-label fw-bold'>
-                            Component Owner
+                            {t('Component Owner')}
                         </label>
                         <input
                             type='text'
                             className='form-control'
                             data-bs-toggle='modal'
                             data-bs-target='#search_users_modal'
-                            placeholder='Click to edit'
+                            placeholder={t('Click to edit')}
                             id='component_owner'
                             aria-describedby='component_owner'
                             readOnly={true}
@@ -110,12 +112,12 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='owner_accounting_unit' className='form-label fw-bold'>
-                            Owner Accounting Unit
+                            {t('Owner Accounting Unit')}
                         </label>
                         <input
                             type='text'
                             className='form-control'
-                            placeholder='Enter Owner Accounting Unit'
+                            placeholder={t('Enter Owner Accounting Unit')}
                             id='owner_accounting_unit'
                             aria-describedby='Owner Accounting Unit'
                             name='ownerAccountingUnit'
@@ -125,12 +127,12 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='owner_billing_group' className='form-label fw-bold'>
-                            Owner Billing Group
+                             {t('Owner Billing Group')}
                         </label>
                         <input
                             type='text'
                             className='form-control'
-                            placeholder='Enter Owner Billing Group'
+                            placeholder={t('Enter Owner Billing Group')}
                             id='owner_billing_group'
                             aria-describedby='Owner Billing Group'
                             name='ownerGroup'
@@ -149,14 +151,14 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='moderators' className='form-label fw-bold'>
-                            Moderators
+                            {t('Moderators')}
                         </label>
                         <input
                             type='text'
                             className='form-control'
                             data-bs-toggle='modal'
                             data-bs-target='#search_users_modal'
-                            placeholder='Click to edit'
+                            placeholder={t('Click to edit')}
                             id='moderators'
                             aria-describedby='Moderators'
                             readOnly={true}

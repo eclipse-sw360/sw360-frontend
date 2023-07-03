@@ -16,14 +16,16 @@ import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import 'react-toastify/dist/ReactToastify.css'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 interface Props {
     session: Session
     componentPayload: ComponentPayload
     setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
- const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload}: Props) => {
-
+const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }: Props) => {
+    const t = useTranslations(COMMON_NAMESPACE)
     const [vendorName, setVendorName] = useState<string>()
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
 
@@ -69,17 +71,17 @@ interface Props {
             <div className='col'>
                 <div className='row mb-4'>
                     <div className={`${styles['header']} mb-2`}>
-                        <p className='fw-bold mt-3'>General Information</p>
+                        <p className='fw-bold mt-3'>{t('General Information')}</p>
                     </div>
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='name' className='form-label fw-bold'>
-                                Name <span className='text-red'>*</span>
+                                {t('Name')} <span className='text-red'>*</span>
                             </label>
                             <input
                                 type='text'
                                 className='form-control'
-                                placeholder='Enter Name'
+                                placeholder={t('Enter Name')}
                                 id='name'
                                 name='name'
                                 aria-describedby='name'
@@ -90,14 +92,14 @@ interface Props {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='createdBy' className='form-label fw-bold'>
-                                Created by
+                                {t('Created by')}
                             </label>
                             <input
                                 type='text'
                                 className='form-control'
                                 data-bs-toggle='modal'
                                 data-bs-target='#search_vendors_modal'
-                                placeholder='Will be set auto'
+                                placeholder={t('Will be set auto')}
                                 id='createdBy'
                                 aria-describedby='Created By'
                                 readOnly={true}
@@ -108,7 +110,7 @@ interface Props {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='categories' className='form-label fw-bold'>
-                                Categories <span className='text-red'>*</span>
+                                {t('Categories')} <span className='text-red'>*</span>
                             </label>
                             <input
                                 type='text'
@@ -127,7 +129,7 @@ interface Props {
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='component_type' className='form-label fw-bold'>
-                                Component Type <span className='text-red'>*</span>
+                                {t('Component Type')} <span className='text-red'>*</span>
                             </label>
                             <select
                                 className='form-select'
@@ -140,13 +142,13 @@ interface Props {
                                 value={componentPayload.componentType}
                             >
                                 <option value=''></option>
-                                <option value='OSS'>OSS</option>
-                                <option value='COTS'>COTS</option>
-                                <option value='INTERNAL'>Internal</option>
-                                <option value='INNER_SOURCE'>Inner Source</option>
-                                <option value='SERVICE'>Service</option>
-                                <option value='FREESOFTWARE'>Freeware</option>
-                                <option value='CODE_SNIPPET'>Code Snippet</option>
+                                <option value='OSS'>{t('OSS')}</option>
+                                <option value='COTS'> {t('COTS')}</option>
+                                <option value='INTERNAL'>{t('Internal')}</option>
+                                <option value='INNER_SOURCE'>{t('Inner Source')}</option>
+                                <option value='SERVICE'>{t('Service')}</option>
+                                <option value='FREESOFTWARE'>{t('Freeware')}</option>
+                                <option value='CODE_SNIPPET'>{t('Code Snippet')}</option>
                             </select>
                             <div id='learn_more_about_component_type' className='form-text'>
                                 <i className='bi bi-info-circle'></i> Learn more about component types.
@@ -155,14 +157,14 @@ interface Props {
 
                         <div className='col-lg-4'>
                             <label htmlFor='default_vendor' className='form-label fw-bold'>
-                                Default Vendor
+                                {t('Default vendor')}
                             </label>
                             <input
                                 type='text'
                                 className='form-control'
                                 data-bs-toggle='modal'
                                 data-bs-target='#search_vendors_modal'
-                                placeholder='Click to set vendor'
+                                placeholder={t('Click to set vendor')}
                                 id='default_vendor'
                                 aria-describedby='Vendor'
                                 readOnly={true}
@@ -183,12 +185,12 @@ interface Props {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='tag' className='form-label fw-bold'>
-                                Homepage Url
+                                {t('Homepage Url')}
                             </label>
                             <input
                                 type='URL'
                                 className='form-control'
-                                placeholder='Will be set automatically'
+                                placeholder={t('Will be set automatically')}
                                 id='tag'
                                 aria-describedby='Tag'
                                 name='homepage'
@@ -201,12 +203,12 @@ interface Props {
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='blog_url' className='form-label fw-bold'>
-                                Blog URL
+                                {t('Blog URL')}
                             </label>
                             <input
                                 type='URL'
                                 className='form-control'
-                                placeholder='Enter Blog URL'
+                                placeholder={t('Enter Blog URL')}
                                 id='blog_url'
                                 aria-describedby='blog_url'
                                 name='blog'
@@ -216,12 +218,12 @@ interface Props {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='wiki_url' className='form-label fw-bold'>
-                                Wiki URL
+                                {t('Wiki URL')}
                             </label>
                             <input
                                 type='URL'
                                 className='form-control'
-                                placeholder='Enter Wiki URL'
+                                placeholder={t('Enter Wiki URL')}
                                 id='wiki_url'
                                 aria-describedby='wiki_url'
                                 name='wiki'
@@ -231,12 +233,12 @@ interface Props {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='mailing_list_url' className='form-label fw-bold'>
-                                Mailing List URL
+                                {t('Mailing List URL')}
                             </label>
                             <input
                                 type='text'
                                 className='form-control'
-                                placeholder='Enter Mailing List URL '
+                                placeholder={t('Enter Mailing List URL')}
                                 id='mailing_list_url'
                                 aria-describedby='mailing_list_url'
                                 name='mailinglist'
@@ -249,11 +251,11 @@ interface Props {
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='description' className='form-label fw-bold'>
-                                Description
+                                {t('Description')}
                             </label>
                             <textarea
                                 className='form-control'
-                                placeholder='Enter Description'
+                                placeholder={t('Enter Description')}
                                 id='description'
                                 aria-describedby='Description'
                                 style={{ height: '100px' }}
@@ -264,7 +266,7 @@ interface Props {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='modified_on' className='form-label fw-bold'>
-                                Modified On
+                                {t('Modified On')}
                             </label>
                             <input
                                 type='date'
@@ -276,12 +278,12 @@ interface Props {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='modified_by' className='form-label fw-bold'>
-                                Modified By
+                                {t('Modified By')}
                             </label>
                             <input
                                 type='text'
                                 className='form-control'
-                                placeholder='Will be set automatically'
+                                placeholder={t('Will be set automatically')}
                                 id='modified_by'
                                 aria-describedby='Modified By'
                                 readOnly={true}
@@ -295,4 +297,4 @@ interface Props {
     )
 }
 
-export default React.memo(GeneralInfoComponent);
+export default React.memo(GeneralInfoComponent)

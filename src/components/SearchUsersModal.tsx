@@ -7,9 +7,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { COMMON_NAMESPACE } from '@/object-types/Constants';
+import { useTranslations } from 'next-intl';
 import React from 'react'
 
 export default function SearchUsersModalComponent() {
+    const t = useTranslations(COMMON_NAMESPACE);
     return (
         <>
             <div
@@ -23,7 +26,7 @@ export default function SearchUsersModalComponent() {
                     <div className='modal-content'>
                         <div className='modal-header'>
                             <h5 className='modal-title fw-bold' id='search_users_modal_label'>
-                                Search Users
+                                {t('Search Users')}
                             </h5>
                             <button
                                 type='button'
@@ -47,10 +50,10 @@ export default function SearchUsersModalComponent() {
                                         type='button'
                                         className={`fw-bold btn btn-light button-plain me-2`}
                                     >
-                                        Search
+                                        {t('Search')}
                                     </button>
                                     <button type='button' className={`fw-bold btn btn-light button-plain`}>
-                                        Reset
+                                        {t('Reset')}
                                     </button>
                                 </div>
                             </div>
@@ -61,10 +64,10 @@ export default function SearchUsersModalComponent() {
                                 data-bs-dismiss='modal'
                                 className={`fw-bold btn btn-light button-plain me-2`}
                             >
-                                Close
+                                {t('Close')}
                             </button>
                             <button type='button' className={`fw-bold btn btn-light button-orange`}>
-                                Select Users
+                                {t('Select Users')}
                             </button>
                         </div>
                     </div>

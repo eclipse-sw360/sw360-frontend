@@ -26,11 +26,14 @@ import 'react-toastify/dist/ReactToastify.css'
 import GeneralInfoComponent from './GeneralInfoComponent'
 import RolesInformation from './RolesInformation'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 interface Props {
     session: Session
 }
 
 export default function ComponentAddSummary({ session }: Props) {
+    const t = useTranslations(COMMON_NAMESPACE);
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const router = useRouter()
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
@@ -121,10 +124,10 @@ export default function ComponentAddSummary({ session }: Props) {
 
         if (response.status == HttpStatus.CREATED) {
             const data = await response.json()
-            notify('Component is created', 'success')
+            notify(t('Component is created'), 'success')
             router.push('/components/detail/' + data.id)
         } else {
-            notify('Component is Duplicate', 'error')
+            notify(t('Component is Duplicate'), 'error')
         }
     }
 
@@ -152,7 +155,7 @@ export default function ComponentAddSummary({ session }: Props) {
                                     <div className='btn-toolbar' role='toolbar'>
                                         <div className='btn-group' role='group'>
                                             <button type='submit' className='btn btn-primary'>
-                                                Create Component
+                                                {t('Create Component')}
                                             </button>
                                         </div>
                                         <div className='btn-group' role='group'>
@@ -162,7 +165,7 @@ export default function ComponentAddSummary({ session }: Props) {
                                                 className='btn btn-secondary'
                                                 onClick={handleCancelClick}
                                             >
-                                                Cancel
+                                                {t('Cancel')}
                                             </button>
                                         </div>
                                     </div>
@@ -187,14 +190,14 @@ export default function ComponentAddSummary({ session }: Props) {
                                 </div>
                                 <div className='row mb-4'>
                                     <AddKeyValueComponent
-                                        header={'External ids'}
+                                        header={t('External ids')}
                                         keyName={'external id'}
                                         setData={setExternalIds}
                                     />
                                 </div>
                                 <div className='row mb-4'>
                                     <AddKeyValueComponent
-                                        header={'Additional Data'}
+                                        header={t('Additional Data')}
                                         keyName={'additional data'}
                                         setData={setAddtionalData}
                                     />
