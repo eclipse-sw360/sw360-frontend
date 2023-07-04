@@ -43,6 +43,8 @@
 .header {
     background-color: #5D8EA9;
     color: white;
+    margin-top: 10px;
+    margin-left: 12px;
 }
 
 .list-group-item-action {
@@ -58,6 +60,6 @@
 
 .sidebar-active {
     border-color: #dbdce4 !important;
-    color: #6b6c7e !important;
+    color: #000000 !important;
     background-color: #e89734 !important;
 }

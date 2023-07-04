@@ -90,7 +90,11 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
                                     </select>
                                 </div>
                                 <div className="col-lg-5">
-                                    <input name="email" value={elem.email} type="email" onChange={e => handleInputChange(e, j)} className="form-control" placeholder={`Enter email`} aria-describedby={`Email`} />
+                                    <input name="email" value={elem.email} type="email"
+                                           onChange={e => handleInputChange(e, j)}
+                                           className="form-control"
+                                           placeholder={`Enter email`}
+                                           aria-describedby={`Email`} />
                                 </div>
                                 <div className="col-lg-2">
                                     <button type="button" onClick={() => handleRemoveClick(j)} className={`fw-bold btn btn-light button-plain`}><FaTrashAlt className="bi bi-trash3-fill" /></button>
