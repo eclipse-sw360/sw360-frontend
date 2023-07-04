@@ -15,9 +15,9 @@ import { Session } from '@/object-types/Session'
 import 'react-toastify/dist/ReactToastify.css'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
-import ComponentOwnerDiaglog from '../sw360/SearchComponentOwner/ComponentOwnerDialog'
-import SelectCountryComponent from '../SelectCountry'
-import ModeratorsDiaglog from '../sw360/SearchModerators/ModeratorsDiaglog'
+import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
+import SelectCountryComponent from '@/components/SelectCountry'
+import ModeratorsDiaglog from '@/components/sw360/SearchModerators/ModeratorsDiaglog'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -28,8 +28,7 @@ interface Props {
 }
 
 const RolesInformation = ({ session, componentPayload, setComponentPayload }: Props) => {
-
-    const t = useTranslations(COMMON_NAMESPACE);
+    const t = useTranslations(COMMON_NAMESPACE)
     const [fullNameComponentOwner, setFullNameComponentOwner] = useState<string>()
     const [fullNameModerators, setFullNameModerators] = useState<string>()
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
@@ -127,7 +126,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='owner_billing_group' className='form-label fw-bold'>
-                             {t('Owner Billing Group')}
+                            {t('Owner Billing Group')}
                         </label>
                         <input
                             type='text'
@@ -144,10 +143,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                 <hr className='my-4' />
                 <div className='row'>
                     <div className='col-lg-4'>
-                        <SelectCountryComponent
-                            selectCountry={updateField}
-                            value={componentPayload.ownerCountry}
-                        />
+                        <SelectCountryComponent selectCountry={updateField} value={componentPayload.ownerCountry} />
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='moderators' className='form-label fw-bold'>
@@ -181,6 +177,5 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
         </>
     )
 }
-
 
 export default React.memo(RolesInformation)

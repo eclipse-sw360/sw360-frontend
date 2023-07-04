@@ -8,13 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client";
-import { SessionProvider } from "next-auth/react";
+'use client'
+import { SessionProvider } from 'next-auth/react'
 
 type Props = {
-  children?: React.ReactNode;
-};
+    children?: React.ReactNode
+}
 
-export const NextAuthProvider = ({ children }: Props) => {
-  return <SessionProvider>{children}</SessionProvider>;
-};
+export const Providers = ({ children }: Props) => {
+    return <SessionProvider>{children}</SessionProvider>
+}

@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import * as React from 'react'
 import { Component, createRef, RefObject } from 'react'
 import { Config, Grid } from 'gridjs'

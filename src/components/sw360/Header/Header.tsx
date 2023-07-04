@@ -59,8 +59,7 @@ const Header = () => {
                                     id='search-addon'
                                     onClick={initiateSearch}
                                 >
-                                    <Image src={searchLogo} alt='Search Icon'/>
-
+                                    <Image src={searchLogo} alt='Search Icon' />
                                 </button>
                             </form>
                         ) : (
@@ -79,9 +78,13 @@ const Header = () => {
                 </div>
             </div>
 
-            <div className='row'>
-                <Navbar />
-            </div>
+            {session ? (
+                <div className='row'>
+                    <Navbar />
+                </div>
+            ) : (
+                <></>
+            )}
         </div>
     )
 }

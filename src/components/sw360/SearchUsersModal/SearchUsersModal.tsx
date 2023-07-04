@@ -7,12 +7,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants';
-import { useTranslations } from 'next-intl';
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 export default function SearchUsersModalComponent() {
-    const t = useTranslations(COMMON_NAMESPACE);
+    const t = useTranslations(COMMON_NAMESPACE)
     return (
         <>
             <div
@@ -41,15 +41,12 @@ export default function SearchUsersModalComponent() {
                                     <input
                                         type='text'
                                         className='form-control'
-                                        placeholder='Enter search text...'
-                                        aria-describedby='Search Users'
+                                        placeholder={t('Enter search text')}
+                                        aria-describedby={t('Search Users')}
                                     />
                                 </div>
                                 <div className='col-lg-4'>
-                                    <button
-                                        type='button'
-                                        className={`fw-bold btn btn-light button-plain me-2`}
-                                    >
+                                    <button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
                                         {t('Search')}
                                     </button>
                                     <button type='button' className={`fw-bold btn btn-light button-plain`}>

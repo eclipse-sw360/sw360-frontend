@@ -31,7 +31,7 @@ interface Props {
 }
 
 const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE);
+    const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
     const [componentOwner, setComponentOwner] = useState<ComponentOwner>()
     const [users, setUsers] = useState([])
@@ -94,7 +94,7 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                             <input
                                 type='text'
                                 className='form-control'
-                                placeholder='Enter search text...'
+                                placeholder={t('Enter search text')}
                                 aria-describedby='Search User'
                             />
                         </div>

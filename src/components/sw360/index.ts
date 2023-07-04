@@ -7,23 +7,38 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
+import AuthScreen from './AuthScreen/AuthScreen'
+import ComponentAddSummary from './ComponentAddSummary/ComponentAddSummary'
+import Footer from './Footer/Footer'
+import Header from './Header/Header'
+import Navbar from './Navbar/Navbar'
+import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
+import QuickFilter from './QuickFilter/QuickFilter'
+import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
+import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
+import SideBar from './SideBar/SideBar'
+import VendorDialog from './SearchVendorsModal/VendorDialog'
+
 // Table component
 // IS strictly derived from gridjs-react with dedicated changes
 import Table from './Table/Table'
 import { ReactWrapper, _ } from './Table/wrapper'
 
-// PageButtonHeader component
-import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
-
-// Quickfilter component
-import QuickFilter from './QuickFilter/QuickFilter'
-
-// Advabced search component
-import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
-
-// Navvbar
-import Navbar from './Navbar/Navbar'
-
-import SideBar from './SideBar/SideBar'
-
-export { AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, SideBar, Table, _, ReactWrapper }
+export {
+    _,
+    AdvancedSearch,
+    AuthScreen,
+    ComponentAddSummary,
+    Footer,
+    Header,
+    Navbar,
+    PageButtonHeader,
+    QuickFilter,
+    ReactWrapper,
+    SearchUsersModal,
+    SearchVendorsModal,
+    SideBar,
+    Table,
+    VendorDialog,
+}

@@ -7,7 +7,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, {useState} from 'react'
+'use client'
+
+import React, { useState } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
@@ -17,13 +19,13 @@ import CommonUtils from '@/utils/common.utils'
 import { FaInfoCircle } from 'react-icons/fa'
 
 interface Option {
-    key: string,
+    key: string
     text: string
 }
 
 interface Field {
     fieldName: string
-    value:  string | Array<Option>
+    value: string | Array<Option>
     paramName: string
 }
 
@@ -79,7 +81,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                                 className={`form-control ${styles['form-control']}`}
                                 size='sm'
                                 name={field.paramName}
-                                onChange={changeCreatedOnSearchOption} value={searchParams.type}
+                                onChange={changeCreatedOnSearchOption}
+                                value={searchParams.type}
                             >
                                 <option defaultValue='' />
                                 {field.value.map((option) => (
@@ -131,7 +134,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                             className={`form-control ${styles['form-control']}`}
                             size='sm'
                             name={field.paramName}
-                            onChange={handleSearchParam} value={searchParams.type}
+                            onChange={handleSearchParam}
+                            value={searchParams.type}
                         >
                             <option defaultValue='' />
                             {field.value.map((option) => (

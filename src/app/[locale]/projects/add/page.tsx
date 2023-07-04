@@ -13,7 +13,7 @@ import styles from '@/css/AddProjects.module.css'
 import AddKeyValueComponent from '@/components/AddKeyValue'
 import SelectCountryComponent from '@/components/SelectCountry'
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import SearchUsersModalComponent from '@/components/SearchUsersModal'
+import { SearchUsersModal } from '@/components/sw360'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -22,7 +22,7 @@ export default function Summary() {
 
     return (
         <>
-            <SearchUsersModalComponent />
+            <SearchUsersModal />
             <div className='mx-5 mt-1'>
                 <div className='row mt-2'>
                     <div className='col col-sm-2'>
