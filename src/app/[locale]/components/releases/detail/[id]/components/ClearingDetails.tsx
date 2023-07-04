@@ -13,12 +13,25 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Link from 'next/link'
+import Image from 'next/image'
+import fossologyIcon from '@/assets/images/fossology.svg'
 import styles from '../detail.module.css'
 import ClearingInformationStatus from './ClearingInformationStatus'
+import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 
-const ClearingDetails = ({ release }: any) => {
+import { Session } from '@/object-types/Session'
+
+interface Props {
+    release: any
+    session: Session
+    releaseId: string
+}
+
+const ClearingDetails = ({ release, session, releaseId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE);
     const [toggle, setToggle] = useState(false);
+    const [show, setShow] = useState(false);
+
     return (
         <div className='col'>
             <table className={`table label-value-table ${styles['summary-table']}`}>
@@ -32,6 +45,14 @@ const ClearingDetails = ({ release }: any) => {
                         <td>{t('Clearing State')}:</td>
                         <td>
                             {t(release.clearingState)}
+                            <Image
+                                src={fossologyIcon}
+                                width={15}
+                                height={15}
+                                style={{marginLeft: '5px'}}
+                                alt='Fossology'
+                                onClick={() => setShow(true)}
+                            />
                         </td>
                     </tr>
                     <tr>
@@ -140,6 +161,7 @@ const ClearingDetails = ({ release }: any) => {
             </table>
             <RequestInformation clearingInformation={release.clearingInformation} />
             <SupplementalInformation clearingInformation={release.clearingInformation} />
+            <FossologyClearing show={show} setShow={setShow} session={session} releaseId={releaseId}/>
         </div>
     )
 }

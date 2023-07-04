@@ -23,6 +23,9 @@ import { Session } from '@/object-types/Session'
 import ReleaseLink from '@/object-types/ReleaseLink'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
 import styles from '../detail.module.css'
+import Image from 'next/image'
+import fossologyIcon from '@/assets/images/fossology.svg'
+import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 
 import { Table, _ } from '@/components/sw360'
 import DeleteReleaseModal from './DeleteReleaseModal'
@@ -37,10 +40,17 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     const [data, setData] = useState([])
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [clearingReleaseId, setClearingReleaseId] = useState(undefined)
+    const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
 
     const handleClickDelete = (releaseId: any) => {
         setDeletingRelease(releaseId)
         setDeleteModalOpen(true)
+    }
+
+    const handleFossologyClearing = (releaseId: string) => {
+        setClearingReleaseId(releaseId)
+        setFossologyClearingModelOpen(true)
     }
 
     const fetchData: any = useCallback(
@@ -109,6 +119,14 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
             formatter: (id: string) =>
                 _(
                     <span>
+                        <Image
+                            src={fossologyIcon}
+                            width={15}
+                            height={15}
+                            style={{marginRight: '5px'}}
+                            alt='Fossology'
+                            onClick={() => handleFossologyClearing(id)}
+                        />
                         <Link href={'/release/edit/' + id} style={{ color: 'gray', fontSize: '14px' }}>
                             <FaPencilAlt />
                         </Link>{' '}
@@ -129,6 +147,11 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                 show={deleteModalOpen}
                 setShow={setDeleteModalOpen}
             />
+            {(clearingReleaseId) &&
+                <FossologyClearing show={fossologyClearingModelOpen}
+                    setShow={setFossologyClearingModelOpen}
+                    session={session} releaseId={clearingReleaseId}/>
+            }
         </>
     )
 }
