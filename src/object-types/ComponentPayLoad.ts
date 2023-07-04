@@ -10,8 +10,11 @@
 
 export default interface ComponentPayload {
     name: string
+    createBy: string
     description: string
     componentType: string
+    modifiedBy: string
+    modifiedOn: string
     moderators: string[]
     componentOwner: string
     ownerAccountingUnit: string

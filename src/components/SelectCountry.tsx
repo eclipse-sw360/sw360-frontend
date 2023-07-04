@@ -35,7 +35,7 @@ export default function SelectCountryComponent(props: Props) {
             >
                 <option value=''>{t('Select a country')}</option>
                 {getData().map((country: any) => (
-                    <option key={country.code} value={country.name}>
+                    <option key={country.code} value={country.code}>
                         {country.name}
                     </option>
                 ))}

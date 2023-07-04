@@ -25,15 +25,17 @@ interface Props {
     session: Session
     componentPayload: ComponentPayload
     setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    componentOwner: ComponentOwner
+    setComponentOwner: React.Dispatch<React.SetStateAction<ComponentOwner>>
+    moderator: Moderators
+    setModerator: React.Dispatch<React.SetStateAction<Moderators>>
 }
 
-const RolesInformation = ({ session, componentPayload, setComponentPayload }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
-    const [fullNameComponentOwner, setFullNameComponentOwner] = useState<string>()
-    const [fullNameModerators, setFullNameModerators] = useState<string>()
+const RolesInformation = ({ session, componentPayload, setComponentPayload, componentOwner, setComponentOwner, moderator, setModerator}: Props) => {
+
+    const t = useTranslations(COMMON_NAMESPACE);
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
-
     const handleClickSearchComponentOwner = useCallback(() => setDialogOpenComponentOwner(true), [])
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
 
@@ -45,7 +47,11 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
     }
 
     const setComponentOwnerId = (componentOwnerResponse: ComponentOwner) => {
-        setFullNameComponentOwner(componentOwnerResponse.fullName)
+        const componentOwner: ComponentOwner = {
+            email: componentOwnerResponse.email,
+            fullName: componentOwnerResponse.fullName
+        }
+        setComponentOwner(componentOwner)
         setComponentPayload({
             ...componentPayload,
             componentOwner: componentOwnerResponse.email,
@@ -53,7 +59,11 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
     }
 
     const setModerators = (moderatorsResponse: Moderators) => {
-        setFullNameModerators(moderatorsResponse.fullName)
+        const moderator : Moderators = {
+            emails: moderatorsResponse.emails,
+            fullName: moderatorsResponse.fullName
+        }
+        setModerator(moderator)
         setComponentPayload({
             ...componentPayload,
             moderators: moderatorsResponse.emails,
@@ -61,7 +71,11 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
     }
 
     const handleClearComponentOwner = () => {
-        setFullNameComponentOwner('')
+        const componentOwner: ComponentOwner = {
+            email: '',
+            fullName: ''
+        }
+        setComponentOwner(componentOwner)
         setComponentPayload({
             ...componentPayload,
             componentOwner: '',
@@ -69,7 +83,11 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
     }
 
     const handleClearModerators = () => {
-        setFullNameModerators('')
+        const moderator : Moderators = {
+            emails: null,
+            fullName: ''
+        }
+        setModerator(moderator);
         setComponentPayload({
             ...componentPayload,
             moderators: [],
@@ -99,7 +117,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                             name='componentOwner'
                             onClick={handleClickSearchComponentOwner}
                             onChange={updateField}
-                            value={fullNameComponentOwner}
+                            value={componentOwner.fullName}
                         />
                         <ComponentOwnerDiaglog
                             show={dialogOpenComponentOwner}
@@ -160,7 +178,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                             readOnly={true}
                             name='moderators'
                             onChange={updateField}
-                            value={fullNameModerators}
+                            value={moderator.fullName}
                             onClick={handleClickSearchModerators}
                         />
                         <ModeratorsDiaglog
