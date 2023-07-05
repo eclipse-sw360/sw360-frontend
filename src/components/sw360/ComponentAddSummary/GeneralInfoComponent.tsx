@@ -11,7 +11,7 @@
 'use client'
 import styles from './AddComponents.module.css'
 import React, { useCallback, useState } from 'react'
-import VendorDialog from '@/components/sw360/SearchVendorsModal/VendorDialog'
+import { VendorDialog } from '@/components/sw360'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import 'react-toastify/dist/ReactToastify.css'
@@ -151,7 +151,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 <option value='CODE_SNIPPET'>{t('Code Snippet')}</option>
                             </select>
                             <div id='learn_more_about_component_type' className='form-text'>
-                                <i className='bi bi-info-circle'></i> Learn more about component types.
+                                <i className='bi bi-info-circle'></i> learn_more_components
                             </div>
                         </div>
 

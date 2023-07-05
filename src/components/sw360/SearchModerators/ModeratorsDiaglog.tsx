@@ -92,7 +92,7 @@ const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) 
                             <input
                                 type='text'
                                 className='form-control'
-                                placeholder='Enter search text...'
+                                placeholder={t('Enter search text')}
                                 aria-describedby='Search User'
                             />
                         </div>

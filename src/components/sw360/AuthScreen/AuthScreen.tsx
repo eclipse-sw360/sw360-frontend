@@ -8,37 +8,37 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
-import { useState } from 'react';
-import Link from 'next/link';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Alert from 'react-bootstrap/Alert';
-import { signIn } from 'next-auth/react';
-import { CREDENTIALS } from '@/object-types/Constants';
-import HttpStatus from '@/object-types/enums/HttpStatus';
+'use client'
+import { useState } from 'react'
+import Link from 'next/link'
+import Modal from 'react-bootstrap/Modal'
+import Button from 'react-bootstrap/Button'
+import Form from 'react-bootstrap/Form'
+import Alert from 'react-bootstrap/Alert'
+import { signIn } from 'next-auth/react'
+import { CREDENTIALS } from '@/object-types/Constants'
+import HttpStatus from '@/object-types/enums/HttpStatus'
 import { useRouter } from 'next/navigation'
-import LanguageSwitcher from '@/components/language-switcher/LanguageSwitcher';
-import { useLocale, useTranslations } from 'next-intl';
-import { COMMON_NAMESPACE } from '@/object-types/Constants';
-import { Session } from '@/object-types/Session';
+import LanguageSwitcher from '@/components/language-switcher/LanguageSwitcher'
+import { useLocale, useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Session } from '@/object-types/Session'
 
 interface Props {
-    session? : Session
+    session?: Session
 }
 
 const AuthScreen = ({ session }: Props) => {
-    const router = useRouter();
-    const locale = useLocale();
-    const t = useTranslations(COMMON_NAMESPACE);
-    const [dialogShow, setDialogShow] = useState<boolean>(false);
-    const [messageShow, setMessageShow] = useState<boolean>(false);
-    const [emailAddress, setEmailAddress] = useState<string>('@sw360.org');
-    const [password, setPassword] = useState<string>('');
+    const router = useRouter()
+    const locale = useLocale()
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [dialogShow, setDialogShow] = useState<boolean>(false)
+    const [messageShow, setMessageShow] = useState<boolean>(false)
+    const [emailAddress, setEmailAddress] = useState<string>('@sw360.org')
+    const [password, setPassword] = useState<string>('')
 
-    const handleClose = () => setDialogShow(false);
-    const handleShow = () => setDialogShow(true);
+    const handleClose = () => setDialogShow(false)
+    const handleShow = () => setDialogShow(true)
 
     const handleLogin = async () => {
         await signIn(CREDENTIALS, {
@@ -47,12 +47,12 @@ const AuthScreen = ({ session }: Props) => {
             redirect: false,
         }).then((result) => {
             if (result.status == HttpStatus.OK) {
-                router.push(`/${locale}/home`);
+                router.push(`/${locale}/home`)
             } else {
-                setMessageShow(true);
+                setMessageShow(true)
             }
         })
-    };
+    }
 
     return (
         <>
@@ -61,42 +61,47 @@ const AuthScreen = ({ session }: Props) => {
                     <div className='portlet-content-container p-1' style={{ background: '#f1f2f5' }}>
                         <div className='portlet-body p-5'>
                             <div className='jumbotron'>
-                                <h1 className='display-4' >{t('Welcome to SW360!')}</h1>
+                                <h1 className='display-4'>{t('Welcome to SW360!')}</h1>
                                 <LanguageSwitcher />
                                 <br />
                                 <p className='mt-3'>
-                                    {t('SW360 is an open source software project that provides both a web application and a repository to collect, organize and make available information about software components It establishes a central hub for software components in an organization')}
+                                    {t(
+                                        'SW360_INFO'
+                                    )}
                                 </p>
                                 <hr className='my-4' />
                                 <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
-                                {(!session) ? (
+                                {!session ? (
                                     <div className='buttons'>
                                         <span>
-                                            <a className='btn btn-primary btn-lg' role='button' onClick={handleShow}>{t('Sign In')}</a>
+                                            <a className='btn btn-primary btn-lg' role='button' onClick={handleShow}>
+                                                {t('Sign In')}
+                                            </a>
                                         </span>
-                                        <a className='btn btn-outline-primary btn-lg' style={{ marginLeft: '3rem' }} role='button'>{t('Create Account')}</a>
-                                    </div>)
-                                    :
+                                        <a
+                                            className='btn btn-outline-primary btn-lg'
+                                            style={{ marginLeft: '3rem' }}
+                                            role='button'
+                                        >
+                                            {t('Create Account')}
+                                        </a>
+                                    </div>
+                                ) : (
                                     <div className='buttons'>
                                         <span>
-                                            <Link className='btn btn-primary btn-lg' role='button' href='/home'>{t('Start')}</Link>
+                                            <Link className='btn btn-primary btn-lg' role='button' href='/home'>
+                                                {t('Start')}
+                                            </Link>
                                         </span>
                                     </div>
-                                }
+                                )}
                             </div>
-
                         </div>
                     </div>
                 </div>
             </section>
 
-            <Modal
-                show={dialogShow}
-                onHide={() => handleClose()}
-                backdrop='static'
-                className='login-modal'
-                centered
-            >
+            <Modal show={dialogShow} onHide={() => handleClose()} backdrop='static' className='login-modal' centered>
                 <Modal.Header closeButton>
                     <Modal.Title>{t('Sign In')}</Modal.Title>
                 </Modal.Header>
@@ -110,30 +115,31 @@ const AuthScreen = ({ session }: Props) => {
                             <Form.Control
                                 type='email'
                                 defaultValue='@sw360.org'
-                                onChange={event => setEmailAddress(event.target.value)}
+                                onChange={(event) => setEmailAddress(event.target.value)}
                                 autoFocus
                                 required
                             />
                         </Form.Group>
-                        <Form.Group
-                            className='mb-3'
-                        >
+                        <Form.Group className='mb-3'>
                             <Form.Label>{t('Password')}</Form.Label>
                             <Form.Control
                                 type='password'
                                 placeholder=''
-                                onChange={event => setPassword(event.target.value)}
+                                onChange={(event) => setPassword(event.target.value)}
                                 required
                             />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
-                <Modal.Footer className='justify-content-start' >
-                    <Button className='login-btn' variant='primary' onClick={() => handleLogin()}> {t('Sign In')} </Button>
+                <Modal.Footer className='justify-content-start'>
+                    <Button className='login-btn' variant='primary' onClick={() => handleLogin()}>
+                        {' '}
+                        {t('Sign In')}{' '}
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </>
-    );
+    )
 }
 
 export default AuthScreen

@@ -11,7 +11,7 @@
 'use client'
 import AddKeyValueComponent from '@/components/AddKeyValue'
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import SearchUsersModalComponent from '@/components/SearchUsersModal'
+import { SearchUsersModal } from '@/components/sw360'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { useRouter } from 'next/navigation'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
@@ -33,7 +33,7 @@ interface Props {
 }
 
 export default function ComponentAddSummary({ session }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE);
+    const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const router = useRouter()
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
@@ -133,7 +133,7 @@ export default function ComponentAddSummary({ session }: Props) {
 
     return (
         <>
-            <SearchUsersModalComponent />
+            <SearchUsersModal />
             <form
                 action=''
                 id='form_submit'

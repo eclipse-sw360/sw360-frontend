@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import React from 'react'
 import { Form } from 'react-bootstrap'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'

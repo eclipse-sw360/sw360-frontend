@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.4
-
 # Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 # This program and the accompanying materials are made

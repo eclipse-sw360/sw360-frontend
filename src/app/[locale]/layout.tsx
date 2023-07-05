@@ -12,19 +12,20 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@/styles/globals.css'
 import '@/styles/auth.css'
 import '@/styles/gridjs/sw360.css'
-import { NextAuthProvider } from '../provider'
+import { Providers } from '../provider'
 import React, { ReactNode } from 'react'
-import Header from '@/components/Header/Header'
-import Footer from '@/components/Footer/Footer'
+
 import { NextIntlClientProvider } from 'next-intl'
 import { notFound } from 'next/navigation'
+
+import { Header, Footer } from '@/components/sw360'
 
 type Props = {
     children: ReactNode
     params: { locale: string }
 }
 
-export default async function RootLayout({ children, params: { locale } }: Props) {
+async function RootLayout({ children, params: { locale } }: Props) {
     let messages
     try {
         messages = (await import(`../../../messages/${locale}.json`)).default
@@ -33,7 +34,7 @@ export default async function RootLayout({ children, params: { locale } }: Props
     }
     return (
         <html lang={locale}>
-            <NextAuthProvider>
+            <Providers>
                 <NextIntlClientProvider locale={locale} messages={messages}>
                     <body>
                         <div id='conrainer'>
@@ -45,7 +46,9 @@ export default async function RootLayout({ children, params: { locale } }: Props
                         </div>
                     </body>
                 </NextIntlClientProvider>
-            </NextAuthProvider>
+            </Providers>
         </html>
     )
 }
+
+export default RootLayout

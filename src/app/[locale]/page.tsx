@@ -8,17 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import AuthScreen from '@/components/auth-screen/AuthScreen';
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { AuthScreen } from '@/components/sw360'
+import { Session } from '@/object-types/Session'
 import { Metadata } from 'next';
-import { Session } from '@/object-types/Session';
 
 export const metadata: Metadata = {
-  title: 'Welcome - SW360',
-};
+    title: 'Welcome - SW360',
+}
 
 export default async function AuthPage() {
-  const session: Session = await getServerSession(authOptions);
-  return <AuthScreen session={session} />;
+    const session: Session = await getServerSession(authOptions)
+    return <AuthScreen session={session} />
 }
