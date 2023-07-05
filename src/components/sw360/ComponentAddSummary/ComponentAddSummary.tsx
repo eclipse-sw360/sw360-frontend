@@ -38,6 +38,8 @@ interface Props {
 export default function ComponentAddSummary({ session }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const [externalIds,setExternalIds] = useState<Input[]>([])
+    const [addtionalData,setAddtionalData] = useState<Input[]>([])
     const [vendor, setVendor] = useState<Vendor> ({
         id: '',
         fullName: ''
@@ -81,7 +83,7 @@ export default function ComponentAddSummary({ session }: Props) {
         },
     ]
 
-    const setAddtionalData = (additionalDatas: Map<string, string>) => {
+    const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
         setComponentPayload({
             ...componentPayload,
@@ -89,7 +91,7 @@ export default function ComponentAddSummary({ session }: Props) {
         })
     }
 
-    const setExternalIds = (externalIds: Map<string, string>) => {
+    const setDataExternalIds = (externalIds: Map<string, string>) => {
         const obj = Object.fromEntries(externalIds)
         setComponentPayload({
             ...componentPayload,
@@ -217,6 +219,8 @@ export default function ComponentAddSummary({ session }: Props) {
                                         header={t('External ids')}
                                         keyName={'external id'}
                                         setData={setExternalIds}
+                                        data={externalIds}
+                                        setMap={setDataExternalIds}
                                     />
                                 </div>
                                 <div className='row mb-4'>
@@ -224,6 +228,8 @@ export default function ComponentAddSummary({ session }: Props) {
                                         header={t('Additional Data')}
                                         keyName={'additional data'}
                                         setData={setAddtionalData}
+                                        data={addtionalData}
+                                        setMap={setDataAddtionalData}
                                     />
                                 </div>
                             </div>

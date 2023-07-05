@@ -40,6 +40,8 @@ interface Props {
 export default function ComponentEditSummary({ session, componentId}: Props) {
     const t = useTranslations(COMMON_NAMESPACE);
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const [externalIds,setExternalIds] = useState<Input[]>([])
+    const [addtionalData,setAddtionalData] = useState<Input[]>([])
     const [vendor, setVendor] = useState<Vendor> ({
         id: '',
         fullName: ''
@@ -111,11 +113,36 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         setModerator(moderatorsResponse)
     }
 
+    const convertObjectToMap = (data: string) => {
+        const map = new Map(Object.entries(data));
+        const inputs: Input[] = []
+        map.forEach((value, key) => {
+            const input: Input = {
+                key: key,
+                value: value
+            }
+            inputs.push(input)
+        })
+        return inputs
+    }
+
     useEffect(() => {
         fetchData(`components/${componentId}`).then((component: any) => {
+
+            console.log(component.roles)
+
+            if (typeof component.externalIds !== "undefined") {
+                setExternalIds(convertObjectToMap(component.externalIds))
+            }
+
+            if (typeof component.additionalData !== "undefined") {
+                setAddtionalData(convertObjectToMap(component.additionalData))
+            }
+
             if (typeof component['_embedded']['sw360:moderators'] !== "undefined") {
                 handlerModerators(component['_embedded']['sw360:moderators'])
             }
+
             if (typeof component['_embedded']['defaultVendor'] !== "undefined") {
                 const vendor: Vendor = {
                     id: component.defaultVendorId,
@@ -131,6 +158,7 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
                 }
                 setComponentOwner(componentOwner)
             }
+
             let modifiedBy = '';
             if (typeof component['_embedded']['modifiedBy'] !== "undefined") {
                 modifiedBy = component['_embedded']['modifiedBy']['fullName'];
@@ -174,7 +202,7 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         },
     ]
 
-    const setAddtionalData = (additionalDatas: Map<string, string>) => {
+    const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
         setComponentPayload({
             ...componentPayload,
@@ -182,7 +210,7 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         })
     }
 
-    const setExternalIds = (externalIds: Map<string, string>) => {
+    const setDataExternalIds = (externalIds: Map<string, string>) => {
         const obj = Object.fromEntries(externalIds)
         setComponentPayload({
             ...componentPayload,
@@ -310,6 +338,8 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
                                         header={t('External ids')}
                                         keyName={'external id'}
                                         setData={setExternalIds}
+                                        data={externalIds}
+                                        setMap={setDataExternalIds}
                                     />
                                 </div>
                                 <div className='row mb-4'>
@@ -317,6 +347,8 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
                                         header={t('Additional Data')}
                                         keyName={'additional data'}
                                         setData={setAddtionalData}
+                                        data={addtionalData}
+                                        setMap={setDataAddtionalData}
                                     />
                                 </div>
                             </div>

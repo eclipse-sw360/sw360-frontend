@@ -29,7 +29,6 @@ interface Props {
 const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, vendor, setVendor }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
-    console.log(vendor)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
