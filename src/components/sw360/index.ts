@@ -12,7 +12,7 @@ import AuthScreen from './AuthScreen/AuthScreen'
 import ComponentAddSummary from './ComponentAddSummary/ComponentAddSummary'
 import Footer from './Footer/Footer'
 import Header from './Header/Header'
-import Navbar from './Navbar/Navbar'
+import SW360Navbar from './SW360Navbar/SW360Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import QuickFilter from './QuickFilter/QuickFilter'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
@@ -32,7 +32,7 @@ export {
     ComponentAddSummary,
     Footer,
     Header,
-    Navbar,
+    SW360Navbar,
     PageButtonHeader,
     QuickFilter,
     ReactWrapper,

@@ -37,7 +37,7 @@ async function RootLayout({ children, params: { locale } }: Props) {
             <Providers>
                 <NextIntlClientProvider locale={locale} messages={messages}>
                     <body>
-                        <div id='conrainer'>
+                        <div id='container'>
                             <div id='content'>
                                 <Header />
                                 {children}

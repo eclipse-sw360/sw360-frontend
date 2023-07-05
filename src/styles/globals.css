@@ -44,8 +44,10 @@ code {
     --background-without-opacity: rgba(255, 255, 255, 0.7);
     --column-width: 42rem;
     --column-margin-top: 4rem;
-    --sw360-primary-background-color: #5D8EA9;
+    --sw360-primary-background-color: #5d8ea9;
     --sw360-primary-color: #f7941e;
+    --sw360-navlink-color: #6c757d;
+    --sw360-navlink-hover-color: #272833;
 }
 
 .header {
@@ -83,11 +85,11 @@ footer {
     margin-top: 20px;
 }
 
-.footerAlignment{
-    background-color: #30313F;
+.footerAlignment {
+    background-color: #30313f;
     position: relative;
     bottom: '0px';
-    width : '100%';
+    width: '100%';
 }
 
 #footer a {
@@ -222,14 +224,14 @@ th {
 .card-header:first-child {
     border-radius: calc(0.25rem - 0px) calc(0.25rem - 0px) 0 0;
     background-color: var(--sw360-primary-background-color);
-    color: #FFF;
+    color: #fff;
 }
 
 .card-header {
     border-bottom: 0px solid rgba(0, 0, 0, 0.125);
     margin-bottom: 0;
     padding: 0.75rem 1.25rem;
-    color: #FFF;
+    color: #fff;
     background-color: var(--sw360-primary-background-color);
     font-weight: bold;
 }
@@ -241,7 +243,7 @@ th {
     padding-left: 1rem;
     padding-right: 1rem;
     padding-top: 1rem;
-    background-color: #EBF0F5;
+    background-color: #ebf0f5;
 }
 
 .sw360-button {
@@ -273,4 +275,37 @@ th {
     background-color: #f28809 !important;
     border-color: #dbdce4 !important;
     color: white !important;
+}
+
+.nav {
+    padding-left: 64px;
+}
+
+.nav-link {
+    color: var(--sw360-navlink-color);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.nav-link:hover {
+    color: var(--sw360-navlink-hover-color);
+    border-bottom-color: var(--sw360-primary-color);
+}
+
+.heading-div {
+    background-color: #fafafa;
+    color: #272833;
+    border-style: solid none solid none;
+    border-width: 1px;
+    border-color: #e7e7ed;
+    padding-left: 64px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.logo {
+    padding-left: 40px;
 }
