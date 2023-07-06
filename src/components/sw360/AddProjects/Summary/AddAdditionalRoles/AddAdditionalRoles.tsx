@@ -35,8 +35,8 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
             {
                     inputList.map((elem, j) => {
                         return (
-                            <Row className="mb-2">
-                                <Col lg={5}>
+                            <Row className="mb-2" key="addAdditionalData">
+                                <Col lg={6}>
                                     <Form.Select name="role" value={elem.role} defaultValue="Stakeholder" onChange={(e) => {         
                                                 const { name, value } = e.target;
                                                 const list: RoleInput[] = [...inputList];
@@ -65,7 +65,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                                         }}
                                     placeholder="Enter Email Address" aria-label="Enter Email Address"/>
                                 </Col>
-                                <Col lg={2} >
+                                <Col lg={1} >
                                         <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
                                             <span className="d-inline-block">
                                                 < MdDeleteOutline size={25} className={`ml-2 ${styles["icon-link"]}`} onClick={() => handleRemoveClick(j)} />
@@ -76,7 +76,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                         )
                     })
                 }
-                <Col lg={3}>
+                <Col lg={4}>
                     <Button onClick={() => handleAddClick()} className={`fw-bold btn btn-light ${styles['button-plain']}`}>
                         Click to add row to Additional Roles
                     </Button>

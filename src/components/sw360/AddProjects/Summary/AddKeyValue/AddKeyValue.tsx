@@ -38,8 +38,8 @@ export default function AddKeyValue({ inputList, setInputList, keyName } : {
                     inputList.map((elem, j) => {
                         return (
                             <>
-                                <Row className="mb-2 w-100">
-                                    <Col lg={5} >
+                                <Row className="mb-2">
+                                    <Col lg={6} >
                                         <Form.Control type="text" name="key" value={elem.key} onChange={(e) => {         
                                             const { name, value } = e.target;
                                             const list: Input[] = [...inputList];
@@ -57,7 +57,7 @@ export default function AddKeyValue({ inputList, setInputList, keyName } : {
                                             }}
                                         placeholder={`Enter ${keyName.toLowerCase()} value`} aria-label={`${keyName.toLowerCase()} value`}/>
                                     </Col>
-                                    <Col lg={2} >
+                                    <Col lg={1} >
                                         <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
                                             <span className="d-inline-block">
                                                 < MdDeleteOutline size={25} className={`ml-2 ${styles["icon-link"]}`} onClick={() => handleRemoveClick(j)} />

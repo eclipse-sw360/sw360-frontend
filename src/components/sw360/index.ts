@@ -48,10 +48,15 @@ import  AddAdditionalRoles from './AddProjects/Summary/AddAdditionalRoles/AddAdd
 
 import  AddAdditionalData from './AddProjects/Summary/AddAdditionalData/AddAdditionalData'
 
+import  UsersModal from './AddProjects/Summary/UsersModal/UsersModal'
+
+import  DepartmentModal from './AddProjects/Summary/DepartmentModal/DepartmentModal'
+
 export { 
         AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, 
         SideBar, Table, _, ReactWrapper, Actions, WarningModal, 
         DeleteModal, Summary, Administration, LinkedProjects,
         VendorsModal, AddKeyValue, SelectCountryComponent, 
-        AddAdditionalRoles, AddAdditionalData
+        AddAdditionalRoles, AddAdditionalData, UsersModal,
+        DepartmentModal
     }

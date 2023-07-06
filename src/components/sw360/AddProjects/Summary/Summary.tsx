@@ -5,7 +5,8 @@ import { Row, Col, Form, OverlayTrigger, Tooltip, Container } from "react-bootst
 import { BiInfoCircle } from "react-icons/bi"
 import { useState } from "react"
 import { GiCancel } from "react-icons/gi"
-import { VendorsModal, SelectCountryComponent, AddKeyValue, AddAdditionalRoles, AddAdditionalData } from "@/components/sw360"
+import { VendorsModal, UsersModal, SelectCountryComponent, AddKeyValue, 
+        AddAdditionalRoles, AddAdditionalData, DepartmentModal } from "@/components/sw360"
 import Input from "./AddKeyValue/AddKeyValue.types"
 import RoleInput from "./AddAdditionalRoles/AddAdditionalRoles.types"
 import AdditionalDataInput from "./AddAdditionalData/AddAdditionalData.types"
@@ -25,14 +26,14 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
 
 export default function Summary() {
 
-    const VISIBILITY_INFO: string = `
+    const VISIBILITY_INFO = `
     Private: Only visible by creator (and admin which applies to all visibility levels) 
     Me and Moderators: Visible by creator and moderators 
     Group and Moderators: All users of the same group and the moderators 
     Everyone: Every user who is logged into the system
     `
 
-    const PROJECT_TYPE_INFO: string = `
+    const PROJECT_TYPE_INFO = `
     Customer: 
     Internal: 
     Product: 
@@ -43,6 +44,8 @@ export default function Summary() {
     const roles=["Stakeholder", "Analyst",  "Contributor",  "Accountant", "End User", "Quality Manager", "Test Manager", "Technical User", "Key user"]
 
     const [showVendorModal, setShowVendorsModal] = useState<boolean>(false)
+    const [showDepartmentModal, setShowDepartmentModal] = useState<boolean>(false)
+    const [showUserModal, setShowUserModal] = useState<boolean>(false)
     const [externalUrlList, setExternalUrlList] = useState<Input[]>([])
     const [externalIdList, setExternalIdList] = useState<Input[]>([])
     const [additionalRolesList, setAdditionalRolesList] = useState<RoleInput[]>([])
@@ -60,6 +63,8 @@ export default function Summary() {
     return (
         <>
             <VendorsModal show={showVendorModal} setShow={setShowVendorsModal} />
+            <UsersModal show={showUserModal} setShow={setShowUserModal} />
+            <DepartmentModal show={showDepartmentModal} setShow={setShowDepartmentModal} />
             <Container>
                 <Row className="mb-4">
                     <Row className={`${styles["header"]} mb-2`}>
@@ -217,7 +222,7 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.group">
                                 <Form.Label className="fw-bold">Group</Form.Label>
-                                <Form.Control type="text" aria-label="Group" placeholder="Click to set Department" readOnly onClick={() => setShowVendorsModal(true)}/>
+                                <Form.Control type="text" aria-label="Group" placeholder="Click to set Department" readOnly onClick={() => setShowDepartmentModal(true)}/>
                                 <Form.Text id="addProjects.vendor.HelpBlock">
                                      < GiCancel />
                                 </Form.Text>
@@ -226,13 +231,13 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.projectManager">
                                 <Form.Label className="fw-bold">Project Manager</Form.Label>
-                                <Form.Control type="text" aria-label="Project Manager" placeholder="Click to edit" readOnly onClick={() => setShowVendorsModal(true)}/>
+                                <Form.Control type="text" aria-label="Project Manager" placeholder="Click to edit" readOnly onClick={() => setShowUserModal(true)}/>
                             </Form.Group>
                         </Col>
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.projectOwner">
                                 <Form.Label className="fw-bold">Project Owner</Form.Label>
-                                <Form.Control type="text" aria-label="Project Owner" placeholder="Click to edit" readOnly onClick={() => setShowVendorsModal(true)}/>
+                                <Form.Control type="text" aria-label="Project Owner" placeholder="Click to edit" readOnly onClick={() => setShowUserModal(true)}/>
                             </Form.Group>
                         </Col>
                     </Row>
@@ -259,19 +264,19 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.leadArchitect">
                                 <Form.Label className="fw-bold">Lead Architect</Form.Label>
-                                <Form.Control type="text" aria-label="Lead Architect" placeholder="Click to edit" readOnly onClick={() => setShowVendorsModal(true)}/>
+                                <Form.Control type="text" aria-label="Lead Architect" placeholder="Click to edit" readOnly onClick={() => setShowUserModal(true)}/>
                             </Form.Group>
                         </Col>
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.moderators">
                                 <Form.Label className="fw-bold">Moderators</Form.Label>
-                                <Form.Control type="text" aria-label="Moderators" placeholder="Click to edit" readOnly onClick={() => setShowVendorsModal(true)}/>
+                                <Form.Control type="text" aria-label="Moderators" placeholder="Click to edit" readOnly onClick={() => setShowUserModal(true)}/>
                             </Form.Group>
                         </Col>
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.contributors">
                                 <Form.Label className="fw-bold">Contributors</Form.Label>
-                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly onClick={() => setShowVendorsModal(true)}/>
+                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly onClick={() => setShowUserModal(true)}/>
                             </Form.Group>
                         </Col>
                     </Row>
@@ -280,7 +285,7 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.securityResponsibles">
                                 <Form.Label className="fw-bold">Security Responsibles</Form.Label>
-                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly onClick={() => setShowVendorsModal(true)}/>
+                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly onClick={() => setShowUserModal(true)}/>
                             </Form.Group>
                         </Col>
                     </Row>

@@ -1,7 +1,7 @@
 import { Modal, Form, Row, Col, Button } from "react-bootstrap"
-import styles from './VendorModal.module.css'
+import styles from './UsersModal.module.css'
 
-export default function VendorsModal({ show, setShow }: {
+export default function UsersModal({ show, setShow }: {
     show: boolean,
     setShow: (show: boolean) => void
 }) {
@@ -12,11 +12,11 @@ export default function VendorsModal({ show, setShow }: {
                 centered
                 show={show}
                 onHide={() => setShow(false)}
-                aria-labelledby="Vendor Search Modal"
+                aria-labelledby="Search Users Modal"
             >
                 <Modal.Header closeButton>
-                    <Modal.Title id="vendor-modal">
-                        Search Vendor
+                    <Modal.Title id="user-modal">
+                        Search Users
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -26,17 +26,17 @@ export default function VendorsModal({ show, setShow }: {
                                 <Col xs={6}>
                                     <Form.Control type="text" placeholder="Enter Search  Text..." />
                                 </Col>
-                                <Col xs={2}>
-                                    <Button type="submit" variant="light" className={`fw-bold ${styles['button-plain']}`}>Search</Button>                            
-                                </Col>
+                                <Col xs={6}>
+                                    <Button type="submit" variant="light" className={`fw-bold ${styles['button-plain']} mx-2`}>Search</Button>      
+                                    <Button type="submit" variant="light" className={`fw-bold ${styles['button-plain']}`}>Reset</Button>     
+                                </Col>                      
                             </Row>
                         </Col>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="light" onClick={() => setShow(false)} className={`fw-bold ${styles['button-plain']}`}>Close</Button>
-                    <Button variant="light" onClick={() => { setShow(false) }} className={`fw-bold ${styles['button-plain']}`}>Add Vendor</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold ${styles['button-orange']}`}>Select Vendor</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold ${styles['button-orange']}`}>Select Users</Button>
                 </Modal.Footer>
             </Modal>
         </>
