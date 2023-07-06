@@ -32,4 +32,26 @@ import WarningModal from './ProjectsTable/WarningModal/WarningModal'
 
 import  DeleteModal from './ProjectsTable/DeleteModal/DeleteModal'
 
-export { AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, SideBar, Table, _, ReactWrapper, Actions, WarningModal, DeleteModal }
+import  Summary from './AddProjects/Summary/Summary'
+
+import  Administration from './AddProjects/Administration/Administration'
+
+import  LinkedProjects from './AddProjects/LinkedProjects/LinkedProjects'
+
+import  VendorsModal from './AddProjects/Summary/VendorsModal/VendorsModal'
+
+import  AddKeyValue from './AddProjects/Summary/AddKeyValue/AddKeyValue'
+
+import  SelectCountryComponent from './AddProjects/Summary/SelectCountry/SelectCountry'
+
+import  AddAdditionalRoles from './AddProjects/Summary/AddAdditionalRoles/AddAdditionalRoles'
+
+import  AddAdditionalData from './AddProjects/Summary/AddAdditionalData/AddAdditionalData'
+
+export { 
+        AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, 
+        SideBar, Table, _, ReactWrapper, Actions, WarningModal, 
+        DeleteModal, Summary, Administration, LinkedProjects,
+        VendorsModal, AddKeyValue, SelectCountryComponent, 
+        AddAdditionalRoles, AddAdditionalData
+    }

@@ -66,3 +66,18 @@
     color: black !important;
     background-color: #f8f9fa !important;
 }
+
+.sidebar-list-item {
+    text-decoration: none !important;
+    color: #6b6c7e !important;
+}
+
+.sidebar-list-item:hover {
+    color: black !important;
+    background-color: #fbd3a3 !important;
+}
+
+.sidebar-list-item:focus {
+    color: black !important;
+    background-color: #fcba76 !important;
+}
