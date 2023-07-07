@@ -1,5 +1,5 @@
 import { Modal, Form, Row, Col, Button } from "react-bootstrap"
-import styles from './VendorModal.module.css'
+import styles from "../../AddProjects.module.css"
 
 export default function VendorsModal({ show, setShow }: {
     show: boolean,

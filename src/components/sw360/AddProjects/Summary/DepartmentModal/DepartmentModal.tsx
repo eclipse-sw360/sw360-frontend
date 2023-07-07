@@ -1,5 +1,5 @@
 import { Modal, Form, Row, Col, Button } from "react-bootstrap"
-import styles from './DepartmentModal.module.css'
+import styles from "../../AddProjects.module.css"
 
 export default function UsersModal({ show, setShow }: {
     show: boolean,

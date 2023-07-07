@@ -1,6 +1,6 @@
 "use client"
 
-import styles from "@/css/AddProjects.module.css"
+import styles from "../AddProjects.module.css"
 import { Row, Col, Form, OverlayTrigger, Tooltip, Container } from "react-bootstrap"
 import { BiInfoCircle } from "react-icons/bi"
 import { useState } from "react"
@@ -41,8 +41,6 @@ export default function Summary() {
     Inner Source:
     `
 
-    const roles=["Stakeholder", "Analyst",  "Contributor",  "Accountant", "End User", "Quality Manager", "Test Manager", "Technical User", "Key user"]
-
     const [showVendorModal, setShowVendorsModal] = useState<boolean>(false)
     const [showDepartmentModal, setShowDepartmentModal] = useState<boolean>(false)
     const [showUserModal, setShowUserModal] = useState<boolean>(false)
@@ -70,7 +68,7 @@ export default function Summary() {
                     <Row className={`${styles["header"]} mb-2`}>
                         <p className="fw-bold mt-3">General Information</p>
                     </Row>
-                    <Row className="w-100">
+                    <Row>
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.name">
                                 <Form.Label className="fw-bold">Name</Form.Label>
@@ -315,75 +313,6 @@ export default function Summary() {
                     </Row>
                 </Row>
             </Container>
-                        {/* 
-            <div className="row mb-4">
-                <AddKeyValueComponent header={"External URLs"} keyName={"external url"} />
-            </div>
-            <div className="row mb-4">
-                <div className={`${styles["header"]} mb-2`}>
-                    <p className="fw-bold mt-3">Roles</p>
-                </div>
-                <div className="row">
-                    <div className="col-lg-4">
-                        <label htmlFor="group" className="form-label fw-bold">Group</label>
-                        <input type="text" className="form-control" placeholder="Click to set group" id="group" aria-describedby="Group" readOnly={true} />
-                        <div id="close_group" className="form-text"><i className="bi bi-x-circle"></i></div>
-                    </div>
-                    <div className="col-lg-4">
-                        <label htmlFor="project_manager" className="form-label fw-bold">Project Manager</label>
-                        <input type="text" className="form-control" data-bs-toggle="modal" data-bs-target="#search_users_modal" placeholder="Click to set" id="project_manager" aria-describedby="Project Manager" readOnly={true} />
-                    </div>
-                    <div className="col-lg-4">
-                        <label htmlFor="project_owner" className="form-label fw-bold">Project Owner</label>
-                        <input type="text" className="form-control" data-bs-toggle="modal" data-bs-target="#search_users_modal" placeholder="Click to set" id="project_owner" aria-describedby="Project Owner" readOnly={true} />
-                    </div>
-                </div>
-                <hr className="my-4" />
-                <div className="row">
-                    <div className="col-lg-4">
-                        <label htmlFor="owner_accounting_unit" className="form-label fw-bold">Owner Accounting Unit</label>
-                        <input type="text" className="form-control" placeholder="Enter owner's accounting unit" id="owner_accounting_unit" aria-describedby="Owner Accounting Unit" />
-                    </div>
-                    <div className="col-lg-4">
-                        <label htmlFor="owner_billing_group" className="form-label fw-bold">Owner Billing Group</label>
-                        <input type="text" className="form-control" placeholder="Enter owner billing group" id="owner_billing_group" aria-describedby="Owner Billing Group" />
-                    </div>
-                    <div className="col-lg-4">
-                        < SelectCountryComponent />
-                    </div>
-                </div>
-                <hr className="my-4"           />
-                <div className="row">
-                    <div className="col-lg-4">
-                        <label htmlFor="lead_architect" className="form-label fw-bold">Lead Architect</label>
-                        <input type="text" className="form-control" data-bs-toggle="modal" data-bs-target="#search_users_modal" placeholder="Click to edit" id="lead_architect" aria-describedby="Lead Architect" readOnly={true} />
-                    </div>
-                    <div className="col-lg-4">
-                        <label htmlFor="moderators" className="form-label fw-bold">Moderators</label>
-                        <input type="text" className="form-control" data-bs-toggle="modal" data-bs-target="#search_users_modal" placeholder="Click to edit" id="moderators" aria-describedby="Moderators" readOnly={true} />
-                    </div>
-                    <div className="col-lg-4">
-                        <label htmlFor="contributors" className="form-label fw-bold">Contributors</label>
-                        <input type="text" className="form-control" data-bs-toggle="modal" data-bs-target="#search_users_modal" placeholder="Click to edit" id="contributors" aria-describedby="Contributors" readOnly={true} />
-                    </div>
-                </div>
-                <hr className="my-4" />
-                <div className="row">
-                    <div className="col-lg-4">
-                        <label htmlFor="security_responsibles" className="form-label fw-bold">Security Responsibles</label>
-                        <input type="text" className="form-control" data-bs-toggle="modal" data-bs-target="#search_users_modal" placeholder="Click to edit" id="security_responsibles" aria-describedby="Security Responsibles" readOnly={true} />
-                    </div>
-                </div>
-            </div>
-            <div className="row mb-4">
-                <AddAdditionalRolesComponent />
-            </div>
-            <div className="row mb-4">
-                <AddKeyValueComponent header={"External IDs"} keyName={"external id"} />
-            </div>
-            <div className="row mb-4">
-                <AddKeyValueComponent header={"Additional Data"} keyName={"additional data"} />
-            </div> */}
         </>
     )
 }

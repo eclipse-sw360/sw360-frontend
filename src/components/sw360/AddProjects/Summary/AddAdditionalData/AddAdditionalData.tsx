@@ -9,7 +9,7 @@
 
 "use client"
 
-import styles from "./AddAdditionalData.module.css"
+import styles from "../../AddProjects.module.css"
 import AdditionalDataInput from "./AddAdditionalData.types"
 import { Row, Col, Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap"
 import { MdDeleteOutline } from 'react-icons/md'

@@ -9,7 +9,7 @@
 
 "use client"
 
-import styles from "./AddAdditionalRoles.module.css"
+import styles from "../../AddProjects.module.css"
 import RoleInput from "./AddAdditionalRoles.types"
 import { Row, Col, Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap"
 import { MdDeleteOutline } from 'react-icons/md'

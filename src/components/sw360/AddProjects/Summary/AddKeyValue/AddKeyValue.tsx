@@ -10,7 +10,7 @@
 "use client"
 
 import React from 'react'
-import styles from "./AddKeyValue.module.css"
+import styles from "../../AddProjects.module.css"
 import Input from "./AddKeyValue.types"
 import { Row, Col, Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap"
 import { MdDeleteOutline } from 'react-icons/md'
