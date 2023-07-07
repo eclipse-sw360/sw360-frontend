@@ -21,6 +21,7 @@ export default interface Attachment {
   checkedComment : string | undefined,
   checkedOn : string | undefined,
   checkStatus : string | undefined,
+  checkedBy: string | undefined,
   usageAttachment : {
     visible : number,
     restricted : number

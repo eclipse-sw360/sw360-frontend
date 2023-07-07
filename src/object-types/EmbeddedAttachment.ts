@@ -8,19 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface ReleaseLink {
-  id: string
-  name: string
-  version: string
-  mainlineState: string | undefined
-  clearingReport: {
-    clearingReportStatus: string
-  } | undefined
-  clearingState: string
-  vendor: string
-  longName: string
-  releaseRelationship: string
-  hasSubreleases: boolean
-  licenseIds: Array<string> | undefined
-  accessible: boolean
+export default interface EmbeddedAttachment {
+    filename: string,
+    sha1: string,
+    attachmentType: string,
+    _links: {
+        self: {
+            href: string
+        }
+    }
 }

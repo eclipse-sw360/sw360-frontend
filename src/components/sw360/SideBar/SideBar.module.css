@@ -36,3 +36,46 @@
   margin-left: 0.5rem;
   border-radius: 10rem;
 }
+
+.APPROVED {
+  background-color: #287d3c;
+  width: 24px;
+  height: 24px;
+  border-radius: 0.2rem;
+  margin: 0 0.5rem;
+  display: inline-block;
+}
+
+.OPEN {
+  background-color: red;
+  width: 24px;
+  height: 24px;
+  border-radius: 0.2rem;
+  margin: 0 0.5rem;
+  display: inline-block;
+}
+
+.IN_PROGRESS {
+  background-color: #b95000;
+  width: 24px;
+  height: 24px;
+  border-radius: 0.2rem;
+  margin: 0 0.5rem;
+  display: inline-block;
+}
+
+.REJECTED::before {
+  content: '!'
+}
+
+.REJECTED {
+  background-color: red;
+  width: 24px;
+  height: 24px;
+  border-radius: 0.2rem;
+  margin: 0 0.5rem;
+  display: inline-block;
+  color: white;
+  padding-left: 5px;
+  font-weight: bold;
+}

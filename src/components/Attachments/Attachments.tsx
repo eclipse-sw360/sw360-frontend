@@ -35,7 +35,7 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
     const [attachmentData, setAttachmentData] = useState([])
     const [totalRows, setTotalRows] = useState(0)
 
-    const buildAttachmentDetail = (item: any) => {
+    const buildAttachmentDetail = (item: Attachment) => {
         return (event: any) => {
             if (event.target.className == styles.expand) {
                 event.target.className = styles.collapse
@@ -62,7 +62,7 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
                             </tr>
                             <tr>
                             <td>${t('Checked On')} : </td>
-                            <td>${item.checkedOn}</td>
+                            <td>${(item.checkedOn) ? item.checkedOn : ''}</td>
                             <td>${t('Checked Comment')} : </td>
                             <td>${item.checkedComment}</td>
                             <td></td>
@@ -122,11 +122,15 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
                     item.filename,
                     'n/a',
                     item.attachmentType,
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
+                    item.createdTeam,
+                    item.createdBy,
+                    item.checkedTeam,
+                    item.checkedBy,
+                    (item.usageAttachment.visible === 0 && item.usageAttachment.restricted == 0)
+                        ? 'n/a'
+                        : <a href='javascript:;' title='visible / restricted'>
+                            {item.usageAttachment.visible} / {item.usageAttachment.restricted}
+                          </a>,
                     [item.attachmentContentId, item.filename],
                 ])
                 setAttachmentData(attachmentData)
