@@ -22,7 +22,7 @@ import { LOCALES as locales } from '@/object-types/Constants'
 function SW360Navbar() {
     const [heading, setHeading] = useState('Home')
     const pathname = usePathname()
-    const isLoginPage = locales.includes(pathname.substring(1))
+    const isLoginPage = locales.includes(pathname.substring(1)) || pathname.substring(1) === ''
     const t = useTranslations(COMMON_NAMESPACE)
 
     const navlist = [

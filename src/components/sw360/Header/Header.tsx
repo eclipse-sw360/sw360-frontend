@@ -78,13 +78,9 @@ const Header = () => {
                 </div>
             </div>
 
-            {session ? (
-                <div className='row'>
-                    <SW360Navbar />
-                </div>
-            ) : (
-                <></>
-            )}
+            <div className='row'>
+                <SW360Navbar />
+            </div>
         </div>
     )
 }
