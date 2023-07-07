@@ -15,7 +15,6 @@ import { SearchUsersModal } from '@/components/sw360'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { useRouter } from 'next/navigation'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import MapData from '@/object-types/MapData'
 import { Session } from '@/object-types/Session'
 import { SideBar } from '@/components/sw360'
 import ApiUtils from '@/utils/api/api.util'
@@ -40,6 +39,7 @@ export default function ComponentAddSummary({ session }: Props) {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [externalIds,setExternalIds] = useState<Input[]>([])
     const [addtionalData,setAddtionalData] = useState<Input[]>([])
+    const [roles,setRoles] = useState<Input[]>([])
     const [vendor, setVendor] = useState<Vendor> ({
         id: '',
         fullName: ''
@@ -99,7 +99,7 @@ export default function ComponentAddSummary({ session }: Props) {
         })
     }
 
-    const setRoles = (roles: MapData[]) => {
+    const setDataRoles = (roles: Input[]) => {
         const roleDatas = convertRoles(roles)
         setComponentPayload({
             ...componentPayload,
@@ -116,12 +116,12 @@ export default function ComponentAddSummary({ session }: Props) {
         const commiters: string[] = []
         const expecters: string[] = []
         datas.forEach((data) => {
-            if (data.role === 'Contributor') {
-                contributors.push(data.email)
-            } else if (data.role === 'Committer') {
-                commiters.push(data.email)
-            } else if (data.role === 'Expert') {
-                expecters.push(data.email)
+            if (data.key === 'Contributor') {
+                contributors.push(data.value)
+            } else if (data.key === 'Committer') {
+                commiters.push(data.value)
+            } else if (data.key === 'Expert') {
+                expecters.push(data.value)
             }
         })
         const roles = {
@@ -211,6 +211,8 @@ export default function ComponentAddSummary({ session }: Props) {
                                 <div className='row mb-4'>
                                     <AddAdditionalRolesComponent
                                         documentType={DocumentTypes.COMPONENT}
+                                        setDataRoles={setDataRoles}
+                                        roles={roles}
                                         setRoles={setRoles}
                                     />
                                 </div>

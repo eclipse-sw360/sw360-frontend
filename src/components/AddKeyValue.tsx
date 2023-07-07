@@ -38,6 +38,11 @@ export default function AddKeyValueComponent(props: Props) {
         const list = [... props.data]
         list.splice(index, 1)
         props.setData(list)
+        const map = new Map<string, string>()
+        list.forEach((item) => {
+            map.set(item.key, item.value)
+        })
+        props.setMap(map)
     }
 
     const handleAddClick = () => {

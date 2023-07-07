@@ -15,7 +15,6 @@ import SearchUsersModalComponent from '@/components/SearchUsersModal'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { notFound, useRouter } from 'next/navigation'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import MapData from '@/object-types/MapData'
 import { Session } from '@/object-types/Session'
 import { SideBar } from '@/components/sw360'
 import ApiUtils from '@/utils/api/api.util'
@@ -40,6 +39,8 @@ interface Props {
 export default function ComponentEditSummary({ session, componentId}: Props) {
     const t = useTranslations(COMMON_NAMESPACE);
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const [componentName, setComponentName] =useState<string>();
+    const [roles,setRoles] = useState<Input[]>([])
     const [externalIds,setExternalIds] = useState<Input[]>([])
     const [addtionalData,setAddtionalData] = useState<Input[]>([])
     const [vendor, setVendor] = useState<Vendor> ({
@@ -110,7 +111,19 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
             fullName: moderatorsName,
             emails: moderatorsEmail,
         }
-        setModerator(moderatorsResponse)
+        return moderatorsResponse;
+    }
+
+    const getEmailsModerators = (emails: any[]) => {
+        const moderatorsEmail: string[] = []
+        if (emails.length == 0) {
+            return ;
+        }
+        emails.forEach((item) => {
+            moderatorsEmail.push(item.email)
+        })
+
+        return moderatorsEmail;
     }
 
     const convertObjectToMap = (data: string) => {
@@ -126,10 +139,28 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         return inputs
     }
 
+    const convertObjectToMapRoles = (data: string) => {
+        const inputs: Input[] = []
+        const map = new Map(Object.entries(data));
+        map.forEach((value, key) => {
+            for (let index = 0; index < value.length; index++) {
+                const input: Input = {
+                    key: key,
+                    value: value.at(index)
+                }
+                inputs.push(input)
+            }
+        })
+        return inputs
+    }
+
+
     useEffect(() => {
         fetchData(`components/${componentId}`).then((component: any) => {
 
-            console.log(component.roles)
+            if (typeof component.roles !== "undefined") {
+                setRoles(convertObjectToMapRoles(component.roles))
+            }
 
             if (typeof component.externalIds !== "undefined") {
                 setExternalIds(convertObjectToMap(component.externalIds))
@@ -140,7 +171,7 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
             }
 
             if (typeof component['_embedded']['sw360:moderators'] !== "undefined") {
-                handlerModerators(component['_embedded']['sw360:moderators'])
+               setModerator(handlerModerators(component['_embedded']['sw360:moderators']))
             }
 
             if (typeof component['_embedded']['defaultVendor'] !== "undefined") {
@@ -174,23 +205,24 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
                 createBy: creatBy,
                 description: component.description,
                 componentType: component.componentType,
-                moderators: null,
+                moderators: getEmailsModerators(component['_embedded']['sw360:moderators']),
                 modifiedBy: modifiedBy,
                 modifiedOn: component.modifiedOn,
-                componentOwner: '',
+                componentOwner: component['_embedded']['componentOwner']['email'],
                 ownerAccountingUnit: component.ownerAccountingUnit,
                 ownerGroup: component.ownerGroup,
                 ownerCountry: component.ownerCountry,
-                roles: null,
-                externalIds: null,
-                additionalData: null,
-                defaultVendorId: '',
+                roles: convertRoles(convertObjectToMapRoles(component.roles)),
+                externalIds: component.externalIds,
+                additionalData: component.additionalData,
+                defaultVendorId: component.defaultVendorId,
                 categories: component.categories,
                 homepage: component.homepage,
                 mailinglist: component.mailinglist,
                 wiki: component.wiki,
                 blog: component.blog,
             }
+            setComponentName(component.name)
             setComponentPayload(componentPayloadData)
         })
     }, [componentId, fetchData])
@@ -218,7 +250,7 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         })
     }
 
-    const setRoles = (roles: MapData[]) => {
+    const setDataRoles = (roles: Input[]) => {
         const roleDatas = convertRoles(roles)
         setComponentPayload({
             ...componentPayload,
@@ -230,17 +262,17 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         router.push('/components')
     }
 
-    const convertRoles = (datas: any[]) => {
+    const convertRoles = (datas: Input[]) => {
         const contributors: string[] = []
         const commiters: string[] = []
         const expecters: string[] = []
         datas.forEach((data) => {
-            if (data.role === 'Contributor') {
-                contributors.push(data.email)
-            } else if (data.role === 'Committer') {
-                commiters.push(data.email)
-            } else if (data.role === 'Expert') {
-                expecters.push(data.email)
+            if (data.key === 'Contributor') {
+                contributors.push(data.value)
+            } else if (data.key === 'Committer') {
+                commiters.push(data.value)
+            } else if (data.key === 'Expert') {
+                expecters.push(data.value)
             }
         })
         const roles = {
@@ -259,12 +291,11 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         })
 
     const submit = async () => {
-        const response = await ApiUtils.PUT('components', componentPayload, session.user.access_token)
+        const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
 
-        if (response.status == HttpStatus.CREATED) {
-            const data = await response.json()
-            notify(t('Component is created'), 'success')
-            router.push('/components/detail/' + data.id)
+        if (response.status == HttpStatus.OK) {
+            notify(`Success:Component  ${componentName}  updated successfully!`, 'success')
+            router.push('/components/detail/' + componentId)
         } else {
             notify(t('Component is Duplicate'), 'error')
         }
@@ -330,6 +361,8 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
                                 <div className='row mb-4'>
                                     <AddAdditionalRolesComponent
                                         documentType={DocumentTypes.COMPONENT}
+                                        setDataRoles={setDataRoles}
+                                        roles={roles}
                                         setRoles={setRoles}
                                     />
                                 </div>
