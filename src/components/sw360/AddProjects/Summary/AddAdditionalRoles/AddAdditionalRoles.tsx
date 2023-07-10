@@ -37,7 +37,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                         return (
                             <Row className="mb-2" key="addAdditionalData">
                                 <Col lg={6}>
-                                    <Form.Select name="role" value={elem.role} defaultValue="Stakeholder" onChange={(e) => {         
+                                    <Form.Select name="role" value={elem.role} onChange={(e) => {         
                                                 const { name, value } = e.target;
                                                 const list: RoleInput[] = [...inputList];
                                                 list[j][name as keyof RoleInput] = value;

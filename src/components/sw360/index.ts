@@ -52,11 +52,20 @@ import  UsersModal from './AddProjects/Summary/UsersModal/UsersModal'
 
 import  DepartmentModal from './AddProjects/Summary/DepartmentModal/DepartmentModal'
 
+import  LinkProjectsModal from './AddProjects/LinkedProjects/LinkProjectsModal/LinkProjectsModal'
+
+import  LinkReleasesModal from './AddProjects/LinkedProjects/LinkReleasesModal/LinkReleasesModal'
+
+import  SummaryView from './ViewProjects/SummaryView/SummaryView'
+
+import  AdministrationView from './ViewProjects/AdministrationView/AdministrationView'
+
 export { 
         AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, 
         SideBar, Table, _, ReactWrapper, Actions, WarningModal, 
         DeleteModal, Summary, Administration, LinkedProjects,
         VendorsModal, AddKeyValue, SelectCountryComponent, 
         AddAdditionalRoles, AddAdditionalData, UsersModal,
-        DepartmentModal
+        DepartmentModal, LinkProjectsModal, LinkReleasesModal,
+        SummaryView, AdministrationView
     }

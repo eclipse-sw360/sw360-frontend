@@ -3,7 +3,6 @@
 import { Container, Row, Col, Form, OverlayTrigger, Tooltip,  Button } from "react-bootstrap"
 import styles from "../AddProjects.module.css"
 import { BiInfoCircle } from "react-icons/bi"
-import { useState } from "react"
 
 const ShowInfoOnHover = ({ text }: { text: string }) => {
     return (

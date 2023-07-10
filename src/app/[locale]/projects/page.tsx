@@ -160,7 +160,7 @@ function Project() {
     ]
 
     const headerbuttons = {
-        'Add Projects': { link: '/projects/add/#summary', type: 'primary' },
+        'Add Projects': { link: '/projects/add', type: 'primary' },
         'Import SBOM': { link: '/projects', type: 'secondary' },
     }
 

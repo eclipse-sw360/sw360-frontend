@@ -37,7 +37,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                         <Form.Control type="text" name="key" value={inputList[0].key} readOnly/>
                     </Col>
                     <Col lg={6}>
-                        <Form.Select name="value" value={inputList[0].value} defaultValue="" onChange={(e) => {         
+                        <Form.Select name="value" value={inputList[0].value} onChange={(e) => {         
                                     const { name, value } = e.target;
                                     const list: AdditionalDataInput[] = [...inputList];
                                     list[0][name as keyof AdditionalDataInput] = value;
@@ -79,7 +79,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                         <Form.Control type="text" name="key" value={inputList[1].key} readOnly/>
                     </Col>
                     <Col lg={6}>
-                        <Form.Select name="value" value={inputList[1].value} defaultValue="" onChange={(e) => {         
+                        <Form.Select name="value" value={inputList[1].value} onChange={(e) => {         
                                     const { name, value } = e.target;
                                     const list: AdditionalDataInput[] = [...inputList];
                                     list[1][name as keyof AdditionalDataInput] = value;

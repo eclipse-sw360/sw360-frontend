@@ -17,17 +17,17 @@ export default function AddProjects() {
     return (
         <>
             <Container className="mt-2">
-                <Tab.Container defaultActiveKey="#summary">
+                <Tab.Container defaultActiveKey="summary">
                     <Row>
                         <Col sm={3}>
                             <ListGroup>
-                                <ListGroup.Item action href="#summary">
+                                <ListGroup.Item action eventKey="summary">
                                     Summary
                                 </ListGroup.Item>
-                                <ListGroup.Item action href="#administration">
+                                <ListGroup.Item action eventKey="administration">
                                     Administration
                                 </ListGroup.Item>
-                                <ListGroup.Item action href="#linkedProjects">
+                                <ListGroup.Item action eventKey="linkedProjects">
                                     Linked Projects and Releases
                                 </ListGroup.Item>
                             </ListGroup>
@@ -39,9 +39,9 @@ export default function AddProjects() {
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>
-                                    <Tab.Pane eventKey="#summary"><Summary/></Tab.Pane>
-                                    <Tab.Pane eventKey="#administration"><Administration/></Tab.Pane>
-                                    <Tab.Pane eventKey="#linkedProjects"><LinkedProjects/></Tab.Pane>
+                                    <Tab.Pane eventKey="summary"><Summary/></Tab.Pane>
+                                    <Tab.Pane eventKey="administration"><Administration/></Tab.Pane>
+                                    <Tab.Pane eventKey="linkedProjects"><LinkedProjects/></Tab.Pane>
                                 </Tab.Content>
                             </Row>
                         </Col>

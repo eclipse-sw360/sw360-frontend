@@ -56,6 +56,21 @@
     color: var(--sw360-primary-color) !important;
 }
 
+.text-link {
+    text-decoration: none;
+    color: var(--sw360-primary-color);
+}
+
+.text-link:visited {
+    text-decoration: none;
+    color: var(--sw360-primary-color);
+}
+
+.text-link:hover {
+    text-decoration: underline;
+    color: var(--sw360-primary-background-color);
+}
+
 .button-link:focus {
     text-decoration: none !important;
     background: none !important;
