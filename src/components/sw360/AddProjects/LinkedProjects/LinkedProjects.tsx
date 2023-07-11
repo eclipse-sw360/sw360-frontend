@@ -1,7 +1,6 @@
 "use client"
 
 import { Container, Button, Row, Col } from "react-bootstrap"
-import styles from "../AddProjects.module.css"
 import { useState } from "react"
 import { LinkProjectsModal } from "@/components/sw360"
 import { LinkReleasesModal } from "@/components/sw360"
@@ -17,22 +16,22 @@ export default function LinkedProjects() {
             <LinkReleasesModal show={showLinkReleasesModal} setShow={setShowLinkReleasesModal} />
             <Container>
                 <Row className="mb-4">
-                    <Row className={`${styles["header-1"]} mb-2 border-bottom`}>
+                    <Row className={`header-1 mb-2 border-bottom`}>
                         <h6 className="fw-bold mt-3">LINKED PROJECTS</h6>
                     </Row>
                     <Row>
                         <Col lg={4} >
-                            <Button variant="light" className={`${styles["button-plain"]}`} onClick={() => setShowLinkProjectsModal(true)} >Link Projects</Button>
+                            <Button variant="light" className={`button-plain`} onClick={() => setShowLinkProjectsModal(true)} >Link Projects</Button>
                         </Col>
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header-1"]} mb-2 border-bottom`}>
+                    <Row className={`header-1 mb-2 border-bottom`}>
                         <h6 className="fw-bold mt-3">LINKED RELEASES</h6>
                     </Row>
                     <Row>
                         <Col lg={4} >
-                                <Button variant="light" className={`${styles["button-plain"]}`} onClick={() => setShowLinkReleasesModal(true)} >Link Releases</Button>
+                                <Button variant="light" className={`button-plain`} onClick={() => setShowLinkReleasesModal(true)} >Link Releases</Button>
                         </Col>
                     </Row>
                 </Row>

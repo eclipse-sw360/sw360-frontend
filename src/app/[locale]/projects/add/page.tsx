@@ -10,7 +10,6 @@
 "use client"
 
 import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
-import styles from '../projects.module.css'
 import { Summary, Administration,  LinkedProjects } from "@/components/sw360"
 
 export default function AddProjects() {
@@ -34,8 +33,8 @@ export default function AddProjects() {
                         </Col>
                         <Col sm={9}>
                             <Row>
-                                <Button variant="primary" className={`${styles['button-orange']} me-2 col-lg-2 fw-bold`}>Create Project</Button>
-                                <Button variant="light" className={`${styles['button-plain']} col-lg-2 fw-bold`}>Cancel</Button>
+                                <Button variant="primary" className={`button-orange me-2 col-lg-2 fw-bold`}>Create Project</Button>
+                                <Button variant="light" className={`button-plain col-lg-2 fw-bold`}>Cancel</Button>
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>

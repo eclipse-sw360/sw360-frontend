@@ -1,14 +1,13 @@
-import { Container, Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap"
-import styles from "../ViewProjects.module.css"
-import { BiClipboard } from "react-icons/bi"
-import Link from "next/link";
+"use client"
+
+import { Container, Row, Col } from "react-bootstrap"
 
 export default function AdministrationView() {
     return (
         <>
             <Container>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <h6 className="my-2">Clearing</h6>
                     </Row>
                     <Row>
@@ -63,7 +62,7 @@ export default function AdministrationView() {
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <h6 className="my-2">Lifecycle</h6>
                     </Row>
                     <Row>
@@ -93,7 +92,7 @@ export default function AdministrationView() {
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <h6 className="my-2">License Info Header</h6>
                     </Row>
                     <Row>

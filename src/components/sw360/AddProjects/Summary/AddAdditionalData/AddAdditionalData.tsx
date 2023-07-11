@@ -9,7 +9,6 @@
 
 "use client"
 
-import styles from "../../AddProjects.module.css"
 import AdditionalDataInput from "./AddAdditionalData.types"
 import { Row, Col, Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap"
 import { MdDeleteOutline } from 'react-icons/md'
@@ -126,7 +125,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                                         <Col lg={1} >
                                             <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
                                                 <span className="d-inline-block">
-                                                    < MdDeleteOutline size={25} className={`ml-2 ${styles["icon-link"]}`} onClick={() => handleRemoveClick(j)} />
+                                                    < MdDeleteOutline size={25} className={`ml-2 icon-link`} onClick={() => handleRemoveClick(j)} />
                                                 </span>
                                             </OverlayTrigger>
                                         </Col>
@@ -139,7 +138,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
             </Row>
             <Row>
                 <Col>
-                    <Button onClick={() => handleAddClick()} className={`fw-bold btn btn-light ${styles['button-plain']}`} >
+                    <Button onClick={() => handleAddClick()} className={`fw-bold btn btn-light button-plain`} >
                         Click to add row to Additional Data
                     </Button>
                 </Col>

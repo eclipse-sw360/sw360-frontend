@@ -7,13 +7,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+"use client"
+
 import React, { useState } from 'react'
 import styles from "@/css/AddKeyValue.module.css"
-import { FaTrashAlt } from 'react-icons/fa';
 import DocumentTypes from '@/object-types/enums/DocumentTypes';
 import { RolesType } from '@/object-types/RolesType';
 import { useTranslations } from 'next-intl';
 import { COMMON_NAMESPACE } from '@/object-types/Constants';
+import { MdDeleteOutline } from 'react-icons/md'
 
 interface Props {
     documentType?: string;
@@ -76,15 +78,15 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
                                         </>
                                         :
                                         <>
-                                            <option value="Stakeholder">{t('Stakeholder')}</option>
-                                            <option value="Analyst">{t('Analyst')}</option>
-                                            <option value="Contributor">{t('Contributor')}</option>
-                                            <option value="Accountant">{t('Accountant')}</option>
-                                            <option value="End User">{t('End User')}</option>
-                                            <option value="Quality Manager">{t('Quality Manager')}</option>
-                                            <option value="Test Manager">{t('Test Manager')}</option>
-                                            <option value="Technical writer">{t('Technical writer')}</option>
-                                            <option value="Key User">{t('Key User')}</option>
+                                            <option value="Stakeholder">Stakeholder</option>
+                                            <option value="Analyst">Analyst</option>
+                                            <option value="Contributor">Contributor</option>
+                                            <option value="Accountant">Accountant</option>
+                                            <option value="End User">End User</option>
+                                            <option value="Quality Manager">Quality Manager</option>
+                                            <option value="Test Manager">Test Manager</option>
+                                            <option value="Technical writer">Technical writer</option>
+                                            <option value="Key User">Key User</option>
                                         </>
                                         }
                                     </select>
@@ -97,7 +99,7 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
                                            aria-describedby={`Email`} />
                                 </div>
                                 <div className="col-lg-2">
-                                    <button type="button" onClick={() => handleRemoveClick(j)} className={`fw-bold btn btn-light button-plain`}><FaTrashAlt className="bi bi-trash3-fill" /></button>
+                                    < MdDeleteOutline size={25} className={`ml-2 icon-link`} onClick={() => handleRemoveClick(j)} />
                                 </div>
                             </div>
                         )

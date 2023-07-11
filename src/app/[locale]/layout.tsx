@@ -8,11 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
-
 import 'bootstrap/dist/css/bootstrap.min.css'
-import $ from 'jquery'
-import Popper from 'popper.js'
 import '@/styles/globals.css'
 import '@/styles/auth.css'
 import '@/styles/gridjs/sw360.css'
@@ -25,7 +21,7 @@ import { notFound } from 'next/navigation'
 import { Header, Footer } from '@/components/sw360'
 
 type Props = {
-    children: JSX.Element
+    children: ReactNode
     params: { locale: string }
 }
 

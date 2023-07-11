@@ -1,14 +1,13 @@
 "use client"
 
-import styles from "../AddProjects.module.css"
 import { Row, Col, Form, OverlayTrigger, Tooltip, Container } from "react-bootstrap"
 import { BiInfoCircle } from "react-icons/bi"
 import { useState } from "react"
 import { GiCancel } from "react-icons/gi"
-import { AddAdditionalData, DepartmentModal, AddKeyValueComponent, SearchUsersModal } from "@/components/sw360"
-import { SelectCountryComponent } from '@/components/sw360'
+import { DepartmentModal, AddKeyValueComponent, SearchUsersModal, VendorDialog, 
+            AddAdditionalRolesComponent,  SelectCountryComponent } from "@/components/sw360"
+import AddAdditionalData from "./AddAdditionalData/AddAdditionalData"
 import AdditionalDataInput from "./AddAdditionalData/AddAdditionalData.types"
-import  { AddAdditionalRolesComponent } from '@/components/sw360'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
 const ShowInfoOnHover = ({ text }: { text: string }) => {
@@ -59,7 +58,7 @@ export default function Summary() {
             <DepartmentModal show={showDepartmentModal} setShow={setShowDepartmentModal} />
             <Container>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <p className="fw-bold mt-3">General Information</p>
                     </Row>
                     <Row>
@@ -207,7 +206,7 @@ export default function Summary() {
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <p className="fw-bold mt-3">Roles</p>
                     </Row>
                     <Row>
@@ -298,7 +297,7 @@ export default function Summary() {
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <p className="fw-bold mt-3">Add Additional Data</p>
                     </Row>
                     <Row>

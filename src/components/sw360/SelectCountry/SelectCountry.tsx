@@ -31,6 +31,7 @@ export default function SelectCountryComponent(props: Props) {
                 defaultValue=''
                 name='ownerCountry'
                 onChange={props.selectCountry}
+                value={props.value}
             >
                 <option value=''>{t('Select a country')}</option>
                 {getData().map((country: any) => (

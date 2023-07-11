@@ -11,7 +11,7 @@
 
 import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
 import styles from '../projects.module.css'
-import { SummaryView, AdministrationView,  LinkedProjects } from "@/components/sw360"
+import { SummaryView, AdministrationView, LinkedProjects } from "@/components/sw360"
 
 export default function EditProjects() {
     return (

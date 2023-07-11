@@ -9,7 +9,6 @@
 // License-Filename: LICENSE
 
 'use client'
-
 import { AddKeyValueComponent } from '@/components/sw360'
 import { AddAdditionalRolesComponent } from '@/components/sw360'
 import { SearchUsersModal } from '@/components/sw360'
@@ -29,7 +28,6 @@ import RolesInformation from './RolesInformation'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-
 interface Props {
     session: Session
 }

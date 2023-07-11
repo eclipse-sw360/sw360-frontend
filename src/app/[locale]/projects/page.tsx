@@ -14,11 +14,9 @@ import React, { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Dropdown } from 'react-bootstrap'
-import Link from 'next/link'
 
 import { AdvancedSearch, PageButtonHeader, Table, _ } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
-import { Actions } from '@/components/sw360'
 
 interface ProjectType {
     name: string
@@ -33,30 +31,12 @@ function Project() {
 
     const pagination = { limit: 10 }
     const columns = [
-        {
-            name: t('Project Name'),
-            sort: true
-        },
-        {
-            name: t('Description'),
-            sort: true
-        },
-        {
-            name: t('Project Responsible'),
-            sort: true
-        },
-        {
-            name: t('License Clearing'),
-            sort: true
-        },
-        {
-            name: t('State'),
-            sort: true
-        },
-        {
-            name: t('Actions'),
-            sort: false
-        }
+        t('Project Name'),
+        t('Description'),
+        t('Project Responsible'),
+        t('License Clearing'),
+        t('State'),
+        t('Actions'),
     ]
 
     const advancedSearch = [
@@ -194,15 +174,9 @@ function Project() {
                         </PageButtonHeader>
                         <Table
                             columns={columns}
-                            data={data.map((data) => [
-                                _(<Link href="#" >{data.name}</Link>),
-                                data.description, 
-                                _(<Link href="#" >{data.projectResponsible}</Link>), 
-                                '', 
-                                '',
-                                _(< Actions />)
-                            ])}
+                            data={data.map((data) => [data.name, data.description, data.projectResponsible])}
                             pagination={pagination}
+                            selector={true}
                         />
                     </div>
                 </div>

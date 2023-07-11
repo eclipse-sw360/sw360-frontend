@@ -1,5 +1,6 @@
+"use client"
+
 import { Container, Row, Col, OverlayTrigger, Tooltip } from "react-bootstrap"
-import styles from "../ViewProjects.module.css"
 import { BiClipboard } from "react-icons/bi"
 import Link from "next/link";
 
@@ -24,7 +25,7 @@ export default function SummaryView() {
         <>
             <Container>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <h6 className="my-2">General Information</h6>
                     </Row>
                     <Row>
@@ -54,7 +55,7 @@ export default function SummaryView() {
                         </Row>
                     <Row>
                         <Col lg={4}>{"Created By"}:</Col>
-                        <Col><Link className={`${styles["text-link"]}`} href="#">{"CLEARINGBOT DH"}</Link></Col>
+                        <Col><Link className={`text-link`} href="#">{"CLEARINGBOT DH"}</Link></Col>
                         <hr className="my-2" />
                     </Row>
                     <Row>
@@ -64,7 +65,7 @@ export default function SummaryView() {
                     </Row>
                     <Row>
                         <Col lg={4}>{"Modified By"}:</Col>
-                        <Col><Link className={`${styles["text-link"]}`} href="#">{"CLEARINGBOT DH"}</Link></Col>
+                        <Col><Link className={`text-link`} href="#">{"CLEARINGBOT DH"}</Link></Col>
                         <hr className="my-2" />
                     </Row>
                     <Row>
@@ -103,7 +104,7 @@ export default function SummaryView() {
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <h6 className="my-2">Roles</h6>
                     </Row>
                     <Row>
@@ -113,12 +114,12 @@ export default function SummaryView() {
                     </Row>
                     <Row>
                         <Col lg={4}>{"Project Responsible"}:</Col>
-                        <Col><Link className={`${styles["text-link"]}`} href="#">{"Dilip Bhaskar"}</Link></Col>
+                        <Col><Link className={`text-link`} href="#">{"Dilip Bhaskar"}</Link></Col>
                         <hr className="my-2" />
                     </Row>
                     <Row>
                         <Col lg={4}>{"Project Owner"}:</Col>
-                        <Col><Link className={`${styles["text-link"]}`} href="#">{"ashok.anandaram@siemens-healthineers.com"}</Link></Col>
+                        <Col><Link className={`text-link`} href="#">{"ashok.anandaram@siemens-healthineers.com"}</Link></Col>
                         <hr className="my-2" />
                     </Row>
                     <Row>
@@ -138,7 +139,7 @@ export default function SummaryView() {
                     </Row>
                     <Row>
                         <Col lg={4}>{"Lead Architect"}:</Col>
-                        <Col><Link className={`${styles["text-link"]}`} href="#">{"Sujith Manuel"}</Link></Col>
+                        <Col><Link className={`text-link`} href="#">{"Sujith Manuel"}</Link></Col>
                         <hr className="my-2" />
                     </Row>
                     <Row>
@@ -147,7 +148,7 @@ export default function SummaryView() {
                             {
                                 moderators.map((elem, i) => { 
                                     return (
-                                        <><Link className={`${styles["text-link"]}`} href="#">{elem}</Link>{(i === moderators.length - 1)?"":","} </>
+                                        <><Link className={`text-link`} href="#">{elem}</Link>{(i === moderators.length - 1)?"":","} </>
                                     )
                                 })
                             }
@@ -165,7 +166,7 @@ export default function SummaryView() {
                             {
                                 securityResponsibles.map((elem, i) => { 
                                     return (
-                                        <><Link className={`${styles["text-link"]}`} href="#">{elem}</Link>{(i === securityResponsibles.length - 1)?"":","} </>
+                                        <><Link className={`text-link`} href="#">{elem}</Link>{(i === securityResponsibles.length - 1)?"":","} </>
                                     )
                                 })
                             }
@@ -179,7 +180,7 @@ export default function SummaryView() {
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
+                    <Row className={`header mb-2`}>
                         <h6 className="my-2">Project Vendor</h6>
                     </Row>
                     <Row>

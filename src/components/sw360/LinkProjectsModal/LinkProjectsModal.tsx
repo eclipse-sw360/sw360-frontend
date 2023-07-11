@@ -1,5 +1,6 @@
+"use client"
+
 import { Modal, Form, Row, Col, Button } from "react-bootstrap"
-import styles from "../../AddProjects.module.css"
 import { FaInfoCircle } from "react-icons/fa"
 
 export default function LinkedProjectsModal({ show, setShow }: {
@@ -39,7 +40,7 @@ export default function LinkedProjectsModal({ show, setShow }: {
                                     </Form.Group>
                                 </Col>
                                 <Col xs={2}>
-                                    <Button type="submit" variant="light" className={`fw-bold ${styles['button-plain']}`}>Search</Button>                            
+                                    <Button type="submit" variant="light" className={`fw-bold button-plain`}>Search</Button>                            
                                 </Col>
                             </Row>
                         </Col>
@@ -47,8 +48,8 @@ export default function LinkedProjectsModal({ show, setShow }: {
 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold ${styles['button-plain']}`}>Close</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold ${styles['button-orange']}`}>Link Projects</Button>
+                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Close</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold button-orange`}>Link Projects</Button>
                 </Modal.Footer>
             </Modal>
         </>

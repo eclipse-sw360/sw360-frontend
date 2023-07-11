@@ -1,8 +1,9 @@
+"use client"
+
 import { Modal, Form, Row, Col, Button } from "react-bootstrap"
-import styles from "../../AddProjects.module.css"
 import { FaInfoCircle } from "react-icons/fa"
 
-export default function LinkedReleasesModal({ show, setShow }: {
+export default function LinkReleasesModal({ show, setShow }: {
     show: boolean,
     setShow: (show: boolean) => void
 }) {
@@ -28,10 +29,10 @@ export default function LinkedReleasesModal({ show, setShow }: {
                                     <Form.Control type="text" placeholder="Enter Search  Text..." />
                                 </Col>
                                 <Col xs={2}>
-                                    <Button type="submit" variant="light" className={`fw-bold ${styles['button-plain']} w-100`}>Search</Button>                            
+                                    <Button type="submit" variant="light" className={`fw-bold button-plain w-100`}>Search</Button>                            
                                 </Col>
                                 <Col ls={3}>
-                                <Button type="submit" variant="light" className={`fw-bold ${styles['button-plain']}`}>Releases of linked projects</Button>                            
+                                <Button type="submit" variant="light" className={`fw-bold button-plain`}>Releases of linked projects</Button>                            
                                 </Col>
                             </Row>
                             <Row>
@@ -49,8 +50,8 @@ export default function LinkedReleasesModal({ show, setShow }: {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold ${styles['button-plain']}`}>Close</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold ${styles['button-orange']}`}>Link Releases</Button>
+                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Close</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold button-orange`}>Link Releases</Button>
                 </Modal.Footer>
             </Modal>
         </>

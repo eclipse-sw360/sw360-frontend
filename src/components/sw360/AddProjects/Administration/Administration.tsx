@@ -1,7 +1,6 @@
 "use client"
 
 import { Container, Row, Col, Form, OverlayTrigger, Tooltip,  Button } from "react-bootstrap"
-import styles from "../AddProjects.module.css"
 import { BiInfoCircle } from "react-icons/bi"
 
 const ShowInfoOnHover = ({ text }: { text: string }) => {
@@ -35,8 +34,8 @@ export default function Administration() {
         <>
             <Container>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
-                        <p className="fw-bold mt-3">Clearing</p>
+                    <Row className={`header mb-2`}>
+                        <p className="fw-bold">Clearing</p>
                     </Row>
                     <Row>
                         <Col lg={4}>
@@ -119,8 +118,8 @@ export default function Administration() {
                     </Form.Group>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
-                        <p className="fw-bold mt-3">Lifecycle</p>
+                    <Row className={`header mb-2`}>
+                        <p className="fw-bold">Lifecycle</p>
                     </Row>
                     <Row>
                         <Col lg={4}>
@@ -166,12 +165,12 @@ export default function Administration() {
                     </Row>
                 </Row>
                 <Row className="mb-4">
-                    <Row className={`${styles["header"]} mb-2`}>
-                        <p className="fw-bold mt-3">License Info Header</p>
+                    <Row className={`header mb-2`}>
+                        <p className="fw-bold">License Info Header</p>
                     </Row>
                     <Row className="d-flex justify-content-end">
                         <Col lg={3}>
-                            <Button variant="primary" className={`${styles['button-link']} fw-normal`}>Set to default text</Button>
+                            <Button variant="primary" className={`button-link fw-normal`}>Set to default text</Button>
                         </Col>
                     </Row>
                     <Row>

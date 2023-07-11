@@ -1,5 +1,6 @@
+"use client"
+
 import { Modal, Form, Row, Col, Button } from "react-bootstrap"
-import styles from "../../AddProjects.module.css"
 
 export default function DepartmentModal({ show, setShow }: {
     show: boolean,
@@ -31,8 +32,8 @@ export default function DepartmentModal({ show, setShow }: {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold ${styles['button-plain']}`}>Close</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold ${styles['button-orange']}`}>Select</Button>
+                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Close</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold button-orange`}>Select</Button>
                 </Modal.Footer>
             </Modal>
         </>

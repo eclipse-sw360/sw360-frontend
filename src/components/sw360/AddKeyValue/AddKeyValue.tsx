@@ -7,11 +7,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+"use client"
+
 import React from 'react'
 import styles from '@/css/AddKeyValue.module.css'
 import { useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
+import { MdDeleteOutline } from 'react-icons/md'
+
 
 interface Props {
     header: string
@@ -51,14 +54,14 @@ export default function AddKeyValueComponent(props: Props) {
 
     return (
         <>
-            <div className={` row ${styles['header']} mb-2`}>
+            <div className={`${styles['header']} mb-2`}>
                 <p className='fw-bold mt-3'>{props.header}</p>
             </div>
             <div className='row'>
                 {inputList.map((elem, j) => {
                     return (
                         <div className='row mb-2' key=''>
-                            <div className='col-lg-5'>
+                            <div className='col-lg-6'>
                                 <input
                                     name='key'
                                     value={elem.key}
@@ -82,14 +85,8 @@ export default function AddKeyValueComponent(props: Props) {
                                     aria-describedby={`${props.keyName.toLowerCase()} value`}
                                 />
                             </div>
-                            <div className='col-lg-2'>
-                                <button
-                                    type='button'
-                                    onClick={() => handleRemoveClick(j)}
-                                    className={`fw-bold btn btn-light button-plain`}
-                                >
-                                    <FaTrashAlt className="bi bi-trash3-fill" />
-                                </button>
+                            <div className='col-lg-1'>
+                                < MdDeleteOutline size={25} className={`ml-2 icon-link`} onClick={() => handleRemoveClick(j)} />
                             </div>
                         </div>
                     )

@@ -18,15 +18,6 @@ interface Context {
 }
 
 const Detail = async ({ params }: Context) => {
-<<<<<<<< HEAD:src/app/[locale]/components/detail/[id]/page.tsx
-  const session: Session = await getServerSession(authOptions);
-  const componentId = params.id;
-
-  return <DetailOverview session={session} componentId={componentId} />
-}
-
-export default Detail
-========
   const session: Session = await getServerSession(authOptions)
   const releaseId = params.id
 
@@ -34,4 +25,3 @@ export default Detail
 }
 
 export default Detail
->>>>>>>> 638bcdebaab52f71c5ab09003551b5fc0d6f413a:src/app/[locale]/components/releases/detail/[id]/page.tsx
