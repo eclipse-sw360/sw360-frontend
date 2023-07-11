@@ -12,7 +12,7 @@
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
-            "VARIANT": "19-bullseye-slim"
+            "VARIANT": "20-bullseye-slim"
         }
     },
     // Configure tool-specific properties.

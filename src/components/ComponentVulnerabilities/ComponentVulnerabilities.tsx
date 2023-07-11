@@ -86,6 +86,7 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
             formatter: ({ checked, index }: any) =>
                 _(<Form.Check defaultChecked={checked}
                     onClick={() => handleCheckBox(index, checked)} type='checkbox'></Form.Check>),
+            sort: false,
         },
         {
             name: t('Release'),

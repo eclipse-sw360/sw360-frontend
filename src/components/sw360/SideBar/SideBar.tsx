@@ -11,7 +11,10 @@
 "use client"
 import { useTranslations } from 'next-intl'
 import styles from './SideBar.module.css'
+
+import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
+
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useState, useEffect } from 'react'
 import CommonUtils from '@/utils/common.utils'
@@ -28,9 +31,10 @@ interface Props {
   setSelectedTab: React.Dispatch<React.SetStateAction<string>>,
   tabList: Array<Tab>,
   vulnerabilities?: Array<LinkedVulnerability>,
+  eccStatus?: string
 }
 
-const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities }: Props) => {
+const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccStatus }: Props) => {
   const [numberOfCheckedOrUncheckedVulnerabilities, setNumberOfCheckedOrUncheckedVulnerabilities] = useState(0);
   const [numberOfIncorrectVulnerabilities, setNumberOfIncorrectVulnerabilities] = useState(0);
   const t = useTranslations(COMMON_NAMESPACE);
@@ -67,6 +71,11 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities }: Prop
               {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
             </span>
           </a>
+        )
+      } else if (tab.id === ReleaseTabIds.ECC_DETAILS) {
+        return (
+          <a key={index} className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
+            id={tab.id} onClick={handleSelectTab}>{t(tab.name)} <span className={`${styles[eccStatus]}`}></span></a>
         )
       }
       return (

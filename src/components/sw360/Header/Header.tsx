@@ -17,7 +17,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ProfileDropdown from '@/components/ProfileDropdown/ProfileDropdown'
 
-import { Navbar } from '@/components/sw360'
+import { SW360Navbar } from '@/components/sw360'
 import sw360logo from '@/assets/images/sw360-logo.svg'
 import searchLogo from '@/assets/icons/search.svg'
 
@@ -38,7 +38,7 @@ const Header = () => {
             <div className='container-fluid pt-2 pb-2'>
                 <div className='row'>
                     <div className='col-md-4'>
-                        <Link className='container' href='/'>
+                        <Link href='/' className='logo'>
                             <Image src={sw360logo} height={57} width={147} alt='SW360 Logo' />
                         </Link>
                     </div>
@@ -59,8 +59,7 @@ const Header = () => {
                                     id='search-addon'
                                     onClick={initiateSearch}
                                 >
-                                    <Image src={searchLogo} alt='Search Icon'/>
-
+                                    <Image src={searchLogo} alt='Search Icon' />
                                 </button>
                             </form>
                         ) : (
@@ -80,7 +79,7 @@ const Header = () => {
             </div>
 
             <div className='row'>
-                <Navbar />
+                <SW360Navbar />
             </div>
         </div>
     )

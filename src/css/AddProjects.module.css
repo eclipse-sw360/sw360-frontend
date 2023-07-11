@@ -1,0 +1,65 @@
+/*
+  Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.link-sidebar {
+    background-color: white !important;
+    color: #6b6c7e !important;
+}
+
+.button,
+.button:focus,
+.button:active {
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: black !important;
+}
+.button:hover {
+    background-color: #f28809 !important;
+    border-color: #dbdce4 !important;
+    color: white !important;
+}
+
+.button-plain,
+.button-plain:focus,
+.button-plain:active {
+    border-color: #dbdce4 !important;
+    color: #6b6c7e !important;
+    background-color: white !important;
+}
+.button-plain:hover {
+    border-color: #dbdce4 !important;
+    color: black !important;
+    background-color: #f8f9fa !important;
+}
+
+.header {
+    background-color: #5D8EA9;
+    color: white;
+    margin-top: 10px;
+    margin-left: 12px;
+}
+
+.list-group-item-action {
+    background-color: white !important;
+    color: #6b6c7e !important;
+}
+
+.list-group-item-action:hover {
+    border-color: #dbdce4 !important;
+    color: #6b6c7e !important;
+    background-color: #edcaa0 !important;
+}
+
+.sidebar-active {
+    border-color: #dbdce4 !important;
+    color: #000000 !important;
+    background-color: #e89734 !important;
+}

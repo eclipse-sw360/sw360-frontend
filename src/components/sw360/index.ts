@@ -7,65 +7,47 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-// Table component
-// IS strictly derived from gridjs-react with dedicated changes
+import AuthScreen from './AuthScreen/AuthScreen'
+import ComponentAddSummary from './ComponentAddSummary/ComponentAddSummary'
+import Footer from './Footer/Footer'
+import Header from './Header/Header'
+import SW360Navbar from './SW360Navbar/SW360Navbar'
+import SearchUsersModal from './SearchUsersModal/SearchUsersModal'
+import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
+import SideBar from './SideBar/SideBar'
+import VendorDialog from './SearchVendorsModal/VendorDialog'
 import Table from './Table/Table'
 import { ReactWrapper, _ } from './Table/wrapper'
-
-// PageButtonHeader component
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
-
-// Quickfilter component
 import QuickFilter from './QuickFilter/QuickFilter'
-
-// Advabced search component
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
-
-// Navvbar
 import Navbar from './Navbar/Navbar'
-
-import SideBar from './SideBar/SideBar'
-
 import Actions from './ProjectsTable/Actions/Actions'
-
 import WarningModal from './ProjectsTable/WarningModal/WarningModal'
-
 import  DeleteModal from './ProjectsTable/DeleteModal/DeleteModal'
-
 import  Summary from './AddProjects/Summary/Summary'
-
 import  Administration from './AddProjects/Administration/Administration'
-
 import  LinkedProjects from './AddProjects/LinkedProjects/LinkedProjects'
-
-import  VendorsModal from './AddProjects/Summary/VendorsModal/VendorsModal'
-
-import  AddKeyValue from './AddProjects/Summary/AddKeyValue/AddKeyValue'
-
-import  SelectCountryComponent from './AddProjects/Summary/SelectCountry/SelectCountry'
-
-import  AddAdditionalRoles from './AddProjects/Summary/AddAdditionalRoles/AddAdditionalRoles'
-
 import  AddAdditionalData from './AddProjects/Summary/AddAdditionalData/AddAdditionalData'
-
-import  UsersModal from './AddProjects/Summary/UsersModal/UsersModal'
-
 import  DepartmentModal from './AddProjects/Summary/DepartmentModal/DepartmentModal'
-
 import  LinkProjectsModal from './AddProjects/LinkedProjects/LinkProjectsModal/LinkProjectsModal'
-
 import  LinkReleasesModal from './AddProjects/LinkedProjects/LinkReleasesModal/LinkReleasesModal'
-
 import  SummaryView from './ViewProjects/SummaryView/SummaryView'
-
 import  AdministrationView from './ViewProjects/AdministrationView/AdministrationView'
+import AddKeyValueComponent from './AddKeyValue/AddKeyValue'
+import AddAdditionalRolesComponent from './AddAdditionalRoles/AddAdditionalRoles'
+import SelectCountryComponent from './SelectCountry/SelectCountry'
+import ModeratorsDiaglog from "./SearchModerators/ModeratorsDiaglog"
+import ComponentOwnerDiaglog from './SearchComponentOwner/ComponentOwnerDialog'
 
 export { 
         AdvancedSearch, Navbar, PageButtonHeader, QuickFilter, 
         SideBar, Table, _, ReactWrapper, Actions, WarningModal, 
         DeleteModal, Summary, Administration, LinkedProjects,
-        VendorsModal, AddKeyValue, SelectCountryComponent, 
-        AddAdditionalRoles, AddAdditionalData, UsersModal,
-        DepartmentModal, LinkProjectsModal, LinkReleasesModal,
-        SummaryView, AdministrationView
+        AddAdditionalData, DepartmentModal, SW360Navbar,
+        LinkProjectsModal, LinkReleasesModal, SearchUsersModal,
+        SummaryView, AdministrationView, Footer, SearchVendorsModal,
+        Header, AuthScreen, ComponentAddSummary, VendorDialog,
+        AddKeyValueComponent, AddAdditionalRolesComponent, 
+        SelectCountryComponent, ModeratorsDiaglog, ComponentOwnerDiaglog
     }

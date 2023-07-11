@@ -29,10 +29,18 @@ const createUrlWithParams = (url: string, params: any) => {
   return `${url}?${queryString}`;
 }
 
+const isNullEmptyOrUndefinedArray = (arr: Array<any>) => {
+  if (arr === null || arr === undefined || arr.length === 0) {
+    return true;
+  }
+  return false;
+}
+
 const CommonUtils = {
   isNullOrUndefined,
   isNullEmptyOrUndefinedString,
   createUrlWithParams,
+  isNullEmptyOrUndefinedArray,
 }
 
 export default CommonUtils;
