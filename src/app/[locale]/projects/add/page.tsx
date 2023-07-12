@@ -10,7 +10,7 @@
 "use client"
 
 import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
-import { Summary, Administration,  LinkedProjects } from "@/components/sw360"
+import { Summary, Administration, LinkedProjects } from "@/components/sw360"
 
 export default function AddProjects() {
     return (

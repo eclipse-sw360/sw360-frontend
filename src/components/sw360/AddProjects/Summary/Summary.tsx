@@ -4,8 +4,8 @@ import { Row, Col, Form, OverlayTrigger, Tooltip, Container } from "react-bootst
 import { BiInfoCircle } from "react-icons/bi"
 import { useState } from "react"
 import { GiCancel } from "react-icons/gi"
-import { DepartmentModal, AddKeyValueComponent, SearchUsersModal, VendorDialog, 
-            AddAdditionalRolesComponent,  SelectCountryComponent } from "@/components/sw360"
+import { DepartmentModal, AddKeyValueComponent, VendorDialog, 
+        AddAdditionalRolesComponent, SelectCountryComponent, UsersModal } from "@/components/sw360"
 import AddAdditionalData from "./AddAdditionalData/AddAdditionalData"
 import AdditionalDataInput from "./AddAdditionalData/AddAdditionalData.types"
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
@@ -41,6 +41,9 @@ export default function Summary() {
     `
 
     const [showDepartmentModal, setShowDepartmentModal] = useState<boolean>(false)
+    const [showUsersModal, setShowUsersModal] = useState<boolean>(false)
+    const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
+
     const [additionalDataList, setAdditionalDataList] = useState<AdditionalDataInput[]>([
         {
             key: "BA BL",
@@ -54,7 +57,8 @@ export default function Summary() {
 
     return (
         <>
-            <SearchUsersModal />
+            <UsersModal show={showUsersModal} setShow={setShowUsersModal} />
+            {/* <VendorDialog show={showVendorsModal} setShow={setShowVendorsModal}/> */}
             <DepartmentModal show={showDepartmentModal} setShow={setShowDepartmentModal} />
             <Container>
                 <Row className="mb-4">
@@ -143,7 +147,7 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.vendor">
                                 <Form.Label className="fw-bold">Vendor</Form.Label>
-                                <Form.Control type="text" aria-describedby="addProjects.vendor.HelpBlock" placeholder="Click to set vendor" readOnly/>
+                                <Form.Control type="text" aria-describedby="addProjects.vendor.HelpBlock" placeholder="Click to set vendor" readOnly onClick={() => setShowVendorsModal(true)}/>
                                 <Form.Text id="addProjects.vendor.HelpBlock">
                                      < GiCancel />
                                 </Form.Text>
@@ -222,13 +226,13 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.projectManager">
                                 <Form.Label className="fw-bold">Project Manager</Form.Label>
-                                <Form.Control type="text" aria-label="Project Manager" placeholder="Click to edit" data-bs-toggle="modal" data-bs-target="#exampleModal" readOnly={true}/>
+                                <Form.Control type="text" aria-label="Project Manager" placeholder="Click to edit" readOnly onClick={() => setShowUsersModal(true)}/>
                             </Form.Group>
                         </Col>
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.projectOwner">
                                 <Form.Label className="fw-bold">Project Owner</Form.Label>
-                                <Form.Control type="text" aria-label="Project Owner" placeholder="Click to edit" readOnly/>
+                                <Form.Control type="text" aria-label="Project Owner" placeholder="Click to edit" readOnly onClick={() => setShowUsersModal(true)}/>
                             </Form.Group>
                         </Col>
                     </Row>
@@ -255,19 +259,19 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.leadArchitect">
                                 <Form.Label className="fw-bold">Lead Architect</Form.Label>
-                                <Form.Control type="text" aria-label="Lead Architect" placeholder="Click to edit" readOnly/>
+                                <Form.Control type="text" aria-label="Lead Architect" placeholder="Click to edit" readOnly onClick={() => setShowUsersModal(true)}/>
                             </Form.Group>
                         </Col>
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.moderators">
                                 <Form.Label className="fw-bold">Moderators</Form.Label>
-                                <Form.Control type="text" aria-label="Moderators" placeholder="Click to edit" readOnly/>
+                                <Form.Control type="text" aria-label="Moderators" placeholder="Click to edit" readOnly onClick={() => setShowUsersModal(true)}/>
                             </Form.Group>
                         </Col>
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.contributors">
                                 <Form.Label className="fw-bold">Contributors</Form.Label>
-                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly/>
+                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly onClick={() => setShowUsersModal(true)}/>
                             </Form.Group>
                         </Col>
                     </Row>
@@ -276,7 +280,7 @@ export default function Summary() {
                         <Col lg={4}>
                             <Form.Group className="mb-3" controlId="addProjects.securityResponsibles">
                                 <Form.Label className="fw-bold">Security Responsibles</Form.Label>
-                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly/>
+                                <Form.Control type="text" aria-label="" placeholder="Click to edit" readOnly onClick={() => setShowUsersModal(true)}/>
                             </Form.Group>
                         </Col>
                     </Row>

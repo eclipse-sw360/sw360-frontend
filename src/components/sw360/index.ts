@@ -30,6 +30,7 @@ import LinkedProjects from "./AddProjects/LinkedProjects/LinkedProjects"
 import Administration from './AddProjects/Administration/Administration'
 import SummaryView from "./ViewProjects/SummaryView/SummaryView"
 import AdministrationView from './ViewProjects/AdministrationView/AdministrationView'
+import UsersModal from './UsersModal/UsersModal'
 
 // Table component
 // IS strictly derived from gridjs-react with dedicated changes
@@ -62,5 +63,6 @@ export {
     Administration,
     Summary,
     SummaryView, 
-    AdministrationView
+    AdministrationView,
+    UsersModal
 }

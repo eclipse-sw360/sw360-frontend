@@ -10,7 +10,6 @@
 "use client"
 
 import React from 'react'
-import styles from '@/css/AddKeyValue.module.css'
 import { useState } from 'react'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
 import { MdDeleteOutline } from 'react-icons/md'
@@ -54,7 +53,7 @@ export default function AddKeyValueComponent(props: Props) {
 
     return (
         <>
-            <div className={`${styles['header']} mb-2`}>
+            <div className={`header mb-2`}>
                 <p className='fw-bold mt-3'>{props.header}</p>
             </div>
             <div className='row'>

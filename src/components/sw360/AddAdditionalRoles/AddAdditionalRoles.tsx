@@ -10,7 +10,6 @@
 "use client"
 
 import React, { useState } from 'react'
-import styles from "@/css/AddKeyValue.module.css"
 import DocumentTypes from '@/object-types/enums/DocumentTypes';
 import { RolesType } from '@/object-types/RolesType';
 import { useTranslations } from 'next-intl';
@@ -58,7 +57,7 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
 
     return(
         <>
-            <div className={`${styles["header"]} mb-2`}>
+            <div className={`header mb-2`}>
                 <p className="fw-bold mt-3">{t('Additional Roles')}</p>
             </div>
             <div className="row">
