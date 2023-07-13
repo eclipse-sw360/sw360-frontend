@@ -6,7 +6,7 @@ import { useState } from "react"
 
 export default function LinkProjects() {
 
-    const [showLinkProjectsModal, setShowLinkProjectsModal] = useState(false);
+    const [showLinkProjectsModal, setShowLinkProjectsModal] = useState(false)
 
     return (
         <>

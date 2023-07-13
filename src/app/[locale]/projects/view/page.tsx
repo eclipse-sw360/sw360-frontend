@@ -10,12 +10,16 @@
 "use client"
 
 import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
-import styles from '../projects.module.css'
-import { SummaryView, AdministrationView, LinkedProjects } from "@/components/sw360"
+import { SummaryView, AdministrationView, LinkedProjects, LinkProjectsModal } from "@/components/sw360"
+import { useState } from 'react'
 
 export default function EditProjects() {
+
+    const [showLinkProjectsModal, setShowLinkProjectsModal] = useState(false)
+
     return (
         <>
+            <LinkProjectsModal show={showLinkProjectsModal} setShow={setShowLinkProjectsModal} />
             <Container className="mt-2">
                 <Tab.Container defaultActiveKey="summary">
                     <Row>
@@ -55,21 +59,21 @@ export default function EditProjects() {
                         </Col>
                         <Col sm={9}>
                             <Row>
-                                <Button variant="primary" className={`${styles['button-orange']} me-2 col-lg-3 fw-bold`}>Edit Projects</Button>
-                                <Button variant="light" className={`${styles['button-plain']} col-lg-3 fw-bold`}>Link to Projects</Button>
+                                <Button variant="primary" className={`button-orange me-2 col-lg-3 fw-bold`}>Edit Projects</Button>
+                                <Button variant="light" className={`button-plain col-lg-3 fw-bold`} onClick={() => setShowLinkProjectsModal(true)}>Link to Projects</Button>
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>
                                     <Tab.Pane eventKey="summary"><SummaryView/></Tab.Pane>
                                     <Tab.Pane eventKey="administration"><AdministrationView/></Tab.Pane>
-                                    <Tab.Pane eventKey="licenseClearing"><LinkedProjects/></Tab.Pane>
-                                    <Tab.Pane eventKey="obligations"><SummaryView/></Tab.Pane>
-                                    <Tab.Pane eventKey="ecc"><AdministrationView/></Tab.Pane>
-                                    <Tab.Pane eventKey="vulnerabilityTrackingStatus"><LinkedProjects/></Tab.Pane>
-                                    <Tab.Pane eventKey="attachments"><SummaryView/></Tab.Pane>
-                                    <Tab.Pane eventKey="attachmentUsages"><AdministrationView/></Tab.Pane>
-                                    <Tab.Pane eventKey="vulnerabilities"><LinkedProjects/></Tab.Pane>
-                                    <Tab.Pane eventKey="changeLog"><SummaryView/></Tab.Pane>
+                                    <Tab.Pane eventKey="licenseClearing">Tab 3</Tab.Pane>
+                                    <Tab.Pane eventKey="obligations">Tab 4</Tab.Pane>
+                                    <Tab.Pane eventKey="ecc">Tab 5</Tab.Pane>
+                                    <Tab.Pane eventKey="vulnerabilityTrackingStatus">Tab 6</Tab.Pane>
+                                    <Tab.Pane eventKey="attachments">Tab 7</Tab.Pane>
+                                    <Tab.Pane eventKey="attachmentUsages">Tab 8</Tab.Pane>
+                                    <Tab.Pane eventKey="vulnerabilities">Tab 9</Tab.Pane>
+                                    <Tab.Pane eventKey="changeLog">Tab 10</Tab.Pane>
                                 </Tab.Content>
                             </Row>
                         </Col>
