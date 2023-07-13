@@ -11,17 +11,13 @@
 'use client'
 import AddKeyValueComponent from '@/components/AddKeyValue'
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import SearchUsersModalComponent from '@/components/SearchUsersModal'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { Session } from '@/object-types/Session'
-import { SideBar } from '@/components/sw360'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import { toast, TypeOptions, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -31,14 +27,16 @@ import RolesInformation from '../ComponentAddSummary/RolesInformation'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
+import SearchUsersModalComponent from '../SearchUsersModal/SearchUsersModal'
 interface Props {
     session: Session
     componentId: string
+    componentData: ComponentPayload
+    setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
-export default function ComponentEditSummary({ session, componentId}: Props) {
+export default function ComponentEditSummary({ session, componentId, componentData, setComponentData}: Props) {
     const t = useTranslations(COMMON_NAMESPACE);
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [componentName, setComponentName] =useState<string>();
     const [roles,setRoles] = useState<Input[]>([])
     const [externalIds,setExternalIds] = useState<Input[]>([])
@@ -57,7 +55,6 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         emails: null,
         fullName: ''
     })
-    const router = useRouter()
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
         createBy: '',
@@ -116,7 +113,7 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
 
     const getEmailsModerators = (emails: any[]) => {
         const moderatorsEmail: string[] = []
-        if (emails.length == 0) {
+        if (typeof emails === "undefined") {
             return ;
         }
         emails.forEach((item) => {
@@ -140,6 +137,9 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
     }
 
     const convertObjectToMapRoles = (data: string) => {
+        if (data === undefined) {
+            return;
+        }
         const inputs: Input[] = []
         const map = new Map(Object.entries(data));
         map.forEach((value, key) => {
@@ -157,7 +157,6 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
 
     useEffect(() => {
         fetchData(`components/${componentId}`).then((component: any) => {
-
             if (typeof component.roles !== "undefined") {
                 setRoles(convertObjectToMapRoles(component.roles))
             }
@@ -199,6 +198,11 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
             if (typeof component['_embedded']['modifiedBy'] !== "undefined") {
                 creatBy = component['_embedded']['createdBy']['fullName']
             }
+
+            let componentOwnerEmail = '';
+            if (typeof component['_embedded']['componentOwner'] !== "undefined") {
+                componentOwnerEmail =  component['_embedded']['componentOwner']['email']
+            }
             
             const componentPayloadData: ComponentPayload = {
                 name: component.name,
@@ -208,7 +212,7 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
                 moderators: getEmailsModerators(component['_embedded']['sw360:moderators']),
                 modifiedBy: modifiedBy,
                 modifiedOn: component.modifiedOn,
-                componentOwner: component['_embedded']['componentOwner']['email'],
+                componentOwner: componentOwnerEmail,
                 ownerAccountingUnit: component.ownerAccountingUnit,
                 ownerGroup: component.ownerGroup,
                 ownerCountry: component.ownerCountry,
@@ -224,20 +228,18 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
             }
             setComponentName(component.name)
             setComponentPayload(componentPayloadData)
+            setComponentData(componentPayloadData)
         })
     }, [componentId, fetchData])
-
-    const tabList = [
-        {
-            id: CommonTabIds.SUMMARY,
-            name: 'Summary',
-        },
-    ]
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
         setComponentPayload({
             ...componentPayload,
+            additionalData: obj,
+        })
+        setComponentData({
+            ...componentData,
             additionalData: obj,
         })
     }
@@ -248,6 +250,10 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
             ...componentPayload,
             externalIds: obj,
         })
+        setComponentData({
+            ...componentData,
+            externalIds: obj,
+        })
     }
 
     const setDataRoles = (roles: Input[]) => {
@@ -256,13 +262,16 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
             ...componentPayload,
             roles: roleDatas,
         })
-    }
-
-    const handleCancelClick = () => {
-        router.push('/components')
+        setComponentData({
+            ...componentData,
+            roles: roleDatas,
+        })
     }
 
     const convertRoles = (datas: Input[]) => {
+        if ( datas === undefined) {
+            return "";
+        }
         const contributors: string[] = []
         const commiters: string[] = []
         const expecters: string[] = []
@@ -283,24 +292,6 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
         return roles
     }
 
-    const notify = (text: string, type: TypeOptions) =>
-        toast(text, {
-            type,
-            position: toast.POSITION.TOP_LEFT,
-            theme: 'colored',
-        })
-
-    const submit = async () => {
-        const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
-
-        if (response.status == HttpStatus.OK) {
-            notify(`Success:Component  ${componentName}  updated successfully!`, 'success')
-            router.push('/components/detail/' + componentId)
-        } else {
-            notify(t('Component is Duplicate'), 'error')
-        }
-    }
-
     return (
         <>
             <SearchUsersModalComponent />
@@ -310,37 +301,11 @@ export default function ComponentEditSummary({ session, componentId}: Props) {
                 method='post'
                 onSubmit={(e) => {
                     e.preventDefault()
-                    submit()
                 }}
             >
-                <ToastContainer className='foo' style={{ width: '300px', height: '100px' }} />
                 <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
                     <div className='row'>
-                        <div className='col-2 sidebar'>
-                            <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
-                        </div>
                         <div className='col'>
-                            <div className='row' style={{ marginBottom: '20px' }}>
-                                <div className='col-auto'>
-                                    <div className='btn-toolbar' role='toolbar'>
-                                        <div className='btn-group' role='group'>
-                                            <button type='submit' className='btn btn-primary'>
-                                                {t('Update Component')}
-                                            </button>
-                                        </div>
-                                        <div className='btn-group' role='group'>
-                                            <button
-                                                type='button'
-                                                id='mergeButton'
-                                                className='btn btn-secondary'
-                                                onClick={handleCancelClick}
-                                            >
-                                                {t('Cancel')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div className='col'>
                                 <GeneralInfoComponent
                                     session={session}

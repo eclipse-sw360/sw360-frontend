@@ -24,7 +24,7 @@ export default function AddKeyValueComponent(props: Props) {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: Input[] = [... props.data]
+        const list: Input[] = [...props.data]
         list[index][name as keyof Input] = value
         const map = new Map<string, string>()
         list.forEach((item) => {

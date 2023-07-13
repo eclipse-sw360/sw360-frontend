@@ -26,7 +26,7 @@ function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
                 // Button needs to link to the referenced page from props (value)
                 // and switch to the correct tab (key)
                 <Link href={value['link']} key={key}>
-                    <button key={key} className={`btn btn-${value['type']}` } style={{marginRight: '10px'}}>
+                    <button key={key} className={`btn btn-${value['type']}`} style={{marginRight: '10px'}} onClick= {value.onClick} >
                         {t(key)}
                     </button>
                 </Link>

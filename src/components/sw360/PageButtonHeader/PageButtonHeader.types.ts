@@ -11,6 +11,6 @@ import { ReactNode } from 'react'
 
 export interface PageButtonHeaderProps {
     title?: string
-    buttons?: { [key: string]: { [key: string]: string } }
+    buttons?: { [key: string]: { [key: string]: any} }
     children?: ReactNode
 }

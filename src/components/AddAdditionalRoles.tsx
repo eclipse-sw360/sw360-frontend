@@ -29,6 +29,8 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
         const { name, value } = e.target;
         const list: Input[] = [...roles];
         list[index][name as keyof Input] = value;
+        console.log("list")
+        console.log(list)
         setRoles(list);
         setDataRoles(list);
     };
@@ -36,8 +38,8 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
     const handleRemoveClick = (index: number) => {
         const list = [...roles];
         list.splice(index, 1);
-        setDataRoles(list)
         setRoles(list);
+        setDataRoles(list)
     };
 
     const handleAddClick = () => {
@@ -61,7 +63,7 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
                         return (
                             <div className="row mb-2" key ="">
                                 <div className="col-lg-5">
-                                    <select className="form-select" key ="" name="role" value={elem.key} aria-label="additional role" defaultValue = {defaultValue()} onChange={e => handleInputChange(e, j)}>
+                                    <select className="form-select" key ="" name="key" value={elem.key} aria-label="additional role" defaultValue = {defaultValue()} onChange={e => handleInputChange(e, j)}>
                                         {
                                         documentType === DocumentTypes.COMPONENT
                                         ?
@@ -86,7 +88,7 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
                                     </select>
                                 </div>
                                 <div className="col-lg-5">
-                                    <input name="email" value={elem.value} type="email"
+                                    <input name="value" value={elem.value} type="email"
                                            onChange={e => handleInputChange(e, j)}
                                            className="form-control"
                                            placeholder={`Enter email`}

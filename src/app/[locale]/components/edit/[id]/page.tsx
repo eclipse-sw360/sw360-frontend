@@ -11,7 +11,7 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getServerSession } from "next-auth/next"
 import { Session } from '@/object-types/Session'
-import ComponentEditSummary from '@/components/ComponentEditSummary/ComponentEditSummary'
+import EditComponent from './EditComponent'
 
 interface Context {
   params: { id: string }
@@ -21,7 +21,7 @@ const Detail = async ({ params }: Context) => {
   const session: Session = await getServerSession(authOptions);
   const componentId = params.id;
 
-  return <ComponentEditSummary session={session} componentId={componentId} />
+  return <EditComponent session={session} componentId={componentId} />
 }
 
 export default Detail
