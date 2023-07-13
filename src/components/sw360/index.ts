@@ -15,8 +15,6 @@ import Header from './Header/Header'
 import SW360Navbar from './SW360Navbar/SW360Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import QuickFilter from './QuickFilter/QuickFilter'
-import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
-import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import SideBar from './SideBar/SideBar'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountryComponent from "./SelectCountry/SelectCountry"
@@ -31,6 +29,7 @@ import Administration from './AddProjects/Administration/Administration'
 import SummaryView from "./ViewProjects/SummaryView/SummaryView"
 import AdministrationView from './ViewProjects/AdministrationView/AdministrationView'
 import UsersModal from './UsersModal/UsersModal'
+import SearchUsersModal from './SearchUsersModal/SearchUsersModal'
 
 // Table component
 // IS strictly derived from gridjs-react with dedicated changes
@@ -49,7 +48,6 @@ export {
     QuickFilter,
     ReactWrapper,
     SearchUsersModal,
-    SearchVendorsModal,
     SideBar,
     Table,
     VendorDialog,

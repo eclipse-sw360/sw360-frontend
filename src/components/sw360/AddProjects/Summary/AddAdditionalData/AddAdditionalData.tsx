@@ -10,7 +10,7 @@
 "use client"
 
 import AdditionalDataInput from "./AddAdditionalData.types"
-import { Row, Col, Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap"
+import { Tooltip, OverlayTrigger } from "react-bootstrap"
 import { MdDeleteOutline } from 'react-icons/md'
 
 export default function AddAdditionalRoles({ inputList, setInputList } : {
@@ -30,19 +30,22 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
 
     return(
         <>
-            <Row>
-                <Row className="mb-2">
-                    <Col lg={6} >
-                        <Form.Control type="text" name="key" value={inputList[0].key} readOnly/>
-                    </Col>
-                    <Col lg={6}>
-                        <Form.Select name="value" value={inputList[0].value} onChange={(e) => {         
-                                    const { name, value } = e.target;
-                                    const list: AdditionalDataInput[] = [...inputList];
-                                    list[0][name as keyof AdditionalDataInput] = value;
-                                    setInputList(list)
-                                }}
-                                aria-label="Add Additional Data"
+            <div className="row">
+                <div className={`row header mb-2`}>
+                    <h6>Add Additional Data</h6>
+                </div>
+                <div className="row mb-2">
+                    <div className="col-lg-6">
+                        <input type="text" className="form-control" name="key" value={inputList[0].key} readOnly/>
+                    </div>
+                    <div className="col-lg-6">
+                        <select className="form-select" name="value" value={inputList[0].value} onChange={(e) => {         
+                                const { name, value } = e.target;
+                                const list: AdditionalDataInput[] = [...inputList];
+                                list[0][name as keyof AdditionalDataInput] = value;
+                                setInputList(list)
+                            }}
+                            aria-label="Add Additional Data"
                         >
                             <option value="">Select:</option>
                             <option value="SHS AT">SHS AT</option>
@@ -70,21 +73,21 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                             <option value="SHS TE PLE UX">SHS TE PLE UX</option>
                             <option value="SHS US">SHS US</option>
                             <option value="SHS VAR">SHS VAR</option>
-                        </Form.Select>
-                    </Col>
-                </Row>
-                <Row className="mb-2">
-                    <Col lg={6} >
-                        <Form.Control type="text" name="key" value={inputList[1].key} readOnly/>
-                    </Col>
-                    <Col lg={6}>
-                        <Form.Select name="value" value={inputList[1].value} onChange={(e) => {         
-                                    const { name, value } = e.target;
-                                    const list: AdditionalDataInput[] = [...inputList];
-                                    list[1][name as keyof AdditionalDataInput] = value;
-                                    setInputList(list)
-                                }}
-                                aria-label="Add Additional Data"
+                        </select>
+                    </div>
+                </div>
+                <div className="row mb-2">
+                    <div className="col-lg-6">
+                        <input type="text" className="form-control" name="key" value={inputList[0].key} readOnly/>
+                    </div>
+                    <div className="col-lg-6">
+                        <select className="form-select" name="value" value={inputList[0].value} onChange={(e) => {         
+                                const { name, value } = e.target;
+                                const list: AdditionalDataInput[] = [...inputList];
+                                list[0][name as keyof AdditionalDataInput] = value;
+                                setInputList(list)
+                            }}
+                            aria-label="Add Additional Data"
                         >
                             <option value="">Select:</option>
                             <option value="Cloud Service">Cloud Service</option>
@@ -92,9 +95,9 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                             <option value="Platform">Platform</option>
                             <option value="Software Only">Software Only</option>
                             <option value="System">System</option>
-                        </Form.Select>
-                    </Col>
-                </Row>
+                        </select>
+                    </div>
+                </div>
                 {
                     inputList.map((elem, j) => {
                         if(j <= 1) {
@@ -103,46 +106,44 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                         else {
                             return (
                                 <>
-                                    <Row className="mb-2">
-                                        <Col lg={6} >
-                                            <Form.Control type="text" name="key" value={elem.key} onChange={(e) => {         
-                                                const { name, value } = e.target;
-                                                const list: AdditionalDataInput[] = [...inputList];
-                                                list[j][name as keyof AdditionalDataInput] = value;
-                                                setInputList(list)
-                                            }} 
-                                            placeholder="Click to add Additional Data"/>
-                                        </Col>
-                                        <Col lg={5}>
-                                            <Form.Control type="text" name="value" value={elem.value} onChange={(e) => {         
+                                    <div className="row mb-2">
+                                        <div className="col-lg-6">
+                                            <input type="text" className="form-control" name="key" value={elem.key} onChange={(e) => {         
                                                     const { name, value } = e.target;
                                                     const list: AdditionalDataInput[] = [...inputList];
                                                     list[j][name as keyof AdditionalDataInput] = value;
                                                     setInputList(list)
-                                                }}
-                                            placeholder="Enter additional data value"/>
-                                        </Col>
-                                        <Col lg={1} >
+                                                }} 
+                                                placeholder="Click to add Additional Data"
+                                            />
+                                        </div>
+                                        <div className="col-lg-5">
+                                            <input type="text" className="form-control" name="value" value={elem.value} onChange={(e) => {         
+                                                    const { name, value } = e.target;
+                                                    const list: AdditionalDataInput[] = [...inputList];
+                                                    list[j][name as keyof AdditionalDataInput] = value;
+                                                    setInputList(list)
+                                                }} 
+                                                placeholder="Click to add Additional Data"
+                                            />
+                                        </div>
+                                        <div className="col-lg-1">
                                             <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
                                                 <span className="d-inline-block">
                                                     < MdDeleteOutline size={25} className={`ml-2 icon-link`} onClick={() => handleRemoveClick(j)} />
                                                 </span>
                                             </OverlayTrigger>
-                                        </Col>
-                                    </Row>
+                                        </div>
+                                    </div>
                                 </>
                             )
                         }
                     })
                 }
-            </Row>
-            <Row>
-                <Col>
-                    <Button onClick={() => handleAddClick()} className={`fw-bold btn btn-light button-plain`} >
-                        Click to add row to Additional Data
-                    </Button>
-                </Col>
-            </Row>
+                <div className="col-lg-4">
+                    <button type="button" className="fw-bold btn btn-light button-plain" onClick={() => handleAddClick()}>Click to add row to Additional Data</button>
+                </div>
+            </div>
         </>
     );
 }

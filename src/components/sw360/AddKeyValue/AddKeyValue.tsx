@@ -53,8 +53,8 @@ export default function AddKeyValueComponent(props: Props) {
 
     return (
         <>
-            <div className={`header mb-2`}>
-                <p className='fw-bold mt-3'>{props.header}</p>
+            <div className={`row header mb-2`}>
+                <h6>{props.header}</h6>
             </div>
             <div className='row'>
                 {inputList.map((elem, j) => {

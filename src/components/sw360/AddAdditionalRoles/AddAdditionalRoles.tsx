@@ -57,8 +57,8 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
 
     return(
         <>
-            <div className={`header mb-2`}>
-                <p className="fw-bold mt-3">{t('Additional Roles')}</p>
+            <div className={`row header mb-2`}>
+                <h6>{t('Additional Roles')}</h6>
             </div>
             <div className="row">
                 {
