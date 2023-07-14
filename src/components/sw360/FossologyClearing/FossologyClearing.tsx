@@ -21,6 +21,7 @@ import { Alert } from 'react-bootstrap'
 import CommonUtils from '@/utils/common.utils'
 import ApiUtils from '@/utils/api/api.util'
 import { FossologyProcessInfo, FossologyProcessStatus } from '@/object-types/FossologyProcessStatus'
+import HttpStatus from '@/object-types/enums/HttpStatus'
 
 interface Props {
 	show?: boolean
@@ -41,12 +42,18 @@ const clearingMessages: { [key: string]: { [key: string]: string } } = {
 	ERROR_PROCESSING: {
 		message: 'Error when processing!',
 		variant: 'danger'
+	},
+	SET_OUTDATED: {
+		message: 'fossology_process_outdated',
+		variant: 'success'
 	}
 }
 
 const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
 	const t = useTranslations(COMMON_NAMESPACE)
-	const stepSize = 16.66
+	const STEP_PERCENT = 16.66
+	const PERCENT_DONE = 99.96
+	const RELOAD_ATTACHMENTS_PERCENT = 66.46
 	const progressInterval = useRef(undefined)
 	const countDownInterval = useRef(undefined)
 	const numberOfSourceAttachment = useRef(0)
@@ -79,6 +86,7 @@ const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
 			setRelease(data)
 			numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
 			if (!isClearingAllowed()) {
+ 				clearAllInterval()
 				showMessage(clearingMessages.NUMBER_OF_ATTACHMENTS_NOT_MATCH)
 				setProgressStatus({
 					percent: 0,
@@ -102,18 +110,27 @@ const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
 
 	const handleOutdated = () => {
 		handleFossologyClearing({ markFossologyProcessOutdated: true })
+		showMessage(clearingMessages.SET_OUTDATED)
 		setConfirmShow(false)
 	}
 
-	const reloadReport = () => {
-		// Missing API will handle later
-		handleFossologyClearing({ markFossologyProcessOutdated: false })
+	const reloadReport = async () => {
+		hideMessage()
+		const url = `releases/${releaseId}/reloadFossologyReport`
+		const response = await ApiUtils.GET(url, session.user.access_token);
+		if (response.status === HttpStatus.OK) {
+			clearAllInterval()
+			setProgressStatus({
+				percent: RELOAD_ATTACHMENTS_PERCENT,
+				stepName: 'Report generation to be started'
+			})
+			startIntervalCheckFossologyProcessStatus()
+		}
 	}
 
 	const handleFossologyClearing = async (params: any) => {
 		hideMessage()
 		clearAllInterval()
-
 		const triggerStatus = await triggerFossologyClearing(params)
 		if (triggerStatus == false) {
 			showMessage(clearingMessages.ERROR_PROCESSING)
@@ -125,14 +142,7 @@ const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
 			stepName: ''
 		})
 
-		startCountDownt()
-
-		const interval = setInterval(() => {
-			checkFossologyProcessStatus()
-			resetTimeCountDown()
-		}, 5000)
-
-		progressInterval.current = interval
+		startIntervalCheckFossologyProcessStatus()
 	}
 
 	const triggerFossologyClearing = async (params: { [key: string]: string }) => {
@@ -147,15 +157,31 @@ const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
 
 		if (response.status === 'SUCCESS') {
 			setProgressStatus({
-				percent: 99.96,
+				percent: PERCENT_DONE,
 				stepName: 'Report generation done'
 			})
 			showMessage(clearingMessages.CLEARING_SUCCESS)
+			clearAllInterval()
 			return
 		}
+
 		if (response.fossologyProcessInfo !== null) {
 			updateProgressStatus(response.fossologyProcessInfo)
 		}
+		if (progressStatus.percent < PERCENT_DONE && progressStatus.percent > 0) {
+			clearAllInterval()
+			startIntervalCheckFossologyProcessStatus()
+		}
+	}
+
+	const startIntervalCheckFossologyProcessStatus = () => {
+		startCountDownt()
+
+		const interval = setInterval(() => {
+			checkFossologyProcessStatus()
+			resetTimeCountDown()
+		}, 5000)
+		progressInterval.current = interval
 	}
 
 	const updateProgressStatus = (fossologyProcessInfo: FossologyProcessInfo) => {
@@ -163,24 +189,24 @@ const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
 			progressPercent = 0
 		if (fossologyProcessInfo.processSteps.length === 3) {
 			progressText += 'Report generation'
-			progressPercent = 4 * stepSize
+			progressPercent = 4 * STEP_PERCENT
 		} else if (fossologyProcessInfo.processSteps.length === 2) {
 			progressText += 'Scanning source'
-			progressPercent = 2 * stepSize
+			progressPercent = 2 * STEP_PERCENT
 		} else {
 			progressText += 'Uploading source'
-			progressPercent = 0 * stepSize
+			progressPercent = 0 * STEP_PERCENT
 		}
 
 		if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'DONE') {
 			progressText += ' done'
-			progressPercent += 2 * stepSize
+			progressPercent += 2 * STEP_PERCENT
 		} else if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'IN_WORK') {
 			progressText += ' in progress'
-			progressPercent += 1 * stepSize
+			progressPercent += 1 * STEP_PERCENT
 		} else {
 			progressText += ' to be started'
-			progressPercent += 0 * stepSize
+			progressPercent += 0 * STEP_PERCENT
 		}
 
 		setProgressStatus({
@@ -242,26 +268,25 @@ const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
 				checkFossologyProcessStatus()
 			}
 			else {
-				if (progressStatus.percent > 99) {
+				if (progressStatus.percent >= PERCENT_DONE) {
 					showMessage(clearingMessages.CLEARING_SUCCESS)
 					return
 				}
-
-				if (show === true &&
-					!countDownInterval.current &&
+				if (!countDownInterval.current &&
 					!progressInterval.current &&
+					(progressStatus.percent === 0) &&
 					(numberOfSourceAttachment.current == 1)) {
 					handleFossologyClearing({})
 				}
 
-				if (progressStatus.percent > 99) {
+				if (progressStatus.percent >= PERCENT_DONE) {
 					clearAllInterval()
 					showMessage(clearingMessages.CLEARING_SUCCESS)
 				}
 			}
 		}
-		
-	}, [show, progressStatus.percent, releaseId, fetchRelease]);
+
+	}, [show, progressStatus.percent, releaseId, numberOfSourceAttachment.current]);
 
 	return (
 		<>
