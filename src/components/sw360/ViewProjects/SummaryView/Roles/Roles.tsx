@@ -53,7 +53,7 @@ export default function Roles() {
                     <div className="col">       {
                             moderators.map((elem, i) => { 
                                 return (
-                                    <><Link className={`text-link`} href="#">{elem}</Link>{(i === moderators.length - 1)?"":","} </>
+                                    <><li key={elem} style={{display:"inline"}}><Link className={`text-link`} href="#" key={elem}>{elem}</Link>{(i === moderators.length - 1)?"":","} </li></>
                                 )
                             })
                         }
@@ -71,7 +71,7 @@ export default function Roles() {
                         {
                             securityResponsibles.map((elem, i) => { 
                                 return (
-                                    <><Link className={`text-link`} href="#">{elem}</Link>{(i === securityResponsibles.length - 1)?"":","} </>
+                                    <><li key={elem} style={{display:"inline"}}><Link className={`text-link`} href="#">{elem}</Link>{(i === securityResponsibles.length - 1)?"":","} </li></>
                                 )
                             })
                         }

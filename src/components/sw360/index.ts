@@ -30,6 +30,8 @@ import SummaryView from "./ViewProjects/SummaryView/SummaryView"
 import AdministrationView from './ViewProjects/AdministrationView/AdministrationView'
 import UsersModal from './UsersModal/UsersModal'
 import SearchUsersModal from './SearchUsersModal/SearchUsersModal'
+import LicenseClearingView from './ViewProjects/LicenseClearingView/LicenseClearingView'
+import ObligationsView from './ViewProjects/ObligationsView/ObligationsView'
 
 // Table component
 // IS strictly derived from gridjs-react with dedicated changes
@@ -62,5 +64,7 @@ export {
     Summary,
     SummaryView, 
     AdministrationView,
-    UsersModal
+    UsersModal,
+    LicenseClearingView,
+    ObligationsView
 }

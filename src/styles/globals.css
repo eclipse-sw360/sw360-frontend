@@ -276,9 +276,9 @@ th {
     color: white !important;
 }
 
-.nav {
+/* .nav {
     padding-left: 64px;
-}
+} */
 
 .nav-link {
     color: var(--sw360-navlink-color);
@@ -371,6 +371,5 @@ th {
     text-decoration: underline;
     color: var(--sw360-primary-background-color);
 }
-
 
 

@@ -10,7 +10,8 @@
 "use client"
 
 import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
-import { SummaryView, AdministrationView, LinkedProjects, LinkProjectsModal } from "@/components/sw360"
+import { SummaryView, AdministrationView, LinkProjectsModal, 
+            LicenseClearingView, ObligationsView } from "@/components/sw360"
 import { useState } from 'react'
 
 export default function EditProjects() {
@@ -66,8 +67,8 @@ export default function EditProjects() {
                                 <Tab.Content>
                                     <Tab.Pane eventKey="summary"><SummaryView/></Tab.Pane>
                                     <Tab.Pane eventKey="administration"><AdministrationView/></Tab.Pane>
-                                    <Tab.Pane eventKey="licenseClearing">Tab 3</Tab.Pane>
-                                    <Tab.Pane eventKey="obligations">Tab 4</Tab.Pane>
+                                    <Tab.Pane eventKey="licenseClearing"><LicenseClearingView/></Tab.Pane>
+                                    <Tab.Pane eventKey="obligations"><ObligationsView/></Tab.Pane>
                                     <Tab.Pane eventKey="ecc">Tab 5</Tab.Pane>
                                     <Tab.Pane eventKey="vulnerabilityTrackingStatus">Tab 6</Tab.Pane>
                                     <Tab.Pane eventKey="attachments">Tab 7</Tab.Pane>

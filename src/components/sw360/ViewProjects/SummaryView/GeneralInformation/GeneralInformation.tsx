@@ -87,7 +87,7 @@ export default function GeneralInformation() {
                     <div className="col-lg-4">{"Additional Data"}:</div>
                     <div className="col">        
                         <ul>
-                            <li><span className="fw-bold">{"BA BL"}</span> {"SHS DI DH"}</li>
+                            <li key={1}><span className="fw-bold">{"BA BL"}</span> {"SHS DI DH"}</li>
                         </ul>
                     </div>
                     <hr className="my-2" />
