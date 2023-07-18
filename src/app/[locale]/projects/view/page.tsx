@@ -11,10 +11,12 @@
 
 import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
 import { SummaryView, AdministrationView, LinkProjectsModal, 
-            LicenseClearingView, ObligationsView } from "@/components/sw360"
+            LicenseClearingView, ObligationsView, ECCView,
+            VulnerabilityStatusView, AttachmentsView, VulnerabilitiesView,
+            ChangelogView } from "@/components/sw360"
 import { useState } from 'react'
 
-export default function EditProjects() {
+export default function ViewProjects() {
 
     const [showLinkProjectsModal, setShowLinkProjectsModal] = useState(false)
 
@@ -63,18 +65,18 @@ export default function EditProjects() {
                                 <Button variant="primary" className={`button-orange me-2 col-lg-3 fw-bold`}>Edit Projects</Button>
                                 <Button variant="light" className={`button-plain col-lg-3 fw-bold`} onClick={() => setShowLinkProjectsModal(true)}>Link to Projects</Button>
                             </Row>
-                            <Row className="mt-5">
+                            <Row className="mt-3">
                                 <Tab.Content>
                                     <Tab.Pane eventKey="summary"><SummaryView/></Tab.Pane>
                                     <Tab.Pane eventKey="administration"><AdministrationView/></Tab.Pane>
                                     <Tab.Pane eventKey="licenseClearing"><LicenseClearingView/></Tab.Pane>
                                     <Tab.Pane eventKey="obligations"><ObligationsView/></Tab.Pane>
-                                    <Tab.Pane eventKey="ecc">Tab 5</Tab.Pane>
-                                    <Tab.Pane eventKey="vulnerabilityTrackingStatus">Tab 6</Tab.Pane>
-                                    <Tab.Pane eventKey="attachments">Tab 7</Tab.Pane>
+                                    <Tab.Pane eventKey="ecc"><ECCView/></Tab.Pane>
+                                    <Tab.Pane eventKey="vulnerabilityTrackingStatus"><VulnerabilityStatusView/></Tab.Pane>
+                                    <Tab.Pane eventKey="attachments"><AttachmentsView/></Tab.Pane>
                                     <Tab.Pane eventKey="attachmentUsages">Tab 8</Tab.Pane>
-                                    <Tab.Pane eventKey="vulnerabilities">Tab 9</Tab.Pane>
-                                    <Tab.Pane eventKey="changeLog">Tab 10</Tab.Pane>
+                                    <Tab.Pane eventKey="vulnerabilities"><VulnerabilitiesView/></Tab.Pane>
+                                    <Tab.Pane eventKey="changeLog"><ChangelogView/></Tab.Pane>
                                 </Tab.Content>
                             </Row>
                         </Col>

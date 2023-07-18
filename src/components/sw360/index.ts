@@ -32,6 +32,13 @@ import UsersModal from './UsersModal/UsersModal'
 import SearchUsersModal from './SearchUsersModal/SearchUsersModal'
 import LicenseClearingView from './ViewProjects/LicenseClearingView/LicenseClearingView'
 import ObligationsView from './ViewProjects/ObligationsView/ObligationsView'
+import ECCView from './ViewProjects/ECCView/ECCView'
+import VulnerabilityStatusView from './ViewProjects/VulnerabilityStatus/VulnerabilityStatus'
+import AttachmentsView from "./ViewProjects/AttachmentsView/AttachmentsView"
+import VulnerabilitiesView from "./ViewProjects/VulnerabilitiesView/VulnerabilitiesView"
+import ChangelogView from  "./ViewProjects/ChangelogView/ChangelogView"
+import ModerationRequestModal from './ModerationRequestModal/ModerationRequestModal'
+import DeleteProjectModal from './DeleteProjectModal/DeleteProjectModal'
 
 // Table component
 // IS strictly derived from gridjs-react with dedicated changes
@@ -66,5 +73,12 @@ export {
     AdministrationView,
     UsersModal,
     LicenseClearingView,
-    ObligationsView
+    ObligationsView,
+    ECCView,
+    VulnerabilityStatusView,
+    AttachmentsView,
+    VulnerabilitiesView,
+    ChangelogView,
+    ModerationRequestModal,
+    DeleteProjectModal
 }
