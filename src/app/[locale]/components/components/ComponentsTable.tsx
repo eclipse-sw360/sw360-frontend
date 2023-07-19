@@ -94,10 +94,12 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
 
     const columns = [
         {
+            id: 'vendor',
             name: t('Vendor'),
             sort: true,
         },
         {
+            id: 'name',
             name: t('Component Name'),
             formatter: ([id, name]: any) =>
                 _(
@@ -108,6 +110,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
             sort: true,
         },
         {
+            id: 'mainLicenses',
             name: t('Main Licenses'),
             formatter: (licenseIds: any) =>
                 licenseIds.length > 0 &&
@@ -124,10 +127,12 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
             sort: true,
         },
         {
+            id: 'type',
             name: t('Component Type'),
             sort: true,
         },
         {
+            id: 'action',
             name: t('Actions'),
             formatter: (id: string) =>
                 _(

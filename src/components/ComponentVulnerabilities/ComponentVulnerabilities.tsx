@@ -82,6 +82,7 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
 
     const columns = [
         {
+            id: 'check',
             name: _(<Form.Check defaultChecked={checkAll} type='checkbox' onClick={handleCheckAll}></Form.Check>),
             formatter: ({ checked, index }: any) =>
                 _(<Form.Check defaultChecked={checked}
@@ -89,10 +90,12 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
             sort: false,
         },
         {
+            id: 'release',
             name: t('Release'),
             sort: true,
         },
         {
+            id: 'externalId',
             name: t('External Id'),
             formatter: ([externalId, id]: Array<string>) =>
                 _(
@@ -103,18 +106,22 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
             sort: true,
         },
         {
+            id: 'priority',
             name: t('Priority'),
             sort: true,
         },
         {
+            id: 'matchedBy',
             name: t('Matched by'),
             sort: true,
         },
         {
+            id: 'title',
             name: t('Title'),
             sort: true,
         },
         {
+            id: 'verification',
             name: t('Verification'),
             formatter: (verificationStateInfos: Array<VerificationStateInfo>) =>
                 _(
