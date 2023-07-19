@@ -130,7 +130,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                                         <div className="col-lg-1">
                                             <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
                                                 <span className="d-inline-block">
-                                                    < MdDeleteOutline size={25} className={`ml-2 icon-link`} onClick={() => handleRemoveClick(j)} />
+                                                    < MdDeleteOutline size={25} className="ms-2 btn-icon" onClick={() => handleRemoveClick(j)} />
                                                 </span>
                                             </OverlayTrigger>
                                         </div>
@@ -141,7 +141,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                     })
                 }
                 <div className="col-lg-4">
-                    <button type="button" className="fw-bold btn btn-light button-plain" onClick={() => handleAddClick()}>Click to add row to Additional Data</button>
+                    <button type="button" className="btn btn-secondary" onClick={() => handleAddClick()}>Click to add row to Additional Data</button>
                 </div>
             </div>
         </>

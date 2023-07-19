@@ -43,9 +43,9 @@ export default function EditProjects() {
                         </Col>
                         <Col sm={9}>
                             <Row>
-                                <Button variant="primary" className={`button-orange me-2 col-lg-3 fw-bold`} onClick={() => setShowRequestModerationModal(true)}>Update Project</Button>
-                                <Button variant="danger" className={`col-lg-3 fw-bold  me-2`} onClick={() => setShowDeleteProjectModal(true)}>Delete Project</Button>
-                                <Button variant="light" className={`button-plain col-lg-2 fw-bold`}>Cancel</Button>
+                                <Button variant="primary" className="me-2 col-auto" onClick={() => setShowRequestModerationModal(true)}>Update Project</Button>
+                                <Button variant="danger" className={`col-auto fw-bold  me-2`} onClick={() => setShowDeleteProjectModal(true)}>Delete Project</Button>
+                                <Button variant="secondary" className="col-auto">Cancel</Button>
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>

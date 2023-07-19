@@ -46,10 +46,10 @@ export default function SearchUsersModalComponent() {
                                     />
                                 </div>
                                 <div className='col-lg-4'>
-                                    <button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
+                                    <button type='button' className='btn btn-secondary me-2'>
                                         {t('Search')}
                                     </button>
-                                    <button type='button' className={`fw-bold btn btn-light button-plain`}>
+                                    <button type='button' className='btn btn-secondary me-2'>
                                         {t('Reset')}
                                     </button>
                                 </div>
@@ -59,11 +59,11 @@ export default function SearchUsersModalComponent() {
                             <button
                                 type='button'
                                 data-bs-dismiss='modal'
-                                className={`fw-bold btn btn-light button-plain me-2`}
+                                className='btn btn-secondary me-2'
                             >
                                 {t('Close')}
                             </button>
-                            <button type='button' className={`fw-bold btn btn-light button-orange`}>
+                            <button type='button' className="btn btn-primary">
                                 {t('Select Users')}
                             </button>
                         </div>

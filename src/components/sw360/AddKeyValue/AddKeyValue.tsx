@@ -13,6 +13,7 @@ import React from 'react'
 import { useState } from 'react'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
 import { MdDeleteOutline } from 'react-icons/md'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 
 interface Props {
@@ -85,7 +86,11 @@ export default function AddKeyValueComponent(props: Props) {
                                 />
                             </div>
                             <div className='col-lg-1'>
-                                < MdDeleteOutline size={25} className={`ml-2 icon-link`} onClick={() => handleRemoveClick(j)} />
+                                <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                    <span className="d-inline-block">
+                                        < MdDeleteOutline size={25} className="ms-2 btn-icon" onClick={() => handleRemoveClick(j)} />
+                                    </span>
+                                </OverlayTrigger>
                             </div>
                         </div>
                     )
@@ -94,7 +99,7 @@ export default function AddKeyValueComponent(props: Props) {
                     <button
                         type='button'
                         onClick={() => handleAddClick()}
-                        className={`fw-bold btn btn-light button-plain`}
+                        className="btn btn-secondary"
                     >{`Click to add row to ${props.keyName
                         .split(' ')
                         .map((elem) => elem[0].toUpperCase() + elem.substring(1))

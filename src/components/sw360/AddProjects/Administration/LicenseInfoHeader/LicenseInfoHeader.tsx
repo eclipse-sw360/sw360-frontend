@@ -25,7 +25,7 @@ export default function LicenseInfoHeader() {
                 </div>
                 <div className="row d-flex justify-content-end">
                     <div className="col-lg-3">
-                        <button type="button" className="btn btn-primary button-link">Set to default text</button>
+                        <button type="button" className="btn btn-light">Set to default text</button>
                     </div>
                 </div>
                 <div className="mb-2 row">

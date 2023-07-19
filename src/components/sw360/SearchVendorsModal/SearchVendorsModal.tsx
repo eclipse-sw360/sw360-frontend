@@ -55,7 +55,7 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                                 <div className='col-lg-4'>
                                     <button
                                         type='button'
-                                        className={`fw-bold btn btn-light ${styles['button-plain']} me-2`}
+                                        className='btn btn-secondary me-2'
                                     >
                                         Search
                                     </button>
@@ -69,16 +69,16 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                             <button
                                 type='button'
                                 data-bs-dismiss='modal'
-                                className={`fw-bold btn btn-light ${styles['button-plain']} me-2`}
+                                className='btn btn-secondary me-2'
                             >
                                 Close
                             </button>
-                            <button type='button' className={`fw-bold btn btn-light ${styles['button-plain']}`}>
+                            <button type='button' className='btn btn-secondary me-2'>
                                 Add Vendor
                             </button>
                             <button
                                 type='button'
-                                className={`fw-bold btn btn-light ${styles['button-orange']}`}
+                                className="btn btn-primary"
                                 onClick={() => chooseVendor(vendor)}
                             >
                                 Select Vendor

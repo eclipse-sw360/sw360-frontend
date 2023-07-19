@@ -40,7 +40,7 @@ export default function LinkedProjectsModal({ show, setShow }: {
                                     </Form.Group>
                                 </Col>
                                 <Col xs={2}>
-                                    <Button type="submit" variant="light" className={`fw-bold button-plain`}>Search</Button>                            
+                                    <Button type="submit" variant="secondary">Search</Button>                            
                                 </Col>
                             </Row>
                         </Col>
@@ -48,8 +48,8 @@ export default function LinkedProjectsModal({ show, setShow }: {
 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Close</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold button-orange`}>Link Projects</Button>
+                    <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }}>Link Projects</Button>
                 </Modal.Footer>
             </Modal>
         </>

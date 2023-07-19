@@ -60,10 +60,10 @@ export default function ViewProjects() {
                                 </ListGroup.Item>
                             </ListGroup>
                         </Col>
-                        <Col sm={9}>
+                        <Col sm={9} className="ps-2">
                             <Row>
-                                <Button variant="primary" className={`button-orange me-2 col-lg-3 fw-bold`}>Edit Projects</Button>
-                                <Button variant="light" className={`button-plain col-lg-3 fw-bold`} onClick={() => setShowLinkProjectsModal(true)}>Link to Projects</Button>
+                                <Button variant="primary" className="me-2 col-auto">Edit Projects</Button>
+                                <Button variant="secondary" className="col-auto" onClick={() => setShowLinkProjectsModal(true)}>Link to Projects</Button>
                             </Row>
                             <Row className="mt-3">
                                 <Tab.Content>

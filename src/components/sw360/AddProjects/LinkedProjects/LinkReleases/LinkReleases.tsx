@@ -17,7 +17,7 @@ export default function LinkReleases() {
                 </div>
                 <div className="row">
                     <div className="col-lg-4">
-                        <button type="button" className="fw-bold btn btn-light button-plain" onClick={() => setShowLinkReleasesModal(true)}>Link Releases</button>
+                        <button type="button" className="btn btn-secondary" onClick={() => setShowLinkReleasesModal(true)}>Link Releases</button>
                     </div>
                 </div>
             </div>

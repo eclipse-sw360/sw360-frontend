@@ -28,16 +28,16 @@ export default function UsersModal({ show, setShow }: {
                                     <Form.Control type="text" placeholder="Enter Search  Text..." />
                                 </Col>
                                 <Col xs={6}>
-                                    <Button type="submit" variant="light" className={`fw-bold button-plain mx-2`}>Search</Button>      
-                                    <Button type="submit" variant="light" className={`fw-bold button-plain`}>Reset</Button>     
+                                    <Button variant="secondary" className="me-2">Search</Button>      
+                                    <Button variant="secondary">Reset</Button>     
                                 </Col>                      
                             </Row>
                         </Col>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Close</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold button-orange`}>Select Users</Button>
+                    <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }}>Select Users</Button>
                 </Modal.Footer>
             </Modal>
         </>

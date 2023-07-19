@@ -17,7 +17,7 @@ export default function LinkProjects() {
                 </div>
                 <div className="row">
                     <div className="col-lg-4">
-                        <button type="button" className="fw-bold btn btn-light button-plain" onClick={() => setShowLinkProjectsModal(true)}>Link Projects</button>
+                        <button type="button" className="btn btn-secondary" onClick={() => setShowLinkProjectsModal(true)}>Link Projects</button>
                     </div>
                 </div>
             </div>

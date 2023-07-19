@@ -32,8 +32,8 @@ export default function DepartmentModal({ show, setShow }: {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Close</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold button-orange`}>Select</Button>
+                    <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }}>Select</Button>
                 </Modal.Footer>
             </Modal>
         </>

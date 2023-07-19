@@ -41,8 +41,8 @@ export default function DeleteProjectModal({ show, setShow }: {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Cancel</Button>
-                    <Button variant="danger" onClick={() => { setShow(false) }} className={`fw-bold`}>Delete Project</Button>
+                    <Button variant="secondary" onClick={() => setShow(false)}>Cancel</Button>
+                    <Button variant="danger" onClick={() => setShow(false)}>Delete Project</Button>
                 </Modal.Footer>
             </Modal>
         </>

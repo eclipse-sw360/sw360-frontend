@@ -17,7 +17,7 @@ body {
     color: #272833;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen-Sans, Ubuntu, Cantarell,
         Helvetica Neue, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
-    font-size: 1rem;
+    font-size: 0.9rem;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     font-weight: 400;
@@ -140,10 +140,8 @@ th {
 }
 
 .btn {
-    font-weight: bold !important;
+    font-weight: 500 !important;
     border-radius: 3px !important;
-    padding-left: 15px !important;
-    padding-right: 15px !important;
 }
 
 .btn-secondary {
@@ -152,15 +150,14 @@ th {
     color: #6b6c7e !important;
 }
 
+.btn-secondary:hover {
+    color: #000 !important;
+}
+
 .btn-primary {
     background-color: var(--sw360-primary-color) !important;
     border-color: var(--sw360-primary-color) !important;
     color: #272833 !important;
-}
-
-.btn-outline-primary {
-    border-color: var(--sw360-primary-color) !important;
-    color: var(--sw360-primary-color) !important;
 }
 
 .btn-primary:focus {
@@ -168,14 +165,15 @@ th {
     border-color: white !important;
 }
 
-.btn-secondary:hover {
-    color: #000 !important;
-}
-
 .btn-primary:hover {
     background-color: var(--sw360-primary-color) !important;
     border-color: transparent !important;
     color: #fff !important;
+}
+
+.btn-outline-primary {
+    border-color: var(--sw360-primary-color) !important;
+    color: var(--sw360-primary-color) !important;
 }
 
 .btn-outline-primary:hover {
@@ -252,30 +250,6 @@ th {
     width: 100%;
 }
 
-.button-plain,
-.button-plain:focus,
-.button-plain:active {
-    color: #6b6c7e !important;
-    background-color: white !important;
-}
-.button-plain:hover {
-    color: black !important;
-    background-color: #f8f9fa !important;
-}
-
-.button-orange,
-.button-orange:focus,
-.button-orange:active {
-    background-color: #f28809 !important;
-    border-color: #dbdce4 !important;
-    color: black !important;
-}
-.button-orange:hover {
-    background-color: #f28809 !important;
-    border-color: #dbdce4 !important;
-    color: white !important;
-}
-
 /* .nav {
     padding-left: 64px;
 } */
@@ -309,38 +283,38 @@ th {
     padding-left: 40px;
 }
 
-.icon-link {
+.btn-icon {
     text-decoration: none !important;
     color: #6c757d !important;
 }
 
-.icon-link:hover {
+.btn-icon:hover {
     text-decoration: underline !important;
     color: var(--sw360-primary-color) !important;
 }
 
-.button-link {
+.btn-light {
     text-decoration: none !important;
     background: none !important;
     border: none !important;
     color: var(--sw360-primary-color) !important;
 }
 
-.button-link:focus {
+.btn-light:focus {
     text-decoration: none !important;
     background: none !important;
     border: none !important;
     color: var(--sw360-primary-color) !important;
 }
 
-.button-link:active {
+.btn-light:active {
     text-decoration: none !important;
     background: none !important;
     border: none !important;
     color: var(--sw360-primary-color) !important;
 }
 
-.button-link:hover {
+.btn-light:hover {
     text-decoration: underline !important;
     background: none !important;
     border: none !important;

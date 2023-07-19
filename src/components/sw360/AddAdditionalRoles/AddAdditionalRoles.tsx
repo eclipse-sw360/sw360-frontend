@@ -10,11 +10,12 @@
 "use client"
 
 import React, { useState } from 'react'
-import DocumentTypes from '@/object-types/enums/DocumentTypes';
-import { RolesType } from '@/object-types/RolesType';
-import { useTranslations } from 'next-intl';
-import { COMMON_NAMESPACE } from '@/object-types/Constants';
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import { RolesType } from '@/object-types/RolesType'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { MdDeleteOutline } from 'react-icons/md'
+import { Tooltip, OverlayTrigger } from "react-bootstrap"
 
 interface Props {
     documentType?: string;
@@ -98,14 +99,18 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
                                            aria-describedby={`Email`} />
                                 </div>
                                 <div className="col-lg-2">
-                                    < MdDeleteOutline size={25} className={`ml-2 icon-link`} onClick={() => handleRemoveClick(j)} />
+                                    <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                        <span className="d-inline-block">
+                                            < MdDeleteOutline size={25} className="ms-2 btn-icon" onClick={() => handleRemoveClick(j)} />
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </div>
                         )
                     })
                 }
                 <div className="col-lg-4">
-                    <button type="button" onClick={() => handleAddClick()} className={`fw-bold btn btn-light button-plain`}>{t('Click to add row to Additional Roles')}</button>
+                    <button type="button" onClick={() => handleAddClick()} className="btn btn-secondary">{t('Click to add row to Additional Roles')}</button>
                 </div>
             </div>
         </>

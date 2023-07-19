@@ -101,12 +101,12 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                         <div className='col-lg-4'>
                             <button
                                 type='button'
-                                className={`fw-bold btn btn-light button-plain me-2`}
+                                className='btn btn-secondary me-2'
                                 onClick={searchVendor}
                             >
                                 {t('Search')}
                             </button>
-                            <button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
+                            <button type='button' className='btn btn-secondary me-2'>
                                 {t('Reset')}
                             </button>
                         </div>
@@ -120,17 +120,16 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                 <Button
                     type='button'
                     data-bs-dismiss='modal'
-                    className={`fw-bold btn btn-light button-plain me-2`}
+                    className='btn btn-secondary me-2'
                     onClick={handleCloseDialog}
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className={`fw-bold btn btn-light button-plain`}>
+                <Button variant="secondary">
                     {t('Add User')}
                 </Button>
                 <Button
-                    type='button'
-                    className={`fw-bold btn btn-light button-orange`}
+                    variant="primary"
                     onClick={handleClickSelectComponentOwnerId}
                 >
                     {t('Select User')}

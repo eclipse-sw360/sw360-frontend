@@ -28,8 +28,8 @@ export default function ModerationRequestModal({ show, setShow }: {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShow(false)} className={`fw-bold button-plain`}>Cancel</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }} className={`fw-bold button-orange`}>Send Moderation Request</Button>
+                    <Button variant="secondary" onClick={() => setShow(false)}>Cancel</Button>
+                    <Button variant="primary" onClick={() => { setShow(false) }}>Send Moderation Request</Button>
                 </Modal.Footer>
             </Modal>
         </>

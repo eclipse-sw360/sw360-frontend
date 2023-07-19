@@ -33,8 +33,8 @@ export default function AddProjects() {
                         </Col>
                         <Col sm={9}>
                             <Row>
-                                <Button variant="primary" className={`button-orange me-2 col-lg-2 fw-bold`}>Create Project</Button>
-                                <Button variant="light" className={`button-plain col-lg-2 fw-bold`}>Cancel</Button>
+                                <Button variant="primary" className="me-2 col-lg-2">Create Project</Button>
+                                <Button variant="secondary" className="col-auto">Cancel</Button>
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>
