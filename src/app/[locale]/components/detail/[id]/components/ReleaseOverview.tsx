@@ -89,10 +89,12 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
 
     const columns = [
         {
+            id: 'name',
             name: t('Name'),
             sort: true,
         },
         {
+            id: 'version',
             name: t('Version'),
             formatter: ([id, version]: Array<string>) =>
                 _(
@@ -103,18 +105,22 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
             sort: true,
         },
         {
+            id: 'clearingState',
             name: t('Clearing State'),
             sort: true,
         },
         {
+            id: 'clearingReport',
             name: t('Clearing Report'),
             sort: true,
         },
         {
+            id: 'mainlineState',
             name: t('Release Mainline State'),
             sort: true,
         },
         {
+            id: 'action',
             name: t('Actions'),
             formatter: (id: string) =>
                 _(
@@ -140,7 +146,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     return (
         <>
             <div className='row'>
-                <Table data={data} search={true} columns={columns} />
+                <Table data={data} search={true} columns={columns} selector={true}/>
             </div>
             <DeleteReleaseModal
                 releaseId={deletingRelease}
