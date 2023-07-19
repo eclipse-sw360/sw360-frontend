@@ -174,7 +174,7 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
                 >
                     {t('Vulnerabilities')}
                 </h5>
-                <Table columns={columns} data={data} />
+                <Table columns={columns} data={data} selector={true}/>
                 <Form.Group className='mb-3' controlId='createdOn'>
                     <Form.Label>
                         <b>{t('Change verification state of selected vulnerabilities to')}</b>

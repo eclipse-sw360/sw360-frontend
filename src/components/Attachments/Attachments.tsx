@@ -203,7 +203,7 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
             {totalRows ? (
                 <>
                     <div className={`row ${styles['attachment-table']}`}>
-                        <Table data={attachmentData} columns={columns} search={true} />
+                        <Table data={attachmentData} columns={columns} search={true} selector={true}/>
                     </div>
                 </>
             ) : (

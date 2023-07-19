@@ -151,7 +151,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         <>
             <div className='row'>
                 {loading == false ? (
-                    <Table data={componentData} columns={columns} />
+                    <Table data={componentData} columns={columns} selector={true}/>
                 ) : (
                     <div className='col-12' style={{ textAlign: 'center' }}>
                         <PageSpinner />

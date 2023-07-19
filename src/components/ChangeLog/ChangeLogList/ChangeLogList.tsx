@@ -75,7 +75,7 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
     return (
         <>
             <div className='row'>
-                <Table data={changeLogData} search={true} columns={columns} />
+                <Table data={changeLogData} search={true} columns={columns} selector={true}/>
             </div>
         </>
     )

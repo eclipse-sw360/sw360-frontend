@@ -146,7 +146,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     return (
         <>
             <div className='row'>
-                <Table data={data} search={true} columns={columns} />
+                <Table data={data} search={true} columns={columns} selector={true}/>
             </div>
             <DeleteReleaseModal
                 releaseId={deletingRelease}
