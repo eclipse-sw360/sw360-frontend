@@ -201,6 +201,15 @@ th {
     color: white !important;
 }
 
+#project-clearing-report {
+    background-color: var(--sw360-primary-color) !important;
+    color: black !important;
+}
+
+#project-clearing-report:hover {
+    color: white !important;
+}
+
 .link {
     color: var(--sw360-primary-color);
     text-decoration: none;

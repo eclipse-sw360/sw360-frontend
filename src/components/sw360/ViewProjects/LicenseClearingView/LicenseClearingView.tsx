@@ -1,25 +1,21 @@
 "use client"
 
-import { Nav, Dropdown,Tab } from "react-bootstrap"
+import { Nav, Dropdown, Tab, NavItem } from "react-bootstrap"
 
 export default function LicenseClearingView() {
     return (
         <>
             <Tab.Container id="views-tab" defaultActiveKey="tree-view">
-                <div className="row">
-                    <div className="col-auto ps-0">
-                        <Nav variant="pills" className="d-inline-flex">
-                            <Nav.Item>
-                                <Nav.Link eventKey="tree-view">Tree View</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="list-view">List View</Nav.Link>
-                            </Nav.Item>
-                        </Nav>
-                    </div>
-                    <div className='col-lg-3'>
-                        <Dropdown>
-                            <Dropdown.Toggle variant='secondary' id='project-export'>
+                <div className="row ps-0">
+                    <Nav variant="pills" className="d-inline-flex ps-0">
+                        <Nav.Item>
+                            <Nav.Link eventKey="tree-view">Tree View</Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey="list-view">List View</Nav.Link>
+                        </Nav.Item>
+                        <Dropdown as={NavItem} className="mx-2">
+                            <Dropdown.Toggle variant='secondary'>
                                 Export Spreadsheet
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
@@ -27,10 +23,8 @@ export default function LicenseClearingView() {
                                 <Dropdown.Item>Projects with linked releases</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-                    </div>
-                    <div className='btn-group col-lg-5' role='group'>
                         <Dropdown>
-                            <Dropdown.Toggle variant='secondary' id='project-export'>
+                            <Dropdown.Toggle variant='secondary'>
                                 Generate License Info
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
@@ -39,7 +33,7 @@ export default function LicenseClearingView() {
                             </Dropdown.Menu>
                         </Dropdown>
                         <Dropdown>
-                            <Dropdown.Toggle variant='secondary' id='project-export'>
+                            <Dropdown.Toggle variant='secondary'>
                                 Generate Source Code bundle
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
@@ -47,10 +41,10 @@ export default function LicenseClearingView() {
                                 <Dropdown.Item>Projects with sub project</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-                    </div>
-                    <div className="row mt-2">
-                        <button type="button" className="btn btn-secondary col-lg-4" disabled={true}>Create Clearing Request</button>
-                    </div>
+                    </Nav>
+                </div>
+                <div className="row mt-2">
+                    <button type="button" className="btn btn-secondary col-lg-3" disabled={true}>Create Clearing Request</button>
                 </div>
                 <Tab.Content className="mt-3">
                     <Tab.Pane eventKey="tree-view">Tree View Table</Tab.Pane>
