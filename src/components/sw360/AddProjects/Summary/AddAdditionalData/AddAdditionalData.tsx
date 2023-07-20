@@ -84,7 +84,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                         <select className="form-select" name="value" value={inputList[1].value} onChange={(e) => {         
                                 const { name, value } = e.target;
                                 const list: AdditionalDataInput[] = [...inputList];
-                                list[0][name as keyof AdditionalDataInput] = value;
+                                list[1][name as keyof AdditionalDataInput] = value;
                                 setInputList(list)
                             }}
                             aria-label="Add Additional Data"
