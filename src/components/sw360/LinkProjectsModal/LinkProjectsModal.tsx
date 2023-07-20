@@ -48,7 +48,7 @@ export default function LinkedProjectsModal({ show, setShow }: {
 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                    <Button variant="dark" onClick={() => setShow(false)}>Close</Button>
                     <Button variant="primary" onClick={() => { setShow(false) }}>Link Projects</Button>
                 </Modal.Footer>
             </Modal>

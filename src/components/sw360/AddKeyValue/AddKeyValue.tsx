@@ -60,7 +60,7 @@ export default function AddKeyValueComponent(props: Props) {
             <div className='row'>
                 {inputList.map((elem, j) => {
                     return (
-                        <div className='row mb-2' key=''>
+                        <div className='row mb-2' key={j}>
                             <div className='col-lg-6'>
                                 <input
                                     name='key'

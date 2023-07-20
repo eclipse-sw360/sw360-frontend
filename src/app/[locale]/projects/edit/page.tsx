@@ -42,10 +42,19 @@ export default function EditProjects() {
                             </ListGroup>
                         </Col>
                         <Col sm={9}>
-                            <Row>
-                                <Button variant="primary" className="me-2 col-auto" onClick={() => setShowRequestModerationModal(true)}>Update Project</Button>
-                                <Button variant="danger" className={`col-auto fw-bold  me-2`} onClick={() => setShowDeleteProjectModal(true)}>Delete Project</Button>
-                                <Button variant="secondary" className="col-auto">Cancel</Button>
+                            {/* <Row>
+                            </Row> */}
+                            <Row className="d-flex justify-content-between">
+                                <Col lg={5}>
+                                    <Row>
+                                        <Button variant="primary" className="me-2 col-auto" onClick={() => setShowRequestModerationModal(true)}>Update Project</Button>
+                                        <Button variant="danger" className={`col-auto fw-bold  me-2`} onClick={() => setShowDeleteProjectModal(true)}>Delete Project</Button>
+                                        <Button variant="secondary" className="col-auto">Cancel</Button>
+                                    </Row>
+                                </Col>
+                                <Col lg={4} className="text-truncate buttonheader-title">
+                                    {"-DICOMQUERYRETRIEVESCU (VANADIUM52)"}
+                                </Col>
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>

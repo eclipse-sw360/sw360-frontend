@@ -36,7 +36,7 @@ export default function UsersModal({ show, setShow }: {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                    <Button variant="dark" onClick={() => setShow(false)}>Close</Button>
                     <Button variant="primary" onClick={() => { setShow(false) }}>Select Users</Button>
                 </Modal.Footer>
             </Modal>

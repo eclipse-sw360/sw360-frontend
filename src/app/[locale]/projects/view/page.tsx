@@ -62,8 +62,17 @@ export default function ViewProjects() {
                         </Col>
                         <Col sm={9} className="ps-2">
                             <Row>
-                                <Button variant="primary" className="me-2 col-auto">Edit Projects</Button>
-                                <Button variant="secondary" className="col-auto" onClick={() => setShowLinkProjectsModal(true)}>Link to Projects</Button>
+                                <Row className="d-flex justify-content-between">
+                                <Col lg={4}>
+                                    <Row>
+                                        <Button variant="primary" className="me-2 col-auto">Edit Projects</Button>
+                                        <Button variant="secondary" className="col-auto" onClick={() => setShowLinkProjectsModal(true)}>Link to Projects</Button>
+                                    </Row>
+                                </Col>
+                                <Col lg={4} className="text-truncate buttonheader-title">
+                                    {"-DICOMQUERYRETRIEVESCU (VANADIUM52)"}
+                                </Col>
+                            </Row>
                             </Row>
                             <Row className="mt-3">
                                 <Tab.Content>

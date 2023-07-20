@@ -14,7 +14,7 @@ export default function LinkReleasesModal({ show, setShow }: {
                 centered
                 show={show}
                 onHide={() => setShow(false)}
-                aria-labelledby="Linked Projects Modal"
+                aria-labelledby="Linked Releases Modal"
             >
                 <Modal.Header closeButton>
                     <Modal.Title id="linked-projects-modal">
@@ -50,7 +50,7 @@ export default function LinkReleasesModal({ show, setShow }: {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                    <Button variant="dark" onClick={() => setShow(false)}>Close</Button>
                     <Button variant="primary" onClick={() => { setShow(false) }}>Link Releases</Button>
                 </Modal.Footer>
             </Modal>

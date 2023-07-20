@@ -154,6 +154,16 @@ th {
     color: #000 !important;
 }
 
+.btn-dark {
+    background-color: #f1f2f5 !important;
+    border: none !important;
+    color: #000 !important;
+}
+
+.btn-dark:hover {
+    background-color: #c2c3c7 !important;
+}
+
 .btn-primary {
     background-color: var(--sw360-primary-color) !important;
     border-color: var(--sw360-primary-color) !important;
@@ -198,15 +208,6 @@ th {
 
 .nav-pills .nav-link.active {
     background-color: #0C70F2 !important;
-    color: white !important;
-}
-
-#project-clearing-report {
-    background-color: var(--sw360-primary-color) !important;
-    color: black !important;
-}
-
-#project-clearing-report:hover {
     color: white !important;
 }
 
@@ -379,5 +380,16 @@ th {
 .list-group-item-action:hover.active {
     background-color: #fcba76 !important;
     color: black !important;
+}
+
+.buttonheader-title {
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: -0.5rem;
+    font-size: 1.5rem;
+    text-align: right;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(108, 117, 125, 0.4);
 }
 

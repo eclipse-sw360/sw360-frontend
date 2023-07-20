@@ -27,14 +27,21 @@ export default function AddProjects() {
                                     Administration
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="linkedProjects">
-                                    Linked Projects and Releases
+                                    Linked Releases and Projects
                                 </ListGroup.Item>
                             </ListGroup>
                         </Col>
                         <Col sm={9}>
-                            <Row>
-                                <Button variant="primary" className="me-2 col-lg-2">Create Project</Button>
-                                <Button variant="secondary" className="col-auto">Cancel</Button>
+                            <Row className="d-flex justify-content-between">
+                                <Col lg={3}>
+                                    <Row>
+                                        <Button variant="primary" className="me-2 col-auto">Create Project</Button>
+                                        <Button variant="secondary" className="col-auto">Cancel</Button>
+                                    </Row>
+                                </Col>
+                                <Col lg={4} className="text-truncate buttonheader-title">
+                                    {"New Project"}
+                                </Col>
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>

@@ -78,10 +78,10 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                 </div>
                 <div className="row mb-2">
                     <div className="col-lg-6">
-                        <input type="text" className="form-control" name="key" value={inputList[0].key} readOnly/>
+                        <input type="text" className="form-control" name="key" value={inputList[1].key} readOnly/>
                     </div>
                     <div className="col-lg-6">
-                        <select className="form-select" name="value" value={inputList[0].value} onChange={(e) => {         
+                        <select className="form-select" name="value" value={inputList[1].value} onChange={(e) => {         
                                 const { name, value } = e.target;
                                 const list: AdditionalDataInput[] = [...inputList];
                                 list[0][name as keyof AdditionalDataInput] = value;
@@ -106,7 +106,7 @@ export default function AddAdditionalRoles({ inputList, setInputList } : {
                         else {
                             return (
                                 <>
-                                    <div className="row mb-2">
+                                    <div className="row mb-2" key={j}>
                                         <div className="col-lg-6">
                                             <input type="text" className="form-control" name="key" value={elem.key} onChange={(e) => {         
                                                     const { name, value } = e.target;

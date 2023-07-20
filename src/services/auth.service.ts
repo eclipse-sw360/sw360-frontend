@@ -17,22 +17,6 @@ import { AuthToken } from '@/object-types/AuthToken';
 
 const generateToken = async (userData: UserCredentialInfo) => {
 
-    return {
-
-        "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic3czNjAtUkVTVC1BUEkiXSwidXNlcl9uYW1lIjoiYW1yaXQudmVybWFAc2llbWVucy5jb20iLCJzY29wZSI6WyJSRUFEIiwiV1JJVEUiXSwiZXhwIjoxNjk2NDg1ODk1LCJhdXRob3JpdGllcyI6WyJSRUFEIiwiV1JJVEUiXSwianRpIjoiSzNlck1CMmx3aURXTjk1T2UzTkYzSXhRbFpZIiwiY2xpZW50X2lkIjoiNDY2NmQzNzAyNjAzYmNmZWU4MGM4NGJmOTUwMDIxMDMifQ.DBdlzvOiGq7kUFSUzcn9ffa5R-U3fyd6aO31f5ACpxzjM2F3eqSLKUO8Muj459MebXrrbYXSpsVMVSUFVnvirpJtvMwFYDXP7-kSAcCes4-G5prKxbs1gWTCLpbuUjmsKomVJ4riFNp3js6iE82yRulKibED-E1EtU8Ggn-U-y5xy9aGBJ0rxXfhIkdgnsL4eXsCIStv2C7Cmpkx61dLCq9ULfncaipQIqGEmer9TxlGxHpt3nJ7ZDhxLnvYIQrrLDl54X2gZ39--cYvy3RCYtEdsfgS-gVTX6vomisdoLzKFZzBAOXPlhrPip4atA0J3474AClbzfneRxa7LVj_Ug",
-
-        "token_type" : "bearer",
-
-        "refresh_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic3czNjAtUkVTVC1BUEkiXSwidXNlcl9uYW1lIjoiYW1yaXQudmVybWFAc2llbWVucy5jb20iLCJzY29wZSI6WyJSRUFEIiwiV1JJVEUiXSwiYXRpIjoiSzNlck1CMmx3aURXTjk1T2UzTkYzSXhRbFpZIiwiZXhwIjoxNzA0MjYxODk1LCJhdXRob3JpdGllcyI6WyJSRUFEIiwiV1JJVEUiXSwianRpIjoiamVHS1kyeU1NODh4SDlwMEtieTQtLTUzaXJVIiwiY2xpZW50X2lkIjoiNDY2NmQzNzAyNjAzYmNmZWU4MGM4NGJmOTUwMDIxMDMifQ.t8mATXhezs2xtezzOLEik2x5Cyq08j_QjunDKYQRHu5qzdlh1hyu-yaxeEBytA1epDEP4YfT9ZRGNDP-d3VP5MNH4yF-CqKKD5x1jy62RZzPnTgtVxJO3NFn_h0RPR2MwMa3aX9jqJ4jR4dymK-SaFq37KVhkNDKAZjAmEia0ALAeaVVPRrGaJW6qT9aFuxqX0camYMPfxtpKcJ_mJ6zqJBwP9n2T8sVkyPQL4B08AJO_eYaGDPteW4wuemrPH6VM4ryThRiwZ-iamBCIjItoxo4VEmx8u_d_6bFHr8SuvIeIXLna-muCkN2MZ7w3M589XhZL2Z7O6sZD9dB76NgZg",
-
-        "expires_in" : 7775999,
-
-        "scope" : "READ WRITE",
-
-        "jti" : "K3erMB2lwiDWN95Oe3NF3IxQlZY"
-
-    }
-
     const clientManagementURL: string = SW360_API_URL + '/authorization/client-management';
     let credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64');
 
