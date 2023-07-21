@@ -128,6 +128,7 @@
         "File name": "Tên tệp",
         "Finalized License Scan Report": "Báo cáo quét giấy phép đã hoàn thành",
         "fossology_clearing_finished": "The FOSSology process already finished. You should find the resulting report as attachment at this release.",
+        "fossology_process_outdated": "The FOSSology process has been set to OUTDATED and will start all over.",
         "Found source attachment": "Tìm thấy nguồn đính kèm",
         "Fossology Process": "Quy trình Fossology",
         "Freeware": "Phần mềm miễn phí",

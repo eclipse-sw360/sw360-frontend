@@ -127,6 +127,7 @@
         "File name": "File name",
         "Finalized License Scan Report": "Finalized License Scan Report",
         "fossology_clearing_finished": "The FOSSology process already finished. You should find the resulting report as attachment at this release.",
+        "fossology_process_outdated": "The FOSSology process has been set to OUTDATED and will start all over.",
         "Found source attachment": "Found source attachment",
         "Fossology Process": "Fossology Process",
         "Freeware": "Freeware",
