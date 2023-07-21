@@ -63,12 +63,12 @@ export default function Clearing() {
                 </div>
                 <hr />
                 <div className="mb-2 row">
-                    <label htmlFor="addProjects.clearingSummary" className="form-label fw-bold">Clearing Summary</label>
+                    <label htmlFor="addProjects.clearingSummary" className="form-label fw-bold">Clearing summary</label>
                     <textarea className="form-control" aria-label="Clearing Summary" id="addProjects.clearingSummary" style={{ height: '120px' }}></textarea>
                 </div>
                 <hr />
                 <div className="mb-2 row">
-                    <label htmlFor="addProjects.specialRiskOpenSourceSoftware" className="form-label fw-bold">Special Risk Open Source Software</label>
+                    <label htmlFor="addProjects.specialRiskOpenSourceSoftware" className="form-label fw-bold">Special risk Open Source Software</label>
                     <textarea className="form-control" id="addProjects.specialRiskOpenSourceSoftware" aria-label="Special Risk Open Source Software" style={{ height: '120px' }}></textarea>
                 </div>
                 <hr />
@@ -78,7 +78,7 @@ export default function Clearing() {
                 </div>
                 <hr />
                 <div className="mb-2 row">
-                    <label htmlFor="addProjects.specialRiskThirdPartySoftware" className="form-label fw-bold">Special risk 3rd party software</label>
+                    <label htmlFor="addProjects.specialRiskThirdPartySoftware" className="form-label fw-bold">Special risks 3rd party software</label>
                     <textarea className="form-control" id="addProjects.specialRiskThirdPartySoftware" aria-label="Special risk 3rd party software" style={{ height: '120px' }}></textarea>
                 </div>
                 <hr />
