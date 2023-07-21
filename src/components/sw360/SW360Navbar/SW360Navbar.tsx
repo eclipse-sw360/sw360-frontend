@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import Nav from 'react-bootstrap/Nav'
+import { Nav, Navbar, Container } from 'react-bootstrap'
 
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { LOCALES as locales } from '@/object-types/Constants'
@@ -38,15 +38,19 @@ function SW360Navbar() {
     ]
 
     const NavItems = () => (
-        <Nav className='me-auto' variant='underline' activeKey='home'>
-            {navlist.map((item) => (
-                <Nav.Item key={item.name}>
-                    <Link className={`nav-link`} href={item.link} onClick={() => setHeading(item.name)}>
-                        {t(item.name)}
-                    </Link>
-                </Nav.Item>
-            ))}
-        </Nav>
+        <Navbar expand="lg">
+            <Container fluid>
+                <Nav variant='underline' className="ms-5" activeKey='home'>
+                    {navlist.map((item) => (
+                        <Nav.Item key={item.name}>
+                            <Link className={`nav-link`} href={item.link} onClick={() => setHeading(item.name)}>
+                                {t(item.name)}
+                            </Link>
+                        </Nav.Item>
+                    ))}
+                </Nav>  
+            </Container>
+        </Navbar>
     )
 
     return (
