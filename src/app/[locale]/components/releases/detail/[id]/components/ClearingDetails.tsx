@@ -19,6 +19,7 @@ import styles from '../detail.module.css'
 import ClearingInformationStatus from './ClearingInformationStatus'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
+import SPDXAttachments from './SPDXAttachments'
 
 import { Session } from '@/object-types/Session'
 import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
@@ -37,6 +38,7 @@ const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: P
 
     return (
         <div className='col'>
+            <SPDXAttachments releaseId={releaseId} session={session}/>
             <AssessmentSummaryInfo releaseId={releaseId} embeddedAttachments={embeddedAttachments}/>
             <table className={`table label-value-table ${styles['summary-table']}`}>
                 <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
