@@ -18,22 +18,26 @@ import fossologyIcon from '@/assets/images/fossology.svg'
 import styles from '../detail.module.css'
 import ClearingInformationStatus from './ClearingInformationStatus'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
+import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 
 import { Session } from '@/object-types/Session'
+import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
 
 interface Props {
     release: any
     session: Session
     releaseId: string
+    embeddedAttachments: Array<EmbeddedAttachment>
 }
 
-const ClearingDetails = ({ release, session, releaseId }: Props) => {
+const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE);
     const [toggle, setToggle] = useState(false);
     const [show, setShow] = useState(false);
 
     return (
         <div className='col'>
+            <AssessmentSummaryInfo releaseId={releaseId} embeddedAttachments={embeddedAttachments}/>
             <table className={`table label-value-table ${styles['summary-table']}`}>
                 <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
                     <tr>
