@@ -22,8 +22,11 @@ import { notFound } from 'next/navigation'
 import Attachment from '@/object-types/Attachment'
 import { Table, _ } from '@/components/sw360'
 import { Form } from 'react-bootstrap'
-import EnterCommentDialog from './EnterCommentDialog'
 import { FaTrashAlt } from 'react-icons/fa'
+import SelectAttachment from './SelectAttachment'
+import DeleteAttachment from './DeleteAttachment'
+import EnterCreatedCommentDialog from './EnterCreatedCommentDialog'
+import EnterCheckedCommentDialog from './EnterCheckedCommentDialog'
 
 interface Props {
     documentId: string
@@ -34,9 +37,20 @@ interface Props {
 const EditAttachments = ({ documentId, session, documentType }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [attachmentData, setAttachmentData] = useState([])
+    const [reRender, setReRender] = useState(false)
+    const handleReRender = () => {
+        setReRender(!reRender)
+    }
     const [totalRows, setTotalRows] = useState(0)
-    const [dialogOpenEnterComment, setDialogOpenEnterComment] = useState(false)
-    const handleClickEnterComment = useCallback(() => setDialogOpenEnterComment(true), [])
+    const [createdComment, setCreatedComment] = useState()
+    const [checkedComment, setCheckedComment] = useState()
+    const [dialogOpenCreatedComment, setDialogOpenCreatedComment] = useState(false)
+    const [dialogOpenCheckedComment, setDialogOpenCheckedComment] = useState(false)
+    const [dialogDeleteAttachment, setDialogDeleteAttachment] = useState(false)
+    const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
+    const handleClickEnterCreatedComment = useCallback(() => setDialogOpenCreatedComment(true), [])
+    const handleClickCheckedComment = useCallback(() => setDialogOpenCheckedComment(true), [])
+    const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
     const fetchData: any = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -58,7 +72,7 @@ const EditAttachments = ({ documentId, session, documentType }: Props) => {
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
             ) {
-                const attachmentData = attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => [
+                const attachmentDatas = attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => [
                     item.filename,
                     item.attachmentType,
                     item.createdComment,
@@ -70,122 +84,198 @@ const EditAttachments = ({ documentId, session, documentType }: Props) => {
                     item.checkedTeam,
                     item.checkedBy,
                     item.checkedOn,
+                    item.attachmentContentId,
                 ])
-                setAttachmentData(attachmentData)
-                setTotalRows(attachmentData.length)
+                setAttachmentData(attachmentDatas)
+                setTotalRows(attachmentDatas.length)
             }
         })
     }, [documentId, documentType, fetchData])
 
-    const handleClickDelete = (attachmentContentId: any) => {
-        // setDeletingComponent(componentId)
-        // setDeleteDialogOpen(true)
+    const handleClickDelete = (id: string) => {
+        let data: any = attachmentData
+        data = attachmentData.filter((item) => !item.includes(id))
+        setAttachmentData(data)
     }
 
     const columns = [
-        { 
+        {
             name: 'Attachments',
             width: '800px',
             columns: [
                 {
                     name: 'Filename',
                     sort: true,
-                }, {
+                },
+                {
                     name: 'Type',
                     formatter: (item: any) =>
-                    _(<Form.Select name='typeComponent'>                                
-                        <option value='SOURCE'>{t('SOURCE')}</option>
-                        <option value='DESIGN'> {t('DESIGN')}</option>
-                        <option value='REQUIREMENT'>{t('REQUIREMENT')}</option>
-                        <option value='CLEARING_REPORT'>{t('CLEARING REPORT')}</option>
-                        <option value='COMPONENT_LICENSE_INFO_XML'>{t('COMPONENT LICENSE INFO XML')}</option>
-                        <option value='COMPONENT_LICENSE_INFO_COMBINED'>{t('COMPONENT LICENSE INFO COMBINED')}</option>
-                        <option value='SCAN_RESULT_REPORT'>{t('SCAN RESULT REPORT')}</option>
-                        <option value='SCAN_RESULT_REPORT_XML'>{t('SCAN RESULT REPORT')}</option>
-                        <option value='SOURCE_SELF'> {t('SOURCE SELF')}</option>
-                        <option value='BINARY'>{t('BINARY')}</option>
-                        <option value='BINARY_SELF'>{t('BINARY SELF')}</option>
-                    </Form.Select>),
+                        _(
+                            <Form.Select name='typeComponent'>
+                                <option value='SOURCE'>{t('Source file')}</option>
+                                <option value='CLEARING_REPORT'>{t('Clearing report')}</option>
+                                <option value='COMPONENT_LICENSE_INFO_XML'>
+                                    {t('Component license information (XML)')}
+                                </option>
+                                <option value='COMPONENT_LICENSE_INFO_COMBINED'>
+                                    {t('Component license information (Combined)')}
+                                </option>
+                                <option value='DOCUMENT'>{t('Document')}</option>
+                                <option value='DESIGN'>{t('Design document')}</option>
+                                <option value='REQUIREMENT'>{t('Requirement document')}</option>
+                                <option value='SCAN_RESULT_REPORT'>{t('Scan result report')}</option>
+                                <option value='SCAN_RESULT_REPORT_XML'>{t('Scan result report (XML)')}</option>
+                                <option value='SOURCE_SELF'>{t('Source file (Self-made)')}</option>
+                                <option value='BINARY'>{t('Binaries')}</option>
+                                <option value='BINARY_SELF'>{t('Binaries (Self-made)')}</option>
+                                <option value='DECISION_REPORT'>{t('Decision report')}</option>
+                                <option value='LEGAL_EVALUATION'>{t('Legal evaluation report')}</option>
+                                <option value='LICENSE_AGREEMENT'>{t('License Agreement')}</option>
+                                <option value='SCREENSHOT'>{t('Screenshot of Website')}</option>
+                                <option value='OTHER'>{t('Other')}</option>
+                                <option value='README_OSS'>{t('ReadMe OSS')}</option>
+                                <option value='SECURITY_ASSESSMENT'>{t('Security Assessment')}</option>
+                                <option value='INITIAL_SCAN_REPORT'>{t('Initial Scan Report')}</option>
+                                <option value='SBOM'>{t('SBOM')}</option>
+                                <option value='INTERNAL_USE_SCAN'>{t('Initial Use Scan')}</option>
+                            </Form.Select>
+                        ),
                     sort: true,
-                }, {
+                },
+                {
                     name: 'Upload',
                     width: '500px',
                     columns: [
                         {
                             name: 'Comment',
                             formatter: (item: any) =>
-                            _(<Form.Control type="text" placeholder="Enter comment" onClick={handleClickEnterComment}/>),
+                                _(
+                                    <Form.Control
+                                        type='text'
+                                        placeholder='Enter comment'
+                                        onClick={handleClickEnterCreatedComment}
+                                    />
+                                ),
                             sort: true,
-                        }, {
+                        },
+                        {
                             name: 'Group',
                             sort: true,
-                        }, {
+                        },
+                        {
                             name: 'Name',
                             sort: true,
                             width: '100px',
-                        }, {
+                        },
+                        {
                             name: 'Date',
                             width: '100px',
                             sort: true,
-                        }
-                    ]
-                }, {
+                        },
+                    ],
+                },
+                {
                     name: 'Approval',
                     columns: [
                         {
                             name: 'Status',
                             formatter: (item: any) =>
-                            _(<Form.Select name='statusApproval'>                           
-                                <option value='NOTCHECKED'>{t('NOT_CHECKED')}</option>
-                                <option value='ACCEPTED'> {t('ACCEPTED')}</option>
-                                <option value='REJECTED'>{t('REJECTED')}</option>
-                            </Form.Select>),
+                                _(
+                                    <Form.Select name='statusApproval'>
+                                        <option value='NOTCHECKED'>{t('NOT_CHECKED')}</option>
+                                        <option value='ACCEPTED'> {t('ACCEPTED')}</option>
+                                        <option value='REJECTED'>{t('REJECTED')}</option>
+                                    </Form.Select>
+                                ),
                             sort: true,
-                        }, {
+                        },
+                        {
                             name: 'Comment',
                             formatter: (item: any) =>
-                            _(
-                            <Form.Control type="text" placeholder="Enter comment" onClick={handleClickEnterComment}/>
-                            ),
+                                _(
+                                    <Form.Control
+                                        type='text'
+                                        placeholder='Enter comment'
+                                        onClick={handleClickCheckedComment}
+                                    />
+                                ),
                             sort: true,
-                        }, {
+                        },
+                        {
                             name: 'Group',
                             sort: true,
-                        }, {
+                        },
+                        {
                             name: 'Name',
                             sort: true,
-                        }, {
+                        },
+                        {
                             name: 'Date',
                             sort: true,
-                        }, {
+                        },
+                        {
                             name: '',
                             formatter: (id: string) =>
-                            _(
-                                <FaTrashAlt className={styles['delete-btn']} onClick={() => handleClickDelete(id)} />
-                            ),
-                        }
-                    ]
-                }
-            ]
-        }
-    ]  
+                                _(
+                                    <FaTrashAlt
+                                        className={styles['delete-btn']}
+                                        onClick={() => handleClickDelete(id)}
+                                    />
+                                ),
+                        },
+                    ],
+                },
+            ],
+        },
+    ]
 
     return (
         <>
+            <SelectAttachment
+                attachmentUpload={attachmentData}
+                setAttachmentFromUpload={setAttachmentData}
+                show={dialogOpenSelectAttachment}
+                setShow={setDialogOpenSelectAttachment}
+                session={session}
+                onReRender={handleReRender}
+            />
             {totalRows ? (
                 <>
                     <div className={`row ${styles['attachment-table']}`}>
                         <Table data={attachmentData} columns={columns} search={true} />
                     </div>
+                    <DeleteAttachment
+                        show={dialogDeleteAttachment}
+                        setShow={setDialogDeleteAttachment}
+                        session={session}
+                    />
+                    <EnterCreatedCommentDialog
+                        show={dialogOpenCreatedComment}
+                        setShow={setDialogOpenCreatedComment}
+                        createdComment={createdComment}
+                        setCreatedComment={setCreatedComment}
+                    />
+                    <EnterCheckedCommentDialog
+                        show={dialogOpenCheckedComment}
+                        setShow={setDialogOpenCheckedComment}
+                        checkedComment={checkedComment}
+                        setCheckedComment={setCheckedComment}
+                    />
                 </>
             ) : (
                 <div className='col'>
                     <Alert variant='primary'>{t('No attachments yet')}</Alert>
                 </div>
             )}
-            <EnterCommentDialog show={dialogOpenEnterComment}
-            setShow={setDialogOpenEnterComment}
-            session={session} />
+            <div>
+                <button
+                    type='button'
+                    onClick={handleClickSelectAttachment}
+                    className={`fw-bold btn btn-light button-plain`}
+                >
+                    {t('Add Attachment')}
+                </button>
+            </div>
         </>
     )
 }

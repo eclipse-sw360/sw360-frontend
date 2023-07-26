@@ -29,8 +29,6 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
         const { name, value } = e.target;
         const list: Input[] = [...roles];
         list[index][name as keyof Input] = value;
-        console.log("list")
-        console.log(list)
         setRoles(list);
         setDataRoles(list);
     };

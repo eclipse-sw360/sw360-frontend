@@ -159,9 +159,9 @@ const EditComponent = ({ session, componentId }: Props) => {
                         <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>
                             <Releases componentId={componentId} session={session} />
                         </div>
-                        {/* <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
+                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
                             <EditAttachments session={session} documentId={componentId} documentType={DocumentTypes.COMPONENT} />
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </div>

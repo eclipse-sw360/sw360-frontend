@@ -11,57 +11,22 @@
 'use client'
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
-import { Session } from '@/object-types/Session'
-import { notFound } from 'next/navigation'
-import ApiUtils from '@/utils/api/api.util'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import React, { useCallback, useEffect, useState } from 'react'
-import CommonUtils from '@/utils/common.utils'
-import { VendorType } from '@/object-types/VendorType'
+import React from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
+    checkedComment: any
+    setCheckedComment: any
 }
 
-const EnterCommentDialog = ({ show, setShow, session }: Props) => {
+const EnterCheckedCommentDialog = ({ show, setShow, checkedComment, setCheckedComment }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const handleCloseDialog = () => {
         setShow(!show)
     }
-
-
-
-    // const fetchData: any = useCallback(async (url: string) => {
-    //     const response = await ApiUtils.GET(url, session.user.access_token)
-    //     if (response.status == HttpStatus.OK) {
-    //         const data = await response.json()
-    //         return data
-    //     } else {
-    //         notFound()
-    //     }
-    // }, [])
-
-    // useEffect(() => {
-    //     fetchData(`vendors`).then((vendors: any) => {
-    //         if (
-    //             !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
-    //             !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
-    //         ) {
-    //             const data = vendors['_embedded']['sw360:vendors'].map((item: any) => [
-    //                 item,
-    //                 item.fullName,
-    //                 item.shortName,
-    //                 item.url,
-    //                 '',
-    //             ])
-    //             setData(data)
-    //         }
-    //     })
-    // }, [])
 
     return (
         <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
@@ -76,6 +41,10 @@ const EnterCommentDialog = ({ show, setShow, session }: Props) => {
                             className='form-control'
                             placeholder={t('Update create comment')}
                             aria-describedby=''
+                            onChange={(e) => {
+                                setCheckedComment(e.target.value)
+                            }}
+                            value={checkedComment}
                         />
                     </div>
                 </div>
@@ -89,10 +58,7 @@ const EnterCommentDialog = ({ show, setShow, session }: Props) => {
                 >
                     {t('Cancel')}
                 </Button>
-                <Button
-                    type='button'
-                    className={`fw-bold btn btn-light button-orange`}
-                >
+                <Button type='button' className={`fw-bold btn btn-light button-orange`}>
                     {t('Update')}
                 </Button>
             </Modal.Footer>
@@ -100,4 +66,4 @@ const EnterCommentDialog = ({ show, setShow, session }: Props) => {
     )
 }
 
-export default EnterCommentDialog
+export default EnterCheckedCommentDialog
