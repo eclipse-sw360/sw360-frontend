@@ -39,6 +39,7 @@ import VulnerabilitiesView from "./ViewProjects/VulnerabilitiesView/Vulnerabilit
 import ChangelogView from  "./ViewProjects/ChangelogView/ChangelogView"
 import ModerationRequestModal from './ModerationRequestModal/ModerationRequestModal'
 import DeleteProjectModal from './DeleteProjectModal/DeleteProjectModal'
+import Actions from "./ProjectsTable/Actions/Actions"
 
 // Table component
 // IS strictly derived from gridjs-react with dedicated changes
@@ -80,5 +81,6 @@ export {
     VulnerabilitiesView,
     ChangelogView,
     ModerationRequestModal,
-    DeleteProjectModal
+    DeleteProjectModal,
+    Actions
 }

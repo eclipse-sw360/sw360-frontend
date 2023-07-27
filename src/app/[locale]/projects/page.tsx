@@ -14,8 +14,9 @@ import React, { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Dropdown } from 'react-bootstrap'
+import Link from 'next/link'
 
-import { AdvancedSearch, PageButtonHeader, Table, _ } from '@/components/sw360'
+import { AdvancedSearch, PageButtonHeader, Table, _, Actions } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 interface ProjectType {
@@ -31,12 +32,48 @@ function Project() {
 
     const pagination = { limit: 10 }
     const columns = [
-        t('Project Name'),
-        t('Description'),
-        t('Project Responsible'),
-        t('License Clearing'),
+        {
+            id: 'name',
+            name: t('Project Name'),
+            formatter: (name: string) =>
+                _(
+                    <Link href={"#"} className='link'>
+                        {name}
+                    </Link>
+                ),
+            sort: true,
+        },
+        {
+            id: 'description',
+            name: t('Description'),
+            formatter: (description: string) =>
+                _(
+                    <p>{description}</p>
+                ),
+            sort: true,
+        },
+        {
+            id: 'projectResponsible',
+            name: t('Project Responsible'),
+            formatter: (email: string) =>
+                _(
+                    <Link href={"#"} className='link'>
+                        {email}
+                    </Link>
+                ),
+            sort: true,
+        },
         t('State'),
-        t('Actions'),
+        t('License Clearing'),
+        {
+            id: 'projectResponsible',
+            name: t('Actions'),
+            formatter: () =>
+                _(
+                    <Actions/>
+                ),
+            sort: true,
+        },
     ]
 
     const advancedSearch = [
