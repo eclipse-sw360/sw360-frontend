@@ -41,14 +41,20 @@ class Table extends Component<TableProps, unknown> {
     }
 
     componentDidMount(): void {
+        if (this.wrapper.current.childNodes.length > 0) {
+            this.wrapper.current.innerHTML = ''
+        }
         this.instance.render(this.wrapper.current)
     }
 
     componentDidUpdate(): void {
+        this.instance.config.plugin.remove('pagination')
+        this.instance.config.plugin.remove('search')
         this.instance.updateConfig(this.props).forceRender()
     }
 
     handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        this.instance.config.plugin.remove('pagination')
         const pageSize = parseInt(event.target.value, 10)
         this.instance
             .updateConfig({

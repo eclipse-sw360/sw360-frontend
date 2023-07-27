@@ -128,6 +128,7 @@
         "File name": "ファイル名",
         "Finalized License Scan Report": "ライセンススキャンレポート完成",
         "fossology_clearing_finished": "The FOSSology process already finished. You should find the resulting report as attachment at this release.",
+        "fossology_process_outdated": "The FOSSology process has been set to OUTDATED and will start all over.",
         "Found source attachment": "検出された添付ソースコードファイル",
         "Fossology Process": "FOSSologyのプロセス",
         "Freeware": "フリーウェア",

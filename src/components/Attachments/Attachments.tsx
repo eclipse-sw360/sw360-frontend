@@ -141,43 +141,53 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
 
     const columns = [
         {
+            id: 'check',
             name: _(<FaDownload className={styles['download-btn']} style={{ width: '100%' }} onClick={downloadBundle}/>),
             formatter: (item: any) => _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
             sort: false,
             width: '60px'
         },
         {
+            id: 'fileName',
             name: t('File name'),
             sort: true,
         },
         {
+            id: 'size',
             name: t('Size'),
             sort: true,
         },
         {
+            id: 'type',
             name: t('Type'),
             sort: true,
         },
         {
+            id: 'group',
             name: t('Group'),
             sort: true,
         },
         {
+            id: 'uploadedBy',
             name: t('Uploaded By'),
             sort: true,
         },
         {
+            id: 'group',
             name: t('Group'),
             sort: true,
         },
         {
+            id: 'checkedBy',
             name: t('Checked By'),
             sort: true,
         },
         {
+            id: 'usage',
             name: t('Usage'),
         },
         {
+            id: 'action',
             name: t('Action'),
             formatter: ([attachmentId, attachmentName]: Array<string>) => _
                                     (<FaDownload className={styles['download-btn']} style={{ width: '100%' }} 
@@ -193,7 +203,7 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
             {totalRows ? (
                 <>
                     <div className={`row ${styles['attachment-table']}`}>
-                        <Table data={attachmentData} columns={columns} search={true} />
+                        <Table data={attachmentData} columns={columns} search={true} selector={true}/>
                     </div>
                 </>
             ) : (

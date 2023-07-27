@@ -127,6 +127,7 @@
         "File name": "文件名",
         "Finalized License Scan Report": "最终许可证扫描报告",
         "fossology_clearing_finished": "The FOSSology process already finished. You should find the resulting report as attachment at this release.",
+        "fossology_process_outdated": "The FOSSology process has been set to OUTDATED and will start all over.",
         "Found source attachment": "找到源附件",
         "Fossology Process": "Fossology进程",
         "Freeware": "免费软件",
