@@ -22,16 +22,19 @@ interface Props {
     setCreatedComment: any
 }
 
-
 const EnterCreatedCommentDialog = ({ show, setShow, createdComment, setCreatedComment }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
+    const [comment, setComment] = useState('')
     const handleCloseDialog = () => {
         setShow(!show)
     }
 
     const selectValue = () => {
+        setCreatedComment(comment)
         setShow(!show)
     }
+
+    console.log('re-render')
     return (
         <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
             <Modal.Header closeButton>
@@ -45,7 +48,9 @@ const EnterCreatedCommentDialog = ({ show, setShow, createdComment, setCreatedCo
                             className='form-control'
                             placeholder={t('Update create comment')}
                             aria-describedby=''
-                            onChange={(e) => {setCreatedComment(e.target.value)}}
+                            onChange={(e) => {
+                                setComment(e.target.value)
+                            }}
                             value={createdComment}
                         />
                     </div>
@@ -60,11 +65,7 @@ const EnterCreatedCommentDialog = ({ show, setShow, createdComment, setCreatedCo
                 >
                     {t('Cancel')}
                 </Button>
-                <Button
-                    type='button'
-                    className={`fw-bold btn btn-light button-orange`}
-                    onClick={selectValue}
-                >
+                <Button type='button' className={`fw-bold btn btn-light button-orange`} onClick={selectValue}>
                     {t('Update')}
                 </Button>
             </Modal.Footer>
@@ -72,4 +73,4 @@ const EnterCreatedCommentDialog = ({ show, setShow, createdComment, setCreatedCo
     )
 }
 
-export default EnterCreatedCommentDialog
+export default React.memo(EnterCreatedCommentDialog)

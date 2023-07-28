@@ -11,7 +11,7 @@
 'use client'
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
@@ -24,7 +24,13 @@ interface Props {
 
 const EnterCheckedCommentDialog = ({ show, setShow, checkedComment, setCheckedComment }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
+    const [comment, setComment] = useState('')
     const handleCloseDialog = () => {
+        setShow(!show)
+    }
+
+    const selectValue = () => {
+        setCheckedComment(comment)
         setShow(!show)
     }
 
@@ -41,9 +47,7 @@ const EnterCheckedCommentDialog = ({ show, setShow, checkedComment, setCheckedCo
                             className='form-control'
                             placeholder={t('Update create comment')}
                             aria-describedby=''
-                            onChange={(e) => {
-                                setCheckedComment(e.target.value)
-                            }}
+                            onChange={(e) => setComment(e.target.value)}
                             value={checkedComment}
                         />
                     </div>
@@ -58,7 +62,7 @@ const EnterCheckedCommentDialog = ({ show, setShow, checkedComment, setCheckedCo
                 >
                     {t('Cancel')}
                 </Button>
-                <Button type='button' className={`fw-bold btn btn-light button-orange`}>
+                <Button type='button' className={`fw-bold btn btn-light button-orange`} onClick={selectValue}>
                     {t('Update')}
                 </Button>
             </Modal.Footer>
@@ -66,4 +70,4 @@ const EnterCheckedCommentDialog = ({ show, setShow, checkedComment, setCheckedCo
     )
 }
 
-export default EnterCheckedCommentDialog
+export default React.memo(EnterCheckedCommentDialog)

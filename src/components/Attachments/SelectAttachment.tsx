@@ -15,7 +15,7 @@ import { Session } from '@/object-types/Session'
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import Attachment from '@/object-types/Attachment'
+import AttachmentDetail from '@/object-types/AttachmentDetail'
 
 interface Props {
     show: boolean
@@ -55,23 +55,7 @@ const SelectAttachment = ({ show, setShow, session, attachmentUpload, setAttachm
         })
             .then((res) => res.json())
             .then((json) => {
-                const attachments = json.map((item: Attachment) => [
-                    item.filename,
-                    item.attachmentType,
-                    item.createdComment,
-                    item.createdTeam,
-                    item.createdBy,
-                    item.createdOn,
-                    item.checkStatus,
-                    item.checkedComment,
-                    item.checkedTeam,
-                    item.checkedBy,
-                    item.checkedOn,
-                    item.attachmentContentId,
-                ])
-                for (const key of Object.keys(attachments)) {
-                    attachmentUpload.push(attachments[key])
-                }
+                json.map((item: AttachmentDetail) => attachmentUpload.push(item))
                 setAttachmentFromUpload(attachmentUpload)
                 onReRender()
             })

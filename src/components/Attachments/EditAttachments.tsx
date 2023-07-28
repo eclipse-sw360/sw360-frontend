@@ -19,14 +19,14 @@ import { Session } from '@/object-types/Session'
 import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { notFound } from 'next/navigation'
-import Attachment from '@/object-types/Attachment'
 import { Table, _ } from '@/components/sw360'
-import { Form } from 'react-bootstrap'
-import { FaTrashAlt } from 'react-icons/fa'
 import SelectAttachment from './SelectAttachment'
 import DeleteAttachment from './DeleteAttachment'
 import EnterCreatedCommentDialog from './EnterCreatedCommentDialog'
 import EnterCheckedCommentDialog from './EnterCheckedCommentDialog'
+import TableAttachment from './TableAttachment'
+import TiltleAttachment from './TitleAttachment'
+import AttachmentDetail from '@/object-types/AttachmentDetail'
 
 interface Props {
     documentId: string
@@ -36,7 +36,7 @@ interface Props {
 
 const EditAttachments = ({ documentId, session, documentType }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [attachmentData, setAttachmentData] = useState([])
+    const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
     const [reRender, setReRender] = useState(false)
     const handleReRender = () => {
         setReRender(!reRender)
@@ -72,162 +72,15 @@ const EditAttachments = ({ documentId, session, documentType }: Props) => {
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
             ) {
-                const attachmentDatas = attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => [
-                    item.filename,
-                    item.attachmentType,
-                    item.createdComment,
-                    item.createdTeam,
-                    item.createdBy,
-                    item.createdOn,
-                    item.checkStatus,
-                    item.checkedComment,
-                    item.checkedTeam,
-                    item.checkedBy,
-                    item.checkedOn,
-                    item.attachmentContentId,
-                ])
-                setAttachmentData(attachmentDatas)
-                setTotalRows(attachmentDatas.length)
+                const attachmentDetails: AttachmentDetail[] = []
+                attachments['_embedded']['sw360:attachmentDTOes'].map((item: any) => {
+                    attachmentDetails.push(item)
+                })
+                setAttachmentData(attachmentDetails)
+                setTotalRows(attachmentDetails.length)
             }
         })
     }, [documentId, documentType, fetchData])
-
-    const handleClickDelete = (id: string) => {
-        let data: any = attachmentData
-        data = attachmentData.filter((item) => !item.includes(id))
-        setAttachmentData(data)
-    }
-
-    const columns = [
-        {
-            name: 'Attachments',
-            width: '800px',
-            columns: [
-                {
-                    name: 'Filename',
-                    sort: true,
-                },
-                {
-                    name: 'Type',
-                    formatter: (item: any) =>
-                        _(
-                            <Form.Select name='typeComponent'>
-                                <option value='SOURCE'>{t('Source file')}</option>
-                                <option value='CLEARING_REPORT'>{t('Clearing report')}</option>
-                                <option value='COMPONENT_LICENSE_INFO_XML'>
-                                    {t('Component license information (XML)')}
-                                </option>
-                                <option value='COMPONENT_LICENSE_INFO_COMBINED'>
-                                    {t('Component license information (Combined)')}
-                                </option>
-                                <option value='DOCUMENT'>{t('Document')}</option>
-                                <option value='DESIGN'>{t('Design document')}</option>
-                                <option value='REQUIREMENT'>{t('Requirement document')}</option>
-                                <option value='SCAN_RESULT_REPORT'>{t('Scan result report')}</option>
-                                <option value='SCAN_RESULT_REPORT_XML'>{t('Scan result report (XML)')}</option>
-                                <option value='SOURCE_SELF'>{t('Source file (Self-made)')}</option>
-                                <option value='BINARY'>{t('Binaries')}</option>
-                                <option value='BINARY_SELF'>{t('Binaries (Self-made)')}</option>
-                                <option value='DECISION_REPORT'>{t('Decision report')}</option>
-                                <option value='LEGAL_EVALUATION'>{t('Legal evaluation report')}</option>
-                                <option value='LICENSE_AGREEMENT'>{t('License Agreement')}</option>
-                                <option value='SCREENSHOT'>{t('Screenshot of Website')}</option>
-                                <option value='OTHER'>{t('Other')}</option>
-                                <option value='README_OSS'>{t('ReadMe OSS')}</option>
-                                <option value='SECURITY_ASSESSMENT'>{t('Security Assessment')}</option>
-                                <option value='INITIAL_SCAN_REPORT'>{t('Initial Scan Report')}</option>
-                                <option value='SBOM'>{t('SBOM')}</option>
-                                <option value='INTERNAL_USE_SCAN'>{t('Initial Use Scan')}</option>
-                            </Form.Select>
-                        ),
-                    sort: true,
-                },
-                {
-                    name: 'Upload',
-                    width: '500px',
-                    columns: [
-                        {
-                            name: 'Comment',
-                            formatter: (item: any) =>
-                                _(
-                                    <Form.Control
-                                        type='text'
-                                        placeholder='Enter comment'
-                                        onClick={handleClickEnterCreatedComment}
-                                    />
-                                ),
-                            sort: true,
-                        },
-                        {
-                            name: 'Group',
-                            sort: true,
-                        },
-                        {
-                            name: 'Name',
-                            sort: true,
-                            width: '100px',
-                        },
-                        {
-                            name: 'Date',
-                            width: '100px',
-                            sort: true,
-                        },
-                    ],
-                },
-                {
-                    name: 'Approval',
-                    columns: [
-                        {
-                            name: 'Status',
-                            formatter: (item: any) =>
-                                _(
-                                    <Form.Select name='statusApproval'>
-                                        <option value='NOTCHECKED'>{t('NOT_CHECKED')}</option>
-                                        <option value='ACCEPTED'> {t('ACCEPTED')}</option>
-                                        <option value='REJECTED'>{t('REJECTED')}</option>
-                                    </Form.Select>
-                                ),
-                            sort: true,
-                        },
-                        {
-                            name: 'Comment',
-                            formatter: (item: any) =>
-                                _(
-                                    <Form.Control
-                                        type='text'
-                                        placeholder='Enter comment'
-                                        onClick={handleClickCheckedComment}
-                                    />
-                                ),
-                            sort: true,
-                        },
-                        {
-                            name: 'Group',
-                            sort: true,
-                        },
-                        {
-                            name: 'Name',
-                            sort: true,
-                        },
-                        {
-                            name: 'Date',
-                            sort: true,
-                        },
-                        {
-                            name: '',
-                            formatter: (id: string) =>
-                                _(
-                                    <FaTrashAlt
-                                        className={styles['delete-btn']}
-                                        onClick={() => handleClickDelete(id)}
-                                    />
-                                ),
-                        },
-                    ],
-                },
-            ],
-        },
-    ]
 
     return (
         <>
@@ -242,7 +95,9 @@ const EditAttachments = ({ documentId, session, documentType }: Props) => {
             {totalRows ? (
                 <>
                     <div className={`row ${styles['attachment-table']}`}>
-                        <Table data={attachmentData} columns={columns} search={true} />
+                        <TiltleAttachment />
+                        <TableAttachment data={attachmentData} setAttachmentData={setAttachmentData} />
+                        &nbsp;&nbsp;&nbsp;&nbsp;
                     </div>
                     <DeleteAttachment
                         show={dialogDeleteAttachment}
