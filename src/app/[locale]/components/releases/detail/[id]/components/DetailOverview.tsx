@@ -23,6 +23,7 @@ import { SideBar, PageButtonHeader } from '@/components/sw360'
 
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
 import { LinkedVulnerability } from '@/object-types/LinkedVulnerability'
 import DownloadService from '@/services/download.service'
 import Link from 'next/link'
@@ -78,7 +79,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<any>(undefined)
     const [releasesSameComponent, setReleasesSameComponentt] = useState<Array<any>>([])
-    const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
+    const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<EmbeddedAttachment>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
@@ -107,7 +108,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                     !CommonUtils.isNullOrUndefined(release['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:attachments'])
                 ) {
-                    setAttachmentNumber(release['_embedded']['sw360:attachments'].length)
+                    setEmbeddedAttachments(release['_embedded']['sw360:attachments'])
                 }
                 return release
             })
@@ -184,7 +185,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
-                                {selectedTab === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
+                                {selectedTab === CommonTabIds.ATTACHMENTS && embeddedAttachments.length > 0 && (
                                     <div className='list-group-companion' data-belong-to='tab-Attachments'>
                                         <div className='btn-group' role='group'>
                                             <button
@@ -235,7 +236,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             <LinkedReleases release={release}/>
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
-                            <ClearingDetails release={release} releaseId={releaseId} session={session}/>
+                            <ClearingDetails release={release} releaseId={releaseId} session={session} embeddedAttachments={embeddedAttachments}/>
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
                             <ECCDetails release={release}/>
