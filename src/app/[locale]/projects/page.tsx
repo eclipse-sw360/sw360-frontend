@@ -41,7 +41,7 @@ function Project() {
                         {name}
                     </Link>
                 ),
-            sort: true,
+            width: "15%"
         },
         {
             id: 'description',
@@ -50,7 +50,7 @@ function Project() {
                 _(
                     <p>{description}</p>
                 ),
-            sort: true,
+            width: "20%",
         },
         {
             id: 'projectResponsible',
@@ -61,18 +61,21 @@ function Project() {
                         {email}
                     </Link>
                 ),
-            sort: true,
+            width: "20%",
         },
         t('State'),
-        t('License Clearing'),
         {
-            id: 'projectResponsible',
+            id: 'licenseClearing',
+            name: t('License Clearing'),
+            width: "10%"
+        },
+        {
+            id: 'actions',
             name: t('Actions'),
             formatter: () =>
                 _(
                     <Actions/>
                 ),
-            sort: true,
         },
     ]
 
@@ -188,7 +191,7 @@ function Project() {
     }, [])
 
     return (
-        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+        <div className='mx-5' style={{ maxWidth: '98vw', marginTop: '10px' }}>
             <div className='row'>
                 <div className='col-2 sidebar'>
                     <AdvancedSearch title='Advanced Search' fields={advancedSearch} />

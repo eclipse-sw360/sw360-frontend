@@ -10,11 +10,40 @@
 "use client"
 
 import { Modal, Form, Row, Col, Button } from "react-bootstrap"
+import { _, Table } from "@/components/sw360"
 
 export default function DepartmentModal({ show, setShow }: {
     show: boolean,
     setShow: (show: boolean) => void
 }) {
+
+    const columns = [
+        {
+            id: 'selectDepartmentRadio',
+            name: '',
+            formatter: (departmentId: string) =>
+            _(
+                  <div className="form-check d-flex justify-content-center">
+                      <input className="form-check-input" type="radio" name="department" id={departmentId}/>
+                  </div>
+            ),
+            width: "10%"
+        },
+        {
+            id: 'departmentName',
+            name: 'Deparment Name',
+            width: "30%"
+        },
+        {
+            id: 'priority',
+            name: 'Priority'
+        },
+    ]
+
+    const data = [
+        { departmentId: "1", departmentName: "T", priority: "PRIMARY" }
+    ]
+
     return (
         <>
             <Modal
@@ -30,18 +59,24 @@ export default function DepartmentModal({ show, setShow }: {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    <Row>
+                        <Table
+                            columns={columns}
+                            data={data.map((data) => [data.departmentId, data.departmentName, data.priority])}
+                        />
+                    </Row>
                     <Form>
                         <Col>
                             <Row className="mb-3 d-flex justify-content-end">
                                 <Col xs={6}>
-                                    <Form.Control type="text"/>
+                                    <Form.Control type="text" name="department" defaultValue="T"/>
                                 </Col>                    
                             </Row>
                         </Col>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShow(false)}>Close</Button>
+                    <Button variant="dark" onClick={() => setShow(false)}>Close</Button>
                     <Button variant="primary" onClick={() => { setShow(false) }}>Select</Button>
                 </Modal.Footer>
             </Modal>

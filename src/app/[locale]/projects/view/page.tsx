@@ -9,7 +9,7 @@
 
 "use client"
 
-import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
+import { Col, Row, ListGroup, Tab, Button } from 'react-bootstrap'
 import { SummaryView, AdministrationView, LinkProjectsModal, 
             LicenseClearingView, ObligationsView, ECCView,
             VulnerabilityStatusView, AttachmentsView, VulnerabilitiesView,
@@ -23,44 +23,44 @@ export default function ViewProjects() {
     return (
         <>
             <LinkProjectsModal show={showLinkProjectsModal} setShow={setShowLinkProjectsModal} />
-            <Container className="mt-2">
+            <div className="ms-5 mt-2">
                 <Tab.Container defaultActiveKey="summary">
                     <Row>
-                        <Col sm={3}>
+                        <Col sm="auto" className="me-3">
                             <ListGroup>
                                 <ListGroup.Item action eventKey="summary">
-                                    Summary
+                                    <div className="my-2">Summary</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="administration">
-                                    Administration
+                                    <div className="my-2">Administration</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="licenseClearing">
-                                    License Clearing
+                                    <div className="my-2">License Clearing</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="obligations">
-                                    Obligations
+                                    <div className="my-2">Obligations</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="ecc">
-                                    ECC
+                                    <div className="my-2">ECC</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="vulnerabilityTrackingStatus">
-                                    Vulnerability Tracking Status
+                                    <div className="my-2">Vulnerability Tracking Status</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="attachments">
-                                    Attachments
+                                    <div className="my-2">Attachments</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="attachmentUsages">
-                                    Attachment Usages
+                                    <div className="my-2">Attachment Usages</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="vulnerabilities">
-                                    Vulnerabilities
+                                    <div className="my-2">Vulnerabilities</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="changeLog">
-                                    Change Log
+                                    <div className="my-2">Change Log</div>
                                 </ListGroup.Item>
                             </ListGroup>
                         </Col>
-                        <Col sm={9} className="ps-2">
+                        <Col className="ps-2 me-3">
                             <Row>
                                 <Row className="d-flex justify-content-between">
                                 <Col lg={4}>
@@ -69,7 +69,7 @@ export default function ViewProjects() {
                                         <Button variant="secondary" className="col-auto" onClick={() => setShowLinkProjectsModal(true)}>Link to Projects</Button>
                                     </Row>
                                 </Col>
-                                <Col lg={4} className="text-truncate buttonheader-title">
+                                <Col lg={4} className="text-truncate buttonheader-title me-3">
                                     {"-DICOMQUERYRETRIEVESCU (VANADIUM52)"}
                                 </Col>
                             </Row>
@@ -91,7 +91,7 @@ export default function ViewProjects() {
                         </Col>
                     </Row>
                 </Tab.Container>
-            </Container>
+            </div>
         </>
     )
 }

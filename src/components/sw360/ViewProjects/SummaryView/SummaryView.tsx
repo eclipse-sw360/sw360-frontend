@@ -20,7 +20,7 @@ export default function SummaryView() {
     return (
         <>
             <div className="container">
-                <div className="row ms-0">
+                <div className="row ms-0 my-2">
                     <p className="ps-0">{description}</p>
                 </div>
                 <GeneralInformation/>

@@ -202,12 +202,11 @@ table.gridjs-table {
 
 td.gridjs-td {
     border: 1px solid #e5e7eb;
-    padding: 8px 16px;
+    padding: 12px 24px;
     background-color: #fff;
     box-sizing: content-box;
     font-size: 14px;
-    word-wrap: break-word;
-    max-width: 20%;
+    overflow-wrap: break-word;
 }
 td.gridjs-td:first-child {
     border-left: none;
@@ -240,7 +239,6 @@ th.gridjs-th .gridjs-th-content {
     overflow: hidden;
     width: 100%;
     float: left;
-    /* word-wrap: break-word; */
 }
 th.gridjs-th-sort {
     cursor: pointer;

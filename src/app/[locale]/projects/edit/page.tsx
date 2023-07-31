@@ -9,7 +9,7 @@
 
 "use client"
 
-import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
+import { Col, Row, ListGroup, Tab, Button } from 'react-bootstrap'
 import { Summary, Administration, LinkedProjects, ModerationRequestModal, DeleteProjectModal } from "@/components/sw360"
 import { useState } from 'react'
 
@@ -22,37 +22,35 @@ export default function EditProjects() {
         <>
             <ModerationRequestModal show={showRequestModerationModal} setShow={setShowRequestModerationModal}/>
             <DeleteProjectModal show={showDeleteProjectModal} setShow={setShowDeleteProjectModal}/>
-            <Container className="mt-2">
+            <div className="ms-5 mt-2">
                 <Tab.Container defaultActiveKey="summary">
                     <Row>
-                        <Col sm={3}>
+                        <Col sm="auto" className="me-3">
                             <ListGroup>
                                 <ListGroup.Item action eventKey="summary">
-                                    Summary
+                                    <div className="my-2">Summary</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="administration">
-                                    Administration
+                                    <div className="my-2">Administration</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="linkedProjects">
-                                    Linked Projects and Releases
+                                    <div className="my-2">Linked Projects and Releases</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="attachments">
-                                    Attachments
+                                    <div className="my-2">Attachments</div>
                                 </ListGroup.Item>
                             </ListGroup>
                         </Col>
-                        <Col sm={9}>
-                            {/* <Row>
-                            </Row> */}
+                        <Col  className="me-3">
                             <Row className="d-flex justify-content-between">
                                 <Col lg={5}>
                                     <Row>
                                         <Button variant="primary" className="me-2 col-auto" onClick={() => setShowRequestModerationModal(true)}>Update Project</Button>
-                                        <Button variant="danger" className={`col-auto fw-bold  me-2`} onClick={() => setShowDeleteProjectModal(true)}>Delete Project</Button>
+                                        <Button variant="danger" className={`col-auto fw-bold me-2`} onClick={() => setShowDeleteProjectModal(true)}>Delete Project</Button>
                                         <Button variant="secondary" className="col-auto">Cancel</Button>
                                     </Row>
                                 </Col>
-                                <Col lg={4} className="text-truncate buttonheader-title">
+                                <Col lg={4} className="text-truncate buttonheader-title me-3">
                                     {"-DICOMQUERYRETRIEVESCU (VANADIUM52)"}
                                 </Col>
                             </Row>
@@ -67,7 +65,7 @@ export default function EditProjects() {
                         </Col>
                     </Row>
                 </Tab.Container>
-            </Container>
+            </div>
         </>
     )
 }

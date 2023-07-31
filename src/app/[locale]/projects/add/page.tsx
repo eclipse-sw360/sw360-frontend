@@ -9,29 +9,29 @@
 
 "use client"
 
-import { Col, Row, ListGroup, Tab, Container, Button } from 'react-bootstrap'
+import { Col, Row, ListGroup, Tab, Button } from 'react-bootstrap'
 import { Summary, Administration, LinkedProjects } from "@/components/sw360"
 
 export default function AddProjects() {
     return (
         <>
-            <Container className="mt-2">
+            <div className="ms-5 mt-2">
                 <Tab.Container defaultActiveKey="summary">
                     <Row>
-                        <Col sm={3}>
+                        <Col sm="auto" className="me-3">
                             <ListGroup>
                                 <ListGroup.Item action eventKey="summary">
-                                    Summary
+                                    <div className="my-2">Summary</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="administration">
-                                    Administration
+                                    <div className="my-2">Administration</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item action eventKey="linkedProjects">
-                                    Linked Releases and Projects
+                                    <div className="my-2">Linked Releases and Projects</div>
                                 </ListGroup.Item>
                             </ListGroup>
                         </Col>
-                        <Col sm={9}>
+                        <Col className="me-3">
                             <Row className="d-flex justify-content-between">
                                 <Col lg={3}>
                                     <Row>
@@ -53,7 +53,7 @@ export default function AddProjects() {
                         </Col>
                     </Row>
                 </Tab.Container>
-            </Container>
+            </div>
         </>
     )
 }
