@@ -12,7 +12,7 @@
 
 .summary-table {
   border: 1px solid lightgray;
-  margin-bottom: 2rem;
+  margin-bottom: 2rem !important;
 }
 
 .mapDisplayRootItem {

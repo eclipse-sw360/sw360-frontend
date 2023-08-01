@@ -17,6 +17,7 @@ import { Session } from '@/object-types/Session'
 
 import { PageButtonHeader, AdvancedSearch } from '@/components/sw360'
 import { useState } from 'react'
+import DownloadService from '@/services/download.service'
 
 interface Props {
     session?: Session
@@ -141,6 +142,12 @@ const ComponentIndex = ({ session }: Props) => {
         }
     ]
 
+    const handleExportComponent = (withLinkedReleases: boolean) => {
+        const currentDate = new Date().toISOString().split('T')[0]
+        DownloadService.download(`reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=false&module=components`,
+                                session, `components-${currentDate}.xlsx`)
+    }
+
     return (
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
             <div className='row'>
@@ -155,8 +162,8 @@ const ComponentIndex = ({ session }: Props) => {
                                     {t('Export Spreadsheet')}
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item>{t('Components only')}</Dropdown.Item>
-                                    <Dropdown.Item>{t('Components with releases')}</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => handleExportComponent(false)}>{t('Components only')}</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => handleExportComponent(true)}>{t('Components with releases')}</Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </div>
