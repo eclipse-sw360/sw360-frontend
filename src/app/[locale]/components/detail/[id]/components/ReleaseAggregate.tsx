@@ -9,10 +9,11 @@
 // License-Filename: LICENSE
 
 "use client"
-import { useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl'
 import styles from '../detail.module.css'
 import { useState } from 'react'
-import { COMMON_NAMESPACE } from '@/object-types/Constants';
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import CommonUtils from '@/utils/common.utils';
 
 const ReleaseAgrregate = ({ component }: any) => {
   const [toggle, setToggle] = useState(false);
@@ -28,7 +29,19 @@ const ReleaseAgrregate = ({ component }: any) => {
       <tbody hidden={toggle}>
         <tr>
           <td>{t('Vendors')}:</td>
-          <td>{(component['sw360:vendors']) && component['sw360:vendors']}</td>
+          <td>
+            {(component['_embedded'])
+            &&
+            <>
+              {(!CommonUtils.isNullEmptyOrUndefinedArray(component['_embedded']['sw360:vendors'])) && (
+              Object.values(component['_embedded']['sw360:vendors'])
+                  .map((vendor: any) => (
+                    <span key={vendor.fullName}>{vendor.fullName}</span>
+                  ))
+                  .reduce((prev, curr): any => [prev, ', ', curr])
+              )}
+            </>
+          }</td>
         </tr>
         <tr>
           <td>{t('Languages')}:</td>

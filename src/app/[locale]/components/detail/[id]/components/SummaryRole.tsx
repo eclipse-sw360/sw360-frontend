@@ -8,10 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl'
 import styles from '../detail.module.css'
 import { useState } from 'react'
-import { COMMON_NAMESPACE } from '@/object-types/Constants';
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import CommonUtils from '@/utils/common.utils'
 
 const SummaryRole = ({ component }: any) => {
   const t = useTranslations(COMMON_NAMESPACE)
@@ -27,11 +28,11 @@ const SummaryRole = ({ component }: any) => {
       <tbody hidden={toggle}>
         <tr>
           <td>{t('Component Owner')}:</td>
-          {(component.componentOwner) && <td>{component.componentOwner}</td>}
+          <td>{(component.componentOwner) && <>{component.componentOwner}</>}</td>
         </tr>
         <tr>
           <td>{t('Owner Accounting Unit')}:</td>
-          {(component.ownerAccountingUnit) && <td>{component.ownerAccountingUnit}</td>}
+          <td>{(component.ownerAccountingUnit) && <>{component.ownerAccountingUnit}</>}</td>
         </tr>
         <tr>
           <td>{t('Owner Billing Group')}:</td>
@@ -43,9 +44,20 @@ const SummaryRole = ({ component }: any) => {
         </tr>
         <tr>
           <td>{t('Moderators')}:</td>
-          {(component['_embedded']) && <td>{(component['_embedded']['sw360:moderators']) && 
-            <a className={styles.link} href={`mailto:${component['_embedded']['sw360:moderators']['email']}`}>{component['_embedded']['createdBy']['fullName']}</a>
-          } </td>}
+          <td>
+            {(component['_embedded'])
+              &&
+              <>
+                {(!CommonUtils.isNullEmptyOrUndefinedArray(component['_embedded']['sw360:moderators'])) && (
+                  Object.values(component['_embedded']['sw360:moderators'])
+                    .map((user: any) => (
+                      <a key={user.email} href={`mailto:${user.email}`}>{user.fullName}</a>
+                    ))
+                    .reduce((prev, curr): any => [prev, ', ', curr])
+                )}
+              </>
+            }
+          </td>
         </tr>
         <tr>
           <td>{t('Subscribers')}:</td>
