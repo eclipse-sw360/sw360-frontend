@@ -175,7 +175,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                         </div>
                     </Form.Group>
                     <Form.Group>
-                        <Button size='sm' className='sw360-button' onClick={submitSearch}>
+                        <Button size='sm' variant='primary' className='w-100' onClick={submitSearch}>
                             {t('Search')}
                         </Button>
                     </Form.Group>

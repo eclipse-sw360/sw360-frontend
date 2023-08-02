@@ -17,7 +17,7 @@ body {
     color: #272833;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen-Sans, Ubuntu, Cantarell,
         Helvetica Neue, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
-    font-size: 1rem;
+    font-size: 0.9rem;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     font-weight: 400;
@@ -140,7 +140,7 @@ th {
 }
 
 .btn {
-    font-weight: bold !important;
+    font-weight: 500 !important;
     border-radius: 3px !important;
     padding-left: 15px !important;
     padding-right: 15px !important;
@@ -245,37 +245,6 @@ th {
     padding-right: 1rem;
     padding-top: 1rem;
     background-color: #ebf0f5;
-}
-
-.sw360-button {
-    background-color: var(--sw360-primary-color);
-    width: 100%;
-}
-
-.button-plain,
-.button-plain:focus,
-.button-plain:active {
-    border-color: #dbdce4 !important;
-    color: #6b6c7e !important;
-    background-color: white !important;
-}
-.button-plain:hover {
-    border-color: #dbdce4 !important;
-    color: black !important;
-    background-color: #f8f9fa !important;
-}
-
-.button-orange,
-.button-orange:focus,
-.button-orange:active {
-    background-color: #f28809 !important;
-    border-color: #dbdce4 !important;
-    color: black !important;
-}
-.button-orange:hover {
-    background-color: #f28809 !important;
-    border-color: #dbdce4 !important;
-    color: white !important;
 }
 
 .nav {

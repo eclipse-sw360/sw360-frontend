@@ -86,7 +86,7 @@ export default function AddKeyValueComponent(props: Props) {
                                 <button
                                     type='button'
                                     onClick={() => handleRemoveClick(j)}
-                                    className={`fw-bold btn btn-light button-plain`}
+                                    className='btn btn-secondary'
                                 >
                                     <FaTrashAlt className="bi bi-trash3-fill" />
                                 </button>
@@ -98,7 +98,7 @@ export default function AddKeyValueComponent(props: Props) {
                     <button
                         type='button'
                         onClick={() => handleAddClick()}
-                        className={`fw-bold btn btn-light button-plain`}
+                        className='btn btn-secondary'
                     >{`Click to add row to ${props.keyName
                         .split(' ')
                         .map((elem) => elem[0].toUpperCase() + elem.substring(1))

@@ -69,7 +69,7 @@ export default function Summary() {
                                 </button>
                                 <button
                                     type='button'
-                                    className={`fw-bold btn btn-light ${styles['button-plain']} mt-2`}
+                                    className='btn btn-secondary mt-2'
                                 >
                                     Cancel
                                 </button>

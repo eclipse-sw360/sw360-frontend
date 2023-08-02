@@ -100,7 +100,7 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
                     })
                 }
                 <div className="col-lg-4">
-                    <button type="button" onClick={() => handleAddClick()} className={`fw-bold btn btn-light button-plain`}>{t('Click to add row to Additional Roles')}</button>
+                    <button type="button" onClick={() => handleAddClick()} className='btn btn-secondary'>{t('Click to add row to Additional Roles')}</button>
                 </div>
             </div>
         </>
