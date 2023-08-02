@@ -19,38 +19,39 @@ import { Session } from '@/object-types/Session'
 import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { notFound } from 'next/navigation'
-import { Table, _ } from '@/components/sw360'
+import { _ } from '@/components/sw360'
 import SelectAttachment from './SelectAttachment'
-import DeleteAttachment from './DeleteAttachment'
-import EnterCreatedCommentDialog from './EnterCreatedCommentDialog'
-import EnterCheckedCommentDialog from './EnterCheckedCommentDialog'
+
 import TableAttachment from './TableAttachment'
 import TiltleAttachment from './TitleAttachment'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
+import ComponentPayload from '@/object-types/ComponentPayLoad'
 
 interface Props {
     documentId: string
     session: Session
     documentType: string
+    componentData: ComponentPayload
+    setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
-const EditAttachments = ({ documentId, session, documentType }: Props) => {
+const EditAttachments = ({ documentId, session, documentType, componentData, setComponentData }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
     const [reRender, setReRender] = useState(false)
     const handleReRender = () => {
         setReRender(!reRender)
     }
-    const [totalRows, setTotalRows] = useState(0)
-    const [createdComment, setCreatedComment] = useState()
-    const [checkedComment, setCheckedComment] = useState()
-    const [dialogOpenCreatedComment, setDialogOpenCreatedComment] = useState(false)
-    const [dialogOpenCheckedComment, setDialogOpenCheckedComment] = useState(false)
-    const [dialogDeleteAttachment, setDialogDeleteAttachment] = useState(false)
     const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
-    const handleClickEnterCreatedComment = useCallback(() => setDialogOpenCreatedComment(true), [])
-    const handleClickCheckedComment = useCallback(() => setDialogOpenCheckedComment(true), [])
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
+
+    const setAttachmentToComponentData = (attachmentDatas: AttachmentDetail[]) => {
+        setComponentData({
+            ...componentData,
+            attachmentDTOs: attachmentDatas,
+        })
+    }
+
     const fetchData: any = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -77,7 +78,10 @@ const EditAttachments = ({ documentId, session, documentType }: Props) => {
                     attachmentDetails.push(item)
                 })
                 setAttachmentData(attachmentDetails)
-                setTotalRows(attachmentDetails.length)
+                setComponentData({
+                    ...componentData,
+                    attachmentDTOs: attachmentDetails,
+                })
             }
         })
     }, [documentId, documentType, fetchData])
@@ -85,6 +89,8 @@ const EditAttachments = ({ documentId, session, documentType }: Props) => {
     return (
         <>
             <SelectAttachment
+                componentData={componentData}
+                setComponentData={setComponentData}
                 attachmentUpload={attachmentData}
                 setAttachmentFromUpload={setAttachmentData}
                 show={dialogOpenSelectAttachment}
@@ -92,34 +98,26 @@ const EditAttachments = ({ documentId, session, documentType }: Props) => {
                 session={session}
                 onReRender={handleReRender}
             />
-            {totalRows ? (
-                <>
-                    <div className={`row ${styles['attachment-table']}`}>
-                        <TiltleAttachment />
-                        <TableAttachment data={attachmentData} setAttachmentData={setAttachmentData} />
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                    </div>
-                    <DeleteAttachment
-                        show={dialogDeleteAttachment}
-                        setShow={setDialogDeleteAttachment}
-                        session={session}
+            {attachmentData ? (
+                <div className={`row ${styles['attachment-table']}`}>
+                    <TiltleAttachment />
+                    <TableAttachment
+                        data={attachmentData}
+                        setAttachmentData={setAttachmentData}
+                        setAttachmentToComponentData={setAttachmentToComponentData}
                     />
-                    <EnterCreatedCommentDialog
-                        show={dialogOpenCreatedComment}
-                        setShow={setDialogOpenCreatedComment}
-                        createdComment={createdComment}
-                        setCreatedComment={setCreatedComment}
-                    />
-                    <EnterCheckedCommentDialog
-                        show={dialogOpenCheckedComment}
-                        setShow={setDialogOpenCheckedComment}
-                        checkedComment={checkedComment}
-                        setCheckedComment={setCheckedComment}
-                    />
-                </>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>
             ) : (
                 <div className='col'>
+                    <TiltleAttachment />
                     <Alert variant='primary'>{t('No attachments yet')}</Alert>
+                    <TableAttachment
+                        data={attachmentData}
+                        setAttachmentData={setAttachmentData}
+                        setAttachmentToComponentData={setAttachmentToComponentData}
+                    />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
             )}
             <div>

@@ -18,15 +18,28 @@ import 'react-toastify/dist/ReactToastify.css'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import FeatureType from '@/object-types/enums/FeatureType'
 interface Props {
-    session: Session
-    componentPayload: ComponentPayload
-    setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    vendor: Vendor
-    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
+    session?: Session
+    componentPayload?: ComponentPayload
+    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    vendor?: Vendor
+    setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
+    componentData?: ComponentPayload
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    featureType?: string
 }
 
-const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, vendor, setVendor }: Props) => {
+const GeneralInfoComponent = ({
+    session,
+    componentPayload,
+    setComponentPayload,
+    vendor,
+    setVendor,
+    componentData,
+    setComponentData,
+    featureType
+}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
@@ -36,12 +49,22 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, 
             ...componentPayload,
             [e.target.name]: e.target.value,
         })
+        featureType === FeatureType.EDIT &&
+        setComponentData({
+            ...componentData,
+            [e.target.name]: e.target.value,
+        })
     }
 
     const setCategoriesData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         const data: string[] = splitValueCategories(e.target.value)
         setComponentPayload({
             ...componentPayload,
+            categories: data,
+        })
+        featureType === FeatureType.EDIT &&
+        setComponentData({
+            ...componentData,
             categories: data,
         })
     }
@@ -53,11 +76,16 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, 
     const setVendorId = (vendorResponse: Vendor) => {
         const vendorData: Vendor = {
             id: vendorResponse.id,
-            fullName: vendorResponse.fullName
+            fullName: vendorResponse.fullName,
         }
-        setVendor(vendorData);
+        setVendor(vendorData)
         setComponentPayload({
             ...componentPayload,
+            defaultVendorId: vendorResponse.id,
+        })
+        featureType === FeatureType.EDIT &&
+        setComponentData({
+            ...componentData,
             defaultVendorId: vendorResponse.id,
         })
     }
@@ -65,7 +93,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, 
     const handleClearVendor = () => {
         const vendorData: Vendor = {
             id: '',
-            fullName: ''
+            fullName: '',
         }
         setVendor(vendorData)
         setComponentPayload({

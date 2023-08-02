@@ -16,6 +16,8 @@ import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
+import { SW360_API_URL } from '@/utils/env'
+import ComponentPayload from '@/object-types/ComponentPayLoad'
 
 interface Props {
     show: boolean
@@ -24,9 +26,20 @@ interface Props {
     attachmentUpload: any
     setAttachmentFromUpload: any
     onReRender: () => void
+    componentData: ComponentPayload
+    setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
-const SelectAttachment = ({ show, setShow, session, attachmentUpload, setAttachmentFromUpload, onReRender }: Props) => {
+const SelectAttachment = ({
+    show,
+    setShow,
+    session,
+    attachmentUpload,
+    setAttachmentFromUpload,
+    onReRender,
+    componentData,
+    setComponentData,
+}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [files, setFiles] = useState(null)
 
@@ -45,8 +58,8 @@ const SelectAttachment = ({ show, setShow, session, attachmentUpload, setAttachm
         for (const key of Object.keys(files)) {
             formData.append('files', files[key])
         }
-
-        fetch('http://10.116.43.147:8080/resource/api/attachments', {
+        const url = SW360_API_URL + '/resource/api/attachments'
+        fetch(url, {
             method: 'POST',
             body: formData,
             headers: {
@@ -57,6 +70,10 @@ const SelectAttachment = ({ show, setShow, session, attachmentUpload, setAttachm
             .then((json) => {
                 json.map((item: AttachmentDetail) => attachmentUpload.push(item))
                 setAttachmentFromUpload(attachmentUpload)
+                setComponentData({
+                    ...componentData,
+                    attachmentDTOs: attachmentUpload,
+                })
                 onReRender()
             })
         setShow(!show)
@@ -78,7 +95,6 @@ const SelectAttachment = ({ show, setShow, session, attachmentUpload, setAttachm
                                     or
                                     <br />
                                     <input type='file' multiple onChange={handleInputFiles} />
-                                    {/* <button id="fileupload-browse" type="button" className="btn btn-secondary">Browser</button> */}
                                 </div>
                             </div>
                         </div>

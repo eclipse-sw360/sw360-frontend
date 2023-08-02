@@ -17,7 +17,6 @@ import { Session } from '@/object-types/Session'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
 import { notFound, useRouter } from 'next/navigation'
-import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
@@ -28,25 +27,26 @@ import ComponentEditSummary from '@/components/sw360/ComponentEditSummary/Compon
 import Releases from './Releases'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
+import DeleteComponentDialog from '../../components/DeleteComponentDialog'
 
 interface Props {
-    session: Session
-    componentId: string
+    session?: Session
+    componentId?: string
 }
 
 const tabList = [
-  {
-      id: CommonTabIds.SUMMARY,
-      name: 'Summary',
-  },
-  {
-      id: CommonTabIds.RELEASES,
-      name: 'Release',
-  },
-  {
-      id: CommonTabIds.ATTACHMENTS,
-      name: 'Attachments',
-  }
+    {
+        id: CommonTabIds.SUMMARY,
+        name: 'Summary',
+    },
+    {
+        id: CommonTabIds.RELEASES,
+        name: 'Release',
+    },
+    {
+        id: CommonTabIds.ATTACHMENTS,
+        name: 'Attachments',
+    },
 ]
 
 const EditComponent = ({ session, componentId }: Props) => {
@@ -54,7 +54,7 @@ const EditComponent = ({ session, componentId }: Props) => {
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [component, setComponent] = useState<any>(undefined)
-    const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [componentData, setComponentData] = useState<ComponentPayload>({
         name: '',
         createBy: '',
@@ -76,6 +76,7 @@ const EditComponent = ({ session, componentId }: Props) => {
         mailinglist: '',
         wiki: '',
         blog: '',
+        attachmentDTOs: null,
     })
 
     const fetchData: any = useCallback(
@@ -96,14 +97,7 @@ const EditComponent = ({ session, componentId }: Props) => {
     useEffect(() => {
         fetchData(`components/${componentId}`).then((component: any) => {
             setComponent(component)
-            if (
-                !CommonUtils.isNullOrUndefined(component['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(component['_embedded']['sw360:attachments'])
-            ) {
-                setAttachmentNumber(component['_embedded']['sw360:attachments'].length)
-            }
         })
-
     }, [componentId, fetchData])
 
     const notify = (text: string, type: TypeOptions) =>
@@ -114,10 +108,7 @@ const EditComponent = ({ session, componentId }: Props) => {
         })
 
     const submit = async () => {
-        console.log("----componentPayload----")
-        console.log(componentData)
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentData, session.user.access_token)
-
         if (response.status == HttpStatus.OK) {
             notify(`Success:Component  ${componentData.name}  updated successfully!`, 'success')
             router.push('/components/detail/' + componentId)
@@ -127,40 +118,55 @@ const EditComponent = ({ session, componentId }: Props) => {
     }
 
     const handleDeleteComponent = () => {
-        console.log("-------delete--------")
+        setDeleteDialogOpen(true)
     }
 
     const headerButtons = {
-        'Update Component': { link: '/components/edit/'+componentId, type: 'primary', onClick: submit },
-        'Delete Component': { link: '/components/edit/'+componentId, type: 'primary', onClick: handleDeleteComponent},
-        Cancel: { link: '/components/detail/'+componentId, type: 'secondary'},
+        'Update Component': { link: '/components/edit/' + componentId, type: 'primary', onClick: submit },
+        'Delete Component': {
+            link: '/components/edit/' + componentId,
+            type: 'primary',
+            onClick: handleDeleteComponent,
+        },
+        Cancel: { link: '/components/detail/' + componentId, type: 'secondary' },
     }
 
     return (
         component && (
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
                 <div className='row'>
+                    <DeleteComponentDialog
+                        componentId={componentId}
+                        show={deleteDialogOpen}
+                        setShow={setDeleteDialogOpen}
+                    />
                     <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
-                        />
+                        <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
                     </div>
                     <div className='col'>
-                    <div className='row' style={{ marginBottom: '20px' }}>
-                            <PageButtonHeader title={component.name} buttons={headerButtons}>
-                            </PageButtonHeader>
+                        <div className='row' style={{ marginBottom: '20px' }}>
+                            <PageButtonHeader title={component.name} buttons={headerButtons}></PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ToastContainer className='foo' style={{ width: '300px', height: '100px' }} />
-                            <ComponentEditSummary session={session} componentId={componentId} componentData={componentData} setComponentData={setComponentData}/>
+                            <ComponentEditSummary
+                                session={session}
+                                componentId={componentId}
+                                componentData={componentData}
+                                setComponentData={setComponentData}
+                            />
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>
                             <Releases componentId={componentId} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <EditAttachments session={session} documentId={componentId} documentType={DocumentTypes.COMPONENT} />
+                            <EditAttachments
+                                session={session}
+                                documentId={componentId}
+                                documentType={DocumentTypes.COMPONENT}
+                                componentData={componentData}
+                                setComponentData={setComponentData}
+                            />
                         </div>
                     </div>
                 </div>

@@ -21,19 +21,33 @@ import ModeratorsDiaglog from '@/components/sw360/SearchModerators/ModeratorsDia
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import FeatureType from '@/object-types/enums/FeatureType'
 interface Props {
-    session: Session
-    componentPayload: ComponentPayload
-    setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    componentOwner: ComponentOwner
-    setComponentOwner: React.Dispatch<React.SetStateAction<ComponentOwner>>
-    moderator: Moderators
-    setModerator: React.Dispatch<React.SetStateAction<Moderators>>
+    session?: Session
+    componentPayload?: ComponentPayload
+    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    componentOwner?: ComponentOwner
+    setComponentOwner?: React.Dispatch<React.SetStateAction<ComponentOwner>>
+    moderator?: Moderators
+    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
+    componentData?: ComponentPayload
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    featureType?: string
 }
 
-const RolesInformation = ({ session, componentPayload, setComponentPayload, componentOwner, setComponentOwner, moderator, setModerator}: Props) => {
-
-    const t = useTranslations(COMMON_NAMESPACE);
+const RolesInformation = ({
+    session,
+    componentPayload,
+    setComponentPayload,
+    componentOwner,
+    setComponentOwner,
+    moderator,
+    setModerator,
+    componentData,
+    setComponentData,
+    featureType
+}: Props) => {
+    const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchComponentOwner = useCallback(() => setDialogOpenComponentOwner(true), [])
@@ -44,28 +58,43 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload, comp
             ...componentPayload,
             [e.target.name]: e.target.value,
         })
+        featureType === FeatureType.EDIT &&
+        setComponentData({
+            ...componentData,
+            [e.target.name]: e.target.value,
+        })
     }
 
     const setComponentOwnerId = (componentOwnerResponse: ComponentOwner) => {
         const componentOwner: ComponentOwner = {
             email: componentOwnerResponse.email,
-            fullName: componentOwnerResponse.fullName
+            fullName: componentOwnerResponse.fullName,
         }
         setComponentOwner(componentOwner)
         setComponentPayload({
             ...componentPayload,
             componentOwner: componentOwnerResponse.email,
         })
+        featureType === FeatureType.EDIT &&
+        setComponentData({
+            ...componentData,
+            componentOwner: componentOwnerResponse.email,
+        })
     }
 
     const setModerators = (moderatorsResponse: Moderators) => {
-        const moderator : Moderators = {
+        const moderator: Moderators = {
             emails: moderatorsResponse.emails,
-            fullName: moderatorsResponse.fullName
+            fullName: moderatorsResponse.fullName,
         }
         setModerator(moderator)
         setComponentPayload({
             ...componentPayload,
+            moderators: moderatorsResponse.emails,
+        })
+        featureType === FeatureType.EDIT &&
+        setComponentData({
+            ...componentData,
             moderators: moderatorsResponse.emails,
         })
     }
@@ -73,7 +102,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload, comp
     const handleClearComponentOwner = () => {
         const componentOwner: ComponentOwner = {
             email: '',
-            fullName: ''
+            fullName: '',
         }
         setComponentOwner(componentOwner)
         setComponentPayload({
@@ -83,11 +112,11 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload, comp
     }
 
     const handleClearModerators = () => {
-        const moderator : Moderators = {
+        const moderator: Moderators = {
             emails: null,
-            fullName: ''
+            fullName: '',
         }
-        setModerator(moderator);
+        setModerator(moderator)
         setComponentPayload({
             ...componentPayload,
             moderators: [],

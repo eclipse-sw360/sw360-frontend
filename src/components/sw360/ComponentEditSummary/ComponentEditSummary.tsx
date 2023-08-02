@@ -28,6 +28,7 @@ import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import SearchUsersModalComponent from '../SearchUsersModal/SearchUsersModal'
+import FeatureType from '@/object-types/enums/FeatureType'
 interface Props {
     session: Session
     componentId: string
@@ -35,25 +36,24 @@ interface Props {
     setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
-export default function ComponentEditSummary({ session, componentId, componentData, setComponentData}: Props) {
-    const t = useTranslations(COMMON_NAMESPACE);
-    const [componentName, setComponentName] =useState<string>();
-    const [roles,setRoles] = useState<Input[]>([])
-    const [externalIds,setExternalIds] = useState<Input[]>([])
-    const [addtionalData,setAddtionalData] = useState<Input[]>([])
-    const [vendor, setVendor] = useState<Vendor> ({
+export default function ComponentEditSummary({ session, componentId, componentData, setComponentData }: Props) {
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [roles, setRoles] = useState<Input[]>([])
+    const [externalIds, setExternalIds] = useState<Input[]>([])
+    const [addtionalData, setAddtionalData] = useState<Input[]>([])
+    const [vendor, setVendor] = useState<Vendor>({
         id: '',
-        fullName: ''
+        fullName: '',
     })
 
-    const [componentOwner, setComponentOwner] = useState<ComponentOwner> ({
+    const [componentOwner, setComponentOwner] = useState<ComponentOwner>({
         email: '',
-        fullName: ''
+        fullName: '',
     })
 
-    const [moderator, setModerator] = useState<Moderators> ({
+    const [moderator, setModerator] = useState<Moderators>({
         emails: null,
-        fullName: ''
+        fullName: '',
     })
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
@@ -97,7 +97,7 @@ export default function ComponentEditSummary({ session, componentId, componentDa
         const fullNames: string[] = []
         const moderatorsEmail: string[] = []
         if (emails.length == 0) {
-            return ;
+            return
         }
         emails.forEach((item) => {
             fullNames.push(item.fullName)
@@ -108,28 +108,28 @@ export default function ComponentEditSummary({ session, componentId, componentDa
             fullName: moderatorsName,
             emails: moderatorsEmail,
         }
-        return moderatorsResponse;
+        return moderatorsResponse
     }
 
     const getEmailsModerators = (emails: any[]) => {
         const moderatorsEmail: string[] = []
-        if (typeof emails === "undefined") {
-            return ;
+        if (typeof emails === 'undefined') {
+            return
         }
         emails.forEach((item) => {
             moderatorsEmail.push(item.email)
         })
 
-        return moderatorsEmail;
+        return moderatorsEmail
     }
 
     const convertObjectToMap = (data: string) => {
-        const map = new Map(Object.entries(data));
+        const map = new Map(Object.entries(data))
         const inputs: Input[] = []
         map.forEach((value, key) => {
             const input: Input = {
                 key: key,
-                value: value
+                value: value,
             }
             inputs.push(input)
         })
@@ -138,72 +138,71 @@ export default function ComponentEditSummary({ session, componentId, componentDa
 
     const convertObjectToMapRoles = (data: string) => {
         if (data === undefined) {
-            return;
+            return
         }
-        const inputs: Input[] = []
-        const map = new Map(Object.entries(data));
-        map.forEach((value, key) => {
+        const inputRoles: Input[] = []
+        const mapRoles = new Map(Object.entries(data))
+        mapRoles.forEach((value, key) => {
             for (let index = 0; index < value.length; index++) {
                 const input: Input = {
                     key: key,
-                    value: value.at(index)
+                    value: value.at(index),
                 }
-                inputs.push(input)
+                inputRoles.push(input)
             }
         })
-        return inputs
+        return inputRoles
     }
-
 
     useEffect(() => {
         fetchData(`components/${componentId}`).then((component: any) => {
-            if (typeof component.roles !== "undefined") {
+            if (typeof component.roles !== 'undefined') {
                 setRoles(convertObjectToMapRoles(component.roles))
             }
 
-            if (typeof component.externalIds !== "undefined") {
+            if (typeof component.externalIds !== 'undefined') {
                 setExternalIds(convertObjectToMap(component.externalIds))
             }
 
-            if (typeof component.additionalData !== "undefined") {
+            if (typeof component.additionalData !== 'undefined') {
                 setAddtionalData(convertObjectToMap(component.additionalData))
             }
 
-            if (typeof component['_embedded']['sw360:moderators'] !== "undefined") {
-               setModerator(handlerModerators(component['_embedded']['sw360:moderators']))
+            if (typeof component['_embedded']['sw360:moderators'] !== 'undefined') {
+                setModerator(handlerModerators(component['_embedded']['sw360:moderators']))
             }
 
-            if (typeof component['_embedded']['defaultVendor'] !== "undefined") {
+            if (typeof component['_embedded']['defaultVendor'] !== 'undefined') {
                 const vendor: Vendor = {
                     id: component.defaultVendorId,
-                    fullName: component['_embedded']['defaultVendor']['fullName']
+                    fullName: component['_embedded']['defaultVendor']['fullName'],
                 }
                 setVendor(vendor)
             }
 
-            if (typeof component['_embedded']['componentOwner'] !== "undefined") {
+            if (typeof component['_embedded']['componentOwner'] !== 'undefined') {
                 const componentOwner: ComponentOwner = {
                     email: component['_embedded']['componentOwner']['email'],
-                    fullName: component['_embedded']['componentOwner']['fullName']
+                    fullName: component['_embedded']['componentOwner']['fullName'],
                 }
                 setComponentOwner(componentOwner)
             }
 
-            let modifiedBy = '';
-            if (typeof component['_embedded']['modifiedBy'] !== "undefined") {
-                modifiedBy = component['_embedded']['modifiedBy']['fullName'];
+            let modifiedBy = ''
+            if (typeof component['_embedded']['modifiedBy'] !== 'undefined') {
+                modifiedBy = component['_embedded']['modifiedBy']['fullName']
             }
 
-            let creatBy = '';
-            if (typeof component['_embedded']['modifiedBy'] !== "undefined") {
+            let creatBy = ''
+            if (typeof component['_embedded']['modifiedBy'] !== 'undefined') {
                 creatBy = component['_embedded']['createdBy']['fullName']
             }
 
-            let componentOwnerEmail = '';
-            if (typeof component['_embedded']['componentOwner'] !== "undefined") {
-                componentOwnerEmail =  component['_embedded']['componentOwner']['email']
+            let componentOwnerEmail = ''
+            if (typeof component['_embedded']['componentOwner'] !== 'undefined') {
+                componentOwnerEmail = component['_embedded']['componentOwner']['email']
             }
-            
+
             const componentPayloadData: ComponentPayload = {
                 name: component.name,
                 createBy: creatBy,
@@ -226,7 +225,6 @@ export default function ComponentEditSummary({ session, componentId, componentDa
                 wiki: component.wiki,
                 blog: component.blog,
             }
-            setComponentName(component.name)
             setComponentPayload(componentPayloadData)
             setComponentData(componentPayloadData)
         })
@@ -269,8 +267,8 @@ export default function ComponentEditSummary({ session, componentId, componentDa
     }
 
     const convertRoles = (datas: Input[]) => {
-        if ( datas === undefined) {
-            return "";
+        if (datas === undefined) {
+            return ''
         }
         const contributors: string[] = []
         const commiters: string[] = []
@@ -309,19 +307,25 @@ export default function ComponentEditSummary({ session, componentId, componentDa
                             <div className='col'>
                                 <GeneralInfoComponent
                                     session={session}
+                                    featureType={FeatureType.EDIT}
                                     vendor={vendor}
                                     setVendor={setVendor}
                                     componentPayload={componentPayload}
                                     setComponentPayload={setComponentPayload}
+                                    componentData={componentData}
+                                    setComponentData={setComponentData}
                                 />
                                 <RolesInformation
                                     session={session}
+                                    featureType={FeatureType.EDIT}
                                     componentOwner={componentOwner}
                                     setComponentOwner={setComponentOwner}
                                     moderator={moderator}
                                     setModerator={setModerator}
                                     componentPayload={componentPayload}
                                     setComponentPayload={setComponentPayload}
+                                    componentData={componentData}
+                                    setComponentData={setComponentData}
                                 />
                                 <div className='row mb-4'>
                                     <AddAdditionalRolesComponent

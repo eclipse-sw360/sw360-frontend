@@ -13,25 +13,29 @@ import { FaTrashAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
+import { AttachmentType } from '@/object-types/AttachmentType'
 
 interface Props {
     setAttachmentData: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
     data: AttachmentDetail[]
+    setAttachmentToComponentData: AttachmentType
 }
 
-export default function TableAttachment({ data, setAttachmentData }: Props) {
+export default function TableAttachment({ data, setAttachmentData, setAttachmentToComponentData }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
         const list: AttachmentDetail[] = [...data]
         list[index][name as keyof AttachmentDetail] = value
         setAttachmentData(list)
+        setAttachmentToComponentData(list)
     }
 
     const handleClickDelete = (index: number) => {
         const list: AttachmentDetail[] = [...data]
         list.splice(index, 1)
         setAttachmentData(list)
+        setAttachmentToComponentData(list)
     }
 
     return (
@@ -40,10 +44,13 @@ export default function TableAttachment({ data, setAttachmentData }: Props) {
                 {data.map((item, j) => {
                     return (
                         <>
-                            <div style={{ border: '1px solid #969696' }}>
-                                <label style={{ width: '220px' }}>{item.filename}</label>
+                            <div style={{}}>
+                                <label style={{ width: '200px', overflowWrap: 'break-word', fontSize: '14px' }}>
+                                    {item.filename}
+                                </label>
+                                &nbsp;&nbsp;
                                 <select
-                                    style={{ width: '100px' }}
+                                    style={{ width: '100px', fontSize: '14px' }}
                                     aria-label='component_type'
                                     id='component_type'
                                     defaultValue=''
@@ -52,7 +59,7 @@ export default function TableAttachment({ data, setAttachmentData }: Props) {
                                     value={item.attachmentType}
                                 >
                                     <option value='SOURCE'>{t('Source file')}</option>
-                                    <option value='CLEARING_REPORT'>{t('Clearing report')}</option>
+                                    <option value='CLEARING_REPORT'>{t('Clearing Report')}</option>
                                     <option value='COMPONENT_LICENSE_INFO_XML'>
                                         {t('Component license information (XML)')}
                                     </option>
@@ -78,21 +85,22 @@ export default function TableAttachment({ data, setAttachmentData }: Props) {
                                     <option value='SBOM'>{t('SBOM')}</option>
                                     <option value='INTERNAL_USE_SCAN'>{t('Initial Use Scan')}</option>
                                 </select>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                &nbsp;&nbsp;
                                 <input
                                     name='createdComment'
-                                    style={{ width: '100px' }}
+                                    style={{ width: '120px' }}
                                     value={item.createdComment}
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     placeholder='Enter Comment'
                                 />
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <label style={{ width: '100px' }}>{item.createdTeam}</label>
-                                <label style={{ width: '130px' }}>{item.createdBy}</label>
-                                <label style={{ width: '100px' }}>{item.createdOn}</label>
+                                &nbsp;&nbsp;
+                                <label style={{ width: '100px', fontSize: '14px' }}>{item.createdTeam}</label>
+                                &nbsp;&nbsp;
+                                <label style={{ width: '120px', fontSize: '14px' }}>{item.createdBy}</label>&nbsp;&nbsp;
+                                <label style={{ width: '80px', fontSize: '14px' }}>{item.createdOn}</label>&nbsp;&nbsp;
                                 <select
-                                    style={{ width: '120px' }}
+                                    style={{ width: '120px', fontSize: '16px' }}
                                     aria-label='component_type'
                                     id='component_type'
                                     defaultValue=''
@@ -104,19 +112,20 @@ export default function TableAttachment({ data, setAttachmentData }: Props) {
                                     <option value='ACCEPTED'> {t('ACCEPTED')}</option>
                                     <option value='REJECTED'>{t('REJECTED')}</option>
                                 </select>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                &nbsp;&nbsp;
                                 <input
-                                    style={{ width: '100px' }}
+                                    style={{ width: '120px' }}
                                     type='text'
                                     value={item.checkedComment}
                                     name='checkedComment'
                                     onChange={(e) => handleInputChange(e, j)}
                                     placeholder='Enter Comment'
                                 />
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <label style={{ width: '100px' }}>{item.checkedTeam}</label>
-                                <label style={{ width: '130px' }}>{item.checkedBy}</label>
-                                <label style={{ width: '100px' }}>{item.checkedOn}</label>
+                                &nbsp;&nbsp;
+                                <label style={{ width: '100px', fontSize: '14px' }}>{item.checkedTeam}</label>
+                                &nbsp;&nbsp;
+                                <label style={{ width: '120px', fontSize: '14px' }}>{item.checkedBy}</label>&nbsp;&nbsp;
+                                <label style={{ width: '80px', fontSize: '14px' }}>{item.checkedOn}</label>&nbsp;&nbsp;
                                 <button
                                     type='button'
                                     onClick={() => handleClickDelete(j)}
@@ -126,6 +135,7 @@ export default function TableAttachment({ data, setAttachmentData }: Props) {
                                     <FaTrashAlt className='bi bi-trash3-fill' />
                                 </button>
                             </div>
+                            <hr style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }} />
                         </>
                     )
                 })}
