@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+"use client"
+
 import React from 'react'
 import styles from '@/css/AddKeyValue.module.css'
 import { FaTrashAlt } from 'react-icons/fa'
@@ -86,7 +88,7 @@ export default function AddKeyValueComponent(props: Props) {
                                 <button
                                     type='button'
                                     onClick={() => handleRemoveClick(j)}
-                                    className='btn btn-secondary'
+                                    className={`fw-bold btn btn-light button-plain`}
                                 >
                                     <FaTrashAlt className="bi bi-trash3-fill" />
                                 </button>
@@ -98,7 +100,7 @@ export default function AddKeyValueComponent(props: Props) {
                     <button
                         type='button'
                         onClick={() => handleAddClick()}
-                        className='btn btn-secondary'
+                        className={`fw-bold btn btn-light button-plain`}
                     >{`Click to add row to ${props.keyName
                         .split(' ')
                         .map((elem) => elem[0].toUpperCase() + elem.substring(1))
