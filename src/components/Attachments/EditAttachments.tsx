@@ -20,12 +20,12 @@ import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { notFound } from 'next/navigation'
 import { _ } from '@/components/sw360'
-import SelectAttachment from './SelectAttachment'
+import SelectAttachment from './SelectAttachment/SelectAttachment'
 
-import TableAttachment from './TableAttachment'
-import TiltleAttachment from './TitleAttachment'
+import TableAttachment from './TableAttachment/TableAttachment'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
+import TiltleAttachment from './TitleAttachment/TitleAttachment'
 
 interface Props {
     documentId: string
@@ -98,28 +98,15 @@ const EditAttachments = ({ documentId, session, documentType, componentData, set
                 session={session}
                 onReRender={handleReRender}
             />
-            {attachmentData ? (
-                <div className={`row ${styles['attachment-table']}`}>
-                    <TiltleAttachment />
-                    <TableAttachment
-                        data={attachmentData}
-                        setAttachmentData={setAttachmentData}
-                        setAttachmentToComponentData={setAttachmentToComponentData}
-                    />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </div>
-            ) : (
-                <div className='col'>
-                    <TiltleAttachment />
-                    <Alert variant='primary'>{t('No attachments yet')}</Alert>
-                    <TableAttachment
-                        data={attachmentData}
-                        setAttachmentData={setAttachmentData}
-                        setAttachmentToComponentData={setAttachmentToComponentData}
-                    />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </div>
-            )}
+            <div className={`row ${styles['attachment-table']}`} style={{padding:'25px'}}>
+                <TiltleAttachment />
+                <TableAttachment
+                    data={attachmentData}
+                    setAttachmentData={setAttachmentData}
+                    setAttachmentToComponentData={setAttachmentToComponentData}
+                />
+            </div>
+
             <div>
                 <button
                     type='button'

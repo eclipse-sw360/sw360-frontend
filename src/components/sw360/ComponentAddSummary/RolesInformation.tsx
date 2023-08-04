@@ -21,7 +21,7 @@ import ModeratorsDiaglog from '@/components/sw360/SearchModerators/ModeratorsDia
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import FeatureType from '@/object-types/enums/FeatureType'
+import ActionType from '@/object-types/enums/ActionType'
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload
@@ -32,7 +32,7 @@ interface Props {
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
     componentData?: ComponentPayload
     setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    featureType?: string
+    actionType?: string
 }
 
 const RolesInformation = ({
@@ -45,7 +45,7 @@ const RolesInformation = ({
     setModerator,
     componentData,
     setComponentData,
-    featureType
+    actionType
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
@@ -58,7 +58,7 @@ const RolesInformation = ({
             ...componentPayload,
             [e.target.name]: e.target.value,
         })
-        featureType === FeatureType.EDIT &&
+        actionType === ActionType.EDIT &&
         setComponentData({
             ...componentData,
             [e.target.name]: e.target.value,
@@ -75,7 +75,7 @@ const RolesInformation = ({
             ...componentPayload,
             componentOwner: componentOwnerResponse.email,
         })
-        featureType === FeatureType.EDIT &&
+        actionType === ActionType.EDIT &&
         setComponentData({
             ...componentData,
             componentOwner: componentOwnerResponse.email,
@@ -92,7 +92,7 @@ const RolesInformation = ({
             ...componentPayload,
             moderators: moderatorsResponse.emails,
         })
-        featureType === FeatureType.EDIT &&
+        actionType === ActionType.EDIT &&
         setComponentData({
             ...componentData,
             moderators: moderatorsResponse.emails,

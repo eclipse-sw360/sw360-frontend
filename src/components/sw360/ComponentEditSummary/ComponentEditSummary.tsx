@@ -28,15 +28,17 @@ import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import SearchUsersModalComponent from '../SearchUsersModal/SearchUsersModal'
-import FeatureType from '@/object-types/enums/FeatureType'
+import AttachmentDetail from '@/object-types/AttachmentDetail'
+import ActionType from '@/object-types/enums/ActionType'
 interface Props {
-    session: Session
-    componentId: string
-    componentData: ComponentPayload
-    setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    session?: Session
+    componentId?: string
+    componentData?: ComponentPayload
+    attachmentData?: AttachmentDetail[]
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
-export default function ComponentEditSummary({ session, componentId, componentData, setComponentData }: Props) {
+export default function ComponentEditSummary({ session, componentId, componentData, setComponentData, attachmentData }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
     const [externalIds, setExternalIds] = useState<Input[]>([])
@@ -76,6 +78,7 @@ export default function ComponentEditSummary({ session, componentId, componentDa
         mailinglist: '',
         wiki: '',
         blog: '',
+        attachmentDTOs: attachmentData,
     })
 
     const fetchData: any = useCallback(
@@ -138,7 +141,7 @@ export default function ComponentEditSummary({ session, componentId, componentDa
 
     const convertObjectToMapRoles = (data: string) => {
         if (data === undefined) {
-            return
+            return null
         }
         const inputRoles: Input[] = []
         const mapRoles = new Map(Object.entries(data))
@@ -224,6 +227,7 @@ export default function ComponentEditSummary({ session, componentId, componentDa
                 mailinglist: component.mailinglist,
                 wiki: component.wiki,
                 blog: component.blog,
+                attachmentDTOs: attachmentData,
             }
             setComponentPayload(componentPayloadData)
             setComponentData(componentPayloadData)
@@ -267,8 +271,8 @@ export default function ComponentEditSummary({ session, componentId, componentDa
     }
 
     const convertRoles = (datas: Input[]) => {
-        if (datas === undefined) {
-            return ''
+        if (datas === null) {
+            return null;
         }
         const contributors: string[] = []
         const commiters: string[] = []
@@ -307,7 +311,7 @@ export default function ComponentEditSummary({ session, componentId, componentDa
                             <div className='col'>
                                 <GeneralInfoComponent
                                     session={session}
-                                    featureType={FeatureType.EDIT}
+                                    actionType={ActionType.EDIT}
                                     vendor={vendor}
                                     setVendor={setVendor}
                                     componentPayload={componentPayload}
@@ -317,7 +321,7 @@ export default function ComponentEditSummary({ session, componentId, componentDa
                                 />
                                 <RolesInformation
                                     session={session}
-                                    featureType={FeatureType.EDIT}
+                                    actionType={ActionType.EDIT}
                                     componentOwner={componentOwner}
                                     setComponentOwner={setComponentOwner}
                                     moderator={moderator}

@@ -1,4 +1,5 @@
-// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -14,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import { AttachmentType } from '@/object-types/AttachmentType'
+import styles from './TableAttachment.module.css'
 
 interface Props {
     setAttachmentData: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
@@ -44,13 +46,10 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
                 {data.map((item, j) => {
                     return (
                         <>
-                            <div style={{}}>
-                                <label style={{ width: '200px', overflowWrap: 'break-word', fontSize: '14px' }}>
-                                    {item.filename}
-                                </label>
-                                &nbsp;&nbsp;
+                            <div className={`${styles['div-row']}`}>
+                                <label className={`${styles['label-filename']}`}>{item.filename}</label>
                                 <select
-                                    style={{ width: '100px', fontSize: '14px' }}
+                                    className={`${styles['select-type']}`}
                                     aria-label='component_type'
                                     id='component_type'
                                     defaultValue=''
@@ -85,22 +84,19 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
                                     <option value='SBOM'>{t('SBOM')}</option>
                                     <option value='INTERNAL_USE_SCAN'>{t('Initial Use Scan')}</option>
                                 </select>
-                                &nbsp;&nbsp;
                                 <input
+                                    className={`${styles['input-comment']}`}
                                     name='createdComment'
-                                    style={{ width: '120px' }}
                                     value={item.createdComment}
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     placeholder='Enter Comment'
                                 />
-                                &nbsp;&nbsp;
-                                <label style={{ width: '100px', fontSize: '14px' }}>{item.createdTeam}</label>
-                                &nbsp;&nbsp;
-                                <label style={{ width: '120px', fontSize: '14px' }}>{item.createdBy}</label>&nbsp;&nbsp;
-                                <label style={{ width: '80px', fontSize: '14px' }}>{item.createdOn}</label>&nbsp;&nbsp;
+                                <label className={`${styles['label-team']}`}>{item.createdTeam}</label>
+                                <label className={`${styles['label-by']}`}>{item.createdBy}</label>
+                                <label className={`${styles['label-on']}`}>{item.createdOn}</label>
                                 <select
-                                    style={{ width: '120px', fontSize: '16px' }}
+                                    className={`${styles['select-status']}`}
                                     aria-label='component_type'
                                     id='component_type'
                                     defaultValue=''
@@ -112,20 +108,17 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
                                     <option value='ACCEPTED'> {t('ACCEPTED')}</option>
                                     <option value='REJECTED'>{t('REJECTED')}</option>
                                 </select>
-                                &nbsp;&nbsp;
                                 <input
-                                    style={{ width: '120px' }}
+                                    className={`${styles['input-comment']}`}
                                     type='text'
                                     value={item.checkedComment}
                                     name='checkedComment'
                                     onChange={(e) => handleInputChange(e, j)}
                                     placeholder='Enter Comment'
                                 />
-                                &nbsp;&nbsp;
-                                <label style={{ width: '100px', fontSize: '14px' }}>{item.checkedTeam}</label>
-                                &nbsp;&nbsp;
-                                <label style={{ width: '120px', fontSize: '14px' }}>{item.checkedBy}</label>&nbsp;&nbsp;
-                                <label style={{ width: '80px', fontSize: '14px' }}>{item.checkedOn}</label>&nbsp;&nbsp;
+                                <label className={`${styles['label-team']}`}>{item.checkedTeam}</label>
+                                <label className={`${styles['label-by']}`}>{item.checkedBy}</label>
+                                <label className={`${styles['label-on']}`}>{item.checkedOn}</label>
                                 <button
                                     type='button'
                                     onClick={() => handleClickDelete(j)}
@@ -135,7 +128,7 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
                                     <FaTrashAlt className='bi bi-trash3-fill' />
                                 </button>
                             </div>
-                            <hr style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }} />
+                            <hr className={`${styles['hr']}`} />
                         </>
                     )
                 })}

@@ -121,7 +121,7 @@ const DetailOverview = ({ session, componentId }: Props) => {
     }, [componentId, fetchData])
 
     const headerButtons = {
-        'Edit component': { link: '/components/edit/'+componentId, type: 'primary' },
+        'Edit component': { link: `/components/edit/${componentId}`, type: 'primary' },
         Merge: { link: '', type: 'secondary' },
         Split: { link: '', type: 'secondary' },
         Subscribe: { link: '', type: 'outline-success' },

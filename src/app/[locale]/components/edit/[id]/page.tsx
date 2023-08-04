@@ -11,17 +11,17 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getServerSession } from "next-auth/next"
 import { Session } from '@/object-types/Session'
-import EditComponent from './EditComponent'
+import EditComponent from './components/EditComponent'
 
 interface Context {
   params: { id: string }
 }
 
-const Detail = async ({ params }: Context) => {
+const ComponentEditPage = async ({ params }: Context) => {
   const session: Session = await getServerSession(authOptions);
   const componentId = params.id;
 
   return <EditComponent session={session} componentId={componentId} />
 }
 
-export default Detail
+export default ComponentEditPage

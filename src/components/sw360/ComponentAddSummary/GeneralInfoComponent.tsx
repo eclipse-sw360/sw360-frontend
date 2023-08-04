@@ -18,7 +18,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import FeatureType from '@/object-types/enums/FeatureType'
+import ActionType from '@/object-types/enums/ActionType'
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload
@@ -27,7 +27,7 @@ interface Props {
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
     componentData?: ComponentPayload
     setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    featureType?: string
+    actionType?: string
 }
 
 const GeneralInfoComponent = ({
@@ -38,7 +38,7 @@ const GeneralInfoComponent = ({
     setVendor,
     componentData,
     setComponentData,
-    featureType
+    actionType
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
@@ -49,7 +49,7 @@ const GeneralInfoComponent = ({
             ...componentPayload,
             [e.target.name]: e.target.value,
         })
-        featureType === FeatureType.EDIT &&
+        actionType === ActionType.EDIT &&
         setComponentData({
             ...componentData,
             [e.target.name]: e.target.value,
@@ -62,7 +62,7 @@ const GeneralInfoComponent = ({
             ...componentPayload,
             categories: data,
         })
-        featureType === FeatureType.EDIT &&
+        actionType === ActionType.EDIT &&
         setComponentData({
             ...componentData,
             categories: data,
@@ -83,7 +83,7 @@ const GeneralInfoComponent = ({
             ...componentPayload,
             defaultVendorId: vendorResponse.id,
         })
-        featureType === FeatureType.EDIT &&
+        actionType === ActionType.EDIT &&
         setComponentData({
             ...componentData,
             defaultVendorId: vendorResponse.id,
