@@ -177,7 +177,7 @@ const SPDXAttachments = ({ releaseId, session }: any) => {
 
     useEffect(() => {
         fetchData(`releases/${releaseId}/attachments`)
-            .then((response: any) => response._embedded['sw360:attachmentDTOes'])
+            .then((response: any) => (response._embedded) ? response._embedded['sw360:attachmentDTOes']: [])
             .then((attachments: Array<Attachment>) => {
                 const isrAttachments = filterAttachmentByType(attachments,
                     [AttachmentType.INITIAL_SCAN_REPORT])
