@@ -11,6 +11,7 @@
 enum CommonTabIds {
   SUMMARY = 'tab-Summary',
   ATTACHMENTS = 'tab-Attachments',
+  RELEASES = 'tab-releases',
   VULNERABILITIES = 'tab-Vulnerabilities',
   CHANGE_LOG = 'tab-ChangeLogs'
 }

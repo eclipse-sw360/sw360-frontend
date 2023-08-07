@@ -23,6 +23,7 @@ import { SideBar, PageButtonHeader } from '@/components/sw360'
 import { toast, TypeOptions, ToastContainer } from 'react-toastify'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import ComponentEditSummary from '@/components/sw360/ComponentEditSummary/ComponentEditSummary'
+import Releases from './Releases'
 
 interface Props {
     session?: Session
@@ -33,6 +34,10 @@ const tabList = [
     {
         id: CommonTabIds.SUMMARY,
         name: 'Summary',
+    },
+    {
+        id: CommonTabIds.RELEASES,
+        name: 'Releases',
     }
 ]
 
@@ -124,6 +129,9 @@ const EditComponent = ({ session, componentId }: Props) => {
                                 session={session}
                                 componentId={componentId}
                             />
+                        </div>
+                        <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>
+                            <Releases componentId={componentId} session={session} />
                         </div>
                     </div>
                 </div>
