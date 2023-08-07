@@ -7,6 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import AttachmentDetail from "./AttachmentDetail"
 export default interface ComponentPayload {
     name: string
     createBy: string
@@ -28,4 +29,5 @@ export default interface ComponentPayload {
     mailinglist: string
     wiki: string
     blog: string
+    attachmentDTOs?: AttachmentDetail[]
 }

@@ -21,9 +21,11 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import { toast, TypeOptions, ToastContainer } from 'react-toastify'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import ComponentEditSummary from '@/components/sw360/ComponentEditSummary/ComponentEditSummary'
 import Releases from './Releases'
+import ComponentPayload from '@/object-types/ComponentPayLoad'
+import EditAttachments from '@/components/Attachments/EditAttachments'
 
 interface Props {
     session?: Session
@@ -38,7 +40,11 @@ const tabList = [
     {
         id: CommonTabIds.RELEASES,
         name: 'Releases',
-    }
+    },
+    {
+        id: CommonTabIds.ATTACHMENTS,
+        name: 'Attachments',
+    },
 ]
 
 const EditComponent = ({ session, componentId }: Props) => {
@@ -67,6 +73,7 @@ const EditComponent = ({ session, componentId }: Props) => {
         mailinglist: '',
         wiki: '',
         blog: '',
+        attachmentDTOs: null,
     })
 
     const fetchData: any = useCallback(
@@ -132,6 +139,15 @@ const EditComponent = ({ session, componentId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>
                             <Releases componentId={componentId} session={session} />
+                        </div>
+                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
+                            <EditAttachments
+                                session={session}
+                                documentId={componentId}
+                                documentType={DocumentTypes.COMPONENT}
+                                componentData={componentData}
+                                setComponentData={setComponentData}
+                            />
                         </div>
                     </div>
                 </div>
