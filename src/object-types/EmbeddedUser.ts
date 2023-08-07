@@ -8,11 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum ReleaseTabIds {
-  LINKED_RELEASES = 'tab-Releases',
-  CLEARING_DETAILS = 'tab-ClearingDetails',
-  ECC_DETAILS = 'tab-EccDetails',
-  COMMERCIAL_DETAILS = 'tab-CommercialDetails',
+export default interface EmbeddedUser {
+    email: string,
+    deactivated: boolean
+    fullName: string
+    _links: {
+        self: {
+            href: string
+        }
+    }
 }
-
-export default ReleaseTabIds

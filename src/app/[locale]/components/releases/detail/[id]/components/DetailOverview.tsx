@@ -37,42 +37,13 @@ import Attachments from '@/components/Attachments/Attachments'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
+import ReleaseDetailTabs from './ReleaseDetailTabs'
+import CommercialDetails from './CommercialDetails'
 
 interface Props {
     session: Session
     releaseId: string
 }
-
-const tabList = [
-    {
-        id: CommonTabIds.SUMMARY,
-        name: 'Summary',
-    },
-    {
-        id: ReleaseTabIds.LINKED_RELEASES,
-        name: 'Linked Releases',
-    },
-    {
-        id: ReleaseTabIds.CLEARING_DETAILS,
-        name: 'Clearing Details',
-    },
-    {
-        id: ReleaseTabIds.ECC_DETAILS,
-        name: 'ECC Details',
-    },
-    {
-        id: CommonTabIds.ATTACHMENTS,
-        name: 'Attachments',
-    },
-    {
-        id: CommonTabIds.VULNERABILITIES,
-        name: 'Vulnerabilities',
-    },
-    {
-        id: CommonTabIds.CHANGE_LOG,
-        name: 'Change Log',
-    },
-]
 
 const DetailOverview = ({ session, releaseId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
@@ -84,6 +55,8 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [changeLogList, setChangeLogList] = useState<Array<any>>([])
+
+    const [tabList, setTabList] = useState(ReleaseDetailTabs.WITHOUT_COMMERCIAL_DETAILS)
 
     const fetchData: any = useCallback(
         async (url: string) => {
@@ -104,12 +77,18 @@ const DetailOverview = ({ session, releaseId }: Props) => {
         fetchData(`releases/${releaseId}`)
             .then((release: any) => {
                 setRelease(release)
+
                 if (
                     !CommonUtils.isNullOrUndefined(release['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:attachments'])
                 ) {
                     setEmbeddedAttachments(release['_embedded']['sw360:attachments'])
                 }
+
+                if (release.componentType === 'COTS') {
+                    setTabList(ReleaseDetailTabs.WITH_COMMERCIAL_DETAILS)
+                }
+
                 return release
             })
             .then((release: any) => {
@@ -243,6 +222,9 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
                             <Attachments session={session} documentId={releaseId} documentType={DocumentTypes.RELEASE} />
+                        </div>
+                        <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
+                            <CommercialDetails costDetails={(release._embedded['sw360:cotsDetails']) && release._embedded['sw360:cotsDetails'][0]} />
                         </div>
                         <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
                             <ComponentVulnerabilities vulnerData={vulnerData} session={session} />
