@@ -18,12 +18,16 @@ import 'react-toastify/dist/ReactToastify.css'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ActionType from '@/object-types/enums/ActionType'
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
+    componentData?: ComponentPayload
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    actionType?: string
 }
 
 const GeneralInfoComponent = ({
@@ -31,7 +35,10 @@ const GeneralInfoComponent = ({
     componentPayload,
     setComponentPayload,
     vendor,
-    setVendor
+    setVendor,
+    componentData,
+    setComponentData,
+    actionType
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
@@ -42,12 +49,22 @@ const GeneralInfoComponent = ({
             ...componentPayload,
             [e.target.name]: e.target.value,
         })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
+            [e.target.name]: e.target.value,
+        })
     }
 
     const setCategoriesData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         const data: string[] = splitValueCategories(e.target.value)
         setComponentPayload({
             ...componentPayload,
+            categories: data,
+        })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
             categories: data,
         })
     }
@@ -64,6 +81,11 @@ const GeneralInfoComponent = ({
         setVendor(vendorData)
         setComponentPayload({
             ...componentPayload,
+            defaultVendorId: vendorResponse.id,
+        })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
             defaultVendorId: vendorResponse.id,
         })
     }

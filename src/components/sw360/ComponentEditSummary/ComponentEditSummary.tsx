@@ -17,6 +17,7 @@ import { Session } from '@/object-types/Session'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -27,12 +28,17 @@ import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import SearchUsersModalComponent from '../SearchUsersModal/SearchUsersModal'
+import AttachmentDetail from '@/object-types/AttachmentDetail'
+import ActionType from '@/object-types/enums/ActionType'
 interface Props {
     session?: Session
     componentId?: string
+    componentData?: ComponentPayload
+    attachmentData?: AttachmentDetail[]
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
-export default function ComponentEditSummary({ session, componentId }: Props) {
+export default function ComponentEditSummary({ session, componentId, componentData, setComponentData, attachmentData }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
     const [externalIds, setExternalIds] = useState<Input[]>([])
@@ -71,7 +77,8 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
         homepage: '',
         mailinglist: '',
         wiki: '',
-        blog: ''
+        blog: '',
+        attachmentDTOs: attachmentData,
     })
 
     const fetchData: any = useCallback(
@@ -219,9 +226,11 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
                 homepage: component.homepage,
                 mailinglist: component.mailinglist,
                 wiki: component.wiki,
-                blog: component.blog
+                blog: component.blog,
+                attachmentDTOs: attachmentData,
             }
             setComponentPayload(componentPayloadData)
+            setComponentData(componentPayloadData)
         })
     }, [componentId, fetchData])
 
@@ -229,6 +238,10 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
         const obj = Object.fromEntries(additionalDatas)
         setComponentPayload({
             ...componentPayload,
+            additionalData: obj,
+        })
+        setComponentData({
+            ...componentData,
             additionalData: obj,
         })
     }
@@ -239,12 +252,20 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
             ...componentPayload,
             externalIds: obj,
         })
+        setComponentData({
+            ...componentData,
+            externalIds: obj,
+        })
     }
 
     const setDataRoles = (roles: Input[]) => {
         const roleDatas = convertRoles(roles)
         setComponentPayload({
             ...componentPayload,
+            roles: roleDatas,
+        })
+        setComponentData({
+            ...componentData,
             roles: roleDatas,
         })
     }
@@ -290,23 +311,30 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
                             <div className='col'>
                                 <GeneralInfoComponent
                                     session={session}
+                                    actionType={ActionType.EDIT}
                                     vendor={vendor}
                                     setVendor={setVendor}
                                     componentPayload={componentPayload}
                                     setComponentPayload={setComponentPayload}
+                                    componentData={componentData}
+                                    setComponentData={setComponentData}
                                 />
                                 <RolesInformation
                                     session={session}
+                                    actionType={ActionType.EDIT}
                                     componentOwner={componentOwner}
                                     setComponentOwner={setComponentOwner}
                                     moderator={moderator}
                                     setModerator={setModerator}
                                     componentPayload={componentPayload}
                                     setComponentPayload={setComponentPayload}
+                                    componentData={componentData}
+                                    setComponentData={setComponentData}
                                 />
                                 <div className='row mb-4'>
                                     <AddAdditionalRolesComponent
                                         documentType={DocumentTypes.COMPONENT}
+                                        setDataRoles={setDataRoles}
                                         roles={roles}
                                         setRoles={setRoles}
                                     />
@@ -315,6 +343,7 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
                                     <AddKeyValueComponent
                                         header={t('External ids')}
                                         keyName={'external id'}
+                                        setData={setExternalIds}
                                         data={externalIds}
                                         setMap={setDataExternalIds}
                                     />
@@ -323,6 +352,7 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
                                     <AddKeyValueComponent
                                         header={t('Additional Data')}
                                         keyName={'additional data'}
+                                        setData={setAddtionalData}
                                         data={addtionalData}
                                         setMap={setDataAddtionalData}
                                     />

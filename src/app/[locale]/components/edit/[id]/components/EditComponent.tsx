@@ -24,8 +24,11 @@ import { toast, TypeOptions, ToastContainer } from 'react-toastify'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import ComponentEditSummary from '@/components/sw360/ComponentEditSummary/ComponentEditSummary'
 import Releases from './Releases'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
 import EditAttachments from '@/components/Attachments/EditAttachments'
+import ComponentPayload from '@/object-types/ComponentPayLoad'
+import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
+import CommonUtils from '@/utils/common.utils'
+import AttachmentDetail from '@/object-types/AttachmentDetail'
 
 interface Props {
     session?: Session
@@ -39,7 +42,7 @@ const tabList = [
     },
     {
         id: CommonTabIds.RELEASES,
-        name: 'Releases',
+        name: 'Release',
     },
     {
         id: CommonTabIds.ATTACHMENTS,
@@ -52,6 +55,8 @@ const EditComponent = ({ session, componentId }: Props) => {
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [component, setComponent] = useState<any>(undefined)
+    const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [componentData, setComponentData] = useState<ComponentPayload>({
         name: '',
         createBy: '',
@@ -95,6 +100,18 @@ const EditComponent = ({ session, componentId }: Props) => {
         fetchData(`components/${componentId}`).then((component: any) => {
             setComponent(component)
         })
+        fetchData(`components/${componentId}/attachments`).then((attachments: any) => {
+            if (
+                !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
+            ) {
+                const attachmentDetails: AttachmentDetail[] = []
+                attachments['_embedded']['sw360:attachmentDTOes'].map((item: any) => {
+                    attachmentDetails.push(item)
+                })
+                setAttachmentData(attachmentDetails)
+            }
+        })
     }, [componentId, fetchData])
 
     const notify = (text: string, type: TypeOptions) =>
@@ -114,8 +131,17 @@ const EditComponent = ({ session, componentId }: Props) => {
         }
     }
 
+    const handleDeleteComponent = () => {
+        setDeleteDialogOpen(true)
+    }
+
     const headerButtons = {
         'Update Component': { link: '/components/edit/' + componentId, type: 'primary', onClick: submit },
+        'Delete Component': {
+            link: '/components/edit/' + componentId,
+            type: 'primary',
+            onClick: handleDeleteComponent,
+        },
         Cancel: { link: '/components/detail/' + componentId, type: 'secondary' },
     }
 
@@ -135,6 +161,8 @@ const EditComponent = ({ session, componentId }: Props) => {
                             <ComponentEditSummary
                                 session={session}
                                 componentId={componentId}
+                                componentData={componentData}
+                                setComponentData={setComponentData}
                             />
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>

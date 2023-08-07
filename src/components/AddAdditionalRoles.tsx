@@ -16,11 +16,12 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants';
 
 interface Props {
     documentType?: string;
+    setDataRoles?: RolesType
     setRoles?: React.Dispatch<React.SetStateAction<Input[]>>
     roles?: Input[]
 }
 
-export default function AddAdditionalRolesComponent({documentType, roles, setRoles}: Props) {
+export default function AddAdditionalRolesComponent({documentType, setDataRoles, roles, setRoles}: Props) {
 
     const t = useTranslations(COMMON_NAMESPACE);
 
@@ -29,12 +30,14 @@ export default function AddAdditionalRolesComponent({documentType, roles, setRol
         const list: Input[] = [...roles];
         list[index][name as keyof Input] = value;
         setRoles(list);
+        setDataRoles(list);
     };
 
     const handleRemoveClick = (index: number) => {
         const list = [...roles];
         list.splice(index, 1);
         setRoles(list);
+        setDataRoles(list)
     };
 
     const handleAddClick = () => {

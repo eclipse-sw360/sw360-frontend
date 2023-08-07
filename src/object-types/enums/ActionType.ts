@@ -8,7 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface MapData {
-    role: string
-    email: string
+enum ActionType {
+    ADD = 'add',
+    EDIT = 'edit',
 }
+
+export default ActionType

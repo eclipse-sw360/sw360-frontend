@@ -15,7 +15,6 @@ import { SearchUsersModal } from '@/components/sw360'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { useRouter } from 'next/navigation'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import MapData from '@/object-types/MapData'
 import { Session } from '@/object-types/Session'
 import { SideBar } from '@/components/sw360'
 import ApiUtils from '@/utils/api/api.util'
@@ -28,6 +27,9 @@ import RolesInformation from './RolesInformation'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import Vendor from '@/object-types/Vendor'
+import ComponentOwner from '@/object-types/ComponentOwner'
+import Moderators from '@/object-types/Moderators'
 interface Props {
     session: Session
 }
@@ -35,12 +37,30 @@ interface Props {
 export default function ComponentAddSummary({ session }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const [externalIds,setExternalIds] = useState<Input[]>([])
+    const [addtionalData,setAddtionalData] = useState<Input[]>([])
+    const [roles,setRoles] = useState<Input[]>([])
+    const [vendor, setVendor] = useState<Vendor> ({
+        id: '',
+        fullName: ''
+    })
+    const [componentOwner, setComponentOwner] = useState<ComponentOwner> ({
+        email: '',
+        fullName: ''
+    })
+    const [moderator, setModerator] = useState<Moderators> ({
+        emails: null,
+        fullName: ''
+    })
     const router = useRouter()
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
+        createBy:'',
         description: '',
         componentType: '',
         moderators: null,
+        modifiedBy: '',
+        modifiedOn: '',
         componentOwner: '',
         ownerAccountingUnit: '',
         ownerGroup: '',
@@ -63,7 +83,7 @@ export default function ComponentAddSummary({ session }: Props) {
         },
     ]
 
-    const setAddtionalData = (additionalDatas: Map<string, string>) => {
+    const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
         setComponentPayload({
             ...componentPayload,
@@ -71,7 +91,7 @@ export default function ComponentAddSummary({ session }: Props) {
         })
     }
 
-    const setExternalIds = (externalIds: Map<string, string>) => {
+    const setDataExternalIds = (externalIds: Map<string, string>) => {
         const obj = Object.fromEntries(externalIds)
         setComponentPayload({
             ...componentPayload,
@@ -79,7 +99,7 @@ export default function ComponentAddSummary({ session }: Props) {
         })
     }
 
-    const setRoles = (roles: MapData[]) => {
+    const setDataRoles = (roles: Input[]) => {
         const roleDatas = convertRoles(roles)
         setComponentPayload({
             ...componentPayload,
@@ -96,12 +116,12 @@ export default function ComponentAddSummary({ session }: Props) {
         const commiters: string[] = []
         const expecters: string[] = []
         datas.forEach((data) => {
-            if (data.role === 'Contributor') {
-                contributors.push(data.email)
-            } else if (data.role === 'Committer') {
-                commiters.push(data.email)
-            } else if (data.role === 'Expert') {
-                expecters.push(data.email)
+            if (data.key === 'Contributor') {
+                contributors.push(data.value)
+            } else if (data.key === 'Committer') {
+                commiters.push(data.value)
+            } else if (data.key === 'Expert') {
+                expecters.push(data.value)
             }
         })
         const roles = {
@@ -174,17 +194,25 @@ export default function ComponentAddSummary({ session }: Props) {
                             <div className='col'>
                                 <GeneralInfoComponent
                                     session={session}
+                                    vendor={vendor}
+                                    setVendor={setVendor}
                                     componentPayload={componentPayload}
                                     setComponentPayload={setComponentPayload}
                                 />
                                 <RolesInformation
                                     session={session}
+                                    componentOwner={componentOwner}
+                                    setComponentOwner={setComponentOwner}
+                                    moderator={moderator}
+                                    setModerator={setModerator}
                                     componentPayload={componentPayload}
                                     setComponentPayload={setComponentPayload}
                                 />
                                 <div className='row mb-4'>
                                     <AddAdditionalRolesComponent
                                         documentType={DocumentTypes.COMPONENT}
+                                        setDataRoles={setDataRoles}
+                                        roles={roles}
                                         setRoles={setRoles}
                                     />
                                 </div>
@@ -193,6 +221,8 @@ export default function ComponentAddSummary({ session }: Props) {
                                         header={t('External ids')}
                                         keyName={'external id'}
                                         setData={setExternalIds}
+                                        data={externalIds}
+                                        setMap={setDataExternalIds}
                                     />
                                 </div>
                                 <div className='row mb-4'>
@@ -200,6 +230,8 @@ export default function ComponentAddSummary({ session }: Props) {
                                         header={t('Additional Data')}
                                         keyName={'additional data'}
                                         setData={setAddtionalData}
+                                        data={addtionalData}
+                                        setMap={setDataAddtionalData}
                                     />
                                 </div>
                             </div>
