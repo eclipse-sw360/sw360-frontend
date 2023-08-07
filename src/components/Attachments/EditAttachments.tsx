@@ -20,11 +20,11 @@ import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { notFound } from 'next/navigation'
 import { _ } from '@/components/sw360'
+import SelectAttachment from './SelectAttachment/SelectAttachment'
 import TableAttachment from './TableAttachment/TableAttachment'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import TitleAttachment from './TiltleAttachment/TitleAttachment'
-import SelectAttachment from './SelectAttachment/SelectAttachment'
 
 interface Props {
     documentId: string

@@ -22,6 +22,8 @@ import CommonUtils from "@/utils/common.utils";
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { COMMON_NAMESPACE } from "@/object-types/Constants";
+import { useRouter } from "next/navigation";
+import ActionType from "@/object-types/enums/ActionType";
 
 const DEFAULT_COMPONENT_INFO: any = { name: '', _embedded: { 'sw360:releases': [] } }
 
@@ -29,11 +31,13 @@ interface Props {
   componentId?: string,
   show?: boolean,
   setShow?: React.Dispatch<React.SetStateAction<boolean>>
+  actionType?: string
 }
 
-const DeleteComponentDialog = ({ componentId, show, setShow }: Props) => {
+const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props) => {
   const {data: session}: any = useSession();
   const t = useTranslations(COMMON_NAMESPACE);
+  const router = useRouter()
   const [component, setComponent] = useState(DEFAULT_COMPONENT_INFO);
   const [variant, setVariant] = useState('success');
   const [message, setMessage] = useState('');
@@ -59,6 +63,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow }: Props) => {
         const deleteStatus = body[0].status;
         if (deleteStatus == HttpStatus.OK) {
           displayMessage('success', 'Delete component success!');
+          actionType === ActionType.EDIT && router.push('/components')
           setReloadPage(true);
         } else if (deleteStatus == HttpStatus.CONFLICT) {
           displayMessage('danger', 'The component cannot be deleted, since it contains releases Please delete the releases first');

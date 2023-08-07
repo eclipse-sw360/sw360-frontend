@@ -29,6 +29,7 @@ import ComponentPayload from '@/object-types/ComponentPayLoad'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import CommonUtils from '@/utils/common.utils'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
+import ActionType from '@/object-types/enums/ActionType'
 
 interface Props {
     session?: Session
@@ -149,6 +150,12 @@ const EditComponent = ({ session, componentId }: Props) => {
         component && (
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
                 <div className='row'>
+                    <DeleteComponentDialog
+                        componentId={componentId}
+                        show={deleteDialogOpen}
+                        setShow={setDeleteDialogOpen}
+                        actionType={ActionType.EDIT}
+                    />
                     <div className='col-2 sidebar'>
                         <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
                     </div>
@@ -159,6 +166,7 @@ const EditComponent = ({ session, componentId }: Props) => {
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ToastContainer className='foo' style={{ width: '300px', height: '100px' }} />
                             <ComponentEditSummary
+                                attachmentData={attachmentData}
                                 session={session}
                                 componentId={componentId}
                                 componentData={componentData}
