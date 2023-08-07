@@ -140,7 +140,7 @@ const EditComponent = ({ session, componentId }: Props) => {
         'Update Component': { link: '/components/edit/' + componentId, type: 'primary', onClick: submit },
         'Delete Component': {
             link: '/components/edit/' + componentId,
-            type: 'primary',
+            type: 'danger',
             onClick: handleDeleteComponent,
         },
         Cancel: { link: '/components/detail/' + componentId, type: 'secondary' },
