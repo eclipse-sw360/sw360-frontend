@@ -9,11 +9,14 @@
 // License-Filename: LICENSE
 
 'use client'
+import AddKeyValueComponent from '@/components/AddKeyValue'
+import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
 import { notFound } from 'next/navigation'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { Session } from '@/object-types/Session'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -301,6 +304,13 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
                                     componentPayload={componentPayload}
                                     setComponentPayload={setComponentPayload}
                                 />
+                                <div className='row mb-4'>
+                                    <AddAdditionalRolesComponent
+                                        documentType={DocumentTypes.COMPONENT}
+                                        roles={roles}
+                                        setRoles={setRoles}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
