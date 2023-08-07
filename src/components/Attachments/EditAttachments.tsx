@@ -20,10 +20,11 @@ import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { notFound } from 'next/navigation'
 import { _ } from '@/components/sw360'
+import TableAttachment from './TableAttachment/TableAttachment'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import TiltleAttachment from './TiltleAttachment/TiltleAttachment'
-import TableAttachment from './TableAttachment/TableAttachment'
+import TitleAttachment from './TiltleAttachment/TitleAttachment'
+import SelectAttachment from './SelectAttachment/SelectAttachment'
 
 interface Props {
     documentId: string
@@ -36,6 +37,13 @@ interface Props {
 const EditAttachments = ({ documentId, session, documentType, componentData, setComponentData }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
+    const [reRender, setReRender] = useState(false)
+    const handleReRender = () => {
+        setReRender(!reRender)
+    }
+    const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
+    const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
+
     const setAttachmentToComponentData = (attachmentDatas: AttachmentDetail[]) => {
         setComponentData({
             ...componentData,
@@ -79,17 +87,29 @@ const EditAttachments = ({ documentId, session, documentType, componentData, set
 
     return (
         <>
+            <SelectAttachment
+                componentData={componentData}
+                setComponentData={setComponentData}
+                attachmentUpload={attachmentData}
+                setAttachmentFromUpload={setAttachmentData}
+                show={dialogOpenSelectAttachment}
+                setShow={setDialogOpenSelectAttachment}
+                session={session}
+                onReRender={handleReRender}
+            />
             <div className={`row ${styles['attachment-table']}`} style={{padding:'25px'}}>
-                <TiltleAttachment />
+                <TitleAttachment />
                 <TableAttachment
                     data={attachmentData}
                     setAttachmentData={setAttachmentData}
+                    setAttachmentToComponentData={setAttachmentToComponentData}
                 />
             </div>
 
             <div>
                 <button
                     type='button'
+                    onClick={handleClickSelectAttachment}
                     className={`fw-bold btn btn-light button-plain`}
                 >
                     {t('Add Attachment')}

@@ -14,26 +14,31 @@ import { FaTrashAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
+
 import styles from './TableAttachment.module.css'
+import { AttachmentType } from '@/object-types/AttachmentType'
 
 interface Props {
     setAttachmentData: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
     data: AttachmentDetail[]
+    setAttachmentToComponentData: AttachmentType
 }
 
-export default function TableAttachment({ data, setAttachmentData }: Props) {
+export default function TableAttachment({ data, setAttachmentData, setAttachmentToComponentData }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
         const list: AttachmentDetail[] = [...data]
         list[index][name as keyof AttachmentDetail] = value
         setAttachmentData(list)
+        setAttachmentToComponentData(list)
     }
 
     const handleClickDelete = (index: number) => {
         const list: AttachmentDetail[] = [...data]
         list.splice(index, 1)
         setAttachmentData(list)
+        setAttachmentToComponentData(list)
     }
 
     return (

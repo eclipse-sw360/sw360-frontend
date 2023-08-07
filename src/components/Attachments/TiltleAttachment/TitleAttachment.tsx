@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import styles from './TitleAttachment.module.css'
 
-export default function TiltleAttachment() {
+export default function TitleAttachment() {
     const t = useTranslations(COMMON_NAMESPACE)
     return (
         <>
