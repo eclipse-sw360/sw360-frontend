@@ -311,6 +311,22 @@ export default function ComponentEditSummary({ session, componentId }: Props) {
                                         setRoles={setRoles}
                                     />
                                 </div>
+                                <div className='row mb-4'>
+                                    <AddKeyValueComponent
+                                        header={t('External ids')}
+                                        keyName={'external id'}
+                                        data={externalIds}
+                                        setMap={setDataExternalIds}
+                                    />
+                                </div>
+                                <div className='row mb-4'>
+                                    <AddKeyValueComponent
+                                        header={t('Additional Data')}
+                                        keyName={'additional data'}
+                                        data={addtionalData}
+                                        setMap={setDataAddtionalData}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
