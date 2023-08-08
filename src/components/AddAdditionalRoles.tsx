@@ -52,8 +52,8 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
 
     return(
         <>
-            <div className='row header mb-2'>
-                <h6>{t('Additional Roles')}</h6>
+            <div className={`${styles["header"]} mb-2`}>
+                <p className="fw-bold mt-3">{t('Additional Roles')}</p>
             </div>
             <div className="row">
                 {
@@ -61,7 +61,7 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
                         return (
                             <div className="row mb-2" key ={index}>
                                 <div className="col-lg-5">
-                                    <select className="form-select" key ="" name="key" value={elem.key} aria-label={t("additional role")} defaultValue = {defaultValue()} onChange={e => handleInputChange(e, index)}>
+                                    <select className="form-select" key ="" name="key" value={elem.key} aria-label="additional role" defaultValue = {defaultValue()} onChange={e => handleInputChange(e, index)}>
                                         {
                                         documentType === DocumentTypes.COMPONENT
                                         ?
@@ -89,8 +89,8 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
                                     <input name="value" value={elem.value} type="email"
                                            onChange={e => handleInputChange(e, index)}
                                            className="form-control"
-                                           placeholder={t('Enter email')}
-                                           aria-describedby={t('Email')} />
+                                           placeholder={`Enter email`}
+                                           aria-describedby={`Email`} />
                                 </div>
                                 <div className="col-lg-2">
                                     <button type="button" onClick={() => handleRemoveClick(index)} className={`fw-bold btn btn-light button-plain`}><FaTrashAlt className="bi bi-trash3-fill" /></button>
@@ -100,7 +100,7 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
                     })
                 }
                 <div className="col-lg-4">
-                    <button type="button" onClick={() => handleAddClick()} className="btn btn-secondary">{t('Click to add row to Additional Roles')}</button>
+                    <button type="button" onClick={() => handleAddClick()} className={`fw-bold btn btn-light button-plain`}>{t('Click to add row to Additional Roles')}</button>
                 </div>
             </div>
         </>

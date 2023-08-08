@@ -99,6 +99,7 @@
         "Clearing Details": "Clearing Details",
         "Clearing Standard": "Clearing Standard",
         "Closed": "Closed",
+        "Cloud Backend": "Cloud Backend",
         "Change Vulnerability Rating And Action?": "Change Vulnerability Rating And Action?",
         "Create Account": "Create Account",
         "Created By (Email)": "Created By (Email)",
@@ -130,6 +131,7 @@
         "Do you really want to delete the release?": "Do you really want to delete the release: <strong>{name}</strong>?",
         "Document Id": "Document Id",
         "Document Type": "Document Type",
+        "Domain": "Domain",
         "Download Attachment Bundle": "Download Attachment Bundle",
         "DOWNLOAD": "Download",
         "Drop a File Here": "Drop a File Here",
@@ -437,6 +439,8 @@
         "Will be set automatically": "Will be set automatically",
         "Wiki URL": "Wiki Url",
         "Yes": "Yes",
-        "You need a security responsible to enable monitoring": "You need a security responsible to enable monitoring"
+        "You need a security responsible to enable monitoring": "You need a security responsible to enable monitoring",
+        "Your project is created": "Your project is created",
+        "There are some errors while creating project": "There are some errors while creating project"
     }
 }

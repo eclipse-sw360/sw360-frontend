@@ -102,6 +102,7 @@
         "Click to add row to Additional Roles": "Nhấp để thêm hàng vào Vai trò bổ sung",
         "Click to set vendor": "Nhấp để đặt nhà cung cấp",
         "CLI attachment not found in the release!": "CLI attachment not found in the release!",
+        "Cloud Backend": "NOT TRANSLATED",
         "Create Account": "Tạo Tài Khoản",
         "Created By (Email)": "Được Tạo Bởi (Email)",
         "Create Component": "Tạo Thành Phần",
@@ -138,6 +139,7 @@
         "Download Attachment Bundle": "Tải xuống tệp tin đính kèm",
         "Do not create monitoring list, but use list from external id": "NOT TRANSLATED",
         "Documentation": "NOT TRANSLATED",
+        "Domain": "NOT TRANSTALTED",
         "External Ids": "NOT TRANSLATED",
         "External URLs": "NOT TRANSLATED",
         "Enter external id key": "NOT TRANSLATED",
@@ -438,6 +440,8 @@
         "Wiki URL": "Wiki Url",
         "entries": "mục",
         "Yes": "Có",
-        "You need a security responsible to enable monitoring": "NOT TRANSLATED"
+        "You need a security responsible to enable monitoring": "NOT TRANSLATED",
+        "Your project is created": "NOT TRANSLATED",
+        "There are some errors while creating project": "NOT TRANSLATED"
     }
 }

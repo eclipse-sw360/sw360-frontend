@@ -101,6 +101,7 @@
         "COTS": "COTS",
         "Clearing Details": "クリアリング詳細",
         "Clearing Standard": "クリアリング基準",
+        "Cloud Backend": "NOT TRANSLATED",
         "Change Vulnerability Rating And Action?": "脆弱性レートとそのアクションを変更しますか？",
         "Create Account": "アカウントの作成",
         "Created By (Email)": "Created by (Email)",
@@ -135,6 +136,7 @@
         "Document Id": "ドキュメントID",
         "Document Name": "NOT TRANSLATED",
         "Document Type": "ドキュメントの種類",
+        "Domain": "NOT TRANSTALTED",
         "Download Attachment Bundle": "添付ファイルの一括ダウンロード",
         "Do not create monitoring list, but use list from external id": "NOT TRANSLATED",
         "Documentation": "NOT TRANSLATED",
@@ -438,6 +440,8 @@
         "Wiki URL": "ウィキの URL",
         "entries": "件表示",
         "Yes": "はい",
-        "You need a security responsible to enable monitoring": "NOT TRANSLATED"
+        "You need a security responsible to enable monitoring": "NOT TRANSLATED",
+        "Your project is created": "NOT TRANSLATED",
+        "There are some errors while creating project": "NOT TRANSLATED"
     }
 }

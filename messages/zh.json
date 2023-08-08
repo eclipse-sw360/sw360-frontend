@@ -102,6 +102,7 @@
         "COTS": "COTS",
         "Clearing Details": "明确细节",
         "Clearing Standard": "明确标准",
+        "Cloud Backend": "NOT TRANSLATED",
         "Change Vulnerability Rating And Action?": "是否更改漏洞等级和操作？",
         "Create Account": "创建账户",
         "Created By (Email)": "创建者（电子邮件）",
@@ -135,6 +136,7 @@
         "Document Id": "文档ID",
         "Document Name": "NOT TRANSLATED",
         "Document Type": "文档类型",
+        "Domain": "NOT TRANSTALTED",
         "Download Attachment Bundle": "下载附件包",
         "Do not create monitoring list, but use list from external id": "NOT TRANSLATED",
         "Documentation": "NOT TRANSLATED",
@@ -437,6 +439,8 @@
         "Will be set automatically": "将自动设置",
         "Wiki URL": "维基网址",
         "Yes": "是",
-        "You need a security responsible to enable monitoring": "NOT TRANSLATED"
+        "You need a security responsible to enable monitoring": "NOT TRANSLATED",
+        "Your project is created": "NOT TRANSLATED",
+        "There are some errors while creating project": "NOT TRANSLATED"
     }
 }

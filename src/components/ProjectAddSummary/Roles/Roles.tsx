@@ -29,32 +29,32 @@ export default function Roles() {
             <DepartmentModal show={showDepartmentModal} setShow={setShowDepartmentModal} />
             <UsersModal show={showUsersModal} setShow={setShowUsersModal} />
             <div className="row mb-4">
-                <div className="row mb-2 header">
-                    <h6>{t('Roles')}</h6>
-                </div>
+                <h6 className="header pb-2 px-2">
+                        {t('Roles')}
+                </h6>
                 <div className="row">
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.group" className="form-label fw-bold">{t('Group')}</label>
+                        <label htmlFor="addProjects.group" className="form-label fw-medium">{t('Group')}</label>
                         <input type="text" className="form-control" id="addProjects.group" aria-label={t('Group')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowDepartmentModal(true)} />
                         <div className="form-text"> <GiCancel /></div>
                     </div>
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.projectManager" className="form-label fw-bold">{t('Project Manager')}</label>
+                        <label htmlFor="addProjects.projectManager" className="form-label fw-medium">{t('Project Manager')}</label>
                         <input type="text" className="form-control" id="addProjects.projectManager" aria-label={t('Project Manager')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowUsersModal(true)} />
                     </div>
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.projectOwner" className="form-label fw-bold">{t('Project Owner')}</label>
+                        <label htmlFor="addProjects.projectOwner" className="form-label fw-medium">{t('Project Owner')}</label>
                         <input type="text" className="form-control" id="addProjects.projectOwner" aria-label={t('Project Owner')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowUsersModal(true)} />
                     </div>
                 </div>
                 <hr className="my-2"/>
                 <div className="row">
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.ownerAccountingUnit" className="form-label fw-bold">{t('Owner Accounting Unit')}</label>
+                        <label htmlFor="addProjects.ownerAccountingUnit" className="form-label fw-medium">{t('Owner Accounting Unit')}</label>
                         <input type="text" className="form-control" aria-label={t('Owner Accounting Unit')} id="addProjects.ownerAccountingUnit" placeholder={t('Enter owner\'s accounting unit')} readOnly={true}/>
                     </div>
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.ownerBillingGroup" className="form-label fw-bold">{t('Owner Billing Group')}</label>
+                        <label htmlFor="addProjects.ownerBillingGroup" className="form-label fw-medium">{t('Owner Billing Group')}</label>
                         <input type="text" className="form-control" aria-label={t('Owner Billing Group')} id="addProjects.ownerBillingGroup" placeholder={t('Enter Owner Billing Group')} readOnly={true}/>
                     </div>
                     <div className="col-lg-4 mb-3">
@@ -64,22 +64,22 @@ export default function Roles() {
                 <hr className="my-2"/>
                 <div className="row">
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.leadArchitect" className="form-label fw-bold">{t('Lead Architect')}</label>
+                        <label htmlFor="addProjects.leadArchitect" className="form-label fw-medium">{t('Lead Architect')}</label>
                         <input type="text" className="form-control" id="addProjects.leadArchitect" aria-label={t('Lead Architect')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowUsersModal(true)}/>
                     </div>
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.moderators" className="form-label fw-bold">{t('Moderators')}</label>
+                        <label htmlFor="addProjects.moderators" className="form-label fw-medium">{t('Moderators')}</label>
                         <input type="text" className="form-control" id="addProjects.moderators" aria-label={t('Moderators')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowUsersModal(true)}/>
                     </div>
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.contributors" className="form-label fw-bold">{t('Contributors')}</label>
+                        <label htmlFor="addProjects.contributors" className="form-label fw-medium">{t('Contributors')}</label>
                         <input type="text" className="form-control" id="addProjects.contributors" aria-label={t('Contributors')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowUsersModal(true)}/>
                     </div>
                 </div>
                 <hr className="my-2" />
                 <div className="row">
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.securityResponsibles" className="form-label fw-bold">{t('Security Responsibles')}</label>
+                        <label htmlFor="addProjects.securityResponsibles" className="form-label fw-medium">{t('Security Responsibles')}</label>
                         <input type="text" className="form-control" id="addProjects.securityResponsibles" aria-label={t('Security Responsibles')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowUsersModal(true)}/>
                     </div>
                 </div>

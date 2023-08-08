@@ -10,16 +10,74 @@
 "use client"
 
 import { Col, Row, ListGroup, Tab, Button } from 'react-bootstrap'
-import Summary from "./components/Summary/Summary"
+import Summary from "@/components/ProjectAddSummary/Summary"
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { useRouter } from 'next/navigation'
+import HttpStatus from '@/object-types/enums/HttpStatus'
+import { TypeOptions, toast } from 'react-toastify'
+import ApiUtils from '@/utils/api/api.util'
+import ProjectPayload from "@/object-types/CreateProjectPayload"
+import { useState } from 'react'
+import { AUTH_TOKEN } from '@/utils/env'
+
 
 export default function AddProjects() {
 
+    const router = useRouter();
     const t = useTranslations(COMMON_NAMESPACE)
+    const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
+        name: '',
+        description: '',
+        version: '',
+        visibility: '',
+        projectType: '',
+        tag: '',
+        domain: '',
+        leadArchitect: '',
+        state: 'ACTIVE',
+        phaseOutSince: '',
+        moderators: null,
+        contributors: null
+    });
+
+    const alert = (text: string, type: TypeOptions) =>
+        toast(text, {
+            type,
+            position: toast.POSITION.TOP_LEFT,
+            theme: 'colored',
+        })
+
+    const createProject = async () => {
+        const response = await ApiUtils.POST('projects',
+                                              projectPayload,
+                                              AUTH_TOKEN)
+
+        if (response.status == HttpStatus.CREATED) {
+            const responseData = await response.json()
+            alert(t('Your project is created'), 'success')
+            router.push('/projects')
+        } else {
+            alert(t('There are some errors while creating project'), 'error')
+        }
+    }
+
+    const handleCancelClick = () => {
+
+        router.push('/projects')
+    }
 
     return (
         <>
+        <form
+                action=''
+                id='form_submit'
+                method='post'
+                onSubmit={(event) => {
+                    event.preventDefault()
+                    createProject()
+                }}
+            >
             <div className="ms-5 mt-2">
                 <Tab.Container defaultActiveKey="summary">
                     <Row>
@@ -40,8 +98,18 @@ export default function AddProjects() {
                             <Row className="d-flex justify-content-between">
                                 <Col lg={3}>
                                     <Row>
-                                        <Button variant="primary" className="me-2 col-auto">{t('Create Project')}</Button>
-                                        <Button variant="secondary" className="col-auto">{t('Cancel')}</Button>
+                                        <Button variant="primary"
+                                                className="me-2 col-auto"
+                                                onClick={createProject}
+                                                >
+                                                    {t('Create Project')}
+                                        </Button>
+                                        <Button variant="secondary"
+                                                className="col-auto"
+                                                onClick={handleCancelClick}
+                                                >
+                                                    {t('Cancel')}
+                                        </Button>
                                     </Row>
                                 </Col>
                                 <Col lg={4} className="text-truncate buttonheader-title">
@@ -50,8 +118,14 @@ export default function AddProjects() {
                             </Row>
                             <Row className="mt-5">
                                 <Tab.Content>
-                                    <Tab.Pane eventKey="summary"><Summary/></Tab.Pane>
-                                    <Tab.Pane eventKey="administration"></Tab.Pane>
+                                    <Tab.Pane eventKey="summary">
+                                        <Summary token={AUTH_TOKEN}
+                                                 projectPayload={projectPayload}
+                                                 setProjectPayload={setProjectPayload}
+                                        />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey="administration">
+                                    </Tab.Pane>
                                     <Tab.Pane eventKey="linkedProjects"></Tab.Pane>
                                 </Tab.Content>
                             </Row>
@@ -59,6 +133,7 @@ export default function AddProjects() {
                     </Row>
                 </Tab.Container>
             </div>
+            </form>
         </>
     )
 }

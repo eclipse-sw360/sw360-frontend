@@ -7,8 +7,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
-
 import React from 'react'
 import styles from '@/css/AddKeyValue.module.css'
 import { FaTrashAlt } from 'react-icons/fa'

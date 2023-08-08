@@ -9,37 +9,37 @@
 
 "use client"
 
-import { useState } from "react"
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
 import AddKeyValueComponent from '@/components/AddKeyValue'
-
-import AddAdditionalData from "./AddAdditionalData/AddAdditionalData"
-import AdditionalDataInput from "./AddAdditionalData/AddAdditionalData.types"
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import GeneralInformation from "./GeneralInformation" 
+import GeneralInformation from "./GeneralInformation"
 import Roles from "./Roles/Roles"
+import ProjectPayload from "@/object-types/CreateProjectPayload"
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { useTranslations } from "next-intl"
 
-export default function Summary() {
+interface Props{
+    token: string
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
 
-    const [additionalDataList, setAdditionalDataList] = useState<AdditionalDataInput[]>([
-        {
-            key: "BA BL",
-            value: ""
-        },
-        {
-            key: "CSMS Asset Type",
-            value: ""
-        }
-    ])
+export default function Summary({token, projectPayload, setProjectPayload}: Props) {
+
+    const t = useTranslations(COMMON_NAMESPACE)
 
     return (
         <>
-            <div className="container">
-                <GeneralInformation/>
+            <div className="ms-1">
+                <GeneralInformation
+                    token={token}
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
                 <div className="row mb-4">
                     <AddKeyValueComponent
-                        header={'External URLs'}
-                        keyName={'external url'}
+                        header={t('External URLs')}
+                        keyName={t('external url')}
                     />
                 </div>
                 <Roles/>
@@ -50,12 +50,15 @@ export default function Summary() {
                 </div>
                 <div className="row mb-4">
                     <AddKeyValueComponent
-                        header={'External Ids'}
-                        keyName={'external id'}
+                        header={t('External Ids')}
+                        keyName={t('external id')}
                     />
                 </div>
                 <div className="row mb-4">
-                    <AddAdditionalData inputList={additionalDataList} setInputList={setAdditionalDataList} />
+                    <AddKeyValueComponent
+                        header={t('Additional Data')}
+                        keyName={t('Additional Data')}
+                    />
                 </div>
             </div>
         </>
