@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Alert from 'react-bootstrap/Alert'
 import { useEffect, useState, useCallback } from 'react'
 import CommonUtils from '@/utils/common.utils'
 import styles from './Attachment.module.css'

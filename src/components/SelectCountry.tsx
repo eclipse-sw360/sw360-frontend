@@ -28,7 +28,6 @@ export default function SelectCountryComponent(props: Props) {
                 className='form-select'
                 aria-label='country'
                 id='country'
-                defaultValue=''
                 name='ownerCountry'
                 onChange={props.selectCountry}
                 value={props.value}

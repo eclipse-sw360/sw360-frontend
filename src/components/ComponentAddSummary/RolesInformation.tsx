@@ -146,7 +146,7 @@ const RolesInformation = ({
                             name='componentOwner'
                             onClick={handleClickSearchComponentOwner}
                             onChange={updateField}
-                            value={componentOwner.fullName}
+                            value={componentOwner.fullName ?? ''}
                         />
                         <ComponentOwnerDiaglog
                             show={dialogOpenComponentOwner}
@@ -168,7 +168,7 @@ const RolesInformation = ({
                             aria-describedby='Owner Accounting Unit'
                             name='ownerAccountingUnit'
                             onChange={updateField}
-                            value={componentPayload.ownerAccountingUnit}
+                            value={componentPayload.ownerAccountingUnit ?? ''}
                         />
                     </div>
                     <div className='col-lg-4'>
@@ -183,14 +183,14 @@ const RolesInformation = ({
                             aria-describedby='Owner Billing Group'
                             name='ownerGroup'
                             onChange={updateField}
-                            value={componentPayload.ownerGroup}
+                            value={componentPayload.ownerGroup ?? ''}
                         />
                     </div>
                 </div>
                 <hr className='my-4' />
                 <div className='row'>
                     <div className='col-lg-4'>
-                        <SelectCountryComponent selectCountry={updateField} value={componentPayload.ownerCountry} />
+                        <SelectCountryComponent selectCountry={updateField} value={componentPayload.ownerCountry ?? ''} />
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='moderators' className='form-label fw-bold'>
@@ -207,7 +207,7 @@ const RolesInformation = ({
                             readOnly={true}
                             name='moderators'
                             onChange={updateField}
-                            value={moderator.fullName}
+                            value={moderator.fullName ?? ''}
                             onClick={handleClickSearchModerators}
                         />
                         <ModeratorsDiaglog

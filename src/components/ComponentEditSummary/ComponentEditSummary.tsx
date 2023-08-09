@@ -27,7 +27,7 @@ import RolesInformation from '../ComponentAddSummary/RolesInformation'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
-import SearchUsersModalComponent from '../SearchUsersModal/SearchUsersModal'
+import SearchUsersModalComponent from '../sw360/SearchUsersModal/SearchUsersModal'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ActionType from '@/object-types/enums/ActionType'
 interface Props {

@@ -122,7 +122,7 @@ const GeneralInfoComponent = ({
                                 name='name'
                                 aria-describedby='name'
                                 required
-                                value={componentPayload.name}
+                                value={componentPayload.name ?? ''}
                                 onChange={updateField}
                             />
                         </div>
@@ -138,7 +138,8 @@ const GeneralInfoComponent = ({
                                 placeholder={t('Will be set auto')}
                                 id='createdBy'
                                 aria-describedby='Created By'
-                                value={componentPayload.createBy}
+                                value={componentPayload.createBy ?? ''}
+                                // value={componentPayload.createBy}
                                 readOnly={true}
                             />
                             <div id='createdBy' className='form-text'>
@@ -158,7 +159,7 @@ const GeneralInfoComponent = ({
                                 required
                                 name='categories'
                                 onChange={setCategoriesData}
-                                value={componentPayload.categories}
+                                value={componentPayload.categories ?? ''}
                             />
                         </div>
                     </div>
@@ -173,10 +174,9 @@ const GeneralInfoComponent = ({
                                 aria-label='component_type'
                                 id='component_type'
                                 required
-                                defaultValue=''
                                 name='componentType'
                                 onChange={updateField}
-                                value={componentPayload.componentType}
+                                value={componentPayload.componentType ?? ''}
                             >
                                 <option value=''></option>
                                 <option value='OSS'>{t('OSS')}</option>
@@ -207,7 +207,7 @@ const GeneralInfoComponent = ({
                                 readOnly={true}
                                 name='defaultVendorId'
                                 onClick={handleClickSearchVendor}
-                                value={vendor.fullName}
+                                value={vendor.fullName ?? ''}
                             />
                             <div id='default_vendor' className='form-text'>
                                 <i className='bi bi-x-circle'></i>
@@ -232,7 +232,7 @@ const GeneralInfoComponent = ({
                                 aria-describedby='Tag'
                                 name='homepage'
                                 onChange={updateField}
-                                value={componentPayload.homepage}
+                                value={componentPayload.homepage ?? ''}
                             />
                         </div>
                     </div>
@@ -250,7 +250,7 @@ const GeneralInfoComponent = ({
                                 aria-describedby='blog_url'
                                 name='blog'
                                 onChange={updateField}
-                                value={componentPayload.blog}
+                                value={componentPayload.blog ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -265,7 +265,7 @@ const GeneralInfoComponent = ({
                                 aria-describedby='wiki_url'
                                 name='wiki'
                                 onChange={updateField}
-                                value={componentPayload.wiki}
+                                value={componentPayload.wiki ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -280,7 +280,7 @@ const GeneralInfoComponent = ({
                                 aria-describedby='mailing_list_url'
                                 name='mailinglist'
                                 onChange={updateField}
-                                value={componentPayload.mailinglist}
+                                value={componentPayload.mailinglist ?? ''}
                             />
                         </div>
                     </div>
@@ -298,7 +298,7 @@ const GeneralInfoComponent = ({
                                 style={{ height: '100px' }}
                                 name='description'
                                 onChange={updateField}
-                                value={componentPayload.description}
+                                value={componentPayload.description ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -311,7 +311,7 @@ const GeneralInfoComponent = ({
                                 id='modified_on'
                                 aria-describedby='Modified on'
                                 readOnly={true}
-                                value={componentPayload.modifiedOn}
+                                value={componentPayload.modifiedOn ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -325,7 +325,7 @@ const GeneralInfoComponent = ({
                                 id='modified_by'
                                 aria-describedby='Modified By'
                                 readOnly={true}
-                                value={componentPayload.modifiedBy}
+                                value={componentPayload.modifiedBy ?? ''}
                             />
                         </div>
                     </div>

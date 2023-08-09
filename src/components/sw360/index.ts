@@ -9,7 +9,6 @@
 
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
-import ComponentAddSummary from './ComponentAddSummary/ComponentAddSummary'
 import Footer from './Footer/Footer'
 import Header from './Header/Header'
 import SW360Navbar from './SW360Navbar/SW360Navbar'
@@ -29,7 +28,6 @@ export {
     _,
     AdvancedSearch,
     AuthScreen,
-    ComponentAddSummary,
     Footer,
     Header,
     SW360Navbar,

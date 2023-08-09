@@ -9,25 +9,25 @@
 
 import AttachmentDetail from "./AttachmentDetail"
 export default interface ComponentPayload {
-    name: string
-    createBy: string
-    description: string
-    componentType: string
-    modifiedBy: string
-    modifiedOn: string
-    moderators: string[]
-    componentOwner: string
-    ownerAccountingUnit: string
-    ownerGroup: string
-    ownerCountry: string
-    roles: any
-    externalIds: any
-    additionalData: any
-    defaultVendorId: string
-    categories: string[]
-    homepage: string
-    mailinglist: string
-    wiki: string
-    blog: string
-    attachmentDTOs?: AttachmentDetail[]
+    name?: string | undefined
+    createBy?: string | undefined
+    description?: string | undefined
+    componentType?: string | undefined
+    modifiedBy?: string | undefined
+    modifiedOn?: string | undefined
+    moderators?: string[] | undefined
+    componentOwner?: string | undefined
+    ownerAccountingUnit?: string | undefined
+    ownerGroup?: string | undefined
+    ownerCountry?: string | undefined
+    roles?: any | undefined
+    externalIds?: any | undefined
+    additionalData?: any | undefined
+    defaultVendorId?: string | undefined
+    categories?: string[] | undefined
+    homepage?: string | undefined
+    mailinglist?: string | undefined
+    wiki?: string | undefined
+    blog?: string | undefined
+    attachmentDTOs?: AttachmentDetail[] | undefined
 }

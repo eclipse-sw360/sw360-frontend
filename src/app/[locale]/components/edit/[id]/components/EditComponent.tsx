@@ -22,7 +22,6 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import { toast, TypeOptions, ToastContainer } from 'react-toastify'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import ComponentEditSummary from '@/components/sw360/ComponentEditSummary/ComponentEditSummary'
 import Releases from './Releases'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
@@ -30,6 +29,7 @@ import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import CommonUtils from '@/utils/common.utils'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ActionType from '@/object-types/enums/ActionType'
+import ComponentEditSummary from '@/components/ComponentEditSummary/ComponentEditSummary'
 
 interface Props {
     session?: Session

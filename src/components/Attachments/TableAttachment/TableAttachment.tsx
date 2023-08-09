@@ -44,19 +44,18 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
     return (
         <>
             <div className='row'>
-                {data.map((item, j) => {
+                {data.map((item: AttachmentDetail, index: number) => {
                     return (
-                        <>
+                        <div key={item.attachmentContentId}>
                             <div className={`${styles['div-row']}`}>
-                                <label className={`${styles['label-filename']}`}>{item.filename}</label>
+                                <label className={`${styles['label-filename']}`}>{item.filename ?? ''}</label>
                                 <select
                                     className={`${styles['select-type']}`}
                                     aria-label='component_type'
                                     id='component_type'
-                                    defaultValue=''
                                     name='attachmentType'
-                                    onChange={(e) => handleInputChange(e, j)}
-                                    value={item.attachmentType}
+                                    onChange={(e) => handleInputChange(e, index)}
+                                    value={item.attachmentType ?? ''}
                                 >
                                     <option value='SOURCE'>{t('Source file')}</option>
                                     <option value='CLEARING_REPORT'>{t('Clearing Report')}</option>
@@ -88,22 +87,21 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
                                 <input
                                     className={`${styles['input-comment']}`}
                                     name='createdComment'
-                                    value={item.createdComment}
+                                    value={item.createdComment ?? ''}
                                     type='text'
-                                    onChange={(e) => handleInputChange(e, j)}
+                                    onChange={(e) => handleInputChange(e, index)}
                                     placeholder='Enter Comment'
                                 />
-                                <label className={`${styles['label-team']}`}>{item.createdTeam}</label>
-                                <label className={`${styles['label-by']}`}>{item.createdBy}</label>
-                                <label className={`${styles['label-on']}`}>{item.createdOn}</label>
+                                <label className={`${styles['label-team']}`}>{item.createdTeam ?? ''}</label>
+                                <label className={`${styles['label-by']}`}>{item.createdBy ?? ''}</label>
+                                <label className={`${styles['label-on']}`}>{item.createdOn ?? ''}</label>
                                 <select
                                     className={`${styles['select-status']}`}
                                     aria-label='component_type'
                                     id='component_type'
-                                    defaultValue=''
                                     name='checkStatus'
-                                    value={item.checkStatus}
-                                    onChange={(e) => handleInputChange(e, j)}
+                                    value={item.checkStatus ?? ''}
+                                    onChange={(e) => handleInputChange(e, index)}
                                 >
                                     <option value='NOTCHECKED'>{t('NOT_CHECKED')}</option>
                                     <option value='ACCEPTED'> {t('ACCEPTED')}</option>
@@ -112,17 +110,17 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
                                 <input
                                     className={`${styles['input-comment']}`}
                                     type='text'
-                                    value={item.checkedComment}
+                                    value={item.checkedComment ?? ''}
                                     name='checkedComment'
-                                    onChange={(e) => handleInputChange(e, j)}
+                                    onChange={(e) => handleInputChange(e, index)}
                                     placeholder='Enter Comment'
                                 />
-                                <label className={`${styles['label-team']}`}>{item.checkedTeam}</label>
-                                <label className={`${styles['label-by']}`}>{item.checkedBy}</label>
-                                <label className={`${styles['label-on']}`}>{item.checkedOn}</label>
+                                <label className={`${styles['label-team']}`}>{item.checkedTeam ?? ''}</label>
+                                <label className={`${styles['label-by']}`}>{item.checkedBy ?? ''}</label>
+                                <label className={`${styles['label-on']}`}>{item.checkedOn ?? ''}</label>
                                 <button
                                     type='button'
-                                    onClick={() => handleClickDelete(j)}
+                                    onClick={() => handleClickDelete(index)}
                                     style={{ border: 'none' }}
                                     className={`fw-bold btn btn-light button-plain`}
                                 >
@@ -130,7 +128,7 @@ export default function TableAttachment({ data, setAttachmentData, setAttachment
                                 </button>
                             </div>
                             <hr className={`${styles['hr']}`} />
-                        </>
+                        </div>
                     )
                 })}
             </div>

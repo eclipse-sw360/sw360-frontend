@@ -57,11 +57,11 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
             </div>
             <div className="row">
                 {
-                    roles.map((elem, j) => {
+                    roles.map((elem, index) => {
                         return (
-                            <div className="row mb-2" key ="">
+                            <div className="row mb-2" key ={index}>
                                 <div className="col-lg-5">
-                                    <select className="form-select" key ="" name="key" value={elem.key} aria-label="additional role" defaultValue = {defaultValue()} onChange={e => handleInputChange(e, j)}>
+                                    <select className="form-select" key ="" name="key" value={elem.key} aria-label="additional role" defaultValue = {defaultValue()} onChange={e => handleInputChange(e, index)}>
                                         {
                                         documentType === DocumentTypes.COMPONENT
                                         ?
@@ -87,13 +87,13 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
                                 </div>
                                 <div className="col-lg-5">
                                     <input name="value" value={elem.value} type="email"
-                                           onChange={e => handleInputChange(e, j)}
+                                           onChange={e => handleInputChange(e, index)}
                                            className="form-control"
                                            placeholder={`Enter email`}
                                            aria-describedby={`Email`} />
                                 </div>
                                 <div className="col-lg-2">
-                                    <button type="button" onClick={() => handleRemoveClick(j)} className={`fw-bold btn btn-light button-plain`}><FaTrashAlt className="bi bi-trash3-fill" /></button>
+                                    <button type="button" onClick={() => handleRemoveClick(index)} className={`fw-bold btn btn-light button-plain`}><FaTrashAlt className="bi bi-trash3-fill" /></button>
                                 </div>
                             </div>
                         )

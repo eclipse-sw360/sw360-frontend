@@ -9,6 +9,6 @@
 // License-Filename: LICENSE
 
 export default interface Vendor {
-    id: string
-    fullName: string
+    id?: string
+    fullName?: string
 }
