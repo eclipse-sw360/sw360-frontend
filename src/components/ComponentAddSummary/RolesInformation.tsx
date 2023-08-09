@@ -21,19 +21,35 @@ import ModeratorsDiaglog from '@/components/sw360/SearchModerators/ModeratorsDia
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ActionType from '@/object-types/enums/ActionType'
 interface Props {
-    session: Session
-    componentPayload: ComponentPayload
-    setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    session?: Session
+    componentPayload?: ComponentPayload
+    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    componentOwner?: ComponentOwner
+    setComponentOwner?: React.Dispatch<React.SetStateAction<ComponentOwner>>
+    moderator?: Moderators
+    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
+    componentData?: ComponentPayload
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    actionType?: string
 }
 
-const RolesInformation = ({ session, componentPayload, setComponentPayload }: Props) => {
+const RolesInformation = ({
+    session,
+    componentPayload,
+    setComponentPayload,
+    componentOwner,
+    setComponentOwner,
+    moderator,
+    setModerator,
+    componentData,
+    setComponentData,
+    actionType
+}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [fullNameComponentOwner, setFullNameComponentOwner] = useState<string>()
-    const [fullNameModerators, setFullNameModerators] = useState<string>()
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
-
     const handleClickSearchComponentOwner = useCallback(() => setDialogOpenComponentOwner(true), [])
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
 
@@ -42,26 +58,53 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
             ...componentPayload,
             [e.target.name]: e.target.value,
         })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
+            [e.target.name]: e.target.value,
+        })
     }
 
     const setComponentOwnerId = (componentOwnerResponse: ComponentOwner) => {
-        setFullNameComponentOwner(componentOwnerResponse.fullName)
+        const componentOwner: ComponentOwner = {
+            email: componentOwnerResponse.email,
+            fullName: componentOwnerResponse.fullName,
+        }
+        setComponentOwner(componentOwner)
         setComponentPayload({
             ...componentPayload,
+            componentOwner: componentOwnerResponse.email,
+        })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
             componentOwner: componentOwnerResponse.email,
         })
     }
 
     const setModerators = (moderatorsResponse: Moderators) => {
-        setFullNameModerators(moderatorsResponse.fullName)
+        const moderator: Moderators = {
+            emails: moderatorsResponse.emails,
+            fullName: moderatorsResponse.fullName,
+        }
+        setModerator(moderator)
         setComponentPayload({
             ...componentPayload,
+            moderators: moderatorsResponse.emails,
+        })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
             moderators: moderatorsResponse.emails,
         })
     }
 
     const handleClearComponentOwner = () => {
-        setFullNameComponentOwner('')
+        const componentOwner: ComponentOwner = {
+            email: '',
+            fullName: '',
+        }
+        setComponentOwner(componentOwner)
         setComponentPayload({
             ...componentPayload,
             componentOwner: '',
@@ -69,7 +112,11 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
     }
 
     const handleClearModerators = () => {
-        setFullNameModerators('')
+        const moderator: Moderators = {
+            emails: null,
+            fullName: '',
+        }
+        setModerator(moderator)
         setComponentPayload({
             ...componentPayload,
             moderators: [],
@@ -99,7 +146,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                             name='componentOwner'
                             onClick={handleClickSearchComponentOwner}
                             onChange={updateField}
-                            value={fullNameComponentOwner}
+                            value={componentOwner.fullName ?? ''}
                         />
                         <ComponentOwnerDiaglog
                             show={dialogOpenComponentOwner}
@@ -121,7 +168,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                             aria-describedby='Owner Accounting Unit'
                             name='ownerAccountingUnit'
                             onChange={updateField}
-                            value={componentPayload.ownerAccountingUnit}
+                            value={componentPayload.ownerAccountingUnit ?? ''}
                         />
                     </div>
                     <div className='col-lg-4'>
@@ -136,14 +183,14 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                             aria-describedby='Owner Billing Group'
                             name='ownerGroup'
                             onChange={updateField}
-                            value={componentPayload.ownerGroup}
+                            value={componentPayload.ownerGroup ?? ''}
                         />
                     </div>
                 </div>
                 <hr className='my-4' />
                 <div className='row'>
                     <div className='col-lg-4'>
-                        <SelectCountryComponent selectCountry={updateField} value={componentPayload.ownerCountry} />
+                        <SelectCountryComponent selectCountry={updateField} value={componentPayload.ownerCountry ?? ''} />
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='moderators' className='form-label fw-bold'>
@@ -160,7 +207,7 @@ const RolesInformation = ({ session, componentPayload, setComponentPayload }: Pr
                             readOnly={true}
                             name='moderators'
                             onChange={updateField}
-                            value={fullNameModerators}
+                            value={moderator.fullName ?? ''}
                             onClick={handleClickSearchModerators}
                         />
                         <ModeratorsDiaglog

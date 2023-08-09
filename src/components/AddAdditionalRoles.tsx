@@ -7,7 +7,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState } from 'react'
 import styles from "@/css/AddKeyValue.module.css"
 import { FaTrashAlt } from 'react-icons/fa';
 import DocumentTypes from '@/object-types/enums/DocumentTypes';
@@ -17,37 +16,34 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants';
 
 interface Props {
     documentType?: string;
-    setRoles?: RolesType
+    setDataRoles?: RolesType
+    setRoles?: React.Dispatch<React.SetStateAction<Input[]>>
+    roles?: Input[]
 }
 
-interface Input {
-    role: string;
-    email: string;
-}
-
-export default function AddAdditionalRolesComponent({documentType, setRoles}: Props) {
+export default function AddAdditionalRolesComponent({documentType, setDataRoles, roles, setRoles}: Props) {
 
     const t = useTranslations(COMMON_NAMESPACE);
-    const [inputList, setInputList] = useState<Input[]>([]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target;
-        const list: Input[] = [...inputList];
+        const list: Input[] = [...roles];
         list[index][name as keyof Input] = value;
-        setInputList(list);
         setRoles(list);
+        setDataRoles(list);
     };
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList];
+        const list = [...roles];
         list.splice(index, 1);
-        setInputList(list);
+        setRoles(list);
+        setDataRoles(list)
     };
 
     const handleAddClick = () => {
         documentType === DocumentTypes.COMPONENT?
-        setInputList([...inputList, { role: "Committer", email: "" }])
-        : setInputList([...inputList, { role: "Stakeholder", email: "" }]);
+        setRoles([...roles, { key: "Committer", value: "" }])
+        : setRoles([...roles, { key: "Stakeholder", value: "" }]);
     };
 
     const defaultValue = () => {
@@ -61,11 +57,11 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
             </div>
             <div className="row">
                 {
-                    inputList.map((elem, j) => {
+                    roles.map((elem, index) => {
                         return (
-                            <div className="row mb-2" key ="">
+                            <div className="row mb-2" key ={index}>
                                 <div className="col-lg-5">
-                                    <select className="form-select" key ="" name="role" value={elem.role} aria-label="additional role" defaultValue = {defaultValue()} onChange={e => handleInputChange(e, j)}>
+                                    <select className="form-select" key ="" name="key" value={elem.key} aria-label="additional role" defaultValue = {defaultValue()} onChange={e => handleInputChange(e, index)}>
                                         {
                                         documentType === DocumentTypes.COMPONENT
                                         ?
@@ -90,14 +86,14 @@ export default function AddAdditionalRolesComponent({documentType, setRoles}: Pr
                                     </select>
                                 </div>
                                 <div className="col-lg-5">
-                                    <input name="email" value={elem.email} type="email"
-                                           onChange={e => handleInputChange(e, j)}
+                                    <input name="value" value={elem.value} type="email"
+                                           onChange={e => handleInputChange(e, index)}
                                            className="form-control"
                                            placeholder={`Enter email`}
                                            aria-describedby={`Email`} />
                                 </div>
                                 <div className="col-lg-2">
-                                    <button type="button" onClick={() => handleRemoveClick(j)} className={`fw-bold btn btn-light button-plain`}><FaTrashAlt className="bi bi-trash3-fill" /></button>
+                                    <button type="button" onClick={() => handleRemoveClick(index)} className={`fw-bold btn btn-light button-plain`}><FaTrashAlt className="bi bi-trash3-fill" /></button>
                                 </div>
                             </div>
                         )

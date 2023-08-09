@@ -28,14 +28,13 @@ export default function SelectCountryComponent(props: Props) {
                 className='form-select'
                 aria-label='country'
                 id='country'
-                defaultValue=''
                 name='ownerCountry'
                 onChange={props.selectCountry}
                 value={props.value}
             >
                 <option value=''>{t('Select a country')}</option>
                 {getData().map((country: any) => (
-                    <option key={country.code} value={country.name}>
+                    <option key={country.code} value={country.code}>
                         {country.name}
                     </option>
                 ))}

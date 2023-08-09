@@ -18,22 +18,40 @@ import 'react-toastify/dist/ReactToastify.css'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ActionType from '@/object-types/enums/ActionType'
 interface Props {
-    session: Session
-    componentPayload: ComponentPayload
-    setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    session?: Session
+    componentPayload?: ComponentPayload
+    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    vendor?: Vendor
+    setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
+    componentData?: ComponentPayload
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    actionType?: string
 }
 
-const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }: Props) => {
+const GeneralInfoComponent = ({
+    session,
+    componentPayload,
+    setComponentPayload,
+    vendor,
+    setVendor,
+    componentData,
+    setComponentData,
+    actionType
+}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [vendorName, setVendorName] = useState<string>()
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
-
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setComponentPayload({
             ...componentPayload,
+            [e.target.name]: e.target.value,
+        })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
             [e.target.name]: e.target.value,
         })
     }
@@ -44,6 +62,11 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
             ...componentPayload,
             categories: data,
         })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
+            categories: data,
+        })
     }
 
     const splitValueCategories = (valueCatergories: string) => {
@@ -51,15 +74,28 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
     }
 
     const setVendorId = (vendorResponse: Vendor) => {
-        setVendorName(vendorResponse.fullName)
+        const vendorData: Vendor = {
+            id: vendorResponse.id,
+            fullName: vendorResponse.fullName,
+        }
+        setVendor(vendorData)
         setComponentPayload({
             ...componentPayload,
+            defaultVendorId: vendorResponse.id,
+        })
+        actionType === ActionType.EDIT &&
+        setComponentData({
+            ...componentData,
             defaultVendorId: vendorResponse.id,
         })
     }
 
     const handleClearVendor = () => {
-        setVendorName('')
+        const vendorData: Vendor = {
+            id: '',
+            fullName: '',
+        }
+        setVendor(vendorData)
         setComponentPayload({
             ...componentPayload,
             defaultVendorId: '',
@@ -86,7 +122,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 name='name'
                                 aria-describedby='name'
                                 required
-                                value={componentPayload.name}
+                                value={componentPayload.name ?? ''}
                                 onChange={updateField}
                             />
                         </div>
@@ -102,6 +138,8 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 placeholder={t('Will be set auto')}
                                 id='createdBy'
                                 aria-describedby='Created By'
+                                value={componentPayload.createBy ?? ''}
+                                // value={componentPayload.createBy}
                                 readOnly={true}
                             />
                             <div id='createdBy' className='form-text'>
@@ -121,7 +159,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 required
                                 name='categories'
                                 onChange={setCategoriesData}
-                                value={componentPayload.categories}
+                                value={componentPayload.categories ?? ''}
                             />
                         </div>
                     </div>
@@ -136,10 +174,9 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 aria-label='component_type'
                                 id='component_type'
                                 required
-                                defaultValue=''
                                 name='componentType'
                                 onChange={updateField}
-                                value={componentPayload.componentType}
+                                value={componentPayload.componentType ?? ''}
                             >
                                 <option value=''></option>
                                 <option value='OSS'>{t('OSS')}</option>
@@ -170,7 +207,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 readOnly={true}
                                 name='defaultVendorId'
                                 onClick={handleClickSearchVendor}
-                                value={vendorName}
+                                value={vendor.fullName ?? ''}
                             />
                             <div id='default_vendor' className='form-text'>
                                 <i className='bi bi-x-circle'></i>
@@ -195,7 +232,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 aria-describedby='Tag'
                                 name='homepage'
                                 onChange={updateField}
-                                value={componentPayload.homepage}
+                                value={componentPayload.homepage ?? ''}
                             />
                         </div>
                     </div>
@@ -213,7 +250,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 aria-describedby='blog_url'
                                 name='blog'
                                 onChange={updateField}
-                                value={componentPayload.blog}
+                                value={componentPayload.blog ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -228,7 +265,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 aria-describedby='wiki_url'
                                 name='wiki'
                                 onChange={updateField}
-                                value={componentPayload.wiki}
+                                value={componentPayload.wiki ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -243,7 +280,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 aria-describedby='mailing_list_url'
                                 name='mailinglist'
                                 onChange={updateField}
-                                value={componentPayload.mailinglist}
+                                value={componentPayload.mailinglist ?? ''}
                             />
                         </div>
                     </div>
@@ -261,7 +298,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 style={{ height: '100px' }}
                                 name='description'
                                 onChange={updateField}
-                                value={componentPayload.description}
+                                value={componentPayload.description ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -274,6 +311,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 id='modified_on'
                                 aria-describedby='Modified on'
                                 readOnly={true}
+                                value={componentPayload.modifiedOn ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -287,6 +325,7 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload }
                                 id='modified_by'
                                 aria-describedby='Modified By'
                                 readOnly={true}
+                                value={componentPayload.modifiedBy ?? ''}
                             />
                         </div>
                     </div>

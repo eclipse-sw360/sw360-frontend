@@ -8,7 +8,5 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import MapData from "./MapData";
 
-
-export type RolesType = (roles: MapData[]) => void
+export type RolesType = (roles: Input[]) => void

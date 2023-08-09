@@ -9,46 +9,44 @@
 
 import React from 'react'
 import styles from '@/css/AddKeyValue.module.css'
-import { useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     header: string
     keyName: string
-    setData?: AddtionalDataType
-}
-
-interface Input {
-    key: string
-    value: string
+    setData?: React.Dispatch<React.SetStateAction<Input[]>>
+    data?: Input[]
+    setMap?: AddtionalDataType
 }
 
 export default function AddKeyValueComponent(props: Props) {
-    const [inputList, setInputList] = useState<Input[]>([])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: Input[] = [...inputList]
+        const list: Input[] = [...props.data]
         list[index][name as keyof Input] = value
         const map = new Map<string, string>()
         list.forEach((item) => {
             map.set(item.key, item.value)
         })
-        setInputList(list)
-        props.setData(map)
+        props.setData(list)
+        props.setMap(map)
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList]
+        const list = [... props.data]
         list.splice(index, 1)
-        setInputList(list)
+        props.setData(list)
+        const map = new Map<string, string>()
+        list.forEach((item) => {
+            map.set(item.key, item.value)
+        })
+        props.setMap(map)
     }
 
     const handleAddClick = () => {
-        setInputList([...inputList, { key: '', value: '' }])
+        props.setData([... props.data, { key: '', value: '' }])
     }
 
     return (
@@ -57,7 +55,7 @@ export default function AddKeyValueComponent(props: Props) {
                 <p className='fw-bold mt-3'>{props.header}</p>
             </div>
             <div className='row'>
-                {inputList.map((elem, j) => {
+                {props.data.map((elem, j) => {
                     return (
                         <div className='row mb-2' key=''>
                             <div className='col-lg-5'>
