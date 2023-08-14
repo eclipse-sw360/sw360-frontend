@@ -17,8 +17,12 @@ async function send({ method, path, data, token, signal }: { method: string, pat
 	const request_content: RequestContent = { method, headers: { Accept: 'application/*' }, body: null };
 
 	if (data) {
-		request_content.headers['Content-Type'] = 'application/json';
-		request_content['body'] = JSON.stringify(data);
+		if (data instanceof FormData) {
+			request_content['body'] = data;
+		} else {
+			request_content.headers['Content-Type'] = 'application/json';
+			request_content['body'] = JSON.stringify(data);
+		}
 	}
 
 	if (token) {

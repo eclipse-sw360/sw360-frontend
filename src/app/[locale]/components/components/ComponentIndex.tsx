@@ -18,6 +18,7 @@ import { Session } from '@/object-types/Session'
 import { PageButtonHeader, AdvancedSearch } from '@/components/sw360'
 import { useState } from 'react'
 import DownloadService from '@/services/download.service'
+import ImportSBOMModal from './ImportSBOMModal'
 
 interface Props {
     session?: Session
@@ -27,10 +28,16 @@ interface Props {
 const ComponentIndex = ({ session }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [numberOfComponent, setNumberOfComponent] = useState(0)
+    const [importModalOpen, setImportModalOpen] = useState(false)
+
+    const handleClickImportSBOM = (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault()
+        setImportModalOpen(true)
+    }
 
     const headerbuttons = {
         'Add Component': { link: '/components/add', type: 'primary' },
-        'Import SBOM': { link: '/projects', type: 'secondary' },
+        'Import SBOM': { link: '#', type: 'secondary', onClick: handleClickImportSBOM }
     }
 
     const advancedSearch = [
@@ -171,6 +178,7 @@ const ComponentIndex = ({ session }: Props) => {
                     <div className='row' style={{ marginBottom: '20px' }}>
                         <ComponentsTable session={session} setNumberOfComponent={setNumberOfComponent} />
                     </div>
+                    <ImportSBOMModal show={importModalOpen} setShow={setImportModalOpen} session={session}/>
                 </div>
             </div>
         </div>
