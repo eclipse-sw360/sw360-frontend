@@ -34,8 +34,8 @@ export default function Roles() {
                 </h6>
                 <div className="row">
                     <div className="col-lg-4 mb-3">
-                        <label htmlFor="addProjects.group" className="form-label fw-medium">{t('Group')}</label>
-                        <input type="text" className="form-control" id="addProjects.group" aria-label={t('Group')} placeholder={t('Click to edit')} readOnly={true} onClick={() => setShowDepartmentModal(true)} />
+                        <label htmlFor="addProjects.group" className="form-label fw-medium">{t('Group')} <span style={{color:'red'}}>*</span></label>
+                        <input type="text" className="form-control" id="addProjects.group" aria-label={t('Group')} placeholder={t('Click to edit')} readOnly={true} required onClick={() => setShowDepartmentModal(true)} />
                         <div className="form-text"> <GiCancel /></div>
                     </div>
                     <div className="col-lg-4 mb-3">

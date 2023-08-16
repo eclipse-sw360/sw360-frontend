@@ -9,8 +9,8 @@
 
 "use client"
 
-import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import AddKeyValueComponent from '@/components/AddKeyValue'
+import AddAdditionalRolesComponent from '@/components/ProjectAddSummary/component/AddAdditionalRoles'
+import AddKeyValueComponent from '@/components/ProjectAddSummary/component/AddKeyValue'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import GeneralInformation from "./GeneralInformation"
 import Roles from "./Roles/Roles"
@@ -39,7 +39,7 @@ export default function Summary({token, projectPayload, setProjectPayload}: Prop
                 <div className="row mb-4">
                     <AddKeyValueComponent
                         header={t('External URLs')}
-                        keyName={t('external url')}
+                        keyName={t('External URL')}
                     />
                 </div>
                 <Roles/>
@@ -51,13 +51,13 @@ export default function Summary({token, projectPayload, setProjectPayload}: Prop
                 <div className="row mb-4">
                     <AddKeyValueComponent
                         header={t('External Ids')}
-                        keyName={t('external id')}
+                        keyName={t('External Id')}
                     />
                 </div>
                 <div className="row mb-4">
                     <AddKeyValueComponent
                         header={t('Additional Data')}
-                        keyName={t('Additional Data')}
+                        keyName={t('additional data')}
                     />
                 </div>
             </div>

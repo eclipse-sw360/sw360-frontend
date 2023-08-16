@@ -59,7 +59,7 @@ export default function GeneralInformation({ token, projectPayload, setProjectPa
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.name' className='form-label fw-medium'>
-                            {t('Name')}
+                            {t('Name')} <span style={{color:'red'}}>*</span>
                         </label>
                         <input
                             type='text'
@@ -89,7 +89,7 @@ export default function GeneralInformation({ token, projectPayload, setProjectPa
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.visibility' className='form-label fw-medium'>
-                            {t('Visibility')}
+                            {t('Visibility')} <span style={{color:'red'}}>*</span>
                         </label>
                         <select
                             className='form-select'
@@ -127,7 +127,7 @@ export default function GeneralInformation({ token, projectPayload, setProjectPa
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.projectType' className='form-label fw-medium'>
-                            {t('Project Type')}
+                            {t('Project Type')} <span style={{color:'red'}}>*</span>
                         </label>
                         <select
                             className='form-select'
