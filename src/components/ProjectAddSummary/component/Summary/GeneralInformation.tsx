@@ -11,15 +11,19 @@
 
 import { BiInfoCircle } from 'react-icons/bi'
 import { GiCancel } from 'react-icons/gi'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 import { Session } from '@/object-types/Session'
+import { VendorDialog } from '@/components/sw360'
+import Vendor from '@/object-types/Vendor'
 
 interface Param {
     token: string
+    vendor: Vendor
+    setVendor: Dispatch<SetStateAction<Vendor>>
     projectPayload: ProjectPayload
     setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
@@ -36,12 +40,15 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
     );
 };
 
-export default function GeneralInformation({ token, projectPayload, setProjectPayload }: Param) {
-
+export default function GeneralInformation({ token,
+                                             vendor,
+                                             setVendor,
+                                             projectPayload,
+                                             setProjectPayload
+                                            }: Param) {
     const t = useTranslations(COMMON_NAMESPACE)
-
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
-
+    const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
@@ -49,9 +56,32 @@ export default function GeneralInformation({ token, projectPayload, setProjectPa
         })
     }
 
+    const setVendorData = (vendorResponse: Vendor) => {
+        const vendorData: Vendor = {
+            id: vendorResponse.id,
+            fullName: vendorResponse.fullName,
+        }
+        setVendor(vendorData)
+        setProjectPayload({
+            ...projectPayload,
+            defaultVendorId: vendorResponse.id,
+        })
+    }
+
+    const handleClearVendorData = () => {
+        const vendorData: Vendor = {
+            id: '',
+            fullName: '',
+        }
+        setVendor(vendorData)
+        setProjectPayload({
+            ...projectPayload,
+            defaultVendorId: '',
+        })
+    }
+
     return (
         <>
-            {/* <VendorDialog show={showVendorsModal} setShow={setShowVendorsModal}/> */}
             <div className='row mb-4'>
                 <h6 className="header pb-2 px-2">
                     {t('General Information')}
@@ -211,10 +241,16 @@ export default function GeneralInformation({ token, projectPayload, setProjectPa
                             id='addProjects.vendor'
                             placeholder={t('Click to set vendor')}
                             readOnly={true}
-                            // onClick={() => setShowVendorsModal(true)}
+                            name='defaultVendorId'
+                            value={vendor.fullName ?? ''}
+                            onClick={handleClickSearchVendor}
                         />
+                        <VendorDialog show={showVendorsModal}
+                                      setShow={setShowVendorsModal}
+                                      selectVendor= {setVendorData}
+                                      />
                         <div className='form-text'>
-                            <GiCancel />
+                            <GiCancel onClick={handleClearVendorData}/>
                         </div>
                     </div>
                 </div>
