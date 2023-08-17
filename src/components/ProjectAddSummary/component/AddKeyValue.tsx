@@ -7,65 +7,73 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+"use client"
+
 import React from 'react'
-import styles from '@/css/AddKeyValue.module.css'
-import { FaTrashAlt } from 'react-icons/fa'
+import { useState } from 'react'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
+import { MdDeleteOutline } from 'react-icons/md'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     header: string
     keyName: string
-    setData?: React.Dispatch<React.SetStateAction<Input[]>>
-    data?: Input[]
-    setMap?: AddtionalDataType
+    setData?: AddtionalDataType
+}
+
+interface Input {
+    key: string
+    value: string
 }
 
 export default function AddKeyValueComponent(props: Props) {
 
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [inputList, setInputList] = useState<Input[]>([])
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: Input[] = [...props.data]
+        const list: Input[] = [...inputList]
         list[index][name as keyof Input] = value
-        const map = new Map<string, string>()
-        list.forEach((item) => {
-            map.set(item.key, item.value)
-        })
-        props.setData(list)
-        props.setMap(map)
+        setInputList(list)
+        if(props.setData) {
+            const map = new Map<string, string>()
+            list.forEach((item) => {
+                map.set(item.key, item.value)
+            })
+            props.setData(map)
+        }
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [... props.data]
+        const list = [...inputList]
         list.splice(index, 1)
-        props.setData(list)
-        const map = new Map<string, string>()
-        list.forEach((item) => {
-            map.set(item.key, item.value)
-        })
-        props.setMap(map)
+        setInputList(list)
     }
 
     const handleAddClick = () => {
-        props.setData([... props.data, { key: '', value: '' }])
+        setInputList([...inputList, { key: '', value: '' }])
     }
 
     return (
         <>
-            <div className={`${styles['header']} mb-2`}>
-                <p className='fw-bold mt-3'>{props.header}</p>
-            </div>
+            <h6 className="header pb-2 px-2">
+                    {t(props.header)}
+            </h6>
             <div className='row'>
-                {props.data.map((elem, j) => {
+                {inputList.map((elem, j) => {
                     return (
-                        <div className='row mb-2' key=''>
-                            <div className='col-lg-5'>
+                        <div className='row mb-2' key={j}>
+                            <div className='col-lg-6'>
                                 <input
                                     name='key'
                                     value={elem.key}
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     className='form-control'
-                                    placeholder={`Enter ${props.keyName.toLowerCase()} key`}
+                                    placeholder={t(`Enter ${props.keyName.toLowerCase()} key`)}
                                     required
                                     aria-describedby={`${props.keyName.toLowerCase()} key`}
                                 />
@@ -77,14 +85,17 @@ export default function AddKeyValueComponent(props: Props) {
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     className='form-control'
-                                    placeholder={`Enter ${props.keyName.toLowerCase()} value`}
+                                    placeholder={t(`Enter ${props.keyName.toLowerCase()} value`)}
                                     required
-                                    aria-describedby={`${props.keyName.toLowerCase()} value`}
+                                    aria-describedby={t(`${props.keyName.toLowerCase()} value`)}
                                 />
                             </div>
-                            <div className='col-lg-2'>
-                                    <FaTrashAlt className="btn-icon bi bi-trash3-fill"
-                                    onClick={() => handleRemoveClick(j)}/>
+                            <div className='col-lg-1'>
+                                <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                    <span className="d-inline-block">
+                                        < MdDeleteOutline size={25} className="ms-2 btn-icon" onClick={() => handleRemoveClick(j)} />
+                                    </span>
+                                </OverlayTrigger>
                             </div>
                         </div>
                     )
@@ -93,11 +104,11 @@ export default function AddKeyValueComponent(props: Props) {
                     <button
                         type='button'
                         onClick={() => handleAddClick()}
-                        className={`fw-bold btn btn-secondary`}
-                    >{`Click to add row to ${props.keyName
+                        className="btn btn-secondary"
+                    >{t(`Click to add row to ${props.keyName
                         .split(' ')
                         .map((elem) => elem[0].toUpperCase() + elem.substring(1))
-                        .join(' ')}`}</button>
+                        .join(' ')}`)}</button>
                 </div>
             </div>
         </>
