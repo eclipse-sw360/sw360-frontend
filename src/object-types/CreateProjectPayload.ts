@@ -17,6 +17,7 @@ export default interface ProjectPayload {
     tag: string
     domain: string
     leadArchitect: string
+    defaultVendorId: string
     state: string
     phaseOutSince: string
     moderators: string[]

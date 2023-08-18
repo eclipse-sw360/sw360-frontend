@@ -20,12 +20,17 @@ import ApiUtils from '@/utils/api/api.util'
 import ProjectPayload from "@/object-types/CreateProjectPayload"
 import { useState } from 'react'
 import { AUTH_TOKEN } from '@/utils/env'
+import Vendor from '@/object-types/Vendor'
 
 
 export default function AddProjects() {
 
     const router = useRouter();
     const t = useTranslations(COMMON_NAMESPACE)
+    const [vendor, setVendor] = useState<Vendor> ({
+        id: '',
+        fullName: ''
+    })
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
         description: '',
@@ -35,6 +40,7 @@ export default function AddProjects() {
         tag: '',
         domain: '',
         leadArchitect: '',
+        defaultVendorId: '',
         state: 'ACTIVE',
         phaseOutSince: '',
         moderators: null,
@@ -120,6 +126,8 @@ export default function AddProjects() {
                                 <Tab.Content>
                                     <Tab.Pane eventKey="summary">
                                         <Summary token={AUTH_TOKEN}
+                                                 vendor={vendor}
+                                                 setVendor={setVendor}
                                                  projectPayload={projectPayload}
                                                  setProjectPayload={setProjectPayload}
                                         />

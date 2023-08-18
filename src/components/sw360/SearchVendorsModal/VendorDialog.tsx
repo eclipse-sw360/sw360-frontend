@@ -26,7 +26,7 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
+    session?: Session
     selectVendor: VendorType
 }
 
