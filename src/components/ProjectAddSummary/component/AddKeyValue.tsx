@@ -20,7 +20,9 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 interface Props {
     header: string
     keyName: string
-    setData?: AddtionalDataType
+    data?: Input[]
+    setData?: React.Dispatch<React.SetStateAction<Input[]>>
+    setObject?: AddtionalDataType
 }
 
 interface Input {
@@ -37,13 +39,13 @@ export default function AddKeyValueComponent(props: Props) {
         const { name, value } = e.target
         const list: Input[] = [...inputList]
         list[index][name as keyof Input] = value
-        setInputList(list)
-        if(props.setData) {
+        props.setData(list)
+        if(props.setObject) {
             const map = new Map<string, string>()
             list.forEach((item) => {
                 map.set(item.key, item.value)
             })
-            props.setData(map)
+            props.setObject(map)
         }
     }
 
@@ -87,7 +89,7 @@ export default function AddKeyValueComponent(props: Props) {
                                     className='form-control'
                                     placeholder={t(`Enter ${props.keyName.toLowerCase()} value`)}
                                     required
-                                    aria-describedby={t(`${props.keyName.toLowerCase()} value`)}
+                                    aria-describedby={`${props.keyName.toLowerCase()} value`}
                                 />
                             </div>
                             <div className='col-lg-1'>

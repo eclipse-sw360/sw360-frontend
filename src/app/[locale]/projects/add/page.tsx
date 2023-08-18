@@ -31,6 +31,10 @@ export default function AddProjects() {
         id: '',
         fullName: ''
     })
+    const [externalUrls, setExternalUrls] = useState<Input[]>([{
+        key: '',
+        value:''
+    }])
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
         description: '',
@@ -41,6 +45,7 @@ export default function AddProjects() {
         domain: '',
         leadArchitect: '',
         defaultVendorId: '',
+        externalUrls: null,
         state: 'ACTIVE',
         phaseOutSince: '',
         moderators: null,
@@ -53,6 +58,15 @@ export default function AddProjects() {
             position: toast.POSITION.TOP_LEFT,
             theme: 'colored',
         })
+
+    const setExternalUrlsData = (externalUrls: Map<string, string>) => {
+        const obj = Object.fromEntries(externalUrls)
+        setProjectPayload({
+            ...projectPayload,
+            externalUrls: obj,
+        })
+    }
+
 
     const createProject = async () => {
         const response = await ApiUtils.POST('projects',
@@ -128,6 +142,9 @@ export default function AddProjects() {
                                         <Summary token={AUTH_TOKEN}
                                                  vendor={vendor}
                                                  setVendor={setVendor}
+                                                 externalUrls={externalUrls}
+                                                 setExternalUrls={setExternalUrls}
+                                                 setExternalUrlsData={setExternalUrlsData}
                                                  projectPayload={projectPayload}
                                                  setProjectPayload={setProjectPayload}
                                         />
