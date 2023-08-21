@@ -125,7 +125,7 @@ const RolesInformation = ({
 
     return (
         <>
-            <div className='row mb-4'>
+            <div className='row mb-4' style={{padding:'0px 12px'}}>
                 <div className={`${styles['header']} mb-2`}>
                     <p className='fw-bold mt-3'> {t('Roles')}</p>
                 </div>

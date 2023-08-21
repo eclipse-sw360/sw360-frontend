@@ -92,7 +92,7 @@ const Releases = ({ session, componentId }: Props) => {
                 <button
                     type='button'
                     onClick={() => handleAddReleaseClick()}
-                    className={`fw-bold btn btn-light button-plain`}
+                    className={`fw-bold btn btn-secondary`}
                     >
                         {t('Add Release')}
                 </button>
