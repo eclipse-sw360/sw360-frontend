@@ -22,14 +22,15 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { signOut } from 'next-auth/react'
-import GeneralInfoComponent from '../ComponentAddSummary/GeneralInfoComponent'
-import RolesInformation from '../ComponentAddSummary/RolesInformation'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ActionType from '@/object-types/enums/ActionType'
 import SearchUsersModalComponent from '@/components/sw360/SearchUsersModal/SearchUsersModal'
+import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
+import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
+
 interface Props {
     session?: Session
     componentId?: string

@@ -14,7 +14,7 @@ import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { Session } from '@/object-types/Session'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import { useState } from 'react'
-import ReleaseAddSummary from '@/components/releases/ReleaseAddSummary'
+import ReleaseAddSummary from './ReleaseAddSummary'
 
 interface Props {
     session?: Session

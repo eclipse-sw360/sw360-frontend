@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from './AddComponents.module.css'
+import styles from './SummaryComponent.module.css'
 import React, { useCallback, useState } from 'react'
 import { VendorDialog } from '@/components/sw360'
 import { Session } from '@/object-types/Session'
@@ -19,6 +19,8 @@ import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { BiInfoCircle } from 'react-icons/bi'
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload
@@ -29,6 +31,18 @@ interface Props {
     setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     actionType?: string
 }
+
+const ShowInfoOnHover = ({ text }: { text: string }) => {
+    return (
+        <>
+            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
+                <span className='d-inline-block'>
+                    <BiInfoCircle />
+                </span>
+            </OverlayTrigger>
+        </>
+    );
+};
 
 const GeneralInfoComponent = ({
     session,
@@ -112,7 +126,7 @@ const GeneralInfoComponent = ({
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='name' className='form-label fw-bold'>
-                                {t('Name')} <span className='text-red'>*</span>
+                                {t('Name')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
                             </label>
                             <input
                                 type='text'
@@ -139,16 +153,12 @@ const GeneralInfoComponent = ({
                                 id='createdBy'
                                 aria-describedby='Created By'
                                 value={componentPayload.createBy ?? ''}
-                                // value={componentPayload.createBy}
                                 readOnly={true}
                             />
-                            <div id='createdBy' className='form-text'>
-                                <i className='bi bi-x-circle'></i>
-                            </div>
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='categories' className='form-label fw-bold'>
-                                {t('Categories')} <span className='text-red'>*</span>
+                                {t('Categories')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
                             </label>
                             <input
                                 type='text'
@@ -167,7 +177,7 @@ const GeneralInfoComponent = ({
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='component_type' className='form-label fw-bold'>
-                                {t('Component Type')} <span className='text-red'>*</span>
+                                {t('Component Type')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
                             </label>
                             <select
                                 className='form-select'
@@ -188,7 +198,8 @@ const GeneralInfoComponent = ({
                                 <option value='CODE_SNIPPET'>{t('Code Snippet')}</option>
                             </select>
                             <div id='learn_more_about_component_type' className='form-text'>
-                                <i className='bi bi-info-circle'></i> learn_more_components
+                                <ShowInfoOnHover text={t('TYPE_COMPONENT')} />
+                                {t('Learn more about component types')}.
                             </div>
                         </div>
 
@@ -209,9 +220,6 @@ const GeneralInfoComponent = ({
                                 onClick={handleClickSearchVendor}
                                 value={vendor.fullName ?? ''}
                             />
-                            <div id='default_vendor' className='form-text'>
-                                <i className='bi bi-x-circle'></i>
-                            </div>
                             <VendorDialog
                                 show={dialogOpenVendor}
                                 setShow={setDialogOpenVendor}

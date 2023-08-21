@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from './AddComponents.module.css'
+import styles from '../GeneralInfoComponent/SummaryComponent.module.css'
 import React, { useCallback, useState } from 'react'
 import { Session } from '@/object-types/Session'
 import 'react-toastify/dist/ReactToastify.css'

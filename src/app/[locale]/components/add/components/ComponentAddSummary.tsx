@@ -22,14 +22,14 @@ import HttpStatus from '@/object-types/enums/HttpStatus'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import { toast, TypeOptions, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import GeneralInfoComponent from './GeneralInfoComponent'
-import RolesInformation from './RolesInformation'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
+import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
+import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
 interface Props {
     session: Session
 }

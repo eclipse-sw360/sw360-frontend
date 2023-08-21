@@ -13,6 +13,8 @@ import styles from './ReleaseSummary.module.css'
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { BiInfoCircle } from 'react-icons/bi'
 
 const getDate = () => {
     const today = new Date()
@@ -21,6 +23,18 @@ const getDate = () => {
     const date = today.getDate()
     return `${month}/${date}/${year}`
 }
+
+const ShowInfoOnHover = ({ text }: { text: string }) => {
+    return (
+        <>
+            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
+                <span className='d-inline-block'>
+                    <BiInfoCircle />
+                </span>
+            </OverlayTrigger>
+        </>
+    );
+};
 
 const ReleaseSummary = () => {
     const t = useTranslations(COMMON_NAMESPACE)
@@ -52,7 +66,7 @@ const ReleaseSummary = () => {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='name' className='form-label fw-bold'>
-                                {t('Name')} <span className='text-red'>*</span>
+                                {t('Name')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
                             </label>
                             <input
                                 type='text'
@@ -63,13 +77,14 @@ const ReleaseSummary = () => {
                                 aria-describedby='name'
                                 readOnly={true}
                             />
-                            <div id='learn_more_about_component_type' className='form-text'>
-                                <i className='bi bi-info-circle'></i>(i) Name of the component.
+                            <div id='learn_more_about_component_name' className='form-text'>
+                                <ShowInfoOnHover text={t('NAME_COMPONENT')} />
+                                {t('Name of the component')}.
                             </div>
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='version' className='form-label fw-bold'>
-                                {t('Version')} <span className='text-red'>*</span>
+                                {t('Version')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
                             </label>
                             <input
                                 type='text'
@@ -122,8 +137,9 @@ const ReleaseSummary = () => {
                                 aria-describedby='Tag'
                                 name='cpeid'
                             />
-                            <div id='learn_more_about_component_type' className='form-text'>
-                                <i className='bi bi-info-circle'></i>(i) Learn more about the CPE ID format.
+                            <div id='learn_more_about_cpe' className='form-text'>
+                                <ShowInfoOnHover text={t('CPE_ID')} />
+                                {t('Learn more about the CPE ID format')}.
                             </div>
                         </div>
                     </div>
@@ -170,9 +186,6 @@ const ReleaseSummary = () => {
                                 readOnly={true}
                                 name='mainLicenseIds'
                             />
-                            <div id='mainLicenseIds-i' className='form-text'>
-                                <i className='bi bi-x-circle'></i>
-                            </div>
                         </div>
                     </div>
                     <hr className='my-2' />
@@ -240,7 +253,7 @@ const ReleaseSummary = () => {
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='mainlineState' className='form-label fw-bold'>
-                                {t('Release Mainline State')} <span className='text-red'>*</span>
+                                {t('Release Mainline State')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
                             </label>
                             <select
                                 className='form-select'
@@ -256,7 +269,8 @@ const ReleaseSummary = () => {
                                 <option value='DENIED'>{t('DENIED')}</option>
                             </select>
                             <div id='mainlineState-i' className='form-text'>
-                                <i className='bi bi-info-circle'></i>(i) Learn more about the CPE ID format.
+                                <ShowInfoOnHover text={t('RELEASE_MAIN_STATE')} />
+                                {t('Learn more about mainline states')}.
                             </div>
                         </div>
                         <div className='col-lg-4'>

@@ -12,7 +12,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { Session } from '@/object-types/Session'
 import { Metadata } from 'next'
-import ComponentAddSummary from '@/components/components/ComponentAddSummary/ComponentAddSummary'
+import ComponentAddSummary from './components/ComponentAddSummary'
 
 export const metadata: Metadata = {
     title: 'Components',

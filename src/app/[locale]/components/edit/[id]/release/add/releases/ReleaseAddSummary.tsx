@@ -14,8 +14,9 @@ import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ReleaseSummary from './ReleaseSummary'
-import ReleaseRepository from './ReleaseRepository'
+import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
+import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
+
 
 export default function ReleaseAddSummary() {
     const t = useTranslations(COMMON_NAMESPACE)

@@ -29,7 +29,7 @@ import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import CommonUtils from '@/utils/common.utils'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ActionType from '@/object-types/enums/ActionType'
-import ComponentEditSummary from '@/components/components/ComponentEditSummary/ComponentEditSummary'
+import ComponentEditSummary from './ComponentEditSummary'
 
 interface Props {
     session?: Session
