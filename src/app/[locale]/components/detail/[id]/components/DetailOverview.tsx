@@ -187,7 +187,7 @@ const DetailOverview = ({ session, componentId }: Props) => {
                             </PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary component={component} componentId={componentId} />
+                            <Summary component={component} componentId={componentId} session={session}/>
                         </div>
                         <div className='row' hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}>
                             <ReleaseOverview componentId={componentId} session={session} />
