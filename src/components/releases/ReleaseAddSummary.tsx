@@ -9,10 +9,15 @@
 // License-Filename: LICENSE
 
 'use client'
-
-import ReleaseSummary from "./ReleaseSummary"
+import AddKeyValueComponent from '@/components/AddKeyValue'
+import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import { useTranslations } from 'next-intl'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ReleaseSummary from './ReleaseSummary'
 
 export default function ReleaseAddSummary() {
+    const t = useTranslations(COMMON_NAMESPACE)
 
     return (
         <>
@@ -28,6 +33,23 @@ export default function ReleaseAddSummary() {
                     <div className='row'>
                         <div className='col' style={{ fontSize: '0.875rem' }}>
                             <ReleaseSummary />
+                            <div className='row mb-4'>
+                                <AddAdditionalRolesComponent
+                                    documentType={DocumentTypes.COMPONENT}
+                                />
+                            </div>
+                            <div className='row mb-4'>
+                                <AddKeyValueComponent
+                                    header={t('External ids')}
+                                    keyName={'external id'}
+                                />
+                            </div>
+                            <div className='row mb-4'>
+                                <AddKeyValueComponent
+                                    header={t('Additional Data')}
+                                    keyName={'additional data'}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
