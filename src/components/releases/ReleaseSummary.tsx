@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from './AddRelease.module.css'
+import styles from './ReleaseSummary.module.css'
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'

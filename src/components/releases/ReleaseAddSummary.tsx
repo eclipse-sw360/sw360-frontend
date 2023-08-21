@@ -15,6 +15,7 @@ import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleaseSummary from './ReleaseSummary'
+import ReleaseRepository from './ReleaseRepository'
 
 export default function ReleaseAddSummary() {
     const t = useTranslations(COMMON_NAMESPACE)
@@ -34,22 +35,15 @@ export default function ReleaseAddSummary() {
                         <div className='col' style={{ fontSize: '0.875rem' }}>
                             <ReleaseSummary />
                             <div className='row mb-4'>
-                                <AddAdditionalRolesComponent
-                                    documentType={DocumentTypes.COMPONENT}
-                                />
+                                <AddAdditionalRolesComponent documentType={DocumentTypes.COMPONENT} />
                             </div>
                             <div className='row mb-4'>
-                                <AddKeyValueComponent
-                                    header={t('External ids')}
-                                    keyName={'external id'}
-                                />
+                                <AddKeyValueComponent header={t('External ids')} keyName={'external id'} />
                             </div>
                             <div className='row mb-4'>
-                                <AddKeyValueComponent
-                                    header={t('Additional Data')}
-                                    keyName={'additional data'}
-                                />
+                                <AddKeyValueComponent header={t('Additional Data')} keyName={'additional data'} />
                             </div>
+                            <ReleaseRepository />
                         </div>
                     </div>
                 </div>
