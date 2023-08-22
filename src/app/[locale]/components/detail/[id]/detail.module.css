@@ -36,11 +36,12 @@
   margin-right: 0.5rem;
 }
 
-.delete-btn {
+.icon-btn {
   color: gray;
   font-size: 14px;
+  margin-right: 5px;
 }
 
-.delete-btn:hover {
+.icon-btn:hover {
   cursor: pointer;
 }

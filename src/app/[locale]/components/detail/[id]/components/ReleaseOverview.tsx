@@ -29,6 +29,8 @@ import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyCle
 
 import { Table, _ } from '@/components/sw360'
 import DeleteReleaseModal from './DeleteReleaseModal'
+import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
+import { HiOutlineLink } from 'react-icons/hi'
 
 interface Props {
     session: Session
@@ -42,6 +44,8 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [clearingReleaseId, setClearingReleaseId] = useState(undefined)
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
+    const [linkingReleaseId, setLinkingReleaseId] = useState(undefined)
+    const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
 
     const handleClickDelete = (releaseId: any) => {
         setDeletingRelease(releaseId)
@@ -51,6 +55,11 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     const handleFossologyClearing = (releaseId: string) => {
         setClearingReleaseId(releaseId)
         setFossologyClearingModelOpen(true)
+    }
+
+    const handleLinkToProject  = (releaseId: string) => {
+        setLinkToProjectModalOpen(true)
+        setLinkingReleaseId(releaseId)
     }
 
     const fetchData: any = useCallback(
@@ -133,11 +142,11 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                             alt='Fossology'
                             onClick={() => handleFossologyClearing(id)}
                         />
-                        <Link href={'/release/edit/' + id} style={{ color: 'gray', fontSize: '14px' }}>
-                            <FaPencilAlt />
-                        </Link>{' '}
-                        &nbsp;
-                        <FaTrashAlt className={styles['delete-btn']} onClick={() => handleClickDelete(id)} />
+                        <Link href={'/releases/edit/' + id}>
+                            <FaPencilAlt className={styles['icon-btn']}/>
+                        </Link>
+                        <HiOutlineLink className={styles['icon-btn']} onClick={() => handleLinkToProject(id)} />
+                        <FaTrashAlt className={styles['icon-btn']} onClick={() => handleClickDelete(id)} />
                     </span>
                 ),
         },
@@ -157,6 +166,11 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                 <FossologyClearing show={fossologyClearingModelOpen}
                     setShow={setFossologyClearingModelOpen}
                     session={session} releaseId={clearingReleaseId}/>
+            }
+            {(linkingReleaseId) &&
+                <LinkReleaseToProjectModal show={linkToProjectModalOpen}
+                    setShow={setLinkToProjectModalOpen}
+                    session={session} releaseId={linkingReleaseId}/>
             }
         </>
     )
