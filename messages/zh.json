@@ -133,7 +133,10 @@
         "CVS": "CVS",
         "Created on": "创建于",
         "ClearCase": "透明案例",
+<<<<<<< HEAD
         "Contains OSS": "Contains OSS",
+=======
+>>>>>>> 817e795 (feat(project_detail_summary): Project detail summary page integration)
         "CycloneDX": "CycloneDX",
         "Department": "NOT TRANSLATED",
         "Deparment Name": "NOT TRANSLATED",

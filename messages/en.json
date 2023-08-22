@@ -130,9 +130,12 @@
         "CriticalFilesFound": "Critical Files Found",
         "Customer Project": "Customer Project",
         "Create Project": "Create Project",
+<<<<<<< HEAD
         "Commercial Details Administration": "Commercial Details Administration",
         "Commercial Details": "Commercial Details",
         "Contains OSS": "Contains OSS",
+=======
+>>>>>>> 817e795 (feat(project_detail_summary): Project detail summary page integration)
         "Copy to Clipboard": "Copy to Clipboard",
         "CycloneDX": "CycloneDX",
         "Deparment Name": "Deparment Name",
@@ -503,7 +506,11 @@
         "UsageRestrictionsFound": "Usage Restrictions Found",
         "User": "User",
         "Vulnerability Tracking Status": "Vulnerability Tracking Status",
+<<<<<<< HEAD
         "VISIBILITY_INFO": "Private: Only visible by creator (and admin which applies to all visibility levels) \n Me and Moderators: Visible by creator and moderators \n Group and Moderators: All users of the same group and the moderators \n Everyone: Every user who is logged into the system",
+=======
+        "VISIBILITY_INFO": "Private: Only visible by creator (and admin which applies to all visibility levels)<br/>Me and Moderators: Visible by creator and moderators<br/>Group and Moderators: All users of the same group and the moderators<br/>Everyone: Every user who is logged into the system",
+>>>>>>> 817e795 (feat(project_detail_summary): Project detail summary page integration)
         "Visibility": "Visibility",
         "Vendor": "Vendor",
         "Vendor Name": "Vendor Name",
