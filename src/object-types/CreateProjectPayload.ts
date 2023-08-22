@@ -10,16 +10,17 @@
 
 export default interface ProjectPayload {
     name: string
-    description: string
-    version: string
+    description?: string
+    version?: string
     visibility: string
     projectType: string
-    tag: string
-    domain: string
-    leadArchitect: string
-    defaultVendorId: string
-    state: string
-    phaseOutSince: string
-    moderators: string[]
-    contributors: string[]
+    tag?: string
+    domain?: string
+    leadArchitect?: string
+    defaultVendorId?: string
+    externalUrls?: object
+    state?: string
+    phaseOutSince?: string
+    moderators?: string[]
+    contributors?: string[]
 }

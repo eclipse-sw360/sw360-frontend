@@ -18,16 +18,28 @@ import ProjectPayload from "@/object-types/CreateProjectPayload"
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from "next-intl"
 import Vendor from '@/object-types/Vendor'
+import { AddtionalDataType } from '@/object-types/AddtionalDataType'
 
 interface Props{
     token: string
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
+    externalUrls: Input[]
+    setExternalUrls: React.Dispatch<React.SetStateAction<Input[]>>
+    setExternalUrlsData: AddtionalDataType
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function Summary({token, vendor, setVendor, projectPayload, setProjectPayload}: Props) {
+export default function Summary({token,
+                                 vendor,
+                                 setVendor,
+                                 externalUrls,
+                                 setExternalUrls,
+                                 setExternalUrlsData,
+                                 projectPayload,
+                                 setProjectPayload
+                                }: Props) {
 
     const t = useTranslations(COMMON_NAMESPACE)
 
@@ -45,6 +57,9 @@ export default function Summary({token, vendor, setVendor, projectPayload, setPr
                     <AddKeyValueComponent
                         header={t('External URLs')}
                         keyName={t('External URL')}
+                        data={externalUrls}
+                        setData={setExternalUrls}
+                        setObject={setExternalUrlsData}
                     />
                 </div>
                 <Roles/>
