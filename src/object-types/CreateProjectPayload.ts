@@ -20,6 +20,7 @@ export default interface ProjectPayload {
     defaultVendorId?: string
     externalUrls?: object
     externalIds?: object
+    additionalData?: object
     state?: string
     phaseOutSince?: string
     moderators?: string[]
