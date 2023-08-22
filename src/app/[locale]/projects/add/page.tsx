@@ -35,6 +35,10 @@ export default function AddProjects() {
         key: '',
         value:''
     }])
+    const [externalIds, setExternalIds] = useState<Input[]>([{
+        key: '',
+        value:''
+    }])
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
         description: '',
@@ -46,6 +50,7 @@ export default function AddProjects() {
         leadArchitect: '',
         defaultVendorId: '',
         externalUrls: null,
+        externalIds: null,
         state: 'ACTIVE',
         phaseOutSince: '',
         moderators: null,
@@ -64,6 +69,14 @@ export default function AddProjects() {
         setProjectPayload({
             ...projectPayload,
             externalUrls: obj,
+        })
+    }
+
+    const setExternalIdsData = (externalIds: Map<string, string>) => {
+        const obj = Object.fromEntries(externalIds)
+        setProjectPayload({
+            ...projectPayload,
+            externalIds: obj,
         })
     }
 
@@ -145,6 +158,9 @@ export default function AddProjects() {
                                                  externalUrls={externalUrls}
                                                  setExternalUrls={setExternalUrls}
                                                  setExternalUrlsData={setExternalUrlsData}
+                                                 externalIds={externalIds}
+                                                 setExternalIds={setExternalIds}
+                                                 setExternalIdsData={setExternalIdsData}
                                                  projectPayload={projectPayload}
                                                  setProjectPayload={setProjectPayload}
                                         />

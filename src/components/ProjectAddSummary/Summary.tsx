@@ -23,21 +23,27 @@ import { AddtionalDataType } from '@/object-types/AddtionalDataType'
 interface Props{
     token: string
     vendor: Vendor
-    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     externalUrls: Input[]
+    externalIds: Input[]
+    projectPayload: ProjectPayload
+    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     setExternalUrls: React.Dispatch<React.SetStateAction<Input[]>>
     setExternalUrlsData: AddtionalDataType
-    projectPayload: ProjectPayload
+    setExternalIds: React.Dispatch<React.SetStateAction<Input[]>>
+    setExternalIdsData: AddtionalDataType
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
 export default function Summary({token,
                                  vendor,
-                                 setVendor,
                                  externalUrls,
+                                 externalIds,
+                                 projectPayload,
+                                 setVendor,
                                  setExternalUrls,
                                  setExternalUrlsData,
-                                 projectPayload,
+                                 setExternalIds,
+                                 setExternalIdsData,
                                  setProjectPayload
                                 }: Props) {
 
@@ -72,6 +78,9 @@ export default function Summary({token,
                     <AddKeyValueComponent
                         header={t('External Ids')}
                         keyName={t('External Id')}
+                        data={externalIds}
+                        setData={setExternalIds}
+                        setObject={setExternalIdsData}
                     />
                 </div>
                 <div className="row mb-4">
