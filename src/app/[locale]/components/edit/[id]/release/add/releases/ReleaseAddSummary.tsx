@@ -17,7 +17,6 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 
-
 export default function ReleaseAddSummary() {
     const t = useTranslations(COMMON_NAMESPACE)
 
@@ -31,22 +30,18 @@ export default function ReleaseAddSummary() {
                     e.preventDefault()
                 }}
             >
-                <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
-                    <div className='row'>
-                        <div className='col' style={{ fontSize: '0.875rem' }}>
-                            <ReleaseSummary />
-                            <div className='row mb-4'>
-                                <AddAdditionalRolesComponent documentType={DocumentTypes.COMPONENT} />
-                            </div>
-                            <div className='row mb-4'>
-                                <AddKeyValueComponent header={t('External ids')} keyName={'external id'} />
-                            </div>
-                            <div className='row mb-4'>
-                                <AddKeyValueComponent header={t('Additional Data')} keyName={'additional data'} />
-                            </div>
-                            <ReleaseRepository />
-                        </div>
+                <div className='col' style={{ fontSize: '0.875rem' }}>
+                    <ReleaseSummary />
+                    <div className='row mb-4'>
+                        <AddAdditionalRolesComponent documentType={DocumentTypes.COMPONENT} />
                     </div>
+                    <div className='row mb-4'>
+                        <AddKeyValueComponent header={t('External ids')} keyName={'external id'} />
+                    </div>
+                    <div className='row mb-4'>
+                        <AddKeyValueComponent header={t('Additional Data')} keyName={'additional data'} />
+                    </div>
+                    <ReleaseRepository />
                 </div>
             </form>
         </>
