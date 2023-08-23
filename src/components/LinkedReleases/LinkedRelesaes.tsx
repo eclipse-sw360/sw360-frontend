@@ -10,12 +10,14 @@
 
 'use client'
 
+import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 import styles from './LinkedReases.module.css'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { useState } from 'react'
 import { Session } from '@/object-types/Session'
-import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
-
+import LinkedRelease from '@/object-types/LinkedRelease'
+import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
 
 interface Props {
     session?: Session
@@ -23,12 +25,17 @@ interface Props {
 
 const LinkedReleases = ({ session}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
+    const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
 
     return (
         <>
             <div className='col' style={{ fontSize: '0.875rem' }}>
                 <div className={`row ${styles['attachment-table']}`} style={{ padding: '25px',fontSize: '0.875rem', paddingTop: '1px' }}>
                     <TitleLinkedReleases />
+                    <TableLinkedReleases
+                        releaseLinks={releaseLinks}
+                        setReleaseLinks={setReleaseLinks}
+                    />
                 </div>
                 <div>
                     <button
