@@ -28,7 +28,6 @@ export default function TableLinkedReleases({ releaseLinks, setReleaseLinks, set
         const { name, value } = e.target
         const list: LinkedRelease[] = [...releaseLinks]
         list[index][name as keyof LinkedRelease] = value
-        console.log(list)
         const map = new Map<string, string>()
         list.forEach((item) => {
             map.set(item.id, item.releaseRelationship)

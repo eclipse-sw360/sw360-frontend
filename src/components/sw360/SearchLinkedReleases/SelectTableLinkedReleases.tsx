@@ -52,6 +52,7 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
 
     const columns = [
         {
+            id: 'releaseId',
             name: '',
             formatter: (item: string) =>
                 _(
@@ -66,22 +67,27 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
             width: '7%',
         },
         {
+            id: 'Vendor',
             name: 'Vendor',
             sort: true,
         },
         {
+            id: 'Component Name',
             name: 'Component Name',
             sort: true,
         },
         {
+            id: 'Release Version',
             name: 'Release Version',
             sort: true,
         },
         {
+            id: 'Clearing State',
             name: 'Clearing State',
             sort: true,
         },
         {
+            id: 'Mainline State',
             name: 'Mainline State',
             sort: true,
         },
