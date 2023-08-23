@@ -19,6 +19,8 @@ export default interface ProjectPayload {
     leadArchitect?: string
     defaultVendorId?: string
     externalUrls?: object
+    externalIds?: object
+    additionalData?: object
     state?: string
     phaseOutSince?: string
     moderators?: string[]

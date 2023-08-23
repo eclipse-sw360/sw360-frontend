@@ -23,21 +23,33 @@ import { AddtionalDataType } from '@/object-types/AddtionalDataType'
 interface Props{
     token: string
     vendor: Vendor
-    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     externalUrls: Input[]
+    externalIds: Input[]
+    additionalData: Input[]
+    projectPayload: ProjectPayload
+    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     setExternalUrls: React.Dispatch<React.SetStateAction<Input[]>>
     setExternalUrlsData: AddtionalDataType
-    projectPayload: ProjectPayload
+    setExternalIds: React.Dispatch<React.SetStateAction<Input[]>>
+    setExternalIdsData: AddtionalDataType
+    setAdditionalData: React.Dispatch<React.SetStateAction<Input[]>>
+    setAdditionalDataObject: AddtionalDataType
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
 export default function Summary({token,
                                  vendor,
-                                 setVendor,
                                  externalUrls,
+                                 externalIds,
+                                 additionalData,
+                                 projectPayload,
+                                 setVendor,
                                  setExternalUrls,
                                  setExternalUrlsData,
-                                 projectPayload,
+                                 setExternalIds,
+                                 setExternalIdsData,
+                                 setAdditionalData,
+                                 setAdditionalDataObject,
                                  setProjectPayload
                                 }: Props) {
 
@@ -72,12 +84,18 @@ export default function Summary({token,
                     <AddKeyValueComponent
                         header={t('External Ids')}
                         keyName={t('External Id')}
+                        data={externalIds}
+                        setData={setExternalIds}
+                        setObject={setExternalIdsData}
                     />
                 </div>
                 <div className="row mb-4">
                     <AddKeyValueComponent
                         header={t('Additional Data')}
                         keyName={t('additional data')}
+                        data={additionalData}
+                        setData={setAdditionalData}
+                        setObject={setAdditionalDataObject}
                     />
                 </div>
             </div>
