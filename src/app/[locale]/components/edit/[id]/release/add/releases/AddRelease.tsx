@@ -15,6 +15,8 @@ import { Session } from '@/object-types/Session'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import { useState } from 'react'
 import ReleaseAddSummary from './ReleaseAddSummary'
+import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
+import LinkedReleases from '@/components/LinkedReleases/LinkedRelesaes'
 
 interface Props {
     session?: Session
@@ -25,10 +27,14 @@ const tabList = [
     {
         id: CommonTabIds.SUMMARY,
         name: 'Summary',
-    }
+    },
+    {
+        id: ReleaseTabIds.LINKED_RELEASES,
+        name: 'Linked Releases',
+    },
 ]
 
-const AddRelease = ({ componentId }: Props) => {
+const AddRelease = ({ componentId, session }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
 
     const headerButtons = {
@@ -49,6 +55,11 @@ const AddRelease = ({ componentId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ReleaseAddSummary />
+                        </div>
+                        <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
+                            <LinkedReleases
+                                session={session}
+                            />
                         </div>
                     </div>
                 </div>
