@@ -109,7 +109,7 @@ const EditAttachments = ({ documentId, session, documentType, componentData, set
                 <button
                     type='button'
                     onClick={handleClickSelectAttachment}
-                    className={`fw-bold btn btn-light button-plain`}
+                    className={`fw-bold btn btn-secondary`}
                 >
                     {t('Add Attachment')}
                 </button>

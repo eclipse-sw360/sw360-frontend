@@ -57,7 +57,7 @@ export default function AddAdditionalRolesComponent({documentType, setDataRoles,
             </div>
             <div className="row">
                 {
-                    roles.map((elem, index) => {
+                    roles?.map((elem, index) => {
                         return (
                             <div className="row mb-2" key ={index}>
                                 <div className="col-lg-5">

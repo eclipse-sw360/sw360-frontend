@@ -55,7 +55,7 @@ export default function AddKeyValueComponent(props: Props) {
                 <p className='fw-bold mt-3'>{props.header}</p>
             </div>
             <div className='row'>
-                {props.data.map((elem, j) => {
+                {props.data?.map((elem, j) => {
                     return (
                         <div className='row mb-2' key=''>
                             <div className='col-lg-5'>

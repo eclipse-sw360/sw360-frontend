@@ -22,14 +22,15 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { signOut } from 'next-auth/react'
-import GeneralInfoComponent from '../ComponentAddSummary/GeneralInfoComponent'
-import RolesInformation from '../ComponentAddSummary/RolesInformation'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
-import SearchUsersModalComponent from '../sw360/SearchUsersModal/SearchUsersModal'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ActionType from '@/object-types/enums/ActionType'
+import SearchUsersModalComponent from '@/components/sw360/SearchUsersModal/SearchUsersModal'
+import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
+import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
+
 interface Props {
     session?: Session
     componentId?: string
@@ -38,7 +39,13 @@ interface Props {
     setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
 }
 
-export default function ComponentEditSummary({ session, componentId, componentData, setComponentData, attachmentData }: Props) {
+export default function ComponentEditSummary({
+    session,
+    componentId,
+    componentData,
+    setComponentData,
+    attachmentData,
+}: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
     const [externalIds, setExternalIds] = useState<Input[]>([])
@@ -272,7 +279,7 @@ export default function ComponentEditSummary({ session, componentId, componentDa
 
     const convertRoles = (datas: Input[]) => {
         if (datas === null) {
-            return null;
+            return null
         }
         const contributors: string[] = []
         const commiters: string[] = []
@@ -305,59 +312,55 @@ export default function ComponentEditSummary({ session, componentId, componentDa
                     e.preventDefault()
                 }}
             >
-                <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
-                    <div className='row'>
-                        <div className='col'>
-                            <div className='col'>
-                                <GeneralInfoComponent
-                                    session={session}
-                                    actionType={ActionType.EDIT}
-                                    vendor={vendor}
-                                    setVendor={setVendor}
-                                    componentPayload={componentPayload}
-                                    setComponentPayload={setComponentPayload}
-                                    componentData={componentData}
-                                    setComponentData={setComponentData}
-                                />
-                                <RolesInformation
-                                    session={session}
-                                    actionType={ActionType.EDIT}
-                                    componentOwner={componentOwner}
-                                    setComponentOwner={setComponentOwner}
-                                    moderator={moderator}
-                                    setModerator={setModerator}
-                                    componentPayload={componentPayload}
-                                    setComponentPayload={setComponentPayload}
-                                    componentData={componentData}
-                                    setComponentData={setComponentData}
-                                />
-                                <div className='row mb-4'>
-                                    <AddAdditionalRolesComponent
-                                        documentType={DocumentTypes.COMPONENT}
-                                        setDataRoles={setDataRoles}
-                                        roles={roles}
-                                        setRoles={setRoles}
-                                    />
-                                </div>
-                                <div className='row mb-4'>
-                                    <AddKeyValueComponent
-                                        header={t('External ids')}
-                                        keyName={'external id'}
-                                        setData={setExternalIds}
-                                        data={externalIds}
-                                        setMap={setDataExternalIds}
-                                    />
-                                </div>
-                                <div className='row mb-4'>
-                                    <AddKeyValueComponent
-                                        header={t('Additional Data')}
-                                        keyName={'additional data'}
-                                        setData={setAddtionalData}
-                                        data={addtionalData}
-                                        setMap={setDataAddtionalData}
-                                    />
-                                </div>
-                            </div>
+                <div className='col'>
+                    <div className='col'>
+                        <GeneralInfoComponent
+                            session={session}
+                            actionType={ActionType.EDIT}
+                            vendor={vendor}
+                            setVendor={setVendor}
+                            componentPayload={componentPayload}
+                            setComponentPayload={setComponentPayload}
+                            componentData={componentData}
+                            setComponentData={setComponentData}
+                        />
+                        <RolesInformation
+                            session={session}
+                            actionType={ActionType.EDIT}
+                            componentOwner={componentOwner}
+                            setComponentOwner={setComponentOwner}
+                            moderator={moderator}
+                            setModerator={setModerator}
+                            componentPayload={componentPayload}
+                            setComponentPayload={setComponentPayload}
+                            componentData={componentData}
+                            setComponentData={setComponentData}
+                        />
+                        <div className='row mb-4'>
+                            <AddAdditionalRolesComponent
+                                documentType={DocumentTypes.COMPONENT}
+                                setDataRoles={setDataRoles}
+                                roles={roles}
+                                setRoles={setRoles}
+                            />
+                        </div>
+                        <div className='row mb-4'>
+                            <AddKeyValueComponent
+                                header={t('External ids')}
+                                keyName={'external id'}
+                                setData={setExternalIds}
+                                data={externalIds}
+                                setMap={setDataExternalIds}
+                            />
+                        </div>
+                        <div className='row mb-4'>
+                            <AddKeyValueComponent
+                                header={t('Additional Data')}
+                                keyName={'additional data'}
+                                setData={setAddtionalData}
+                                data={addtionalData}
+                                setMap={setDataAddtionalData}
+                            />
                         </div>
                     </div>
                 </div>
