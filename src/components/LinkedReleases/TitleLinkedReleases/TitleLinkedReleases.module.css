@@ -1,0 +1,26 @@
+/*
+  Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
+  Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.div-title-second {
+    float: left;
+    background-color: #5D8EA9;
+    color: white;
+    text-align: center;
+    padding-top: 0px;
+}
+
+.div-filename {
+    width: 340px;
+    float: left;
+    position: relative;
+    text-align: left;
+    padding-top: 8px;
+    font-size: 0.875rem;
+}

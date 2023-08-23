@@ -14,6 +14,7 @@ import styles from './LinkedReases.module.css'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types/Session'
+import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
 
 interface Props {
@@ -26,6 +27,9 @@ const LinkedReleases = ({ session}: Props) => {
     return (
         <>
             <div className='col' style={{ fontSize: '0.875rem' }}>
+                <div className={`row ${styles['attachment-table']}`} style={{ padding: '25px',fontSize: '0.875rem', paddingTop: '1px' }}>
+                    <TitleLinkedReleases />
+                </div>
                 <div>
                     <button
                         type='button'
