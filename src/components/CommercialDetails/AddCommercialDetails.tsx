@@ -8,11 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum ReleaseTabIds {
-  LINKED_RELEASES = 'tab-Releases',
-  CLEARING_DETAILS = 'tab-ClearingDetails',
-  ECC_DETAILS = 'tab-EccDetails',
-  COMMERCIAL_DETAILS = 'tab-CommercialDetails',
+'use client'
+
+import { Session } from '@/object-types/Session'
+interface Props {
+    session?: Session
 }
 
-export default ReleaseTabIds
+const AddCommercialDetails = ({ session }: Props) => {
+    return (
+        <>
+        </>
+    )
+}
+
+export default AddCommercialDetails

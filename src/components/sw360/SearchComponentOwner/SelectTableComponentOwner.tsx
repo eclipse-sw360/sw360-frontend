@@ -32,19 +32,23 @@ const SelectTableComponentOwner = ({ users, setComponentOwner }: Props) => {
 
     const columns = [
         {
+            id: 'userId',
             name: '',
             formatter: (item: any) =>
                 _(<Form.Check type='radio' name='VendorId' onChange={() => handlerRadioButton(item)}></Form.Check>),
         },
         {
+            id: 'FullName',
             name: 'FullName',
             sort: true,
         },
         {
+            id: 'ShortName',
             name: 'ShortName',
             sort: true,
         },
         {
+            id: 'URL',
             name: 'URL',
             sort: true,
         },
