@@ -9,13 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
+import { useCallback, useEffect, useState } from 'react'
 
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { Session } from '@/object-types/Session'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
-import { useState } from 'react'
-import ReleaseAddSummary from './ReleaseAddSummary'
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
+import { notFound } from 'next/navigation'
+import ApiUtils from '@/utils/api/api.util'
+import HttpStatus from '@/object-types/enums/HttpStatus'
+import { signOut } from 'next-auth/react'
+import ReleaseAddSummary from './ReleaseAddSummary'
+import ReleaseAddTabs from './ReleaseAddTab'
+import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedRelesaes'
 
 interface Props {
@@ -23,19 +29,32 @@ interface Props {
     componentId?: string
 }
 
-const tabList = [
-    {
-        id: CommonTabIds.SUMMARY,
-        name: 'Summary',
-    },
-    {
-        id: ReleaseTabIds.LINKED_RELEASES,
-        name: 'Linked Releases',
-    },
-]
-
-const AddRelease = ({ componentId, session }: Props) => {
+const AddRelease = ({ session, componentId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
+
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                signOut()
+            } else {
+                notFound()
+            }
+        },
+        [session.user.access_token]
+    )
+
+    useEffect(() => {
+        fetchData(`components/${componentId}`).then((component: any) => {
+            if (component.componentType === 'COTS') {
+                setTabList(ReleaseAddTabs.WITH_COMMERCIAL_DETAILS)
+            }
+        })
+    }, [componentId, fetchData])
 
     const headerButtons = {
         'Create Release': { link: '', type: 'primary' },
@@ -57,9 +76,10 @@ const AddRelease = ({ componentId, session }: Props) => {
                             <ReleaseAddSummary />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases
-                                session={session}
-                            />
+                            <LinkedReleases session={session} />
+                        </div>
+                        <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
+                            <AddCommercialDetails session={session} />
                         </div>
                     </div>
                 </div>
