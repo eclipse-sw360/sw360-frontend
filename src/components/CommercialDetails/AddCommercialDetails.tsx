@@ -11,6 +11,8 @@
 'use client'
 
 import { Session } from '@/object-types/Session'
+import CommercialDetailsAdministration from './CommercialDetailsAdministration'
+
 interface Props {
     session?: Session
 }
@@ -18,6 +20,9 @@ interface Props {
 const AddCommercialDetails = ({ session }: Props) => {
     return (
         <>
+            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
+                <CommercialDetailsAdministration session={session} />
+            </div>
         </>
     )
 }
