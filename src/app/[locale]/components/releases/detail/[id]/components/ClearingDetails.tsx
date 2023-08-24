@@ -64,103 +64,106 @@ const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: P
                     <tr>
                         <td>{t('Binaries Original from Community')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.binariesOriginalFromCommunity} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.binariesOriginalFromCommunity : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Binaries Self-Made')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.binariesSelfMade} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.binariesSelfMade : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Component License Information')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.componentLicenseInformation} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.componentLicenseInformation : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Delivery')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.sourceCodeDelivery} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeDelivery : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Original from Community')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.sourceCodeOriginalFromCommunity} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeOriginalFromCommunity : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Tool-Made')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.sourceCodeToolMade} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeToolMade : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Self-Made')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.sourceCodeSelfMade} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeSelfMade : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Screenshot of Website')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.screenshotOfWebSite} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.screenshotOfWebSite : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Finalized License Scan Report')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.finalizedLicenseScanReport} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.finalizedLicenseScanReport : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('License Scan Report Result')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.licenseScanReportResult} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.licenseScanReportResult : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Legal Evaluation')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.licenseAgreement} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.licenseAgreement : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('License Agreement')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.licenseScanReportResult} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.licenseScanReportResult : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Scanned')}:</td>
                         <td>
-                            {release.clearingInformation.scanned}
+                            {(release.clearingInformation) && release.clearingInformation.scanned}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Component Clearing Report')}:</td>
                         <td>
-                            <ClearingInformationStatus status={release.clearingInformation.componentClearingReport} />
+                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.componentClearingReport : false} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Standard')}:</td>
                         <td>
-                            {release.clearingInformation.clearingStandard}
+                            {(release.clearingInformation) && release.clearingInformation.clearingStandard}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('External URL')}:</td>
                         <td>
+                            {
+                            (release.clearingInformation) &&
                             <Link href={release.clearingInformation.externalUrl}>{release.clearingInformation.externalUrl}</Link>
+                            }
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Comments')}:</td>
                         <td>
-                            {release.clearingInformation.comment}
+                            {(release.clearingInformation) && release.clearingInformation.comment}
                         </td>
                     </tr>
                 </tbody>
@@ -187,13 +190,13 @@ const SupplementalInformation = ({ clearingInformation }: any) => {
                 <tr>
                     <td>{t('External Supplier ID')}:</td>
                     <td>
-                        {clearingInformation.externalSupplierID}
+                        {(clearingInformation) && clearingInformation.externalSupplierID}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Number of Security Vulnerabilities')}:</td>
                     <td>
-                        {clearingInformation.countOfSecurityVn}
+                        {(clearingInformation) && clearingInformation.countOfSecurityVn}
                     </td>
                 </tr>
             </tbody>
@@ -216,25 +219,25 @@ const RequestInformation = ({ clearingInformation }: any) => {
                 <tr>
                     <td>{t('Request ID')}:</td>
                     <td>
-                        {clearingInformation.requestID}
+                        {(clearingInformation) && clearingInformation.requestID}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Additional Request Information')}:</td>
                     <td>
-                        {clearingInformation.additionalRequestInfo}
+                        {(clearingInformation) && clearingInformation.additionalRequestInfo}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Evaluation Start')}:</td>
                     <td>
-                        {clearingInformation.procStart}
+                        {(clearingInformation) && clearingInformation.procStart}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Evaluation End')}:</td>
                     <td>
-                        {clearingInformation.evaluated}
+                        {(clearingInformation) && clearingInformation.evaluated}
                     </td>
                 </tr>
             </tbody>

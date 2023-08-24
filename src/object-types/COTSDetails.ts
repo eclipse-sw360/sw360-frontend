@@ -8,11 +8,19 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum ReleaseTabIds {
-  LINKED_RELEASES = 'tab-Releases',
-  CLEARING_DETAILS = 'tab-ClearingDetails',
-  ECC_DETAILS = 'tab-EccDetails',
-  COMMERCIAL_DETAILS = 'tab-CommercialDetails',
-}
+import EmbeddedUser from "./EmbeddedUser"
 
-export default ReleaseTabIds
+export default interface COTSDetails {
+    usedLicense?: string,
+    licenseClearingReportURL?: string
+    containsOSS?: boolean
+    ossContractSigned?: boolean
+    ossInformationURL?: string
+    usageRightAvailable?: boolean
+    cotsResponsible?: string
+    clearingDeadline?: string
+    sourceCodeAvailable: boolean
+    _embedded: {
+        'sw360:cotsResponsible': EmbeddedUser
+    }
+}
