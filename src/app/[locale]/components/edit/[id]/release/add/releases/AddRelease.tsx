@@ -67,6 +67,41 @@ const AddRelease = ({ session, componentId }: Props) => {
         releaseIdToRelationship: null,
     })
 
+    const [vendor, setVendor] = useState<Vendor>({
+        id: '',
+        fullName: '',
+    })
+
+    const [mainLicensesId, setMainLicensesId] = useState<Licenses>({
+        id: null,
+        fullName: '',
+    })
+
+    const [otherLicensesId, setOtherLicensesId] = useState<Licenses>({
+        id: null,
+        fullName: '',
+    })
+
+    const [contributor, setContributor] = useState<Moderators>({
+        emails: null,
+        fullName: '',
+    })
+
+    const [moderator, setModerator] = useState<Moderators>({
+        emails: null,
+        fullName: '',
+    })
+
+    const [releaseRepository, setReleaseRepository] = useState<Repository>({
+        repositorytype: 'UNKNOWN',
+        url: '',
+    })
+
+    const [cotsResponsible, setCotsResponsible] = useState<ComponentOwner>({
+        email: '',
+        fullName: '',
+    })
+
     const fetchData: any = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -136,7 +171,23 @@ const AddRelease = ({ session, componentId }: Props) => {
                             <PageButtonHeader buttons={headerButtons}></PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <ReleaseAddSummary />
+                            <ReleaseAddSummary
+                                session={session}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                                vendor={vendor}
+                                setVendor={setVendor}
+                                mainLicensesId={mainLicensesId}
+                                setMainLicensesId={setMainLicensesId}
+                                otherLicensesId={otherLicensesId}
+                                setOtherLicensesId={setOtherLicensesId}
+                                contributor={contributor}
+                                setContributor={setContributor}
+                                moderator={moderator}
+                                setModerator={setModerator}
+                                releaseRepository={releaseRepository}
+                                setReleaseRepository={setReleaseRepository}
+                            />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases session={session} />

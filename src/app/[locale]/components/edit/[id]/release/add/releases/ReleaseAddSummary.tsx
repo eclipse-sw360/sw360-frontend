@@ -16,8 +16,48 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import { Session } from '@/object-types/Session'
+import Vendor from '@/object-types/Vendor'
+import Licenses from '@/object-types/Licenses'
+import Moderators from '@/object-types/Moderators'
+import Repository from '@/object-types/Repository'
 
-export default function ReleaseAddSummary() {
+interface Props {
+    session?: Session
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    vendor?: Vendor
+    setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
+    mainLicensesId?: Licenses
+    setMainLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
+    otherLicensesId?: Licenses
+    setOtherLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
+    contributor?: Moderators
+    setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
+    moderator?: Moderators
+    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
+    releaseRepository?: Repository
+    setReleaseRepository?: React.Dispatch<React.SetStateAction<Repository>>
+}
+
+export default function ReleaseAddSummary({
+    session,
+    releasePayload,
+    setReleasePayload,
+    vendor,
+    setVendor,
+    mainLicensesId,
+    setMainLicensesId,
+    otherLicensesId,
+    setOtherLicensesId,
+    contributor,
+    setContributor,
+    moderator,
+    setModerator,
+    releaseRepository,
+    setReleaseRepository,
+}: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
 
     return (
