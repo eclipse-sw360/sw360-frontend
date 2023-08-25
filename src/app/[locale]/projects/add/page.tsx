@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import { TypeOptions, toast } from 'react-toastify'
+import { ToastContainer, TypeOptions, toast } from 'react-toastify'
 import ApiUtils from '@/utils/api/api.util'
 import ProjectPayload from "@/object-types/CreateProjectPayload"
 import { useState } from 'react'
@@ -123,6 +123,7 @@ export default function AddProjects() {
                     createProject()
                 }}
             >
+            <ToastContainer className='foo' style={{ width: '300px', height: '100px' }} />
             <div className="ms-5 mt-2">
                 <Tab.Container defaultActiveKey="summary">
                     <Row>
@@ -144,8 +145,8 @@ export default function AddProjects() {
                                 <Col lg={3}>
                                     <Row>
                                         <Button variant="primary"
+                                                type='submit'
                                                 className="me-2 col-auto"
-                                                onClick={createProject}
                                                 >
                                                     {t('Create Project')}
                                         </Button>

@@ -112,7 +112,6 @@ export default function GeneralInformation({ token,
                             id='addProjects.version'
                             placeholder={t('Enter Version')}
                             name='version'
-                            required
                             value={projectPayload.version}
                             onChange={updateInputField}
                         />
@@ -124,11 +123,11 @@ export default function GeneralInformation({ token,
                         <select
                             className='form-select'
                             id='addProjects.visibility'
-                            defaultValue='Group and Moderators'
                             aria-describedby='addProjects.visibility.HelpBlock'
                             name='visibility'
                             value={projectPayload.visibility}
                             onChange={updateInputField}
+                            required
                         >
                             <option value='PRIVATE'>{t('Private')}</option>
                             <option value='ME_AND_MODERATORS'>{t('Me and Moderators')}</option>
@@ -161,12 +160,12 @@ export default function GeneralInformation({ token,
                         </label>
                         <select
                             className='form-select'
-                            defaultValue='Product'
                             id='addProjects.projectType'
                             aria-describedby='addProjects.projectType.HelpBlock'
                             name='projectType'
                             value={projectPayload.projectType}
                             onChange={updateInputField}
+                            required
                         >
                             <option value='CUSTOMER'>{t('Customer Project')}</option>
                             <option value='INTERNAL'>{t('Internal Project')}</option>
@@ -217,7 +216,6 @@ export default function GeneralInformation({ token,
                         <select
                             className='form-select'
                             id='addProjects.domain'
-                            defaultValue=''
                             aria-label={t('Enter Domain')}
                             name='domain'
                             value={projectPayload.domain}
