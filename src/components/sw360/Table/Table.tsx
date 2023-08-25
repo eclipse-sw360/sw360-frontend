@@ -23,6 +23,7 @@ const defaultOptions = {
 
 interface TableProps extends Partial<Config> {
     selector?: boolean
+    language?: any
 }
 
 class Table extends Component<TableProps, unknown> {
