@@ -12,13 +12,14 @@
 
 import { Form } from 'react-bootstrap'
 import React from 'react'
-import { _ } from '@/components/sw360'
+import { Table, _ } from '@/components/sw360'
 import LicensesTable from './MainLicensesTable'
 import Licenses from '@/object-types/Licenses'
+import { LicensesType } from '@/object-types/LicensesType'
 
 interface Props {
     licenseDatas?: any[]
-    setLicenses?: (licenses: Licenses) => void
+    setLicenses?: LicensesType
     fullnames?: any[]
 }
 
@@ -50,6 +51,7 @@ const SelectTableMainLicenses = ({ licenseDatas, setLicenses, fullnames }: Props
 
     const columns = [
         {
+            id: 'licenseId',
             name: '',
             formatter: (item: string) =>
                 _(
@@ -61,10 +63,13 @@ const SelectTableMainLicenses = ({ licenseDatas, setLicenses, fullnames }: Props
                         }}
                     ></Form.Check>
                 ),
+            width: '5%'
         },
         {
-            name: 'FullName',
+            id: 'license',
+            name: 'License',
             sort: true,
+            width: '95%'
         },
     ]
 

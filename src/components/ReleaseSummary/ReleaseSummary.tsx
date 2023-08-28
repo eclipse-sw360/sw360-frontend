@@ -10,7 +10,7 @@
 
 'use client'
 import styles from './ReleaseSummary.module.css'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -21,6 +21,7 @@ import Licenses from '@/object-types/Licenses'
 import ModeratorsDiaglog from '../sw360/SearchModerators/ModeratorsDiaglog'
 import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
+import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
 interface Props {
     session?: Session
     releasePayload: ReleasePayload
@@ -74,6 +75,21 @@ const ReleaseSummary = ({
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [currentDate, setCurrentDate] = useState(getDate())
+    const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
+    const handleClickSearchMainLicenses = useCallback(() => setDialogOpenMainLicenses(true), [])
+
+    const setMainLicenses = (licenseResponse: Licenses) => {
+        const mainLicenses: Licenses = {
+            id: licenseResponse.id,
+            fullName: licenseResponse.fullName,
+        }
+        setMainLicensesId(mainLicenses)
+        setReleasePayload({
+            ...releasePayload,
+            mainLicenseIds: mainLicenses.id,
+        })
+    }
+
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setReleasePayload({
             ...releasePayload,
@@ -248,6 +264,13 @@ const ReleaseSummary = ({
                                 readOnly={true}
                                 name='mainLicenseIds'
                                 value={mainLicensesId.fullName ?? ''}
+                                onClick={handleClickSearchMainLicenses}
+                            />
+                            <MainLicensesDiaglog
+                                show={dialogOpenMainLicenses}
+                                setShow={setDialogOpenMainLicenses}
+                                session={session}
+                                selectLicenses={setMainLicenses}
                             />
                         </div>
                     </div>
