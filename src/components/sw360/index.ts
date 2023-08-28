@@ -22,6 +22,7 @@ import VendorDialog from './SearchVendorsModal/VendorDialog'
 // Table component
 // IS strictly derived from gridjs-react with dedicated changes
 import Table from './Table/Table'
+import TreeTable from './TreeTable/TreeTable'
 import { ReactWrapper, _ } from './Table/wrapper'
 
 export {
@@ -38,5 +39,6 @@ export {
     SearchVendorsModal,
     SideBar,
     Table,
+    TreeTable,
     VendorDialog,
 }
