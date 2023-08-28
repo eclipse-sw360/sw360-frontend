@@ -12,35 +12,37 @@
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import { Session } from '@/object-types/Session'
-import SelectTableVendor from './SelectTableVendor'
 import { notFound } from 'next/navigation'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import CommonUtils from '@/utils/common.utils'
-import Vendor from '@/object-types/Vendor'
-import { VendorType } from '@/object-types/VendorType'
+import SelectTableModerators from './SelectTableContributors'
+import Moderators from '@/object-types/Moderators'
+import { ModeratorsType } from '@/object-types/ModeratorsType'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
-    show: boolean
-    setShow: React.Dispatch<React.SetStateAction<boolean>>
+    show?: boolean
+    setShow?: React.Dispatch<React.SetStateAction<boolean>>
     session?: Session
-    selectVendor: VendorType
+    selectModerators?: ModeratorsType
 }
 
-const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
+const ContributorsDiaglog = ({ show, setShow, session, selectModerators }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
-    const [vendor, setVendor] = useState<Vendor>()
-    const [vendors, setVendors] = useState([])
+    const [moderators, setModerators] = useState([])
+    const [moderatorsResponse, setModeratorsResponse] = useState<Moderators>()
+    const [users, setUsers] = useState([])
+
     const handleCloseDialog = () => {
         setShow(!show)
     }
 
     const searchVendor = () => {
-        setVendors(data)
+        setUsers(data)
     }
 
     const fetchData: any = useCallback(async (url: string) => {
@@ -54,34 +56,34 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
     }, [])
 
     useEffect(() => {
-        fetchData(`vendors`).then((vendors: any) => {
+        fetchData(`users`).then((users: any) => {
             if (
-                !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
+                !CommonUtils.isNullOrUndefined(users['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])
             ) {
-                const data = vendors['_embedded']['sw360:vendors'].map((item: any) => [
+                const data = users['_embedded']['sw360:users'].map((item: any) => [
                     item,
-                    item.fullName,
-                    item.shortName,
-                    item.url,
-                    '',
+                    item.givenName,
+                    item.lastName,
+                    item.email,
+                    item.department,
                 ])
                 setData(data)
             }
         })
     }, [])
 
-    const handleClickSelectVendor = () => {
-        selectVendor(vendor)
+    const handleClickSelectModerators = () => {
+        selectModerators(moderatorsResponse)
         setShow(!show)
     }
 
-    const getVendor: VendorType = useCallback((Vendor: Vendor) => setVendor(Vendor), [])
+    const getModerators: ModeratorsType = useCallback((moderators: Moderators) => setModeratorsResponse(moderators), [])
 
     return (
         <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
             <Modal.Header closeButton>
-                <Modal.Title>{t('Search Vendor')}</Modal.Title>
+                <Modal.Title>{t('Search User')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <div className='modal-body'>
@@ -91,24 +93,24 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
                                 type='text'
                                 className='form-control'
                                 placeholder={t('Enter search text')}
-                                aria-describedby='Search Vendor'
+                                aria-describedby='Search User'
                             />
                         </div>
                         <div className='col-lg-4'>
                             <button
                                 type='button'
-                                className='btn btn-secondary me-2'
+                                className={`fw-bold btn btn-light button-plain me-2`}
                                 onClick={searchVendor}
                             >
                                 {t('Search')}
                             </button>
-                            <button type='button' className='btn btn-secondary me-2'>
+                            <button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
                                 {t('Reset')}
                             </button>
                         </div>
                     </div>
                     <div className='row mt-3'>
-                        <SelectTableVendor vendors={vendors} setVendor={getVendor} />
+                        <SelectTableModerators users={users} setModerator={getModerators} emails={moderators} />
                     </div>
                 </div>
             </Modal.Body>
@@ -116,24 +118,21 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
                 <Button
                     type='button'
                     data-bs-dismiss='modal'
-                    className='fw-bold btn btn-light button-plain me-2'
+                    className={`fw-bold btn btn-light button-plain me-2`}
                     onClick={handleCloseDialog}
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className='fw-bold btn btn-light button-plain me-2'>
-                    {t('Add Vendor')}
-                </Button>
                 <Button
                     type='button'
-                    className='btn btn-primary'
-                    onClick={handleClickSelectVendor}
+                    className={`btn btn-primary`}
+                    onClick={handleClickSelectModerators}
                 >
-                    {t('Select Vendor')}
+                    {t('Select User')}
                 </Button>
             </Modal.Footer>
         </Modal>
     )
 }
 
-export default VendorDialog
+export default ContributorsDiaglog

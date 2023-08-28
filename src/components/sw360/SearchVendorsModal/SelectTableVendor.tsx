@@ -38,19 +38,23 @@ const SelectTableVendor = ({ vendors, setVendor }: Props) => {
 
     const columns = [
         {
+            id: 'vendorId',
             name: '',
             formatter: (item: any) =>
                 _(<Form.Check type='radio' name='VendorId' onChange={() => handlerRadioButton(item)}></Form.Check>),
         },
         {
+            id: 'fullName',
             name: 'FullName',
             sort: true,
         },
         {
+            id: 'shortName',
             name: 'ShortName',
             sort: true,
         },
         {
+            id: 'url',
             name: 'URL',
             sort: true,
         },
