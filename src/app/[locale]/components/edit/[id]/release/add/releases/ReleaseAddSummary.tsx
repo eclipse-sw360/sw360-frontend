@@ -61,6 +61,8 @@ export default function ReleaseAddSummary({
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
+    const [externalIds, setExternalIds] = useState<Input[]>([])
+    const [addtionalData, setAddtionalData] = useState<Input[]>([])
 
     const setDataRoles = (roles: Input[]) => {
         const roleDatas = convertRoles(roles)
@@ -89,6 +91,22 @@ export default function ReleaseAddSummary({
             Expert: expecters,
         }
         return roles
+    }
+
+    const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
+        const obj = Object.fromEntries(additionalDatas)
+        setReleasePayload({
+            ...releasePayload,
+            additionalData: obj,
+        })
+    }
+
+    const setDataExternalIds = (externalIds: Map<string, string>) => {
+        const obj = Object.fromEntries(externalIds)
+        setReleasePayload({
+            ...releasePayload,
+            externalIds: obj,
+        })
     }
     return (
         <>
@@ -125,10 +143,22 @@ export default function ReleaseAddSummary({
                         />
                     </div>
                     <div className='row mb-4'>
-                        <AddKeyValueComponent header={t('External ids')} keyName={'external id'} />
+                        <AddKeyValueComponent
+                            header={t('External ids')}
+                            keyName={'external id'}
+                            setData={setExternalIds}
+                            data={externalIds}
+                            setMap={setDataExternalIds}
+                        />
                     </div>
                     <div className='row mb-4'>
-                        <AddKeyValueComponent header={t('Additional Data')} keyName={'additional data'} />
+                        <AddKeyValueComponent
+                            header={t('Additional Data')}
+                            keyName={'additional data'}
+                            setData={setAddtionalData}
+                            data={addtionalData}
+                            setMap={setDataAddtionalData}
+                        />
                     </div>
                     <ReleaseRepository />
                 </div>
