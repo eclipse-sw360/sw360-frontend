@@ -47,6 +47,7 @@ const SelectTableContributors = ({ users, setModerator, emails }: Props) => {
 
     const columns = [
         {
+            id: 'moderatorId',
             name: '',
             formatter: (item: string) =>
                 _(
@@ -61,23 +62,28 @@ const SelectTableContributors = ({ users, setModerator, emails }: Props) => {
             width: '7%',
         },
         {
+            id: 'givenName',
             name: 'GivenName',
-            width: '14%',
+            width: '20%',
             sort: true,
         },
         {
+            id: 'lastName',
             name: 'LastName',
             sort: true,
-            width: '14%',
+            width: '20%',
         },
         {
+            id: 'email',
             name: 'Email',
             sort: true,
-            width: '40%',
+            width: '30%',
         },
         {
+            id: 'department',
             name: 'Department',
             sort: true,
+            width: '20%',
         },
     ]
 

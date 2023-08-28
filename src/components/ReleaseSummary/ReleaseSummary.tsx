@@ -24,6 +24,7 @@ import ReleasePayload from '@/object-types/ReleasePayload'
 import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
 import { VendorDialog } from '../sw360'
 import { GiCancel } from 'react-icons/gi'
+import ContributorsDiaglog from '../sw360/SearchContributors/ContributorsDiaglog'
 interface Props {
     session?: Session
     releasePayload: ReleasePayload
@@ -81,6 +82,8 @@ const ReleaseSummary = ({
     const handleClickSearchMainLicenses = useCallback(() => setDialogOpenMainLicenses(true), [])
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
+    const [dialogOpenContributors, setDialogOpenContributors] = useState(false)
+    const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
 
     const setMainLicenses = (licenseResponse: Licenses) => {
         const mainLicenses: Licenses = {
@@ -134,6 +137,18 @@ const ReleaseSummary = ({
         setReleasePayload({
             ...releasePayload,
             vendorId: '',
+        })
+    }
+
+    const setContributors = (contributorsResponse: Moderators) => {
+        const contributors: Moderators = {
+            emails: contributorsResponse.emails,
+            fullName: contributorsResponse.fullName,
+        }
+        setContributor(contributors)
+        setReleasePayload({
+            ...releasePayload,
+            contributors: contributors.emails,
         })
     }
 
@@ -438,6 +453,14 @@ const ReleaseSummary = ({
                                 aria-describedby='component_owner'
                                 readOnly={true}
                                 name='contributors'
+                                onClick={handleClickSearchContributors}
+                                value={contributor.fullName ?? ''}
+                            />
+                            <ContributorsDiaglog
+                                show={dialogOpenContributors}
+                                setShow={setDialogOpenContributors}
+                                session={session}
+                                selectModerators={setContributors}
                             />
                         </div>
                         <div className='col-lg-4'>

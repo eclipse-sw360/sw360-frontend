@@ -84,6 +84,8 @@ export default function ReleaseAddSummary({
                         setOtherLicensesId={setOtherLicensesId}
                         moderator={moderator}
                         setModerator={setModerator}
+                        contributor={contributor}
+                        setContributor={setContributor}
                     />
                     <div className='row mb-4'>
                         <AddAdditionalRolesComponent documentType={DocumentTypes.COMPONENT} />
