@@ -60,7 +60,36 @@ export default function ReleaseAddSummary({
     setReleaseRepository,
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
+    const [roles, setRoles] = useState<Input[]>([])
 
+    const setDataRoles = (roles: Input[]) => {
+        const roleDatas = convertRoles(roles)
+        setReleasePayload({
+            ...releasePayload,
+            roles: roleDatas,
+        })
+    }
+
+    const convertRoles = (datas: any[]) => {
+        const contributors: string[] = []
+        const commiters: string[] = []
+        const expecters: string[] = []
+        datas.forEach((data) => {
+            if (data.key === 'Contributor') {
+                contributors.push(data.value)
+            } else if (data.key === 'Committer') {
+                commiters.push(data.value)
+            } else if (data.key === 'Expert') {
+                expecters.push(data.value)
+            }
+        })
+        const roles = {
+            Contributor: contributors,
+            Committer: commiters,
+            Expert: expecters,
+        }
+        return roles
+    }
     return (
         <>
             <form
@@ -88,7 +117,12 @@ export default function ReleaseAddSummary({
                         setContributor={setContributor}
                     />
                     <div className='row mb-4'>
-                        <AddAdditionalRolesComponent documentType={DocumentTypes.COMPONENT} />
+                        <AddAdditionalRolesComponent
+                            documentType={DocumentTypes.COMPONENT}
+                            roles={roles}
+                            setRoles={setRoles}
+                            setDataRoles={setDataRoles}
+                        />
                     </div>
                     <div className='row mb-4'>
                         <AddKeyValueComponent header={t('External ids')} keyName={'external id'} />
