@@ -22,6 +22,7 @@ import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
 import Repository from '@/object-types/Repository'
+import { useState } from 'react'
 
 interface Props {
     session?: Session
@@ -71,7 +72,19 @@ export default function ReleaseAddSummary({
                 }}
             >
                 <div className='col' style={{ fontSize: '0.875rem' }}>
-                    <ReleaseSummary />
+                    <ReleaseSummary
+                        session={session}
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                        vendor={vendor}
+                        setVendor={setVendor}
+                        mainLicensesId={mainLicensesId}
+                        setMainLicensesId={setMainLicensesId}
+                        otherLicensesId={otherLicensesId}
+                        setOtherLicensesId={setOtherLicensesId}
+                        moderator={moderator}
+                        setModerator={setModerator}
+                    />
                     <div className='row mb-4'>
                         <AddAdditionalRolesComponent documentType={DocumentTypes.COMPONENT} />
                     </div>
