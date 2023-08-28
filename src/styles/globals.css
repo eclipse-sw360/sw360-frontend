@@ -311,31 +311,27 @@ th {
 }
 
 .btn-light {
-    text-decoration: none !important;
-    background: none !important;
-    border: none !important;
-    color: var(--sw360-primary-color) !important;
+    background-color: #f1f2f5 !important;
+    border-color: #f1f2f5 !important;
+    color: #000000 !important;
 }
 
 .btn-light:focus {
-    text-decoration: none !important;
-    background: none !important;
-    border: none !important;
-    color: var(--sw360-primary-color) !important;
+    background-color: #f1f2f5 !important;
+    border-color: #f1f2f5 !important;
+    color: #000000 !important;
 }
 
 .btn-light:active {
-    text-decoration: none !important;
-    background: none !important;
-    border: none !important;
-    color: var(--sw360-primary-color) !important;
+    background-color: #f1f2f5 !important;
+    border-color: #f1f2f5 !important;
+    color: #000000 !important;
 }
 
 .btn-light:hover {
-    text-decoration: underline !important;
-    background: none !important;
-    border: none !important;
-    color: var(--sw360-primary-background-color) !important;
+    background-color: #e2e4ea;
+    border-color: transparent;
+    color: #000000;
 }
 
 .header-underline {

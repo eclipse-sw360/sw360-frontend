@@ -39,6 +39,7 @@ import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ReleaseDetailTabs from './ReleaseDetailTabs'
 import CommercialDetails from './CommercialDetails'
+import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 
 interface Props {
     session: Session
@@ -55,6 +56,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [changeLogList, setChangeLogList] = useState<Array<any>>([])
+    const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
 
     const [tabList, setTabList] = useState(ReleaseDetailTabs.WITHOUT_COMMERCIAL_DETAILS)
 
@@ -125,6 +127,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
 
     const headerButtons = {
         'Edit release': { link: '', type: 'primary' },
+        'Link To Project': { link: '', type: 'secondary', onClick: () => { setLinkProjectModalShow(true) } },
         Merge: { link: '', type: 'secondary' },
         Subscribe: { link: '', type: 'outline-success' },
     }
@@ -145,7 +148,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                     <div className='col'>
                         <div className='row' style={{ marginBottom: '20px' }}>
                             <PageButtonHeader title={`${release.name} ${release.version}`} buttons={headerButtons}>
-                                <div style={{ marginLeft: '5px'}} className='btn-group' role='group'>
+                                <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
                                     <Dropdown>
                                         <Dropdown.Toggle variant='primary'>
                                             <span className={`${styles['badge-circle']} ${styles[release.clearingState]}`}></span>
@@ -247,6 +250,9 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                     </div>
                 </div>
+                <LinkReleaseToProjectModal show={linkProjectModalShow}
+                    setShow={setLinkProjectModalShow}
+                    session={session} releaseId={releaseId} />
             </div>
         )
     )
