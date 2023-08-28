@@ -84,6 +84,8 @@ const ReleaseSummary = ({
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
     const [dialogOpenContributors, setDialogOpenContributors] = useState(false)
     const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
+    const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
+    const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
 
     const setMainLicenses = (licenseResponse: Licenses) => {
         const mainLicenses: Licenses = {
@@ -149,6 +151,18 @@ const ReleaseSummary = ({
         setReleasePayload({
             ...releasePayload,
             contributors: contributors.emails,
+        })
+    }
+
+    const setModerators = (moderatorsResponse: Moderators) => {
+        const moderators: Moderators = {
+            emails: moderatorsResponse.emails,
+            fullName: moderatorsResponse.fullName,
+        }
+        setModerator(moderators)
+        setReleasePayload({
+            ...releasePayload,
+            moderators: moderators.emails,
         })
     }
 
@@ -477,7 +491,14 @@ const ReleaseSummary = ({
                                 aria-describedby='Moderators'
                                 readOnly={true}
                                 name='moderators'
+                                onClick={handleClickSearchModerators}
                                 value={moderator.fullName ?? ''}
+                            />
+                            <ModeratorsDiaglog
+                                show={dialogOpenModerators}
+                                setShow={setDialogOpenModerators}
+                                session={session}
+                                selectModerators={setModerators}
                             />
                         </div>
                     </div>
