@@ -22,6 +22,8 @@ import ModeratorsDiaglog from '../sw360/SearchModerators/ModeratorsDiaglog'
 import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
+import { VendorDialog } from '../sw360'
+import { GiCancel } from 'react-icons/gi'
 interface Props {
     session?: Session
     releasePayload: ReleasePayload
@@ -77,6 +79,8 @@ const ReleaseSummary = ({
     const [currentDate, setCurrentDate] = useState(getDate())
     const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
     const handleClickSearchMainLicenses = useCallback(() => setDialogOpenMainLicenses(true), [])
+    const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
+    const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
 
     const setMainLicenses = (licenseResponse: Licenses) => {
         const mainLicenses: Licenses = {
@@ -109,6 +113,30 @@ const ReleaseSummary = ({
         return valueCatergories.split(',')
     }
 
+    const setVendorId = (vendorResponse: Vendor) => {
+        const vendorData: Vendor = {
+            id: vendorResponse.id,
+            fullName: vendorResponse.fullName,
+        }
+        setVendor(vendorData)
+        setReleasePayload({
+            ...releasePayload,
+            vendorId: vendorResponse.id,
+        })
+    }
+
+    const handleClearVendor = () => {
+        const vendorData: Vendor = {
+            id: '',
+            fullName: '',
+        }
+        setVendor(vendorData)
+        setReleasePayload({
+            ...releasePayload,
+            vendorId: '',
+        })
+    }
+
     return (
         <>
             <div className='col' style={{ padding: '0px 12px' }}>
@@ -131,9 +159,16 @@ const ReleaseSummary = ({
                                 aria-describedby='Vendor'
                                 readOnly={true}
                                 name='defaultVendorId'
+                                onClick={handleClickSearchVendor}
                                 value={vendor.fullName ?? ''}
                             />
-                            <span >x</span>
+                            <VendorDialog
+                                show={dialogOpenVendor}
+                                setShow={setDialogOpenVendor}
+                                selectVendor={setVendorId}
+                                session={session}
+                            />
+                            <div className="form-text" onClick={handleClearVendor}> <GiCancel /></div>
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='name' className='form-label fw-bold'>

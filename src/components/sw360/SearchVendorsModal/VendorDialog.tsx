@@ -116,12 +116,12 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
                 <Button
                     type='button'
                     data-bs-dismiss='modal'
-                    className='btn btn-secondary me-2'
+                    className='fw-bold btn btn-light button-plain me-2'
                     onClick={handleCloseDialog}
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className='btn btn-secondary'>
+                <Button type='button' className='fw-bold btn btn-light button-plain me-2'>
                     {t('Add Vendor')}
                 </Button>
                 <Button
