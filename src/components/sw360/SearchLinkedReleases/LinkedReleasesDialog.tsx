@@ -30,7 +30,7 @@ interface Props {
     onReRender: () => void
 }
 
-const LinkedReleasesDiaglog = ({ show, setShow, session, selectLinkedReleases, onReRender }: Props) => {
+const LinkedReleasesDialog = ({ show, setShow, session, selectLinkedReleases, onReRender }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
     const [linkedReleases, setLinkedReleases] = useState([])
@@ -134,4 +134,4 @@ const LinkedReleasesDiaglog = ({ show, setShow, session, selectLinkedReleases, o
     )
 }
 
-export default LinkedReleasesDiaglog
+export default LinkedReleasesDialog

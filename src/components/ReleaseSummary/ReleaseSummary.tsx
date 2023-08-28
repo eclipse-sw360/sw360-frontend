@@ -18,13 +18,13 @@ import { BiInfoCircle } from 'react-icons/bi'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
-import ModeratorsDiaglog from '../sw360/SearchModerators/ModeratorsDiaglog'
 import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
 import { VendorDialog } from '../sw360'
 import { GiCancel } from 'react-icons/gi'
-import ContributorsDiaglog from '../sw360/SearchContributors/ContributorsDiaglog'
+import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
+import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
 interface Props {
     session?: Session
     releasePayload: ReleasePayload
@@ -470,7 +470,7 @@ const ReleaseSummary = ({
                                 onClick={handleClickSearchContributors}
                                 value={contributor.fullName ?? ''}
                             />
-                            <ContributorsDiaglog
+                            <ContributorsDialog
                                 show={dialogOpenContributors}
                                 setShow={setDialogOpenContributors}
                                 session={session}
@@ -494,7 +494,7 @@ const ReleaseSummary = ({
                                 onClick={handleClickSearchModerators}
                                 value={moderator.fullName ?? ''}
                             />
-                            <ModeratorsDiaglog
+                            <ModeratorsDialog
                                 show={dialogOpenModerators}
                                 setShow={setDialogOpenModerators}
                                 session={session}

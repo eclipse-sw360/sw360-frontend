@@ -17,11 +17,11 @@ import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
 import SelectCountryComponent from '@/components/SelectCountry'
-import ModeratorsDiaglog from '@/components/sw360/SearchModerators/ModeratorsDiaglog'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
+import ModeratorsDialog from '@/components/sw360/SearchModerators/ModeratorsDialog'
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload
@@ -210,7 +210,7 @@ const RolesInformation = ({
                             value={moderator.fullName ?? ''}
                             onClick={handleClickSearchModerators}
                         />
-                        <ModeratorsDiaglog
+                        <ModeratorsDialog
                             show={dialogOpenModerators}
                             setShow={setDialogOpenModerators}
                             session={session}

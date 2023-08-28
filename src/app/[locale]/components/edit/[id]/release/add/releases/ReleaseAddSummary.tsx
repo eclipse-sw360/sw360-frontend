@@ -160,7 +160,12 @@ export default function ReleaseAddSummary({
                             setMap={setDataAddtionalData}
                         />
                     </div>
-                    <ReleaseRepository />
+                    <ReleaseRepository
+                        releaseRepository={releaseRepository}
+                        setReleaseRepository={setReleaseRepository}
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                    />
                 </div>
             </form>
         </>
