@@ -111,7 +111,7 @@ function LicensesPage({ session }: Props) {
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
             <div className='row'>
                 <div className='col-2 sidebar'>
-                    <QuickFilter searchFunction={doSearch} />
+                    <QuickFilter key='licensefilter' title={t('Quick Filter')} searchFunction={doSearch} />
                 </div>
                 <div className='col col-sm-9'>
                     <div className='col'>

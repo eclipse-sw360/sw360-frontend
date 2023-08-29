@@ -8,5 +8,7 @@
 // License-Filename: LICENSE
 
 export interface QuiickFilterProps {
+    key: string
     searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+    title?: string
 }
