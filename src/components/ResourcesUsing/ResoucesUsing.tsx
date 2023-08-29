@@ -37,7 +37,10 @@ const ResoucesUsing = ({ documentId, session, documentType, documentName }: Prop
         <>
             {
                 (resourcesUsing._embedded['sw360:projects'] && resourcesUsing._embedded['sw360:projects'].length > 0) &&
-                <ProjectsUsing projectUsings={resourcesUsing._embedded['sw360:projects']} />
+                <ProjectsUsing projectUsings={resourcesUsing._embedded['sw360:projects']}
+                    documentName={documentName}
+                    restrictedResource={resourcesUsing._embedded['sw360:restrictedResources'][0]}
+                />
             }
             {
                 (resourcesUsing._embedded['sw360:components'] && resourcesUsing._embedded['sw360:components'].length > 0) &&

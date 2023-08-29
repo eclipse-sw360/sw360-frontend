@@ -13,12 +13,15 @@ import Link from 'next/link'
 import { _, Table } from '../sw360'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Alert } from 'react-bootstrap'
 
 interface Props {
     projectUsings: Array<any>
+    documentName: string
+    restrictedResource: any
 }
 
-const ProjectsUsing = ({ projectUsings }: Props) => {
+const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [tableData, setTableData] = useState([])
 
@@ -58,7 +61,12 @@ const ProjectsUsing = ({ projectUsings }: Props) => {
     }, [])
 
     return (
-        <Table data={tableData} columns={columns} />
+        <>
+            <Alert variant='primary'>
+                {`${documentName} is used by a total of ${restrictedResource.projects + projectUsings.length} (${projectUsings.length} visible / ${restrictedResource.projects} restricted) projects.`}
+            </Alert>
+            <Table data={tableData} columns={columns} />
+        </>
     )
 }
 
