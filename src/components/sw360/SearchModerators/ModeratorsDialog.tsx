@@ -30,7 +30,7 @@ interface Props {
     selectModerators: ModeratorsType
 }
 
-const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) => {
+const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
     const [moderators, setModerators] = useState([])
@@ -138,4 +138,4 @@ const ModeratorsDiaglog = ({ show, setShow, session, selectModerators }: Props) 
     )
 }
 
-export default ModeratorsDiaglog
+export default ModeratorsDialog

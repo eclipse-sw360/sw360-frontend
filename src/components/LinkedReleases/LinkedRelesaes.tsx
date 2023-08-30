@@ -18,7 +18,7 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useCallback, useState } from 'react'
 import { Session } from '@/object-types/Session'
 import LinkedRelease from '@/object-types/LinkedRelease'
-import LinkedReleasesDiaglog from '../sw360/SearchLinkedReleases/LinkedReleasesDiaglog'
+import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
 
 interface Props {
     session?: Session
@@ -42,7 +42,7 @@ const LinkedReleases = ({ session}: Props) => {
     return (
         <>
             <div className='col' style={{ fontSize: '0.875rem' }}>
-                <LinkedReleasesDiaglog
+                <LinkedReleasesDialog
                     session={session}
                     show={linkedReleasesDiaglog}
                     setShow={setLinkedReleasesDiaglog}

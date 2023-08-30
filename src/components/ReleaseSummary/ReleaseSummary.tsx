@@ -18,13 +18,13 @@ import { BiInfoCircle } from 'react-icons/bi'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
-import ModeratorsDiaglog from '../sw360/SearchModerators/ModeratorsDiaglog'
 import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
 import { VendorDialog } from '../sw360'
 import { GiCancel } from 'react-icons/gi'
-import ContributorsDiaglog from '../sw360/SearchContributors/ContributorsDiaglog'
+import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
+import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
 interface Props {
     session?: Session
     releasePayload: ReleasePayload
@@ -84,6 +84,8 @@ const ReleaseSummary = ({
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
     const [dialogOpenContributors, setDialogOpenContributors] = useState(false)
     const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
+    const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
+    const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
 
     const setMainLicenses = (licenseResponse: Licenses) => {
         const mainLicenses: Licenses = {
@@ -149,6 +151,18 @@ const ReleaseSummary = ({
         setReleasePayload({
             ...releasePayload,
             contributors: contributors.emails,
+        })
+    }
+
+    const setModerators = (moderatorsResponse: Moderators) => {
+        const moderators: Moderators = {
+            emails: moderatorsResponse.emails,
+            fullName: moderatorsResponse.fullName,
+        }
+        setModerator(moderators)
+        setReleasePayload({
+            ...releasePayload,
+            moderators: moderators.emails,
         })
     }
 
@@ -456,7 +470,7 @@ const ReleaseSummary = ({
                                 onClick={handleClickSearchContributors}
                                 value={contributor.fullName ?? ''}
                             />
-                            <ContributorsDiaglog
+                            <ContributorsDialog
                                 show={dialogOpenContributors}
                                 setShow={setDialogOpenContributors}
                                 session={session}
@@ -477,7 +491,14 @@ const ReleaseSummary = ({
                                 aria-describedby='Moderators'
                                 readOnly={true}
                                 name='moderators'
+                                onClick={handleClickSearchModerators}
                                 value={moderator.fullName ?? ''}
+                            />
+                            <ModeratorsDialog
+                                show={dialogOpenModerators}
+                                setShow={setDialogOpenModerators}
+                                session={session}
+                                selectModerators={setModerators}
                             />
                         </div>
                     </div>

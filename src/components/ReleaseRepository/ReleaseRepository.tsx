@@ -13,9 +13,43 @@ import styles from '@/css/AddKeyValue.module.css'
 import React from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import Repository from '@/object-types/Repository'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { BiInfoCircle } from 'react-icons/bi'
 
-const ReleaseRepository = () => {
+interface Props {
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    setReleaseRepository?: React.Dispatch<React.SetStateAction<Repository>>
+    releaseRepository?: Repository
+}
+
+const ShowInfoOnHover = ({ text }: { text: string }) => {
+    return (
+        <>
+            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
+                <span className='d-inline-block'>
+                    <BiInfoCircle />
+                </span>
+            </OverlayTrigger>
+        </>
+    );
+};
+
+const ReleaseRepository = ({releaseRepository, setReleaseRepository, releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+        setReleaseRepository({
+            ...releaseRepository,
+            [e.target.name]: e.target.value,
+        })
+        setReleasePayload({
+            ...releasePayload,
+            repository: releaseRepository,
+        })
+    }
 
     return (
         <>
@@ -34,6 +68,8 @@ const ReleaseRepository = () => {
                                 id='repository_type'
                                 required
                                 name='repositorytype'
+                                value={releaseRepository.repositorytype ?? ''}
+                                onChange={(e) => handleInputChange(e)}
                             >
                                 <option value='UNKNOWN'>{t('Unknown')}</option>
                                 <option value='GIT'>{t('Git')}</option>
@@ -57,8 +93,9 @@ const ReleaseRepository = () => {
                                 <option value='RATIONAL_TEAM_CONCERT'>{t('Rational Team Concert')}</option>
                                 <option value='RCS'>{t('Revision Control System (RCS)')}</option>
                             </select>
-                            <div id='learn_more_about_component_type' className='form-text'>
-                                <i className='bi bi-info-circle'></i>(i)Learn more about repository types.
+                            <div id='learn_more_about_repository_types' className='form-text'>
+                                <ShowInfoOnHover text={t('REPOSITORY_TYPE')} />
+                                {t('Learn more about repository types')}.
                             </div>
                         </div>
                         <div className='col-lg-4'>
@@ -73,6 +110,8 @@ const ReleaseRepository = () => {
                                 aria-describedby='version'
                                 required
                                 name='url'
+                                value={releaseRepository.url ?? ''}
+                                onChange={(e) => handleInputChange(e)}
                             />
                         </div>
                     </div>
