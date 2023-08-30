@@ -15,12 +15,20 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import { ToastContainer, TypeOptions, toast } from 'react-toastify'
+import { ToastContainer, Toast } from 'react-bootstrap'
 import ApiUtils from '@/utils/api/api.util'
 import ProjectPayload from "@/object-types/CreateProjectPayload"
 import { useState } from 'react'
 import { AUTH_TOKEN } from '@/utils/env'
 import Vendor from '@/object-types/Vendor'
+import ToastMessage from '@/components/sw360/ToastContainer/Toast'
+
+
+interface ToastProp {
+  show: boolean;
+  type: string;
+  message: string;
+}
 
 
 export default function AddProjects() {
@@ -61,13 +69,20 @@ export default function AddProjects() {
         moderators: null,
         contributors: null
     });
+    const [toastData, setToastData] = useState<ToastProp>({
+                            show: false,
+                            type: '',
+                            message: '',
+                        });
 
-    const alert = (text: string, type: TypeOptions) =>
-        toast(text, {
-            type,
-            position: toast.POSITION.TOP_LEFT,
-            theme: 'colored',
-        })
+    const alert = (show_data: boolean, status_type:string, message: string) =>{
+
+        setToastData({
+            show: show_data,
+            type: status_type,
+            message: message,
+          });
+    }
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
@@ -84,6 +99,7 @@ export default function AddProjects() {
             externalIds: obj,
         })
     }
+
     const setAdditionalDataObject = (additionalData: Map<string, string>) => {
         const obj = Object.fromEntries(additionalData)
         setProjectPayload({
@@ -100,10 +116,11 @@ export default function AddProjects() {
 
         if (response.status == HttpStatus.CREATED) {
             const responseData = await response.json()
-            alert(t('Your project is created'), 'success')
-            router.push('/projects')
+            alert(true, 'success', t('Your project is created'))
+            // router.push('/projects')
         } else {
-            alert(t('There are some errors while creating project'), 'error')
+            alert(true, 'error', t('There are some errors while creating project'))
+            // router.push('/projects')
         }
     }
 
@@ -114,6 +131,7 @@ export default function AddProjects() {
 
     return (
         <>
+
         <form
                 action=''
                 id='form_submit'
@@ -123,7 +141,15 @@ export default function AddProjects() {
                     createProject()
                 }}
             >
-            <ToastContainer className='foo' style={{ width: '300px', height: '100px' }} />
+            <ToastContainer position='top-start'>
+                <ToastMessage
+                    show={toastData.show}
+                    type={toastData.type}
+                    message={toastData.message}
+                    onClose={() => setToastData({ ...toastData, show: false })}
+                    setShowToast={setToastData}
+                />
+            </ToastContainer>
             <div className="ms-5 mt-2">
                 <Tab.Container defaultActiveKey="summary">
                     <Row>
