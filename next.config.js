@@ -8,9 +8,8 @@
 // License-Filename: LICENSE
 
 const nextConfig = {
-    reactStrictMode: true,
-    trailingSlash: false,
-    output: 'standalone',
+  reactStrictMode: true,
+  output: 'standalone'
 }
 
 module.exports = nextConfig

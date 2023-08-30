@@ -7,8 +7,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface QuiickFilterProps {
-    key: string
-    searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
-    title?: string
+import QuickFilter from './QuickFilter'
+import { QuiickFilterProps } from './QuickFilter.types'
+
+const quickfilter = {
+    title: 'SW360/QuickFilter',
+    component: QuickFilter,
 }
+
+const Template = (args: QuiickFilterProps) => <QuickFilter {...args} />
+
+export const Primary = Template.bind({})
+
+export default quickfilter

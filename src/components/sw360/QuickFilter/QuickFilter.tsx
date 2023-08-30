@@ -11,30 +11,21 @@
 
 import React from 'react'
 import { Form } from 'react-bootstrap'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useTranslations } from 'next-intl'
-
 import { QuiickFilterProps } from './QuickFilter.types'
-import styles from '@/components/sw360/AdvancedSearch/advancedsearch.module.css'
 
-function QuickFilter({ searchFunction }: QuiickFilterProps) {
-    const t = useTranslations(COMMON_NAMESPACE)
-
+function QuickFilter({ key, searchFunction, title = 'Quick Filter' }: QuiickFilterProps) {
     return (
         <div className='card-deck'>
-            <div id='quick-filter' className='card'>
-                <div className='card-header'>{t('Quick Filter')}</div>
-
+            <div id='component-quickfilter' className='card'>
+                <div className='card-header'>{title}</div>
                 <div className='card-body'>
                     <Form>
-                        <Form.Group key='Quick Filter' className='mb-3' controlId='Quick Filter'>
+                        <Form.Group key={key} className='mb-3' controlId={key}>
                             <Form.Control
-                                className={`form-control ${styles['form-control']}`}
+                                className='form-control'
                                 type='text'
                                 size='sm'
-                                name='Quick Filter'
-                                // value={searchParams.name}
-                                // onChange={handleSearchParam}
+                                name={title}
                                 onKeyUp={searchFunction}
                             />
                         </Form.Group>

@@ -14,7 +14,6 @@ import { Form, Button } from 'react-bootstrap'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import styles from './advancedsearch.module.css'
 import CommonUtils from '@/utils/common.utils'
 import { FaInfoCircle } from 'react-icons/fa'
 
@@ -76,9 +75,9 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                 return (
                     <>
                         <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                            <Form.Label className={styles['label']}>{t(field.fieldName)}</Form.Label>
+                            <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
                             <Form.Select
-                                className={`form-control ${styles['form-control']}`}
+                                className='form-control'
                                 size='sm'
                                 name={field.paramName}
                                 onChange={changeCreatedOnSearchOption}
@@ -105,7 +104,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                                     <Form.Control type='date' size='sm' />
                                 </Form.Group>
                                 <Form.Group className='mb-3'>
-                                    <Form.Label className={styles['label']}>{t('To')}</Form.Label>
+                                    <Form.Label className='label'>{t('To')}</Form.Label>
                                     <Form.Control type='date' size='sm' />
                                 </Form.Group>
                             </>
@@ -115,9 +114,9 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
             } else if (typeof field.value === 'string') {
                 return (
                     <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                        <Form.Label className={styles['label']}>{t(field.fieldName)}</Form.Label>
+                        <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
                         <Form.Control
-                            className={`form-control ${styles['form-control']}`}
+                            className='form-control'
                             type='text'
                             size='sm'
                             name={field.paramName}
@@ -129,9 +128,9 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
             } else if (Array.isArray(field.value)) {
                 return (
                     <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                        <Form.Label className={styles['label']}>{t(field.fieldName)}</Form.Label>
+                        <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
                         <Form.Select
-                            className={`form-control ${styles['form-control']}`}
+                            className={'form-control'}
                             size='sm'
                             name={field.paramName}
                             onChange={handleSearchParam}
@@ -168,8 +167,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                                 marginRight: '5px',
                             }}
                         />
-                        <FaInfoCircle className={styles['info-icon']} />
-                        <div className={styles['popup']}>
+                        <FaInfoCircle className='info-icon' />
+                        <div className='popup'>
                             The search result will display elements exactly matching the input. Equivalent to using
                             (&quot;) around the search keyword. Applied on Component Name.
                         </div>
