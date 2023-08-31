@@ -29,7 +29,7 @@ interface Props {
     selectLicenses?: LicensesType
 }
 
-const MainLicensesDiaglog = ({ show, setShow, session, selectLicenses }: Props) => {
+const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState([])
     const [licenses, setLicenses] = useState([])
@@ -135,4 +135,4 @@ const MainLicensesDiaglog = ({ show, setShow, session, selectLicenses }: Props) 
     )
 }
 
-export default MainLicensesDiaglog
+export default MainLicensesDialog

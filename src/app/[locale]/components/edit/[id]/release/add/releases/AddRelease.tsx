@@ -188,7 +188,11 @@ const AddRelease = ({ session, componentId }: Props) => {
                             />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases session={session} />
+                            <LinkedReleases
+                                session={session}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                            />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <AddCommercialDetails session={session} />

@@ -25,7 +25,7 @@ import { VendorDialog } from '../sw360'
 import { GiCancel } from 'react-icons/gi'
 import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
 import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
-import OtherLicensesDiaglog from '../sw360/SearchOtherLicenses/OtherLicensesDialog'
+import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialog'
 interface Props {
     session?: Session
     releasePayload: ReleasePayload
@@ -372,7 +372,7 @@ const ReleaseSummary = ({
                                 onClick={handleClickSearchOtherLicenses}
                                 value={otherLicensesId.fullName ?? ''}
                             />
-                            <OtherLicensesDiaglog
+                            <OtherLicensesDialog
                                 show={dialogOpenOtherLicenses}
                                 setShow={setDialogOpenOtherLicenses}
                                 session={session}

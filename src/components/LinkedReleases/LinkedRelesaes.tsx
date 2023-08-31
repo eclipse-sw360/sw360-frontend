@@ -19,12 +19,15 @@ import { useCallback, useState } from 'react'
 import { Session } from '@/object-types/Session'
 import LinkedRelease from '@/object-types/LinkedRelease'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
+import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
     session?: Session
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const LinkedReleases = ({ session}: Props) => {
+const LinkedReleases = ({ session, releasePayload, setReleasePayload}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
@@ -35,7 +38,20 @@ const LinkedReleases = ({ session}: Props) => {
     const handleClickSelectLinkedReleases = useCallback(() => setLinkedReleasesDiaglog(true), [])
 
     const selectLinkedReleases = (releaseLinks: LinkedRelease[]) => {
+        const mapReleaseRelationship = new Map<string, string>()
+        releaseLinks.forEach((item) => {
+            mapReleaseRelationship.set(item.id, item.releaseRelationship)
+        })
         setReleaseLinks(releaseLinks)
+        setReleaseIdToRelationshipsToReleasePayLoad(mapReleaseRelationship)
+    }
+
+    const setReleaseIdToRelationshipsToReleasePayLoad = (releaseIdToRelationships: Map<string, string>) => {
+        const obj = Object.fromEntries(releaseIdToRelationships)
+        setReleasePayload({
+            ...releasePayload,
+            releaseIdToRelationship: obj,
+        })
     }
 
 
@@ -54,6 +70,7 @@ const LinkedReleases = ({ session}: Props) => {
                     <TableLinkedReleases
                         releaseLinks={releaseLinks}
                         setReleaseLinks={setReleaseLinks}
+                        setReleaseIdToRelationshipsToReleasePayLoad={setReleaseIdToRelationshipsToReleasePayLoad}
                     />
                 </div>
                 <div>
