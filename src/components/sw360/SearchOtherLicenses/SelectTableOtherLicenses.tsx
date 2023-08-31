@@ -51,6 +51,7 @@ const SelectTableOtherLicenses = ({ licenseDatas, setLicenses, fullnames }: Prop
 
     const columns = [
         {
+            id: 'licenseId',
             name: '',
             formatter: (item: string) =>
                 _(
@@ -62,10 +63,13 @@ const SelectTableOtherLicenses = ({ licenseDatas, setLicenses, fullnames }: Prop
                         }}
                     ></Form.Check>
                 ),
+            width: '5%',
         },
         {
+            id: 'fullName',
             name: 'FullName',
             sort: true,
+            width: '95%',
         },
     ]
 

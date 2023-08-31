@@ -113,53 +113,52 @@ export default function ReleaseAddSummary({
                     e.preventDefault()
                 }}
             >
-                <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
-                    <div className='row'>
-                        <div className='col' style={{ fontSize: '0.875rem' }}>
-                            <ReleaseSummary
-                                session={session}
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                                vendor={vendor}
-                                setVendor={setVendor}
-                                mainLicensesId={mainLicensesId}
-                                setMainLicensesId={setMainLicensesId}
-                                otherLicensesId={otherLicensesId}
-                                setOtherLicensesId={setOtherLicensesId}
-                                contributor={contributor}
-                                setContributor={setContributor}
-                                moderator={moderator}
-                                setModerator={setModerator}
-                            />
-                            <div className='row mb-4'>
-                                <AddAdditionalRolesComponent
-                                    documentType={DocumentTypes.COMPONENT}
-                                    roles={roles}
-                                    setRoles={setRoles}
-                                    setDataRoles={setDataRoles}
-                                />
-                            </div>
-                            <div className='row mb-4'>
-                                <AddKeyValueComponent
-                                    header={t('External ids')}
-                                    keyName={'external id'}
-                                    setData={setExternalIds}
-                                    data={externalIds}
-                                    setMap={setDataExternalIds}
-                                />
-                            </div>
-                            <div className='row mb-4'>
-                                <AddKeyValueComponent
-                                    header={t('Additional Data')}
-                                    keyName={'additional data'}
-                                    setData={setAddtionalData}
-                                    data={addtionalData}
-                                    setMap={setDataAddtionalData}
-                                />
-                            </div>
-                            <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
-                        </div>
+                <div className='col' style={{ fontSize: '0.875rem' }}>
+                    <ReleaseSummary
+                        session={session}
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                        vendor={vendor}
+                        setVendor={setVendor}
+                        mainLicensesId={mainLicensesId}
+                        setMainLicensesId={setMainLicensesId}
+                        otherLicensesId={otherLicensesId}
+                        setOtherLicensesId={setOtherLicensesId}
+                        moderator={moderator}
+                        setModerator={setModerator}
+                        contributor={contributor}
+                        setContributor={setContributor}
+                    />
+                    <div className='row mb-4'>
+                        <AddAdditionalRolesComponent
+                            documentType={DocumentTypes.COMPONENT}
+                            roles={roles}
+                            setRoles={setRoles}
+                            setDataRoles={setDataRoles}
+                        />
                     </div>
+                    <div className='row mb-4'>
+                        <AddKeyValueComponent
+                            header={t('External ids')}
+                            keyName={'external id'}
+                            setData={setExternalIds}
+                            data={externalIds}
+                            setMap={setDataExternalIds}
+                        />
+                    </div>
+                    <div className='row mb-4'>
+                        <AddKeyValueComponent
+                            header={t('Additional Data')}
+                            keyName={'additional data'}
+                            setData={setAddtionalData}
+                            data={addtionalData}
+                            setMap={setDataAddtionalData}
+                        />
+                    </div>
+                    <ReleaseRepository
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                    />
                 </div>
             </form>
         </>
