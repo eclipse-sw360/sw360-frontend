@@ -21,7 +21,6 @@ import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
-import Repository from '@/object-types/Repository'
 import { useState } from 'react'
 
 interface Props {
@@ -38,8 +37,6 @@ interface Props {
     setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
     moderator?: Moderators
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
-    releaseRepository?: Repository
-    setReleaseRepository?: React.Dispatch<React.SetStateAction<Repository>>
 }
 
 export default function ReleaseAddSummary({
@@ -56,8 +53,6 @@ export default function ReleaseAddSummary({
     setContributor,
     moderator,
     setModerator,
-    releaseRepository,
-    setReleaseRepository,
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
@@ -118,54 +113,53 @@ export default function ReleaseAddSummary({
                     e.preventDefault()
                 }}
             >
-                <div className='col' style={{ fontSize: '0.875rem' }}>
-                    <ReleaseSummary
-                        session={session}
-                        releasePayload={releasePayload}
-                        setReleasePayload={setReleasePayload}
-                        vendor={vendor}
-                        setVendor={setVendor}
-                        mainLicensesId={mainLicensesId}
-                        setMainLicensesId={setMainLicensesId}
-                        otherLicensesId={otherLicensesId}
-                        setOtherLicensesId={setOtherLicensesId}
-                        moderator={moderator}
-                        setModerator={setModerator}
-                        contributor={contributor}
-                        setContributor={setContributor}
-                    />
-                    <div className='row mb-4'>
-                        <AddAdditionalRolesComponent
-                            documentType={DocumentTypes.COMPONENT}
-                            roles={roles}
-                            setRoles={setRoles}
-                            setDataRoles={setDataRoles}
-                        />
+                <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+                    <div className='row'>
+                        <div className='col' style={{ fontSize: '0.875rem' }}>
+                            <ReleaseSummary
+                                session={session}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                                vendor={vendor}
+                                setVendor={setVendor}
+                                mainLicensesId={mainLicensesId}
+                                setMainLicensesId={setMainLicensesId}
+                                otherLicensesId={otherLicensesId}
+                                setOtherLicensesId={setOtherLicensesId}
+                                contributor={contributor}
+                                setContributor={setContributor}
+                                moderator={moderator}
+                                setModerator={setModerator}
+                            />
+                            <div className='row mb-4'>
+                                <AddAdditionalRolesComponent
+                                    documentType={DocumentTypes.COMPONENT}
+                                    roles={roles}
+                                    setRoles={setRoles}
+                                    setDataRoles={setDataRoles}
+                                />
+                            </div>
+                            <div className='row mb-4'>
+                                <AddKeyValueComponent
+                                    header={t('External ids')}
+                                    keyName={'external id'}
+                                    setData={setExternalIds}
+                                    data={externalIds}
+                                    setMap={setDataExternalIds}
+                                />
+                            </div>
+                            <div className='row mb-4'>
+                                <AddKeyValueComponent
+                                    header={t('Additional Data')}
+                                    keyName={'additional data'}
+                                    setData={setAddtionalData}
+                                    data={addtionalData}
+                                    setMap={setDataAddtionalData}
+                                />
+                            </div>
+                            <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                        </div>
                     </div>
-                    <div className='row mb-4'>
-                        <AddKeyValueComponent
-                            header={t('External ids')}
-                            keyName={'external id'}
-                            setData={setExternalIds}
-                            data={externalIds}
-                            setMap={setDataExternalIds}
-                        />
-                    </div>
-                    <div className='row mb-4'>
-                        <AddKeyValueComponent
-                            header={t('Additional Data')}
-                            keyName={'additional data'}
-                            setData={setAddtionalData}
-                            data={addtionalData}
-                            setMap={setDataAddtionalData}
-                        />
-                    </div>
-                    <ReleaseRepository
-                        releaseRepository={releaseRepository}
-                        setReleaseRepository={setReleaseRepository}
-                        releasePayload={releasePayload}
-                        setReleasePayload={setReleasePayload}
-                    />
                 </div>
             </form>
         </>
