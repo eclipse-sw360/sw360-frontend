@@ -11,6 +11,7 @@
 
 import { Col, Row, ListGroup, Tab, Button, Dropdown } from 'react-bootstrap'
 import Summary from './Summary'
+import Administration from './Administration'
 import React, { useState, useEffect } from 'react'
 import PageSpinner from '@/components/Spinner/Spinner'
 
@@ -24,12 +25,15 @@ import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
 
 import { SummaryDataType } from '@/object-types/SummaryDataType'
+import { AdministrationDataType } from '@/object-types/AdministrationDataType'
+
 import { notFound } from 'next/navigation'
 
 export default function ViewProjects({ session, projectId }: { session: Session, projectId: string }) {
 
     const t = useTranslations(COMMON_NAMESPACE)
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
+    const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -135,6 +139,30 @@ export default function ViewProjects({ session, projectId }: { session: Session,
                         vendorUrl: CommonUtils.isNullEmptyOrUndefinedArray(data["_embedded"]["sw360:vendors"])?"":data["_embedded"]["sw360:vendors"][0]["url"]
                     }
                 )
+                setAdministrationData({
+                        // Clearing
+                        projectClearingState: data.clearingState,
+                        clearingDetails: "",
+                        clearingTeam: "",
+                        deadlineForPreEval: data.preevaluationDeadline,
+                        clearingSummary: data.clearingSummary,
+                        specialRiskOpenSourceSoftware: data.specialRisksOSS,
+                        generalRisksThirdPartySoftware: data.generalRisks3rdParty,
+                        specialRisksThirdPartySoftware: data.specialRisks3rdParty,
+                        salesAndDeliveryChannels: data.deliveryChannels,
+                        remarksAdditionalRequirements: data.remarksAdditionalRequirements,  
+            
+                        // Lifecycle
+                        projectState: data.state,
+                        systemStateBegin: data.systemTestStart,
+                        systemStateEnd: data.systemTestEnd,
+                        deliveryStart: data.deliveryStart,
+                        phaseOutSince: data.phaseOutSince,
+                        
+                        // LicenseInfoHeader
+                        licenseInfoHeader: ""
+                    }
+                )
             } catch(e) {
                 console.error(e)
             }
@@ -207,7 +235,7 @@ export default function ViewProjects({ session, projectId }: { session: Session,
                             <Row className="mt-3">
                                 <Tab.Content>
                                     <Tab.Pane eventKey="summary">{!summaryData ? <div className='col-12' style={{ textAlign: 'center' }}><PageSpinner /></div> : <Summary  summaryData={summaryData}/>}</Tab.Pane>
-                                    <Tab.Pane eventKey="administration"></Tab.Pane>
+                                    <Tab.Pane eventKey="administration">{!administrationData ? <div className='col-12' style={{ textAlign: 'center' }}><PageSpinner /></div> : <Administration data={administrationData}/>}</Tab.Pane>
                                     <Tab.Pane eventKey="licenseClearing"></Tab.Pane>
                                     <Tab.Pane eventKey="obligations"></Tab.Pane>
                                     <Tab.Pane eventKey="ecc"></Tab.Pane>
