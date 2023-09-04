@@ -465,4 +465,18 @@ th {
     font-weight: bold;
 }
 
+.nav-pills .nav-link {
+    background-color: #F2F2F2 !important;
+    color: #F2A922 !important;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #F2F2F2 !important;
+    color: #21719c !important;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #0C70F2 !important;
+    color: white !important;
+}
 
