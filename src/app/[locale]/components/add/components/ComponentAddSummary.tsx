@@ -20,8 +20,6 @@ import { SideBar } from '@/components/sw360'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import { toast, TypeOptions, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -30,6 +28,9 @@ import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
+import ToastData from '@/object-types/ToastData'
+import ToastMessage from '@/components/sw360/ToastContainer/Toast'
+import { ToastContainer } from 'react-bootstrap'
 interface Props {
     session: Session
 }
@@ -37,25 +38,25 @@ interface Props {
 export default function ComponentAddSummary({ session }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [externalIds,setExternalIds] = useState<Input[]>([])
-    const [addtionalData,setAddtionalData] = useState<Input[]>([])
-    const [roles,setRoles] = useState<Input[]>([])
-    const [vendor, setVendor] = useState<Vendor> ({
+    const [externalIds, setExternalIds] = useState<Input[]>([])
+    const [addtionalData, setAddtionalData] = useState<Input[]>([])
+    const [roles, setRoles] = useState<Input[]>([])
+    const [vendor, setVendor] = useState<Vendor>({
         id: '',
-        fullName: ''
+        fullName: '',
     })
-    const [componentOwner, setComponentOwner] = useState<ComponentOwner> ({
+    const [componentOwner, setComponentOwner] = useState<ComponentOwner>({
         email: '',
-        fullName: ''
+        fullName: '',
     })
-    const [moderator, setModerator] = useState<Moderators> ({
+    const [moderator, setModerator] = useState<Moderators>({
         emails: null,
-        fullName: ''
+        fullName: '',
     })
     const router = useRouter()
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
-        createBy:'',
+        createBy: '',
         description: '',
         componentType: '',
         moderators: null,
@@ -82,6 +83,22 @@ export default function ComponentAddSummary({ session }: Props) {
             name: 'Summary',
         },
     ]
+
+    const [toastData, setToastData] = useState<ToastData>({
+        show: false,
+        type: '',
+        message: '',
+        contextual: '',
+    })
+
+    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
+        setToastData({
+            show: show_data,
+            type: status_type,
+            message: message,
+            contextual: contextual,
+        })
+    }
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -132,22 +149,15 @@ export default function ComponentAddSummary({ session }: Props) {
         return roles
     }
 
-    const notify = (text: string, type: TypeOptions) =>
-        toast(text, {
-            type,
-            position: toast.POSITION.TOP_LEFT,
-            theme: 'colored',
-        })
-
     const submit = async () => {
         const response = await ApiUtils.POST('components', componentPayload, session.user.access_token)
 
         if (response.status == HttpStatus.CREATED) {
             const data = await response.json()
-            notify(t('Component is created'), 'success')
+            alert(true, 'Success', t('Component is created'), 'success')
             router.push('/components/detail/' + data.id)
         } else {
-            notify(t('Component is Duplicate'), 'error')
+            alert(true, 'Duplicate', t('Component is Duplicate'), 'danger')
         }
     }
 
@@ -163,12 +173,22 @@ export default function ComponentAddSummary({ session }: Props) {
                     submit()
                 }}
             >
-                <ToastContainer className='foo' style={{ width: '300px', height: '100px' }} />
+                <ToastContainer position='top-start'>
+                    <ToastMessage
+                        show={toastData.show}
+                        type={toastData.type}
+                        message={toastData.message}
+                        contextual={toastData.contextual}
+                        onClose={() => setToastData({ ...toastData, show: false })}
+                        setShowToast={setToastData}
+                    />
+                </ToastContainer>
                 <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
                     <div className='row'>
                         <div className='col-2 sidebar'>
                             <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
                         </div>
+
                         <div className='col'>
                             <div className='row' style={{ marginBottom: '20px' }}>
                                 <div className='col-auto'>
