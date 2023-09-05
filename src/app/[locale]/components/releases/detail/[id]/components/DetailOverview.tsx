@@ -126,7 +126,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     }
 
     const headerButtons = {
-        'Edit release': { link: '', type: 'primary' },
+        'Edit release': { link: `/components/editRelease/${releaseId}`, type: 'primary' },
         'Link To Project': { link: '', type: 'secondary', onClick: () => { setLinkProjectModalShow(true) } },
         Merge: { link: '', type: 'secondary' },
         Subscribe: { link: '', type: 'outline-success' },
