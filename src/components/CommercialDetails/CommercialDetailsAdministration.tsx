@@ -16,20 +16,59 @@ import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/Compo
 import { useCallback, useState } from 'react'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import { Session } from '@/object-types/Session'
+import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
     session?: Session
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    cotsResponsible?: ComponentOwner
+    setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
 }
-const CommercialDetailsAdministration = ({ session }: Props) => {
+const CommercialDetailsAdministration = ({
+    session,
+    releasePayload,
+    setReleasePayload,
+    cotsResponsible,
+    setCotsResponsible,
+}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
     const handleClickSearchComponentOwner = useCallback(() => setDialogOpenComponentOwner(true), [])
+
+    const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setReleasePayload({
+            ...releasePayload,
+            cotsDetails: {
+                ...releasePayload.cotsDetails,
+                [e.target.name]: e.target.value,
+            },
+        })
+    }
+
+    const updateFieldChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setReleasePayload({
+            ...releasePayload,
+            cotsDetails: {
+                ...releasePayload.cotsDetails,
+                [e.target.name]: e.target.checked,
+            },
+        })
+    }
 
     const setCotsResponsibleUser = (cotsResponsible: ComponentOwner) => {
         const cotsResponsibleUser: ComponentOwner = {
             email: cotsResponsible.email,
             fullName: cotsResponsible.fullName,
         }
+        setCotsResponsible(cotsResponsibleUser)
+        setReleasePayload({
+            ...releasePayload,
+            cotsDetails: {
+                ...releasePayload.cotsDetails,
+                cotsResponsible: cotsResponsibleUser.email,
+            },
+        })
     }
 
     return (
@@ -47,6 +86,7 @@ const CommercialDetailsAdministration = ({ session }: Props) => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='usageRightAvailable'
+                                    onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='usageRightAvailable'>
                                     {t('Usage Right Available')}
@@ -66,6 +106,7 @@ const CommercialDetailsAdministration = ({ session }: Props) => {
                                 onClick={handleClickSearchComponentOwner}
                                 readOnly={true}
                                 name='COTS_responsible'
+                                value={cotsResponsible.fullName}
                             />
                             <ComponentOwnerDiaglog
                                 show={dialogOpenComponentOwner}
@@ -85,6 +126,7 @@ const CommercialDetailsAdministration = ({ session }: Props) => {
                                 id='clearingDeadline'
                                 aria-describedby='clearingDeadline'
                                 name='clearingDeadline'
+                                onChange={updateField}
                             />
                         </div>
                     </div>
@@ -101,6 +143,7 @@ const CommercialDetailsAdministration = ({ session }: Props) => {
                                 id='licenseClearingReportURL'
                                 aria-describedby='licenseClearingReportURL'
                                 name='licenseClearingReportURL'
+                                onChange={updateField}
                             />
                         </div>
                     </div>

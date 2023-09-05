@@ -13,18 +13,36 @@
 import { Session } from '@/object-types/Session'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import ComponentOwner from '@/object-types/ComponentOwner'
 
 interface Props {
     session?: Session
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    cotsResponsible?: ComponentOwner
+    setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
 }
 
-const AddCommercialDetails = ({ session }: Props) => {
+const AddCommercialDetails = ({
+    session,
+    releasePayload,
+    setReleasePayload,
+    cotsResponsible,
+    setCotsResponsible,
+}: Props) => {
     return (
         <>
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
-                <CommercialDetailsAdministration session={session} />
+                <CommercialDetailsAdministration
+                    session={session}
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
+                    cotsResponsible={cotsResponsible}
+                    setCotsResponsible={setCotsResponsible}
+                />
 
-                <COTSOSSInformation />
+                <COTSOSSInformation releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
             </div>
         </>
     )
