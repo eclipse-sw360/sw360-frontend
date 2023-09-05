@@ -38,6 +38,11 @@ interface Props {
     componentId?: string
 }
 
+const releaseRepository: Repository = {
+    repositorytype: 'UNKNOWN',
+    url: '',
+}
+
 const AddRelease = ({ session, componentId }: Props) => {
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -63,7 +68,7 @@ const AddRelease = ({ session, componentId }: Props) => {
         softwarePlatforms: null,
         sourceCodeDownloadurl: '',
         binaryDownloadurl: '',
-        repository: null,
+        repository: releaseRepository,
         releaseIdToRelationship: null,
     })
 
@@ -90,11 +95,6 @@ const AddRelease = ({ session, componentId }: Props) => {
     const [moderator, setModerator] = useState<Moderators>({
         emails: null,
         fullName: '',
-    })
-
-    const [releaseRepository, setReleaseRepository] = useState<Repository>({
-        repositorytype: 'UNKNOWN',
-        url: '',
     })
 
     const [cotsResponsible, setCotsResponsible] = useState<ComponentOwner>({
@@ -185,12 +185,14 @@ const AddRelease = ({ session, componentId }: Props) => {
                                 setContributor={setContributor}
                                 moderator={moderator}
                                 setModerator={setModerator}
-                                releaseRepository={releaseRepository}
-                                setReleaseRepository={setReleaseRepository}
                             />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases session={session} />
+                            <LinkedReleases
+                                session={session}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                            />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <AddCommercialDetails session={session} />

@@ -13,7 +13,6 @@ import styles from '@/css/AddKeyValue.module.css'
 import React from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import Repository from '@/object-types/Repository'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiInfoCircle } from 'react-icons/bi'
@@ -21,8 +20,6 @@ import { BiInfoCircle } from 'react-icons/bi'
 interface Props {
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
-    setReleaseRepository?: React.Dispatch<React.SetStateAction<Repository>>
-    releaseRepository?: Repository
 }
 
 const ShowInfoOnHover = ({ text }: { text: string }) => {
@@ -37,17 +34,16 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
     );
 };
 
-const ReleaseRepository = ({releaseRepository, setReleaseRepository, releasePayload, setReleasePayload }: Props) => {
+const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-        setReleaseRepository({
-            ...releaseRepository,
-            [e.target.name]: e.target.value,
-        })
         setReleasePayload({
             ...releasePayload,
-            repository: releaseRepository,
+            repository: {
+                ...releasePayload.repository,
+                [e.target.name]: e.target.value,
+            },
         })
     }
 
@@ -68,7 +64,7 @@ const ReleaseRepository = ({releaseRepository, setReleaseRepository, releasePayl
                                 id='repository_type'
                                 required
                                 name='repositorytype'
-                                value={releaseRepository.repositorytype ?? ''}
+                                value={releasePayload.repository?.repositorytype ?? ''}
                                 onChange={(e) => handleInputChange(e)}
                             >
                                 <option value='UNKNOWN'>{t('Unknown')}</option>
@@ -110,7 +106,7 @@ const ReleaseRepository = ({releaseRepository, setReleaseRepository, releasePayl
                                 aria-describedby='version'
                                 required
                                 name='url'
-                                value={releaseRepository.url ?? ''}
+                                value={releasePayload.repository?.url ?? ''}
                                 onChange={(e) => handleInputChange(e)}
                             />
                         </div>

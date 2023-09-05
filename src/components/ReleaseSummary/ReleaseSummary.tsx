@@ -25,6 +25,7 @@ import { VendorDialog } from '../sw360'
 import { GiCancel } from 'react-icons/gi'
 import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
 import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
+import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialog'
 interface Props {
     session?: Session
     releasePayload: ReleasePayload
@@ -80,6 +81,8 @@ const ReleaseSummary = ({
     const [currentDate, setCurrentDate] = useState(getDate())
     const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
     const handleClickSearchMainLicenses = useCallback(() => setDialogOpenMainLicenses(true), [])
+    const [dialogOpenOtherLicenses, setDialogOpenOtherLicenses] = useState(false)
+    const handleClickSearchOtherLicenses = useCallback(() => setDialogOpenOtherLicenses(true), [])
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
     const [dialogOpenContributors, setDialogOpenContributors] = useState(false)
@@ -96,6 +99,18 @@ const ReleaseSummary = ({
         setReleasePayload({
             ...releasePayload,
             mainLicenseIds: mainLicenses.id,
+        })
+    }
+
+    const setOtherLicenses = (licenseResponse: Licenses) => {
+        const otherLicenses: Licenses = {
+            id: licenseResponse.id,
+            fullName: licenseResponse.fullName,
+        }
+        setOtherLicensesId(otherLicenses)
+        setReleasePayload({
+            ...releasePayload,
+            otherLicenseIds: otherLicenses.id,
         })
     }
 
@@ -354,7 +369,14 @@ const ReleaseSummary = ({
                                 aria-describedby='Vendor'
                                 readOnly={true}
                                 name='otherLicenseIds'
+                                onClick={handleClickSearchOtherLicenses}
                                 value={otherLicensesId.fullName ?? ''}
+                            />
+                            <OtherLicensesDialog
+                                show={dialogOpenOtherLicenses}
+                                setShow={setDialogOpenOtherLicenses}
+                                session={session}
+                                selectLicenses={setOtherLicenses}
                             />
                         </div>
                         <div className='col-lg-4'>

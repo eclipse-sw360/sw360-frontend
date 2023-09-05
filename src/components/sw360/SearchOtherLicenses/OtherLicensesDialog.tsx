@@ -18,9 +18,9 @@ import { useCallback, useEffect, useState } from 'react'
 import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import Licenses from '@/object-types/Licenses'
-import SelectTableMainLicenses from './SelectTableMainLicenses'
 import { LicensesType } from '@/object-types/LicensesType'
+import Licenses from '@/object-types/Licenses'
+import SelectTableOtherLicenses from './SelectTableOtherLicenses'
 
 interface Props {
     show?: boolean
@@ -29,7 +29,7 @@ interface Props {
     selectLicenses?: LicensesType
 }
 
-const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) => {
+const OtherLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState([])
     const [licenses, setLicenses] = useState([])
@@ -63,7 +63,7 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
             if (
                 !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
-            ){
+            ) {
                 const data = licenses['_embedded']['sw360:licenses'].map((item: any) => [
                     item,
                     item.fullName,
@@ -110,7 +110,7 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
                         </div>
                     </div>
                     <div className='row mt-3'>
-                        <SelectTableMainLicenses licenseDatas={licenseDatas} setLicenses={getLicenses} fullnames={licenses} />
+                        <SelectTableOtherLicenses licenseDatas={licenseDatas} setLicenses={getLicenses} fullnames={licenses} />
                     </div>
                 </div>
             </Modal.Body>
@@ -125,7 +125,7 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
                 </Button>
                 <Button
                     type='button'
-                    className={`btn btn-primary`}
+                    className={`fw-bold btn btn-light button-orange`}
                     onClick={handleClickSelectModerators}
                 >
                     {t('Select Licenses')}
@@ -135,4 +135,4 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
     )
 }
 
-export default MainLicensesDialog
+export default OtherLicensesDialog

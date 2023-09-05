@@ -21,7 +21,6 @@ import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
-import Repository from '@/object-types/Repository'
 import { useState } from 'react'
 
 interface Props {
@@ -38,8 +37,6 @@ interface Props {
     setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
     moderator?: Moderators
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
-    releaseRepository?: Repository
-    setReleaseRepository?: React.Dispatch<React.SetStateAction<Repository>>
 }
 
 export default function ReleaseAddSummary({
@@ -56,8 +53,6 @@ export default function ReleaseAddSummary({
     setContributor,
     moderator,
     setModerator,
-    releaseRepository,
-    setReleaseRepository,
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
@@ -161,8 +156,6 @@ export default function ReleaseAddSummary({
                         />
                     </div>
                     <ReleaseRepository
-                        releaseRepository={releaseRepository}
-                        setReleaseRepository={setReleaseRepository}
                         releasePayload={releasePayload}
                         setReleasePayload={setReleasePayload}
                     />
