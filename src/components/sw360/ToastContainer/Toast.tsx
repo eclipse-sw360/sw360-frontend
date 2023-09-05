@@ -7,43 +7,38 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { SetStateAction, useState } from 'react';
-import Toast from 'react-bootstrap/Toast';
-// import '@/styles/globals.css'
+import ToastData from '@/object-types/ToastData'
+import React, { SetStateAction } from 'react'
+import Toast from 'react-bootstrap/Toast'
 
-interface ToastData {
-  show: boolean;
-  type: string;
-  message: string;
+interface Props {
+    show: boolean
+    type: string
+    message: string
+    contextual: string  // Contextual variations
+    onClose: () => void
+    setShowToast: React.Dispatch<SetStateAction<ToastData>>
 }
 
-interface ToastProps {
-  show: boolean;
-  type: string;
-  message: string;
-  onClose: () => void;
-  setShowToast: React.Dispatch<SetStateAction<ToastData>>
+const ToastMessage = ({ show, type, message, contextual, onClose, setShowToast }: Props) => {
+    const handleClose = () => {
+        setShowToast({
+            show: false,
+            type: '',
+            message: '',
+            contextual: '',
+        })
+        onClose()
+    }
+
+    return (
+        <Toast show={show} onClose={handleClose} delay={4000} bg={contextual} autohide>
+            <Toast.Header>
+                <strong className='me-auto'>{type}</strong>
+            </Toast.Header>
+            <Toast.Body className='text-white'>{message}</Toast.Body>
+        </Toast>
+    )
 }
 
-const ToastMessage: React.FC<ToastProps> = ({ show, type, message , onClose, setShowToast }) => {
-
-  const handleClose = () => {
-    setShowToast({
-      show: false,
-      type: '',
-      message: '',
-    });
-    onClose();
-  };
-
-  return (
-    <Toast show={show} onClose={handleClose} delay={4000} bg='danger' autohide>
-      <Toast.Header>
-        <strong className={`text-${type}`}>{type === 'success' ? 'Success' : 'Error'}</strong>
-      </Toast.Header>
-      <Toast.Body className='text-white'>{message}</Toast.Body>
-    </Toast>
-  );
-};
-
-export default ToastMessage;
+export default ToastMessage
