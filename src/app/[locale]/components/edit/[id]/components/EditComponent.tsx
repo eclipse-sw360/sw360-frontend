@@ -20,7 +20,6 @@ import { notFound, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
-import { toast, TypeOptions, ToastContainer } from 'react-toastify'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import Releases from './Releases'
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -30,6 +29,9 @@ import CommonUtils from '@/utils/common.utils'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ActionType from '@/object-types/enums/ActionType'
 import ComponentEditSummary from './ComponentEditSummary'
+import { ToastContainer } from 'react-bootstrap'
+import ToastMessage from '@/components/sw360/ToastContainer/Toast'
+import ToastData from '@/object-types/ToastData'
 
 interface Props {
     session?: Session
@@ -82,6 +84,22 @@ const EditComponent = ({ session, componentId }: Props) => {
         attachmentDTOs: null,
     })
 
+    const [toastData, setToastData] = useState<ToastData>({
+        show: false,
+        type: '',
+        message: '',
+        contextual: '',
+    })
+
+    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
+        setToastData({
+            show: show_data,
+            type: status_type,
+            message: message,
+            contextual: contextual,
+        })
+    }
+
     const fetchData: any = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -115,20 +133,13 @@ const EditComponent = ({ session, componentId }: Props) => {
         })
     }, [componentId, fetchData])
 
-    const notify = (text: string, type: TypeOptions) =>
-        toast(text, {
-            type,
-            position: toast.POSITION.TOP_LEFT,
-            theme: 'colored',
-        })
-
     const submit = async () => {
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentData, session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            notify(`Success:Component  ${componentData.name}  updated successfully!`, 'success')
+            alert(true, 'Success',`Success:Component ${componentData.name}  updated successfully!`,'success')
             router.push('/components/detail/' + componentId)
         } else {
-            notify(t('Edit Component Fail'), 'error')
+            alert(true, 'Duplicate', t('Edit Component Fail'), 'danger')
         }
     }
 
@@ -164,7 +175,16 @@ const EditComponent = ({ session, componentId }: Props) => {
                             <PageButtonHeader title={component.name} buttons={headerButtons}></PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <ToastContainer className='foo' style={{ width: '300px', height: '100px' }} />
+                            <ToastContainer position='top-start'>
+                                <ToastMessage
+                                    show={toastData.show}
+                                    type={toastData.type}
+                                    message={toastData.message}
+                                    contextual={toastData.contextual}
+                                    onClose={() => setToastData({ ...toastData, show: false })}
+                                    setShowToast={setToastData}
+                                />
+                            </ToastContainer>
                             <ComponentEditSummary
                                 attachmentData={attachmentData}
                                 session={session}

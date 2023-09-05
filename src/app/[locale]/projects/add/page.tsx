@@ -22,13 +22,9 @@ import { useState } from 'react'
 import { AUTH_TOKEN } from '@/utils/env'
 import Vendor from '@/object-types/Vendor'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
+import ToastData from '@/object-types/ToastData'
 
 
-interface ToastProp {
-  show: boolean;
-  type: string;
-  message: string;
-}
 
 
 export default function AddProjects() {
@@ -69,18 +65,20 @@ export default function AddProjects() {
         moderators: null,
         contributors: null
     });
-    const [toastData, setToastData] = useState<ToastProp>({
+    const [toastData, setToastData] = useState<ToastData>({
                             show: false,
                             type: '',
                             message: '',
+                            contextual: ''
                         });
 
-    const alert = (show_data: boolean, status_type:string, message: string) =>{
+    const alert = (show_data: boolean, status_type:string, message: string, contextual: string) =>{
 
         setToastData({
             show: show_data,
             type: status_type,
             message: message,
+            contextual: contextual
           });
     }
 
@@ -116,10 +114,10 @@ export default function AddProjects() {
 
         if (response.status == HttpStatus.CREATED) {
             const responseData = await response.json()
-            alert(true, 'success', t('Your project is created'))
+            alert(true, 'success', t('Your project is created'),'success')
             // router.push('/projects')
         } else {
-            alert(true, 'error', t('There are some errors while creating project'))
+            alert(true, 'error', t('There are some errors while creating project'), 'danger')
             // router.push('/projects')
         }
     }
@@ -146,6 +144,7 @@ export default function AddProjects() {
                     show={toastData.show}
                     type={toastData.type}
                     message={toastData.message}
+                    contextual={toastData.contextual}
                     onClose={() => setToastData({ ...toastData, show: false })}
                     setShowToast={setToastData}
                 />
