@@ -32,6 +32,7 @@ import { TypeOptions, toast } from 'react-toastify'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleasePayload from '@/object-types/ReleasePayload'
+import COTSDetails from '@/object-types/COTSDetails'
 
 interface Props {
     session?: Session
@@ -41,6 +42,18 @@ interface Props {
 const releaseRepository: Repository = {
     repositorytype: 'UNKNOWN',
     url: '',
+}
+
+const cotsDetails: COTSDetails = {
+    usedLicense: '',
+    licenseClearingReportURL: '',
+    containsOSS: false,
+    ossContractSigned: false,
+    ossInformationURL: '',
+    usageRightAvailable: false,
+    cotsResponsible: '',
+    clearingDeadline: '',
+    sourceCodeAvailable: false,
 }
 
 const AddRelease = ({ session, componentId }: Props) => {
@@ -70,6 +83,7 @@ const AddRelease = ({ session, componentId }: Props) => {
         binaryDownloadurl: '',
         repository: releaseRepository,
         releaseIdToRelationship: null,
+        cotsDetails: cotsDetails
     })
 
     const [vendor, setVendor] = useState<Vendor>({
@@ -195,7 +209,13 @@ const AddRelease = ({ session, componentId }: Props) => {
                             />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
-                            <AddCommercialDetails session={session} />
+                            <AddCommercialDetails
+                                session={session}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                                cotsResponsible={cotsResponsible}
+                                setCotsResponsible={setCotsResponsible}
+                            />
                         </div>
                     </div>
                 </div>

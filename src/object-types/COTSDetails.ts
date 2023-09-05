@@ -19,8 +19,8 @@ export default interface COTSDetails {
     usageRightAvailable?: boolean
     cotsResponsible?: string
     clearingDeadline?: string
-    sourceCodeAvailable: boolean
-    _embedded: {
+    sourceCodeAvailable?: boolean
+    _embedded?: {
         'sw360:cotsResponsible': EmbeddedUser
     }
 }

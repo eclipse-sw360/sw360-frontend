@@ -13,9 +13,15 @@
 import { Session } from '@/object-types/Session'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import ComponentOwner from '@/object-types/ComponentOwner'
 
 interface Props {
     session?: Session
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    cotsResponsible?: ComponentOwner
+    setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
 }
 
 const AddCommercialDetails = ({ session }: Props) => {

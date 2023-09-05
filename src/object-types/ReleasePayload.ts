@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import COTSDetails from "./COTSDetails"
 import Repository from "./Repository"
 
 export default interface ReleasePayload {
@@ -32,4 +33,5 @@ export default interface ReleasePayload {
     binaryDownloadurl?: string
     repository?: Repository
     releaseIdToRelationship?: any
+    cotsDetails?: COTSDetails
 }
