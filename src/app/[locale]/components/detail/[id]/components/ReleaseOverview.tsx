@@ -142,7 +142,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                             alt='Fossology'
                             onClick={() => handleFossologyClearing(id)}
                         />
-                        <Link href={'/releases/edit/' + id}>
+                        <Link href={`/components/editRelease/${id}`}>
                             <FaPencilAlt className={styles['icon-btn']}/>
                         </Link>
                         <HiOutlineLink className={styles['icon-btn']} onClick={() => handleLinkToProject(id)} />
