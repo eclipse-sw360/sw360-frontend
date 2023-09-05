@@ -24,11 +24,23 @@ interface Props {
     setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
 }
 
-const AddCommercialDetails = ({ session }: Props) => {
+const AddCommercialDetails = ({
+    session,
+    releasePayload,
+    setReleasePayload,
+    cotsResponsible,
+    setCotsResponsible,
+}: Props) => {
     return (
         <>
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
-                <CommercialDetailsAdministration session={session} />
+                <CommercialDetailsAdministration
+                    session={session}
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
+                    cotsResponsible={cotsResponsible}
+                    setCotsResponsible={setCotsResponsible}
+                />
 
                 <COTSOSSInformation />
             </div>
