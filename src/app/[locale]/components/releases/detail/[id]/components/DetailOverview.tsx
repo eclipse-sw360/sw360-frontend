@@ -212,7 +212,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             </PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary release={release} releaseId={releaseId} />
+                            <Summary release={release} releaseId={releaseId} session={session}/>
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases release={release}/>
