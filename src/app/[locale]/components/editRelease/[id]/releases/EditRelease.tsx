@@ -15,6 +15,10 @@ import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { useState } from 'react'
 import ReleaseEditTabs from './ReleaseEditTabs'
 import ReleaseEditSummary from './ReleaseEditSummary'
+import Vendor from '@/object-types/Vendor'
+import Licenses from '@/object-types/Licenses'
+import Moderators from '@/object-types/Moderators'
+import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
     session?: Session
@@ -24,6 +28,61 @@ interface Props {
 const EditRelease = ({ session, releaseId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
+
+    const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
+        name: '',
+        cpeid: '',
+        version: '',
+        componentId: '',
+        releaseDate: '',
+        externalIds: null,
+        additionalData: null,
+        mainlineState: 'OPEN',
+        contributors: null,
+        createdOn: '',
+        createBy: '',
+        modifiedBy: '',
+        modifiedOn: '',
+        moderators: null,
+        roles: null,
+        mainLicenseIds: null,
+        otherLicenseIds: null,
+        vendorId: '',
+        languages: null,
+        operatingSystems: null,
+        softwarePlatforms: null,
+        sourceCodeDownloadurl: '',
+        binaryDownloadurl: '',
+        repository: null,
+        releaseIdToRelationship: null,
+        cotsDetails: null,
+    })
+
+    const [vendor, setVendor] = useState<Vendor>({
+        id: '',
+        fullName: '',
+    })
+
+    const [mainLicensesId, setMainLicensesId] = useState<Licenses>({
+        id: null,
+        fullName: '',
+    })
+
+    const [otherLicensesId, setOtherLicensesId] = useState<Licenses>({
+        id: null,
+        fullName: '',
+    })
+
+    const [contributor, setContributor] = useState<Moderators>({
+        emails: null,
+        fullName: '',
+    })
+
+    const [moderator, setModerator] = useState<Moderators>({
+        emails: null,
+        fullName: '',
+    })
+
     const headerButtons = {
         'Update Release': { link: '', type: 'primary' },
         'Delete Release': {
@@ -46,7 +105,22 @@ const EditRelease = ({ session, releaseId }: Props) => {
                             <PageButtonHeader buttons={headerButtons} title='releaseName'></PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <ReleaseEditSummary />
+                            <ReleaseEditSummary
+                                session={session}
+                                releaseId={releaseId}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                                vendor={vendor}
+                                setVendor={setVendor}
+                                mainLicensesId={mainLicensesId}
+                                setMainLicensesId={setMainLicensesId}
+                                otherLicensesId={otherLicensesId}
+                                setOtherLicensesId={setOtherLicensesId}
+                                contributor={contributor}
+                                setContributor={setContributor}
+                                moderator={moderator}
+                                setModerator={setModerator}
+                            />
                         </div>
                     </div>
                 </div>

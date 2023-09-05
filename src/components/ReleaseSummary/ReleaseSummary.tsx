@@ -28,8 +28,8 @@ import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
 import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialog'
 interface Props {
     session?: Session
-    releasePayload: ReleasePayload
-    setReleasePayload: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
     mainLicensesId?: Licenses
