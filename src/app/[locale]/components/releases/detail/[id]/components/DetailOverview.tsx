@@ -215,7 +215,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             <Summary release={release} releaseId={releaseId} session={session}/>
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases release={release}/>
+                            <LinkedReleases releaseId={releaseId} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
                             <ClearingDetails release={release} releaseId={releaseId} session={session} embeddedAttachments={embeddedAttachments}/>

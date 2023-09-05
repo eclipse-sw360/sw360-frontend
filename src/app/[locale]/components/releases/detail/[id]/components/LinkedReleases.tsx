@@ -10,62 +10,85 @@
 
 'use client'
 
-import { Table, _ } from '@/components/sw360'
+import { TreeTable, _ } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useState, useEffect } from 'react'
-import CommonUtils from '@/utils/common.utils'
-import Link from 'next/link'
+import { Session } from '@/object-types/Session'
+import ApiUtils from '@/utils/api/api.util'
+import NodeData from '@/object-types/NodeData'
 import ReleaseLink from '@/object-types/ReleaseLink'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
-    release: any
+    releaseId: string
+    session: Session
 }
 
-const LinkedReleases = ({ release }: Props) => {
+const LinkedReleases = ({ releaseId, session }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [data, setData] = useState([])
+    const [data, setData] = useState<Array<NodeData>>([])
+
+    const convertNodeData = (children: Array<ReleaseLink>): Array<NodeData> => {
+        const childrenNodeData: Array<NodeData> = []
+        children.forEach((child: ReleaseLink) => {
+            const convertedNode: NodeData = {
+                rowData: [
+                    <a key={child.id} href={`components/releases/details/${child.id}`}>{`${child.name} ${child.version}`}</a>,
+                    t(child.releaseRelationship),
+                    (CommonUtils.isNullEmptyOrUndefinedArray(child.licenseIds)) ? '' : child.licenseIds.join(', '),
+                    t(child.clearingState)
+                ],
+                children: child._embedded ? convertNodeData(child._embedded['sw360:releaseLinks']) : []
+            }
+            childrenNodeData.push(convertedNode)
+
+        })
+        return childrenNodeData
+    }
 
     useEffect(() => {
-      if (
-          !CommonUtils.isNullOrUndefined(release['_embedded']) &&
-          !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:releaseLinks'])
-      ) {
-          const data = release['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
-              [item.name, item.version, item.id],
-              t(item.releaseRelationship),
-              (CommonUtils.isNullEmptyOrUndefinedArray(item.licenseIds)) ? '' : item.licenseIds.join(', '),
-              t(item.clearingState)
-          ])
-          setData(data)
-      }
-    }, [])
+        ApiUtils.GET(`releases/${releaseId}/releases?transitive=true`, session.user.access_token)
+            .then((response) => response.json())
+            .then((data) => {
+                const convertedTreeData: Array<NodeData> = []
+                if (data._embedded) {
+                    data._embedded['sw360:releaseLinks'].forEach((node: ReleaseLink) => {
+                        const convertedNode: NodeData = {
+                            rowData: [
+                                <a key={node.id} href={`components/releases/details/${node.id}`}>{`${node.name} ${node.version}`}</a>,
+                                t(node.releaseRelationship),
+                                (CommonUtils.isNullEmptyOrUndefinedArray(node.licenseIds)) ? '' : node.licenseIds.join(', '),
+                                t(node.clearingState)
+                            ],
+                            children: node._embedded ? convertNodeData(node._embedded['sw360:releaseLinks']) : []
+                        }
+                        convertedTreeData.push(convertedNode)
+                    })
+                }
+                setData(convertedTreeData)
+            })
+    }, [releaseId])
 
     const columns = [
         {
-            name: t('Name'),
-            formatter: ([name, version, id]: Array<string>) =>
-                _(
-                    <Link href={`/components/releases/detail/${id}`} className='link'>
-                        {`${name} ${version}`}
-                    </Link>
-                ),
+            name: t('Name')
         },
         {
-            name: t('Release relation'),
+            name: t('Release relation')
         },
         {
-            name: t('Licence names'),
+            name: t('Licence names')
         },
         {
-            name: t('Clearing State'),
+            name: t('Clearing State')
         },
     ]
 
     return (
         <>
             <div className='row'>
-                <Table data={data} search={true} columns={columns} />
+                <TreeTable data={data} setData={setData} columns={columns} />
             </div>
         </>
     )
