@@ -521,6 +521,8 @@
         "Usage": "Usage",
         "UsageRestrictionsFound": "Usage Restrictions Found",
         "User": "User",
+        "Usage Right Available": "Usage Right Available",
+        "Used License": "Used License",
         "Vulnerability Tracking Status": "Vulnerability Tracking Status",
         "VISIBILITY_INFO": "Private: Only visible by creator (and admin which applies to all visibility levels) \n Me and Moderators: Visible by creator and moderators \n Group and Moderators: All users of the same group and the moderators \n Everyone: Every user who is logged into the system",
         "Visibility": "Visibility",

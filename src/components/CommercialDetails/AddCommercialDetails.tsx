@@ -42,7 +42,7 @@ const AddCommercialDetails = ({
                     setCotsResponsible={setCotsResponsible}
                 />
 
-                <COTSOSSInformation />
+                <COTSOSSInformation releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
             </div>
         </>
     )

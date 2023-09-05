@@ -12,9 +12,35 @@
 import { useTranslations } from 'next-intl'
 import styles from './CommercialDetails.module.css'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ReleasePayload from '@/object-types/ReleasePayload'
 
-const COTSOSSInformation = () => {
+interface Props {
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+}
+
+const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
+
+    const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setReleasePayload({
+            ...releasePayload,
+            cotsDetails: {
+                ...releasePayload.cotsDetails,
+                [e.target.name]: e.target.value,
+            },
+        })
+    }
+
+    const updateFieldChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setReleasePayload({
+            ...releasePayload,
+            cotsDetails: {
+                ...releasePayload.cotsDetails,
+                [e.target.name]: e.target.checked,
+            },
+        })
+    }
 
     return (
         <>
@@ -35,6 +61,7 @@ const COTSOSSInformation = () => {
                                 id='used_license'
                                 aria-describedby='used_license'
                                 name='usedLicense'
+                                onChange={updateField}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -44,6 +71,7 @@ const COTSOSSInformation = () => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='containsOSS'
+                                    onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='contains_OSS'>
                                     {t('Contains OSS')}
@@ -57,6 +85,7 @@ const COTSOSSInformation = () => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='ossContractSigned'
+                                    onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='OSS_contract_signed'>
                                     {t('OSS Contract Signed')}
@@ -77,6 +106,7 @@ const COTSOSSInformation = () => {
                                 id='ossInformationURL'
                                 aria-describedby='ossInformationURL'
                                 name='ossInformationURL'
+                                onChange={updateField}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -86,6 +116,7 @@ const COTSOSSInformation = () => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='sourceCodeAvailable'
+                                    onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='sourceCodeAvailable'>
                                     {t('Source Code Available')}
