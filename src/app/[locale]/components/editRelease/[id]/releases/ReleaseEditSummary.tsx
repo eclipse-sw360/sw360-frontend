@@ -10,12 +10,17 @@
 
 'use client'
 
+import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
+import AddKeyValueComponent from '@/components/AddKeyValue'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 interface Props {
     session?: Session
@@ -51,6 +56,10 @@ export default function ReleaseEditSummary({
     moderator,
     setModerator,
 }: Props) {
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [roles, setRoles] = useState<Input[]>([])
+    const [externalIds, setExternalIds] = useState<Input[]>([])
+    const [addtionalData, setAddtionalData] = useState<Input[]>([])
     return (
         <>
             <form
@@ -77,6 +86,25 @@ export default function ReleaseEditSummary({
                         moderator={moderator}
                         setModerator={setModerator}
                     />
+                    <div className='row mb-4'>
+                        <AddAdditionalRolesComponent roles={roles} setRoles={setRoles} />
+                    </div>
+                    <div className='row mb-4'>
+                        <AddKeyValueComponent
+                            header={t('External ids')}
+                            keyName={'external id'}
+                            setData={setExternalIds}
+                            data={externalIds}
+                        />
+                    </div>
+                    <div className='row mb-4'>
+                        <AddKeyValueComponent
+                            header={t('Additional Data')}
+                            keyName={'additional data'}
+                            setData={setAddtionalData}
+                            data={addtionalData}
+                        />
+                    </div>
                 </div>
             </form>
         </>
