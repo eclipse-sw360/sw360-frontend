@@ -233,7 +233,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                             />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
-                            <EditECCDetails />
+                            <EditECCDetails releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
                             <EditAttachments

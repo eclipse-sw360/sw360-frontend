@@ -9,10 +9,195 @@
 // License-Filename: LICENSE
 
 'use client'
+import { useTranslations } from 'next-intl'
+import styles from './EditECCDetails.module.css'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { BiInfoCircle } from 'react-icons/bi'
 import React from 'react'
+import ReleasePayload from '@/object-types/ReleasePayload'
 
-const EditECCDetails = () => {
-    return <></>
+interface Props {
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+}
+
+const ShowInfoOnHover = ({ text }: { text: string }) => {
+    return (
+        <>
+            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
+                <span className='d-inline-block'>
+                    <BiInfoCircle />
+                </span>
+            </OverlayTrigger>
+        </>
+    )
+}
+
+const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
+    const t = useTranslations(COMMON_NAMESPACE)
+    const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+        setReleasePayload({
+            ...releasePayload,
+            eccInformation: {
+                ...releasePayload.eccInformation,
+                [e.target.name]: e.target.value,
+            },
+        })
+    }
+
+    return (
+        <>
+            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
+                <div className='col' style={{ padding: '0px 12px', fontSize: '0.875rem' }}>
+                    <div className='row mb-4'>
+                        <div className={`${styles['header']} mb-2`}>
+                            <p className='fw-bold mt-3'>{t('ECC Information')}</p>
+                        </div>
+                        <div className='row'>
+                            <div className='col-lg-4'>
+                                <label htmlFor='ECC_Status' className='form-label fw-bold'>
+                                    {t('ECC Status')}
+                                </label>
+                                <select
+                                    className='form-select'
+                                    aria-label='component_type'
+                                    id='ECC_Status'
+                                    required
+                                    name='eccStatus'
+                                    value={releasePayload.eccInformation?.eccStatus ?? ''}
+                                    onChange={updateField}
+                                >
+                                    <option value='OPEN'>{t('OPEN')}</option>
+                                    <option value='IN_PROGRESS'> {t('IN_PROGRESS')}</option>
+                                    <option value='APPROVED'>{t('APPROVED')}</option>
+                                    <option value='REJECTED'>{t('REJECTED')}</option>
+                                </select>
+                                <div className='form-text' id='addProjects.visibility.HelpBlock'>
+                                    <ShowInfoOnHover text={t('ECC_STATUS')} />
+                                    {t('Learn more about ECC statuses')}.
+                                </div>
+                            </div>
+                            <div className='col-lg-4'>
+                                <label htmlFor='ECC_comment' className='form-label fw-bold'>
+                                    {t('ECC Comment')}
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Enter ECC comment'
+                                    id='ECC_comment'
+                                    aria-describedby='version'
+                                    required
+                                    name='eccComment'
+                                    value={releasePayload.eccInformation?.eccComment ?? ''}
+                                    onChange={updateField}
+                                />
+                            </div>
+                        </div>
+                        <hr className='my-2' />
+                        <div className='row'>
+                            <div className='col-lg-4'>
+                                <label htmlFor='ausfuhrliste' className='form-label fw-bold'>
+                                    {t('Ausfuhrliste')}
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Enter AL'
+                                    id='ausfuhrliste'
+                                    aria-describedby='ausfuhrliste'
+                                    name='al'
+                                    value={releasePayload.eccInformation?.al ?? ''}
+                                    onChange={updateField}
+                                />
+                            </div>
+                            <div className='col-lg-4'>
+                                <label htmlFor='eccn' className='form-label fw-bold'>
+                                    {t('ECCN')}
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Enter ECCN'
+                                    id='eccn'
+                                    aria-describedby='eccn'
+                                    name='eccn'
+                                    value={releasePayload.eccInformation?.eccn ?? ''}
+                                    onChange={updateField}
+                                />
+                            </div>
+                            <div className='col-lg-4'>
+                                <label htmlFor='material_index_number' className='form-label fw-bold'>
+                                    {t('Material Index Number')}
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Enter material index number'
+                                    id='material_index_number'
+                                    aria-describedby='material_index_number'
+                                    name='materialIndexNumber'
+                                    value={releasePayload.eccInformation?.materialIndexNumber ?? ''}
+                                    onChange={updateField}
+                                />
+                            </div>
+                        </div>
+                        <hr className='my-2' />
+                        <div className='row'>
+                            <div className='col-lg-4'>
+                                <label htmlFor='assessor_contact_person' className='form-label fw-bold'>
+                                    {t('Assessor Contact Person')}
+                                </label>
+                                <input
+                                    type='URL'
+                                    className='form-control'
+                                    placeholder='Will be set automatically'
+                                    id='assessor_contact_person'
+                                    aria-describedby='assessor_contact_person'
+                                    name='assessorContactPerson'
+                                    readOnly={true}
+                                    value={releasePayload.eccInformation?.assessorContactPerson ?? ''}
+                                />
+                            </div>
+                            <div className='col-lg-4'>
+                                <label htmlFor='assessor_department' className='form-label fw-bold'>
+                                    {t('Assessor Department')}
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder='Will be set automatically'
+                                    id='assessor_department'
+                                    aria-describedby='assessor_department'
+                                    name='assessorDepartment'
+                                    readOnly={true}
+                                    value={releasePayload.eccInformation?.assessorDepartment ?? ''}
+                                />
+                            </div>
+                            <div className='col-lg-4'>
+                                <label htmlFor='assessment_date' className='form-label fw-bold'>
+                                    {t('Assessment Date')}
+                                </label>
+                                <input
+                                    type='date'
+                                    className='form-control'
+                                    data-bs-toggle='modal'
+                                    data-bs-target='#search_vendors_modal'
+                                    placeholder={t('Will be set automatically')}
+                                    id='assessment_date'
+                                    aria-describedby='assessment_date'
+                                    readOnly={true}
+                                    name='assessmentDate'
+                                    value={releasePayload.eccInformation?.assessmentDate ?? ''}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
 }
 
 export default React.memo(EditECCDetails)
