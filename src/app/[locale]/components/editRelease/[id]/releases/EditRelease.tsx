@@ -12,13 +12,17 @@
 import { PageButtonHeader, SideBar } from '@/components/sw360'
 import { Session } from '@/object-types/Session'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import ReleaseEditTabs from './ReleaseEditTabs'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
+import ApiUtils from '@/utils/api/api.util'
+import HttpStatus from '@/object-types/enums/HttpStatus'
+import { signOut } from 'next-auth/react'
+import ActionType from '@/object-types/enums/ActionType'
 
 interface Props {
     session?: Session
@@ -28,6 +32,28 @@ interface Props {
 const EditRelease = ({ session, releaseId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
+    const [release, setRelease] = useState<any>(undefined)
+
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                signOut()
+            } else {
+                return null
+            }
+        },
+        [session.user.access_token]
+    )
+
+    useEffect(() => {
+        fetchData(`releases/${releaseId}`).then((release: any) => {
+            setRelease(release)
+        })
+    }, [releaseId])
 
     const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
         name: '',
@@ -93,8 +119,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
     }
 
     return (
-        <>
-            {' '}
+        release && (
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
                 <div className='row'>
                     <div className='col-2 sidebar'>
@@ -107,7 +132,9 @@ const EditRelease = ({ session, releaseId }: Props) => {
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ReleaseEditSummary
                                 session={session}
+                                release={release}
                                 releaseId={releaseId}
+                                actionType={ActionType.EDIT}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                                 vendor={vendor}
@@ -125,7 +152,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                     </div>
                 </div>
             </div>
-        </>
+        )
     )
 }
 

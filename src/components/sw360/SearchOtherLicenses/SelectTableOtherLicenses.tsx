@@ -16,6 +16,7 @@ import { _ } from '@/components/sw360'
 import LicensesTable from './OtherLicensesTable'
 import { LicensesType } from '@/object-types/LicensesType'
 import Licenses from '@/object-types/Licenses'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     licenseDatas?: any[]
@@ -35,7 +36,7 @@ const SelectTableOtherLicenses = ({ licenseDatas, setLicenses, fullnames }: Prop
         const licensesId: string[] = []
         fullnames.forEach((item) => {
             fullNameLicenses.push(item.fullName)
-            licensesId.push(handleId(item._links.self.href))
+            licensesId.push(CommonUtils.getIdFromUrl(item._links.self.href))
         })
         const licensesName: string = fullNameLicenses.join(' , ')
         const licensesResponse: Licenses = {
@@ -43,10 +44,6 @@ const SelectTableOtherLicenses = ({ licenseDatas, setLicenses, fullnames }: Prop
             id: licensesId,
         }
         setLicenses(licensesResponse)
-    }
-
-    const handleId = (id: string): string => {
-        return id.split('/').at(-1)
     }
 
     const columns = [

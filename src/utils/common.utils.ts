@@ -36,11 +36,16 @@ const isNullEmptyOrUndefinedArray = (arr: Array<any>) => {
   return false;
 }
 
+const getIdFromUrl = (url: string): string => {
+  return url.split('/').at(-1)
+}
+
 const CommonUtils = {
   isNullOrUndefined,
   isNullEmptyOrUndefinedString,
   createUrlWithParams,
   isNullEmptyOrUndefinedArray,
+  getIdFromUrl
 }
 
 export default CommonUtils;

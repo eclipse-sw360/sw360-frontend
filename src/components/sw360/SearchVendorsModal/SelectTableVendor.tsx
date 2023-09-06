@@ -15,6 +15,7 @@ import React from 'react'
 import { Table, _ } from '@/components/sw360'
 import Vendor from '@/object-types/Vendor'
 import { VendorType } from '@/object-types/VendorType'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     vendors: any[]
@@ -24,16 +25,12 @@ interface Props {
 const SelectTableVendor = ({ vendors, setVendor }: Props) => {
     // item._links.self.href
     const handlerRadioButton = (item: any) => {
-        const vendorId: string = handleId(item._links.self.href)
+        const vendorId: string = CommonUtils.getIdFromUrl(item._links.self.href)
         const vendorResponse: Vendor = {
             id: vendorId,
             fullName: item.fullName,
         }
         setVendor(vendorResponse)
-    }
-
-    const handleId = (id: string): string => {
-        return id.split('/').at(-1)
     }
 
     const columns = [
