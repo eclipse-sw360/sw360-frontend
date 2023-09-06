@@ -23,6 +23,8 @@ import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
 import ActionType from '@/object-types/enums/ActionType'
+import LinkedReleases from '@/components/LinkedReleases/LinkedRelesaes'
+import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
 
 interface Props {
     session?: Session
@@ -147,6 +149,15 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 setContributor={setContributor}
                                 moderator={moderator}
                                 setModerator={setModerator}
+                            />
+                        </div>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
+                            <LinkedReleases
+                                actionType={ActionType.EDIT}
+                                session={session}
+                                release={release}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
                             />
                         </div>
                     </div>

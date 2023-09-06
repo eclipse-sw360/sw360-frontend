@@ -21,20 +21,33 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import SelectTableLinkedReleases from './SelectTableLinkedReleases'
 import LinkedRelease from '@/object-types/LinkedRelease'
+import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
     session: Session
-    selectLinkedReleases: any
     onReRender: () => void
+    releaseLinks: LinkedRelease[]
+    setReleaseLinks: React.Dispatch<React.SetStateAction<LinkedRelease[]>>
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const LinkedReleasesDialog = ({ show, setShow, session, selectLinkedReleases, onReRender }: Props) => {
+const LinkedReleasesDialog = ({
+    show,
+    setShow,
+    session,
+    onReRender,
+    releaseLinks,
+    setReleaseLinks,
+    releasePayload,
+    setReleasePayload,
+}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
     const [linkedReleases, setLinkedReleases] = useState([])
-    const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<LinkedRelease>()
+    const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<LinkedRelease[]>()
     const [releases, setReleases] = useState([])
 
     const handleCloseDialog = () => {
@@ -63,7 +76,7 @@ const LinkedReleasesDialog = ({ show, setShow, session, selectLinkedReleases, on
             ) {
                 const data = users['_embedded']['sw360:releases'].map((item: any) => [
                     item,
-                    item.vendor ? item.vendor.fullName : " ",
+                    item.vendor ? item.vendor.fullName : ' ',
                     item.name,
                     item.version,
                     item.clearingState,
@@ -75,12 +88,28 @@ const LinkedReleasesDialog = ({ show, setShow, session, selectLinkedReleases, on
     }, [])
 
     const handleClickSelectLinkedReleases = () => {
-        selectLinkedReleases(linkedReleasesResponse)
+        linkedReleasesResponse.forEach((linkedRelease: LinkedRelease) => {
+            releaseLinks.push(linkedRelease)
+        })
+        const mapReleaseRelationship = new Map<string, string>()
+        releaseLinks.forEach((item) => {
+            mapReleaseRelationship.set(item.id, item.releaseRelationship)
+        })
+        const obj = Object.fromEntries(mapReleaseRelationship)
+        setReleasePayload({
+            ...releasePayload,
+            releaseIdToRelationship: obj,
+        })
+        releaseLinks = releaseLinks.filter((v,index,a)=>a.findIndex(v2=>(v2.id===v.id))===index)
+        setReleaseLinks(releaseLinks)
         setShow(!show)
         onReRender()
     }
 
-    const getLinkedReleases: (releaseLink: LinkedRelease) => void = useCallback((releaseLink: LinkedRelease) => setLinkedReleasesResponse(releaseLink), [])
+    const getLinkedReleases: (releaseLink: LinkedRelease[]) => void = useCallback(
+        (releaseLink: LinkedRelease[]) => setLinkedReleasesResponse(releaseLink),
+        []
+    )
 
     return (
         <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
@@ -109,7 +138,11 @@ const LinkedReleasesDialog = ({ show, setShow, session, selectLinkedReleases, on
                         </div>
                     </div>
                     <div className='row mt-3'>
-                        <SelectTableLinkedReleases releases={releases} setLinkedReleases={getLinkedReleases} linkedReleases={linkedReleases} />
+                        <SelectTableLinkedReleases
+                            releases={releases}
+                            setLinkedReleases={getLinkedReleases}
+                            linkedReleases={linkedReleases}
+                        />
                     </div>
                 </div>
             </Modal.Body>
@@ -122,11 +155,7 @@ const LinkedReleasesDialog = ({ show, setShow, session, selectLinkedReleases, on
                 >
                     {t('Close')}
                 </Button>
-                <Button
-                    type='button'
-                    className={`fw-bold btn btn-secondary`}
-                    onClick={handleClickSelectLinkedReleases}
-                >
+                <Button type='button' className={`fw-bold btn btn-secondary`} onClick={handleClickSelectLinkedReleases}>
                     {t('Link Releases')}
                 </Button>
             </Modal.Footer>

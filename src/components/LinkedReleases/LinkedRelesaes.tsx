@@ -15,19 +15,23 @@ import styles from './LinkedReases.module.css'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Session } from '@/object-types/Session'
 import LinkedRelease from '@/object-types/LinkedRelease'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
 import ReleasePayload from '@/object-types/ReleasePayload'
+import ActionType from '@/object-types/enums/ActionType'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     session?: Session
+    release?: any
+    actionType?: string
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const LinkedReleases = ({ session, releasePayload, setReleasePayload}: Props) => {
+const LinkedReleases = ({ session, release, actionType, releasePayload, setReleasePayload}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
@@ -37,15 +41,6 @@ const LinkedReleases = ({ session, releasePayload, setReleasePayload}: Props) =>
     const [linkedReleasesDiaglog, setLinkedReleasesDiaglog] = useState(false)
     const handleClickSelectLinkedReleases = useCallback(() => setLinkedReleasesDiaglog(true), [])
 
-    const selectLinkedReleases = (releaseLinks: LinkedRelease[]) => {
-        const mapReleaseRelationship = new Map<string, string>()
-        releaseLinks.forEach((item) => {
-            mapReleaseRelationship.set(item.id, item.releaseRelationship)
-        })
-        setReleaseLinks(releaseLinks)
-        setReleaseIdToRelationshipsToReleasePayLoad(mapReleaseRelationship)
-    }
-
     const setReleaseIdToRelationshipsToReleasePayLoad = (releaseIdToRelationships: Map<string, string>) => {
         const obj = Object.fromEntries(releaseIdToRelationships)
         setReleasePayload({
@@ -54,6 +49,19 @@ const LinkedReleases = ({ session, releasePayload, setReleasePayload}: Props) =>
         })
     }
 
+    useEffect(() => {
+        if (actionType === ActionType.EDIT) {
+            if (
+                !CommonUtils.isNullOrUndefined(release['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:releaseLinks'])
+            ) {
+                const linkedReleases: LinkedRelease[] = []
+                release['_embedded']['sw360:releaseLinks'].map((item: any) => [linkedReleases.push(item)])
+                setReleaseLinks(linkedReleases)
+            }
+        }
+    }, [])
+
 
     return (
         <>
@@ -61,9 +69,12 @@ const LinkedReleases = ({ session, releasePayload, setReleasePayload}: Props) =>
                 <LinkedReleasesDialog
                     session={session}
                     show={linkedReleasesDiaglog}
+                    releaseLinks={releaseLinks}
+                    setReleaseLinks={setReleaseLinks}
                     setShow={setLinkedReleasesDiaglog}
-                    selectLinkedReleases={selectLinkedReleases}
                     onReRender={handleReRender}
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
                 />
                 <div className={`row ${styles['attachment-table']}`} style={{ padding: '25px',fontSize: '0.875rem', paddingTop: '1px' }}>
                     <TitleLinkedReleases />
