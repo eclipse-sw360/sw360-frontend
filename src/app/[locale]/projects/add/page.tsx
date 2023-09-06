@@ -12,6 +12,7 @@
 import { Col, Row, ListGroup, Tab, Button } from 'react-bootstrap'
 import Summary from '@/components/ProjectAddSummary/Summary'
 import Administration from '@/components/ProjectAddSummary/Administration'
+import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
@@ -191,47 +192,48 @@ export default function AddProjects() {
                                                 variant='secondary'
                                                 className='col-auto'
                                                 onClick={handleCancelClick}
-                                            >
-                                                {t('Cancel')}
-                                            </Button>
-                                        </Row>
-                                    </Col>
-                                    <Col lg={4} className='text-truncate buttonheader-title'>
-                                        {t('New Project')}
-                                    </Col>
-                                </Row>
-                                <Row className='mt-5'>
-                                    <Tab.Content>
-                                        <Tab.Pane eventKey='summary'>
-                                            <Summary
-                                                vendor={vendor}
-                                                setVendor={setVendor}
-                                                externalUrls={externalUrls}
-                                                setExternalUrls={setExternalUrls}
-                                                setExternalUrlsData={setExternalUrlsData}
-                                                externalIds={externalIds}
-                                                setExternalIds={setExternalIds}
-                                                setExternalIdsData={setExternalIdsData}
-                                                additionalData={additionalData}
-                                                setAdditionalData={setAdditionalData}
-                                                setAdditionalDataObject={setAdditionalDataObject}
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='administration'>
-                                            <Administration
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='linkedProjects'></Tab.Pane>
-                                    </Tab.Content>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Tab.Container>
-                </div>
+                                                >
+                                                    {t('Cancel')}
+                                        </Button>
+                                    </Row>
+                                </Col>
+                                <Col lg={4} className="text-truncate buttonheader-title">
+                                    {t("New Project")}
+                                </Col>
+                            </Row>
+                            <Row className="mt-5">
+                                <Tab.Content>
+                                    <Tab.Pane eventKey="summary">
+                                        <Summary token={AUTH_TOKEN}
+                                                 vendor={vendor}
+                                                 setVendor={setVendor}
+                                                 externalUrls={externalUrls}
+                                                 setExternalUrls={setExternalUrls}
+                                                 setExternalUrlsData={setExternalUrlsData}
+                                                 externalIds={externalIds}
+                                                 setExternalIds={setExternalIds}
+                                                 setExternalIdsData={setExternalIdsData}
+                                                 additionalData={additionalData}
+                                                 setAdditionalData={setAdditionalData}
+                                                 setAdditionalDataObject={setAdditionalDataObject}
+                                                 projectPayload={projectPayload}
+                                                 setProjectPayload={setProjectPayload}
+                                        />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey="administration">
+                                        <Administration token={AUTH_TOKEN}
+                                                        projectPayload={projectPayload}
+                                                        setProjectPayload={setProjectPayload}/>
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey="linkedProjects">
+                                        <LinkedReleasesAndProjects/>
+                                    </Tab.Pane>
+                                </Tab.Content>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Tab.Container>
+            </div>
             </form>
         </>
     )
