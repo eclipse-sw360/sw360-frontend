@@ -16,6 +16,7 @@ import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import COTSDetails from '@/object-types/COTSDetails'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ECCInformation from '@/object-types/ECCInformation'
 import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
@@ -48,6 +49,7 @@ interface Props {
     moderator?: Moderators
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
     cotsDetails: COTSDetails
+    eccInformation: ECCInformation
 }
 
 export default function ReleaseEditSummary({
@@ -67,7 +69,8 @@ export default function ReleaseEditSummary({
     setContributor,
     moderator,
     setModerator,
-    cotsDetails
+    cotsDetails,
+    eccInformation
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
@@ -288,7 +291,8 @@ export default function ReleaseEditSummary({
                 binaryDownloadurl: release.binaryDownloadurl,
                 repository: release.repository,
                 releaseIdToRelationship: release.releaseIdToRelationship,
-                cotsDetails: cotsDetails
+                cotsDetails: cotsDetails,
+                eccInformation: eccInformation
             }
             setReleasePayload(releasePayload)
     }, [releaseId, fetchData])

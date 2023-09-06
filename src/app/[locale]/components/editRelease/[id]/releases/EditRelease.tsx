@@ -30,6 +30,8 @@ import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import COTSDetails from '@/object-types/COTSDetails'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
+import EditECCDetails from './ECCDetails/EditECCDetails'
+import ECCInformation from '@/object-types/ECCInformation'
 
 interface Props {
     session?: Session
@@ -59,6 +61,21 @@ const EditRelease = ({ session, releaseId }: Props) => {
     useEffect(() => {
         fetchData(`releases/${releaseId}`).then((release: any) => {
             setRelease(release)
+
+            if (typeof release.eccInformation !== 'undefined') {
+                const eccInformation: ECCInformation = {
+                    eccStatus: release.eccInformation.eccStatus,
+                    al: release.eccInformation.al,
+                    eccn: release.eccInformation.eccn,
+                    assessorContactPerson: release.eccInformation.assessorContactPerson,
+                    assessorDepartment: release.eccInformation.assessorDepartment,
+                    eccComment: release.eccInformation.eccComment,
+                    materialIndexNumber: release.eccInformation.materialIndexNumber,
+                    assessmentDate: release.eccInformation.assessmentDate,
+                }
+                setEccInformation(eccInformation)
+            }
+
             if (typeof release['_embedded']['sw360:cotsDetails'] !== 'undefined') {
                 const cotsDetails: COTSDetails = {
                     usedLicense: release['_embedded']['sw360:cotsDetails'][0].usedLicense,
@@ -109,6 +126,17 @@ const EditRelease = ({ session, releaseId }: Props) => {
         releaseIdToRelationship: null,
         cotsDetails: null,
         attachmentDTOs: null,
+    })
+
+    const [eccInformation, setEccInformation] = useState<ECCInformation>({
+        eccStatus: '',
+        al: '',
+        eccn: '',
+        assessorContactPerson: '',
+        assessorDepartment: '',
+        eccComment: '',
+        materialIndexNumber: '',
+        assessmentDate: '',
     })
 
     const [cotsDetails, setCotsDetails] = useState<COTSDetails>({
@@ -192,6 +220,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 moderator={moderator}
                                 setModerator={setModerator}
                                 cotsDetails={cotsDetails}
+                                eccInformation={eccInformation}
                             />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
@@ -202,6 +231,9 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                             />
+                        </div>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
+                            <EditECCDetails />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
                             <EditAttachments
