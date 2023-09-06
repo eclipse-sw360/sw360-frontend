@@ -24,16 +24,28 @@ import TableAttachment from './TableAttachment/TableAttachment'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import TitleAttachment from './TiltleAttachment/TitleAttachment'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
 interface Props {
-    documentId: string
-    session: Session
-    documentType: string
-    componentData: ComponentPayload
-    setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    documentId?: string
+    session?: Session
+    documentType?: string
+    componentData?: ComponentPayload
+    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const EditAttachments = ({ documentId, session, documentType, componentData, setComponentData }: Props) => {
+const EditAttachments = ({
+    documentId,
+    session,
+    documentType,
+    componentData,
+    setComponentData,
+    releasePayload,
+    setReleasePayload,
+}: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
     const [reRender, setReRender] = useState(false)
@@ -46,6 +58,13 @@ const EditAttachments = ({ documentId, session, documentType, componentData, set
     const setAttachmentToComponentData = (attachmentDatas: AttachmentDetail[]) => {
         setComponentData({
             ...componentData,
+            attachmentDTOs: attachmentDatas,
+        })
+    }
+
+    const setAttachmentToReleasePayload = (attachmentDatas: AttachmentDetail[]) => {
+        setReleasePayload({
+            ...releasePayload,
             attachmentDTOs: attachmentDatas,
         })
     }
@@ -76,10 +95,12 @@ const EditAttachments = ({ documentId, session, documentType, componentData, set
                     attachmentDetails.push(item)
                 })
                 setAttachmentData(attachmentDetails)
-                setComponentData({
-                    ...componentData,
-                    attachmentDTOs: attachmentDetails,
-                })
+                if (documentType === DocumentTypes.COMPONENT) {
+                    setComponentData({
+                        ...componentData,
+                        attachmentDTOs: attachmentDetails,
+                    })
+                }
             }
         })
     }, [documentId, documentType, fetchData])
@@ -95,22 +116,23 @@ const EditAttachments = ({ documentId, session, documentType, componentData, set
                 setShow={setDialogOpenSelectAttachment}
                 session={session}
                 onReRender={handleReRender}
+                documentType={documentType}
+                releasePayload={releasePayload}
+                setReleasePayload={setReleasePayload}
             />
-            <div className={`row ${styles['attachment-table']}`} style={{padding:'25px'}}>
+            <div className={`row ${styles['attachment-table']}`} style={{ padding: '25px' }}>
                 <TitleAttachment />
                 <TableAttachment
                     data={attachmentData}
                     setAttachmentData={setAttachmentData}
                     setAttachmentToComponentData={setAttachmentToComponentData}
+                    documentType={documentType}
+                    setAttachmentToReleasePayload={setAttachmentToReleasePayload}
                 />
             </div>
 
             <div>
-                <button
-                    type='button'
-                    onClick={handleClickSelectAttachment}
-                    className={`fw-bold btn btn-secondary`}
-                >
+                <button type='button' onClick={handleClickSelectAttachment} className={`fw-bold btn btn-secondary`}>
                     {t('Add Attachment')}
                 </button>
             </div>

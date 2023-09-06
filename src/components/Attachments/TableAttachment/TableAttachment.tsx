@@ -17,28 +17,45 @@ import AttachmentDetail from '@/object-types/AttachmentDetail'
 
 import styles from './TableAttachment.module.css'
 import { AttachmentType } from '@/object-types/AttachmentType'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
 interface Props {
-    setAttachmentData: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
-    data: AttachmentDetail[]
-    setAttachmentToComponentData: AttachmentType
+    setAttachmentData?: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
+    data?: AttachmentDetail[]
+    setAttachmentToComponentData?: AttachmentType
+    setAttachmentToReleasePayload?: AttachmentType
+    documentType?: string
 }
 
-export default function TableAttachment({ data, setAttachmentData, setAttachmentToComponentData }: Props) {
+export default function TableAttachment({
+    data,
+    setAttachmentData,
+    setAttachmentToComponentData,
+    setAttachmentToReleasePayload,
+    documentType,
+}: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
         const list: AttachmentDetail[] = [...data]
         list[index][name as keyof AttachmentDetail] = value
         setAttachmentData(list)
-        setAttachmentToComponentData(list)
+        if (documentType === DocumentTypes.COMPONENT) {
+            setAttachmentToComponentData(list)
+        } else if (documentType === DocumentTypes.RELEASE) {
+            setAttachmentToReleasePayload(list)
+        }
     }
 
     const handleClickDelete = (index: number) => {
         const list: AttachmentDetail[] = [...data]
         list.splice(index, 1)
         setAttachmentData(list)
-        setAttachmentToComponentData(list)
+        if (documentType === DocumentTypes.COMPONENT) {
+            setAttachmentToComponentData(list)
+        } else if (documentType === DocumentTypes.RELEASE) {
+            setAttachmentToReleasePayload(list)
+        }
     }
 
     return (

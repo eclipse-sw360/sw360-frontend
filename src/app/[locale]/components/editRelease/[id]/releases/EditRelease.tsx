@@ -25,6 +25,8 @@ import { signOut } from 'next-auth/react'
 import ActionType from '@/object-types/enums/ActionType'
 import LinkedReleases from '@/components/LinkedReleases/LinkedRelesaes'
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
+import EditAttachments from '@/components/Attachments/EditAttachments'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
 interface Props {
     session?: Session
@@ -84,6 +86,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
         repository: null,
         releaseIdToRelationship: null,
         cotsDetails: null,
+        attachmentDTOs: null,
     })
 
     const [vendor, setVendor] = useState<Vendor>({
@@ -156,6 +159,15 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 actionType={ActionType.EDIT}
                                 session={session}
                                 release={release}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                            />
+                        </div>
+                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
+                            <EditAttachments
+                                session={session}
+                                documentId={releaseId}
+                                documentType={DocumentTypes.RELEASE}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                             />
