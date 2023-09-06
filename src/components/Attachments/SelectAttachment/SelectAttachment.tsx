@@ -19,6 +19,8 @@ import AttachmentDetail from '@/object-types/AttachmentDetail'
 import { SW360_API_URL } from '@/utils/env'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import styles from './SelectAttachment.module.css'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
 interface Props {
     show: boolean
@@ -29,6 +31,9 @@ interface Props {
     onReRender: () => void
     componentData: ComponentPayload
     setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    documentType?: string
+    releasePayload?: ReleasePayload
+    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
 const SelectAttachment = ({
@@ -40,6 +45,9 @@ const SelectAttachment = ({
     onReRender,
     componentData,
     setComponentData,
+    releasePayload,
+    setReleasePayload,
+    documentType,
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [files, setFiles] = useState([])
@@ -79,10 +87,17 @@ const SelectAttachment = ({
             .then((json) => {
                 json.map((item: AttachmentDetail) => attachmentUpload.push(item))
                 setAttachmentFromUpload(attachmentUpload)
-                setComponentData({
-                    ...componentData,
-                    attachmentDTOs: attachmentUpload,
-                })
+                if (documentType === DocumentTypes.COMPONENT) {
+                    setComponentData({
+                        ...componentData,
+                        attachmentDTOs: attachmentUpload,
+                    })
+                } else {
+                    setReleasePayload({
+                        ...releasePayload,
+                        attachmentDTOs: attachmentUpload,
+                    })
+                }
                 onReRender()
             })
         setShow(!show)

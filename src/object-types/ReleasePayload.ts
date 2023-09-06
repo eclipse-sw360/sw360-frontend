@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import AttachmentDetail from "./AttachmentDetail"
 import COTSDetails from "./COTSDetails"
 import Repository from "./Repository"
 
@@ -39,4 +40,5 @@ export default interface ReleasePayload {
     repository?: Repository
     releaseIdToRelationship?: any
     cotsDetails?: COTSDetails
+    attachmentDTOs?: AttachmentDetail[]
 }
