@@ -29,6 +29,7 @@ import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialo
 import ActionType from '@/object-types/enums/ActionType'
 interface Props {
     session?: Session
+    actionType?: string
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
     vendor?: Vendor
@@ -65,6 +66,7 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
 
 const ReleaseSummary = ({
     session,
+    actionType,
     releasePayload,
     setReleasePayload,
     vendor,
@@ -180,6 +182,14 @@ const ReleaseSummary = ({
             ...releasePayload,
             moderators: moderators.emails,
         })
+    }
+
+    const defaultValueCreatedOn = () => {
+        return actionType === ActionType.EDIT ? releasePayload.createdOn : currentDate
+    }
+
+    const defaultValueClearingState = () => {
+        return actionType === ActionType.EDIT ? releasePayload.clearingState : 'NEW'
     }
 
     return (
@@ -429,7 +439,8 @@ const ReleaseSummary = ({
                                 id='modified_on'
                                 aria-describedby='Modified on'
                                 readOnly={true}
-                                value='NEW'
+                                name='clearingState'
+                                defaultValue={defaultValueClearingState()}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -466,7 +477,7 @@ const ReleaseSummary = ({
                                 id='createdOn'
                                 aria-describedby='Modified on'
                                 readOnly={true}
-                                value={currentDate}
+                                defaultValue={defaultValueCreatedOn()}
                             />
                         </div>
                     </div>

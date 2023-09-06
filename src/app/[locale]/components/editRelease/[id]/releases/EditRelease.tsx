@@ -22,6 +22,7 @@ import ReleasePayload from '@/object-types/ReleasePayload'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
+import ActionType from '@/object-types/enums/ActionType'
 
 interface Props {
     session?: Session
@@ -133,6 +134,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 session={session}
                                 release={release}
                                 releaseId={releaseId}
+                                actionType={ActionType.EDIT}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                                 vendor={vendor}
