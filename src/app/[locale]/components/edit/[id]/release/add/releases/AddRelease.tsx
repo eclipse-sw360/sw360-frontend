@@ -35,6 +35,7 @@ import COTSDetails from '@/object-types/COTSDetails'
 import ToastData from '@/object-types/ToastData'
 import { ToastContainer } from 'react-bootstrap'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     session?: Session
@@ -161,16 +162,12 @@ const AddRelease = ({ session, componentId }: Props) => {
         })
     }, [componentId, fetchData])
 
-    const handleId = (id: string): string => {
-        return id.split('/').at(-1)
-    }
-
     const submit = async () => {
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)
         if (response.status == HttpStatus.CREATED) {
             const data = await response.json()
             alert(true, 'Success', t('Release is created'), 'success')
-            const releaseId: string = handleId(data._links.self.href)
+            const releaseId: string = CommonUtils.getIdFromUrl(data._links.self.href)
             router.push('/components/releases/detail/' + releaseId)
         } else if (response.status == HttpStatus.CONFLICT) {
             alert(true, 'Duplicate', t('Release is Duplicate'), 'warning')

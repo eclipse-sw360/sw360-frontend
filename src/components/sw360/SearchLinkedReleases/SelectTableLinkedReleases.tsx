@@ -15,6 +15,7 @@ import React from 'react'
 import { _ } from '@/components/sw360'
 import LinkedRelease from '@/object-types/LinkedRelease'
 import LinkedReleasesTable from './LinkedReleasesTable'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     releases?: any[]
@@ -33,7 +34,7 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
         const releaseLinks: LinkedRelease[] = []
         linkedReleases.forEach((item: any) => {
             const releaseLink: LinkedRelease = {
-                id: handleId(item._links.self.href),
+                id: CommonUtils.getIdFromUrl(item._links.self.href),
                 name: item.name,
                 version: item.version,
                 mainlineState: item.mainlineState,
@@ -44,10 +45,6 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
             releaseLinks.push(releaseLink)
         })
         setLinkedReleases(releaseLinks)
-    }
-
-    const handleId = (id: string): string => {
-        return id.split('/').at(-1)
     }
 
     const columns = [

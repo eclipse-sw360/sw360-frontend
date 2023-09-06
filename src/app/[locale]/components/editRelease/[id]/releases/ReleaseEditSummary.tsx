@@ -23,6 +23,7 @@ import Vendor from '@/object-types/Vendor'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import ApiUtils from '@/utils/api/api.util'
+import CommonUtils from '@/utils/common.utils'
 import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
@@ -211,10 +212,6 @@ export default function ReleaseEditSummary({
         return inputRoles
     }
 
-    const handleId = (id: string): string => {
-        return id.split('/').at(-1)
-    }
-
     useEffect(() => {
             if (typeof release.roles !== 'undefined') {
                 setRoles(convertObjectToMapRoles(release.roles))
@@ -238,7 +235,7 @@ export default function ReleaseEditSummary({
 
             let vendorId = ''
             if (typeof release['_embedded']['sw360:vendors'] !== 'undefined') {
-                vendorId = handleId(release['_embedded']['sw360:vendors'][0]._links.self.href)
+                vendorId = CommonUtils.getIdFromUrl(release['_embedded']['sw360:vendors'][0]._links.self.href)
                 const vendor: Vendor = {
                     id: vendorId,
                     fullName: release['_embedded']['sw360:vendors'][0].fullName,
@@ -258,7 +255,7 @@ export default function ReleaseEditSummary({
 
             let componentId = ''
             if (typeof release['_links']['sw360:component']['href'] !== 'undefined') {
-                componentId = handleId(release['_links']['sw360:component']['href'])
+                componentId = CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href'])
             }
 
             const releasePayload: ReleasePayload = {
