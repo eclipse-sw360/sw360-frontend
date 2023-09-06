@@ -9,10 +9,9 @@
 
 "use client"
 
-import { BiInfoCircle } from 'react-icons/bi'
 import { GiCancel } from 'react-icons/gi'
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
@@ -27,18 +26,6 @@ interface Param {
     projectPayload: ProjectPayload
     setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
-
-const ShowInfoOnHover = ({ text }: { text: string }) => {
-    return (
-        <>
-            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
-                <span className='d-inline-block'>
-                    <BiInfoCircle />
-                </span>
-            </OverlayTrigger>
-        </>
-    );
-};
 
 export default function GeneralInformation({ token,
                                              vendor,

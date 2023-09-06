@@ -14,25 +14,12 @@ import React from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleasePayload from '@/object-types/ReleasePayload'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiInfoCircle } from 'react-icons/bi'
+import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
 
 interface Props {
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
-
-const ShowInfoOnHover = ({ text }: { text: string }) => {
-    return (
-        <>
-            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
-                <span className='d-inline-block'>
-                    <BiInfoCircle />
-                </span>
-            </OverlayTrigger>
-        </>
-    );
-};
 
 const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)

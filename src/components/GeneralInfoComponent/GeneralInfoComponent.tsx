@@ -19,8 +19,8 @@ import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiInfoCircle } from 'react-icons/bi'
+import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
+
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload
@@ -31,18 +31,6 @@ interface Props {
     setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     actionType?: string
 }
-
-const ShowInfoOnHover = ({ text }: { text: string }) => {
-    return (
-        <>
-            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
-                <span className='d-inline-block'>
-                    <BiInfoCircle />
-                </span>
-            </OverlayTrigger>
-        </>
-    );
-};
 
 const GeneralInfoComponent = ({
     session,
