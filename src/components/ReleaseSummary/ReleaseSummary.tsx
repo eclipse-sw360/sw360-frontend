@@ -13,8 +13,7 @@ import styles from './ReleaseSummary.module.css'
 import React, { useCallback, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiInfoCircle } from 'react-icons/bi'
+import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
@@ -51,18 +50,6 @@ const getDate = () => {
     const date = today.getDate()
     return `${month}/${date}/${year}`
 }
-
-const ShowInfoOnHover = ({ text }: { text: string }) => {
-    return (
-        <>
-            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
-                <span className='d-inline-block'>
-                    <BiInfoCircle />
-                </span>
-            </OverlayTrigger>
-        </>
-    );
-};
 
 const ReleaseSummary = ({
     session,
@@ -495,7 +482,7 @@ const ReleaseSummary = ({
                                 aria-describedby='Create by'
                                 readOnly={true}
                                 name='createBy'
-                                value={releasePayload.createBy ?? ''} 
+                                value={releasePayload.createBy ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>

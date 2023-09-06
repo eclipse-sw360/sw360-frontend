@@ -9,22 +9,9 @@
 
 'use client'
 
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiInfoCircle } from 'react-icons/bi'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
-const ShowInfoOnHover = ({ text }: { text: string }) => {
-    return (
-        <>
-            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
-                <span className='d-inline-block'>
-                    <BiInfoCircle />
-                </span>
-            </OverlayTrigger>
-        </>
-    )
-}
 
 export default function LicenseInfoHeader() {
     const t = useTranslations(COMMON_NAMESPACE)
