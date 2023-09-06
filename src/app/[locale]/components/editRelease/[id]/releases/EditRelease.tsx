@@ -27,6 +27,9 @@ import LinkedReleases from '@/components/LinkedReleases/LinkedRelesaes'
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import COTSDetails from '@/object-types/COTSDetails'
+import ComponentOwner from '@/object-types/ComponentOwner'
+import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 
 interface Props {
     session?: Session
@@ -56,6 +59,25 @@ const EditRelease = ({ session, releaseId }: Props) => {
     useEffect(() => {
         fetchData(`releases/${releaseId}`).then((release: any) => {
             setRelease(release)
+            if (typeof release['_embedded']['sw360:cotsDetails'] !== 'undefined') {
+                const cotsDetails: COTSDetails = {
+                    usedLicense: release['_embedded']['sw360:cotsDetails'][0].usedLicense,
+                    licenseClearingReportURL: release['_embedded']['sw360:cotsDetails'][0].licenseClearingReportURL,
+                    containsOSS: release['_embedded']['sw360:cotsDetails'][0].containsOSS,
+                    ossContractSigned: release['_embedded']['sw360:cotsDetails'][0].ossContractSigned,
+                    ossInformationURL: release['_embedded']['sw360:cotsDetails'][0].ossInformationURL,
+                    usageRightAvailable: release['_embedded']['sw360:cotsDetails'][0].usageRightAvailable,
+                    cotsResponsible: release['_embedded']['sw360:cotsDetails'][0].cotsResponsible,
+                    clearingDeadline: release['_embedded']['sw360:cotsDetails'][0].clearingDeadline,
+                    sourceCodeAvailable: release['_embedded']['sw360:cotsDetails'][0].sourceCodeAvailable,
+                }
+                const cotsResponsible: ComponentOwner = {
+                    email: release['_embedded']['sw360:cotsDetails'][0]._embedded['sw360:cotsResponsible'].email,
+                    fullName: release['_embedded']['sw360:cotsDetails'][0]._embedded['sw360:cotsResponsible'].fullName,
+                }
+                setCotsResponsible(cotsResponsible)
+                setCotsDetails(cotsDetails)
+            }
         })
     }, [releaseId])
 
@@ -89,6 +111,18 @@ const EditRelease = ({ session, releaseId }: Props) => {
         attachmentDTOs: null,
     })
 
+    const [cotsDetails, setCotsDetails] = useState<COTSDetails>({
+        usedLicense: '',
+        licenseClearingReportURL: '',
+        containsOSS: false,
+        ossContractSigned: false,
+        ossInformationURL: '',
+        usageRightAvailable: false,
+        cotsResponsible: '',
+        clearingDeadline: '',
+        sourceCodeAvailable: false,
+    })
+
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -111,6 +145,11 @@ const EditRelease = ({ session, releaseId }: Props) => {
 
     const [moderator, setModerator] = useState<Moderators>({
         emails: null,
+        fullName: '',
+    })
+
+    const [cotsResponsible, setCotsResponsible] = useState<ComponentOwner>({
+        email: '',
         fullName: '',
     })
 
@@ -152,6 +191,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 setContributor={setContributor}
                                 moderator={moderator}
                                 setModerator={setModerator}
+                                cotsDetails={cotsDetails}
                             />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
@@ -170,6 +210,15 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 documentType={DocumentTypes.RELEASE}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
+                            />
+                        </div>
+                        <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
+                            <AddCommercialDetails
+                                session={session}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                                cotsResponsible={cotsResponsible}
+                                setCotsResponsible={setCotsResponsible}
                             />
                         </div>
                     </div>

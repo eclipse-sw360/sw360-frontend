@@ -25,6 +25,7 @@ interface Props {
     cotsResponsible?: ComponentOwner
     setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
 }
+
 const CommercialDetailsAdministration = ({
     session,
     releasePayload,
@@ -86,6 +87,7 @@ const CommercialDetailsAdministration = ({
                                     type='checkbox'
                                     className='form-check-input'
                                     name='usageRightAvailable'
+                                    checked={releasePayload.cotsDetails?.usageRightAvailable ?? false}
                                     onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='usageRightAvailable'>
@@ -106,7 +108,7 @@ const CommercialDetailsAdministration = ({
                                 onClick={handleClickSearchComponentOwner}
                                 readOnly={true}
                                 name='COTS_responsible'
-                                value={cotsResponsible.fullName}
+                                value={cotsResponsible.fullName ?? ''}
                             />
                             <ComponentOwnerDiaglog
                                 show={dialogOpenComponentOwner}
@@ -126,6 +128,7 @@ const CommercialDetailsAdministration = ({
                                 id='clearingDeadline'
                                 aria-describedby='clearingDeadline'
                                 name='clearingDeadline'
+                                value={releasePayload.cotsDetails?.clearingDeadline ?? ''}
                                 onChange={updateField}
                             />
                         </div>
@@ -143,6 +146,7 @@ const CommercialDetailsAdministration = ({
                                 id='licenseClearingReportURL'
                                 aria-describedby='licenseClearingReportURL'
                                 name='licenseClearingReportURL'
+                                value={releasePayload.cotsDetails?.licenseClearingReportURL ?? ''}
                                 onChange={updateField}
                             />
                         </div>

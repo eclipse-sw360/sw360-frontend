@@ -61,6 +61,7 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
                                 id='used_license'
                                 aria-describedby='used_license'
                                 name='usedLicense'
+                                value={releasePayload.cotsDetails?.usedLicense ?? ''}
                                 onChange={updateField}
                             />
                         </div>
@@ -71,6 +72,7 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='containsOSS'
+                                    checked={releasePayload.cotsDetails?.containsOSS ?? false}
                                     onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='contains_OSS'>
@@ -85,6 +87,7 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='ossContractSigned'
+                                    checked={releasePayload.cotsDetails?.ossContractSigned ?? false}
                                     onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='OSS_contract_signed'>
@@ -106,6 +109,7 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
                                 id='ossInformationURL'
                                 aria-describedby='ossInformationURL'
                                 name='ossInformationURL'
+                                value={releasePayload.cotsDetails?.ossInformationURL ?? ''}
                                 onChange={updateField}
                             />
                         </div>
@@ -116,6 +120,7 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='sourceCodeAvailable'
+                                    checked={releasePayload.cotsDetails?.sourceCodeAvailable ?? false }
                                     onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='sourceCodeAvailable'>
