@@ -21,8 +21,20 @@ export default interface ProjectPayload {
     externalUrls?: object
     externalIds?: object
     additionalData?: object
-    state?: string
+    state: string
     phaseOutSince?: string
     moderators?: string[]
     contributors?: string[]
+    clearingState?: string
+    businessUnit ?: string
+    preevaluationDeadline ?: string
+    clearingSummary ?: string
+    specialRisksOSS ?: string
+    generalRisks3rdParty ?: string
+    specialRisks3rdParty ?: string
+    deliveryChannels ?: string
+    remarksAdditionalRequirements ?: string
+    systemTestStart ?: string
+    systemTestEnd ?: string
+    deliveryStart ?: string
 }

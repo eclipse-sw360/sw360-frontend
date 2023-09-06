@@ -11,6 +11,7 @@
 
 import { Col, Row, ListGroup, Tab, Button } from 'react-bootstrap'
 import Summary from "@/components/ProjectAddSummary/Summary"
+import Administration from '@/components/ProjectAddSummary/Administration'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
@@ -63,7 +64,19 @@ export default function AddProjects() {
         state: 'ACTIVE',
         phaseOutSince: '',
         moderators: null,
-        contributors: null
+        contributors: null,
+        clearingState: '',
+        businessUnit : '',
+        preevaluationDeadline : '',
+        clearingSummary : '',
+        specialRisksOSS : '',
+        generalRisks3rdParty : '',
+        specialRisks3rdParty : '',
+        deliveryChannels : '',
+        remarksAdditionalRequirements : '',
+        systemTestStart : '',
+        systemTestEnd : '',
+        deliveryStart : ''
     });
     const [toastData, setToastData] = useState<ToastData>({
                             show: false,
@@ -136,7 +149,6 @@ export default function AddProjects() {
                 method='post'
                 onSubmit={(event) => {
                     event.preventDefault()
-                    createProject()
                 }}
             >
             <ToastContainer position='top-start'>
@@ -172,6 +184,7 @@ export default function AddProjects() {
                                         <Button variant="primary"
                                                 type='submit'
                                                 className="me-2 col-auto"
+                                                onClick={createProject}
                                                 >
                                                     {t('Create Project')}
                                         </Button>
@@ -207,6 +220,9 @@ export default function AddProjects() {
                                         />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey="administration">
+                                        <Administration token={AUTH_TOKEN}
+                                                        projectPayload={projectPayload}
+                                                        setProjectPayload={setProjectPayload}/>
                                     </Tab.Pane>
                                     <Tab.Pane eventKey="linkedProjects"></Tab.Pane>
                                 </Tab.Content>
