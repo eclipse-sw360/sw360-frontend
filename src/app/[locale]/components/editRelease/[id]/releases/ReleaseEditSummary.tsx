@@ -21,8 +21,12 @@ import ReleasePayload from '@/object-types/ReleasePayload'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import HttpStatus from '@/object-types/enums/HttpStatus'
+import ApiUtils from '@/utils/api/api.util'
+import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { notFound } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Props {
     session?: Session
@@ -44,6 +48,7 @@ interface Props {
 
 export default function ReleaseEditSummary({
     session,
+    release,
     releaseId,
     releasePayload,
     setReleasePayload,
