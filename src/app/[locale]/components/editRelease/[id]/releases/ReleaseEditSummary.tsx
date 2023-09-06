@@ -12,6 +12,7 @@
 
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
 import AddKeyValueComponent from '@/components/AddKeyValue'
+import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Licenses from '@/object-types/Licenses'
@@ -19,6 +20,7 @@ import Moderators from '@/object-types/Moderators'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -60,6 +62,54 @@ export default function ReleaseEditSummary({
     const [roles, setRoles] = useState<Input[]>([])
     const [externalIds, setExternalIds] = useState<Input[]>([])
     const [addtionalData, setAddtionalData] = useState<Input[]>([])
+
+    const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
+        const obj = Object.fromEntries(additionalDatas)
+        setReleasePayload({
+            ...releasePayload,
+            additionalData: obj,
+        })
+    }
+
+    const setDataExternalIds = (externalIds: Map<string, string>) => {
+        const obj = Object.fromEntries(externalIds)
+        setReleasePayload({
+            ...releasePayload,
+            externalIds: obj,
+        })
+    }
+
+    const setDataRoles = (roles: Input[]) => {
+        const roleDatas = convertRoles(roles)
+        setReleasePayload({
+            ...releasePayload,
+            roles: roleDatas,
+        })
+    }
+    const convertRoles = (datas: Input[]) => {
+        if (datas === null) {
+            return null;
+        }
+        const contributors: string[] = []
+        const commiters: string[] = []
+        const expecters: string[] = []
+        datas.forEach((data) => {
+            if (data.key === 'Contributor') {
+                contributors.push(data.value)
+            } else if (data.key === 'Committer') {
+                commiters.push(data.value)
+            } else if (data.key === 'Expert') {
+                expecters.push(data.value)
+            }
+        })
+        const roles = {
+            Contributor: contributors,
+            Committer: commiters,
+            Expert: expecters,
+        }
+        return roles
+    }
+
     return (
         <>
             <form
@@ -87,7 +137,12 @@ export default function ReleaseEditSummary({
                         setModerator={setModerator}
                     />
                     <div className='row mb-4'>
-                        <AddAdditionalRolesComponent roles={roles} setRoles={setRoles} />
+                        <AddAdditionalRolesComponent
+                            documentType={DocumentTypes.COMPONENT}
+                            roles={roles}
+                            setRoles={setRoles}
+                            setDataRoles={setDataRoles}
+                        />
                     </div>
                     <div className='row mb-4'>
                         <AddKeyValueComponent
@@ -95,6 +150,7 @@ export default function ReleaseEditSummary({
                             keyName={'external id'}
                             setData={setExternalIds}
                             data={externalIds}
+                            setMap={setDataExternalIds}
                         />
                     </div>
                     <div className='row mb-4'>
@@ -103,8 +159,13 @@ export default function ReleaseEditSummary({
                             keyName={'additional data'}
                             setData={setAddtionalData}
                             data={addtionalData}
+                            setMap={setDataAddtionalData}
                         />
                     </div>
+                    <ReleaseRepository
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                    />
                 </div>
             </form>
         </>
