@@ -65,8 +65,8 @@ export default function AddProjects() {
         phaseOutSince: '',
         moderators: null,
         contributors: null,
-        clearingState: '',
-        businessUnit : '',
+        clearingState: 'OPEN',
+        businessUnit : 'CT',
         preevaluationDeadline : '',
         clearingSummary : '',
         specialRisksOSS : '',
@@ -76,7 +76,8 @@ export default function AddProjects() {
         remarksAdditionalRequirements : '',
         systemTestStart : '',
         systemTestEnd : '',
-        deliveryStart : ''
+        deliveryStart : '',
+        licenseInfoHeaderText: ''
     });
     const [toastData, setToastData] = useState<ToastData>({
                             show: false,

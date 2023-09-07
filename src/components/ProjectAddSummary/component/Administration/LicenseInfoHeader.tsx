@@ -11,10 +11,23 @@
 
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ProjectPayload from '@/object-types/CreateProjectPayload'
 
+interface Props{
+    token: string
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
 
-export default function LicenseInfoHeader() {
+export default function LicenseInfoHeader({token, projectPayload, setProjectPayload}: Props) {
+
     const t = useTranslations(COMMON_NAMESPACE)
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+        setProjectPayload({
+            ...projectPayload,
+            [event.target.name]: event.target.value,
+        })
+    }
 
     return (
         <>
@@ -33,6 +46,9 @@ export default function LicenseInfoHeader() {
                         id='addProjects.licenseInfoHeader'
                         aria-label='License Info Header'
                         style={{ height: '500px' }}
+                        name='licenseInfoHeaderText'
+                        value={projectPayload.licenseInfoHeaderText}
+                        onChange={updateInputField}
                     ></textarea>
                 </div>
             </div>

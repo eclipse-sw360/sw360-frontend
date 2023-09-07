@@ -37,4 +37,5 @@ export default interface ProjectPayload {
     systemTestStart ?: string
     systemTestEnd ?: string
     deliveryStart ?: string
+    licenseInfoHeaderText ?: string
 }

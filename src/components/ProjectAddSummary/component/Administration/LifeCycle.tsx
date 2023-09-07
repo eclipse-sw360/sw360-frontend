@@ -12,15 +12,25 @@
 import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ProjectPayload from '@/object-types/CreateProjectPayload'
 
-export default function Lifecycle() {
+
+interface Props{
+    token: string
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+export default function Lifecycle({token, projectPayload, setProjectPayload}: Props) {
+
     const t = useTranslations(COMMON_NAMESPACE)
-
-    const PROJECT_STATE_INFO = `
-    Active:
-    Phaseout:
-    Unknown:
-    `
+    const PROJECT_STATE_INFO = `Active: \n Phaseout: \n Unknown:`
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+        setProjectPayload({
+            ...projectPayload,
+            [event.target.name]: event.target.value,
+        })
+    }
 
     return (
         <>
@@ -29,17 +39,20 @@ export default function Lifecycle() {
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.projectState' className='form-label fw-bold'>
-                        {t('Project State')}
+                        {t('Project State')} <span style={{color:'red'}}>*</span>
                         </label>
                         <select
                             className='form-select'
                             id='addProjects.projectState'
-                            defaultValue='Open'
                             aria-describedby='addProjects.projectState.HelpBlock'
+                            name='state'
+                            value={projectPayload.state}
+                            onChange={updateInputField}
+                            required
                         >
-                            <option value='Active'>{t('Active')}</option>
-                            <option value='Phaseout'>{t('Phaseout')}</option>
-                            <option value='Unknown'>{t('Unknown')}</option>
+                            <option value='ACTIVE'>{t('Active')}</option>
+                            <option value='PHASE_OUT'>{t('Phaseout')}</option>
+                            <option value='UNKNOWN'>{t('Unknown')}</option>
                         </select>
                         <div className='form-text' id='addProjects.projectState.HelpBlock'>
                             <ShowInfoOnHover text={PROJECT_STATE_INFO} /> {t('Learn more about project state')}
@@ -61,6 +74,9 @@ export default function Lifecycle() {
                             onBlur={(e) => {
                                 ;(e.target.type as any) = 'text'
                             }}
+                            name='systemTestStart'
+                            value={projectPayload.systemTestStart}
+                            onChange={updateInputField}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -79,6 +95,9 @@ export default function Lifecycle() {
                             onBlur={(e) => {
                                 ;(e.target.type as any) = 'text'
                             }}
+                            name='systemTestEnd'
+                            value={projectPayload.systemTestEnd}
+                            onChange={updateInputField}
                         />
                     </div>
                 </div>
@@ -100,6 +119,9 @@ export default function Lifecycle() {
                             onBlur={(e) => {
                                 ;(e.target.type as any) = 'text'
                             }}
+                            name='deliveryStart'
+                            value={projectPayload.deliveryStart}
+                            onChange={updateInputField}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -118,6 +140,9 @@ export default function Lifecycle() {
                             onBlur={(e) => {
                                 ;(e.target.type as any) = 'text'
                             }}
+                            name='phaseOutSince'
+                            value={projectPayload.phaseOutSince}
+                            onChange={updateInputField}
                         />
                     </div>
                 </div>
