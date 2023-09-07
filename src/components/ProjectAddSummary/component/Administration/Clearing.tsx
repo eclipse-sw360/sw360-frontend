@@ -25,7 +25,7 @@ interface Props{
 export default function Clearing({token, projectPayload, setProjectPayload}: Props) {
 
     const t = useTranslations(COMMON_NAMESPACE)
-    const CLEARING_STATE_INFO = `Open: \\n In Progress: \\n Closed:`
+    const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -69,8 +69,8 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                             id='addProjects.clearingTeam'
                             defaultValue='CT'
                             aria-label='Clearing Team'
-                            name='clearingState'
-                            value={projectPayload.clearingState}
+                            name='businessUnit'
+                            value={projectPayload.businessUnit}
                             onChange={updateInputField}
                         >
                             <option value='CT'>CT</option>
