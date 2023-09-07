@@ -31,7 +31,9 @@ export default function Administration({token, projectPayload, setProjectPayload
                 <Lifecycle  token={token}
                             projectPayload={projectPayload}
                             setProjectPayload={setProjectPayload}/>
-                <LicenseInfoHeader/>
+                <LicenseInfoHeader token={token}
+                            projectPayload={projectPayload}
+                            setProjectPayload={setProjectPayload}/>
             </div>
         </>
     )

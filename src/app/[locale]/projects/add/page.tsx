@@ -76,7 +76,8 @@ export default function AddProjects() {
         remarksAdditionalRequirements : '',
         systemTestStart : '',
         systemTestEnd : '',
-        deliveryStart : ''
+        deliveryStart : '',
+        licenseInfoHeaderText: ''
     });
     const [toastData, setToastData] = useState<ToastData>({
                             show: false,
