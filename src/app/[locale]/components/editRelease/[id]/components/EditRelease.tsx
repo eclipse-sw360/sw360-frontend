@@ -30,10 +30,10 @@ import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import COTSDetails from '@/object-types/COTSDetails'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
-import EditECCDetails from './ECCDetails/EditECCDetails'
 import ECCInformation from '@/object-types/ECCInformation'
-import EditClearingDetails from './ClearingDetail/EditClearingDetails'
+import EditClearingDetails from './EditClearingDetails'
 import ClearingInformation from '@/object-types/ClearingInformation'
+import EditECCDetails from './EditECCDetails'
 
 interface Props {
     session?: Session

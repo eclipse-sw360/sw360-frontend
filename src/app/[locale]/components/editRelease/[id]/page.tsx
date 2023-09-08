@@ -11,7 +11,7 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getServerSession } from "next-auth/next"
 import { Session } from '@/object-types/Session'
-import EditRelease from './releases/EditRelease'
+import EditRelease from './components/EditRelease'
 interface Context {
   params: { id: string }
 }

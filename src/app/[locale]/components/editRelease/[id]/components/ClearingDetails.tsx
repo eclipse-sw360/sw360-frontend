@@ -12,7 +12,7 @@
 
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
-import styles from './ClearingDetails.module.css'
+import styles from '../EditRelease.module.css'
 import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
