@@ -9,6 +9,7 @@
 // License-Filename: LICENSE
 
 import ReleasePayload from '@/object-types/ReleasePayload'
+import ClearingDetails from './ClearingDetails'
 
 interface Props {
     releasePayload?: ReleasePayload
@@ -18,6 +19,9 @@ interface Props {
 const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
     return (
         <>
+            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
+                <ClearingDetails releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+            </div>
         </>
     )
 }
