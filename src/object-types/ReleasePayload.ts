@@ -10,6 +10,7 @@
 
 import AttachmentDetail from "./AttachmentDetail"
 import COTSDetails from "./COTSDetails"
+import ECCInformation from "./ECCInformation"
 import Repository from "./Repository"
 
 export default interface ReleasePayload {
@@ -41,4 +42,5 @@ export default interface ReleasePayload {
     releaseIdToRelationship?: any
     cotsDetails?: COTSDetails
     attachmentDTOs?: AttachmentDetail[]
+    eccInformation?: ECCInformation
 }
