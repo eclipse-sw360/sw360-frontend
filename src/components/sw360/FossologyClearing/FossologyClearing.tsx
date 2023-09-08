@@ -9,10 +9,11 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from "@/object-types/Constants"
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Session } from '@/object-types/Session'
 import styles from './fossologyClearing.module.css'
@@ -24,358 +25,394 @@ import { FossologyProcessInfo, FossologyProcessStatus } from '@/object-types/Fos
 import HttpStatus from '@/object-types/enums/HttpStatus'
 
 interface Props {
-	show?: boolean
-	setShow?: React.Dispatch<React.SetStateAction<boolean>>
-	session: Session
-	releaseId: string
+    show?: boolean
+    setShow?: React.Dispatch<React.SetStateAction<boolean>>
+    session: Session
+    releaseId: string
 }
 
 const clearingMessages: { [key: string]: { [key: string]: string } } = {
-	NUMBER_OF_ATTACHMENTS_NOT_MATCH: {
-		message: 'number_of_attachments_not_match_condition',
-		variant: 'danger'
-	},
-	CLEARING_SUCCESS: {
-		message: 'fossology_clearing_finished',
-		variant: 'success'
-	},
-	ERROR_PROCESSING: {
-		message: 'Error when processing!',
-		variant: 'danger'
-	},
-	SET_OUTDATED: {
-		message: 'fossology_process_outdated',
-		variant: 'success'
-	}
+    NUMBER_OF_ATTACHMENTS_NOT_MATCH: {
+        message: 'number_of_attachments_not_match_condition',
+        variant: 'danger',
+    },
+    CLEARING_SUCCESS: {
+        message: 'fossology_clearing_finished',
+        variant: 'success',
+    },
+    ERROR_PROCESSING: {
+        message: 'Error when processing!',
+        variant: 'danger',
+    },
+    SET_OUTDATED: {
+        message: 'fossology_process_outdated',
+        variant: 'success',
+    },
 }
 
 const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
-	const t = useTranslations(COMMON_NAMESPACE)
-	const STEP_PERCENT = 16.66
-	const PERCENT_DONE = 99.96
-	const RELOAD_ATTACHMENTS_PERCENT = 66.46
-	const progressInterval = useRef(undefined)
-	const countDownInterval = useRef(undefined)
-	const numberOfSourceAttachment = useRef(0)
+    const t = useTranslations(COMMON_NAMESPACE)
+    const STEP_PERCENT = 16.66
+    const PERCENT_DONE = 99.96
+    const RELOAD_ATTACHMENTS_PERCENT = 66.46
+    const progressInterval = useRef(undefined)
+    const countDownInterval = useRef(undefined)
+    const numberOfSourceAttachment = useRef(0)
 
-	const [timeInterval, setTimeInterval] = useState<number>(5)
-	const [release, setRelease] = useState(undefined)
-	const [confirmShow, setConfirmShow] = useState(false)
+    const [timeInterval, setTimeInterval] = useState<number>(5)
+    const [release, setRelease] = useState(undefined)
+    const [confirmShow, setConfirmShow] = useState(false)
 
-	const [message, setMessage] = useState({
-		content: '',
-		variant: 'success',
-		show: false,
-	})
+    const [message, setMessage] = useState({
+        content: '',
+        variant: 'success',
+        show: false,
+    })
 
+    const [progressStatus, setProgressStatus] = useState({
+        percent: 0,
+        stepName: '',
+    })
 
-	const [progressStatus, setProgressStatus] = useState({
-		percent: 0,
-		stepName: ''
-	})
+    const resetTimeCountDown = () => {
+        setTimeInterval(5)
+    }
 
-	const fetchData = async (url: string) => {
-		return ApiUtils.GET(url, session.user.access_token)
-			.then((response) => response.json())
-			.catch(() => undefined)
-	}
+    const clearAllInterval = useCallback(() => {
+        countDownInterval.current = clearInterval(countDownInterval.current)
+        progressInterval.current = clearInterval(progressInterval.current)
+        resetTimeCountDown()
+    }, [])
 
-	const fetchRelease = useCallback(async () => {
-		const url = `releases/${releaseId}`
-		fetchData(url).then(data => {
-			setRelease(data)
-			numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
-			if (!isClearingAllowed()) {
- 				clearAllInterval()
-				showMessage(clearingMessages.NUMBER_OF_ATTACHMENTS_NOT_MATCH)
-				setProgressStatus({
-					percent: 0,
-					stepName: ''
-				})
-				return
-			}
-		})
-	}, [releaseId])
+    const fetchData = useCallback(
+        async (url: string) => {
+            return ApiUtils.GET(url, session.user.access_token)
+                .then((response) => response.json())
+                .catch(() => undefined)
+        },
+        [session]
+    )
 
-	const handleCloseDialog = () => {
-		hideMessage()
-		clearAllInterval()
-		setProgressStatus({
-			percent: 0,
-			stepName: ''
-		})
-		setRelease(undefined)
-		setShow(false)
-	}
+    const fetchRelease = useCallback(async () => {
+        const url = `releases/${releaseId}`
+        fetchData(url).then((data) => {
+            setRelease(data)
+            numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
+            if (!isClearingAllowed()) {
+                clearAllInterval()
+                showMessage(clearingMessages.NUMBER_OF_ATTACHMENTS_NOT_MATCH)
+                setProgressStatus({
+                    percent: 0,
+                    stepName: '',
+                })
+                return
+            }
+        })
+    }, [releaseId, clearAllInterval, fetchData])
 
-	const handleOutdated = () => {
-		handleFossologyClearing({ markFossologyProcessOutdated: true })
-		showMessage(clearingMessages.SET_OUTDATED)
-		setConfirmShow(false)
-	}
+    const handleCloseDialog = () => {
+        hideMessage()
+        clearAllInterval()
+        setProgressStatus({
+            percent: 0,
+            stepName: '',
+        })
+        setRelease(undefined)
+        setShow(false)
+    }
 
-	const reloadReport = async () => {
-		hideMessage()
-		const url = `releases/${releaseId}/reloadFossologyReport`
-		const response = await ApiUtils.GET(url, session.user.access_token);
-		if (response.status === HttpStatus.OK) {
-			clearAllInterval()
-			setProgressStatus({
-				percent: RELOAD_ATTACHMENTS_PERCENT,
-				stepName: 'Report generation to be started'
-			})
-			startIntervalCheckFossologyProcessStatus()
-		}
-	}
+    const handleOutdated = () => {
+        handleFossologyClearing({ markFossologyProcessOutdated: true })
+        showMessage(clearingMessages.SET_OUTDATED)
+        setConfirmShow(false)
+    }
 
-	const handleFossologyClearing = async (params: any) => {
-		hideMessage()
-		clearAllInterval()
-		const triggerStatus = await triggerFossologyClearing(params)
-		if (triggerStatus == false) {
-			showMessage(clearingMessages.ERROR_PROCESSING)
-			return
-		}
+    const triggerFossologyClearing = useCallback(
+        async (params: { [key: string]: string }) => {
+            const url = CommonUtils.createUrlWithParams(`releases/${releaseId}/triggerFossologyProcess`, params)
+            const response = await fetchData(url)
+            return response ? true : false
+        },
+        [releaseId, fetchData]
+    )
 
-		setProgressStatus({
-			percent: 0,
-			stepName: ''
-		})
+    const checkFossologyProcessStatus = useCallback(async () => {
+        const url = `releases/${releaseId}/checkFossologyProcessStatus`
+        const response: FossologyProcessStatus = await fetchData(url)
 
-		startIntervalCheckFossologyProcessStatus()
-	}
+        if (response.status === 'SUCCESS') {
+            setProgressStatus({
+                percent: PERCENT_DONE,
+                stepName: 'Report generation done',
+            })
+            showMessage(clearingMessages.CLEARING_SUCCESS)
+            clearAllInterval()
+            return
+        }
 
-	const triggerFossologyClearing = async (params: { [key: string]: string }) => {
-		const url = CommonUtils.createUrlWithParams(`releases/${releaseId}/triggerFossologyProcess`, params)
-		const response = await fetchData(url)
-		return (response) ? true : false
-	}
+        if (response.fossologyProcessInfo !== null) {
+            updateProgressStatus(response.fossologyProcessInfo)
+        }
+        // RECURSIVE CALL
+        // if (progressStatus.percent < PERCENT_DONE && progressStatus.percent > 0) {
+        //     clearAllInterval()
+        //     startIntervalCheckFossologyProcessStatus()
+        // }
+    }, [clearAllInterval, fetchData, releaseId])
 
-	const checkFossologyProcessStatus = async () => {
-		const url = `releases/${releaseId}/checkFossologyProcessStatus`
-		const response: FossologyProcessStatus = await fetchData(url)
+    const startIntervalCheckFossologyProcessStatus = useCallback(() => {
+        startCountDownt()
 
-		if (response.status === 'SUCCESS') {
-			setProgressStatus({
-				percent: PERCENT_DONE,
-				stepName: 'Report generation done'
-			})
-			showMessage(clearingMessages.CLEARING_SUCCESS)
-			clearAllInterval()
-			return
-		}
+        const interval = setInterval(() => {
+            checkFossologyProcessStatus()
+            resetTimeCountDown()
+        }, 5000)
+        progressInterval.current = interval
+    }, [checkFossologyProcessStatus])
 
-		if (response.fossologyProcessInfo !== null) {
-			updateProgressStatus(response.fossologyProcessInfo)
-		}
-		if (progressStatus.percent < PERCENT_DONE && progressStatus.percent > 0) {
-			clearAllInterval()
-			startIntervalCheckFossologyProcessStatus()
-		}
-	}
+    const reloadReport = async () => {
+        hideMessage()
+        const url = `releases/${releaseId}/reloadFossologyReport`
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            clearAllInterval()
+            setProgressStatus({
+                percent: RELOAD_ATTACHMENTS_PERCENT,
+                stepName: 'Report generation to be started',
+            })
+            startIntervalCheckFossologyProcessStatus()
+        }
+    }
 
-	const startIntervalCheckFossologyProcessStatus = () => {
-		startCountDownt()
+    const handleFossologyClearing = useCallback(
+        async (params: any) => {
+            hideMessage()
+            clearAllInterval()
+            const triggerStatus = await triggerFossologyClearing(params)
+            if (triggerStatus == false) {
+                showMessage(clearingMessages.ERROR_PROCESSING)
+                return
+            }
 
-		const interval = setInterval(() => {
-			checkFossologyProcessStatus()
-			resetTimeCountDown()
-		}, 5000)
-		progressInterval.current = interval
-	}
+            setProgressStatus({
+                percent: 0,
+                stepName: '',
+            })
 
-	const updateProgressStatus = (fossologyProcessInfo: FossologyProcessInfo) => {
-		let progressText = '',
-			progressPercent = 0
-		if (fossologyProcessInfo.processSteps.length === 3) {
-			progressText += 'Report generation'
-			progressPercent = 4 * STEP_PERCENT
-		} else if (fossologyProcessInfo.processSteps.length === 2) {
-			progressText += 'Scanning source'
-			progressPercent = 2 * STEP_PERCENT
-		} else {
-			progressText += 'Uploading source'
-			progressPercent = 0 * STEP_PERCENT
-		}
+            startIntervalCheckFossologyProcessStatus()
+        },
+        [clearAllInterval, triggerFossologyClearing, startIntervalCheckFossologyProcessStatus]
+    )
 
-		if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'DONE') {
-			progressText += ' done'
-			progressPercent += 2 * STEP_PERCENT
-		} else if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'IN_WORK') {
-			progressText += ' in progress'
-			progressPercent += 1 * STEP_PERCENT
-		} else {
-			progressText += ' to be started'
-			progressPercent += 0 * STEP_PERCENT
-		}
+    const updateProgressStatus = (fossologyProcessInfo: FossologyProcessInfo) => {
+        let progressText = '',
+            progressPercent = 0
+        if (fossologyProcessInfo.processSteps.length === 3) {
+            progressText += 'Report generation'
+            progressPercent = 4 * STEP_PERCENT
+        } else if (fossologyProcessInfo.processSteps.length === 2) {
+            progressText += 'Scanning source'
+            progressPercent = 2 * STEP_PERCENT
+        } else {
+            progressText += 'Uploading source'
+            progressPercent = 0 * STEP_PERCENT
+        }
 
-		setProgressStatus({
-			percent: progressPercent,
-			stepName: progressText
-		})
-	}
+        if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'DONE') {
+            progressText += ' done'
+            progressPercent += 2 * STEP_PERCENT
+        } else if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'IN_WORK') {
+            progressText += ' in progress'
+            progressPercent += 1 * STEP_PERCENT
+        } else {
+            progressText += ' to be started'
+            progressPercent += 0 * STEP_PERCENT
+        }
 
-	const hideMessage = () => {
-		setMessage((prev: any) => ({
-			...prev,
-			show: false,
-		}))
-	}
+        setProgressStatus({
+            percent: progressPercent,
+            stepName: progressText,
+        })
+    }
 
-	const showMessage = (clearingMessage: { [key: string]: string }) => {
-		setMessage({
-			content: clearingMessage.message,
-			variant: clearingMessage.variant,
-			show: true
-		})
-	}
+    const hideMessage = () => {
+        setMessage((prev: any) => ({
+            ...prev,
+            show: false,
+        }))
+    }
 
-	const startCountDownt = () => {
-		const interval = setInterval(() => {
-			setTimeInterval(prev => prev - 1)
-		}, 1000)
-		countDownInterval.current = interval
-	}
+    const showMessage = (clearingMessage: { [key: string]: string }) => {
+        setMessage({
+            content: clearingMessage.message,
+            variant: clearingMessage.variant,
+            show: true,
+        })
+    }
 
-	const clearAllInterval = () => {
-		countDownInterval.current = clearInterval(countDownInterval.current)
-		progressInterval.current = clearInterval(progressInterval.current)
-		resetTimeCountDown()
-	}
+    const startCountDownt = () => {
+        const interval = setInterval(() => {
+            setTimeInterval((prev) => prev - 1)
+        }, 1000)
+        countDownInterval.current = interval
+    }
 
-	const resetTimeCountDown = () => {
-		setTimeInterval(5)
-	}
+    const isClearingAllowed = () => {
+        if (numberOfSourceAttachment.current != 1) {
+            return false
+        }
+        return true
+    }
 
-	const isClearingAllowed = () => {
-		if (numberOfSourceAttachment.current != 1) {
-			return false
-		}
-		return true
-	}
+    const countSourceAttachment = (attachments: Array<EmbeddedAttachment> | undefined) => {
+        if (CommonUtils.isNullEmptyOrUndefinedArray(attachments)) {
+            return 0
+        }
+        return attachments.filter((attachment) => attachment.attachmentType === 'SOURCE').length
+    }
 
-	const countSourceAttachment = (attachments: Array<EmbeddedAttachment> | undefined) => {
-		if (CommonUtils.isNullEmptyOrUndefinedArray(attachments)) {
-			return 0
-		}
-		return attachments.filter((attachment) => attachment.attachmentType === 'SOURCE').length
-	}
+    useEffect(() => {
+        if (show === true) {
+            if (release === undefined) {
+                fetchRelease()
+                checkFossologyProcessStatus()
+            } else {
+                if (progressStatus.percent >= PERCENT_DONE) {
+                    showMessage(clearingMessages.CLEARING_SUCCESS)
+                    return
+                }
+                if (
+                    !countDownInterval.current &&
+                    !progressInterval.current &&
+                    progressStatus.percent === 0 &&
+                    numberOfSourceAttachment.current == 1
+                ) {
+                    handleFossologyClearing({})
+                }
 
-	useEffect(() => {
-		if (show === true) {
-			if (release === undefined) {
-				fetchRelease()
-				checkFossologyProcessStatus()
-			}
-			else {
-				if (progressStatus.percent >= PERCENT_DONE) {
-					showMessage(clearingMessages.CLEARING_SUCCESS)
-					return
-				}
-				if (!countDownInterval.current &&
-					!progressInterval.current &&
-					(progressStatus.percent === 0) &&
-					(numberOfSourceAttachment.current == 1)) {
-					handleFossologyClearing({})
-				}
+                if (progressStatus.percent >= PERCENT_DONE) {
+                    clearAllInterval()
+                    showMessage(clearingMessages.CLEARING_SUCCESS)
+                }
+            }
+        }
+    }, [
+        show,
+        progressStatus.percent,
+        releaseId,
+        numberOfSourceAttachment,
+        fetchRelease,
+        handleFossologyClearing,
+        release,
+        clearAllInterval,
+        checkFossologyProcessStatus,
+    ])
 
-				if (progressStatus.percent >= PERCENT_DONE) {
-					clearAllInterval()
-					showMessage(clearingMessages.CLEARING_SUCCESS)
-				}
-			}
-		}
-
-	}, [show, progressStatus.percent, releaseId, numberOfSourceAttachment.current]);
-
-	return (
-		<>
-			<Modal
-				show={show}
-				onHide={handleCloseDialog}
-				backdrop='static'
-				centered
-				size='lg'
-			>
-				<Modal.Header closeButton>
-					<Modal.Title><b>{t('Fossology Process')}</b></Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<Alert variant={message.variant} onClose={hideMessage} dismissible show={message.show}>
-						{t.rich(message.content, {
-							count: numberOfSourceAttachment.current,
-						})}
-					</Alert>
-					<div className={`${styles.guide} form-text`}>
-						<h3>{t('How it works')}:</h3>
-						<p>
-							{t('basic_fossology_process')}:
-						</p><ol>
-							<li>{t('Upload the sources to FOSSology')}</li>
-							<li>{t('Scan the sources')}</li>
-							<li>{t('Generate a report out of the scan results and attach it to this release')}</li>
-						</ol>
-						<p></p>
-						<p>
-							{t('hand_when_got_stuck_fossology')}
-						</p>
-					</div>
-					<div>{t('Found source attachment')}:
-						{(release && (numberOfSourceAttachment.current === 1))
-							? release._embedded['sw360:attachments'].filter((attachment: EmbeddedAttachment) => attachment.attachmentType === 'SOURCE').at(0).filename
-							: 'unknown'
-						}
-					</div>
-					<div className='row mt-2'>
-						<div className='col'>
-							<div className='progress' style={{ height: '40px', borderRadius: '100px' }}>
-								<div className='progress-bar' style={{
-									width: `${progressStatus.percent}%`, backgroundColor: '#F7941E',
-									paddingLeft: '1rem', textAlign: 'left', color: 'black', fontSize: '16px'
-								}}>
-									{progressStatus.stepName}
-								</div>
-							</div>
-						</div>
-					</div>
-					{(progressStatus.percent < 99.96) && <div>Auto-refresh in {timeInterval}</div>}
-				</Modal.Body>
-				<Modal.Footer className='justify-content-end' >
-					{(numberOfSourceAttachment.current === 1)
-						?
-						<>
-							<Button variant='light' onClick={() => setConfirmShow(true)}> {t('Set Outdated')} </Button>
-							<Button variant='light' onClick={reloadReport}> {t('Reload Report')} </Button>
-							<Button variant='light' onClick={handleCloseDialog}> {t('Close')} </Button>
-						</>
-						:
-						<>
-							<Button variant='primary' onClick={handleCloseDialog}> {t('Close')} </Button>
-						</>
-					}
-				</Modal.Footer>
-			</Modal>
-			<Modal
-				show={confirmShow}
-				onHide={() => setConfirmShow(false)}
-				backdrop='static'
-				centered
-				size='lg'
-			>
-				<Modal.Header closeButton>
-					<Modal.Title style={{ color: 'red' }}><b>{t('Reset FOSSology Process')}?</b></Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<div>Do you really want to set the current FOSSology process to state &quot;OUTDATED&quot;?
-						This cannot be undone and a new process is started the next time you open this popup.</div>
-				</Modal.Body>
-				<Modal.Footer className='justify-content-end' >
-					<Button variant='light' onClick={() => setConfirmShow(false)}> {t('Cancel')} </Button>
-					<Button variant='danger' onClick={handleOutdated}> {t('Set To Outdated')} </Button>
-				</Modal.Footer>
-			</Modal>
-		</>
-	)
+    return (
+        <>
+            <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        <b>{t('Fossology Process')}</b>
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Alert variant={message.variant} onClose={hideMessage} dismissible show={message.show}>
+                        {t.rich(message.content, {
+                            count: numberOfSourceAttachment.current,
+                        })}
+                    </Alert>
+                    <div className={`${styles.guide} form-text`}>
+                        <h3>{t('How it works')}:</h3>
+                        <p>{t('basic_fossology_process')}:</p>
+                        <ol>
+                            <li>{t('Upload the sources to FOSSology')}</li>
+                            <li>{t('Scan the sources')}</li>
+                            <li>{t('Generate a report out of the scan results and attach it to this release')}</li>
+                        </ol>
+                        <p></p>
+                        <p>{t('hand_when_got_stuck_fossology')}</p>
+                    </div>
+                    <div>
+                        {t('Found source attachment')}:
+                        {release && numberOfSourceAttachment.current === 1
+                            ? release._embedded['sw360:attachments']
+                                  .filter((attachment: EmbeddedAttachment) => attachment.attachmentType === 'SOURCE')
+                                  .at(0).filename
+                            : 'unknown'}
+                    </div>
+                    <div className='row mt-2'>
+                        <div className='col'>
+                            <div className='progress' style={{ height: '40px', borderRadius: '100px' }}>
+                                <div
+                                    className='progress-bar'
+                                    style={{
+                                        width: `${progressStatus.percent}%`,
+                                        backgroundColor: '#F7941E',
+                                        paddingLeft: '1rem',
+                                        textAlign: 'left',
+                                        color: 'black',
+                                        fontSize: '16px',
+                                    }}
+                                >
+                                    {progressStatus.stepName}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {progressStatus.percent < 99.96 && <div>Auto-refresh in {timeInterval}</div>}
+                </Modal.Body>
+                <Modal.Footer className='justify-content-end'>
+                    {numberOfSourceAttachment.current === 1 ? (
+                        <>
+                            <Button variant='light' onClick={() => setConfirmShow(true)}>
+                                {' '}
+                                {t('Set Outdated')}{' '}
+                            </Button>
+                            <Button variant='light' onClick={reloadReport}>
+                                {' '}
+                                {t('Reload Report')}{' '}
+                            </Button>
+                            <Button variant='light' onClick={handleCloseDialog}>
+                                {' '}
+                                {t('Close')}{' '}
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button variant='primary' onClick={handleCloseDialog}>
+                                {' '}
+                                {t('Close')}{' '}
+                            </Button>
+                        </>
+                    )}
+                </Modal.Footer>
+            </Modal>
+            <Modal show={confirmShow} onHide={() => setConfirmShow(false)} backdrop='static' centered size='lg'>
+                <Modal.Header closeButton>
+                    <Modal.Title style={{ color: 'red' }}>
+                        <b>{t('Reset FOSSology Process')}?</b>
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div>
+                        Do you really want to set the current FOSSology process to state &quot;OUTDATED&quot;? This
+                        cannot be undone and a new process is started the next time you open this popup.
+                    </div>
+                </Modal.Body>
+                <Modal.Footer className='justify-content-end'>
+                    <Button variant='light' onClick={() => setConfirmShow(false)}>
+                        {' '}
+                        {t('Cancel')}{' '}
+                    </Button>
+                    <Button variant='danger' onClick={handleOutdated}>
+                        {' '}
+                        {t('Set To Outdated')}{' '}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    )
 }
 
 export default FossologyClearing

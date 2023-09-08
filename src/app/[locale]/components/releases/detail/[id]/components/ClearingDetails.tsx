@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -32,16 +32,21 @@ interface Props {
 }
 
 const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE);
-    const [toggle, setToggle] = useState(false);
-    const [show, setShow] = useState(false);
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [toggle, setToggle] = useState(false)
+    const [show, setShow] = useState(false)
 
     return (
         <div className='col'>
-            <SPDXAttachments releaseId={releaseId} session={session}/>
-            <AssessmentSummaryInfo releaseId={releaseId} embeddedAttachments={embeddedAttachments}/>
+            <SPDXAttachments releaseId={releaseId} session={session} />
+            <AssessmentSummaryInfo releaseId={releaseId} embeddedAttachments={embeddedAttachments} />
             <table className={`table label-value-table ${styles['summary-table']}`}>
-                <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
+                <thead
+                    title='Click to expand or collapse'
+                    onClick={() => {
+                        setToggle(!toggle)
+                    }}
+                >
                     <tr>
                         <th colSpan={2}>{`${t('Clearing Details')}: ${release.name} ${release.version}`}</th>
                     </tr>
@@ -55,7 +60,7 @@ const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: P
                                 src={fossologyIcon}
                                 width={15}
                                 height={15}
-                                style={{marginLeft: '5px'}}
+                                style={{ marginLeft: '5px' }}
                                 alt='Fossology'
                                 onClick={() => setShow(true)}
                             />
@@ -64,124 +69,192 @@ const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: P
                     <tr>
                         <td>{t('Binaries Original from Community')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.binariesOriginalFromCommunity : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.binariesOriginalFromCommunity
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Binaries Self-Made')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.binariesSelfMade : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation ? release.clearingInformation.binariesSelfMade : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Component License Information')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.componentLicenseInformation : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.componentLicenseInformation
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Delivery')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeDelivery : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation ? release.clearingInformation.sourceCodeDelivery : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Original from Community')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeOriginalFromCommunity : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.sourceCodeOriginalFromCommunity
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Tool-Made')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeToolMade : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation ? release.clearingInformation.sourceCodeToolMade : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Source Code Self-Made')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.sourceCodeSelfMade : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation ? release.clearingInformation.sourceCodeSelfMade : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Screenshot of Website')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.screenshotOfWebSite : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.screenshotOfWebSite
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Finalized License Scan Report')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.finalizedLicenseScanReport : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.finalizedLicenseScanReport
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('License Scan Report Result')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.licenseScanReportResult : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.licenseScanReportResult
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Legal Evaluation')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.licenseAgreement : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation ? release.clearingInformation.licenseAgreement : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('License Agreement')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.licenseScanReportResult : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.licenseScanReportResult
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Scanned')}:</td>
-                        <td>
-                            {(release.clearingInformation) && release.clearingInformation.scanned}
-                        </td>
+                        <td>{release.clearingInformation && release.clearingInformation.scanned}</td>
                     </tr>
                     <tr>
                         <td>{t('Component Clearing Report')}:</td>
                         <td>
-                            <ClearingInformationStatus status={(release.clearingInformation) ? release.clearingInformation.componentClearingReport : false} />
+                            <ClearingInformationStatus
+                                status={
+                                    release.clearingInformation
+                                        ? release.clearingInformation.componentClearingReport
+                                        : false
+                                }
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Standard')}:</td>
-                        <td>
-                            {(release.clearingInformation) && release.clearingInformation.clearingStandard}
-                        </td>
+                        <td>{release.clearingInformation && release.clearingInformation.clearingStandard}</td>
                     </tr>
                     <tr>
                         <td>{t('External URL')}:</td>
                         <td>
-                            {
-                            (release.clearingInformation) &&
-                            <Link href={release.clearingInformation.externalUrl}>{release.clearingInformation.externalUrl}</Link>
-                            }
+                            {release.clearingInformation && (
+                                <Link href={release.clearingInformation.externalUrl}>
+                                    {release.clearingInformation.externalUrl}
+                                </Link>
+                            )}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Comments')}:</td>
-                        <td>
-                            {(release.clearingInformation) && release.clearingInformation.comment}
-                        </td>
+                        <td>{release.clearingInformation && release.clearingInformation.comment}</td>
                     </tr>
                 </tbody>
             </table>
             <RequestInformation clearingInformation={release.clearingInformation} />
             <SupplementalInformation clearingInformation={release.clearingInformation} />
-            <FossologyClearing show={show} setShow={setShow} session={session} releaseId={releaseId}/>
+            <FossologyClearing show={show} setShow={setShow} session={session} releaseId={releaseId} />
         </div>
     )
 }
 
 const SupplementalInformation = ({ clearingInformation }: any) => {
-    const [toggle, setToggle] = useState(false);
-    const t = useTranslations(COMMON_NAMESPACE);
+    const [toggle, setToggle] = useState(false)
+    const t = useTranslations(COMMON_NAMESPACE)
 
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>
-            <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
+            <thead
+                title='Click to expand or collapse'
+                onClick={() => {
+                    setToggle(!toggle)
+                }}
+            >
                 <tr>
                     <th colSpan={2}>{t('Supplemental Information')}</th>
                 </tr>
@@ -189,15 +262,11 @@ const SupplementalInformation = ({ clearingInformation }: any) => {
             <tbody hidden={toggle}>
                 <tr>
                     <td>{t('External Supplier ID')}:</td>
-                    <td>
-                        {(clearingInformation) && clearingInformation.externalSupplierID}
-                    </td>
+                    <td>{clearingInformation && clearingInformation.externalSupplierID}</td>
                 </tr>
                 <tr>
                     <td>{t('Number of Security Vulnerabilities')}:</td>
-                    <td>
-                        {(clearingInformation) && clearingInformation.countOfSecurityVn}
-                    </td>
+                    <td>{clearingInformation && clearingInformation.countOfSecurityVn}</td>
                 </tr>
             </tbody>
         </table>
@@ -205,12 +274,17 @@ const SupplementalInformation = ({ clearingInformation }: any) => {
 }
 
 const RequestInformation = ({ clearingInformation }: any) => {
-    const [toggle, setToggle] = useState(false);
-    const t = useTranslations(COMMON_NAMESPACE);
+    const [toggle, setToggle] = useState(false)
+    const t = useTranslations(COMMON_NAMESPACE)
 
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>
-            <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
+            <thead
+                title='Click to expand or collapse'
+                onClick={() => {
+                    setToggle(!toggle)
+                }}
+            >
                 <tr>
                     <th colSpan={2}>{t('Request Information')}</th>
                 </tr>
@@ -218,27 +292,19 @@ const RequestInformation = ({ clearingInformation }: any) => {
             <tbody hidden={toggle}>
                 <tr>
                     <td>{t('Request ID')}:</td>
-                    <td>
-                        {(clearingInformation) && clearingInformation.requestID}
-                    </td>
+                    <td>{clearingInformation && clearingInformation.requestID}</td>
                 </tr>
                 <tr>
                     <td>{t('Additional Request Information')}:</td>
-                    <td>
-                        {(clearingInformation) && clearingInformation.additionalRequestInfo}
-                    </td>
+                    <td>{clearingInformation && clearingInformation.additionalRequestInfo}</td>
                 </tr>
                 <tr>
                     <td>{t('Evaluation Start')}:</td>
-                    <td>
-                        {(clearingInformation) && clearingInformation.procStart}
-                    </td>
+                    <td>{clearingInformation && clearingInformation.procStart}</td>
                 </tr>
                 <tr>
                     <td>{t('Evaluation End')}:</td>
-                    <td>
-                        {(clearingInformation) && clearingInformation.evaluated}
-                    </td>
+                    <td>{clearingInformation && clearingInformation.evaluated}</td>
                 </tr>
             </tbody>
         </table>

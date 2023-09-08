@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Dropdown } from 'react-bootstrap'
 
-import { AdvancedSearch, PageButtonHeader, Table, _ } from '@/components/sw360'
+import { AdvancedSearch, PageButtonHeader, Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 interface ProjectType {
@@ -43,100 +43,100 @@ function Project() {
         {
             fieldName: 'Project Name',
             value: '',
-            paramName: 'name'
+            paramName: 'name',
         },
         {
             fieldName: 'Project Version',
             value: '',
-            paramName: 'version'
+            paramName: 'version',
         },
         {
             fieldName: 'Project Type',
             value: [
                 {
                     key: 'Customer Project',
-                    text: 'Customer Project'
+                    text: 'Customer Project',
                 },
                 {
                     key: 'Internal Project',
-                    text: 'Internal Project'
+                    text: 'Internal Project',
                 },
                 {
                     key: 'Product',
-                    text: 'Product'
+                    text: 'Product',
                 },
                 {
                     key: 'Service',
-                    text: 'Service'
+                    text: 'Service',
                 },
                 {
                     key: 'Inner Source',
-                    text: 'Inner Source'
-                }
+                    text: 'Inner Source',
+                },
             ],
-            paramName: 'type'
+            paramName: 'type',
         },
         {
             fieldName: 'Project Responsible (Email)',
             value: '',
-            paramName: 'projectResponsible'
+            paramName: 'projectResponsible',
         },
         {
             fieldName: 'Group',
             value: [
                 {
                     key: 'None',
-                    text: 'None'
-                }
+                    text: 'None',
+                },
             ],
-            paramName: 'group'
+            paramName: 'group',
         },
         {
             fieldName: 'State',
-            value:  [
+            value: [
                 {
                     key: 'Active',
-                    text: 'Active'
+                    text: 'Active',
                 },
                 {
                     key: 'PhaseOut',
-                    text: 'PhaseOut'
+                    text: 'PhaseOut',
                 },
                 {
                     key: 'Unknown',
-                    text: 'Unknown'
-                }
+                    text: 'Unknown',
+                },
             ],
-            paramName: 'state'
+            paramName: 'state',
         },
         {
             fieldName: 'Clearing State',
-            value:  [
+            value: [
                 {
                     key: 'Open',
-                    text: 'Open'
+                    text: 'Open',
                 },
                 {
                     key: 'In Progress',
-                    text: 'In Progress'
+                    text: 'In Progress',
                 },
                 {
                     key: 'Closed',
-                    text: 'Closed'
-                }
+                    text: 'Closed',
+                },
             ],
-            paramName: 'clearingState'
+            paramName: 'clearingState',
         },
         {
             fieldName: 'Tag',
-            value:  '',
-            paramName: 'tag'
+            value: '',
+            paramName: 'tag',
         },
         {
             fieldName: 'Additional Data',
-            value:  '',
-            paramName: 'additionalData'
-        }
+            value: '',
+            paramName: 'additionalData',
+        },
     ]
 
     const headerbuttons = {

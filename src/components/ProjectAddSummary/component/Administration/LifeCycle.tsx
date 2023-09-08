@@ -16,12 +16,11 @@ import ProjectPayload from '@/object-types/CreateProjectPayload'
 
 
 interface Props{
-    token: string
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function Lifecycle({token, projectPayload, setProjectPayload}: Props) {
+export default function Lifecycle({projectPayload, setProjectPayload}: Props) {
 
     const t = useTranslations(COMMON_NAMESPACE)
     const PROJECT_STATE_INFO = `Active: \n Phaseout: \n Unknown:`

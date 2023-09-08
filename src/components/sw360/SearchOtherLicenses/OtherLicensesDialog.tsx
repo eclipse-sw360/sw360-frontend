@@ -32,7 +32,7 @@ interface Props {
 const OtherLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState([])
-    const [licenses, setLicenses] = useState([])
+    const [licenses] = useState([])
     const [licensesResponse, setLicensesResponse] = useState<Licenses>()
     const [licenseDatas, setLicenseDatas] = useState([])
 
@@ -44,34 +44,34 @@ const OtherLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) 
         setLicenseDatas(data)
     }
 
-    const fetchData: any = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else {
-            return []
-        }
-    }, [])
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                return []
+            }
+        },
+        [session.user.access_token]
+    )
 
     useEffect(() => {
         fetchData(`licenses`).then((licenses: any) => {
-            if(typeof licenses == "undefined") {
-                setData([]);
-                return;
+            if (typeof licenses == 'undefined') {
+                setData([])
+                return
             }
             if (
                 !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
             ) {
-                const data = licenses['_embedded']['sw360:licenses'].map((item: any) => [
-                    item,
-                    item.fullName,
-                ])
+                const data = licenses['_embedded']['sw360:licenses'].map((item: any) => [item, item.fullName])
                 setData(data)
             }
         })
-    }, [])
+    }, [fetchData])
 
     const handleClickSelectModerators = () => {
         selectLicenses(licensesResponse)
@@ -110,7 +110,11 @@ const OtherLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) 
                         </div>
                     </div>
                     <div className='row mt-3'>
-                        <SelectTableOtherLicenses licenseDatas={licenseDatas} setLicenses={getLicenses} fullnames={licenses} />
+                        <SelectTableOtherLicenses
+                            licenseDatas={licenseDatas}
+                            setLicenses={getLicenses}
+                            fullnames={licenses}
+                        />
                     </div>
                 </div>
             </Modal.Body>

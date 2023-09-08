@@ -7,65 +7,63 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
 import AddAdditionalRolesComponent from '@/components/ProjectAddSummary/component/AddAdditionalRoles'
 import AddKeyValueComponent from '@/components/ProjectAddSummary/component/AddKeyValue'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import GeneralInformation from "./component/Summary/GeneralInformation"
-import Roles from "./Roles/Roles"
-import ProjectPayload from "@/object-types/CreateProjectPayload"
+import GeneralInformation from './component/Summary/GeneralInformation'
+import Roles from './Roles/Roles'
+import ProjectPayload from '@/object-types/CreateProjectPayload'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useTranslations } from "next-intl"
+import { useTranslations } from 'next-intl'
 import Vendor from '@/object-types/Vendor'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
+import InputKeyValue from '@/object-types/InputKeyValue'
 
-interface Props{
-    token: string
+interface Props {
     vendor: Vendor
-    externalUrls: Input[]
-    externalIds: Input[]
-    additionalData: Input[]
+    externalUrls: InputKeyValue[]
+    externalIds: InputKeyValue[]
+    additionalData: InputKeyValue[]
     projectPayload: ProjectPayload
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    setExternalUrls: React.Dispatch<React.SetStateAction<Input[]>>
+    setExternalUrls: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setExternalUrlsData: AddtionalDataType
-    setExternalIds: React.Dispatch<React.SetStateAction<Input[]>>
+    setExternalIds: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setExternalIdsData: AddtionalDataType
-    setAdditionalData: React.Dispatch<React.SetStateAction<Input[]>>
+    setAdditionalData: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setAdditionalDataObject: AddtionalDataType
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function Summary({token,
-                                 vendor,
-                                 externalUrls,
-                                 externalIds,
-                                 additionalData,
-                                 projectPayload,
-                                 setVendor,
-                                 setExternalUrls,
-                                 setExternalUrlsData,
-                                 setExternalIds,
-                                 setExternalIdsData,
-                                 setAdditionalData,
-                                 setAdditionalDataObject,
-                                 setProjectPayload
-                                }: Props) {
-
+export default function Summary({
+    vendor,
+    externalUrls,
+    externalIds,
+    additionalData,
+    projectPayload,
+    setVendor,
+    setExternalUrls,
+    setExternalUrlsData,
+    setExternalIds,
+    setExternalIdsData,
+    setAdditionalData,
+    setAdditionalDataObject,
+    setProjectPayload,
+}: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
 
     return (
         <>
-            <div className="ms-1">
+            <div className='ms-1'>
                 <GeneralInformation
-                    token={token}
                     vendor={vendor}
                     setVendor={setVendor}
                     projectPayload={projectPayload}
                     setProjectPayload={setProjectPayload}
                 />
-                <div className="row mb-4">
+                <div className='row mb-4'>
                     <AddKeyValueComponent
                         header={t('External URLs')}
                         keyName={t('External URL')}
@@ -74,13 +72,11 @@ export default function Summary({token,
                         setObject={setExternalUrlsData}
                     />
                 </div>
-                <Roles/>
-                <div className="row mb-4">
-                    <AddAdditionalRolesComponent
-                        documentType={DocumentTypes.PROJECT}
-                    />
+                <Roles />
+                <div className='row mb-4'>
+                    <AddAdditionalRolesComponent documentType={DocumentTypes.PROJECT} />
                 </div>
-                <div className="row mb-4">
+                <div className='row mb-4'>
                     <AddKeyValueComponent
                         header={t('External Ids')}
                         keyName={t('External Id')}
@@ -89,7 +85,7 @@ export default function Summary({token,
                         setObject={setExternalIdsData}
                     />
                 </div>
-                <div className="row mb-4">
+                <div className='row mb-4'>
                     <AddKeyValueComponent
                         header={t('Additional Data')}
                         keyName={t('additional data')}

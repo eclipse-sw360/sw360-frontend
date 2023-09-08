@@ -68,7 +68,7 @@ const ReleaseSummary = ({
     setModerator,
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [currentDate, setCurrentDate] = useState(getDate())
+    const [currentDate] = useState(getDate())
     const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
     const handleClickSearchMainLicenses = useCallback(() => setDialogOpenMainLicenses(true), [])
     const [dialogOpenOtherLicenses, setDialogOpenOtherLicenses] = useState(false)
@@ -210,11 +210,17 @@ const ReleaseSummary = ({
                                 selectVendor={setVendorId}
                                 session={session}
                             />
-                            <div className="form-text" onClick={handleClearVendor}> <GiCancel /></div>
+                            <div className='form-text' onClick={handleClearVendor}>
+                                {' '}
+                                <GiCancel />
+                            </div>
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='name' className='form-label fw-bold'>
-                                {t('Name')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
+                                {t('Name')}{' '}
+                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'
@@ -233,7 +239,10 @@ const ReleaseSummary = ({
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='version' className='form-label fw-bold'>
-                                {t('Version')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
+                                {t('Version')}{' '}
+                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'

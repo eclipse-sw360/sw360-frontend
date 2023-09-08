@@ -28,25 +28,32 @@ const ResoucesUsing = ({ documentId, session, documentType, documentName }: Prop
     useEffect(() => {
         ApiUtils.GET(`${documentType}/usedBy/${documentId}`, session.user.access_token)
             .then((res) => res.json())
-            .then((resourcesUsing) => { setResourceUsing(resourcesUsing) })
-    }, [])
+            .then((resourcesUsing) => {
+                setResourceUsing(resourcesUsing)
+            })
+    }, [documentId, documentType, session])
 
     return (
-        (resourcesUsing && resourcesUsing._embedded)
-        &&
-        <>
-            {
-                (resourcesUsing._embedded['sw360:projects'] && resourcesUsing._embedded['sw360:projects'].length > 0) &&
-                <ProjectsUsing projectUsings={resourcesUsing._embedded['sw360:projects']}
-                    documentName={documentName}
-                    restrictedResource={resourcesUsing._embedded['sw360:restrictedResources'][0]}
-                />
-            }
-            {
-                (resourcesUsing._embedded['sw360:components'] && resourcesUsing._embedded['sw360:components'].length > 0) &&
-                <ComponentsUsing componentsUsing={resourcesUsing._embedded['sw360:components']} documentName={documentName}/>
-            }
-        </>
+        resourcesUsing &&
+        resourcesUsing._embedded && (
+            <>
+                {resourcesUsing._embedded['sw360:projects'] &&
+                    resourcesUsing._embedded['sw360:projects'].length > 0 && (
+                        <ProjectsUsing
+                            projectUsings={resourcesUsing._embedded['sw360:projects']}
+                            documentName={documentName}
+                            restrictedResource={resourcesUsing._embedded['sw360:restrictedResources'][0]}
+                        />
+                    )}
+                {resourcesUsing._embedded['sw360:components'] &&
+                    resourcesUsing._embedded['sw360:components'].length > 0 && (
+                        <ComponentsUsing
+                            componentsUsing={resourcesUsing._embedded['sw360:components']}
+                            documentName={documentName}
+                        />
+                    )}
+            </>
+        )
     )
 }
 

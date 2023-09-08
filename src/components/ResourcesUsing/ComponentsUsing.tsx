@@ -27,42 +27,42 @@ const ComponentsUsing = ({ componentsUsing, documentName }: Props) => {
     const columns = [
         {
             id: 'vendor',
-            name: t('Vendor')
+            name: t('Vendor'),
         },
         {
             id: 'name',
-            name: t('Name')
+            name: t('Name'),
         },
         {
             id: 'mainLicenses',
-            name: t('Main Licenses')
+            name: t('Main Licenses'),
         },
         {
             id: 'componentType',
-            name: t('Component Type')
-        }
+            name: t('Component Type'),
+        },
     ]
 
     useEffect(() => {
         const data = componentsUsing.map((component: any) => [
             component.defaultVendor?.shortName,
             _(
-                <Link key={component._links.self.href.split('/').at(-1)}
-                    href={`/components/detail/${component._links.self.href.split('/').at(-1)}`}>
+                <Link
+                    key={component._links.self.href.split('/').at(-1)}
+                    href={`/components/detail/${component._links.self.href.split('/').at(-1)}`}
+                >
                     {component.name}
                 </Link>
             ),
             component.mainLicenseIds.join(', '),
-            component.componentType
+            component.componentType,
         ])
         setTableData(data)
-    }, [])
+    }, [componentsUsing])
 
     return (
         <>
-            <h5 id={styles['upper-case-title']}>
-                {`${documentName} ${t('IS USED BY THE FOLLOWING COMPONENTS')}`}
-            </h5>
+            <h5 id={styles['upper-case-title']}>{`${documentName} ${t('IS USED BY THE FOLLOWING COMPONENTS')}`}</h5>
             <Table data={tableData} columns={columns} />
         </>
     )

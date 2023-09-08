@@ -13,10 +13,6 @@ import React, { useEffect, useState } from 'react'
 import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
-interface Components {
-    name: string
-}
-
 function RecentComponentsWidget() {
     const [data, setData] = useState([])
 

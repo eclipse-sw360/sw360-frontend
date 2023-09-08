@@ -10,7 +10,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { _, Table } from '../sw360'
+import { _, Table } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Alert } from 'react-bootstrap'
@@ -28,42 +28,40 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
     const columns = [
         {
             id: 'name',
-            name: t('Name')
+            name: t('Name'),
         },
         {
             id: 'businessUnit',
-            name: t('Group')
+            name: t('Group'),
         },
         {
             id: 'projectResponsible',
-            name: t('Responsible')
-        }
+            name: t('Responsible'),
+        },
     ]
 
     useEffect(() => {
         const data = projectUsings.map((project: any) => [
             _(
-                <Link key={project._links.self.href.split('/').at(-1)}
-                    href={`/projects/detail/${project._links.self.href.split('/').at(-1)}`}>
-                    {
-                        (project.version) ? `${project.name} (${project.version})` : project.name
-                    }
+                <Link
+                    key={project._links.self.href.split('/').at(-1)}
+                    href={`/projects/detail/${project._links.self.href.split('/').at(-1)}`}
+                >
+                    {project.version ? `${project.name} (${project.version})` : project.name}
                 </Link>
             ),
             project.businessUnit,
-            _(
-                <Link href={`mailTo:${project.projectResponsible}}`}>
-                    {project.projectResponsible}
-                </Link>
-            )
+            _(<Link href={`mailTo:${project.projectResponsible}}`}>{project.projectResponsible}</Link>),
         ])
         setTableData(data)
-    }, [])
+    }, [projectUsings])
 
     return (
         <>
             <Alert variant='primary'>
-                {`${documentName} is used by a total of ${restrictedResource.projects + projectUsings.length} (${projectUsings.length} visible / ${restrictedResource.projects} restricted) projects.`}
+                {`${documentName} is used by a total of ${restrictedResource.projects + projectUsings.length} (${
+                    projectUsings.length
+                } visible / ${restrictedResource.projects} restricted) projects.`}
             </Alert>
             <Table data={tableData} columns={columns} />
         </>

@@ -33,7 +33,7 @@ interface Props {
 const ContributorsDialog = ({ show, setShow, session, selectModerators }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
-    const [moderators, setModerators] = useState([])
+    const [moderators] = useState([])
     const [moderatorsResponse, setModeratorsResponse] = useState<Moderators>()
     const [users, setUsers] = useState([])
 
@@ -45,15 +45,18 @@ const ContributorsDialog = ({ show, setShow, session, selectModerators }: Props)
         setUsers(data)
     }
 
-    const fetchData: any = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else {
-            notFound()
-        }
-    }, [])
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                notFound()
+            }
+        },
+        [session]
+    )
 
     useEffect(() => {
         fetchData(`users`).then((users: any) => {
@@ -71,7 +74,7 @@ const ContributorsDialog = ({ show, setShow, session, selectModerators }: Props)
                 setData(data)
             }
         })
-    }, [])
+    }, [fetchData])
 
     const handleClickSelectModerators = () => {
         selectModerators(moderatorsResponse)
@@ -123,11 +126,7 @@ const ContributorsDialog = ({ show, setShow, session, selectModerators }: Props)
                 >
                     {t('Close')}
                 </Button>
-                <Button
-                    type='button'
-                    className={`btn btn-primary`}
-                    onClick={handleClickSelectModerators}
-                >
+                <Button type='button' className={`btn btn-primary`} onClick={handleClickSelectModerators}>
                     {t('Select User')}
                 </Button>
             </Modal.Footer>

@@ -33,7 +33,7 @@ interface Props {
 const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
-    const [moderators, setModerators] = useState([])
+    const [moderators] = useState([])
     const [moderatorsResponse, setModeratorsResponse] = useState<Moderators>()
     const [users, setUsers] = useState([])
 
@@ -45,15 +45,18 @@ const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) =
         setUsers(data)
     }
 
-    const fetchData: any = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else {
-            notFound()
-        }
-    }, [])
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                notFound()
+            }
+        },
+        [session.user.access_token]
+    )
 
     useEffect(() => {
         fetchData(`users`).then((users: any) => {
@@ -71,7 +74,7 @@ const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) =
                 setData(data)
             }
         })
-    }, [])
+    }, [fetchData])
 
     const handleClickSelectModerators = () => {
         selectModerators(moderatorsResponse)
@@ -97,11 +100,7 @@ const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) =
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <button
-                                type='button'
-                                className='btn btn-secondary me-2'
-                                onClick={searchVendor}
-                            >
+                            <button type='button' className='btn btn-secondary me-2' onClick={searchVendor}>
                                 {t('Search')}
                             </button>
                             <button type='button' className='btn btn-secondary me-2'>
@@ -126,11 +125,7 @@ const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) =
                 <Button type='button' className='btn btn-secondary'>
                     {t('Add User')}
                 </Button>
-                <Button
-                    type='button'
-                    className='btn btn-primary'
-                    onClick={handleClickSelectModerators}
-                >
+                <Button type='button' className='btn btn-primary' onClick={handleClickSelectModerators}>
                     {t('Select User')}
                 </Button>
             </Modal.Footer>

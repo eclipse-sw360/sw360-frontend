@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Form from 'react-bootstrap/Form'
 import { useEffect, useState } from 'react'
 import { FaFileAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
@@ -75,7 +74,7 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
     return (
         <>
             <div className='row'>
-                <Table data={changeLogData} search={true} columns={columns} selector={true}/>
+                <Table data={changeLogData} search={true} columns={columns} selector={true} />
             </div>
         </>
     )

@@ -30,6 +30,7 @@ import ActionType from '@/object-types/enums/ActionType'
 import SearchUsersModalComponent from '@/components/sw360/SearchUsersModal/SearchUsersModal'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
+import InputKeyValue from '@/object-types/InputKeyValue'
 
 interface Props {
     session?: Session
@@ -47,9 +48,9 @@ export default function ComponentEditSummary({
     attachmentData,
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [roles, setRoles] = useState<Input[]>([])
-    const [externalIds, setExternalIds] = useState<Input[]>([])
-    const [addtionalData, setAddtionalData] = useState<Input[]>([])
+    const [roles, setRoles] = useState<InputKeyValue[]>([])
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
+    const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -135,9 +136,9 @@ export default function ComponentEditSummary({
 
     const convertObjectToMap = (data: string) => {
         const map = new Map(Object.entries(data))
-        const inputs: Input[] = []
+        const inputs: InputKeyValue[] = []
         map.forEach((value, key) => {
-            const input: Input = {
+            const input: InputKeyValue = {
                 key: key,
                 value: value,
             }
@@ -150,11 +151,11 @@ export default function ComponentEditSummary({
         if (data === undefined) {
             return null
         }
-        const inputRoles: Input[] = []
+        const inputRoles: InputKeyValue[] = []
         const mapRoles = new Map(Object.entries(data))
         mapRoles.forEach((value, key) => {
             for (let index = 0; index < value.length; index++) {
-                const input: Input = {
+                const input: InputKeyValue = {
                     key: key,
                     value: value.at(index),
                 }
@@ -239,7 +240,7 @@ export default function ComponentEditSummary({
             setComponentPayload(componentPayloadData)
             setComponentData(componentPayloadData)
         })
-    }, [componentId, fetchData])
+    }, [componentId, fetchData, setComponentData, attachmentData])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -265,7 +266,7 @@ export default function ComponentEditSummary({
         })
     }
 
-    const setDataRoles = (roles: Input[]) => {
+    const setDataRoles = (roles: InputKeyValue[]) => {
         const roleDatas = convertRoles(roles)
         setComponentPayload({
             ...componentPayload,
@@ -277,7 +278,7 @@ export default function ComponentEditSummary({
         })
     }
 
-    const convertRoles = (datas: Input[]) => {
+    const convertRoles = (datas: InputKeyValue[]) => {
         if (datas === null) {
             return null
         }

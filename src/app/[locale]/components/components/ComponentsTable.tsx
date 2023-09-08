@@ -63,7 +63,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         setLoading(true)
         const searchParams = Object.fromEntries(params)
         const queryUrl = CommonUtils.createUrlWithParams('components', searchParams)
-        const data: any = []
+        const data: Array<unknown> = []
 
         const parseTableRowData = (item: any) => {
             data.push([
@@ -90,7 +90,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         return () => {
             controller.abort()
         }
-    }, [fetchData, params])
+    }, [fetchData, params, setNumberOfComponent])
 
     const columns = [
         {
@@ -116,7 +116,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
                 licenseIds.length > 0 &&
                 _(
                     Object.entries(licenseIds)
-                        .map(([index, item]: any) => (
+                        .map(([, item]: any) => (
                             <Link key={item} className='link' href={'/licenses/' + item}>
                                 {' '}
                                 {item}{' '}
@@ -151,7 +151,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         <>
             <div className='row'>
                 {loading == false ? (
-                    <Table data={componentData} columns={columns} selector={true}/>
+                    <Table data={componentData} columns={columns} selector={true} />
                 ) : (
                     <div className='col-12' style={{ textAlign: 'center' }}>
                         <PageSpinner />

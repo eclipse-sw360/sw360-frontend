@@ -22,6 +22,7 @@ import Vendor from '@/object-types/Vendor'
 import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
 import { useState } from 'react'
+import InputKeyValue from '@/object-types/InputKeyValue'
 
 interface Props {
     session?: Session
@@ -55,11 +56,11 @@ export default function ReleaseAddSummary({
     setModerator,
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [roles, setRoles] = useState<Input[]>([])
-    const [externalIds, setExternalIds] = useState<Input[]>([])
-    const [addtionalData, setAddtionalData] = useState<Input[]>([])
+    const [roles, setRoles] = useState<InputKeyValue[]>([])
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
+    const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
 
-    const setDataRoles = (roles: Input[]) => {
+    const setDataRoles = (roles: InputKeyValue[]) => {
         const roleDatas = convertRoles(roles)
         setReleasePayload({
             ...releasePayload,
@@ -155,10 +156,7 @@ export default function ReleaseAddSummary({
                             setMap={setDataAddtionalData}
                         />
                     </div>
-                    <ReleaseRepository
-                        releasePayload={releasePayload}
-                        setReleasePayload={setReleasePayload}
-                    />
+                    <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
                 </div>
             </form>
         </>

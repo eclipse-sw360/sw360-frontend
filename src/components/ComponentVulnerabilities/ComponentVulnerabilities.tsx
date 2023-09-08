@@ -43,38 +43,40 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
             if (i == index) {
                 rowData[0] = {
                     ...rowData[0],
-                    checked: !checked
+                    checked: !checked,
                 }
             }
-            return rowData;
-        })
-
-        setData(newData);
-    }
-
-    const handleCheckAll = () => {
-        const newData = Object.entries(data).map(([i, rowData]: any) => {
-            rowData[0] = {
-                ...rowData[0],
-                checked: !checkAll
-            }
-            return rowData;
+            return rowData
         })
 
         setData(newData)
-        setCheckAll((prev) => !prev);
+    }
+
+    const handleCheckAll = () => {
+        const newData = Object.entries(data).map(([, rowData]: any) => {
+            rowData[0] = {
+                ...rowData[0],
+                checked: !checkAll,
+            }
+            return rowData
+        })
+
+        setData(newData)
+        setCheckAll((prev) => !prev)
     }
 
     const handleClick = () => {
-        const selectingVulner = Object.entries(data).map(([index, item]: any) => {
-            if (item[0].checked === true) {
-                return {
-                    releaseId: item[0].releaseId,
-                    vulnerExternalId: item[0].vulnerExternalId,
-                    index: index
+        const selectingVulner = Object.entries(data)
+            .map(([index, item]: any) => {
+                if (item[0].checked === true) {
+                    return {
+                        releaseId: item[0].releaseId,
+                        vulnerExternalId: item[0].vulnerExternalId,
+                        index: index,
+                    }
                 }
-            }
-        }).filter(element => element !== undefined)
+            })
+            .filter((element) => element !== undefined)
 
         setSelectedVulner(selectingVulner)
         setDialogOpen(true)
@@ -85,8 +87,13 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
             id: 'check',
             name: _(<Form.Check defaultChecked={checkAll} type='checkbox' onClick={handleCheckAll}></Form.Check>),
             formatter: ({ checked, index }: any) =>
-                _(<Form.Check defaultChecked={checked}
-                    onClick={() => handleCheckBox(index, checked)} type='checkbox'></Form.Check>),
+                _(
+                    <Form.Check
+                        defaultChecked={checked}
+                        onClick={() => handleCheckBox(index, checked)}
+                        type='checkbox'
+                    ></Form.Check>
+                ),
             sort: false,
         },
         {
@@ -126,7 +133,7 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
             formatter: (verificationStateInfos: Array<VerificationStateInfo>) =>
                 _(
                     <VerificationTooltip verificationStateInfos={verificationStateInfos}>
-                        <FaInfoCircle style={{marginRight: '5px', color: 'gray', width: '15px', height: '15px'}}/>
+                        <FaInfoCircle style={{ marginRight: '5px', color: 'gray', width: '15px', height: '15px' }} />
                         {t(verificationStateInfos.at(-1).verificationState)}
                     </VerificationTooltip>
                 ),
@@ -141,7 +148,7 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
                 index: index,
                 checked: false,
                 releaseId: item.releaseVulnerabilityRelation.releaseId,
-                vulnerExternalId: item.externalId
+                vulnerExternalId: item.externalId,
             },
             item.intReleaseName,
             [item.externalId, item.releaseVulnerabilityRelation.vulnerabilityId],
@@ -151,9 +158,8 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
             item.releaseVulnerabilityRelation.verificationStateInfo,
             item.projectAction,
         ])
-        setData(mappedData);
-    }, [vulnerData.length])
-
+        setData(mappedData)
+    }, [vulnerData])
 
     return (
         <div className='row'>
@@ -174,7 +180,7 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
                 >
                     {t('Vulnerabilities')}
                 </h5>
-                <Table columns={columns} data={data} selector={true}/>
+                <Table columns={columns} data={data} selector={true} />
                 <Form.Group className='mb-3' controlId='createdOn'>
                     <Form.Label>
                         <b>{t('Change verification state of selected vulnerabilities to')}</b>
@@ -204,8 +210,13 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
                 </Form.Group>
                 <VulnerabilitiesMatchingStatistics vulnerData={vulnerData} />
             </div>
-            <ChangeStateDialog show={dialogOpen} setShow={setDialogOpen} state={state}
-                selectedVulner={selectedVulner} session={session} />
+            <ChangeStateDialog
+                show={dialogOpen}
+                setShow={setDialogOpen}
+                state={state}
+                selectedVulner={selectedVulner}
+                session={session}
+            />
         </div>
     )
 }

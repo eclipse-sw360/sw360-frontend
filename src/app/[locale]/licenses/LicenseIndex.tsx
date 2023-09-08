@@ -46,7 +46,7 @@ function LicensesPage({ session }: Props) {
     const [licenseData, setLicenseData] = useState([])
 
     const fetchData: any = useCallback(
-        async (queryUrl: string, signal: any) => {
+        async (queryUrl: string, signal: unknown) => {
             const licensesResponse = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
             if (licensesResponse.status == HttpStatus.OK) {
                 const licenses = await licensesResponse.json()

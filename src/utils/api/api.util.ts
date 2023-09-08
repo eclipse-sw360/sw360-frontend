@@ -8,55 +8,66 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { SW360_API_URL } from '@/utils/env';
-import RequestContent from '@/object-types/RequestContent';
+import { SW360_API_URL } from '@/utils/env'
+import RequestContent from '@/object-types/RequestContent'
 
-const base = SW360_API_URL + '/resource/api';
+const base = SW360_API_URL + '/resource/api'
 
-async function send({ method, path, data, token, signal }: { method: string, path: string, data: object | null, token: string, signal?: any }): Promise<any> {
-	const request_content: RequestContent = { method, headers: { Accept: 'application/*' }, body: null };
+async function send({
+    method,
+    path,
+    data,
+    token,
+    signal,
+}: {
+    method: string
+    path: string
+    data: object | null
+    token: string
+    signal?: unknown
+}): Promise<Response> {
+    const request_content: RequestContent = { method, headers: { Accept: 'application/*' }, body: null }
 
-	if (data) {
-		if (data instanceof FormData) {
-			request_content['body'] = data;
-		} else {
-			request_content.headers['Content-Type'] = 'application/json';
-			request_content['body'] = JSON.stringify(data);
-		}
-	}
+    if (data) {
+        if (data instanceof FormData) {
+            request_content['body'] = data
+        } else {
+            request_content.headers['Content-Type'] = 'application/json'
+            request_content['body'] = JSON.stringify(data)
+        }
+    }
 
-	if (token) {
-		request_content.headers['Authorization'] = `Bearer ${token}`;
-	}
+    if (token) {
+        request_content.headers['Authorization'] = `Bearer ${token}`
+    }
 
-	if (signal) {
-		request_content.signal = signal;
-	}
+    if (signal) {
+        request_content.signal = signal
+    }
 
-	return fetch(`${base}/${path}`, request_content)
-		.then((r) => r)
+    return fetch(`${base}/${path}`, request_content).then((r) => r)
 }
 
-function GET(path: string, token: string, signal?: any) {
-	return send({ method: 'GET', path, token, data: null, signal });
+function GET(path: string, token: string, signal?: unknown) {
+    return send({ method: 'GET', path, token, data: null, signal })
 }
 
 function DELETE(path: string, token: string) {
-	return send({ method: 'DELETE', path, token, data: null });
+    return send({ method: 'DELETE', path, token, data: null })
 }
 
 function POST(path: string, data: object, token: string) {
-	return send({ method: 'POST', path, data, token });
+    return send({ method: 'POST', path, data, token })
 }
 
 function PUT(path: string, data: object, token: string) {
-	return send({ method: 'PUT', path, data, token });
+    return send({ method: 'PUT', path, data, token })
 }
 
 function PATCH(path: string, data: object, token: string) {
-	return send({ method: 'PATCH', path, data, token });
+    return send({ method: 'PATCH', path, data, token })
 }
 
-const ApiUtils = { GET, DELETE, POST, PUT, PATCH };
+const ApiUtils = { GET, DELETE, POST, PUT, PATCH }
 
 export default ApiUtils

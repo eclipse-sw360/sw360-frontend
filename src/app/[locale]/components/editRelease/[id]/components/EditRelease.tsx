@@ -133,7 +133,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                 setClearingInformation(clearingInformation)
             }
         })
-    }, [releaseId])
+    }, [releaseId, fetchData])
 
     const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
         name: '',

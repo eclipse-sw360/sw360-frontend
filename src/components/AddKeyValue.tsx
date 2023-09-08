@@ -11,21 +11,21 @@ import React from 'react'
 import styles from '@/css/AddKeyValue.module.css'
 import { FaTrashAlt } from 'react-icons/fa'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
+import InputKeyValue from '@/object-types/InputKeyValue'
 
 interface Props {
     header: string
     keyName: string
-    setData?: React.Dispatch<React.SetStateAction<Input[]>>
-    data?: Input[]
+    setData?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
+    data?: InputKeyValue[]
     setMap?: AddtionalDataType
 }
 
 export default function AddKeyValueComponent(props: Props) {
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const handleInputKeyValueChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: Input[] = [...props.data]
-        list[index][name as keyof Input] = value
+        const list: InputKeyValue[] = [...props.data]
+        list[index][name as keyof InputKeyValue] = value
         const map = new Map<string, string>()
         list.forEach((item) => {
             map.set(item.key, item.value)
@@ -35,7 +35,7 @@ export default function AddKeyValueComponent(props: Props) {
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [... props.data]
+        const list = [...props.data]
         list.splice(index, 1)
         props.setData(list)
         const map = new Map<string, string>()
@@ -46,7 +46,7 @@ export default function AddKeyValueComponent(props: Props) {
     }
 
     const handleAddClick = () => {
-        props.setData([... props.data, { key: '', value: '' }])
+        props.setData([...props.data, { key: '', value: '' }])
     }
 
     return (
@@ -63,7 +63,7 @@ export default function AddKeyValueComponent(props: Props) {
                                     name='key'
                                     value={elem.key}
                                     type='text'
-                                    onChange={(e) => handleInputChange(e, j)}
+                                    onChange={(e) => handleInputKeyValueChange(e, j)}
                                     className='form-control'
                                     placeholder={`Enter ${props.keyName.toLowerCase()} key`}
                                     required
@@ -75,7 +75,7 @@ export default function AddKeyValueComponent(props: Props) {
                                     name='value'
                                     value={elem.value}
                                     type='text'
-                                    onChange={(e) => handleInputChange(e, j)}
+                                    onChange={(e) => handleInputKeyValueChange(e, j)}
                                     className='form-control'
                                     placeholder={`Enter ${props.keyName.toLowerCase()} value`}
                                     required
@@ -83,8 +83,10 @@ export default function AddKeyValueComponent(props: Props) {
                                 />
                             </div>
                             <div className='col-lg-2'>
-                                    <FaTrashAlt className="btn-icon bi bi-trash3-fill"
-                                    onClick={() => handleRemoveClick(j)}/>
+                                <FaTrashAlt
+                                    className='btn-icon bi bi-trash3-fill'
+                                    onClick={() => handleRemoveClick(j)}
+                                />
                             </div>
                         </div>
                     )
