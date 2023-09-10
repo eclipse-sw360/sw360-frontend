@@ -15,7 +15,11 @@ const quickfilter = {
     component: QuickFilter,
 }
 
-const Template = (args: QuiickFilterProps) => <QuickFilter {...args} />
+const Template = (args: QuiickFilterProps) => (
+    <div style={{ width: '10%' }}>
+        <QuickFilter {...args} />
+    </div>
+)
 
 export const Primary = Template.bind({})
 
