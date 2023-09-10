@@ -30,8 +30,10 @@ import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import COTSDetails from '@/object-types/COTSDetails'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
-import EditECCDetails from './ECCDetails/EditECCDetails'
 import ECCInformation from '@/object-types/ECCInformation'
+import EditClearingDetails from './EditClearingDetails'
+import ClearingInformation from '@/object-types/ClearingInformation'
+import EditECCDetails from './EditECCDetails'
 
 interface Props {
     session?: Session
@@ -40,7 +42,7 @@ interface Props {
 
 const EditRelease = ({ session, releaseId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [tabList, setTabList] = useState(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
+    const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
     const [release, setRelease] = useState<any>(undefined)
 
     const fetchData: any = useCallback(
@@ -61,6 +63,10 @@ const EditRelease = ({ session, releaseId }: Props) => {
     useEffect(() => {
         fetchData(`releases/${releaseId}`).then((release: any) => {
             setRelease(release)
+
+            if (release.componentType === 'COTS') {
+                setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
+            }
 
             if (typeof release.eccInformation !== 'undefined') {
                 const eccInformation: ECCInformation = {
@@ -94,6 +100,37 @@ const EditRelease = ({ session, releaseId }: Props) => {
                 }
                 setCotsResponsible(cotsResponsible)
                 setCotsDetails(cotsDetails)
+            }
+
+            if (typeof release.clearingInformation !== 'undefined') {
+                const clearingInformation: ClearingInformation = {
+                    externalSupplierID: release.clearingInformation.externalSupplierID,
+                    additionalRequestInfo: release.clearingInformation.additionalRequestInfo,
+                    evaluated: release.clearingInformation.evaluated,
+                    procStart: release.clearingInformation.procStart,
+                    requestID: release.clearingInformation.requestID,
+                    binariesOriginalFromCommunity: release.clearingInformation.binariesOriginalFromCommunity,
+                    binariesSelfMade: release.clearingInformation.binariesSelfMade,
+                    componentLicenseInformation: release.clearingInformation.componentLicenseInformation,
+                    sourceCodeDelivery: release.clearingInformation.sourceCodeDelivery,
+                    sourceCodeOriginalFromCommunity: release.clearingInformation.sourceCodeOriginalFromCommunity,
+                    sourceCodeToolMade: release.clearingInformation.sourceCodeToolMade,
+                    sourceCodeSelfMade: release.clearingInformation.sourceCodeSelfMade,
+                    sourceCodeCotsAvailable: release.clearingInformation.sourceCodeCotsAvailable,
+                    screenshotOfWebSite: release.clearingInformation.screenshotOfWebSite,
+                    finalizedLicenseScanReport: release.clearingInformation.finalizedLicenseScanReport,
+                    licenseScanReportResult: release.clearingInformation.licenseScanReportResult,
+                    legalEvaluation: release.clearingInformation.legalEvaluation,
+                    licenseAgreement: release.clearingInformation.licenseAgreement,
+                    scanned: release.clearingInformation.scanned,
+                    componentClearingReport: release.clearingInformation.componentClearingReport,
+                    clearingStandard: release.clearingInformation.clearingStandard,
+                    readmeOssAvailable: release.clearingInformation.readmeOssAvailable,
+                    comment: release.clearingInformation.comment,
+                    countOfSecurityVn: release.clearingInformation.countOfSecurityVn,
+                    externalUrl: release.clearingInformation.externalUrl,
+                }
+                setClearingInformation(clearingInformation)
             }
         })
     }, [releaseId])
@@ -149,6 +186,34 @@ const EditRelease = ({ session, releaseId }: Props) => {
         cotsResponsible: '',
         clearingDeadline: '',
         sourceCodeAvailable: false,
+    })
+
+    const [clearingInformation, setClearingInformation] = useState<ClearingInformation>({
+        externalSupplierID: '',
+        additionalRequestInfo: '',
+        evaluated: '',
+        procStart: '',
+        requestID: '',
+        binariesOriginalFromCommunity: false,
+        binariesSelfMade: false,
+        componentLicenseInformation: false,
+        sourceCodeDelivery: false,
+        sourceCodeOriginalFromCommunity: false,
+        sourceCodeToolMade: false,
+        sourceCodeSelfMade: false,
+        sourceCodeCotsAvailable: false,
+        screenshotOfWebSite: false,
+        finalizedLicenseScanReport: false,
+        licenseScanReportResult: false,
+        legalEvaluation: false,
+        licenseAgreement: false,
+        scanned: '',
+        componentClearingReport: false,
+        clearingStandard: '',
+        readmeOssAvailable: false,
+        comment: '',
+        countOfSecurityVn: 0,
+        externalUrl: '',
     })
 
     const [vendor, setVendor] = useState<Vendor>({
@@ -221,6 +286,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 setModerator={setModerator}
                                 cotsDetails={cotsDetails}
                                 eccInformation={eccInformation}
+                                clearingInformation={clearingInformation}
                             />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
@@ -228,6 +294,12 @@ const EditRelease = ({ session, releaseId }: Props) => {
                                 actionType={ActionType.EDIT}
                                 session={session}
                                 release={release}
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                            />
+                        </div>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
+                            <EditClearingDetails
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                             />

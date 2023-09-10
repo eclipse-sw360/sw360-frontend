@@ -10,7 +10,7 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-import styles from './EditECCDetails.module.css'
+import styles from '../EditRelease.module.css'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiInfoCircle } from 'react-icons/bi'

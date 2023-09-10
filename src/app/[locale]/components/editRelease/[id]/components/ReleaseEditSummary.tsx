@@ -15,6 +15,7 @@ import AddKeyValueComponent from '@/components/AddKeyValue'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import COTSDetails from '@/object-types/COTSDetails'
+import ClearingInformation from '@/object-types/ClearingInformation'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ECCInformation from '@/object-types/ECCInformation'
 import Licenses from '@/object-types/Licenses'
@@ -50,6 +51,7 @@ interface Props {
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
     cotsDetails: COTSDetails
     eccInformation: ECCInformation
+    clearingInformation: ClearingInformation
 }
 
 export default function ReleaseEditSummary({
@@ -70,7 +72,8 @@ export default function ReleaseEditSummary({
     moderator,
     setModerator,
     cotsDetails,
-    eccInformation
+    eccInformation,
+    clearingInformation
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [roles, setRoles] = useState<Input[]>([])
@@ -292,7 +295,8 @@ export default function ReleaseEditSummary({
                 repository: release.repository,
                 releaseIdToRelationship: release.releaseIdToRelationship,
                 cotsDetails: cotsDetails,
-                eccInformation: eccInformation
+                eccInformation: eccInformation,
+                clearingInformation: clearingInformation
             }
             setReleasePayload(releasePayload)
     }, [releaseId, fetchData])
