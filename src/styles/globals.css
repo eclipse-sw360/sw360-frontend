@@ -480,3 +480,28 @@ th {
     color: white !important;
 }
 
+.capsule-left {
+    border-top-right-radius: 0%;
+    border-bottom-right-radius: 0%; 
+}
+
+.capsule-right {
+    border-top-left-radius: 0%;
+    border-bottom-left-radius: 0%;   
+}
+
+.bg-success {
+    background-color: #68c17c !important;
+}
+
+.bg-danger {
+    background-color: #e6717c !important;
+}
+
+.bg-secondary {
+    background-color: #dee2e6 !important;
+}
+
+.bg-warning {
+    background-color: #ffd350 !important;
+}
