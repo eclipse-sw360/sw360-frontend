@@ -12,7 +12,6 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@/styles/globals.css'
 import '@/styles/auth.css'
 import '@/styles/gridjs/sw360.css'
-import 'react-toastify/dist/ReactToastify.css'
 import { Providers } from '../provider'
 import React, { ReactNode } from 'react'
 

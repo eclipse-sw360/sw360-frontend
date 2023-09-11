@@ -14,7 +14,6 @@ import React, { useCallback, useState } from 'react'
 import { VendorDialog } from '@/components/sw360'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
-import 'react-toastify/dist/ReactToastify.css'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -40,7 +39,7 @@ const GeneralInfoComponent = ({
     setVendor,
     componentData,
     setComponentData,
-    actionType
+    actionType,
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
@@ -52,10 +51,10 @@ const GeneralInfoComponent = ({
             [e.target.name]: e.target.value,
         })
         actionType === ActionType.EDIT &&
-        setComponentData({
-            ...componentData,
-            [e.target.name]: e.target.value,
-        })
+            setComponentData({
+                ...componentData,
+                [e.target.name]: e.target.value,
+            })
     }
 
     const setCategoriesData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
@@ -65,10 +64,10 @@ const GeneralInfoComponent = ({
             categories: data,
         })
         actionType === ActionType.EDIT &&
-        setComponentData({
-            ...componentData,
-            categories: data,
-        })
+            setComponentData({
+                ...componentData,
+                categories: data,
+            })
     }
 
     const splitValueCategories = (valueCatergories: string) => {
@@ -86,10 +85,10 @@ const GeneralInfoComponent = ({
             defaultVendorId: vendorResponse.id,
         })
         actionType === ActionType.EDIT &&
-        setComponentData({
-            ...componentData,
-            defaultVendorId: vendorResponse.id,
-        })
+            setComponentData({
+                ...componentData,
+                defaultVendorId: vendorResponse.id,
+            })
     }
 
     const handleClearVendor = () => {
@@ -106,7 +105,7 @@ const GeneralInfoComponent = ({
 
     return (
         <>
-            <div className='col' style={{padding:'0px 12px'}}>
+            <div className='col' style={{ padding: '0px 12px' }}>
                 <div className='row mb-4'>
                     <div className={`${styles['header']} mb-2`}>
                         <p className='fw-bold mt-3'>{t('General Information')}</p>
@@ -114,7 +113,10 @@ const GeneralInfoComponent = ({
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='name' className='form-label fw-bold'>
-                                {t('Name')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
+                                {t('Name')}{' '}
+                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'
@@ -146,7 +148,10 @@ const GeneralInfoComponent = ({
                         </div>
                         <div className='col-lg-4'>
                             <label htmlFor='categories' className='form-label fw-bold'>
-                                {t('Categories')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
+                                {t('Categories')}{' '}
+                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'
@@ -165,7 +170,10 @@ const GeneralInfoComponent = ({
                     <div className='row'>
                         <div className='col-lg-4'>
                             <label htmlFor='component_type' className='form-label fw-bold'>
-                                {t('Component Type')} <span className='text-red' style={{color: '#F7941E'}}>*</span>
+                                {t('Component Type')}{' '}
+                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                    *
+                                </span>
                             </label>
                             <select
                                 className='form-select'

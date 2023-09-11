@@ -12,6 +12,9 @@
         "project": true,
         "tsconfigRootDir": "__dirname"
     },
-    "rules": { "tsdoc/syntax": "warn" },
+    "rules": {
+        "tsdoc/syntax": "warn",
+        "@typescript-eslint/no-explicit-any": ["warn", { "fixToUnknown": true }]
+    },
     "root": true
 }
