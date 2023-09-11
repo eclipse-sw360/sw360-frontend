@@ -31,7 +31,7 @@ interface Props {
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const LinkedReleases = ({ session, release, actionType, releasePayload, setReleasePayload}: Props) => {
+const LinkedReleases = ({ session, release, actionType, releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
@@ -60,8 +60,7 @@ const LinkedReleases = ({ session, release, actionType, releasePayload, setRelea
                 setReleaseLinks(linkedReleases)
             }
         }
-    }, [])
-
+    }, [actionType, release])
 
     return (
         <>
@@ -76,7 +75,10 @@ const LinkedReleases = ({ session, release, actionType, releasePayload, setRelea
                     releasePayload={releasePayload}
                     setReleasePayload={setReleasePayload}
                 />
-                <div className={`row ${styles['attachment-table']}`} style={{ padding: '25px',fontSize: '0.875rem', paddingTop: '1px' }}>
+                <div
+                    className={`row ${styles['attachment-table']}`}
+                    style={{ padding: '25px', fontSize: '0.875rem', paddingTop: '1px' }}
+                >
                     <TitleLinkedReleases />
                     <TableLinkedReleases
                         releaseLinks={releaseLinks}

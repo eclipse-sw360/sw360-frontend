@@ -7,47 +7,50 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
 import { Col, Row, ListGroup, Tab, Button } from 'react-bootstrap'
-import Summary from "@/components/ProjectAddSummary/Summary"
+import Summary from '@/components/ProjectAddSummary/Summary'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import { ToastContainer, Toast } from 'react-bootstrap'
+import { ToastContainer } from 'react-bootstrap'
 import ApiUtils from '@/utils/api/api.util'
-import ProjectPayload from "@/object-types/CreateProjectPayload"
+import ProjectPayload from '@/object-types/CreateProjectPayload'
 import { useState } from 'react'
 import { AUTH_TOKEN } from '@/utils/env'
 import Vendor from '@/object-types/Vendor'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 import ToastData from '@/object-types/ToastData'
-
-
-
+import InputKeyValue from '@/object-types/InputKeyValue'
 
 export default function AddProjects() {
-
-    const router = useRouter();
+    const router = useRouter()
     const t = useTranslations(COMMON_NAMESPACE)
-    const [vendor, setVendor] = useState<Vendor> ({
+    const [vendor, setVendor] = useState<Vendor>({
         id: '',
-        fullName: ''
+        fullName: '',
     })
-    const [externalUrls, setExternalUrls] = useState<Input[]>([{
-        key: '',
-        value:''
-    }])
-    const [externalIds, setExternalIds] = useState<Input[]>([{
-        key: '',
-        value:''
-    }])
-    const [additionalData, setAdditionalData] = useState<Input[]>([{
-        key: '',
-        value:''
-    }])
+    const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([
+        {
+            key: '',
+            value: '',
+        },
+    ])
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([
+        {
+            key: '',
+            value: '',
+        },
+    ])
+    const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([
+        {
+            key: '',
+            value: '',
+        },
+    ])
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
         description: '',
@@ -66,34 +69,33 @@ export default function AddProjects() {
         moderators: null,
         contributors: null,
         clearingState: 'OPEN',
-        businessUnit : 'CT',
-        preevaluationDeadline : '',
-        clearingSummary : '',
-        specialRisksOSS : '',
-        generalRisks3rdParty : '',
-        specialRisks3rdParty : '',
-        deliveryChannels : '',
-        remarksAdditionalRequirements : '',
-        systemTestStart : '',
-        systemTestEnd : '',
-        deliveryStart : '',
-        licenseInfoHeaderText: ''
-    });
+        businessUnit: 'CT',
+        preevaluationDeadline: '',
+        clearingSummary: '',
+        specialRisksOSS: '',
+        generalRisks3rdParty: '',
+        specialRisks3rdParty: '',
+        deliveryChannels: '',
+        remarksAdditionalRequirements: '',
+        systemTestStart: '',
+        systemTestEnd: '',
+        deliveryStart: '',
+        licenseInfoHeaderText: '',
+    })
     const [toastData, setToastData] = useState<ToastData>({
-                            show: false,
-                            type: '',
-                            message: '',
-                            contextual: ''
-                        });
+        show: false,
+        type: '',
+        message: '',
+        contextual: '',
+    })
 
-    const alert = (show_data: boolean, status_type:string, message: string, contextual: string) =>{
-
+    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
         setToastData({
             show: show_data,
             type: status_type,
             message: message,
-            contextual: contextual
-          });
+            contextual: contextual,
+        })
     }
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
@@ -120,15 +122,12 @@ export default function AddProjects() {
         })
     }
 
-
     const createProject = async () => {
-        const response = await ApiUtils.POST('projects',
-                                              projectPayload,
-                                              AUTH_TOKEN)
+        const response = await ApiUtils.POST('projects', projectPayload, AUTH_TOKEN)
 
         if (response.status == HttpStatus.CREATED) {
-            const responseData = await response.json()
-            alert(true, 'success', t('Your project is created'),'success')
+            await response.json()
+            alert(true, 'success', t('Your project is created'), 'success')
             // router.push('/projects')
         } else {
             alert(true, 'error', t('There are some errors while creating project'), 'danger')
@@ -137,14 +136,12 @@ export default function AddProjects() {
     }
 
     const handleCancelClick = () => {
-
         router.push('/projects')
     }
 
     return (
         <>
-
-        <form
+            <form
                 action=''
                 id='form_submit'
                 method='post'
@@ -152,86 +149,89 @@ export default function AddProjects() {
                     event.preventDefault()
                 }}
             >
-            <ToastContainer position='top-start'>
-                <ToastMessage
-                    show={toastData.show}
-                    type={toastData.type}
-                    message={toastData.message}
-                    contextual={toastData.contextual}
-                    onClose={() => setToastData({ ...toastData, show: false })}
-                    setShowToast={setToastData}
-                />
-            </ToastContainer>
-            <div className="ms-5 mt-2">
-                <Tab.Container defaultActiveKey="summary">
-                    <Row>
-                        <Col sm="auto" className="me-3">
-                            <ListGroup>
-                                <ListGroup.Item action eventKey="summary">
-                                    <div className="my-2">{t('Summary')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item action eventKey="administration">
-                                    <div className="my-2">{t('Administration')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item action eventKey="linkedProjects">
-                                    <div className="my-2">{t('Linked Releases and Projects')}</div>
-                                </ListGroup.Item>
-                            </ListGroup>
-                        </Col>
-                        <Col className="me-3">
-                            <Row className="d-flex justify-content-between">
-                                <Col lg={3}>
-                                    <Row>
-                                        <Button variant="primary"
+                <ToastContainer position='top-start'>
+                    <ToastMessage
+                        show={toastData.show}
+                        type={toastData.type}
+                        message={toastData.message}
+                        contextual={toastData.contextual}
+                        onClose={() => setToastData({ ...toastData, show: false })}
+                        setShowToast={setToastData}
+                    />
+                </ToastContainer>
+                <div className='ms-5 mt-2'>
+                    <Tab.Container defaultActiveKey='summary'>
+                        <Row>
+                            <Col sm='auto' className='me-3'>
+                                <ListGroup>
+                                    <ListGroup.Item action eventKey='summary'>
+                                        <div className='my-2'>{t('Summary')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='administration'>
+                                        <div className='my-2'>{t('Administration')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='linkedProjects'>
+                                        <div className='my-2'>{t('Linked Releases and Projects')}</div>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Col>
+                            <Col className='me-3'>
+                                <Row className='d-flex justify-content-between'>
+                                    <Col lg={3}>
+                                        <Row>
+                                            <Button
+                                                variant='primary'
                                                 type='submit'
-                                                className="me-2 col-auto"
+                                                className='me-2 col-auto'
                                                 onClick={createProject}
-                                                >
-                                                    {t('Create Project')}
-                                        </Button>
-                                        <Button variant="secondary"
-                                                className="col-auto"
+                                            >
+                                                {t('Create Project')}
+                                            </Button>
+                                            <Button
+                                                variant='secondary'
+                                                className='col-auto'
                                                 onClick={handleCancelClick}
-                                                >
-                                                    {t('Cancel')}
-                                        </Button>
-                                    </Row>
-                                </Col>
-                                <Col lg={4} className="text-truncate buttonheader-title">
-                                    {t("New Project")}
-                                </Col>
-                            </Row>
-                            <Row className="mt-5">
-                                <Tab.Content>
-                                    <Tab.Pane eventKey="summary">
-                                        <Summary token={AUTH_TOKEN}
-                                                 vendor={vendor}
-                                                 setVendor={setVendor}
-                                                 externalUrls={externalUrls}
-                                                 setExternalUrls={setExternalUrls}
-                                                 setExternalUrlsData={setExternalUrlsData}
-                                                 externalIds={externalIds}
-                                                 setExternalIds={setExternalIds}
-                                                 setExternalIdsData={setExternalIdsData}
-                                                 additionalData={additionalData}
-                                                 setAdditionalData={setAdditionalData}
-                                                 setAdditionalDataObject={setAdditionalDataObject}
-                                                 projectPayload={projectPayload}
-                                                 setProjectPayload={setProjectPayload}
-                                        />
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey="administration">
-                                        <Administration token={AUTH_TOKEN}
-                                                        projectPayload={projectPayload}
-                                                        setProjectPayload={setProjectPayload}/>
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey="linkedProjects"></Tab.Pane>
-                                </Tab.Content>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Tab.Container>
-            </div>
+                                            >
+                                                {t('Cancel')}
+                                            </Button>
+                                        </Row>
+                                    </Col>
+                                    <Col lg={4} className='text-truncate buttonheader-title'>
+                                        {t('New Project')}
+                                    </Col>
+                                </Row>
+                                <Row className='mt-5'>
+                                    <Tab.Content>
+                                        <Tab.Pane eventKey='summary'>
+                                            <Summary
+                                                vendor={vendor}
+                                                setVendor={setVendor}
+                                                externalUrls={externalUrls}
+                                                setExternalUrls={setExternalUrls}
+                                                setExternalUrlsData={setExternalUrlsData}
+                                                externalIds={externalIds}
+                                                setExternalIds={setExternalIds}
+                                                setExternalIdsData={setExternalIdsData}
+                                                additionalData={additionalData}
+                                                setAdditionalData={setAdditionalData}
+                                                setAdditionalDataObject={setAdditionalDataObject}
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='administration'>
+                                            <Administration
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='linkedProjects'></Tab.Pane>
+                                    </Tab.Content>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Tab.Container>
+                </div>
             </form>
         </>
     )

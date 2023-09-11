@@ -57,7 +57,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
         setFossologyClearingModelOpen(true)
     }
 
-    const handleLinkToProject  = (releaseId: string) => {
+    const handleLinkToProject = (releaseId: string) => {
         setLinkToProjectModalOpen(true)
         setLinkingReleaseId(releaseId)
     }
@@ -94,7 +94,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                 setData(data)
             }
         })
-    }, [])
+    }, [componentId, fetchData, t])
 
     const columns = [
         {
@@ -138,12 +138,12 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                             src={fossologyIcon}
                             width={15}
                             height={15}
-                            style={{marginRight: '5px'}}
+                            style={{ marginRight: '5px' }}
                             alt='Fossology'
                             onClick={() => handleFossologyClearing(id)}
                         />
                         <Link href={`/components/editRelease/${id}`}>
-                            <FaPencilAlt className={styles['icon-btn']}/>
+                            <FaPencilAlt className={styles['icon-btn']} />
                         </Link>
                         <HiOutlineLink className={styles['icon-btn']} onClick={() => handleLinkToProject(id)} />
                         <FaTrashAlt className={styles['icon-btn']} onClick={() => handleClickDelete(id)} />
@@ -155,23 +155,25 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     return (
         <>
             <div className='row'>
-                <Table data={data} search={true} columns={columns} selector={true}/>
+                <Table data={data} search={true} columns={columns} selector={true} />
             </div>
-            <DeleteReleaseModal
-                releaseId={deletingRelease}
-                show={deleteModalOpen}
-                setShow={setDeleteModalOpen}
-            />
-            {(clearingReleaseId) &&
-                <FossologyClearing show={fossologyClearingModelOpen}
+            <DeleteReleaseModal releaseId={deletingRelease} show={deleteModalOpen} setShow={setDeleteModalOpen} />
+            {clearingReleaseId && (
+                <FossologyClearing
+                    show={fossologyClearingModelOpen}
                     setShow={setFossologyClearingModelOpen}
-                    session={session} releaseId={clearingReleaseId}/>
-            }
-            {(linkingReleaseId) &&
-                <LinkReleaseToProjectModal show={linkToProjectModalOpen}
+                    session={session}
+                    releaseId={clearingReleaseId}
+                />
+            )}
+            {linkingReleaseId && (
+                <LinkReleaseToProjectModal
+                    show={linkToProjectModalOpen}
                     setShow={setLinkToProjectModalOpen}
-                    session={session} releaseId={linkingReleaseId}/>
-            }
+                    session={session}
+                    releaseId={linkingReleaseId}
+                />
+            )}
         </>
     )
 }

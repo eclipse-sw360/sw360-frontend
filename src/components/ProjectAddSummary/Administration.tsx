@@ -7,33 +7,25 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
-import Clearing from "./component/Administration/Clearing"
-import Lifecycle from "./component/Administration/LifeCycle"
-import LicenseInfoHeader from "./component/Administration/LicenseInfoHeader"
-import ProjectPayload from "@/object-types/CreateProjectPayload"
+import Clearing from './component/Administration/Clearing'
+import Lifecycle from './component/Administration/LifeCycle'
+import LicenseInfoHeader from './component/Administration/LicenseInfoHeader'
+import ProjectPayload from '@/object-types/CreateProjectPayload'
 
-interface Props{
-    token: string
+interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function Administration({token, projectPayload, setProjectPayload}: Props) {
-
+export default function Administration({ projectPayload, setProjectPayload }: Props) {
     return (
         <>
-            <div className="ms-1">
-                <Clearing   token={token}
-                            projectPayload={projectPayload}
-                            setProjectPayload={setProjectPayload}/>
-                <Lifecycle  token={token}
-                            projectPayload={projectPayload}
-                            setProjectPayload={setProjectPayload}/>
-                <LicenseInfoHeader token={token}
-                            projectPayload={projectPayload}
-                            setProjectPayload={setProjectPayload}/>
+            <div className='ms-1'>
+                <Clearing projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
+                <Lifecycle projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
+                <LicenseInfoHeader projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
             </div>
         </>
     )

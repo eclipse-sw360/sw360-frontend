@@ -8,5 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import InputKeyValue from '@/object-types/InputKeyValue'
 
-export type RolesType = (roles: Input[]) => void
+export type RolesType = (roles: InputKeyValue[]) => void

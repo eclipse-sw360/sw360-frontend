@@ -18,7 +18,6 @@ import { Session } from '@/object-types/Session'
 import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { notFound } from 'next/navigation'
-import { _ } from '@/components/sw360'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
 import TableAttachment from './TableAttachment/TableAttachment'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
@@ -103,7 +102,7 @@ const EditAttachments = ({
                 }
             }
         })
-    }, [documentId, documentType, fetchData])
+    }, [documentId, documentType, fetchData, setComponentData, componentData])
 
     return (
         <>

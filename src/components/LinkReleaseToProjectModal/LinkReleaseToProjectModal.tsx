@@ -29,7 +29,7 @@ interface Props {
 }
 
 const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE);
+    const t = useTranslations(COMMON_NAMESPACE)
     const searchText = useRef('')
     const linkedProjectIds = useRef([])
 
@@ -38,7 +38,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
     const [withLinkedProject, setWithLinkedProject] = useState(true)
     const [selectedProjectId, setSelectedProjectId] = useState<string>(undefined)
     const [selectedProjectName, setSelectedProjectName] = useState<string>('')
-    const [showMessage, setShowMessage] = useState(false);
+    const [showMessage, setShowMessage] = useState(false)
 
     const handleCloseDialog = () => {
         linkedProjectIds.current = []
@@ -52,10 +52,11 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
 
     const handleLinkToProject = () => {
         if (selectedProjectId !== undefined) {
-            ApiUtils.PATCH(`projects/${selectedProjectId}/releases`, [releaseId], session.user.access_token)
-                .then(() => {
+            ApiUtils.PATCH(`projects/${selectedProjectId}/releases`, [releaseId], session.user.access_token).then(
+                () => {
                     setShowMessage(true)
-                })
+                }
+            )
         }
     }
 
@@ -82,8 +83,8 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
         const url = searchText.current.trim().length === 0 ? 'projects' : `projects?name=${searchText.current.trim()}`
         const projectsData: any = []
         ApiUtils.GET(url, session.user.access_token)
-            .then(response => response.json())
-            .then(projects => {
+            .then((response) => response.json())
+            .then((projects) => {
                 projects._embedded['sw360:projects'].forEach((project: any) => {
                     if (linkedProjectIds.current.includes(project._links.self.href.split('/').at(-1))) {
                         if (withLinkedProject === true) {
@@ -93,7 +94,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
                                 project.version,
                                 project.state,
                                 project.responsible,
-                                project.description
+                                project.description,
                             ])
                         }
                     } else {
@@ -102,14 +103,16 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
                                 <Form.Check
                                     type='radio'
                                     name='project'
-                                    onClick={() => changeSelection(project.name, project._links.self.href.split('/').at(-1))}
+                                    onClick={() =>
+                                        changeSelection(project.name, project._links.self.href.split('/').at(-1))
+                                    }
                                 />
                             ),
                             project.name,
                             project.version,
                             project.state,
                             project.responsible,
-                            project.description
+                            project.description,
                         ])
                     }
                 })
@@ -119,70 +122,79 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
 
     useEffect(() => {
         ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
-            .then(response => response.json())
-            .then(release => { setLinkingReleaseName(`${release.name}(${release.version})`) })
-    }, [releaseId])
+            .then((response) => response.json())
+            .then((release) => {
+                setLinkingReleaseName(`${release.name}(${release.version})`)
+            })
+    }, [releaseId, session])
 
     const columns = [
         {
             id: 'select',
             name: '',
-            sort: false
+            sort: false,
         },
         {
             id: 'name',
-            name: t('Project Name')
+            name: t('Project Name'),
         },
         {
             id: 'version',
-            name: t('Version')
+            name: t('Version'),
         },
         {
             id: 'state',
-            name: t('State')
+            name: t('State'),
         },
         {
             id: 'responsible',
-            name: t('Responsible')
+            name: t('Responsible'),
         },
         {
             id: 'description',
-            name: t('Description')
+            name: t('Description'),
         },
     ]
 
     return (
-        <Modal
-            show={show}
-            onHide={handleCloseDialog}
-            backdrop='static'
-            centered
-            size='lg'
-        >
+        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
             <Modal.Header closeButton>
-                <Modal.Title >{t('Link Release to Project')}</Modal.Title>
+                <Modal.Title>{t('Link Release to Project')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Alert variant='success' show={showMessage}>
                     {t.rich('The release has been successfully linked to project', {
                         releaseName: linkingReleaseName,
                         projectName: selectedProjectName,
-                        strong: (chunks) => <b>{chunks}</b>
+                        strong: (chunks) => <b>{chunks}</b>,
                     })}
                     <br />
-                    {t.rich('Click here to edit the release relation as well as the project mainline state in the project', {
-                        link: (chunks) => <a className='link' href={`/projects/detail/${selectedProjectId}`}>{chunks}</a>
-                    })}
+                    {t.rich(
+                        'Click here to edit the release relation as well as the project mainline state in the project',
+                        {
+                            link: (chunks) => (
+                                <a className='link' href={`/projects/detail/${selectedProjectId}`}>
+                                    {chunks}
+                                </a>
+                            ),
+                        }
+                    )}
                 </Alert>
                 <Form>
                     <Row>
                         <Col lg='5'>
-                            <Form.Control type='text' placeholder={`${t('Enter text search')}...`}
-                                onChange={(e) => { searchText.current = e.target.value }}
+                            <Form.Control
+                                type='text'
+                                placeholder={`${t('Enter text search')}...`}
+                                onChange={(e) => {
+                                    searchText.current = e.target.value
+                                }}
                             />
                         </Col>
                         <Col lg='3'>
-                            <Button variant='secondary' onClick={() => handleSearchProject()}>{t('Search')}</Button>
+                            <Button variant='secondary' onClick={() => handleSearchProject()}>
+                                {t('Search')}
+                            </Button>
                         </Col>
                         <Col lg='4'>
                             <Form.Check
@@ -199,17 +211,28 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
                 <br />
                 <ProjectTable data={tableData} columns={columns} />
             </Modal.Body>
-            <Modal.Footer className='justify-content-end' >
-                {
-                    (showMessage === true)
-                        ?
-                        <Button className='delete-btn' variant='primary' onClick={handleCloseDialog}> {t('Close')} </Button>
-                        :
-                        <>
-                            <Button className='delete-btn' variant='light' onClick={handleCloseDialog}> {t('Close')} </Button>
-                            <Button className='login-btn' variant='primary' onClick={handleLinkToProject} disabled={!selectedProjectId}>{t('Link To Project')}</Button>
-                        </>
-                }
+            <Modal.Footer className='justify-content-end'>
+                {showMessage === true ? (
+                    <Button className='delete-btn' variant='primary' onClick={handleCloseDialog}>
+                        {' '}
+                        {t('Close')}{' '}
+                    </Button>
+                ) : (
+                    <>
+                        <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                            {' '}
+                            {t('Close')}{' '}
+                        </Button>
+                        <Button
+                            className='login-btn'
+                            variant='primary'
+                            onClick={handleLinkToProject}
+                            disabled={!selectedProjectId}
+                        >
+                            {t('Link To Project')}
+                        </Button>
+                    </>
+                )}
             </Modal.Footer>
         </Modal>
     )

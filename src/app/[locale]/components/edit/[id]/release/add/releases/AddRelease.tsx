@@ -86,7 +86,7 @@ const AddRelease = ({ session, componentId }: Props) => {
         binaryDownloadurl: '',
         repository: releaseRepository,
         releaseIdToRelationship: null,
-        cotsDetails: cotsDetails
+        cotsDetails: cotsDetails,
     })
 
     const [vendor, setVendor] = useState<Vendor>({
@@ -123,7 +123,7 @@ const AddRelease = ({ session, componentId }: Props) => {
         show: false,
         type: '',
         message: '',
-        contextual: ''
+        contextual: '',
     })
 
     const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
@@ -131,7 +131,7 @@ const AddRelease = ({ session, componentId }: Props) => {
             show: show_data,
             type: status_type,
             message: message,
-            contextual: contextual
+            contextual: contextual,
         })
     }
 
@@ -160,7 +160,7 @@ const AddRelease = ({ session, componentId }: Props) => {
                 setTabList(ReleaseAddTabs.WITH_COMMERCIAL_DETAILS)
             }
         })
-    }, [componentId, fetchData])
+    }, [componentId, fetchData, releasePayload])
 
     const submit = async () => {
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)

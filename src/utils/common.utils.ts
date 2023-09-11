@@ -8,44 +8,50 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-const isNullOrUndefined = (obj: any) => {
-  if (obj === null || obj === undefined) {
-    return true;
-  }
-  return false;
+const isNullOrUndefined = (obj: unknown) => {
+    if (obj === null || obj === undefined) {
+        return true
+    }
+    return false
 }
 
 const isNullEmptyOrUndefinedString = (str: string) => {
-  if (str === null || str === undefined || str.length === 0) {
-    return true;
-  }
-  return false;
+    if (str === null || str === undefined || str.length === 0) {
+        return true
+    }
+    return false
 }
 
-const createUrlWithParams = (url: string, params: any) => {
-  const queryString =  Object.keys(params).map((key) => {
-    return [key, params[key]].map(encodeURIComponent).join('=');
-  }).join("&");
-  return `${url}?${queryString}`;
+interface Params {
+    [key: string]: string
 }
 
-const isNullEmptyOrUndefinedArray = (arr: Array<any>) => {
-  if (arr === null || arr === undefined || arr.length === 0) {
-    return true;
-  }
-  return false;
+const createUrlWithParams = (url: string, params: Params) => {
+    const queryString = Object.keys(params)
+        .map((key) => {
+            return [key, params[key]].map(encodeURIComponent).join('=')
+        })
+        .join('&')
+    return `${url}?${queryString}`
+}
+
+const isNullEmptyOrUndefinedArray = (arr: Array<unknown>) => {
+    if (arr === null || arr === undefined || arr.length === 0) {
+        return true
+    }
+    return false
 }
 
 const getIdFromUrl = (url: string): string => {
-  return url.split('/').at(-1)
+    return url.split('/').at(-1)
 }
 
 const CommonUtils = {
-  isNullOrUndefined,
-  isNullEmptyOrUndefinedString,
-  createUrlWithParams,
-  isNullEmptyOrUndefinedArray,
-  getIdFromUrl
+    isNullOrUndefined,
+    isNullEmptyOrUndefinedString,
+    createUrlWithParams,
+    isNullEmptyOrUndefinedArray,
+    getIdFromUrl,
 }
 
-export default CommonUtils;
+export default CommonUtils

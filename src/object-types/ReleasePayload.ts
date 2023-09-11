@@ -25,7 +25,7 @@ export default interface ReleasePayload {
     clearingState?:string
     createdOn?: string
     createBy?: string
-    modifiedBy?: string 
+    modifiedBy?: string
     modifiedOn?: string
     mainlineState?: string
     contributors?: string[]

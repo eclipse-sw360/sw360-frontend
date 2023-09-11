@@ -13,14 +13,12 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 
-interface Props{
-    token: string
+interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LicenseInfoHeader({token, projectPayload, setProjectPayload}: Props) {
-
+export default function LicenseInfoHeader({ projectPayload, setProjectPayload }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -36,7 +34,7 @@ export default function LicenseInfoHeader({token, projectPayload, setProjectPayl
                 <div className='row d-flex justify-content-end'>
                     <div className='col-lg-3'>
                         <button type='button' className='btn btn-light'>
-                        {t('Set to default text')}
+                            {t('Set to default text')}
                         </button>
                     </div>
                 </div>

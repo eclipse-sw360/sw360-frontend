@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
 import { GiCancel } from 'react-icons/gi'
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
@@ -15,24 +15,17 @@ import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
-import { Session } from '@/object-types/Session'
 import { VendorDialog } from '@/components/sw360'
 import Vendor from '@/object-types/Vendor'
 
 interface Param {
-    token: string
     vendor: Vendor
     setVendor: Dispatch<SetStateAction<Vendor>>
     projectPayload: ProjectPayload
     setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
 
-export default function GeneralInformation({ token,
-                                             vendor,
-                                             setVendor,
-                                             projectPayload,
-                                             setProjectPayload
-                                            }: Param) {
+export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
     const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
@@ -70,13 +63,11 @@ export default function GeneralInformation({ token,
     return (
         <>
             <div className='row mb-4'>
-                <h6 className="header pb-2 px-2">
-                    {t('General Information')}
-                </h6>
+                <h6 className='header pb-2 px-2'>{t('General Information')}</h6>
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.name' className='form-label fw-medium'>
-                            {t('Name')} <span style={{color:'red'}}>*</span>
+                            {t('Name')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <input
                             type='text'
@@ -105,7 +96,7 @@ export default function GeneralInformation({ token,
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.visibility' className='form-label fw-medium'>
-                            {t('Visibility')} <span style={{color:'red'}}>*</span>
+                            {t('Visibility')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <select
                             className='form-select'
@@ -143,7 +134,7 @@ export default function GeneralInformation({ token,
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.projectType' className='form-label fw-medium'>
-                            {t('Project Type')} <span style={{color:'red'}}>*</span>
+                            {t('Project Type')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <select
                             className='form-select'
@@ -230,12 +221,13 @@ export default function GeneralInformation({ token,
                             value={vendor.fullName ?? ''}
                             onClick={handleClickSearchVendor}
                         />
-                        <VendorDialog show={showVendorsModal}
-                                      setShow={setShowVendorsModal}
-                                      selectVendor= {setVendorData}
-                                      />
+                        <VendorDialog
+                            show={showVendorsModal}
+                            setShow={setShowVendorsModal}
+                            selectVendor={setVendorData}
+                        />
                         <div className='form-text'>
-                            <GiCancel onClick={handleClearVendorData}/>
+                            <GiCancel onClick={handleClearVendorData} />
                         </div>
                     </div>
                 </div>
@@ -245,10 +237,7 @@ export default function GeneralInformation({ token,
                         <label htmlFor='addProjects.modifiedOn' className='form-label fw-medium'>
                             {t('Modified On')}
                         </label>
-                        <input type='date'
-                               className='form-control'
-                               id='addProjects.modifiedOn'
-                               readOnly={true} />
+                        <input type='date' className='form-control' id='addProjects.modifiedOn' readOnly={true} />
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.modifiedBy' className='form-label fw-medium'>

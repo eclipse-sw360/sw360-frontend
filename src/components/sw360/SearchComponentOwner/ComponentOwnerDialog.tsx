@@ -44,15 +44,18 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
         setUsers(data)
     }
 
-    const fetchData: any = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else {
-            notFound()
-        }
-    }, [])
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                notFound()
+            }
+        },
+        [session]
+    )
 
     useEffect(() => {
         fetchData(`users`).then((users: any) => {
@@ -70,7 +73,7 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                 setData(data)
             }
         })
-    }, [])
+    }, [fetchData])
 
     const handleClickSelectComponentOwnerId = () => {
         selectComponentOwner(componentOwner)
@@ -99,11 +102,7 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <button
-                                type='button'
-                                className='btn btn-secondary me-2'
-                                onClick={searchVendor}
-                            >
+                            <button type='button' className='btn btn-secondary me-2' onClick={searchVendor}>
                                 {t('Search')}
                             </button>
                             <button type='button' className='btn btn-secondary me-2'>
@@ -117,22 +116,13 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
                 </div>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button
-                    type='button'
-                    data-bs-dismiss='modal'
-                    className='btn btn-secondary'
-                    onClick={handleCloseDialog}
-                >
+                <Button type='button' data-bs-dismiss='modal' className='btn btn-secondary' onClick={handleCloseDialog}>
                     {t('Close')}
                 </Button>
                 <Button type='button' className='btn btn-secondary'>
                     {t('Add User')}
                 </Button>
-                <Button
-                    type='button'
-                    className='btn btn-primary'
-                    onClick={handleClickSelectComponentOwnerId}
-                >
+                <Button type='button' className='btn btn-primary' onClick={handleClickSelectComponentOwnerId}>
                     {t('Select User')}
                 </Button>
             </Modal.Footer>

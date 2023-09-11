@@ -9,6 +9,7 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { useEffect, useState, useCallback } from 'react'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import ApiUtils from '@/utils/api/api.util'
@@ -94,9 +95,11 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                 return release
             })
             .then((release: any) => {
-                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`).then((component: any) => {
-                    (component) && setReleasesSameComponentt(component['_embedded']['sw360:releaseLinks'])
-                })
+                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`).then(
+                    (component: any) => {
+                        component && setReleasesSameComponentt(component['_embedded']['sw360:releaseLinks'])
+                    }
+                )
             })
 
         fetchData(`releases/${releaseId}/vulnerabilities`).then((vulnerabilities: any) => {
@@ -112,22 +115,32 @@ const DetailOverview = ({ session, releaseId }: Props) => {
         })
 
         fetchData(`changelog/document/${releaseId}`).then((changeLogs: any) => {
-            (changeLogs) && setChangeLogList(
-                CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
-                    ? []
-                    : changeLogs['_embedded']['sw360:changeLogs']
-            )
+            changeLogs &&
+                setChangeLogList(
+                    CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
+                        ? []
+                        : changeLogs['_embedded']['sw360:changeLogs']
+                )
         })
-    }, [releaseId])
+    }, [fetchData, releaseId])
 
     const downloadBundle = () => {
         DownloadService.download(
-            `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`, session, 'AttachmentBundle.zip')
+            `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
+            session,
+            'AttachmentBundle.zip'
+        )
     }
 
     const headerButtons = {
         'Edit release': { link: `/components/editRelease/${releaseId}`, type: 'primary' },
-        'Link To Project': { link: '', type: 'secondary', onClick: () => { setLinkProjectModalShow(true) } },
+        'Link To Project': {
+            link: '',
+            type: 'secondary',
+            onClick: () => {
+                setLinkProjectModalShow(true)
+            },
+        },
         Merge: { link: '', type: 'secondary' },
         Subscribe: { link: '', type: 'outline-success' },
     }
@@ -151,19 +164,24 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                                 <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
                                     <Dropdown>
                                         <Dropdown.Toggle variant='primary'>
-                                            <span className={`${styles['badge-circle']} ${styles[release.clearingState]}`}></span>
+                                            <span
+                                                className={`${styles['badge-circle']} ${styles[release.clearingState]}`}
+                                            ></span>
                                             {`${t('Version')} ${release.version}`}
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                            {
-                                                Object.entries(releasesSameComponent).map(([index, item]: any) =>
-                                                    <Dropdown.Item key={index} className={styles['dropdown-item']}>
-                                                        <span className={`${styles['badge-circle']} ${styles[item.clearingState]}`}></span>
-                                                        <Link href={`components/releases/detail/${item.id}`}>
-                                                            {`${t('Version')} ${item.version}`}
-                                                        </Link>
-                                                    </Dropdown.Item>)
-                                            }
+                                            {Object.entries(releasesSameComponent).map(([index, item]: any) => (
+                                                <Dropdown.Item key={index} className={styles['dropdown-item']}>
+                                                    <span
+                                                        className={`${styles['badge-circle']} ${
+                                                            styles[item.clearingState]
+                                                        }`}
+                                                    ></span>
+                                                    <Link href={`components/releases/detail/${item.id}`}>
+                                                        {`${t('Version')} ${item.version}`}
+                                                    </Link>
+                                                </Dropdown.Item>
+                                            ))}
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
@@ -212,22 +230,35 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             </PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary release={release} releaseId={releaseId} session={session}/>
+                            <Summary release={release} releaseId={releaseId} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases releaseId={releaseId} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
-                            <ClearingDetails release={release} releaseId={releaseId} session={session} embeddedAttachments={embeddedAttachments}/>
+                            <ClearingDetails
+                                release={release}
+                                releaseId={releaseId}
+                                session={session}
+                                embeddedAttachments={embeddedAttachments}
+                            />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
-                            <ECCDetails release={release}/>
+                            <ECCDetails release={release} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments session={session} documentId={releaseId} documentType={DocumentTypes.RELEASE} />
+                            <Attachments
+                                session={session}
+                                documentId={releaseId}
+                                documentType={DocumentTypes.RELEASE}
+                            />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
-                            <CommercialDetails costDetails={(release._embedded['sw360:cotsDetails']) && release._embedded['sw360:cotsDetails'][0]} />
+                            <CommercialDetails
+                                costDetails={
+                                    release._embedded['sw360:cotsDetails'] && release._embedded['sw360:cotsDetails'][0]
+                                }
+                            />
                         </div>
                         <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
                             <ComponentVulnerabilities vulnerData={vulnerData} session={session} />
@@ -250,9 +281,12 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                         </div>
                     </div>
                 </div>
-                <LinkReleaseToProjectModal show={linkProjectModalShow}
+                <LinkReleaseToProjectModal
+                    show={linkProjectModalShow}
                     setShow={setLinkProjectModalShow}
-                    session={session} releaseId={releaseId} />
+                    session={session}
+                    releaseId={releaseId}
+                />
             </div>
         )
     )

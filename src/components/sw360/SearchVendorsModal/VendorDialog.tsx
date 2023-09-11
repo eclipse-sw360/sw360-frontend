@@ -43,15 +43,18 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
         setVendors(data)
     }
 
-    const fetchData: any = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else {
-            notFound()
-        }
-    }, [])
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                notFound()
+            }
+        },
+        [session]
+    )
 
     useEffect(() => {
         fetchData(`vendors`).then((vendors: any) => {
@@ -69,7 +72,7 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
                 setData(data)
             }
         })
-    }, [])
+    }, [fetchData])
 
     const handleClickSelectVendor = () => {
         selectVendor(vendor)
@@ -95,11 +98,7 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <button
-                                type='button'
-                                className='btn btn-secondary me-2'
-                                onClick={searchVendor}
-                            >
+                            <button type='button' className='btn btn-secondary me-2' onClick={searchVendor}>
                                 {t('Search')}
                             </button>
                             <button type='button' className='btn btn-secondary me-2'>
@@ -124,11 +123,7 @@ const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
                 <Button type='button' className='fw-bold btn btn-light button-plain me-2'>
                     {t('Add Vendor')}
                 </Button>
-                <Button
-                    type='button'
-                    className='btn btn-primary'
-                    onClick={handleClickSelectVendor}
-                >
+                <Button type='button' className='btn btn-primary' onClick={handleClickSelectVendor}>
                     {t('Select Vendor')}
                 </Button>
             </Modal.Footer>

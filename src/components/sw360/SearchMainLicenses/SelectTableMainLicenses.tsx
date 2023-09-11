@@ -12,7 +12,7 @@
 
 import { Form } from 'react-bootstrap'
 import React from 'react'
-import { Table, _ } from '@/components/sw360'
+import { _ } from '@/components/sw360'
 import LicensesTable from './MainLicensesTable'
 import Licenses from '@/object-types/Licenses'
 import { LicensesType } from '@/object-types/LicensesType'
@@ -60,13 +60,13 @@ const SelectTableMainLicenses = ({ licenseDatas, setLicenses, fullnames }: Props
                         }}
                     ></Form.Check>
                 ),
-            width: '5%'
+            width: '5%',
         },
         {
             id: 'license',
             name: 'License',
             sort: true,
-            width: '95%'
+            width: '95%',
         },
     ]
 

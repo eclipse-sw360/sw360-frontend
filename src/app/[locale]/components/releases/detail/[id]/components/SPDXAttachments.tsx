@@ -31,58 +31,88 @@ const SPDXAttachments = ({ releaseId, session }: any) => {
         {
             id: 'name',
             name: t('SPDX Attachments'),
-            formatter: ({ isISR, fileName }: any) => _(
-                (isISR)
-                    ?
-                    <>{fileName} <FiAlertTriangle style={{ color: 'red', fontSize: '20px' }} /></>
-                    :
-                    <>{fileName}</>
-            ),
+            formatter: ({ isISR, fileName }: any) =>
+                _(
+                    isISR ? (
+                        <>
+                            {fileName} <FiAlertTriangle style={{ color: 'red', fontSize: '20px' }} />
+                        </>
+                    ) : (
+                        <>{fileName}</>
+                    )
+                ),
             sort: false,
         },
         {
             id: 'action',
             name: t('Action'),
-            formatter: ({ isISR, showLicenseClicked, rowIndex, attachmentId }: any) => _(
-                (showLicenseClicked)
-                    ? ((isISR == false) ?
-                        <Button variant='primary' onClick={(() => handleAddSpdxLicenses(rowIndex))}>{t('Add License To Release')}</Button>
-                        : <></>
+            formatter: ({ isISR, showLicenseClicked, rowIndex, attachmentId }: any) =>
+                _(
+                    showLicenseClicked ? (
+                        isISR == false ? (
+                            <Button variant='primary' onClick={() => handleAddSpdxLicenses(rowIndex)}>
+                                {t('Add License To Release')}
+                            </Button>
+                        ) : (
+                            <></>
+                        )
+                    ) : (
+                        <Button variant='secondary' onClick={() => handleShowLicenseInfo(rowIndex, attachmentId)}>
+                            {t('Show License Info')}
+                        </Button>
                     )
-                    : <Button variant='secondary' onClick={() => handleShowLicenseInfo(rowIndex, attachmentId)}>{t('Show License Info')}</Button>
-            ),
+                ),
             sort: false,
         },
         {
             id: 'result',
             name: t('Result'),
-            formatter: ({ isISR, attachmentName, licenseInfo, addLicensesState }:
-                {
-                    isISR: boolean
-                    attachmentName: string
-                    licenseInfo: { [key: string]: any }
-                    addLicensesState: { [key: string]: any }
-                }) => _(
-                    (licenseInfo) &&
-                    <>
-                        {
-                            (addLicensesState)
-                                ? <Alert variant={addLicensesState.variant}>{t(addLicensesState.message)}</Alert>
-                                : <SPDXLicenseView isISR={isISR} licenseInfo={licenseInfo} attachmentName={attachmentName} t={t}/>
-                        }
-                    </>
+            formatter: ({
+                isISR,
+                attachmentName,
+                licenseInfo,
+                addLicensesState,
+            }: {
+                isISR: boolean
+                attachmentName: string
+                licenseInfo: { [key: string]: any }
+                addLicensesState: { [key: string]: any }
+            }) =>
+                _(
+                    licenseInfo && (
+                        <>
+                            {addLicensesState ? (
+                                <Alert variant={addLicensesState.variant}>{t(addLicensesState.message)}</Alert>
+                            ) : (
+                                <SPDXLicenseView
+                                    isISR={isISR}
+                                    licenseInfo={licenseInfo}
+                                    attachmentName={attachmentName}
+                                    t={t}
+                                />
+                            )}
+                        </>
+                    )
                 ),
             sort: false,
-        }
+        },
     ]
 
     const handleAddSpdxLicenses = async (rowIndex: number) => {
         const requestBody = {
-            otherLicenseIds: tableData[rowIndex][2].licenseInfo.otherLicenseIds ? tableData[rowIndex][2].licenseInfo.otherLicenseIds : [],
-            mainLicenseIds: tableData[rowIndex][2].licenseInfo.licenseIds ? tableData[rowIndex][2].licenseInfo.licenseIds : []
+            otherLicenseIds: tableData[rowIndex][2].licenseInfo.otherLicenseIds
+                ? tableData[rowIndex][2].licenseInfo.otherLicenseIds
+                : [],
+            mainLicenseIds: tableData[rowIndex][2].licenseInfo.licenseIds
+                ? tableData[rowIndex][2].licenseInfo.licenseIds
+                : [],
         }
 
-        const response = await ApiUtils.POST(`releases/${releaseId}/spdxLicenses`, requestBody, session.user.access_token)
+        const response = await ApiUtils.POST(
+            `releases/${releaseId}/spdxLicenses`,
+            requestBody,
+            session.user.access_token
+        )
         if (response.status == HttpStatus.UNAUTHORIZED) {
             signOut()
         } else {
@@ -91,48 +121,47 @@ const SPDXAttachments = ({ releaseId, session }: any) => {
     }
 
     const updateAddLicenseState = (status: number, rowIndex: number) => {
-        const addLicensesState = (status === HttpStatus.OK)
-            ?
-            {
-                variant: 'success',
-                message: 'Success! Please reload page to see the changes!'
-            }
-            :
-            {
-                variant: 'danger',
-                message: 'Error when processing!'
-            }
+        const addLicensesState =
+            status === HttpStatus.OK
+                ? {
+                      variant: 'success',
+                      message: 'Success! Please reload page to see the changes!',
+                  }
+                : {
+                      variant: 'danger',
+                      message: 'Error when processing!',
+                  }
 
         const newData = Object.entries(tableData).map(([index, rowData]: any) => {
             if (index === rowIndex) {
                 rowData[2] = {
                     ...rowData[2],
-                    addLicensesState: addLicensesState
+                    addLicensesState: addLicensesState,
                 }
             }
-            return rowData;
+            return rowData
         })
         setTableData(newData)
     }
 
     const handleShowLicenseInfo = async (rowIndex: number, attachmentId: string) => {
-        const licenseInfo = await fetchData(`releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`);
+        const licenseInfo = await fetchData(`releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`)
 
         const newData = Object.entries(tableData).map(([index, rowData]: any) => {
             if (index === rowIndex) {
                 rowData[1] = {
                     ...rowData[1],
-                    showLicenseClicked: true
+                    showLicenseClicked: true,
                 }
                 rowData[2] = {
                     ...rowData[2],
-                    licenseInfo: licenseInfo
+                    licenseInfo: licenseInfo,
                 }
             }
-            return rowData;
+            return rowData
         })
 
-        setTableData(newData);
+        setTableData(newData)
     }
 
     const fetchData: any = useCallback(
@@ -149,48 +178,51 @@ const SPDXAttachments = ({ releaseId, session }: any) => {
     )
 
     const filterAttachmentByType = (attachments: Array<Attachment>, types: Array<string>) => {
-        return attachments.filter(attachment => types.includes(attachment.attachmentType))
-    }
-
-    const convertToTableData = (isrAttachments: Array<Attachment>, cliAndClxAttachments: Array<Attachment>) => {
-        const data: any = []
-
-        if (cliAndClxAttachments.length !== 0) {
-            Object.entries(cliAndClxAttachments).map(([index, attachment]: any) => {
-                data.push(convertAttachmentToRowData(attachment, false, index))
-            })
-        } else {
-            Object.entries(isrAttachments).map(([index, attachment]: any) => {
-                data.push(convertAttachmentToRowData(attachment, true, index))
-            })
-        }
-        setTableData(data)
-    }
-
-    const convertAttachmentToRowData = (attachment: Attachment, isISR: boolean, rowIndex: number) => {
-        return [
-            { isISR: isISR, fileName: attachment.filename },
-            { isISR: isISR, showLicenseClicked: false, rowIndex: rowIndex, attachmentId: attachment.attachmentContentId },
-            { isISR: isISR, attachmentName: attachment.filename }
-        ]
+        return attachments.filter((attachment) => types.includes(attachment.attachmentType))
     }
 
     useEffect(() => {
+        const convertAttachmentToRowData = (attachment: Attachment, isISR: boolean, rowIndex: number) => {
+            return [
+                { isISR: isISR, fileName: attachment.filename },
+                {
+                    isISR: isISR,
+                    showLicenseClicked: false,
+                    rowIndex: rowIndex,
+                    attachmentId: attachment.attachmentContentId,
+                },
+                { isISR: isISR, attachmentName: attachment.filename },
+            ]
+        }
+
+        const convertToTableData = (isrAttachments: Array<Attachment>, cliAndClxAttachments: Array<Attachment>) => {
+            const data: any = []
+
+            if (cliAndClxAttachments.length !== 0) {
+                Object.entries(cliAndClxAttachments).map(([index, attachment]: any) => {
+                    data.push(convertAttachmentToRowData(attachment, false, index))
+                })
+            } else {
+                Object.entries(isrAttachments).map(([index, attachment]: any) => {
+                    data.push(convertAttachmentToRowData(attachment, true, index))
+                })
+            }
+            setTableData(data)
+        }
+
         fetchData(`releases/${releaseId}/attachments`)
-            .then((response: any) => (response._embedded) ? response._embedded['sw360:attachmentDTOes']: [])
+            .then((response: any) => (response._embedded ? response._embedded['sw360:attachmentDTOes'] : []))
             .then((attachments: Array<Attachment>) => {
-                const isrAttachments = filterAttachmentByType(attachments,
-                    [AttachmentType.INITIAL_SCAN_REPORT])
-                const cliAndClxAttachments = filterAttachmentByType(attachments,
-                    [AttachmentType.COMPONENT_LICENSE_INFO_XML, AttachmentType.COMPONENT_LICENSE_INFO_COMBINED])
+                const isrAttachments = filterAttachmentByType(attachments, [AttachmentType.INITIAL_SCAN_REPORT])
+                const cliAndClxAttachments = filterAttachmentByType(attachments, [
+                    AttachmentType.COMPONENT_LICENSE_INFO_XML,
+                    AttachmentType.COMPONENT_LICENSE_INFO_COMBINED,
+                ])
                 convertToTableData(isrAttachments, cliAndClxAttachments)
             })
-
     }, [releaseId, fetchData])
 
-    return (
-        <Table data={tableData} columns={columns} pagination={false} selector={false} />
-    )
+    return <Table data={tableData} columns={columns} pagination={false} selector={false} />
 }
 
 export default SPDXAttachments

@@ -62,7 +62,7 @@ const Releases = ({ session, componentId }: Props) => {
                 setData(data)
             }
         })
-    }, [])
+    }, [componentId, fetchData])
 
     const columns = [
         {
@@ -78,7 +78,7 @@ const Releases = ({ session, componentId }: Props) => {
                     </Link>
                 ),
             sort: true,
-        }
+        },
     ]
     const handleAddReleaseClick = () => {
         router.push(`/components/edit/${componentId}/release/add`)
@@ -90,12 +90,8 @@ const Releases = ({ session, componentId }: Props) => {
                 <Table data={data} search={true} columns={columns} />
             </div>
             <div>
-                <button
-                    type='button'
-                    onClick={() => handleAddReleaseClick()}
-                    className={`fw-bold btn btn-secondary`}
-                    >
-                        {t('Add Release')}
+                <button type='button' onClick={() => handleAddReleaseClick()} className={`fw-bold btn btn-secondary`}>
+                    {t('Add Release')}
                 </button>
             </div>
         </>

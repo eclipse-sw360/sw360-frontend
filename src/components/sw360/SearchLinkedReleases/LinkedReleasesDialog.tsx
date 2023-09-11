@@ -46,7 +46,7 @@ const LinkedReleasesDialog = ({
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
-    const [linkedReleases, setLinkedReleases] = useState([])
+    const [linkedReleases] = useState([])
     const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<LinkedRelease[]>()
     const [releases, setReleases] = useState([])
 
@@ -58,15 +58,18 @@ const LinkedReleasesDialog = ({
         setReleases(data)
     }
 
-    const fetchData: any = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else {
-            notFound()
-        }
-    }, [])
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                notFound()
+            }
+        },
+        [session]
+    )
 
     useEffect(() => {
         fetchData(`releases?allDetails=true`).then((users: any) => {
@@ -85,7 +88,7 @@ const LinkedReleasesDialog = ({
                 setData(data)
             }
         })
-    }, [])
+    }, [fetchData])
 
     const handleClickSelectLinkedReleases = () => {
         linkedReleasesResponse.forEach((linkedRelease: LinkedRelease) => {
@@ -100,7 +103,7 @@ const LinkedReleasesDialog = ({
             ...releasePayload,
             releaseIdToRelationship: obj,
         })
-        releaseLinks = releaseLinks.filter((v,index,a)=>a.findIndex(v2=>(v2.id===v.id))===index)
+        releaseLinks = releaseLinks.filter((v, index, a) => a.findIndex((v2) => v2.id === v.id) === index)
         setReleaseLinks(releaseLinks)
         setShow(!show)
         onReRender()

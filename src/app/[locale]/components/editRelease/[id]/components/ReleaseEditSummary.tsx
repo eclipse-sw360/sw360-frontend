@@ -31,6 +31,7 @@ import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import InputKeyValue from '@/object-types/InputKeyValue'
 
 interface Props {
     session?: Session
@@ -73,12 +74,12 @@ export default function ReleaseEditSummary({
     setModerator,
     cotsDetails,
     eccInformation,
-    clearingInformation
+    clearingInformation,
 }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [roles, setRoles] = useState<Input[]>([])
-    const [externalIds, setExternalIds] = useState<Input[]>([])
-    const [addtionalData, setAddtionalData] = useState<Input[]>([])
+    const [roles, setRoles] = useState<InputKeyValue[]>([])
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
+    const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -96,16 +97,16 @@ export default function ReleaseEditSummary({
         })
     }
 
-    const setDataRoles = (roles: Input[]) => {
+    const setDataRoles = (roles: InputKeyValue[]) => {
         const roleDatas = convertRoles(roles)
         setReleasePayload({
             ...releasePayload,
             roles: roleDatas,
         })
     }
-    const convertRoles = (datas: Input[]) => {
+    const convertRoles = (datas: InputKeyValue[]) => {
         if (datas === null) {
-            return null;
+            return null
         }
         const contributors: string[] = []
         const commiters: string[] = []
@@ -192,114 +193,125 @@ export default function ReleaseEditSummary({
 
     const convertObjectToMap = (data: string) => {
         const map = new Map(Object.entries(data))
-        const inputs: Input[] = []
+        const InputKeyValues: InputKeyValue[] = []
         map.forEach((value, key) => {
-            const input: Input = {
+            const InputKeyValue: InputKeyValue = {
                 key: key,
                 value: value,
             }
-            inputs.push(input)
+            InputKeyValues.push(InputKeyValue)
         })
-        return inputs
+        return InputKeyValues
     }
 
     const convertObjectToMapRoles = (data: string) => {
         if (data === undefined) {
             return null
         }
-        const inputRoles: Input[] = []
+        const InputKeyValueRoles: InputKeyValue[] = []
         const mapRoles = new Map(Object.entries(data))
         mapRoles.forEach((value, key) => {
             for (let index = 0; index < value.length; index++) {
-                const input: Input = {
+                const InputKeyValue: InputKeyValue = {
                     key: key,
                     value: value.at(index),
                 }
-                inputRoles.push(input)
+                InputKeyValueRoles.push(InputKeyValue)
             }
         })
-        return inputRoles
+        return InputKeyValueRoles
     }
 
     useEffect(() => {
-            if (typeof release.roles !== 'undefined') {
-                setRoles(convertObjectToMapRoles(release.roles))
-            }
+        if (typeof release.roles !== 'undefined') {
+            setRoles(convertObjectToMapRoles(release.roles))
+        }
 
-            if (typeof release.externalIds !== 'undefined') {
-                setExternalIds(convertObjectToMap(release.externalIds))
-            }
+        if (typeof release.externalIds !== 'undefined') {
+            setExternalIds(convertObjectToMap(release.externalIds))
+        }
 
-            if (typeof release.additionalData !== 'undefined') {
-                setAddtionalData(convertObjectToMap(release.additionalData))
-            }
+        if (typeof release.additionalData !== 'undefined') {
+            setAddtionalData(convertObjectToMap(release.additionalData))
+        }
 
-            if (typeof release['_embedded']['sw360:moderators'] !== 'undefined') {
-                setModerator(handlerModerators(release['_embedded']['sw360:moderators']))
-            }
+        if (typeof release['_embedded']['sw360:moderators'] !== 'undefined') {
+            setModerator(handlerModerators(release['_embedded']['sw360:moderators']))
+        }
 
-            if (typeof release['_embedded']['sw360:contributors'] !== 'undefined') {
-                setContributor(handlerContributor(release['_embedded']['sw360:contributors']))
-            }
+        if (typeof release['_embedded']['sw360:contributors'] !== 'undefined') {
+            setContributor(handlerContributor(release['_embedded']['sw360:contributors']))
+        }
 
-            let vendorId = ''
-            if (typeof release['_embedded']['sw360:vendors'] !== 'undefined') {
-                vendorId = CommonUtils.getIdFromUrl(release['_embedded']['sw360:vendors'][0]._links.self.href)
-                const vendor: Vendor = {
-                    id: vendorId,
-                    fullName: release['_embedded']['sw360:vendors'][0].fullName,
-                }
-                setVendor(vendor)
+        let vendorId = ''
+        if (typeof release['_embedded']['sw360:vendors'] !== 'undefined') {
+            vendorId = CommonUtils.getIdFromUrl(release['_embedded']['sw360:vendors'][0]._links.self.href)
+            const vendor: Vendor = {
+                id: vendorId,
+                fullName: release['_embedded']['sw360:vendors'][0].fullName,
             }
+            setVendor(vendor)
+        }
 
-            let modifiedBy = ''
-            if (typeof release['_embedded']['sw360:modifiedBy'] !== 'undefined') {
-                modifiedBy = release['_embedded']['sw360:modifiedBy']['fullName']
-            }
+        let modifiedBy = ''
+        if (typeof release['_embedded']['sw360:modifiedBy'] !== 'undefined') {
+            modifiedBy = release['_embedded']['sw360:modifiedBy']['fullName']
+        }
 
-            let createBy = ''
-            if (typeof release['_embedded']['sw360:createdBy'] !== 'undefined') {
-                createBy = release['_embedded']['sw360:createdBy']['fullName']
-            }
+        let createBy = ''
+        if (typeof release['_embedded']['sw360:createdBy'] !== 'undefined') {
+            createBy = release['_embedded']['sw360:createdBy']['fullName']
+        }
 
-            let componentId = ''
-            if (typeof release['_links']['sw360:component']['href'] !== 'undefined') {
-                componentId = CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href'])
-            }
+        let componentId = ''
+        if (typeof release['_links']['sw360:component']['href'] !== 'undefined') {
+            componentId = CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href'])
+        }
 
-            const releasePayload: ReleasePayload = {
-                name: release.name,
-                cpeid: release.cpeId,
-                version: release.version,
-                componentId: componentId,
-                releaseDate: release.releaseDate,
-                externalIds: release.externalIds,
-                additionalData: release.additionalData,
-                clearingState: release.clearingState,
-                mainlineState: release.mainlineState,
-                contributors: getEmailsModerators(release['_embedded']['sw360:contributors']),
-                createdOn: release.createdOn,
-                createBy: createBy,
-                modifiedBy: modifiedBy,
-                modifiedOn: release.modifiedOn,
-                moderators: getEmailsModerators(release['_embedded']['sw360:moderators']),
-                roles:convertRoles(convertObjectToMapRoles(release.roles)),
-                mainLicenseIds: release.mainLicenseIds,
-                otherLicenseIds: release.otherLicenseIds,
-                vendorId: vendorId,
-                languages: release.languages,
-                operatingSystems: release.operatingSystems,
-                softwarePlatforms: release.softwarePlatforms,
-                sourceCodeDownloadurl: release.sourceCodeDownloadurl,
-                binaryDownloadurl: release.binaryDownloadurl,
-                repository: release.repository,
-                releaseIdToRelationship: release.releaseIdToRelationship,
-                cotsDetails: cotsDetails,
-                eccInformation: eccInformation,
-                clearingInformation: clearingInformation
-            }
-            setReleasePayload(releasePayload)
-    }, [releaseId, fetchData])
+        const releasePayload: ReleasePayload = {
+            name: release.name,
+            cpeid: release.cpeId,
+            version: release.version,
+            componentId: componentId,
+            releaseDate: release.releaseDate,
+            externalIds: release.externalIds,
+            additionalData: release.additionalData,
+            clearingState: release.clearingState,
+            mainlineState: release.mainlineState,
+            contributors: getEmailsModerators(release['_embedded']['sw360:contributors']),
+            createdOn: release.createdOn,
+            createBy: createBy,
+            modifiedBy: modifiedBy,
+            modifiedOn: release.modifiedOn,
+            moderators: getEmailsModerators(release['_embedded']['sw360:moderators']),
+            roles: convertRoles(convertObjectToMapRoles(release.roles)),
+            mainLicenseIds: release.mainLicenseIds,
+            otherLicenseIds: release.otherLicenseIds,
+            vendorId: vendorId,
+            languages: release.languages,
+            operatingSystems: release.operatingSystems,
+            softwarePlatforms: release.softwarePlatforms,
+            sourceCodeDownloadurl: release.sourceCodeDownloadurl,
+            binaryDownloadurl: release.binaryDownloadurl,
+            repository: release.repository,
+            releaseIdToRelationship: release.releaseIdToRelationship,
+            cotsDetails: cotsDetails,
+            eccInformation: eccInformation,
+            clearingInformation: clearingInformation,
+        }
+        setReleasePayload(releasePayload)
+    }, [
+        releaseId,
+        fetchData,
+        release,
+        cotsDetails,
+        eccInformation,
+        clearingInformation,
+        setVendor,
+        setReleasePayload,
+        setContributor,
+        setModerator,
+    ])
 
     return (
         <>
@@ -354,10 +366,7 @@ export default function ReleaseEditSummary({
                             setMap={setDataAddtionalData}
                         />
                     </div>
-                    <ReleaseRepository
-                        releasePayload={releasePayload}
-                        setReleasePayload={setReleasePayload}
-                    />
+                    <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
                 </div>
             </form>
         </>

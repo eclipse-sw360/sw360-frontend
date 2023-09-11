@@ -31,6 +31,7 @@ import RolesInformation from '@/components/RolesInformationComponent/RolesInform
 import ToastData from '@/object-types/ToastData'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 import { ToastContainer } from 'react-bootstrap'
+import InputKeyValue from '@/object-types/InputKeyValue'
 interface Props {
     session: Session
 }
@@ -38,9 +39,9 @@ interface Props {
 export default function ComponentAddSummary({ session }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [externalIds, setExternalIds] = useState<Input[]>([])
-    const [addtionalData, setAddtionalData] = useState<Input[]>([])
-    const [roles, setRoles] = useState<Input[]>([])
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
+    const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
+    const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -116,7 +117,7 @@ export default function ComponentAddSummary({ session }: Props) {
         })
     }
 
-    const setDataRoles = (roles: Input[]) => {
+    const setDataRoles = (roles: InputKeyValue[]) => {
         const roleDatas = convertRoles(roles)
         setComponentPayload({
             ...componentPayload,

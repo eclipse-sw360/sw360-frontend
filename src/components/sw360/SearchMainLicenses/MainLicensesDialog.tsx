@@ -32,7 +32,7 @@ interface Props {
 const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState([])
-    const [licenses, setLicenses] = useState([])
+    const [licenses] = useState([])
     const [licensesResponse, setLicensesResponse] = useState<Licenses>()
     const [licenseDatas, setLicenseDatas] = useState([])
 
@@ -52,26 +52,23 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
         } else {
             return []
         }
-    }, [])
+    }, [session])
 
     useEffect(() => {
         fetchData(`licenses`).then((licenses: any) => {
-            if(typeof licenses == "undefined") {
-                setData([]);
-                return;
+            if (typeof licenses == 'undefined') {
+                setData([])
+                return
             }
             if (
                 !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
-            ){
-                const data = licenses['_embedded']['sw360:licenses'].map((item: any) => [
-                    item,
-                    item.fullName,
-                ])
+            ) {
+                const data = licenses['_embedded']['sw360:licenses'].map((item: any) => [item, item.fullName])
                 setData(data)
             }
         })
-    }, [])
+    }, [fetchData])
 
     const handleClickSelectModerators = () => {
         selectLicenses(licensesResponse)
@@ -110,7 +107,11 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
                         </div>
                     </div>
                     <div className='row mt-3'>
-                        <SelectTableMainLicenses licenseDatas={licenseDatas} setLicenses={getLicenses} fullnames={licenses} />
+                        <SelectTableMainLicenses
+                            licenseDatas={licenseDatas}
+                            setLicenses={getLicenses}
+                            fullnames={licenses}
+                        />
                     </div>
                 </div>
             </Modal.Body>
@@ -123,11 +124,7 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
                 >
                     {t('Close')}
                 </Button>
-                <Button
-                    type='button'
-                    className={`btn btn-primary`}
-                    onClick={handleClickSelectModerators}
-                >
+                <Button type='button' className={`btn btn-primary`} onClick={handleClickSelectModerators}>
                     {t('Select Licenses')}
                 </Button>
             </Modal.Footer>

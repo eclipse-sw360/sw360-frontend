@@ -14,16 +14,12 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 
-
-interface Props{
-    token: string
+interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-
-export default function Clearing({token, projectPayload, setProjectPayload}: Props) {
-
+export default function Clearing({ projectPayload, setProjectPayload }: Props) {
     const t = useTranslations(COMMON_NAMESPACE)
     const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
 
@@ -41,7 +37,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                 <div className='row mb-2'>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.clearingState' className='form-label fw-bold'>
-                        {t('Clearing State')}
+                            {t('Clearing State')}
                         </label>
                         <select
                             className='form-select'
@@ -57,12 +53,13 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                             <option value='CLOSED'>{t('Closed')}</option>
                         </select>
                         <div className='form-text' id='addProjects.clearingState.HelpBlock'>
-                            <ShowInfoOnHover text={CLEARING_STATE_INFO} /> {t('Learn more about project clearing state')}
+                            <ShowInfoOnHover text={CLEARING_STATE_INFO} />{' '}
+                            {t('Learn more about project clearing state')}
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.clearingTeam' className='form-label fw-bold'>
-                        {t('Clearing Team')}
+                            {t('Clearing Team')}
                         </label>
                         <select
                             className='form-select'
@@ -86,7 +83,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.deadlinePreEvaluation' className='form-label fw-bold'>
-                        {t('Deadline for pre-evaluation')}
+                            {t('Deadline for pre-evaluation')}
                         </label>
                         <input
                             type='text'
@@ -109,7 +106,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                 <hr />
                 <div className='mb-2 row'>
                     <label htmlFor='addProjects.clearingSummary' className='form-label fw-bold'>
-                    {t('Clearing summary')}
+                        {t('Clearing summary')}
                     </label>
                     <textarea
                         className='form-control'
@@ -124,7 +121,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                 <hr />
                 <div className='mb-2 row'>
                     <label htmlFor='addProjects.specialRiskOpenSourceSoftware' className='form-label fw-bold'>
-                    {t('Special risk Open Source Software')}
+                        {t('Special risk Open Source Software')}
                     </label>
                     <textarea
                         className='form-control'
@@ -139,7 +136,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                 <hr />
                 <div className='mb-2 row'>
                     <label htmlFor='addProjects.generalRiskThirdPartySoftware' className='form-label fw-bold'>
-                    {t('General risk 3rd party software')}
+                        {t('General risk 3rd party software')}
                     </label>
                     <textarea
                         className='form-control'
@@ -154,7 +151,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                 <hr />
                 <div className='mb-2 row'>
                     <label htmlFor='addProjects.specialRiskThirdPartySoftware' className='form-label fw-bold'>
-                    {t('Special risks 3rd party software')}
+                        {t('Special risks 3rd party software')}
                     </label>
                     <textarea
                         className='form-control'
@@ -169,7 +166,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                 <hr />
                 <div className='mb-2 row'>
                     <label htmlFor='addProjects.salesAndDeliveryChannels' className='form-label fw-bold'>
-                    {t('Sales and delivery channels')}
+                        {t('Sales and delivery channels')}
                     </label>
                     <textarea
                         className='form-control'
@@ -184,7 +181,7 @@ export default function Clearing({token, projectPayload, setProjectPayload}: Pro
                 <hr />
                 <div className='mb-2 row'>
                     <label htmlFor='addProjects.remarksAdditionalRequirements' className='form-label fw-bold'>
-                    {t('Remarks additional requirements')}
+                        {t('Remarks additional requirements')}
                     </label>
                     <textarea
                         className='form-control'
