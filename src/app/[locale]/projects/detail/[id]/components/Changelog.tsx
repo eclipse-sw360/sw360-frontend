@@ -30,7 +30,6 @@ export default function ChangeLog({ projectId, session }: { projectId: string; s
     const [changeLogList, setChangeLogList] = useState<Array<any>>([])
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
 
-    console.log(key)
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal

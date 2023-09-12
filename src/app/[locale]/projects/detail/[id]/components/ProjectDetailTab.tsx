@@ -30,10 +30,13 @@ import { AdministrationDataType } from '@/object-types/AdministrationDataType'
 
 import { notFound } from 'next/navigation'
 
+import LinkProjects from '../../../components/LinkProjects'
+
 export default function ViewProjects({ session, projectId }: { session: Session; projectId: string }) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
+    const [show, setShow] = useState(false)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -215,6 +218,7 @@ export default function ViewProjects({ session, projectId }: { session: Session;
 
     return (
         <>
+            <LinkProjects show={show} setShow={setShow} session={session} projectId={projectId}/>
             <div className='ms-5 mt-2'>
                 <Tab.Container defaultActiveKey='summary'>
                     <Row>
@@ -253,30 +257,28 @@ export default function ViewProjects({ session, projectId }: { session: Session;
                             </ListGroup>
                         </Col>
                         <Col className='ps-2 me-3'>
-                            <Row>
-                                <Row className='d-flex justify-content-between'>
-                                    <Col lg={6}>
-                                        <Row>
-                                            <Button variant='primary' className='me-2 col-auto'>
-                                                {t('Edit Projects')}
-                                            </Button>
-                                            <Button variant='secondary' className='col-auto'>
-                                                {t('Link to Projects')}
-                                            </Button>
-                                            <Dropdown className='col-auto'>
-                                                <Dropdown.Toggle variant='dark' id='exportSBOM' className='px-2'>
-                                                    {t('Export SBOM')}
-                                                </Dropdown.Toggle>
-                                                <Dropdown.Menu>
-                                                    <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
-                                                </Dropdown.Menu>
-                                            </Dropdown>
-                                        </Row>
-                                    </Col>
-                                    <Col lg={5} className='text-truncate buttonheader-title me-3'>
-                                        {summaryData && `${summaryData.name} (${summaryData.version})`}
-                                    </Col>
-                                </Row>
+                            <Row className='d-flex justify-content-between'>
+                                <Col lg={6}>
+                                    <Row>
+                                        <Button variant='primary' className='me-2 col-auto'>
+                                            {t('Edit Projects')}
+                                        </Button>
+                                        <Button variant='secondary' className='col-auto' onClick={() => setShow(true)}>
+                                            {t('Link to Projects')}
+                                        </Button>
+                                        <Dropdown className='col-auto'>
+                                            <Dropdown.Toggle variant='dark' id='exportSBOM' className='px-2'>
+                                                {t('Export SBOM')}
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu>
+                                                <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </Row>
+                                </Col>
+                                <Col lg={5} className='text-truncate buttonheader-title me-3'>
+                                    {summaryData && `${summaryData.name} (${summaryData.version})`}
+                                </Col>
                             </Row>
                             <Row className='mt-3'>
                                 <Tab.Content>
