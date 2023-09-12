@@ -10,6 +10,8 @@
 
 import ReleasePayload from '@/object-types/ReleasePayload'
 import ClearingDetails from './ClearingDetails'
+import RequestInformation from './RequestInformation'
+// import RequestInformation from './RequestInformation'
 
 interface Props {
     releasePayload?: ReleasePayload
@@ -21,6 +23,8 @@ const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
         <>
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
                 <ClearingDetails releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+
+                <RequestInformation releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
             </div>
         </>
     )
