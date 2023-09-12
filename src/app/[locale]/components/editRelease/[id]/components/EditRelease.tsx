@@ -34,6 +34,13 @@ import ECCInformation from '@/object-types/ECCInformation'
 import EditClearingDetails from './EditClearingDetails'
 import ClearingInformation from '@/object-types/ClearingInformation'
 import EditECCDetails from './EditECCDetails'
+import CommonUtils from '@/utils/common.utils'
+import { ToastContainer } from 'react-bootstrap'
+import ToastMessage from '@/components/sw360/ToastContainer/Toast'
+import ToastData from '@/object-types/ToastData'
+import { useRouter } from 'next/navigation'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { useTranslations } from 'next-intl'
 
 interface Props {
     session?: Session
@@ -41,6 +48,8 @@ interface Props {
 }
 
 const EditRelease = ({ session, releaseId }: Props) => {
+    const router = useRouter()
+    const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
     const [release, setRelease] = useState<any>(undefined)
@@ -246,8 +255,41 @@ const EditRelease = ({ session, releaseId }: Props) => {
         fullName: '',
     })
 
+    const [toastData, setToastData] = useState<ToastData>({
+        show: false,
+        type: '',
+        message: '',
+        contextual: '',
+    })
+
+    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
+        setToastData({
+            show: show_data,
+            type: status_type,
+            message: message,
+            contextual: contextual,
+        })
+    }
+
+    const submit = async () => {
+        const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = await response.json()
+            alert(
+                true,
+                'Success',
+                `success:Release ${release.name} (${release.version})  updated successfully!`,
+                'success'
+            )
+            const releaseId: string = CommonUtils.getIdFromUrl(data._links.self.href)
+            router.push('/components/releases/detail/' + releaseId)
+        } else {
+            alert(true, 'Error', t('Release Create failed'), 'danger')
+        }
+    }
+
     const headerButtons = {
-        'Update Release': { link: '', type: 'primary' },
+        'Update Release': { link: '', type: 'primary', onClick: submit },
         'Delete Release': {
             link: '/releases/detail/' + releaseId,
             type: 'danger',
@@ -266,6 +308,16 @@ const EditRelease = ({ session, releaseId }: Props) => {
                         <div className='row' style={{ marginBottom: '20px' }}>
                             <PageButtonHeader buttons={headerButtons} title='releaseName'></PageButtonHeader>
                         </div>
+                        <ToastContainer position='top-start'>
+                            <ToastMessage
+                                show={toastData.show}
+                                type={toastData.type}
+                                message={toastData.message}
+                                contextual={toastData.contextual}
+                                onClose={() => setToastData({ ...toastData, show: false })}
+                                setShowToast={setToastData}
+                            />
+                        </ToastContainer>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ReleaseEditSummary
                                 session={session}
