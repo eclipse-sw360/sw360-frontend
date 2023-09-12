@@ -161,7 +161,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props)
             <Modal.Header closeButton>
                 <Modal.Title>{t('Link Release to Project')}</Modal.Title>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body style={{ overflow: 'scroll' }}>
                 <Alert variant='success' show={showMessage}>
                     {t.rich('The release has been successfully linked to project', {
                         releaseName: linkingReleaseName,
