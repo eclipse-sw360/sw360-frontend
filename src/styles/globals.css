@@ -118,7 +118,7 @@ footer {
     padding: 10px;
 }
 
-.table thead th{
+.table thead th {
     background-color: var(--sw360-primary-background-color);
     color: white;
     font-size: bold;
@@ -197,17 +197,17 @@ th {
 }
 
 .nav-pills .nav-link {
-    background-color: #F2F2F2 !important;
-    color: #F2A922 !important;
+    background-color: #f2f2f2 !important;
+    color: #f2a922 !important;
 }
 
 .nav-pills .nav-link:hover {
-    background-color: #F2F2F2 !important;
+    background-color: #f2f2f2 !important;
     color: #21719c !important;
 }
 
 .nav-pills .nav-link.active {
-    background-color: #0C70F2 !important;
+    background-color: #0c70f2 !important;
     color: white !important;
 }
 
@@ -282,8 +282,8 @@ th {
 }
 
 .nav-link:hover {
-    color: var(--sw360-navlink-hover-color)!important;
-    border-bottom-color: var(--sw360-primary-color)!important;
+    color: var(--sw360-navlink-hover-color) !important;
+    border-bottom-color: var(--sw360-primary-color) !important;
 }
 
 .heading-div {
@@ -339,12 +339,12 @@ th {
 }
 
 .header-underline {
-    color: #5D8EA9;
-    border-color: #5D8EA9 !important;
+    color: #5d8ea9;
+    border-color: #5d8ea9 !important;
 }
 
 .header {
-    background-color: #5D8EA9;
+    background-color: #5d8ea9;
     color: white;
 }
 
@@ -393,24 +393,8 @@ th {
     color: rgba(108, 117, 125, 0.4);
 }
 
-.form-control {
-    border-radius: calc(0.25rem - 0px) calc(0.25rem - 0px) calc(0.25rem - 0px) calc(0.25rem - 0px);
-    border-color: #e7e7ed;
-    box-shadow: none;
-    border-width: 1px;
-    border-style: solid;
-    font-size: 0.875rem;
-    display: block;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    font-weight: 400;
-    height: 1.5rem;
-    padding-bottom: 0.25rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    padding-top: 0.25rem;
-}
-
-.form-control:focus, .form-control.focus {
+.form-control:focus,
+.form-control.focus {
     background-color: #f0f5ff;
     border-color: #80acff;
     box-shadow: 0 0 0 0.125rem #fff, 0 0 0 0.25rem #fbca8f;
@@ -466,17 +450,17 @@ th {
 }
 
 .nav-pills .nav-link {
-    background-color: #F2F2F2 !important;
-    color: #F2A922 !important;
+    background-color: #f2f2f2 !important;
+    color: #f2a922 !important;
 }
 
 .nav-pills .nav-link:hover {
-    background-color: #F2F2F2 !important;
+    background-color: #f2f2f2 !important;
     color: #21719c !important;
 }
 
 .nav-pills .nav-link.active {
-    background-color: #0C70F2 !important;
+    background-color: #0c70f2 !important;
     color: white !important;
 }
 

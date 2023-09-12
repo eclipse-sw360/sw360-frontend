@@ -15,7 +15,7 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import CommonUtils from '@/utils/common.utils'
-import { FaInfoCircle } from 'react-icons/fa'
+import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 
 interface Option {
     key: string
@@ -167,11 +167,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                                 marginRight: '5px',
                             }}
                         />
-                        <FaInfoCircle className='info-icon' />
-                        <div className='popup'>
-                            The search result will display elements exactly matching the input. Equivalent to using
-                            (&quot;) around the search keyword. Applied on Component Name.
-                        </div>
+                        <ShowInfoOnHover
+                            text='The search result will display elements exactly matching the input. Equivalent to using
+                            (") around the search keyword. Applied on Component Name.'
+                        />
                     </Form.Group>
                     <Form.Group>
                         <Button size='sm' variant='primary' className='w-100' onClick={submitSearch}>
