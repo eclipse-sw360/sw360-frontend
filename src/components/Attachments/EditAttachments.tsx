@@ -17,7 +17,6 @@ import ApiUtils from '@/utils/api/api.util'
 import { Session } from '@/object-types/Session'
 import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import { notFound } from 'next/navigation'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
 import TableAttachment from './TableAttachment/TableAttachment'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
@@ -30,8 +29,8 @@ interface Props {
     documentId?: string
     session?: Session
     documentType?: string
-    componentData?: ComponentPayload
-    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    componentPayload?: ComponentPayload
+    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
@@ -40,8 +39,8 @@ const EditAttachments = ({
     documentId,
     session,
     documentType,
-    componentData,
-    setComponentData,
+    componentPayload,
+    setComponentPayload,
     releasePayload,
     setReleasePayload,
 }: Props) => {
@@ -55,8 +54,8 @@ const EditAttachments = ({
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
 
     const setAttachmentToComponentData = (attachmentDatas: AttachmentDetail[]) => {
-        setComponentData({
-            ...componentData,
+        setComponentPayload({
+            ...componentPayload,
             attachmentDTOs: attachmentDatas,
         })
     }
@@ -77,7 +76,7 @@ const EditAttachments = ({
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 signOut()
             } else {
-                notFound()
+                return []
             }
         },
         [session.user.access_token]
@@ -95,20 +94,20 @@ const EditAttachments = ({
                 })
                 setAttachmentData(attachmentDetails)
                 if (documentType === DocumentTypes.COMPONENT) {
-                    setComponentData({
-                        ...componentData,
+                    setComponentPayload({
+                        ...componentPayload,
                         attachmentDTOs: attachmentDetails,
                     })
                 }
             }
         })
-    }, [documentId, documentType, fetchData, setComponentData, componentData])
+    }, [documentId, documentType, fetchData])
 
     return (
         <>
             <SelectAttachment
-                componentData={componentData}
-                setComponentData={setComponentData}
+                componentPayload={componentPayload}
+                setComponentPayload={setComponentPayload}
                 attachmentUpload={attachmentData}
                 setAttachmentFromUpload={setAttachmentData}
                 show={dialogOpenSelectAttachment}

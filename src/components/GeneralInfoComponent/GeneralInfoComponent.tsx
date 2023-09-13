@@ -17,7 +17,7 @@ import Vendor from '@/object-types/Vendor'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ActionType from '@/object-types/enums/ActionType'
+import 'react-toastify/dist/ReactToastify.css'
 import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
 
 interface Props {
@@ -26,21 +26,9 @@ interface Props {
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
-    componentData?: ComponentPayload
-    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    actionType?: string
 }
 
-const GeneralInfoComponent = ({
-    session,
-    componentPayload,
-    setComponentPayload,
-    vendor,
-    setVendor,
-    componentData,
-    setComponentData,
-    actionType,
-}: Props) => {
+const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, vendor, setVendor }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
@@ -50,11 +38,6 @@ const GeneralInfoComponent = ({
             ...componentPayload,
             [e.target.name]: e.target.value,
         })
-        actionType === ActionType.EDIT &&
-            setComponentData({
-                ...componentData,
-                [e.target.name]: e.target.value,
-            })
     }
 
     const setCategoriesData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
@@ -63,11 +46,6 @@ const GeneralInfoComponent = ({
             ...componentPayload,
             categories: data,
         })
-        actionType === ActionType.EDIT &&
-            setComponentData({
-                ...componentData,
-                categories: data,
-            })
     }
 
     const splitValueCategories = (valueCatergories: string) => {
@@ -84,11 +62,6 @@ const GeneralInfoComponent = ({
             ...componentPayload,
             defaultVendorId: vendorResponse.id,
         })
-        actionType === ActionType.EDIT &&
-            setComponentData({
-                ...componentData,
-                defaultVendorId: vendorResponse.id,
-            })
     }
 
     const handleClearVendor = () => {

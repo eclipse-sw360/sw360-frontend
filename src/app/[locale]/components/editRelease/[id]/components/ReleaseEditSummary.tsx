@@ -133,11 +133,11 @@ export default function ReleaseEditSummary({
         }
 
         if (typeof release['_embedded']['sw360:moderators'] !== 'undefined') {
-            setModerator(CommonUtils.handlerModerators(release['_embedded']['sw360:moderators']))
+            setModerator(CommonUtils.getObjectModerators(release['_embedded']['sw360:moderators']))
         }
 
         if (typeof release['_embedded']['sw360:contributors'] !== 'undefined') {
-            setContributor(CommonUtils.handlerContributor(release['_embedded']['sw360:contributors']))
+            setContributor(CommonUtils.getObjectContributors(release['_embedded']['sw360:contributors']))
         }
 
         let vendorId = ''

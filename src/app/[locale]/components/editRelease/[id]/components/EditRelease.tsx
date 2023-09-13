@@ -291,10 +291,10 @@ const EditRelease = ({ session, releaseId }: Props) => {
     const headerButtons = {
         'Update Release': { link: '', type: 'primary', onClick: submit },
         'Delete Release': {
-            link: '/releases/detail/' + releaseId,
+            link: 'components/releases/detail/' + releaseId,
             type: 'danger',
         },
-        Cancel: { link: '/releases/detail/' + releaseId, type: 'secondary' },
+        Cancel: { link: '/components/releases/detail/' + releaseId, type: 'secondary' },
     }
 
     return (

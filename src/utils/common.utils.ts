@@ -49,7 +49,7 @@ const getIdFromUrl = (url: string): string => {
     return url.split('/').at(-1)
 }
 
-const handlerModerators = (emails: any[]) => {
+const getObjectModerators = (emails: any[]) => {
     const fullNames: string[] = []
     const moderatorsEmail: string[] = []
     if (emails.length == 0) {
@@ -67,7 +67,7 @@ const handlerModerators = (emails: any[]) => {
     return moderatorsResponse
 }
 
-const handlerContributor = (emails: any[]) => {
+const getObjectContributors = (emails: any[]) => {
     const fullNames: string[] = []
     const contributorsEmail: string[] = []
     if (emails.length == 0) {
@@ -158,8 +158,8 @@ const CommonUtils = {
     createUrlWithParams,
     isNullEmptyOrUndefinedArray,
     getIdFromUrl,
-    handlerModerators,
-    handlerContributor,
+    getObjectModerators,
+    getObjectContributors,
     getEmailsModerators,
     convertObjectToMap,
     convertObjectToMapRoles,
