@@ -32,6 +32,7 @@ import ToastData from '@/object-types/ToastData'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 import { ToastContainer } from 'react-bootstrap'
 import InputKeyValue from '@/object-types/InputKeyValue'
+import CommonUtils from '@/utils/common.utils'
 interface Props {
     session: Session
 }
@@ -118,7 +119,7 @@ export default function ComponentAddSummary({ session }: Props) {
     }
 
     const setDataRoles = (roles: InputKeyValue[]) => {
-        const roleDatas = convertRoles(roles)
+        const roleDatas = CommonUtils.convertRoles(roles)
         setComponentPayload({
             ...componentPayload,
             roles: roleDatas,
@@ -127,27 +128,6 @@ export default function ComponentAddSummary({ session }: Props) {
 
     const handleCancelClick = () => {
         router.push('/components')
-    }
-
-    const convertRoles = (datas: any[]) => {
-        const contributors: string[] = []
-        const commiters: string[] = []
-        const expecters: string[] = []
-        datas.forEach((data) => {
-            if (data.key === 'Contributor') {
-                contributors.push(data.value)
-            } else if (data.key === 'Committer') {
-                commiters.push(data.value)
-            } else if (data.key === 'Expert') {
-                expecters.push(data.value)
-            }
-        })
-        const roles = {
-            Contributor: contributors,
-            Committer: commiters,
-            Expert: expecters,
-        }
-        return roles
     }
 
     const submit = async () => {

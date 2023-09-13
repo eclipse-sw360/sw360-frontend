@@ -31,6 +31,7 @@ import SearchUsersModalComponent from '@/components/sw360/SearchUsersModal/Searc
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
 import InputKeyValue from '@/object-types/InputKeyValue'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     session?: Session
@@ -104,83 +105,22 @@ export default function ComponentEditSummary({
         [session.user.access_token]
     )
 
-    const handlerModerators = (emails: any[]) => {
-        const fullNames: string[] = []
-        const moderatorsEmail: string[] = []
-        if (emails.length == 0) {
-            return
-        }
-        emails.forEach((item) => {
-            fullNames.push(item.fullName)
-            moderatorsEmail.push(item.email)
-        })
-        const moderatorsName: string = fullNames.join(' , ')
-        const moderatorsResponse: Moderators = {
-            fullName: moderatorsName,
-            emails: moderatorsEmail,
-        }
-        return moderatorsResponse
-    }
-
-    const getEmailsModerators = (emails: any[]) => {
-        const moderatorsEmail: string[] = []
-        if (typeof emails === 'undefined') {
-            return
-        }
-        emails.forEach((item) => {
-            moderatorsEmail.push(item.email)
-        })
-
-        return moderatorsEmail
-    }
-
-    const convertObjectToMap = (data: string) => {
-        const map = new Map(Object.entries(data))
-        const inputs: InputKeyValue[] = []
-        map.forEach((value, key) => {
-            const input: InputKeyValue = {
-                key: key,
-                value: value,
-            }
-            inputs.push(input)
-        })
-        return inputs
-    }
-
-    const convertObjectToMapRoles = (data: string) => {
-        if (data === undefined) {
-            return null
-        }
-        const inputRoles: InputKeyValue[] = []
-        const mapRoles = new Map(Object.entries(data))
-        mapRoles.forEach((value, key) => {
-            for (let index = 0; index < value.length; index++) {
-                const input: InputKeyValue = {
-                    key: key,
-                    value: value.at(index),
-                }
-                inputRoles.push(input)
-            }
-        })
-        return inputRoles
-    }
-
     useEffect(() => {
         fetchData(`components/${componentId}`).then((component: any) => {
             if (typeof component.roles !== 'undefined') {
-                setRoles(convertObjectToMapRoles(component.roles))
+                setRoles(CommonUtils.convertObjectToMapRoles(component.roles))
             }
 
             if (typeof component.externalIds !== 'undefined') {
-                setExternalIds(convertObjectToMap(component.externalIds))
+                setExternalIds(CommonUtils.convertObjectToMap(component.externalIds))
             }
 
             if (typeof component.additionalData !== 'undefined') {
-                setAddtionalData(convertObjectToMap(component.additionalData))
+                setAddtionalData(CommonUtils.convertObjectToMap(component.additionalData))
             }
 
             if (typeof component['_embedded']['sw360:moderators'] !== 'undefined') {
-                setModerator(handlerModerators(component['_embedded']['sw360:moderators']))
+                setModerator(CommonUtils.handlerModerators(component['_embedded']['sw360:moderators']))
             }
 
             if (typeof component['_embedded']['defaultVendor'] !== 'undefined') {
@@ -219,14 +159,14 @@ export default function ComponentEditSummary({
                 createBy: creatBy,
                 description: component.description,
                 componentType: component.componentType,
-                moderators: getEmailsModerators(component['_embedded']['sw360:moderators']),
+                moderators: CommonUtils.getEmailsModerators(component['_embedded']['sw360:moderators']),
                 modifiedBy: modifiedBy,
                 modifiedOn: component.modifiedOn,
                 componentOwner: componentOwnerEmail,
                 ownerAccountingUnit: component.ownerAccountingUnit,
                 ownerGroup: component.ownerGroup,
                 ownerCountry: component.ownerCountry,
-                roles: convertRoles(convertObjectToMapRoles(component.roles)),
+                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(component.roles)),
                 externalIds: component.externalIds,
                 additionalData: component.additionalData,
                 defaultVendorId: component.defaultVendorId,

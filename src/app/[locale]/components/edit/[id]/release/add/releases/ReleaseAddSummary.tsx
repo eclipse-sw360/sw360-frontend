@@ -23,6 +23,7 @@ import Licenses from '@/object-types/Licenses'
 import Moderators from '@/object-types/Moderators'
 import { useState } from 'react'
 import InputKeyValue from '@/object-types/InputKeyValue'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     session?: Session
@@ -61,32 +62,11 @@ export default function ReleaseAddSummary({
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
 
     const setDataRoles = (roles: InputKeyValue[]) => {
-        const roleDatas = convertRoles(roles)
+        const roleDatas = CommonUtils.convertRoles(roles)
         setReleasePayload({
             ...releasePayload,
             roles: roleDatas,
         })
-    }
-
-    const convertRoles = (datas: any[]) => {
-        const contributors: string[] = []
-        const commiters: string[] = []
-        const expecters: string[] = []
-        datas.forEach((data) => {
-            if (data.key === 'Contributor') {
-                contributors.push(data.value)
-            } else if (data.key === 'Committer') {
-                commiters.push(data.value)
-            } else if (data.key === 'Expert') {
-                expecters.push(data.value)
-            }
-        })
-        const roles = {
-            Contributor: contributors,
-            Committer: commiters,
-            Expert: expecters,
-        }
-        return roles
     }
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {

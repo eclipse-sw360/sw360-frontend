@@ -306,7 +306,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
                     </div>
                     <div className='col'>
                         <div className='row' style={{ marginBottom: '20px' }}>
-                            <PageButtonHeader buttons={headerButtons} title='releaseName'></PageButtonHeader>
+                            <PageButtonHeader buttons={headerButtons} title={release.name}></PageButtonHeader>
                         </div>
                         <ToastContainer position='top-start'>
                             <ToastMessage
