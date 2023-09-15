@@ -21,16 +21,20 @@ import { signOut } from 'next-auth/react'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import ActionType from '@/object-types/enums/ActionType'
+import { useRouter } from 'next/navigation'
 
 const DEFAULT_RELEASE_INFO: any = { name: '', version: '', _embedded: { 'sw360:attachments': [] } }
 
 interface Props {
+    componentId?: string
     releaseId?: string
+    actionType?: string
     show?: boolean
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const DeleteReleaseModal = ({ releaseId, show, setShow }: Props) => {
+const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow }: Props) => {
     const { data: session }: any = useSession()
     const t = useTranslations(COMMON_NAMESPACE)
     const [release, setRelease] = useState(DEFAULT_RELEASE_INFO)
@@ -38,6 +42,7 @@ const DeleteReleaseModal = ({ releaseId, show, setShow }: Props) => {
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
+    const router = useRouter()
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -104,7 +109,9 @@ const DeleteReleaseModal = ({ releaseId, show, setShow }: Props) => {
     const handleCloseDialog = () => {
         setShow(!show)
         setShowMessage(false)
-        if (reloadPage === true) {
+        if (actionType === ActionType.EDIT) {
+            router.push('/components/detail/' + componentId)
+        } else if (reloadPage === true) {
             window.location.reload()
         }
     }

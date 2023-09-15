@@ -12,7 +12,6 @@
 import styles from '../GeneralInfoComponent/SummaryComponent.module.css'
 import React, { useCallback, useState } from 'react'
 import { Session } from '@/object-types/Session'
-import 'react-toastify/dist/ReactToastify.css'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import SelectCountryComponent from '@/components/SelectCountry'
