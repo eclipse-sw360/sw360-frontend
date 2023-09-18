@@ -41,6 +41,7 @@ import ToastData from '@/object-types/ToastData'
 import { useRouter } from 'next/navigation'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
+import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 
 interface Props {
     session?: Session
@@ -53,6 +54,9 @@ const EditRelease = ({ session, releaseId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
     const [release, setRelease] = useState<any>(undefined)
+    const [componentId, setComponentId] = useState('')
+    const [deletingRelease, setDeletingRelease] = useState('')
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
     const fetchData: any = useCallback(
         async (url: string) => {
@@ -72,6 +76,8 @@ const EditRelease = ({ session, releaseId }: Props) => {
     useEffect(() => {
         fetchData(`releases/${releaseId}`).then((release: any) => {
             setRelease(release)
+            setDeletingRelease(releaseId)
+            setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
 
             if (release.componentType === 'COTS') {
                 setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
@@ -288,13 +294,18 @@ const EditRelease = ({ session, releaseId }: Props) => {
         }
     }
 
+    const handleDeleteRelease = () => {
+        setDeleteModalOpen(true)
+    }
+
     const headerButtons = {
         'Update Release': { link: '', type: 'primary', onClick: submit },
         'Delete Release': {
-            link: '/releases/detail/' + releaseId,
+            link: '',
             type: 'danger',
+            onClick: handleDeleteRelease,
         },
-        Cancel: { link: '/releases/detail/' + releaseId, type: 'secondary' },
+        Cancel: { link: '/components/releases/detail/' + releaseId, type: 'secondary' },
     }
 
     return (
@@ -306,8 +317,15 @@ const EditRelease = ({ session, releaseId }: Props) => {
                     </div>
                     <div className='col'>
                         <div className='row' style={{ marginBottom: '20px' }}>
-                            <PageButtonHeader buttons={headerButtons} title='releaseName'></PageButtonHeader>
+                            <PageButtonHeader buttons={headerButtons} title={release.name}></PageButtonHeader>
                         </div>
+                        <DeleteReleaseModal
+                            actionType={ActionType.EDIT}
+                            componentId={componentId}
+                            releaseId={deletingRelease}
+                            show={deleteModalOpen}
+                            setShow={setDeleteModalOpen}
+                        />
                         <ToastContainer position='top-start'>
                             <ToastMessage
                                 show={toastData.show}

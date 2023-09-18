@@ -14,13 +14,12 @@ import React, { useCallback, useState } from 'react'
 import { Session } from '@/object-types/Session'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
-import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
 import SelectCountryComponent from '@/components/SelectCountry'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ActionType from '@/object-types/enums/ActionType'
-import ModeratorsDialog from '@/components/sw360/SearchModerators/ModeratorsDialog'
+import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
+import ComponentOwnerDialog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload
@@ -29,9 +28,6 @@ interface Props {
     setComponentOwner?: React.Dispatch<React.SetStateAction<ComponentOwner>>
     moderator?: Moderators
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
-    componentData?: ComponentPayload
-    setComponentData?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    actionType?: string
 }
 
 const RolesInformation = ({
@@ -42,9 +38,6 @@ const RolesInformation = ({
     setComponentOwner,
     moderator,
     setModerator,
-    componentData,
-    setComponentData,
-    actionType
 }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
@@ -55,11 +48,6 @@ const RolesInformation = ({
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setComponentPayload({
             ...componentPayload,
-            [e.target.name]: e.target.value,
-        })
-        actionType === ActionType.EDIT &&
-        setComponentData({
-            ...componentData,
             [e.target.name]: e.target.value,
         })
     }
@@ -74,11 +62,6 @@ const RolesInformation = ({
             ...componentPayload,
             componentOwner: componentOwnerResponse.email,
         })
-        actionType === ActionType.EDIT &&
-        setComponentData({
-            ...componentData,
-            componentOwner: componentOwnerResponse.email,
-        })
     }
 
     const setModerators = (moderatorsResponse: Moderators) => {
@@ -89,11 +72,6 @@ const RolesInformation = ({
         setModerator(moderator)
         setComponentPayload({
             ...componentPayload,
-            moderators: moderatorsResponse.emails,
-        })
-        actionType === ActionType.EDIT &&
-        setComponentData({
-            ...componentData,
             moderators: moderatorsResponse.emails,
         })
     }
@@ -124,7 +102,7 @@ const RolesInformation = ({
 
     return (
         <>
-            <div className='row mb-4' style={{padding:'0px 12px'}}>
+            <div className='row mb-4' style={{ padding: '0px 12px' }}>
                 <div className={`${styles['header']} mb-2`}>
                     <p className='fw-bold mt-3'> {t('Roles')}</p>
                 </div>
@@ -147,7 +125,7 @@ const RolesInformation = ({
                             onChange={updateField}
                             value={componentOwner.fullName ?? ''}
                         />
-                        <ComponentOwnerDiaglog
+                        <ComponentOwnerDialog
                             show={dialogOpenComponentOwner}
                             setShow={setDialogOpenComponentOwner}
                             session={session}
@@ -189,7 +167,10 @@ const RolesInformation = ({
                 <hr className='my-4' />
                 <div className='row'>
                     <div className='col-lg-4'>
-                        <SelectCountryComponent selectCountry={updateField} value={componentPayload.ownerCountry ?? ''} />
+                        <SelectCountryComponent
+                            selectCountry={updateField}
+                            value={componentPayload.ownerCountry ?? ''}
+                        />
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='moderators' className='form-label fw-bold'>

@@ -30,7 +30,7 @@ interface Props {
     selectComponentOwner: ComponentOwnerType
 }
 
-const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }: Props) => {
+const ComponentOwnerDialog = ({ show, setShow, session, selectComponentOwner }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [data, setData] = useState()
     const [componentOwner, setComponentOwner] = useState<ComponentOwner>()
@@ -130,4 +130,4 @@ const ComponentOwnerDiaglog = ({ show, setShow, session, selectComponentOwner }:
     )
 }
 
-export default ComponentOwnerDiaglog
+export default ComponentOwnerDialog

@@ -29,8 +29,8 @@ interface Props {
     attachmentUpload: AttachmentDetail[]
     setAttachmentFromUpload: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
     onReRender: () => void
-    componentData: ComponentPayload
-    setComponentData: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    componentPayload?: ComponentPayload
+    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     documentType?: string
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
@@ -43,8 +43,8 @@ const SelectAttachment = ({
     attachmentUpload,
     setAttachmentFromUpload,
     onReRender,
-    componentData,
-    setComponentData,
+    componentPayload,
+    setComponentPayload,
     releasePayload,
     setReleasePayload,
     documentType,
@@ -88,8 +88,8 @@ const SelectAttachment = ({
                 json.map((item: AttachmentDetail) => attachmentUpload.push(item))
                 setAttachmentFromUpload(attachmentUpload)
                 if (documentType === DocumentTypes.COMPONENT) {
-                    setComponentData({
-                        ...componentData,
+                    setComponentPayload({
+                        ...componentPayload,
                         attachmentDTOs: attachmentUpload,
                     })
                 } else {

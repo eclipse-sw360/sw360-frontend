@@ -98,36 +98,12 @@ export default function ReleaseEditSummary({
     }
 
     const setDataRoles = (roles: InputKeyValue[]) => {
-        const roleDatas = convertRoles(roles)
+        const roleDatas = CommonUtils.convertRoles(roles)
         setReleasePayload({
             ...releasePayload,
             roles: roleDatas,
         })
     }
-    const convertRoles = (datas: InputKeyValue[]) => {
-        if (datas === null) {
-            return null
-        }
-        const contributors: string[] = []
-        const commiters: string[] = []
-        const expecters: string[] = []
-        datas.forEach((data) => {
-            if (data.key === 'Contributor') {
-                contributors.push(data.value)
-            } else if (data.key === 'Committer') {
-                commiters.push(data.value)
-            } else if (data.key === 'Expert') {
-                expecters.push(data.value)
-            }
-        })
-        const roles = {
-            Contributor: contributors,
-            Committer: commiters,
-            Expert: expecters,
-        }
-        return roles
-    }
-
     const fetchData: any = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -143,104 +119,25 @@ export default function ReleaseEditSummary({
         [session.user.access_token]
     )
 
-    const handlerModerators = (emails: any[]) => {
-        const fullNames: string[] = []
-        const moderatorsEmail: string[] = []
-        if (emails.length == 0) {
-            return
-        }
-        emails.forEach((item) => {
-            fullNames.push(item.fullName)
-            moderatorsEmail.push(item.email)
-        })
-        const moderatorsName: string = fullNames.join(' , ')
-        const moderatorsResponse: Moderators = {
-            fullName: moderatorsName,
-            emails: moderatorsEmail,
-        }
-        return moderatorsResponse
-    }
-
-    const handlerContributor = (emails: any[]) => {
-        const fullNames: string[] = []
-        const contributorsEmail: string[] = []
-        if (emails.length == 0) {
-            return
-        }
-        emails.forEach((item) => {
-            fullNames.push(item.fullName)
-            contributorsEmail.push(item.email)
-        })
-        const contributorsName: string = fullNames.join(' , ')
-        const contributorsResponse: Moderators = {
-            fullName: contributorsName,
-            emails: contributorsEmail,
-        }
-        return contributorsResponse
-    }
-
-    const getEmailsModerators = (emails: any[]) => {
-        const moderatorsEmail: string[] = []
-        if (typeof emails === 'undefined') {
-            return
-        }
-        emails.forEach((item) => {
-            moderatorsEmail.push(item.email)
-        })
-
-        return moderatorsEmail
-    }
-
-    const convertObjectToMap = (data: string) => {
-        const map = new Map(Object.entries(data))
-        const InputKeyValues: InputKeyValue[] = []
-        map.forEach((value, key) => {
-            const InputKeyValue: InputKeyValue = {
-                key: key,
-                value: value,
-            }
-            InputKeyValues.push(InputKeyValue)
-        })
-        return InputKeyValues
-    }
-
-    const convertObjectToMapRoles = (data: string) => {
-        if (data === undefined) {
-            return null
-        }
-        const InputKeyValueRoles: InputKeyValue[] = []
-        const mapRoles = new Map(Object.entries(data))
-        mapRoles.forEach((value, key) => {
-            for (let index = 0; index < value.length; index++) {
-                const InputKeyValue: InputKeyValue = {
-                    key: key,
-                    value: value.at(index),
-                }
-                InputKeyValueRoles.push(InputKeyValue)
-            }
-        })
-        return InputKeyValueRoles
-    }
-
     useEffect(() => {
         if (typeof release.roles !== 'undefined') {
-            setRoles(convertObjectToMapRoles(release.roles))
+            setRoles(CommonUtils.convertObjectToMapRoles(release.roles))
         }
 
         if (typeof release.externalIds !== 'undefined') {
-            setExternalIds(convertObjectToMap(release.externalIds))
+            setExternalIds(CommonUtils.convertObjectToMap(release.externalIds))
         }
 
         if (typeof release.additionalData !== 'undefined') {
-            setAddtionalData(convertObjectToMap(release.additionalData))
+            setAddtionalData(CommonUtils.convertObjectToMap(release.additionalData))
         }
 
         if (typeof release['_embedded']['sw360:moderators'] !== 'undefined') {
-            setModerator(handlerModerators(release['_embedded']['sw360:moderators']))
+            setModerator(CommonUtils.getObjectModerators(release['_embedded']['sw360:moderators']))
         }
 
         if (typeof release['_embedded']['sw360:contributors'] !== 'undefined') {
-            setContributor(handlerContributor(release['_embedded']['sw360:contributors']))
+            setContributor(CommonUtils.getObjectContributors(release['_embedded']['sw360:contributors']))
         }
 
         let vendorId = ''
@@ -278,13 +175,13 @@ export default function ReleaseEditSummary({
             additionalData: release.additionalData,
             clearingState: release.clearingState,
             mainlineState: release.mainlineState,
-            contributors: getEmailsModerators(release['_embedded']['sw360:contributors']),
+            contributors: CommonUtils.getEmailsModerators(release['_embedded']['sw360:contributors']),
             createdOn: release.createdOn,
             createBy: createBy,
             modifiedBy: modifiedBy,
             modifiedOn: release.modifiedOn,
-            moderators: getEmailsModerators(release['_embedded']['sw360:moderators']),
-            roles: convertRoles(convertObjectToMapRoles(release.roles)),
+            moderators: CommonUtils.getEmailsModerators(release['_embedded']['sw360:moderators']),
+            roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(release.roles)),
             mainLicenseIds: release.mainLicenseIds,
             otherLicenseIds: release.otherLicenseIds,
             vendorId: vendorId,
