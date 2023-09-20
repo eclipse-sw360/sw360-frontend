@@ -65,7 +65,7 @@ export default function Vulnerabilities({ session }: { session: Session }) {
             formatter: (externalId: string) =>
                 _(
                     <>
-                        <Link href={`/vulnerabilities/${externalId}`} className='text-link'>
+                        <Link href={`/vulnerabilities/detail/${externalId}`} className='text-link'>
                             {externalId}
                         </Link>
                     </>
