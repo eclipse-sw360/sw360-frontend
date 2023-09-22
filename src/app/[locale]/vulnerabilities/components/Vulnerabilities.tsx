@@ -27,6 +27,7 @@ import Link from 'next/link'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
 import { useSearchParams } from 'next/navigation'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
+import { useRouter } from 'next/navigation'
 
 export default function Vulnerabilities({ session }: { session: Session }) {
     const DEFAULT_VULNERABILITIES = 200
@@ -36,6 +37,7 @@ export default function Vulnerabilities({ session }: { session: Session }) {
     const [search, setSearch] = useState({})
     const params = useSearchParams()
     const [vulnerabilityToBeDeleted, setVulnerabilityToBeDeleted] = useState<null | string>(null)
+    const router = useRouter()
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
         setSearch({ keyword: event.currentTarget.value })
@@ -43,6 +45,10 @@ export default function Vulnerabilities({ session }: { session: Session }) {
 
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
+    }
+
+    const handleAddVulnerability = () => {
+        router.push('/vulnerabilities/add')
     }
 
     const advancedSearch = [
@@ -83,10 +89,7 @@ export default function Vulnerabilities({ session }: { session: Session }) {
             formatter: ({ cvss, cvssTime }: { cvss: string; cvssTime: string }) =>
                 _(
                     <>
-                        <span style={{ color: 'red' }}>{`${cvss} (as of: ${cvssTime.substring(
-                            0,
-                            cvssTime.lastIndexOf('T')
-                        )})`}</span>
+                        <span style={{ color: 'red' }}>{`${cvss} (as of: ${cvssTime})`}</span>
                     </>
                 ),
             sort: true,
@@ -144,12 +147,12 @@ export default function Vulnerabilities({ session }: { session: Session }) {
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:vulnerabilityApiDTOes'])
                         ? []
                         : data['_embedded']['sw360:vulnerabilityApiDTOes'].map((elem: any) => [
-                              elem.externalId,
-                              elem.title,
-                              { cvss: elem.cvss, cvssTime: elem.cvssTime },
-                              elem.publishDate.substring(0, elem.publishDate.lastIndexOf('T')),
-                              elem.lastExternalUpdate.substring(0, elem.lastExternalUpdate.lastIndexOf('T')),
-                              elem.externalId,
+                              elem.externalId ?? '',
+                              elem.title ?? '',
+                              { cvss: elem.cvss ?? '', cvssTime: elem.cvssTime ?? '' },
+                              elem.publishDate?.substring(0, elem.publishDate.lastIndexOf('T')) ?? '',
+                              elem.lastExternalUpdate?.substring(0, elem.lastExternalUpdate.lastIndexOf('T')) ?? '',
+                              elem.externalId ?? '',
                           ])
                 setVulnerabilitiesData(dataTableFormat)
             } catch (e) {
@@ -183,7 +186,9 @@ export default function Vulnerabilities({ session }: { session: Session }) {
                         <div className='row d-flex justify-content-between ms-1'>
                             <div className='col-lg-5'>
                                 <div className='row'>
-                                    <button className='btn btn-primary col-auto'>{t('Add Vulnerability')}</button>
+                                    <button className='btn btn-primary col-auto' onClick={handleAddVulnerability}>
+                                        {t('Add Vulnerability')}
+                                    </button>
                                     <Dropdown className='col-auto'>
                                         <Dropdown.Toggle variant='secondary'>
                                             {num !== -1 ? `${t('Show latest')} ${num}` : t('Show All')}
