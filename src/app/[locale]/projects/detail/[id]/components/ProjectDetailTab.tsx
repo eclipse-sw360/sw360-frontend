@@ -9,12 +9,11 @@
 
 'use client'
 
-import { Col, Row, ListGroup, Tab, Button, Dropdown } from 'react-bootstrap'
+import { Col, Row, ListGroup, Tab, Button, Dropdown, Spinner } from 'react-bootstrap'
 import Summary from './Summary'
 import ChangeLog from './Changelog'
 import Administration from './Administration'
 import React, { useState, useEffect } from 'react'
-import PageSpinner from '@/components/Spinner/Spinner'
 
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -218,7 +217,7 @@ export default function ViewProjects({ session, projectId }: { session: Session;
 
     return (
         <>
-            <LinkProjects show={show} setShow={setShow} session={session} projectId={projectId}/>
+            <LinkProjects show={show} setShow={setShow} session={session} projectId={projectId} />
             <div className='ms-5 mt-2'>
                 <Tab.Container defaultActiveKey='summary'>
                     <Row>
@@ -285,7 +284,7 @@ export default function ViewProjects({ session, projectId }: { session: Session;
                                     <Tab.Pane eventKey='summary'>
                                         {!summaryData ? (
                                             <div className='col-12' style={{ textAlign: 'center' }}>
-                                                <PageSpinner />
+                                                <Spinner className='spinner' />
                                             </div>
                                         ) : (
                                             <Summary summaryData={summaryData} />
@@ -294,7 +293,7 @@ export default function ViewProjects({ session, projectId }: { session: Session;
                                     <Tab.Pane eventKey='administration'>
                                         {!administrationData ? (
                                             <div className='col-12' style={{ textAlign: 'center' }}>
-                                                <PageSpinner />
+                                                <Spinner className='spinner' />
                                             </div>
                                         ) : (
                                             <Administration data={administrationData} />

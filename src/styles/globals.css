@@ -466,12 +466,12 @@ th {
 
 .capsule-left {
     border-top-right-radius: 0%;
-    border-bottom-right-radius: 0%; 
+    border-bottom-right-radius: 0%;
 }
 
 .capsule-right {
     border-top-left-radius: 0%;
-    border-bottom-left-radius: 0%;   
+    border-bottom-left-radius: 0%;
 }
 
 .bg-success {
@@ -488,4 +488,8 @@ th {
 
 .bg-warning {
     background-color: #ffd350 !important;
+}
+
+.spinner {
+    color: #f7941e;
 }
