@@ -32,7 +32,6 @@
     "devDependencies": {
         "@commitlint/cli": "^17.6.5",
         "@commitlint/config-conventional": "^17.6.5",
-        "@microsoft/tsdoc": "^0.14.2",
         "@storybook/addon-essentials": "^7.4.4",
         "@storybook/addon-interactions": "^7.4.4",
         "@storybook/addon-links": "^7.4.4",
@@ -59,7 +58,6 @@
         "eslint-config-next": "^13.4.19",
         "eslint-config-prettier": "^8.10.0",
         "eslint-plugin-storybook": "^0.6.14",
-        "eslint-plugin-tsdoc": "^0.2.17",
         "husky": "^8.0.3",
         "lint-staged": "^13.2.2",
         "prettier": "^2.8.8",
