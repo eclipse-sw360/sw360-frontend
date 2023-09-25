@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Check2Circle, XCircle } from 'react-bootstrap-icons'
+import { Spinner } from 'react-bootstrap'
 import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { useSearchParams } from 'next/navigation'
@@ -26,7 +27,6 @@ import ApiUtils from '@/utils/api/api.util'
 
 // SW360 Components
 import { _, PageButtonHeader, QuickFilter, Table } from '@/components/sw360'
-import PageSpinner from '@/components/Spinner/Spinner'
 
 const headerButtons = {
     'Add License': { link: '/licenses/add', type: 'primary' },
@@ -130,7 +130,7 @@ function LicensesPage({ session }: Props) {
                                 />
                             ) : (
                                 <div className='col-12' style={{ textAlign: 'center' }}>
-                                    <PageSpinner />
+                                    <Spinner className='spinner' />
                                 </div>
                             )}
                             <div className='row mt-2'></div>

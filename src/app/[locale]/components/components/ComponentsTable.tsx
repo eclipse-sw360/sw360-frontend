@@ -17,13 +17,13 @@ import styles from '../components.module.css'
 import { signOut } from 'next-auth/react'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import PageSpinner from '@/components/Spinner/Spinner'
 import { useSearchParams } from 'next/navigation'
 import DeleteComponentDialog from './DeleteComponentDialog'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types/Session'
+import { Spinner } from 'react-bootstrap'
 import { Table, _ } from '@/components/sw360'
 
 interface Props {
@@ -154,7 +154,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
                     <Table data={componentData} columns={columns} selector={true} />
                 ) : (
                     <div className='col-12' style={{ textAlign: 'center' }}>
-                        <PageSpinner />
+                        <Spinner className='spinner' />
                     </div>
                 )}
             </div>

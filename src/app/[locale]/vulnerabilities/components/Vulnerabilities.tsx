@@ -11,8 +11,7 @@
 
 import { QuickFilter, AdvancedSearch, _, Table } from '@/components/sw360'
 import { useState, useEffect } from 'react'
-import { Dropdown } from 'react-bootstrap'
-import PageSpinner from '@/components/Spinner/Spinner'
+import { Dropdown, Spinner } from 'react-bootstrap'
 
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
@@ -217,7 +216,7 @@ export default function Vulnerabilities({ session }: { session: Session }) {
                                 <Table columns={columns} data={vulnerabilitiesData} sort={false} search={search} />
                             ) : (
                                 <div className='col-12' style={{ textAlign: 'center' }}>
-                                    <PageSpinner />
+                                    <Spinner className='spinner' />
                                 </div>
                             )}
                         </div>
