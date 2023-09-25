@@ -11,7 +11,7 @@
             "rootDir": "src"
         }
     },
-    "plugins": ["@typescript-eslint", "eslint-plugin-tsdoc", "react"],
+    "plugins": ["@typescript-eslint", "react"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": true,
@@ -21,7 +21,6 @@
         }
     },
     "rules": {
-        "tsdoc/syntax": "error",
         "@typescript-eslint/no-explicit-any": ["warn", { "fixToUnknown": true }],
         "@typescript-eslint/no-unused-vars": ["error"]
     },
