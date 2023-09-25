@@ -140,7 +140,10 @@ export default function LinkProjects({
 
     const handleSearch = async ({ searchValue, session }: { searchValue: string; session: Session }): Promise<any> => {
         try {
-            const response = await ApiUtils.GET(`projects?name=${searchValue}`, session.user.access_token)
+            const response = await ApiUtils.GET(
+                `projects?name=${searchValue}&luceneSearch=true`,
+                session.user.access_token
+            )
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else if (response.status !== HttpStatus.OK) {
