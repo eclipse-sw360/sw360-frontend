@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 export default interface EmbeddedAttachment {
-    filename: string,
-    sha1: string,
-    attachmentType: string,
+    filename: string
+    sha1: string
+    attachmentType?: string
     _links: {
         self: {
             href: string

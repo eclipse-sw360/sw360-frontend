@@ -12,9 +12,8 @@
 import CommonUtils from '@/utils/common.utils'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from '../components.module.css'
-import { signOut } from 'next-auth/react'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { useSearchParams } from 'next/navigation'
@@ -25,6 +24,9 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types/Session'
 import { Spinner } from 'react-bootstrap'
 import { Table, _ } from '@/components/sw360'
+import { EmbeddedComponents } from '@/object-types/EmbeddedComponents'
+import { EmbeddedComponent } from '@/object-types/EmbeddedComponent'
+import { signOut } from 'next-auth/react'
 
 interface Props {
     session?: Session
@@ -36,24 +38,24 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [componentData, setComponentData] = useState([])
     const [loading, setLoading] = useState(true)
-    const [deletingComponent, setDeletingComponent] = useState('')
+    const [deletingComponent, setDeletingComponent] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-    const handleClickDelete = (componentId: any) => {
+    const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)
         setDeleteDialogOpen(true)
     }
 
-    const fetchData: any = useCallback(
-        async (queryUrl: string, signal: any) => {
+    const fetchData = useCallback(
+        async (queryUrl: string, signal: AbortSignal) => {
             const componentsResponse = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
             if (componentsResponse.status == HttpStatus.OK) {
-                const components = await componentsResponse.json()
+                const components = (await componentsResponse.json()) as EmbeddedComponents
                 return components
             } else if (componentsResponse.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                return signOut()
             } else {
-                return []
+                return undefined
             }
         },
         [session.user.access_token]
@@ -65,7 +67,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         const queryUrl = CommonUtils.createUrlWithParams('components', searchParams)
         const data: Array<unknown> = []
 
-        const parseTableRowData = (item: any) => {
+        const parseTableRowData = (item: EmbeddedComponent) => {
             data.push([
                 !CommonUtils.isNullOrUndefined(item.defaultVendor) ? item.defaultVendor.shortName : '',
                 [item.id, item.name],
@@ -78,14 +80,18 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        fetchData(queryUrl, signal).then((components: any) => {
-            if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
-                components['_embedded']['sw360:components'].forEach(parseTableRowData)
-                setComponentData(data)
-                setNumberOfComponent(data.length)
-                setLoading(false)
-            }
-        })
+        fetchData(queryUrl, signal)
+            .then((components: EmbeddedComponents) => {
+                if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
+                    components['_embedded']['sw360:components'].forEach(parseTableRowData)
+                    setComponentData(data)
+                    setNumberOfComponent(data.length)
+                    setLoading(false)
+                }
+            })
+            .catch(() => {
+                console.error('False to fetch components')
+            })
 
         return () => {
             controller.abort()
@@ -101,7 +107,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         {
             id: 'name',
             name: t('Component Name'),
-            formatter: ([id, name]: any) =>
+            formatter: ([id, name]: Array<string>) =>
                 _(
                     <Link href={'/components/detail/' + id} className='link'>
                         {name}
@@ -112,17 +118,19 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         {
             id: 'mainLicenses',
             name: t('Main Licenses'),
-            formatter: (licenseIds: any) =>
+            formatter: (licenseIds: Array<string>) =>
                 licenseIds.length > 0 &&
                 _(
                     Object.entries(licenseIds)
-                        .map(([, item]: any) => (
-                            <Link key={item} className='link' href={'/licenses/' + item}>
-                                {' '}
-                                {item}{' '}
-                            </Link>
-                        ))
-                        .reduce((prev, curr): any => [prev, ', ', curr])
+                        .map(
+                            ([, item]: Array<string>): React.ReactNode => (
+                                <Link key={item} className='link' href={'/licenses/' + item}>
+                                    {' '}
+                                    {item}{' '}
+                                </Link>
+                            )
+                        )
+                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
                 ),
             sort: true,
         },

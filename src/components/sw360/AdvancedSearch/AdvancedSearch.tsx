@@ -44,10 +44,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     const [searchParams, setSearchParam] = useState<SearchParams>(params)
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')
 
-    const handleSearchParam = (event: any) => {
+    const handleSearchParam = (event: React.ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         setSearchParam((prev: SearchParams) => ({
             ...prev,
-            [event.target.name]: event.target.value,
+            [event.target?.name]: event.target.value,
         }))
     }
 
@@ -58,7 +58,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)
         const searchUrl = new URL(currentUrl.origin + currentUrl.pathname)
-        Object.entries(searchParams).forEach(([key, value]: any) => {
+        Object.entries(searchParams).forEach(([key, value]: Array<string>) => {
             if (!CommonUtils.isNullEmptyOrUndefinedString(value)) {
                 searchUrl.searchParams.append(key, value)
             }
@@ -73,7 +73,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
         fieldList = fields.map((field: Field) => {
             if (field.paramName === 'createdOn' && Array.isArray(field.value)) {
                 return (
-                    <>
+                    <div key='createdOn'>
                         <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
                             <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
                             <Form.Select
@@ -109,7 +109,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                                 </Form.Group>
                             </>
                         )}
-                    </>
+                    </div>
                 )
             } else if (typeof field.value === 'string') {
                 return (
