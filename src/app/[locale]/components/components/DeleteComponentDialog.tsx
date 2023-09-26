@@ -24,8 +24,10 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
 import ActionType from '@/object-types/enums/ActionType'
+import { Session } from '@/object-types/Session'
+import Component from '@/object-types/Component'
 
-const DEFAULT_COMPONENT_INFO: any = { name: '', _embedded: { 'sw360:releases': [] } }
+const DEFAULT_COMPONENT_INFO: Component = { name: '', _embedded: { 'sw360:releases': [] } }
 
 interface Props {
     componentId?: string
@@ -34,11 +36,16 @@ interface Props {
     actionType?: string
 }
 
+interface DeleteResponse {
+    resourceId: string
+    status: number
+}
+
 const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props) => {
-    const { data: session }: any = useSession()
+    const { data: session } = useSession() as { data: Session }
     const t = useTranslations(COMMON_NAMESPACE)
     const router = useRouter()
-    const [component, setComponent] = useState(DEFAULT_COMPONENT_INFO)
+    const [component, setComponent] = useState<Component>(DEFAULT_COMPONENT_INFO)
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
@@ -55,11 +62,11 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         setReloadPage(true)
     }, [])
 
-    const deleteComponent: any = async () => {
+    const deleteComponent = async () => {
         const response = await ApiUtils.DELETE(`components/${componentId}`, session.user.access_token)
         try {
             if (response.status == HttpStatus.MULTIPLE_STATUS) {
-                const body = await response.json()
+                const body = (await response.json()) as Array<DeleteResponse>
                 const deleteStatus = body[0].status
                 if (deleteStatus == HttpStatus.OK) {
                     displayMessage('success', 'Delete component success!')
@@ -76,7 +83,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                     displayMessage('danger', 'Error when processing!')
                 }
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
             } else {
                 handleError()
             }
@@ -85,8 +92,8 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         }
     }
 
-    const fetchData: any = useCallback(
-        async (signal: any) => {
+    const fetchData = useCallback(
+        async (signal: AbortSignal) => {
             if (session) {
                 const componentsResponse = await ApiUtils.GET(
                     `components/${componentId}`,
@@ -94,11 +101,11 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                     signal
                 )
                 if (componentsResponse.status == HttpStatus.OK) {
-                    const component = await componentsResponse.json()
+                    const component = (await componentsResponse.json()) as Component
                     console.log(component.name)
                     setComponent(component)
                 } else if (componentsResponse.status == HttpStatus.UNAUTHORIZED) {
-                    signOut()
+                    await signOut()
                 } else {
                     setComponent(DEFAULT_COMPONENT_INFO)
                     handleError()
@@ -109,7 +116,9 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     )
 
     const handleSubmit = () => {
-        deleteComponent()
+        deleteComponent().catch((err) => {
+            console.log(err)
+        })
     }
 
     const handleCloseDialog = () => {
@@ -123,7 +132,9 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-        fetchData(signal)
+        fetchData(signal).catch((err) => {
+            console.error(err)
+        })
 
         return () => {
             controller.abort()
@@ -162,7 +173,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                     {' '}
                     {t('Close')}{' '}
                 </Button>
-                <Button className='login-btn' variant='danger' onClick={handleSubmit} hidden={reloadPage}>
+                <Button className='login-btn' variant='danger' onClick={() => handleSubmit()} hidden={reloadPage}>
                     {t('Delete Component')}
                 </Button>
             </Modal.Footer>

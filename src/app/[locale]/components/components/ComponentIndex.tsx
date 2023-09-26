@@ -37,122 +37,125 @@ const ComponentIndex = ({ session }: Props) => {
 
     const headerbuttons = {
         'Add Component': { link: '/components/add', type: 'primary' },
-        'Import SBOM': { link: '#', type: 'secondary', onClick: handleClickImportSBOM }
+        'Import SBOM': { link: '#', type: 'secondary', onClick: handleClickImportSBOM },
     }
 
     const advancedSearch = [
         {
             fieldName: 'Component Name',
             value: '',
-            paramName: 'name'
+            paramName: 'name',
         },
         {
             fieldName: 'Categories',
             value: '',
-            paramName: 'categories'
+            paramName: 'categories',
         },
         {
             fieldName: 'Component Type',
             value: [
                 {
                     key: 'OSS',
-                    text: 'OSS'
+                    text: 'OSS',
                 },
                 {
                     key: 'COTS',
-                    text: 'COTS'
+                    text: 'COTS',
                 },
                 {
                     key: 'INTERNAL',
-                    text: 'Internal'
+                    text: 'Internal',
                 },
                 {
                     key: 'INNER_SOURCE',
-                    text: 'Inner Source'
+                    text: 'Inner Source',
                 },
                 {
                     key: 'SERVICE',
-                    text: 'Service'
+                    text: 'Service',
                 },
                 {
                     key: 'FREESOFTWARE',
-                    text: 'Freeware'
+                    text: 'Freeware',
                 },
                 {
                     key: 'CODE_SNIPPET',
-                    text: 'Code Snippet'
-                }
+                    text: 'Code Snippet',
+                },
             ],
-            paramName: 'type'
+            paramName: 'type',
         },
         {
             fieldName: 'Group',
             value: [
                 {
                     key: 'None',
-                    text: 'None'
-                }
+                    text: 'None',
+                },
             ],
-            paramName: 'group'
+            paramName: 'group',
         },
         {
             fieldName: 'Languages',
             value: '',
-            paramName: 'languages'
+            paramName: 'languages',
         },
         {
             fieldName: 'Software Platforms',
             value: '',
-            paramName: 'softwarePlatform'
+            paramName: 'softwarePlatform',
         },
         {
             fieldName: 'Vendors',
             value: '',
-            paramName: 'vendors'
+            paramName: 'vendors',
         },
         {
             fieldName: 'Operating Systems',
             value: '',
-            paramName: 'operatingSystem'
+            paramName: 'operatingSystem',
         },
         {
             fieldName: 'Main Licenses',
             value: '',
-            paramName: 'mainLicenses'
+            paramName: 'mainLicenses',
         },
         {
             fieldName: 'Created By (Email)',
             value: '',
-            paramName: 'createdBy'
+            paramName: 'createdBy',
         },
         {
             fieldName: 'Created On',
             value: [
                 {
                     key: 'EQUAL',
-                    text: '='
+                    text: '=',
                 },
                 {
                     key: 'LESS_THAN_OR_EQUAL_TO',
-                    text: '<='
+                    text: '<=',
                 },
                 {
                     key: 'GREATER_THAN_OR_EQUAL_TO',
-                    text: '>='
+                    text: '>=',
                 },
                 {
                     key: 'BETWEEN',
-                    text: 'Between'
-                }
+                    text: 'Between',
+                },
             ],
-            paramName: 'createdOn'
-        }
+            paramName: 'createdOn',
+        },
     ]
 
-    const handleExportComponent = (withLinkedReleases: boolean) => {
+    const handleExportComponent = (withLinkedReleases: string) => {
         const currentDate = new Date().toISOString().split('T')[0]
-        DownloadService.download(`reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=false&module=components`,
-                                session, `components-${currentDate}.xlsx`)
+        DownloadService.download(
+            `reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=false&module=components`,
+            session,
+            `components-${currentDate}.xlsx`
+        )
     }
 
     return (
@@ -169,8 +172,12 @@ const ComponentIndex = ({ session }: Props) => {
                                     {t('Export Spreadsheet')}
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    <Dropdown.Item onClick={() => handleExportComponent(false)}>{t('Components only')}</Dropdown.Item>
-                                    <Dropdown.Item onClick={() => handleExportComponent(true)}>{t('Components with releases')}</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => handleExportComponent('false')}>
+                                        {t('Components only')}
+                                    </Dropdown.Item>
+                                    <Dropdown.Item onClick={() => handleExportComponent('true')}>
+                                        {t('Components with releases')}
+                                    </Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </div>
@@ -178,7 +185,7 @@ const ComponentIndex = ({ session }: Props) => {
                     <div className='row' style={{ marginBottom: '20px' }}>
                         <ComponentsTable session={session} setNumberOfComponent={setNumberOfComponent} />
                     </div>
-                    <ImportSBOMModal show={importModalOpen} setShow={setImportModalOpen} session={session}/>
+                    <ImportSBOMModal show={importModalOpen} setShow={setImportModalOpen} session={session} />
                 </div>
             </div>
         </div>
