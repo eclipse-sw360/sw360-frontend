@@ -9,14 +9,14 @@
 
 'use client'
 
-import { VulnerabilitySummaryDataType } from '@/object-types/VulnerabilitySummaryDataType'
+import { VulnerabilityPayload } from '@/object-types/VulnerabilityPayload'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useState } from 'react'
 import Link from 'next/link'
 import styles from '../detail.module.css'
 
-export default function Summary({ summaryData }: { summaryData: VulnerabilitySummaryDataType }) {
+export default function Summary({ summaryData }: { summaryData: VulnerabilityPayload }) {
     const t = useTranslations(COMMON_NAMESPACE)
     const [toggle, setToggle] = useState(false)
 
@@ -122,8 +122,8 @@ export default function Summary({ summaryData }: { summaryData: VulnerabilitySum
                                     return (
                                         <li key={i}>
                                             <span className='fw-bold'>{'vendor'}: </span>
-                                            {elem.vendor},<span className='fw-bold'>{'name'}: </span>
-                                            {elem.name},<span className='fw-bold'>{'url'}: </span> {elem.url}
+                                            {elem.vendor}, <span className='fw-bold'>{'name'}: </span>
+                                            {elem.name}, <span className='fw-bold'>{'url'}: </span> {elem.url}
                                         </li>
                                     )
                                 })}
