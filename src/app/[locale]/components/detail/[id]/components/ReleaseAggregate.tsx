@@ -8,60 +8,68 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 import { useTranslations } from 'next-intl'
 import styles from '../detail.module.css'
 import { useState } from 'react'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import CommonUtils from '@/utils/common.utils';
+import CommonUtils from '@/utils/common.utils'
+import Component from '@/object-types/Component'
+import Vendor from '@/object-types/Vendor'
 
-const ReleaseAgrregate = ({ component }: any) => {
-  const [toggle, setToggle] = useState(false);
-  const t = useTranslations(COMMON_NAMESPACE)
+const ReleaseAgrregate = ({ component }: { component: Component }) => {
+    const [toggle, setToggle] = useState(false)
+    const t = useTranslations(COMMON_NAMESPACE)
 
-  return (
-    <table className={`table label-value-table ${styles['summary-table']}`}>
-      <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
-        <tr>
-          <th colSpan={2}>{t('Release Aggregate Data')}</th>
-        </tr>
-      </thead>
-      <tbody hidden={toggle}>
-        <tr>
-          <td>{t('Vendors')}:</td>
-          <td>
-            {(component['_embedded'])
-            &&
-            <>
-              {(!CommonUtils.isNullEmptyOrUndefinedArray(component['_embedded']['sw360:vendors'])) && (
-              Object.values(component['_embedded']['sw360:vendors'])
-                  .map((vendor: any) => (
-                    <span key={vendor.fullName}>{vendor.fullName}</span>
-                  ))
-                  .reduce((prev, curr): any => [prev, ', ', curr])
-              )}
-            </>
-          }</td>
-        </tr>
-        <tr>
-          <td>{t('Languages')}:</td>
-          <td>{(component.languages) && component.languages.join(', ')}</td>
-        </tr>
-        <tr>
-          <td>{t('Platforms')}:</td>
-          <td>{(component.softwarePlatforms && component.softwarePlatforms.join(', '))}</td>
-        </tr>
-        <tr>
-          <td>{t('Operating Systems')}:</td>
-          <td>{(component.operatingSystems) && component.operatingSystems.join(', ')}</td>
-        </tr>
-        <tr>
-          <td>{t('Main Licenses')}:</td>
-          <td>{(component.mainLicenseIds) && component.mainLicenseIds.join(', ')}</td>
-        </tr>
-      </tbody>
-    </table>
-  )
+    return (
+        <table className={`table label-value-table ${styles['summary-table']}`}>
+            <thead
+                title='Click to expand or collapse'
+                onClick={() => {
+                    setToggle(!toggle)
+                }}
+            >
+                <tr>
+                    <th colSpan={2}>{t('Release Aggregate Data')}</th>
+                </tr>
+            </thead>
+            <tbody hidden={toggle}>
+                <tr>
+                    <td>{t('Vendors')}:</td>
+                    <td>
+                        {component['_embedded'] && (
+                            <>
+                                {!CommonUtils.isNullEmptyOrUndefinedArray(component['_embedded']['sw360:vendors']) &&
+                                    Object.values(component['_embedded']['sw360:vendors'])
+                                        .map(
+                                            (vendor: Vendor): React.ReactNode => (
+                                                <span key={vendor.fullName}>{vendor.fullName}</span>
+                                            )
+                                        )
+                                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                            </>
+                        )}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{t('Languages')}:</td>
+                    <td>{component.languages && component.languages.join(', ')}</td>
+                </tr>
+                <tr>
+                    <td>{t('Platforms')}:</td>
+                    <td>{component.softwarePlatforms && component.softwarePlatforms.join(', ')}</td>
+                </tr>
+                <tr>
+                    <td>{t('Operating Systems')}:</td>
+                    <td>{component.operatingSystems && component.operatingSystems.join(', ')}</td>
+                </tr>
+                <tr>
+                    <td>{t('Main Licenses')}:</td>
+                    <td>{component.mainLicenseIds && component.mainLicenseIds.join(', ')}</td>
+                </tr>
+            </tbody>
+        </table>
+    )
 }
 
 export default ReleaseAgrregate

@@ -39,6 +39,7 @@ export default interface Component {
     wiki?: string
     blog?: string
     modifiedOn?: string
+    modifiedBy?: string
     setBusinessUnit?: boolean
     setVisbility?: boolean
     _links?: {

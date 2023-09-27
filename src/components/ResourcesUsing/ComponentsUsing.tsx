@@ -14,9 +14,10 @@ import { _, Table } from '../sw360'
 import styles from './ResourceUsing.module.css'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { EmbeddedComponent } from '@/object-types/EmbeddedComponent'
 
 interface Props {
-    componentsUsing: Array<any>
+    componentsUsing: Array<EmbeddedComponent>
     documentName: string
 }
 
@@ -44,7 +45,7 @@ const ComponentsUsing = ({ componentsUsing, documentName }: Props) => {
     ]
 
     useEffect(() => {
-        const data = componentsUsing.map((component: any) => [
+        const data = componentsUsing.map((component: EmbeddedComponent) => [
             component.defaultVendor?.shortName,
             _(
                 <Link

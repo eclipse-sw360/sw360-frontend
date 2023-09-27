@@ -12,14 +12,14 @@ import { useEffect, useState } from 'react'
 import { FaFileAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-
 import { Table, _ } from '@/components/sw360'
+import { ChangeLog } from '@/object-types/ChangeLogs'
 
 interface Props {
     documentId: string
-    setChangeLogIndex: any
-    setChangesLogTab: any
-    changeLogList: Array<any>
+    setChangeLogIndex: React.Dispatch<React.SetStateAction<number>>
+    setChangesLogTab: React.Dispatch<React.SetStateAction<string>>
+    changeLogList: Array<ChangeLog>
 }
 
 const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props) => {
@@ -27,7 +27,7 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
     const [changeLogData, setChangeLogData] = useState([])
 
     useEffect(() => {
-        const data = Object.entries(changeLogList).map(([index, item]: any) => [
+        const data = Object.entries(changeLogList).map(([index, item]: [index: string, item: ChangeLog]) => [
             item.changeTimestamp,
             item.id,
             item.documentId === documentId
@@ -58,12 +58,12 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
         },
         {
             name: t('Actions'),
-            formatter: (index: unknown) =>
+            formatter: (index: string) =>
                 _(
                     <FaFileAlt
                         style={{ color: '#F7941E', fontSize: '18px' }}
                         onClick={() => {
-                            setChangeLogIndex(index)
+                            setChangeLogIndex(parseInt(index))
                             setChangesLogTab('view-log')
                         }}
                     />

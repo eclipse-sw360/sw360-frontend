@@ -21,6 +21,7 @@ import { signOut } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { Session } from '@/object-types/Session'
 import ReleaseLink from '@/object-types/ReleaseLink'
+import EmbeddedLinkedReleases from '@/object-types/ReleaseLink'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
 import styles from '../detail.module.css'
 import Image from 'next/image'
@@ -42,12 +43,12 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     const [data, setData] = useState([])
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-    const [clearingReleaseId, setClearingReleaseId] = useState(undefined)
+    const [clearingReleaseId, setClearingReleaseId] = useState<string>(undefined)
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
-    const [linkingReleaseId, setLinkingReleaseId] = useState(undefined)
+    const [linkingReleaseId, setLinkingReleaseId] = useState<string>(undefined)
     const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
 
-    const handleClickDelete = (releaseId: any) => {
+    const handleClickDelete = (releaseId: string) => {
         setDeletingRelease(releaseId)
         setDeleteModalOpen(true)
     }
@@ -62,14 +63,14 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
         setLinkingReleaseId(releaseId)
     }
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
+                const data = (await response.json()) as EmbeddedLinkedReleases
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
             } else {
                 notFound()
             }
@@ -78,22 +79,24 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
     )
 
     useEffect(() => {
-        fetchData(`components/${componentId}/releases`).then((releaseLinks: any) => {
-            if (
-                !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']['sw360:releaseLinks'])
-            ) {
-                const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
-                    item.name,
-                    [item.id, item.version],
-                    t(item.clearingState),
-                    t(item.clearingReport.clearingReportStatus),
-                    t(item.mainlineState),
-                    item.id,
-                ])
-                setData(data)
-            }
-        })
+        fetchData(`components/${componentId}/releases`)
+            .then((releaseLinks: EmbeddedLinkedReleases) => {
+                if (
+                    !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']['sw360:releaseLinks'])
+                ) {
+                    const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
+                        item.name,
+                        [item.id, item.version],
+                        t(item.clearingState),
+                        t(item.clearingReport.clearingReportStatus),
+                        t(item.mainlineState),
+                        item.id,
+                    ])
+                    setData(data)
+                }
+            })
+            .catch((err) => console.error(err))
     }, [componentId, fetchData, t])
 
     const columns = [
@@ -135,6 +138,7 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                 _(
                     <span>
                         <Image
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             src={fossologyIcon}
                             width={15}
                             height={15}

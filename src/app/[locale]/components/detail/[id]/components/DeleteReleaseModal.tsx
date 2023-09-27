@@ -23,8 +23,10 @@ import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
 import { useRouter } from 'next/navigation'
+import { Session } from '@/object-types/Session'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
 
-const DEFAULT_RELEASE_INFO: any = { name: '', version: '', _embedded: { 'sw360:attachments': [] } }
+const DEFAULT_RELEASE_INFO: ReleaseDetail = { name: '', version: '', _embedded: { 'sw360:attachments': [] } }
 
 interface Props {
     componentId?: string
@@ -34,8 +36,13 @@ interface Props {
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
+interface DeleteResponse {
+    resourceId: string
+    status: number
+}
+
 const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow }: Props) => {
-    const { data: session }: any = useSession()
+    const { data: session } = useSession() as { data: Session }
     const t = useTranslations(COMMON_NAMESPACE)
     const [release, setRelease] = useState(DEFAULT_RELEASE_INFO)
     const [variant, setVariant] = useState('success')
@@ -55,11 +62,11 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         setReloadPage(true)
     }, [])
 
-    const deleteComponent: any = async () => {
+    const deleteComponent = async () => {
         const response = await ApiUtils.DELETE(`releases/${releaseId}`, session.user.access_token)
         try {
             if (response.status == HttpStatus.MULTIPLE_STATUS) {
-                const body = await response.json()
+                const body = (await response.json()) as Array<DeleteResponse>
                 const deleteStatus = body[0].status
                 if (deleteStatus == HttpStatus.OK) {
                     displayMessage('success', 'Delete release success!')
@@ -75,7 +82,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                     displayMessage('danger', 'Error when processing!')
                 }
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                handleError()
             } else {
                 handleError()
             }
@@ -84,15 +91,15 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         }
     }
 
-    const fetchData: any = useCallback(
-        async (signal: any) => {
+    const fetchData = useCallback(
+        async (signal: AbortSignal) => {
             if (session) {
                 const releaseResponse = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
                 if (releaseResponse.status == HttpStatus.OK) {
-                    const release = await releaseResponse.json()
+                    const release = (await releaseResponse.json()) as ReleaseDetail
                     setRelease(release)
                 } else if (releaseResponse.status == HttpStatus.UNAUTHORIZED) {
-                    signOut()
+                    await signOut()
                 } else {
                     setRelease(DEFAULT_RELEASE_INFO)
                     handleError()
@@ -103,7 +110,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     )
 
     const handleSubmit = () => {
-        deleteComponent()
+        deleteComponent().catch((err) => console.error(err))
     }
 
     const handleCloseDialog = () => {
@@ -119,7 +126,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-        fetchData(signal)
+        fetchData(signal).catch((err) => console.error(err))
 
         return () => {
             controller.abort()

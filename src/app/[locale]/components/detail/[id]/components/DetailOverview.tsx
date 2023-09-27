@@ -22,14 +22,15 @@ import ApiUtils from '@/utils/api/api.util'
 import { Session } from '@/object-types/Session'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
-import { notFound } from 'next/navigation'
 import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { LinkedVulnerability } from '@/object-types/LinkedVulnerability'
+import { LinkedVulnerability, EmbeddedVulnerabilites } from '@/object-types/LinkedVulnerability'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import DownloadService from '@/services/download.service'
+import Component from '@/object-types/Component'
+import { ChangeLog, EmbeddedChangeLogs } from '@/object-types/ChangeLogs'
 
 interface Props {
     session: Session
@@ -64,21 +65,22 @@ const DetailOverview = ({ session, componentId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
-    const [component, setComponent] = useState<any>(undefined)
-    const [changeLogList, setChangeLogList] = useState<Array<any>>([])
+    const [component, setComponent] = useState<Component>(undefined)
+    const [changeLogList, setChangeLogList] = useState<Array<ChangeLog>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
+                const data = (await response.json()) as Component & EmbeddedVulnerabilites & EmbeddedChangeLogs
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
+                return undefined
             } else {
-                notFound()
+                return undefined
             }
         },
         [session.user.access_token]
@@ -86,38 +88,47 @@ const DetailOverview = ({ session, componentId }: Props) => {
 
     const downloadBundle = () => {
         DownloadService.download(
-            `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`, session, 'AttachmentBundle.zip')
+            `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
+            session,
+            'AttachmentBundle.zip'
+        )
     }
 
     useEffect(() => {
-        fetchData(`components/${componentId}`).then((component: any) => {
-            setComponent(component)
-            if (
-                !CommonUtils.isNullOrUndefined(component['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(component['_embedded']['sw360:attachments'])
-            ) {
-                setAttachmentNumber(component['_embedded']['sw360:attachments'].length)
-            }
-        })
+        fetchData(`components/${componentId}`)
+            .then((component: Component) => {
+                setComponent(component)
+                if (
+                    !CommonUtils.isNullOrUndefined(component['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(component['_embedded']['sw360:attachments'])
+                ) {
+                    setAttachmentNumber(component['_embedded']['sw360:attachments'].length)
+                }
+            })
+            .catch((err) => console.error(err))
 
-        fetchData(`changelog/document/${componentId}`).then((changeLogs: any) => {
-            setChangeLogList(
-                CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
-                    ? []
-                    : changeLogs['_embedded']['sw360:changeLogs']
-            )
-        })
+        fetchData(`changelog/document/${componentId}`)
+            .then((changeLogs: EmbeddedChangeLogs) => {
+                setChangeLogList(
+                    CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
+                        ? []
+                        : changeLogs['_embedded']['sw360:changeLogs']
+                )
+            })
+            .catch((err) => console.error(err))
 
-        fetchData(`components/${componentId}/vulnerabilities`).then((data: any) => {
-            if (
-                !CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(data['_embedded']['sw360:vulnerabilityDTOes'])
-            ) {
-                setVulnerData(data['_embedded']['sw360:vulnerabilityDTOes'])
-            } else {
-                setVulnerData([])
-            }
-        })
+        fetchData(`components/${componentId}/vulnerabilities`)
+            .then((data: EmbeddedVulnerabilites) => {
+                if (
+                    !CommonUtils.isNullOrUndefined(data['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(data['_embedded']['sw360:vulnerabilityDTOes'])
+                ) {
+                    setVulnerData(data['_embedded']['sw360:vulnerabilityDTOes'])
+                } else {
+                    setVulnerData([])
+                }
+            })
+            .catch((err) => console.error(err))
     }, [componentId, fetchData])
 
     const headerButtons = {
@@ -187,13 +198,17 @@ const DetailOverview = ({ session, componentId }: Props) => {
                             </PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary component={component} componentId={componentId} session={session}/>
+                            <Summary component={component} componentId={componentId} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}>
                             <ReleaseOverview componentId={componentId} session={session} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments session={session} documentId={componentId} documentType={DocumentTypes.COMPONENT} />
+                            <Attachments
+                                session={session}
+                                documentId={componentId}
+                                documentType={DocumentTypes.COMPONENT}
+                            />
                         </div>
                         <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
                             <ComponentVulnerabilities vulnerData={vulnerData} session={session} />
