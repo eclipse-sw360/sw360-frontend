@@ -42,6 +42,7 @@ import { useRouter } from 'next/navigation'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
 
 interface Props {
     session?: Session
@@ -53,19 +54,19 @@ const EditRelease = ({ session, releaseId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
-    const [release, setRelease] = useState<any>(undefined)
+    const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
+                const release = (await response.json()) as ReleaseDetail
+                return release
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                return signOut()
             } else {
                 return null
             }
@@ -74,7 +75,7 @@ const EditRelease = ({ session, releaseId }: Props) => {
     )
 
     useEffect(() => {
-        fetchData(`releases/${releaseId}`).then((release: any) => {
+        void fetchData(`releases/${releaseId}`).then((release: ReleaseDetail) => {
             setRelease(release)
             setDeletingRelease(releaseId)
             setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
@@ -84,67 +85,22 @@ const EditRelease = ({ session, releaseId }: Props) => {
             }
 
             if (typeof release.eccInformation !== 'undefined') {
-                const eccInformation: ECCInformation = {
-                    eccStatus: release.eccInformation.eccStatus,
-                    al: release.eccInformation.al,
-                    eccn: release.eccInformation.eccn,
-                    assessorContactPerson: release.eccInformation.assessorContactPerson,
-                    assessorDepartment: release.eccInformation.assessorDepartment,
-                    eccComment: release.eccInformation.eccComment,
-                    materialIndexNumber: release.eccInformation.materialIndexNumber,
-                    assessmentDate: release.eccInformation.assessmentDate,
-                }
+                const eccInformation: ECCInformation = release.eccInformation
                 setEccInformation(eccInformation)
             }
 
-            if (typeof release['_embedded']['sw360:cotsDetails'] !== 'undefined') {
-                const cotsDetails: COTSDetails = {
-                    usedLicense: release['_embedded']['sw360:cotsDetails'][0].usedLicense,
-                    licenseClearingReportURL: release['_embedded']['sw360:cotsDetails'][0].licenseClearingReportURL,
-                    containsOSS: release['_embedded']['sw360:cotsDetails'][0].containsOSS,
-                    ossContractSigned: release['_embedded']['sw360:cotsDetails'][0].ossContractSigned,
-                    ossInformationURL: release['_embedded']['sw360:cotsDetails'][0].ossInformationURL,
-                    usageRightAvailable: release['_embedded']['sw360:cotsDetails'][0].usageRightAvailable,
-                    cotsResponsible: release['_embedded']['sw360:cotsDetails'][0].cotsResponsible,
-                    clearingDeadline: release['_embedded']['sw360:cotsDetails'][0].clearingDeadline,
-                    sourceCodeAvailable: release['_embedded']['sw360:cotsDetails'][0].sourceCodeAvailable,
-                }
+            if (typeof release['_embedded']['sw360:cotsDetail'] !== 'undefined') {
+                const cotsDetails: COTSDetails = release['_embedded']['sw360:cotsDetail']
                 const cotsResponsible: ComponentOwner = {
-                    email: release['_embedded']['sw360:cotsDetails'][0]._embedded['sw360:cotsResponsible'].email,
-                    fullName: release['_embedded']['sw360:cotsDetails'][0]._embedded['sw360:cotsResponsible'].fullName,
+                    email: cotsDetails._embedded['sw360:cotsResponsible'].email,
+                    fullName: cotsDetails._embedded['sw360:cotsResponsible'].fullName,
                 }
                 setCotsResponsible(cotsResponsible)
                 setCotsDetails(cotsDetails)
             }
 
             if (typeof release.clearingInformation !== 'undefined') {
-                const clearingInformation: ClearingInformation = {
-                    externalSupplierID: release.clearingInformation.externalSupplierID,
-                    additionalRequestInfo: release.clearingInformation.additionalRequestInfo,
-                    evaluated: release.clearingInformation.evaluated,
-                    procStart: release.clearingInformation.procStart,
-                    requestID: release.clearingInformation.requestID,
-                    binariesOriginalFromCommunity: release.clearingInformation.binariesOriginalFromCommunity,
-                    binariesSelfMade: release.clearingInformation.binariesSelfMade,
-                    componentLicenseInformation: release.clearingInformation.componentLicenseInformation,
-                    sourceCodeDelivery: release.clearingInformation.sourceCodeDelivery,
-                    sourceCodeOriginalFromCommunity: release.clearingInformation.sourceCodeOriginalFromCommunity,
-                    sourceCodeToolMade: release.clearingInformation.sourceCodeToolMade,
-                    sourceCodeSelfMade: release.clearingInformation.sourceCodeSelfMade,
-                    sourceCodeCotsAvailable: release.clearingInformation.sourceCodeCotsAvailable,
-                    screenshotOfWebSite: release.clearingInformation.screenshotOfWebSite,
-                    finalizedLicenseScanReport: release.clearingInformation.finalizedLicenseScanReport,
-                    licenseScanReportResult: release.clearingInformation.licenseScanReportResult,
-                    legalEvaluation: release.clearingInformation.legalEvaluation,
-                    licenseAgreement: release.clearingInformation.licenseAgreement,
-                    scanned: release.clearingInformation.scanned,
-                    componentClearingReport: release.clearingInformation.componentClearingReport,
-                    clearingStandard: release.clearingInformation.clearingStandard,
-                    readmeOssAvailable: release.clearingInformation.readmeOssAvailable,
-                    comment: release.clearingInformation.comment,
-                    countOfSecurityVn: release.clearingInformation.countOfSecurityVn,
-                    externalUrl: release.clearingInformation.externalUrl,
-                }
+                const clearingInformation: ClearingInformation = release.clearingInformation
                 setClearingInformation(clearingInformation)
             }
         })
@@ -280,14 +236,14 @@ const EditRelease = ({ session, releaseId }: Props) => {
     const submit = async () => {
         const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            const data = await response.json()
+            const release = (await response.json()) as ReleaseDetail
             alert(
                 true,
                 'Success',
-                `success:Release ${release.name} (${release.version})  updated successfully!`,
+                `Success: Release ${release.name} (${release.version})  updated successfully!`,
                 'success'
             )
-            const releaseId: string = CommonUtils.getIdFromUrl(data._links.self.href)
+            const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
             router.push('/components/releases/detail/' + releaseId)
         } else {
             alert(true, 'Error', t('Release Create failed'), 'danger')

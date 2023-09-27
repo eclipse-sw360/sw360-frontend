@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import EmbeddedUser from '@/object-types/EmbeddedUser'
 import InputKeyValue from '@/object-types/InputKeyValue'
 import Moderators from '@/object-types/Moderators'
 
@@ -49,13 +50,13 @@ const getIdFromUrl = (url: string): string => {
     return url.split('/').at(-1)
 }
 
-const getObjectModerators = (emails: any[]) => {
+const getObjectModerators = (users: EmbeddedUser[]) => {
     const fullNames: string[] = []
     const moderatorsEmail: string[] = []
-    if (emails.length == 0) {
+    if (users.length == 0) {
         return
     }
-    emails.forEach((item) => {
+    users.forEach((item: EmbeddedUser) => {
         fullNames.push(item.fullName)
         moderatorsEmail.push(item.email)
     })
@@ -67,13 +68,13 @@ const getObjectModerators = (emails: any[]) => {
     return moderatorsResponse
 }
 
-const getObjectContributors = (emails: any[]) => {
+const getObjectContributors = (users: EmbeddedUser[]) => {
     const fullNames: string[] = []
     const contributorsEmail: string[] = []
-    if (emails.length == 0) {
+    if (users.length == 0) {
         return
     }
-    emails.forEach((item) => {
+    users.forEach((item: EmbeddedUser) => {
         fullNames.push(item.fullName)
         contributorsEmail.push(item.email)
     })
@@ -85,12 +86,12 @@ const getObjectContributors = (emails: any[]) => {
     return contributorsResponse
 }
 
-const getEmailsModerators = (emails: any[]) => {
+const getEmailsModerators = (users: EmbeddedUser[]) => {
     const moderatorsEmail: string[] = []
-    if (typeof emails === 'undefined') {
+    if (typeof users === 'undefined') {
         return
     }
-    emails.forEach((item) => {
+    users.forEach((item: EmbeddedUser) => {
         moderatorsEmail.push(item.email)
     })
 
