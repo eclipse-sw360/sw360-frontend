@@ -24,18 +24,15 @@ import ReleasePayload from '@/object-types/ReleasePayload'
 import { Session } from '@/object-types/Session'
 import Vendor from '@/object-types/Vendor'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import ApiUtils from '@/utils/api/api.util'
 import CommonUtils from '@/utils/common.utils'
-import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import InputKeyValue from '@/object-types/InputKeyValue'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
 
 interface Props {
     session?: Session
-    release?: any
+    release?: ReleaseDetail
     releaseId?: string
     actionType?: string
     releasePayload?: ReleasePayload
@@ -50,9 +47,9 @@ interface Props {
     setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
     moderator?: Moderators
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
-    cotsDetails: COTSDetails
-    eccInformation: ECCInformation
-    clearingInformation: ClearingInformation
+    cotsDetails?: COTSDetails
+    eccInformation?: ECCInformation
+    clearingInformation?: ClearingInformation
 }
 
 export default function ReleaseEditSummary({
@@ -104,20 +101,6 @@ export default function ReleaseEditSummary({
             roles: roleDatas,
         })
     }
-    const fetchData: any = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
-            } else {
-                notFound()
-            }
-        },
-        [session.user.access_token]
-    )
 
     useEffect(() => {
         if (typeof release.roles !== 'undefined') {
@@ -132,37 +115,37 @@ export default function ReleaseEditSummary({
             setAddtionalData(CommonUtils.convertObjectToMap(release.additionalData))
         }
 
-        if (typeof release['_embedded']['sw360:moderators'] !== 'undefined') {
-            setModerator(CommonUtils.getObjectModerators(release['_embedded']['sw360:moderators']))
+        if (typeof release._embedded['sw360:moderators'] !== 'undefined') {
+            setModerator(CommonUtils.getObjectModerators(release._embedded['sw360:moderators']))
         }
 
-        if (typeof release['_embedded']['sw360:contributors'] !== 'undefined') {
-            setContributor(CommonUtils.getObjectContributors(release['_embedded']['sw360:contributors']))
+        if (typeof release._embedded['sw360:contributors'] !== 'undefined') {
+            setContributor(CommonUtils.getObjectContributors(release._embedded['sw360:contributors']))
         }
 
         let vendorId = ''
-        if (typeof release['_embedded']['sw360:vendors'] !== 'undefined') {
-            vendorId = CommonUtils.getIdFromUrl(release['_embedded']['sw360:vendors'][0]._links.self.href)
+        if (typeof release._embedded['sw360:vendors'] !== 'undefined') {
+            vendorId = CommonUtils.getIdFromUrl(release._embedded['sw360:vendors'][0]._links.self.href)
             const vendor: Vendor = {
                 id: vendorId,
-                fullName: release['_embedded']['sw360:vendors'][0].fullName,
+                fullName: release._embedded['sw360:vendors'][0].fullName,
             }
             setVendor(vendor)
         }
 
         let modifiedBy = ''
-        if (typeof release['_embedded']['sw360:modifiedBy'] !== 'undefined') {
-            modifiedBy = release['_embedded']['sw360:modifiedBy']['fullName']
+        if (typeof release._embedded['sw360:modifiedBy'] !== 'undefined') {
+            modifiedBy = release._embedded['sw360:modifiedBy'].fullName
         }
 
         let createBy = ''
-        if (typeof release['_embedded']['sw360:createdBy'] !== 'undefined') {
-            createBy = release['_embedded']['sw360:createdBy']['fullName']
+        if (typeof release._embedded['sw360:createdBy'] !== 'undefined') {
+            createBy = release._embedded['sw360:createdBy'].fullName
         }
 
         let componentId = ''
-        if (typeof release['_links']['sw360:component']['href'] !== 'undefined') {
-            componentId = CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href'])
+        if (typeof release._links['sw360:component'].href !== 'undefined') {
+            componentId = CommonUtils.getIdFromUrl(release._links['sw360:component'].href)
         }
 
         const releasePayload: ReleasePayload = {
@@ -175,12 +158,12 @@ export default function ReleaseEditSummary({
             additionalData: release.additionalData,
             clearingState: release.clearingState,
             mainlineState: release.mainlineState,
-            contributors: CommonUtils.getEmailsModerators(release['_embedded']['sw360:contributors']),
+            contributors: CommonUtils.getEmailsModerators(release._embedded['sw360:contributors']),
             createdOn: release.createdOn,
             createBy: createBy,
             modifiedBy: modifiedBy,
             modifiedOn: release.modifiedOn,
-            moderators: CommonUtils.getEmailsModerators(release['_embedded']['sw360:moderators']),
+            moderators: CommonUtils.getEmailsModerators(release._embedded['sw360:moderators']),
             roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(release.roles)),
             mainLicenseIds: release.mainLicenseIds,
             otherLicenseIds: release.otherLicenseIds,
@@ -199,7 +182,6 @@ export default function ReleaseEditSummary({
         setReleasePayload(releasePayload)
     }, [
         releaseId,
-        fetchData,
         release,
         cotsDetails,
         eccInformation,
