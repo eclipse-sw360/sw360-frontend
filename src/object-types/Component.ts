@@ -40,6 +40,7 @@ export default interface Component {
     blog?: string
     modifiedOn?: string
     modifiedBy?: string
+    roles?: { [k: string]: Array<string> }
     setBusinessUnit?: boolean
     setVisbility?: boolean
     _links?: {

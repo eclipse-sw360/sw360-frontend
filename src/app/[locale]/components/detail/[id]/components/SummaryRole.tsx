@@ -74,7 +74,27 @@ const SummaryRole = ({ component }: { component: Component }) => {
                 </tr>
                 <tr>
                     <td>{t('Additional Roles')}:</td>
-                    <td></td>
+                    <td>
+                        {component.roles &&
+                            Object.keys(component.roles).map((key) => (
+                                <li key={key}>
+                                    <span className='mapDisplayChildItemLeft' style={{ fontWeight: 'bold' }}>
+                                        {key}:{' '}
+                                    </span>
+                                    <span className='mapDisplayChildItemRight'>
+                                        {component.roles[key]
+                                            .map(
+                                                (email: string): React.ReactNode => (
+                                                    <a key={email} href={`mailto:${email}`}>
+                                                        {email}
+                                                    </a>
+                                                )
+                                            )
+                                            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                    </span>
+                                </li>
+                            ))}
+                    </td>
                 </tr>
             </tbody>
         </table>
