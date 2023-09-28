@@ -164,13 +164,11 @@ export default function Vulnerabilities({ session }: { session: Session }) {
 
     return (
         <>
-            {vulnerabilityToBeDeleted && (
-                <DeleteVulnerabilityModal
-                    vulnerabilityId={vulnerabilityToBeDeleted}
-                    session={session}
-                    setVulnerability={setVulnerabilityToBeDeleted}
-                />
-            )}
+            <DeleteVulnerabilityModal
+                vulnerabilityId={vulnerabilityToBeDeleted}
+                session={session}
+                setVulnerability={setVulnerabilityToBeDeleted}
+            />
             <div className='mx-3 mt-3'>
                 <div className='row'>
                     <div className='col-lg-2'>
