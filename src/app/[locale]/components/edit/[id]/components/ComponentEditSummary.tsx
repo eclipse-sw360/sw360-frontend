@@ -30,6 +30,7 @@ import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoC
 import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
 import InputKeyValue from '@/object-types/InputKeyValue'
 import CommonUtils from '@/utils/common.utils'
+import Component from '@/object-types/Component'
 
 interface Props {
     session?: Session
@@ -65,14 +66,14 @@ export default function ComponentEditSummary({
         fullName: '',
     })
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
+                const data = (await response.json()) as Component
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                return signOut()
             } else {
                 notFound()
             }
@@ -81,7 +82,7 @@ export default function ComponentEditSummary({
     )
 
     useEffect(() => {
-        fetchData(`components/${componentId}`).then((component: any) => {
+        void fetchData(`components/${componentId}`).then((component: Component) => {
             if (typeof component.roles !== 'undefined') {
                 setRoles(CommonUtils.convertObjectToMapRoles(component.roles))
             }
@@ -94,39 +95,39 @@ export default function ComponentEditSummary({
                 setAddtionalData(CommonUtils.convertObjectToMap(component.additionalData))
             }
 
-            if (typeof component['_embedded']['sw360:moderators'] !== 'undefined') {
-                setModerator(CommonUtils.getObjectModerators(component['_embedded']['sw360:moderators']))
+            if (typeof component._embedded['sw360:moderators'] !== 'undefined') {
+                setModerator(CommonUtils.getObjectModerators(component._embedded['sw360:moderators']))
             }
 
-            if (typeof component['_embedded']['defaultVendor'] !== 'undefined') {
+            if (typeof component._embedded.defaultVendor !== 'undefined') {
                 const vendor: Vendor = {
                     id: component.defaultVendorId,
-                    fullName: component['_embedded']['defaultVendor']['fullName'],
+                    fullName: component._embedded.defaultVendor.fullName,
                 }
                 setVendor(vendor)
             }
 
-            if (typeof component['_embedded']['componentOwner'] !== 'undefined') {
+            if (typeof component._embedded.componentOwner !== 'undefined') {
                 const componentOwner: ComponentOwner = {
-                    email: component['_embedded']['componentOwner']['email'],
-                    fullName: component['_embedded']['componentOwner']['fullName'],
+                    email: component._embedded.componentOwner.email,
+                    fullName: component._embedded.componentOwner.fullName,
                 }
                 setComponentOwner(componentOwner)
             }
 
             let modifiedBy = ''
-            if (typeof component['_embedded']['modifiedBy'] !== 'undefined') {
-                modifiedBy = component['_embedded']['modifiedBy']['fullName']
+            if (typeof component._embedded.modifiedBy !== 'undefined') {
+                modifiedBy = component._embedded.modifiedBy.fullName
             }
 
             let creatBy = ''
-            if (typeof component['_embedded']['modifiedBy'] !== 'undefined') {
-                creatBy = component['_embedded']['createdBy']['fullName']
+            if (typeof component._embedded.createdBy !== 'undefined') {
+                creatBy = component._embedded.createdBy.fullName
             }
 
             let componentOwnerEmail = ''
-            if (typeof component['_embedded']['componentOwner'] !== 'undefined') {
-                componentOwnerEmail = component['_embedded']['componentOwner']['email']
+            if (typeof component._embedded.componentOwner !== 'undefined') {
+                componentOwnerEmail = component._embedded.componentOwner.email
             }
 
             const componentPayloadData: ComponentPayload = {
@@ -134,7 +135,7 @@ export default function ComponentEditSummary({
                 createBy: creatBy,
                 description: component.description,
                 componentType: component.componentType,
-                moderators: CommonUtils.getEmailsModerators(component['_embedded']['sw360:moderators']),
+                moderators: CommonUtils.getEmailsModerators(component._embedded['sw360:moderators']),
                 modifiedBy: modifiedBy,
                 modifiedOn: component.modifiedOn,
                 componentOwner: componentOwnerEmail,

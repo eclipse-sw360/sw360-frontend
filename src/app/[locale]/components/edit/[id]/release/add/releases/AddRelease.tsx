@@ -15,7 +15,7 @@ import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import { Session } from '@/object-types/Session'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
-import { notFound, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
@@ -36,6 +36,8 @@ import ToastData from '@/object-types/ToastData'
 import { ToastContainer } from 'react-bootstrap'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 import CommonUtils from '@/utils/common.utils'
+import { EmbeddedComponent } from '@/object-types/EmbeddedComponent'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
 
 interface Props {
     session?: Session
@@ -135,23 +137,23 @@ const AddRelease = ({ session, componentId }: Props) => {
         })
     }
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
+                const component = (await response.json()) as EmbeddedComponent
+                return component
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                return signOut()
             } else {
-                notFound()
+                return null
             }
         },
         [session.user.access_token]
     )
 
     useEffect(() => {
-        fetchData(`components/${componentId}`).then((component: any) => {
+        void fetchData(`components/${componentId}`).then((component: EmbeddedComponent) => {
             setReleasePayload({
                 ...releasePayload,
                 name: component.name,
@@ -165,9 +167,9 @@ const AddRelease = ({ session, componentId }: Props) => {
     const submit = async () => {
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)
         if (response.status == HttpStatus.CREATED) {
-            const data = await response.json()
+            const release = (await response.json()) as ReleaseDetail
             alert(true, 'Success', t('Release is created'), 'success')
-            const releaseId: string = CommonUtils.getIdFromUrl(data._links.self.href)
+            const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
             router.push('/components/releases/detail/' + releaseId)
         } else if (response.status == HttpStatus.CONFLICT) {
             alert(true, 'Duplicate', t('Release is Duplicate'), 'warning')

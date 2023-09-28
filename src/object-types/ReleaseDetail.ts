@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import AttachmentDetail from './AttachmentDetail'
 import COTSDetails from './COTSDetails'
 import ClearingInformation from './ClearingInformation'
 import ECCInformation from './ECCInformation'
@@ -16,20 +15,22 @@ import ReleaseLink from './ReleaseLink'
 import Repository from './Repository'
 import Vendor from './Vendor'
 import EmbeddedUser from './EmbeddedUser'
+import EmbeddedAttachment from './EmbeddedAttachment'
+import EmbeddedLicense from './EmbeddedLicense'
 
 export default interface ReleaseDetail {
     name?: string
     version?: string
     releaseDate?: string
     componentType?: string
-    externalIds?: string
-    additionalData?: string
+    externalIds?: { [k: string]: string }
+    additionalData?: { [k: string]: string }
     createdOn?: string
     repository?: Repository
     mainlineState?: string
     clearingState?: string
     createdBy?: string
-    roles?: string
+    roles?: { [k: string]: Array<string> }
     mainLicenseIds?: string[]
     otherLicenseIds?: string[]
     clearingInformation?: ClearingInformation
@@ -65,6 +66,8 @@ export default interface ReleaseDetail {
         'sw360:contributors'?: EmbeddedUser[]
         'sw360:cotsDetail'?: COTSDetails
         'sw360:releaseLinks'?: ReleaseLink[]
-        'sw360:attachments'?: AttachmentDetail[]
+        'sw360:attachments'?: EmbeddedAttachment[]
+        'sw360:license'?: EmbeddedLicense[]
+        'sw360:subscribers'?: EmbeddedUser[]
     }
 }

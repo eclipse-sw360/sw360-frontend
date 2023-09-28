@@ -20,9 +20,10 @@ import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
 import { notFound, useRouter } from 'next/navigation'
 import { Session } from '@/object-types/Session'
-import ReleaseLink from '@/object-types/ReleaseLink'
 
 import { Table, _ } from '@/components/sw360'
+import EmbeddedLinkedReleases from '@/object-types/EmbeddedLinkedReleases'
+import LinkedRelease from '@/object-types/LinkedRelease'
 
 interface Props {
     session: Session
@@ -31,17 +32,17 @@ interface Props {
 
 const Releases = ({ session, componentId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
-    const [data, setData] = useState([])
+    const [linkedReleases, setLinkedReleases] = useState([])
     const router = useRouter()
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
+                const data = (await response.json()) as EmbeddedLinkedReleases
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                return signOut()
             } else {
                 notFound()
             }
@@ -50,16 +51,16 @@ const Releases = ({ session, componentId }: Props) => {
     )
 
     useEffect(() => {
-        fetchData(`components/${componentId}/releases`).then((releaseLinks: any) => {
+        void fetchData(`components/${componentId}/releases`).then((releaseLinks: EmbeddedLinkedReleases) => {
             if (
-                !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']['sw360:releaseLinks'])
+                !CommonUtils.isNullOrUndefined(releaseLinks._embedded) &&
+                !CommonUtils.isNullOrUndefined(releaseLinks._embedded['sw360:releaseLinks'])
             ) {
-                const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
+                const data = releaseLinks._embedded['sw360:releaseLinks'].map((item: LinkedRelease) => [
                     item.name,
                     [item.id, item.version],
                 ])
-                setData(data)
+                setLinkedReleases(data)
             }
         })
     }, [componentId, fetchData])
@@ -87,7 +88,7 @@ const Releases = ({ session, componentId }: Props) => {
     return (
         <>
             <div className='row'>
-                <Table data={data} search={true} columns={columns} />
+                <Table data={linkedReleases} search={true} columns={columns} />
             </div>
             <div>
                 <button type='button' onClick={() => handleAddReleaseClick()} className={`fw-bold btn btn-secondary`}>

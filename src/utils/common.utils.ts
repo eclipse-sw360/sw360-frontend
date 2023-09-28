@@ -98,7 +98,7 @@ const getEmailsModerators = (users: EmbeddedUser[]) => {
     return moderatorsEmail
 }
 
-const convertObjectToMap = (data: string) => {
+const convertObjectToMap = (data: { [k: string]: string }) => {
     const map = new Map(Object.entries(data))
     const inputs: InputKeyValue[] = []
     map.forEach((value, key) => {
@@ -111,10 +111,7 @@ const convertObjectToMap = (data: string) => {
     return inputs
 }
 
-const convertObjectToMapRoles = (data: string) => {
-    if (data === undefined) {
-        return null
-    }
+const convertObjectToMapRoles = (data: { [k: string]: Array<string> }) => {
     const inputRoles: InputKeyValue[] = []
     const mapRoles = new Map(Object.entries(data))
     mapRoles.forEach((value, key) => {

@@ -8,14 +8,19 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface Vendor {
-    id?: string
-    fullName?: string
-    shortName?: string
-    url?: string
-    _links?: {
-        self: {
-            href: string
-        }
+import Attachment from './Attachment'
+
+export default interface EmbeddedAttachments {
+    _embedded: {
+        'sw360:attachmentDTOes': Array<Attachment>
+    }
+    _links: {
+        curies: [
+            {
+                href: string
+                name: string
+                templated: boolean
+            }
+        ]
     }
 }
