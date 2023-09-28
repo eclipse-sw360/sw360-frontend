@@ -32,6 +32,9 @@ import ComponentEditSummary from './ComponentEditSummary'
 import { ToastContainer } from 'react-bootstrap'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 import ToastData from '@/object-types/ToastData'
+import Component from '@/object-types/Component'
+import EmbeddedAttachments from '@/object-types/EmbeddedAttachments'
+import Attachment from '@/object-types/Attachment'
 
 interface Props {
     session?: Session
@@ -57,7 +60,7 @@ const EditComponent = ({ session, componentId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [component, setComponent] = useState<any>(undefined)
+    const [component, setComponent] = useState<Component>()
     const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
@@ -100,14 +103,14 @@ const EditComponent = ({ session, componentId }: Props) => {
         })
     }
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
+                const data = (await response.json()) as Component & EmbeddedAttachments
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                return signOut()
             } else {
                 notFound()
             }
@@ -116,16 +119,16 @@ const EditComponent = ({ session, componentId }: Props) => {
     )
 
     useEffect(() => {
-        fetchData(`components/${componentId}`).then((component: any) => {
+        void fetchData(`components/${componentId}`).then((component: Component) => {
             setComponent(component)
         })
-        fetchData(`components/${componentId}/attachments`).then((attachments: any) => {
+        void fetchData(`components/${componentId}/attachments`).then((attachments: EmbeddedAttachments) => {
             if (
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
+                !CommonUtils.isNullOrUndefined(attachments._embedded) &&
+                !CommonUtils.isNullOrUndefined(attachments._embedded['sw360:attachmentDTOes'])
             ) {
                 const attachmentDetails: AttachmentDetail[] = []
-                attachments['_embedded']['sw360:attachmentDTOes'].map((item: any) => {
+                attachments._embedded['sw360:attachmentDTOes'].forEach((item: Attachment) => {
                     attachmentDetails.push(item)
                 })
                 setAttachmentData(attachmentDetails)

@@ -33,6 +33,7 @@ import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 import { ToastContainer } from 'react-bootstrap'
 import InputKeyValue from '@/object-types/InputKeyValue'
 import CommonUtils from '@/utils/common.utils'
+import Component from '@/object-types/Component'
 interface Props {
     session: Session
 }
@@ -134,7 +135,7 @@ export default function ComponentAddSummary({ session }: Props) {
         const response = await ApiUtils.POST('components', componentPayload, session.user.access_token)
 
         if (response.status == HttpStatus.CREATED) {
-            const data = await response.json()
+            const data = (await response.json()) as Component
             alert(true, 'Success', t('Component is created'), 'success')
             router.push('/components/detail/' + data.id)
         } else {
@@ -151,7 +152,7 @@ export default function ComponentAddSummary({ session }: Props) {
                 method='post'
                 onSubmit={(e) => {
                     e.preventDefault()
-                    submit()
+                    void submit()
                 }}
             >
                 <ToastContainer position='top-start'>

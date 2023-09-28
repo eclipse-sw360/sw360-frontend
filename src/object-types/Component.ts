@@ -54,6 +54,8 @@ export default interface Component {
         'sw360:vendors'?: Array<Vendor>
         'sw360:releases'?: Array<EmbeddedRelease>
         defaultVendor?: Vendor
+        modifiedBy?: EmbeddedUser
+        componentOwner?: EmbeddedUser
         'sw360:attachments'?: Array<EmbeddedAttachment>
     }
 }
