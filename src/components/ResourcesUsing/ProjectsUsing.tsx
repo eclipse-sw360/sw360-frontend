@@ -14,11 +14,13 @@ import { _, Table } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Alert } from 'react-bootstrap'
+import EmbeddedProject from '@/object-types/EmbeddedProject'
+import { RestrictedResource } from '@/object-types/Resources'
 
 interface Props {
-    projectUsings: Array<any>
+    projectUsings: Array<EmbeddedProject>
     documentName: string
-    restrictedResource: any
+    restrictedResource: RestrictedResource
 }
 
 const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Props) => {
@@ -41,7 +43,7 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
     ]
 
     useEffect(() => {
-        const data = projectUsings.map((project: any) => [
+        const data = projectUsings.map((project: EmbeddedProject) => [
             _(
                 <Link
                     key={project._links.self.href.split('/').at(-1)}

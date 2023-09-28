@@ -8,24 +8,25 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Session } from "@/object-types/Session";
-import ApiUtils from "@/utils/api/api.util";
+import { Session } from '@/object-types/Session'
+import ApiUtils from '@/utils/api/api.util'
 
 const download = (url: string, session: Session, fileName: string) => {
-  ApiUtils.GET(url, session.user.access_token)
-  .then((response: any) => response.blob())
-  .then((blob: any) => {
-      const objectURL = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = objectURL;
-      link.setAttribute("download", fileName);
-      link.click();
-      setTimeout(() => window.URL.revokeObjectURL(objectURL), 0);
-  }).catch(error => console.log('error', error));
+    ApiUtils.GET(url, session.user.access_token)
+        .then((response) => response.blob())
+        .then((blob: Blob) => {
+            const objectURL = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = objectURL
+            link.setAttribute('download', fileName)
+            link.click()
+            setTimeout(() => window.URL.revokeObjectURL(objectURL), 0)
+        })
+        .catch((error) => console.log('error', error))
 }
 
 const DownloadService = {
-  download
+    download,
 }
 
 export default DownloadService

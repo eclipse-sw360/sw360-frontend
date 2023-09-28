@@ -39,6 +39,8 @@ export default interface Component {
     wiki?: string
     blog?: string
     modifiedOn?: string
+    modifiedBy?: string
+    roles?: { [k: string]: Array<string> }
     setBusinessUnit?: boolean
     setVisbility?: boolean
     _links?: {

@@ -19,10 +19,10 @@ import ApiUtils from '@/utils/api/api.util'
 import { Session } from '@/object-types/Session'
 import { signOut } from 'next-auth/react'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import { notFound } from 'next/navigation'
 import Attachment from '@/object-types/Attachment'
 import { Table, _ } from '@/components/sw360'
 import DownloadService from '@/services/download.service'
+import LinkedAttachments from '@/object-types/LinkedAttachments'
 
 interface Props {
     documentId: string
@@ -36,18 +36,17 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
     const [totalRows, setTotalRows] = useState(0)
 
     const buildAttachmentDetail = (item: Attachment) => {
-        return (event: any) => {
-            if (event.target.className == styles.expand) {
-                event.target.className = styles.collapse
+        return (event: React.MouseEvent<HTMLElement>) => {
+            if ((event.target as HTMLElement).className == styles.expand) {
+                ;(event.target as HTMLElement).className = styles.collapse
             } else {
-                event.target.className = styles.expand
+                ;(event.target as HTMLElement).className = styles.expand
             }
 
             const attachmentDetail = document.getElementById(item.attachmentContentId)
             if (!attachmentDetail) {
-                const parent = event.target.parentElement.parentElement.parentElement
-                const html =
-                `<td colspan="10">
+                const parent = (event.target as HTMLElement).parentElement.parentElement.parentElement
+                const html = `<td colspan="10">
                     <table class="table table-borderless">
                         <tbody>
                             <tr>
@@ -62,7 +61,7 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
                             </tr>
                             <tr>
                             <td>${t('Checked On')} : </td>
-                            <td>${(item.checkedOn) ? item.checkedOn : ''}</td>
+                            <td>${item.checkedOn ? item.checkedOn : ''}</td>
                             <td>${t('Checked Comment')} : </td>
                             <td>${item.checkedComment}</td>
                             <td></td>
@@ -86,66 +85,71 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
         }
     }
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json()
+                const data = (await response.json()) as LinkedAttachments
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
             } else {
-                notFound()
+                return {} as LinkedAttachments
             }
         },
         [session.user.access_token]
     )
 
     const downloadAttachment = (attachmentId: string, attachmentName: string) => {
-        DownloadService.download(
-            `${documentType}/${documentId}/attachments/${attachmentId}`, session, attachmentName)
+        DownloadService.download(`${documentType}/${documentId}/attachments/${attachmentId}`, session, attachmentName)
     }
 
     const downloadBundle = () => {
-        DownloadService.download(
-            `${documentType}/${documentId}/attachments/download`, session, 'AttachmentBundle.zip')
+        DownloadService.download(`${documentType}/${documentId}/attachments/download`, session, 'AttachmentBundle.zip')
     }
 
     useEffect(() => {
-        fetchData(`${documentType}/${documentId}/attachments`).then((attachments: any) => {
-            if (
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
-            ) {
-                const attachmentData = attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => [
-                    item,
-                    item.filename,
-                    'n/a',
-                    item.attachmentType,
-                    item.createdTeam,
-                    item.createdBy,
-                    item.checkedTeam,
-                    item.checkedBy,
-                    (item.usageAttachment.visible === 0 && item.usageAttachment.restricted == 0)
-                        ? 'n/a'
-                        : <a href='javascript:;' title='visible / restricted'>
-                            {item.usageAttachment.visible} / {item.usageAttachment.restricted}
-                          </a>,
-                    [item.attachmentContentId, item.filename],
-                ])
-                setAttachmentData(attachmentData)
-                setTotalRows(attachmentData.length)
-            }
-        })
+        fetchData(`${documentType}/${documentId}/attachments`)
+            .then((attachments: LinkedAttachments) => {
+                if (
+                    !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
+                ) {
+                    const attachmentData = attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => [
+                        item,
+                        item.filename,
+                        'n/a',
+                        item.attachmentType,
+                        item.createdTeam,
+                        item.createdBy,
+                        item.checkedTeam,
+                        item.checkedBy,
+                        item.usageAttachment.visible === 0 && item.usageAttachment.restricted == 0 ? (
+                            'n/a'
+                        ) : (
+                            <a href='javascript:;' title='visible / restricted'>
+                                {item.usageAttachment.visible} / {item.usageAttachment.restricted}
+                            </a>
+                        ),
+                        [item.attachmentContentId, item.filename],
+                    ])
+                    setAttachmentData(attachmentData)
+                    setTotalRows(attachmentData.length)
+                }
+            })
+            .catch((err) => console.error(err))
     }, [documentId, documentType, fetchData])
 
     const columns = [
         {
             id: 'check',
-            name: _(<FaDownload className={styles['download-btn']} style={{ width: '100%' }} onClick={downloadBundle}/>),
-            formatter: (item: any) => _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
+            name: _(
+                <FaDownload className={styles['download-btn']} style={{ width: '100%' }} onClick={downloadBundle} />
+            ),
+            formatter: (item: Attachment) =>
+                _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
             sort: false,
-            width: '60px'
+            width: '60px',
         },
         {
             id: 'fileName',
@@ -189,10 +193,14 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
         {
             id: 'action',
             name: t('Action'),
-            formatter: ([attachmentId, attachmentName]: Array<string>) => _
-                                    (<FaDownload className={styles['download-btn']} style={{ width: '100%' }} 
-                                     onClick={() => downloadAttachment(attachmentId, attachmentName)}
-                                    />),
+            formatter: ([attachmentId, attachmentName]: Array<string>) =>
+                _(
+                    <FaDownload
+                        className={styles['download-btn']}
+                        style={{ width: '100%' }}
+                        onClick={() => downloadAttachment(attachmentId, attachmentName)}
+                    />
+                ),
             sort: false,
             width: '60px',
         },
@@ -203,7 +211,7 @@ const Attachments = ({ documentId, session, documentType }: Props) => {
             {totalRows ? (
                 <>
                     <div className={`row ${styles['attachment-table']}`}>
-                        <Table data={attachmentData} columns={columns} search={true} selector={true}/>
+                        <Table data={attachmentData} columns={columns} search={true} selector={true} />
                     </div>
                 </>
             ) : (

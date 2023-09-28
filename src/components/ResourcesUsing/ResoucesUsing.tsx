@@ -14,6 +14,7 @@ import ApiUtils from '@/utils/api/api.util'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import ProjectsUsing from './ProjectsUsing'
 import ComponentsUsing from './ComponentsUsing'
+import { Resources } from '@/object-types/Resources'
 
 interface Props {
     documentId: string
@@ -23,14 +24,15 @@ interface Props {
 }
 
 const ResoucesUsing = ({ documentId, session, documentType, documentName }: Props) => {
-    const [resourcesUsing, setResourceUsing] = useState(undefined)
+    const [resourcesUsing, setResourceUsing] = useState<Resources>(undefined)
 
     useEffect(() => {
         ApiUtils.GET(`${documentType}/usedBy/${documentId}`, session.user.access_token)
             .then((res) => res.json())
-            .then((resourcesUsing) => {
+            .then((resourcesUsing: Resources) => {
                 setResourceUsing(resourcesUsing)
             })
+            .catch((err) => console.log(err))
     }, [documentId, documentType, session])
 
     return (
