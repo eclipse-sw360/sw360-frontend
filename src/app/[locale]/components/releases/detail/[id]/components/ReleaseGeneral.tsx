@@ -19,14 +19,22 @@ import Link from 'next/link'
 import { FaInfoCircle } from 'react-icons/fa'
 import styles from '../detail.module.css'
 import CommonUtils from '@/utils/common.utils'
+import EmbeddedUser from '@/object-types/EmbeddedUser'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
+import EmbeddedLicense from '@/object-types/EmbeddedLicense'
 
-const ReleaseGeneral = ({ release, releaseId }: any) => {
+interface Props {
+    release: ReleaseDetail
+    releaseId: string
+}
+
+const ReleaseGeneral = ({ release, releaseId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [toggle, setToggle] = useState(false)
 
-    const renderArrayOfUsers = (users: Array<any>) => {
+    const renderArrayOfUsers = (users: Array<EmbeddedUser>) => {
         return Object.entries(users)
-            .map(([index, item]: any) => (
+            .map(([index, item]: [string, EmbeddedUser]) => (
                 <Link key={index} className='link' href={`mailto:${item.email}`}>
                     {item.fullName}
                 </Link>
@@ -34,9 +42,9 @@ const ReleaseGeneral = ({ release, releaseId }: any) => {
             .reduce((prev, curr): any => [prev, ', ', curr])
     }
 
-    const renderArrayOfTexts = (texts: Array<any>) => {
+    const renderArrayOfTexts = (texts: Array<string>) => {
         return Object.entries(texts)
-            .map(([index, item]: any) => <span key={index}>{item}</span>)
+            .map(([index, item]: [string, string]) => <span key={index}>{item}</span>)
             .reduce((prev, curr): any => [prev, ', ', curr])
     }
 
@@ -125,26 +133,34 @@ const ReleaseGeneral = ({ release, releaseId }: any) => {
                     <td>{t('Subscribers')}:</td>
                     <td>
                         {release['_embedded'] &&
-                            !CommonUtils.isNullEmptyOrUndefinedArray(release['_embedded']['sw360:subscribers']) &&
-                            renderArrayOfUsers(release['_embedded']['sw360:subscribers'])}
+                            !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:subscribers']) &&
+                            renderArrayOfUsers(release._embedded['sw360:subscribers'])}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Additional Roles')}:</td>
                     <td>
-                        {!CommonUtils.isNullEmptyOrUndefinedArray(release.roles) &&
-                            Object.entries(release.roles).map(([key, value]: any) => (
-                                <li key={key}>
-                                    <b>{key}: </b>
-                                    {Object.entries(value)
-                                        .map(([, item]: any) => (
-                                            <Link key={item} href={`mailto:${item}`}>
-                                                {item}
-                                            </Link>
-                                        ))
-                                        .reduce((prev, curr): any => [prev, ', ', curr])}
-                                </li>
-                            ))}
+                        <td>
+                            {release.roles &&
+                                Object.keys(release.roles).map((key) => (
+                                    <li key={key}>
+                                        <span className='mapDisplayChildItemLeft' style={{ fontWeight: 'bold' }}>
+                                            {key}:{' '}
+                                        </span>
+                                        <span className='mapDisplayChildItemRight'>
+                                            {release.roles[key]
+                                                .map(
+                                                    (email: string): React.ReactNode => (
+                                                        <a key={email} href={`mailto:${email}`}>
+                                                            {email}
+                                                        </a>
+                                                    )
+                                                )
+                                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                        </span>
+                                    </li>
+                                ))}
+                        </td>
                     </td>
                 </tr>
                 <tr>
@@ -175,9 +191,9 @@ const ReleaseGeneral = ({ release, releaseId }: any) => {
                     <td>{t('Main Licenses')}:</td>
                     <td>
                         {release['_embedded'] &&
-                            !CommonUtils.isNullEmptyOrUndefinedArray(release['_embedded']['sw360:licenses']) &&
-                            Object.entries(release['_embedded']['sw360:licenses'])
-                                .map(([index, item]: any) => (
+                            !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:license']) &&
+                            Object.entries(release._embedded['sw360:license'])
+                                .map(([index, item]: [string, EmbeddedLicense]) => (
                                     <span key={index}>
                                         {item.shortName}
                                         <FaInfoCircle
@@ -200,7 +216,7 @@ const ReleaseGeneral = ({ release, releaseId }: any) => {
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release.otherLicenseIds) &&
                             Object.entries(release.otherLicenseIds)
-                                .map(([index, item]: any) => (
+                                .map(([index, item]: [string, string]) => (
                                     <span key={index}>
                                         {item}
                                         <FaInfoCircle

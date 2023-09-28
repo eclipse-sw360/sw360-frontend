@@ -23,9 +23,12 @@ import SPDXAttachments from './SPDXAttachments'
 
 import { Session } from '@/object-types/Session'
 import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
+import SupplementalInformation from './SupplementalInformation'
+import RequestInformation from './RequestInformation'
 
 interface Props {
-    release: any
+    release: ReleaseDetail
     session: Session
     releaseId: string
     embeddedAttachments: Array<EmbeddedAttachment>
@@ -240,74 +243,6 @@ const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: P
             <SupplementalInformation clearingInformation={release.clearingInformation} />
             <FossologyClearing show={show} setShow={setShow} session={session} releaseId={releaseId} />
         </div>
-    )
-}
-
-const SupplementalInformation = ({ clearingInformation }: any) => {
-    const [toggle, setToggle] = useState(false)
-    const t = useTranslations(COMMON_NAMESPACE)
-
-    return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
-            <thead
-                title='Click to expand or collapse'
-                onClick={() => {
-                    setToggle(!toggle)
-                }}
-            >
-                <tr>
-                    <th colSpan={2}>{t('Supplemental Information')}</th>
-                </tr>
-            </thead>
-            <tbody hidden={toggle}>
-                <tr>
-                    <td>{t('External Supplier ID')}:</td>
-                    <td>{clearingInformation && clearingInformation.externalSupplierID}</td>
-                </tr>
-                <tr>
-                    <td>{t('Number of Security Vulnerabilities')}:</td>
-                    <td>{clearingInformation && clearingInformation.countOfSecurityVn}</td>
-                </tr>
-            </tbody>
-        </table>
-    )
-}
-
-const RequestInformation = ({ clearingInformation }: any) => {
-    const [toggle, setToggle] = useState(false)
-    const t = useTranslations(COMMON_NAMESPACE)
-
-    return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
-            <thead
-                title='Click to expand or collapse'
-                onClick={() => {
-                    setToggle(!toggle)
-                }}
-            >
-                <tr>
-                    <th colSpan={2}>{t('Request Information')}</th>
-                </tr>
-            </thead>
-            <tbody hidden={toggle}>
-                <tr>
-                    <td>{t('Request ID')}:</td>
-                    <td>{clearingInformation && clearingInformation.requestID}</td>
-                </tr>
-                <tr>
-                    <td>{t('Additional Request Information')}:</td>
-                    <td>{clearingInformation && clearingInformation.additionalRequestInfo}</td>
-                </tr>
-                <tr>
-                    <td>{t('Evaluation Start')}:</td>
-                    <td>{clearingInformation && clearingInformation.procStart}</td>
-                </tr>
-                <tr>
-                    <td>{t('Evaluation End')}:</td>
-                    <td>{clearingInformation && clearingInformation.evaluated}</td>
-                </tr>
-            </tbody>
-        </table>
     )
 }
 

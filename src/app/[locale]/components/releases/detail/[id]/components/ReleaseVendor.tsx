@@ -8,51 +8,61 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import styles from '../detail.module.css'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
 
-const ReleaseVendor = ({ release }: any) => {
-  const t = useTranslations(COMMON_NAMESPACE);
-  const [toggle, setToggle] = useState(false);
+interface Props {
+    release: ReleaseDetail
+}
 
-  return (
-    <table className={`table label-value-table ${styles['summary-table']}`}>
-      <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
-        <tr>
-          <th colSpan={2}>{t('Release Vendor')}</th>
-        </tr>
-      </thead>
-      <tbody hidden={toggle}>
-        <tr>
-          <td>{t('Full Name')}:</td>
-          <td>
-            {(release['_embedded'] && release['_embedded']['sw360:vendors']) &&
-              (<span>{release['_embedded']['sw360:vendors'][0].fullName}</span>)
-            }
-          </td>
-        </tr>
-        <tr>
-          <td>{t('Short Name')}:</td>
-          <td>
-            {(release['_embedded'] && release['_embedded']['sw360:vendors']) &&
-              (<span>{release['_embedded']['sw360:vendors'][0].shortName}</span>)
-            }
-          </td>
-        </tr>
-        <tr>
-          <td>URL:</td>
-          <td>
-            {(release['_embedded'] && release['_embedded']['sw360:vendors']) &&
-              (<span>{release['_embedded']['sw360:vendors'][0].url}</span>)
-            }
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  )
+const ReleaseVendor = ({ release }: Props) => {
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [toggle, setToggle] = useState(false)
+
+    return (
+        <table className={`table label-value-table ${styles['summary-table']}`}>
+            <thead
+                title='Click to expand or collapse'
+                onClick={() => {
+                    setToggle(!toggle)
+                }}
+            >
+                <tr>
+                    <th colSpan={2}>{t('Release Vendor')}</th>
+                </tr>
+            </thead>
+            <tbody hidden={toggle}>
+                <tr>
+                    <td>{t('Full Name')}:</td>
+                    <td>
+                        {release._embedded && release._embedded['sw360:vendors'] && (
+                            <span>{release._embedded['sw360:vendors'][0].fullName}</span>
+                        )}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{t('Short Name')}:</td>
+                    <td>
+                        {release._embedded && release._embedded['sw360:vendors'] && (
+                            <span>{release._embedded['sw360:vendors'][0].shortName}</span>
+                        )}
+                    </td>
+                </tr>
+                <tr>
+                    <td>URL:</td>
+                    <td>
+                        {release._embedded && release._embedded['sw360:vendors'] && (
+                            <span>{release['_embedded']['sw360:vendors'][0].url}</span>
+                        )}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    )
 }
 
 export default ReleaseVendor

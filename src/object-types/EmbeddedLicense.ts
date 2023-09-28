@@ -8,12 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface Vendor {
-    id?: string
-    fullName?: string
-    shortName?: string
-    url?: string
-    _links?: {
+export default interface EmbeddedLicense {
+    note: string
+    OSIApproved: string
+    FSFLibre: string
+    text: string
+    checked: boolean
+    shortName: string
+    fullName: string
+    _links: {
         self: {
             href: string
         }
