@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface AuthToken {
+interface AuthToken {
     access_token: string,
     token_type: string,
     refresh_token: string,
@@ -16,3 +16,5 @@ export interface AuthToken {
     scope: string,
     jti: string
 }
+
+export default AuthToken

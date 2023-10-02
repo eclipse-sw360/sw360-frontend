@@ -8,8 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { EmbeddedComponent } from './EmbeddedComponent'
-import EmbeddedProject from './EmbeddedProject'
+import { EmbeddedComponent, EmbeddedProject } from '@/object-types'
 
 export interface RestrictedResource {
     projects: number

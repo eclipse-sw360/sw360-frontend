@@ -8,9 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface ToastData {
+interface ToastData {
     show: boolean
     type: string
     message: string
     contextual: string
 }
+
+export default ToastData

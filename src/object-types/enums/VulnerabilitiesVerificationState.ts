@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 enum VulnerabilitiesVerificationState {
-  NOT_CHECKED = 'NOT_CHECKED',
-  CHECKED = 'CHECKED',
-  INCORRECT = 'INCORRECT',
+    NOT_CHECKED = 'NOT_CHECKED',
+    CHECKED = 'CHECKED',
+    INCORRECT = 'INCORRECT',
 }
 
 export default VulnerabilitiesVerificationState

@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 enum ComponentTabIds {
-  RELEASE_OVERVIEW = 'tab-Releases',
+    RELEASE_OVERVIEW = 'tab-Releases',
 }
 
 export default ComponentTabIds

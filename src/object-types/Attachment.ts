@@ -8,22 +8,26 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface Attachment {
-  attachmentContentId : string | undefined,
-  filename : string | undefined,
-  sha1 : string | undefined,
-  attachmentType : string | undefined,
-  createdBy : string | undefined,
-  createdTeam : string | undefined,
-  createdComment : string | undefined,
-  createdOn : string | undefined,
-  checkedTeam : string | undefined,
-  checkedComment : string | undefined,
-  checkedOn : string | undefined,
-  checkStatus : string | undefined,
-  checkedBy: string | undefined,
-  usageAttachment : {
-    visible : number,
-    restricted : number
-  } | undefined
+interface Attachment {
+    attachmentContentId: string | undefined
+    filename: string | undefined
+    sha1: string | undefined
+    attachmentType: string | undefined
+    createdBy: string | undefined
+    createdTeam: string | undefined
+    createdComment: string | undefined
+    createdOn: string | undefined
+    checkedTeam: string | undefined
+    checkedComment: string | undefined
+    checkedOn: string | undefined
+    checkStatus: string | undefined
+    checkedBy: string | undefined
+    usageAttachment:
+        | {
+              visible: number
+              restricted: number
+          }
+        | undefined
 }
+
+export default Attachment

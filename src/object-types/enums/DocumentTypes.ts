@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 enum DocumentTypes {
-  PROJECT = 'projects',
-  COMPONENT = 'components',
-  RELEASE = 'releases',
+    PROJECT = 'projects',
+    COMPONENT = 'components',
+    RELEASE = 'releases',
 }
 
 export default DocumentTypes

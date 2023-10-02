@@ -11,9 +11,8 @@
 import { SW360_API_URL } from '@/utils/env'
 import RequestContent from '@/object-types/RequestContent'
 import UserCredentialInfo from '@/object-types/UserCredentialInfo'
-import OAuthClient from '@/object-types/OAuthClient'
 import HttpStatus from '@/object-types/enums/HttpStatus'
-import { AuthToken } from '@/object-types/AuthToken'
+import { AuthToken, OAuthClient } from '@/object-types'
 
 const generateToken = async (userData: UserCredentialInfo) => {
     const clientManagementURL: string = SW360_API_URL + '/authorization/client-management'
@@ -36,7 +35,8 @@ const generateToken = async (userData: UserCredentialInfo) => {
         })
         .then((json) => {
             try {
-                oAuthClient = JSON.parse(json)[0]
+                const oauth_clients: Array<OAuthClient> = JSON.parse(json) as Array<OAuthClient>
+                oAuthClient = oauth_clients[0]
             } catch (err) {
                 oAuthClient = null
             }
@@ -70,7 +70,7 @@ const generateToken = async (userData: UserCredentialInfo) => {
         })
         .then((json) => {
             try {
-                sw360token = JSON.parse(json)
+                sw360token = JSON.parse(json) as AuthToken
             } catch (err) {
                 sw360token = null
             }
@@ -78,7 +78,6 @@ const generateToken = async (userData: UserCredentialInfo) => {
         .catch(() => {
             oAuthClient = null
         })
-
     return sw360token
 }
 
