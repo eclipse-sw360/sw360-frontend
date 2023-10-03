@@ -19,6 +19,7 @@ import ApiUtils from '@/utils/api/api.util'
 import NodeData from '@/object-types/NodeData'
 import ReleaseLink from '@/object-types/ReleaseLink'
 import CommonUtils from '@/utils/common.utils'
+import EmbeddedReleaseLinks from '@/object-types/EmbeddedReleaseLinks'
 
 interface Props {
     releaseId: string
@@ -52,7 +53,7 @@ const LinkedReleases = ({ releaseId, session }: Props) => {
 
         ApiUtils.GET(`releases/${releaseId}/releases?transitive=true`, session.user.access_token)
             .then((response) => response.json())
-            .then((data) => {
+            .then((data: EmbeddedReleaseLinks) => {
                 const convertedTreeData: Array<NodeData> = []
                 if (data._embedded) {
                     data._embedded['sw360:releaseLinks'].forEach((node: ReleaseLink) => {
@@ -75,6 +76,7 @@ const LinkedReleases = ({ releaseId, session }: Props) => {
                 }
                 setData(convertedTreeData)
             })
+            .catch((err) => console.log(err))
     }, [releaseId, session, t])
 
     const columns = [

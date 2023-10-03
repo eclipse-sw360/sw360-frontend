@@ -60,6 +60,7 @@ const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: P
                         <td>
                             {t(release.clearingState)}
                             <Image
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                                 src={fossologyIcon}
                                 width={15}
                                 height={15}

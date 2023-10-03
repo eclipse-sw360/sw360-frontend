@@ -27,11 +27,15 @@ interface Props {
     embeddedAttachments: Array<EmbeddedAttachment>
 }
 
+interface AssessmentSummaryInfo {
+    [key: string]: string
+}
+
 const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const { data: session } = useSession() as { data: Session }
     const [toggle, setToggle] = useState(false)
-    const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState(undefined)
+    const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo>(undefined)
 
     const cliAttachmentNumber = embeddedAttachments.filter(
         (attachment) => attachment.attachmentType == AttachmentType.COMPONENT_LICENSE_INFO_XML
@@ -40,16 +44,16 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
     const handleShowAssessmentInfo = async () => {
         const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`, session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            const data = await response.json()
+            const data = (await response.json()) as AssessmentSummaryInfo
             setAssessmentSummaryInfo(data)
         } else if (response.status == HttpStatus.NO_CONTENT) {
             setAssessmentSummaryInfo({})
         } else if (response.status == HttpStatus.UNAUTHORIZED) {
-            signOut()
+            await signOut()
         }
     }
 
-    const renderAssessmentSummaryInfo = (assessmentSummaryInfo: { [key: string]: string }) => {
+    const renderAssessmentSummaryInfo = (assessmentSummaryInfo: AssessmentSummaryInfo) => {
         return Object.keys(assessmentSummaryInfo).map((key: string) => {
             if (key !== '#text') {
                 return (
@@ -90,7 +94,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
                         ) : (
                             <tr>
                                 <td colSpan={2}>
-                                    <Button variant='secondary' onClick={handleShowAssessmentInfo}>
+                                    <Button variant='secondary' onClick={() => void handleShowAssessmentInfo()}>
                                         {t('Show Assessment Summary Info')}
                                     </Button>
                                 </td>

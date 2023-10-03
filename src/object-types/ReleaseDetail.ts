@@ -22,6 +22,7 @@ export default interface ReleaseDetail {
     name?: string
     version?: string
     releaseDate?: string
+    description?: string
     componentType?: string
     externalIds?: { [k: string]: string }
     additionalData?: { [k: string]: string }

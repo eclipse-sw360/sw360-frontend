@@ -79,7 +79,7 @@ const WITH_COMMERCIAL_DETAILS = [
 
 const ReleaseDetailTabs = {
     WITHOUT_COMMERCIAL_DETAILS,
-    WITH_COMMERCIAL_DETAILS
+    WITH_COMMERCIAL_DETAILS,
 }
 
 export default ReleaseDetailTabs

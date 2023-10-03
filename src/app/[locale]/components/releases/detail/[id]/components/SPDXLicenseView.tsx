@@ -8,17 +8,20 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 'use client'
 
 import CommonUtils from '@/utils/common.utils'
 import { useState } from 'react'
-import Modal from 'react-bootstrap/Modal';
+import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import { FaInfoCircle } from 'react-icons/fa'
 import styles from '../detail.module.css'
 
 interface Props {
-    licenseInfo: { [key: string]: any }
+    licenseInfo: { [key: string]: string | Array<string> | number }
     isISR: boolean
     attachmentName: string
     t: any
@@ -45,14 +48,18 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName, t }: Props) => {
     }
 
     const renderLicenseIds = (licenseIds: Array<string>) => {
-        return licenseIds.map(licenseId =>
+        return licenseIds.map((licenseId) => (
             <li key={licenseId}>
                 {licenseId}
-                {(isISR)
-                    && <FaInfoCircle onClick={() => showLicenseToSrcMapping(licenseId)} style={{ marginLeft: '5px', color: 'gray' }} className={styles.info} />
-                }
+                {isISR && (
+                    <FaInfoCircle
+                        onClick={() => showLicenseToSrcMapping(licenseId)}
+                        style={{ marginLeft: '5px', color: 'gray' }}
+                        className={styles.info}
+                    />
+                )}
             </li>
-        )
+        ))
     }
 
     const showLicenseToSrcMapping = (licenseId: string) => {
@@ -61,72 +68,85 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName, t }: Props) => {
     }
 
     const renderSourceList = (sourceList: Array<string>) => {
-        return sourceList.map(source => <li key={source}>{source}</li>)
+        return sourceList.map((source) => <li key={source}>{source}</li>)
     }
 
     return (
         <div>
-            {(isISR) &&
+            {isISR && (
                 <>
-                    <div>{t('Total Number Of Files')}: <b>{licenseInfo['totalFileCount']}</b></div>
-                    <div>{t('Complexitty')}: <b>{caculateComplexity(licenseInfo['totalFileCount'])}</b> ({t('based on license file count')})</div>
+                    <div>
+                        {t('Total Number Of Files')}: <b>{licenseInfo['totalFileCount']}</b>
+                    </div>
+                    <div>
+                        {t('Complexitty')}: <b>{caculateComplexity(licenseInfo.totalFileCount as number)}</b> (
+                        {t('based on license file count')})
+                    </div>
                 </>
-            }
-            {(CommonUtils.isNullEmptyOrUndefinedArray(licenseInfo['licenseIds']))
-                ?
+            )}
+            {CommonUtils.isNullEmptyOrUndefinedArray(licenseInfo['licenseIds'] as Array<unknown>) ? (
                 <>
-                    <div><b>{t('Main / Concluded License Ids')}:</b><br /> N/A</div>
+                    <div>
+                        <b>{t('Main / Concluded License Ids')}:</b>
+                        <br /> N/A
+                    </div>
                 </>
-                :
+            ) : (
                 <>
-                    <div><b>{licenseInfo.license}</b></div>
-                    <ul>
-                        {renderLicenseIds(licenseInfo['licenseIds'])}
-                    </ul>
+                    <div>
+                        <b>{licenseInfo.license}</b>
+                    </div>
+                    <ul>{renderLicenseIds(licenseInfo['licenseIds'] as Array<string>)}</ul>
                 </>
-            }
-            {(CommonUtils.isNullEmptyOrUndefinedArray(licenseInfo['otherLicenseIds']))
-                ?
+            )}
+            {CommonUtils.isNullEmptyOrUndefinedArray(licenseInfo['otherLicenseIds'] as Array<string>) ? (
                 <>
-                    <div><b>{t('Other License Ids')}:</b><br /> N/A</div>
+                    <div>
+                        <b>{t('Other License Ids')}:</b>
+                        <br /> N/A
+                    </div>
                 </>
-                :
+            ) : (
                 <>
-                    <div><b>{t(licenseInfo.otherLicense)}</b></div>
-                    <ul>
-                        {renderLicenseIds(licenseInfo['otherLicenseIds'])}
-                    </ul>
+                    <div>
+                        <b>{t(licenseInfo.otherLicense)}</b>
+                    </div>
+                    <ul>{renderLicenseIds(licenseInfo['otherLicenseIds'] as Array<string>)}</ul>
                 </>
-            }
+            )}
 
-            <Modal
-                show={modalShow}
-                onHide={handleCloseDialog}
-                backdrop='static'
-                centered
-                size='lg'
-            >
+            <Modal show={modalShow} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
                 <Modal.Header closeButton style={{ color: '#2e5aac' }}>
-                    <Modal.Title><b>{attachmentName}</b></Modal.Title>
+                    <Modal.Title>
+                        <b>{attachmentName}</b>
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {
-                        (selectedLicenseId) &&
+                    {selectedLicenseId && (
                         <>
-                            <div>License Name: <b>{selectedLicenseId}</b></div>
-                            <div>Source File List:
+                            <div>
+                                License Name: <b>{selectedLicenseId}</b>
+                            </div>
+                            <div>
+                                Source File List:
                                 <ul>
-                                    {(CommonUtils.isNullEmptyOrUndefinedArray(licenseInfo[selectedLicenseId]))
-                                        ? <li>Source file information not found in ISR</li>
-                                        : renderSourceList(licenseInfo[selectedLicenseId])
-                                    }
+                                    {CommonUtils.isNullEmptyOrUndefinedArray(
+                                        licenseInfo[selectedLicenseId] as Array<string>
+                                    ) ? (
+                                        <li>Source file information not found in ISR</li>
+                                    ) : (
+                                        renderSourceList(licenseInfo[selectedLicenseId] as Array<string>)
+                                    )}
                                 </ul>
                             </div>
                         </>
-                    }
+                    )}
                 </Modal.Body>
-                <Modal.Footer className='justify-content-end' >
-                    <Button variant='light' onClick={handleCloseDialog}> OK </Button>
+                <Modal.Footer className='justify-content-end'>
+                    <Button variant='light' onClick={handleCloseDialog}>
+                        {' '}
+                        OK{' '}
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </div>
