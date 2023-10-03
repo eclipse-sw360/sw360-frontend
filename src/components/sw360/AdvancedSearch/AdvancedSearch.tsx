@@ -77,6 +77,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                         <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
                             <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
                             <Form.Select
+                                aria-label={t(field.fieldName)}
+                                title={t(field.fieldName)}
                                 className='form-control'
                                 size='sm'
                                 name={field.paramName}
@@ -160,6 +162,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                         <Form.Check
                             type='checkbox'
                             label='Exact Match'
+                            placeholder='Exact Match'
                             style={{
                                 fontWeight: 'bold',
                                 fontSize: '14px',
