@@ -17,15 +17,18 @@ import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
 import Link from 'next/link'
 
-const CommercialDetailsAdministration = (
-    { costDetails }: { costDetails: COTSDetails }
-) => {
-    const t = useTranslations(COMMON_NAMESPACE);
-    const [toggle, setToggle] = useState(false);
+const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails }) => {
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [toggle, setToggle] = useState(false)
 
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>
-            <thead title='Click to expand or collapse' onClick={() => { setToggle(!toggle) }}>
+            <thead
+                title='Click to expand or collapse'
+                onClick={() => {
+                    setToggle(!toggle)
+                }}
+            >
                 <tr>
                     <th colSpan={2}>{t('Commercial Details Administration')}</th>
                 </tr>
@@ -34,40 +37,39 @@ const CommercialDetailsAdministration = (
                 <tr>
                     <td>{t('Usage Right Available')}:</td>
                     <td>
-                        {(costDetails && costDetails.usageRightAvailable == true)
-                            ? <span style={{ color: '#287d3c' }}><FiCheckCircle /> {t('Yes')}</span>
-                            : <span style={{ color: 'red' }}><CiCircleRemove /> {t('No')}</span>
-                        }
+                        {costDetails && costDetails.usageRightAvailable == true ? (
+                            <span style={{ color: '#287d3c' }}>
+                                <FiCheckCircle /> {t('Yes')}
+                            </span>
+                        ) : (
+                            <span style={{ color: 'red' }}>
+                                <CiCircleRemove /> {t('No')}
+                            </span>
+                        )}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('COTS Responsible')}:</td>
                     <td>
-                        {(costDetails && costDetails._embedded) &&
+                        {costDetails && costDetails._embedded && (
                             <Link href={`mailto:${costDetails._embedded['sw360:cotsResponsible'].email}`}>
                                 {costDetails._embedded['sw360:cotsResponsible'].fullName}
                             </Link>
-                        }
+                        )}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('COTS Clearing Deadline')}:</td>
                     <td>
-                        {(costDetails && costDetails.clearingDeadline) &&
-                            <span>
-                                {costDetails.clearingDeadline}
-                            </span>
-                        }
+                        {costDetails && costDetails.clearingDeadline && <span>{costDetails.clearingDeadline}</span>}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('COTS Clearing Report URL')}:</td>
                     <td>
-                        {(costDetails && costDetails.licenseClearingReportURL) &&
-                            <span>
-                                {costDetails.licenseClearingReportURL}
-                            </span>
-                        }
+                        {costDetails && costDetails.licenseClearingReportURL && (
+                            <span>{costDetails.licenseClearingReportURL}</span>
+                        )}
                     </td>
                 </tr>
             </tbody>

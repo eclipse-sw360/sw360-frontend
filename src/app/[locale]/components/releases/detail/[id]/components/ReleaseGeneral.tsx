@@ -34,18 +34,20 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
 
     const renderArrayOfUsers = (users: Array<EmbeddedUser>) => {
         return Object.entries(users)
-            .map(([index, item]: [string, EmbeddedUser]) => (
-                <Link key={index} className='link' href={`mailto:${item.email}`}>
-                    {item.fullName}
-                </Link>
-            ))
-            .reduce((prev, curr): any => [prev, ', ', curr])
+            .map(
+                ([index, item]: [string, EmbeddedUser]): React.ReactNode => (
+                    <Link key={index} className='link' href={`mailto:${item.email}`}>
+                        {item.fullName}
+                    </Link>
+                )
+            )
+            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
     }
 
     const renderArrayOfTexts = (texts: Array<string>) => {
         return Object.entries(texts)
-            .map(([index, item]: [string, string]) => <span key={index}>{item}</span>)
-            .reduce((prev, curr): any => [prev, ', ', curr])
+            .map(([index, item]: [string, string]): React.ReactNode => <span key={index}>{item}</span>)
+            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
     }
 
     return (
@@ -72,7 +74,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                             data-toggle='tooltip'
                             title='Copy to clipboard'
                             onClick={() => {
-                                navigator.clipboard.writeText(releaseId)
+                                navigator.clipboard.writeText(releaseId).catch((err) => console.log(err))
                             }}
                         >
                             <FaCopy style={{ color: 'gray', width: '20px' }} />
@@ -193,16 +195,18 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                         {release['_embedded'] &&
                             !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:license']) &&
                             Object.entries(release._embedded['sw360:license'])
-                                .map(([index, item]: [string, EmbeddedLicense]) => (
-                                    <span key={index}>
-                                        {item.shortName}
-                                        <FaInfoCircle
-                                            style={{ marginLeft: '5px', color: 'gray' }}
-                                            className={styles.info}
-                                        />
-                                    </span>
-                                ))
-                                .reduce((prev, curr): any => [
+                                .map(
+                                    ([index, item]: [string, EmbeddedLicense]): React.ReactNode => (
+                                        <span key={index}>
+                                            {item.shortName}
+                                            <FaInfoCircle
+                                                style={{ marginLeft: '5px', color: 'gray' }}
+                                                className={styles.info}
+                                            />
+                                        </span>
+                                    )
+                                )
+                                .reduce((prev, curr): React.ReactNode[] => [
                                     prev,
                                     <>
                                         , <br />
@@ -216,16 +220,18 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release.otherLicenseIds) &&
                             Object.entries(release.otherLicenseIds)
-                                .map(([index, item]: [string, string]) => (
-                                    <span key={index}>
-                                        {item}
-                                        <FaInfoCircle
-                                            style={{ marginLeft: '5px', color: 'gray' }}
-                                            className={styles.info}
-                                        />
-                                    </span>
-                                ))
-                                .reduce((prev, curr): any => [prev, ', ', curr])}
+                                .map(
+                                    ([index, item]: [string, string]): React.ReactNode => (
+                                        <span key={index}>
+                                            {item}
+                                            <FaInfoCircle
+                                                style={{ marginLeft: '5px', color: 'gray' }}
+                                                className={styles.info}
+                                            />
+                                        </span>
+                                    )
+                                )
+                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
                     </td>
                 </tr>
                 <tr>

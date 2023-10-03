@@ -13,27 +13,32 @@ import ReleaseGeneral from './ReleaseGeneral'
 import ReleaseVendor from './ReleaseVendor'
 import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import ReleaseDetail from '@/object-types/ReleaseDetail'
 
 interface Props {
-  release: any
-  releaseId: string
-  session: Session
+    release: ReleaseDetail
+    releaseId: string
+    session: Session
 }
 
 const Summary = ({ release, releaseId, session }: Props) => {
-  return (
-    <div className='col'>
-      <div>
-        <p id='up_Summary'>{release.description}</p>
-      </div>
-      <div>
-        <ReleaseGeneral release={release} releaseId={releaseId} />
-        <ReleaseVendor release={release} />
-        <ResoucesUsing session={session} documentId={releaseId}
-            documentType={DocumentTypes.RELEASE} documentName={`${release.name} (${release.version})`}/>
-      </div>
-    </div>
-  )
+    return (
+        <div className='col'>
+            <div>
+                <p id='up_Summary'>{release.description}</p>
+            </div>
+            <div>
+                <ReleaseGeneral release={release} releaseId={releaseId} />
+                <ReleaseVendor release={release} />
+                <ResoucesUsing
+                    session={session}
+                    documentId={releaseId}
+                    documentType={DocumentTypes.RELEASE}
+                    documentName={`${release.name} (${release.version})`}
+                />
+            </div>
+        </div>
+    )
 }
 
 export default Summary

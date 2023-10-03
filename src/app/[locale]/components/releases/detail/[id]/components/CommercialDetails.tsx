@@ -12,10 +12,7 @@ import COTSDetails from '@/object-types/COTSDetails'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 import CotsOssInformation from './CotsOssInformation'
 
-
-const CommercialDetails = (
-    { costDetails }: { costDetails: COTSDetails }
-) => {
+const CommercialDetails = ({ costDetails }: { costDetails: COTSDetails }) => {
     return (
         <div className='col'>
             <CommercialDetailsAdministration costDetails={costDetails} />

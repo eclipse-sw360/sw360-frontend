@@ -44,6 +44,7 @@ import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/Li
 import ReleaseDetail from '@/object-types/ReleaseDetail'
 import { ChangeLog, EmbeddedChangeLogs } from '@/object-types/ChangeLogs'
 import ReleaseLink from '@/object-types/ReleaseLink'
+import EmbeddedReleaseLinks from '@/object-types/EmbeddedReleaseLinks'
 
 interface Props {
     session: Session
@@ -54,7 +55,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     const t = useTranslations(COMMON_NAMESPACE)
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
-    const [releasesSameComponent, setReleasesSameComponentt] = useState<Array<ReleaseLink>>([])
+    const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<EmbeddedAttachment>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [changesLogTab, setChangesLogTab] = useState('list-change')
@@ -68,7 +69,10 @@ const DetailOverview = ({ session, releaseId }: Props) => {
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as ReleaseDetail & EmbeddedVulnerabilites & EmbeddedChangeLogs
+                const data = (await response.json()) as ReleaseDetail &
+                    EmbeddedVulnerabilites &
+                    EmbeddedChangeLogs &
+                    EmbeddedReleaseLinks
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
@@ -80,42 +84,56 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     )
 
     useEffect(() => {
-        void fetchData(`releases/${releaseId}`).then((release: ReleaseDetail) => {
-            setRelease(release)
+        fetchData(`releases/${releaseId}`)
+            .then((release: ReleaseDetail) => {
+                setRelease(release)
 
-            if (
-                !CommonUtils.isNullOrUndefined(release._embedded) &&
-                !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
-            ) {
-                setEmbeddedAttachments(release._embedded['sw360:attachments'])
-            }
+                if (
+                    !CommonUtils.isNullOrUndefined(release._embedded) &&
+                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
+                ) {
+                    setEmbeddedAttachments(release._embedded['sw360:attachments'])
+                }
 
-            if (release.componentType === 'COTS') {
-                setTabList(ReleaseDetailTabs.WITH_COMMERCIAL_DETAILS)
-            }
-            release && setReleasesSameComponentt(release._embedded['sw360:releaseLinks'])
-        })
+                if (release.componentType === 'COTS') {
+                    setTabList(ReleaseDetailTabs.WITH_COMMERCIAL_DETAILS)
+                }
+                return release
+            })
+            .then((release: ReleaseDetail) => {
+                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
+                    .then((embeddedReleaseLinks: EmbeddedReleaseLinks) => {
+                        embeddedReleaseLinks &&
+                            setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
+                    })
+                    .catch((err) => console.error(err))
+            })
+            .catch((err) => console.error(err))
 
-        void fetchData(`releases/${releaseId}/vulnerabilities`).then((vulnerabilities: EmbeddedVulnerabilites) => {
-            if (
-                vulnerabilities &&
-                !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
-            ) {
-                setVulnerData(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
-            } else {
-                setVulnerData([])
-            }
-        })
+        fetchData(`releases/${releaseId}/vulnerabilities`)
+            .then((vulnerabilities: EmbeddedVulnerabilites) => {
+                if (
+                    vulnerabilities &&
+                    !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
+                ) {
+                    setVulnerData(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
+                } else {
+                    setVulnerData([])
+                }
+            })
+            .catch((err) => console.error(err))
 
-        void fetchData(`changelog/document/${releaseId}`).then((changeLogs: EmbeddedChangeLogs) => {
-            changeLogs &&
-                setChangeLogList(
-                    CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
-                        ? []
-                        : changeLogs._embedded['sw360:changeLogs']
-                )
-        })
+        fetchData(`changelog/document/${releaseId}`)
+            .then((changeLogs: EmbeddedChangeLogs) => {
+                changeLogs &&
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
+                            ? []
+                            : changeLogs._embedded['sw360:changeLogs']
+                    )
+            })
+            .catch((err) => console.error(err))
     }, [fetchData, releaseId])
 
     const downloadBundle = () => {
@@ -173,7 +191,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                                                                     styles[item.clearingState]
                                                                 }`}
                                                             ></span>
-                                                            <Link href={`components/releases/detail/${item.id}`}>
+                                                            <Link href={`/components/releases/detail/${item.id}`}>
                                                                 {`${t('Version')} ${item.version}`}
                                                             </Link>
                                                         </Dropdown.Item>
