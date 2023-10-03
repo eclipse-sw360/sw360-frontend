@@ -9,28 +9,25 @@
 // License-Filename: LICENSE
 
 'use client'
-import AddKeyValueComponent from '@/components/AddKeyValue'
-import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import { notFound } from 'next/navigation'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import { Session } from '@/object-types/Session'
-import ApiUtils from '@/utils/api/api.util'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
+import { notFound } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { signOut } from 'next-auth/react'
+
+import AddKeyValueComponent from '@/components/AddKeyValue'
+import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
+import ComponentPayload from '@/object-types/ComponentPayLoad'
+import { Component, InputKeyValue, HttpStatus, Session } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
-import InputKeyValue from '@/object-types/InputKeyValue'
-import CommonUtils from '@/utils/common.utils'
-import Component from '@/object-types/Component'
 
 interface Props {
     session?: Session
@@ -155,7 +152,7 @@ export default function ComponentEditSummary({
             }
             setComponentPayload(componentPayloadData)
         })
-    }, [componentId, fetchData, attachmentData])
+    }, [componentId, fetchData, attachmentData, setComponentPayload])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)

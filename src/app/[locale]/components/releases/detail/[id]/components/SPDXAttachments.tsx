@@ -11,19 +11,17 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import Attachment from '@/object-types/Attachment'
+import { FiAlertTriangle } from 'react-icons/fi'
 import { signOut } from 'next-auth/react'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import ApiUtils from '@/utils/api/api.util'
+import { Alert, Button } from 'react-bootstrap'
+
+import { ApiUtils } from '@/utils'
+import { Attachment, HttpStatus, Session } from '@/object-types'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Table, _ } from '@/components/sw360'
 import AttachmentType from '@/object-types/enums/AttachmentTypes'
-import { Button } from 'react-bootstrap'
-import SPDXLicenseView from './SPDXLicenseView'
-import { Alert } from 'react-bootstrap'
-import { FiAlertTriangle } from 'react-icons/fi'
-import { Session } from '@/object-types/Session'
 import EmbeddedAttachments from '@/object-types/EmbeddedAttachments'
+import SPDXLicenseView from './SPDXLicenseView'
 
 interface Props {
     releaseId: string

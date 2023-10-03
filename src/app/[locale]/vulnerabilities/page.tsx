@@ -9,9 +9,10 @@
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getServerSession } from 'next-auth/next'
-import { Session } from '@/object-types/Session'
-import Vulnerabilities from './components/Vulnerabilities'
 import { Metadata } from 'next'
+
+import { Session } from '@/object-types'
+import Vulnerabilities from './components/Vulnerabilities'
 
 export const metadata: Metadata = {
     title: 'Vulnerabilites',

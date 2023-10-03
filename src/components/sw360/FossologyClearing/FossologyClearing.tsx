@@ -10,19 +10,16 @@
 
 'use client'
 
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
+import { Alert, Button, Modal } from 'react-bootstrap'
+import { useState, useEffect, useRef, useCallback } from 'react'
+
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Session } from '@/object-types/Session'
+import { HttpStatus, Session } from '@/object-types'
 import styles from './fossologyClearing.module.css'
 import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
-import { Alert } from 'react-bootstrap'
-import CommonUtils from '@/utils/common.utils'
-import ApiUtils from '@/utils/api/api.util'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { FossologyProcessInfo, FossologyProcessStatus } from '@/object-types/FossologyProcessStatus'
-import HttpStatus from '@/object-types/enums/HttpStatus'
 
 interface Props {
     show?: boolean

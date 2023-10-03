@@ -9,19 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { ToastContainer } from 'react-bootstrap'
+import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+
 import AddKeyValueComponent from '@/components/AddKeyValue'
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
 import { SearchUsersModal } from '@/components/sw360'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import { useRouter } from 'next/navigation'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import { Session } from '@/object-types/Session'
 import { SideBar } from '@/components/sw360'
-import ApiUtils from '@/utils/api/api.util'
-import HttpStatus from '@/object-types/enums/HttpStatus'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
@@ -30,10 +30,9 @@ import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoC
 import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
 import ToastData from '@/object-types/ToastData'
 import ToastMessage from '@/components/sw360/ToastContainer/Toast'
-import { ToastContainer } from 'react-bootstrap'
-import InputKeyValue from '@/object-types/InputKeyValue'
-import CommonUtils from '@/utils/common.utils'
-import Component from '@/object-types/Component'
+
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Component, InputKeyValue, HttpStatus, Session } from '@/object-types'
 interface Props {
     session: Session
 }

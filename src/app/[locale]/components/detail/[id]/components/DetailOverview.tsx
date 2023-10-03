@@ -10,6 +10,9 @@
 
 'use client'
 import { useEffect, useState, useCallback } from 'react'
+import { signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+
 import Summary from './Summary'
 import ReleaseOverview from './ReleaseOverview'
 import Attachments from '@/components/Attachments/Attachments'
@@ -18,18 +21,13 @@ import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDet
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import ComponentTabIds from '@/object-types/enums/ComponentTabIds'
-import ApiUtils from '@/utils/api/api.util'
-import { Session } from '@/object-types/Session'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { signOut } from 'next-auth/react'
-import CommonUtils from '@/utils/common.utils'
-import { useTranslations } from 'next-intl'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Component, HttpStatus, Session } from '@/object-types'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { LinkedVulnerability, EmbeddedVulnerabilites } from '@/object-types/LinkedVulnerability'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import DownloadService from '@/services/download.service'
-import Component from '@/object-types/Component'
 import { ChangeLog, EmbeddedChangeLogs } from '@/object-types/ChangeLogs'
 
 interface Props {

@@ -11,7 +11,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import LicenseIndex from './LicenseIndex'
 import { Metadata } from 'next'
-import { Session } from '@/object-types/Session'
+import { Session } from '@/object-types'
 
 export const metadata: Metadata = {
     title: 'Licenses',

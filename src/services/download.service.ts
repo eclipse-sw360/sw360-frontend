@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Session } from '@/object-types/Session'
-import ApiUtils from '@/utils/api/api.util'
+import { ApiUtils } from '@/utils'
+import { Session } from '@/object-types'
 
 const download = (url: string, session: Session, fileName: string) => {
     ApiUtils.GET(url, session.user.access_token)

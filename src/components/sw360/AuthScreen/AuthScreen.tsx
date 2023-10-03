@@ -9,20 +9,18 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
+import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import Link from 'next/link'
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
-import Form from 'react-bootstrap/Form'
-import Alert from 'react-bootstrap/Alert'
-import { signIn } from 'next-auth/react'
+
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { CREDENTIALS } from '@/object-types/Constants'
-import HttpStatus from '@/object-types/enums/HttpStatus'
+import { HttpStatus, Session } from '@/object-types'
+import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import LanguageSwitcher from '@/components/language-switcher/LanguageSwitcher'
-import { useLocale, useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { Session } from '@/object-types/Session'
 
 interface Props {
     session?: Session
@@ -64,11 +62,7 @@ const AuthScreen = ({ session }: Props) => {
                                 <h1 className='display-4'>{t('Welcome to SW360!')}</h1>
                                 <LanguageSwitcher />
                                 <br />
-                                <p className='mt-3'>
-                                    {t(
-                                        'SW360_INFO'
-                                    )}
-                                </p>
+                                <p className='mt-3'>{t('SW360_INFO')}</p>
                                 <hr className='my-4' />
                                 <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
                                 {!session ? (

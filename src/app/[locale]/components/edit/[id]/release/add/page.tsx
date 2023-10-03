@@ -9,19 +9,20 @@
 // License-Filename: LICENSE
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from "next-auth/next"
-import { Session } from '@/object-types/Session'
+import { getServerSession } from 'next-auth/next'
+
+import { Session } from '@/object-types'
 import AddRelease from './releases/AddRelease'
 
 interface Context {
-  params: { id: string }
+    params: { id: string }
 }
 
 const ReleaseAddPage = async ({ params }: Context) => {
-  const session: Session = await getServerSession(authOptions);
-  const componentId = params.id;
+    const session: Session = await getServerSession(authOptions)
+    const componentId = params.id
 
-  return <AddRelease session={session} componentId={componentId} />
+    return <AddRelease session={session} componentId={componentId} />
 }
 
 export default ReleaseAddPage

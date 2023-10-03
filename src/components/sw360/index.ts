@@ -17,6 +17,7 @@ import QuickFilter from './QuickFilter/QuickFilter'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import SideBar from './SideBar/SideBar'
+import ToastMessage from './ToastContainer/Toast'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 
 // Table component
@@ -39,6 +40,7 @@ export {
     SearchVendorsModal,
     SideBar,
     Table,
+    ToastMessage,
     TreeTable,
     VendorDialog,
 }

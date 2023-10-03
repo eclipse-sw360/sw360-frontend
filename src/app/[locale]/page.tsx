@@ -9,10 +9,11 @@
 // License-Filename: LICENSE
 
 import { getServerSession } from 'next-auth'
+import { Metadata } from 'next'
+
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { AuthScreen } from '@/components/sw360'
-import { Session } from '@/object-types/Session'
-import { Metadata } from 'next';
+import { Session } from '@/object-types'
 
 export const metadata: Metadata = {
     title: 'Welcome - SW360',

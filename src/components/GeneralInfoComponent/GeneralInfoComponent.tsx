@@ -9,16 +9,17 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from './SummaryComponent.module.css'
+
 import React, { useCallback, useState } from 'react'
-import { VendorDialog } from '@/components/sw360'
-import { Session } from '@/object-types/Session'
-import Vendor from '@/object-types/Vendor'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { useTranslations } from 'next-intl'
+
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import 'react-toastify/dist/ReactToastify.css'
+import { Session } from '@/object-types'
+import { VendorDialog } from '@/components/sw360'
+import ComponentPayload from '@/object-types/ComponentPayLoad'
 import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
+import styles from './SummaryComponent.module.css'
+import Vendor from '@/object-types/Vendor'
 
 interface Props {
     session?: Session

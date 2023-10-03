@@ -8,9 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import EmbeddedUser from '@/object-types/EmbeddedUser'
-import InputKeyValue from '@/object-types/InputKeyValue'
-import Moderators from '@/object-types/Moderators'
+import { EmbeddedUser, InputKeyValue, Moderators } from '@/object-types'
 
 const isNullOrUndefined = (obj: unknown) => {
     if (obj === null || obj === undefined) {

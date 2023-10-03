@@ -9,24 +9,19 @@
 
 'use client'
 
-import { QuickFilter, AdvancedSearch, _, Table } from '@/components/sw360'
-import { useState, useEffect } from 'react'
 import { Dropdown, Spinner } from 'react-bootstrap'
-
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-
-import ApiUtils from '@/utils/api/api.util'
-import CommonUtils from '@/utils/common.utils'
-import { Session } from '@/object-types/Session'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { signOut } from 'next-auth/react'
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
-import { useSearchParams } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { signOut } from 'next-auth/react'
+import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { QuickFilter, AdvancedSearch, _, Table } from '@/components/sw360'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { HttpStatus, Session } from '@/object-types'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
-import { useRouter } from 'next/navigation'
 
 export default function Vulnerabilities({ session }: { session: Session }) {
     const DEFAULT_VULNERABILITIES = 200

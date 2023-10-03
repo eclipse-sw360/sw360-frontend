@@ -9,19 +9,18 @@
 // License-Filename: LICENSE
 
 'use client'
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
-import { Session } from '@/object-types/Session'
+
+import { Button, Modal } from 'react-bootstrap'
 import { notFound } from 'next/navigation'
-import ApiUtils from '@/utils/api/api.util'
-import HttpStatus from '@/object-types/enums/HttpStatus'
 import { useCallback, useEffect, useState } from 'react'
-import CommonUtils from '@/utils/common.utils'
-import SelectTableModerators from './SelectTableModerators'
-import Moderators from '@/object-types/Moderators'
-import { ModeratorsType } from '@/object-types/ModeratorsType'
 import { useTranslations } from 'next-intl'
+
+import { ApiUtils, CommonUtils } from '@/utils'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { HttpStatus, Session } from '@/object-types'
+import { ModeratorsType } from '@/object-types/ModeratorsType'
+import Moderators from '@/object-types/Moderators'
+import SelectTableModerators from './SelectTableModerators'
 
 interface Props {
     show: boolean

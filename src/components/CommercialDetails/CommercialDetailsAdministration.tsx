@@ -9,14 +9,17 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { useTranslations } from 'next-intl'
-import styles from './CommercialDetails.module.css'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
+
 import { useCallback, useState } from 'react'
+
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Session } from '@/object-types'
 import ComponentOwner from '@/object-types/ComponentOwner'
-import { Session } from '@/object-types/Session'
+import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
 import ReleasePayload from '@/object-types/ReleasePayload'
+import styles from './CommercialDetails.module.css'
 
 interface Props {
     session?: Session

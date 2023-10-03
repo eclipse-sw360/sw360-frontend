@@ -13,7 +13,7 @@ import ReleaseAgrregateData from './ReleaseAggregate'
 import SummaryRole from './SummaryRole'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
-import { Session } from '@/object-types/Session'
+import { Session } from '@/object-types'
 import Component from '@/object-types/Component'
 
 interface Props {

@@ -12,11 +12,11 @@
 import ComponentsTable from './ComponentsTable'
 import { Dropdown } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { Session } from '@/object-types/Session'
-
-import { PageButtonHeader, AdvancedSearch } from '@/components/sw360'
 import { useState } from 'react'
+
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Session } from '@/object-types'
+import { PageButtonHeader, AdvancedSearch } from '@/components/sw360'
 import DownloadService from '@/services/download.service'
 import ImportSBOMModal from './ImportSBOMModal'
 

@@ -11,19 +11,18 @@
 import { Alert, Button } from 'react-bootstrap'
 import Link from 'next/link'
 import { Form } from 'react-bootstrap'
-
-import ChangeStateDialog from './ChangeStateDialog'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import VulnerabilitiesVerificationState from '@/object-types/enums/VulnerabilitiesVerificationState'
-
-import { Table, _ } from '@/components/sw360'
-import { LinkedVulnerability, VerificationStateInfo } from '@/object-types/LinkedVulnerability'
-import { Session } from '@/object-types/Session'
-import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
-import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
 import { FaInfoCircle } from 'react-icons/fa'
+
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { LinkedVulnerability, VerificationStateInfo } from '@/object-types/LinkedVulnerability'
+import { Session } from '@/object-types'
+import { Table, _ } from '@/components/sw360'
+import ChangeStateDialog from './ChangeStateDialog'
+import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
+import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
+import VulnerabilitiesVerificationState from '@/object-types/enums/VulnerabilitiesVerificationState'
 
 interface Props {
     vulnerData: Array<LinkedVulnerability>

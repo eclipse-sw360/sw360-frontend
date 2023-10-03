@@ -9,18 +9,17 @@
 // License-Filename: LICENSE
 
 'use client'
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
-import { Session } from '@/object-types/Session'
-import ApiUtils from '@/utils/api/api.util'
-import HttpStatus from '@/object-types/enums/HttpStatus'
+
+import { Button, Modal } from 'react-bootstrap'
 import { useCallback, useEffect, useState } from 'react'
-import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
+
+import { ApiUtils, CommonUtils } from '@/utils'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { HttpStatus, Session } from '@/object-types'
+import { LicensesType } from '@/object-types/LicensesType'
 import Licenses from '@/object-types/Licenses'
 import SelectTableMainLicenses from './SelectTableMainLicenses'
-import { LicensesType } from '@/object-types/LicensesType'
 
 interface Props {
     show?: boolean
@@ -44,15 +43,18 @@ const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) =
         setLicenseDatas(data)
     }
 
-    const fetchData: any = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else {
-            return []
-        }
-    }, [session])
+    const fetchData: any = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                return []
+            }
+        },
+        [session]
+    )
 
     useEffect(() => {
         fetchData(`licenses`).then((licenses: any) => {

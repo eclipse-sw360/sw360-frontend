@@ -14,7 +14,7 @@ import { _, Table } from '../sw360'
 import styles from './ResourceUsing.module.css'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { EmbeddedComponent } from '@/object-types/EmbeddedComponent'
+import { EmbeddedComponent } from '@/object-types'
 
 interface Props {
     componentsUsing: Array<EmbeddedComponent>

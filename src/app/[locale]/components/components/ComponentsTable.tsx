@@ -21,11 +21,9 @@ import DeleteComponentDialog from './DeleteComponentDialog'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { Session } from '@/object-types/Session'
 import { Spinner } from 'react-bootstrap'
 import { Table, _ } from '@/components/sw360'
-import { EmbeddedComponents } from '@/object-types/EmbeddedComponents'
-import { EmbeddedComponent } from '@/object-types/EmbeddedComponent'
+import { Embedded, EmbeddedComponent, Session } from '@/object-types'
 import { signOut } from 'next-auth/react'
 
 interface Props {
@@ -50,7 +48,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         async (queryUrl: string, signal: AbortSignal) => {
             const componentsResponse = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
             if (componentsResponse.status == HttpStatus.OK) {
-                const components = (await componentsResponse.json()) as EmbeddedComponents
+                const components = (await componentsResponse.json()) as Embedded<EmbeddedComponent, 'sw360:components'>
                 return components
             } else if (componentsResponse.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
@@ -58,7 +56,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
                 return undefined
             }
         },
-        [session.user.access_token]
+        [session]
     )
 
     useEffect(() => {
@@ -81,7 +79,7 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         const signal = controller.signal
 
         fetchData(queryUrl, signal)
-            .then((components: EmbeddedComponents) => {
+            .then((components: Embedded<EmbeddedComponent, 'sw360:components'>) => {
                 if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
                     components['_embedded']['sw360:components'].forEach(parseTableRowData)
                     setComponentData(data)

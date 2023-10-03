@@ -9,21 +9,20 @@
 // License-Filename: LICENSE
 
 import { useEffect, useState, useCallback } from 'react'
-import CommonUtils from '@/utils/common.utils'
-import styles from './Attachment.module.css'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ApiUtils from '@/utils/api/api.util'
-import { Session } from '@/object-types/Session'
 import { signOut } from 'next-auth/react'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import SelectAttachment from './SelectAttachment/SelectAttachment'
-import TableAttachment from './TableAttachment/TableAttachment'
+
+import { ApiUtils, CommonUtils } from '@/utils'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { HttpStatus, Session } from '@/object-types'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import TitleAttachment from './TiltleAttachment/TitleAttachment'
-import ReleasePayload from '@/object-types/ReleasePayload'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import SelectAttachment from './SelectAttachment/SelectAttachment'
+import styles from './Attachment.module.css'
+import TableAttachment from './TableAttachment/TableAttachment'
+import TitleAttachment from './TiltleAttachment/TitleAttachment'
 
 interface Props {
     documentId?: string

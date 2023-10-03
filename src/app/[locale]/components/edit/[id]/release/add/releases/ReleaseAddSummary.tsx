@@ -9,21 +9,22 @@
 // License-Filename: LICENSE
 
 'use client'
-import AddKeyValueComponent from '@/components/AddKeyValue'
-import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
-import ReleasePayload from '@/object-types/ReleasePayload'
-import { Session } from '@/object-types/Session'
-import Vendor from '@/object-types/Vendor'
-import Licenses from '@/object-types/Licenses'
-import Moderators from '@/object-types/Moderators'
+
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { CommonUtils } from '@/utils'
+import { Licenses, Session } from '@/object-types'
+import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
+import AddKeyValueComponent from '@/components/AddKeyValue'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import InputKeyValue from '@/object-types/InputKeyValue'
-import CommonUtils from '@/utils/common.utils'
+import Moderators from '@/object-types/Moderators'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
+import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
+import Vendor from '@/object-types/Vendor'
 
 interface Props {
     session?: Session

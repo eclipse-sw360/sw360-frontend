@@ -34,9 +34,9 @@ async function RootLayout({ children, params: { locale } }: Props) {
     }
     return (
         <html lang={locale}>
-            <Providers>
-                <NextIntlClientProvider locale={locale} messages={messages}>
-                    <body>
+            <body>
+                <Providers>
+                    <NextIntlClientProvider locale={locale} messages={messages}>
                         <div id='container'>
                             <div id='content'>
                                 <Header />
@@ -44,9 +44,9 @@ async function RootLayout({ children, params: { locale } }: Props) {
                                 <Footer />
                             </div>
                         </div>
-                    </body>
-                </NextIntlClientProvider>
-            </Providers>
+                    </NextIntlClientProvider>
+                </Providers>
+            </body>
         </html>
     )
 }

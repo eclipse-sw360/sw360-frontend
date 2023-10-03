@@ -8,8 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface EmbeddedProject {
-    name?: string
+import EmbeddedUser from './EmbeddedUser'
+
+interface EmbeddedProject {
+    id?: string
+    name: string
     version?: string
     state?: string
     securityResponsibles?: Array<string>
@@ -23,4 +26,10 @@ export default interface EmbeddedProject {
             href: string
         }
     }
+    _embedded?: {
+        leadArchitect?: EmbeddedUser
+        createdBy?: EmbeddedUser
+    }
 }
+
+export default EmbeddedProject

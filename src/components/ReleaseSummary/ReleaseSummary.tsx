@@ -9,23 +9,25 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from './ReleaseSummary.module.css'
-import React, { useCallback, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
-import { Session } from '@/object-types/Session'
-import Vendor from '@/object-types/Vendor'
-import Licenses from '@/object-types/Licenses'
-import Moderators from '@/object-types/Moderators'
-import ReleasePayload from '@/object-types/ReleasePayload'
-import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
-import { VendorDialog } from '../sw360'
+
 import { GiCancel } from 'react-icons/gi'
+import { useTranslations } from 'next-intl'
+import React, { useCallback, useState } from 'react'
+
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Licenses, Session } from '@/object-types'
+import { VendorDialog } from '@/components/sw360'
+import ActionType from '@/object-types/enums/ActionType'
 import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
+import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
+import Moderators from '@/object-types/Moderators'
 import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
 import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialog'
-import ActionType from '@/object-types/enums/ActionType'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
+import styles from './ReleaseSummary.module.css'
+import Vendor from '@/object-types/Vendor'
+
 interface Props {
     session?: Session
     actionType?: string

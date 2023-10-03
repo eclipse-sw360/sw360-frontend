@@ -9,22 +9,18 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { useSession } from 'next-auth/react'
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
-import Form from 'react-bootstrap/Form'
-import Alert from 'react-bootstrap/Alert'
-import { useEffect, useState } from 'react'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import ApiUtils from '@/utils/api/api.util'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
+import { useEffect, useState, useCallback } from 'react'
 import { signOut } from 'next-auth/react'
-import CommonUtils from '@/utils/common.utils'
-import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
+
+import { ApiUtils, CommonUtils } from '@/utils'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
-import { Session } from '@/object-types/Session'
+import { HttpStatus, Session } from '@/object-types'
 import Component from '@/object-types/Component'
 
 const DEFAULT_COMPONENT_INFO: Component = { name: '', _embedded: { 'sw360:releases': [] } }

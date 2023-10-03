@@ -9,19 +9,20 @@
 // License-Filename: LICENSE
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from "next-auth/next"
-import { Session } from '@/object-types/Session'
+import { getServerSession } from 'next-auth/next'
+
+import { Session } from '@/object-types'
 import DetailOverview from './components/DetailOverview'
 
 interface Context {
-  params: { id: string }
+    params: { id: string }
 }
 
 const Detail = async ({ params }: Context) => {
-  const session: Session = await getServerSession(authOptions);
-  const componentId = params.id;
+    const session: Session = await getServerSession(authOptions)
+    const componentId = params.id
 
-  return <DetailOverview session={session} componentId={componentId} />
+    return <DetailOverview session={session} componentId={componentId} />
 }
 
 export default Detail
