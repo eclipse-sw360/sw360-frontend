@@ -27,7 +27,15 @@
         "sourceMap": true,
         "allowSyntheticDefaultImports": true,
         "paths": {
-            "@/*": ["./src/*"]
+            "next-sw360": ["./src/components/sw360"],
+            "@/app/*": ["./src/app/*"],
+            "@/assets/*": ["./src/assets/*"],
+            "@/components/*": ["./src/components/*"],
+            "@/messages": ["./messages"],
+            "@/object-types/*": ["./src/object-types/*"],
+            "@/services/*": ["./src/services/*"],
+            "@/styles/*": ["./src/styles/*"],
+            "@/utils/*": ["./src/utils/*"]
         },
         "plugins": [
             {
