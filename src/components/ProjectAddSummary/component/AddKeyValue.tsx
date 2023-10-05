@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
 import React from 'react'
 import { useState } from 'react'
@@ -16,6 +16,7 @@ import { MdDeleteOutline } from 'react-icons/md'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
+// import { Session } from '@/object-types/Session'
 
 interface Props {
     header: string
@@ -31,7 +32,6 @@ interface Input {
 }
 
 export default function AddKeyValueComponent(props: Props) {
-
     const t = useTranslations(COMMON_NAMESPACE)
     const [inputList, setInputList] = useState<Input[]>([])
 
@@ -40,7 +40,7 @@ export default function AddKeyValueComponent(props: Props) {
         const list: Input[] = [...inputList]
         list[index][name as keyof Input] = value
         props.setData(list)
-        if(props.setObject) {
+        if (props.setObject) {
             const map = new Map<string, string>()
             list.forEach((item) => {
                 map.set(item.key, item.value)
@@ -61,9 +61,7 @@ export default function AddKeyValueComponent(props: Props) {
 
     return (
         <>
-            <h6 className="header pb-2 px-2">
-                    {t(props.header)}
-            </h6>
+            <h6 className='header pb-2 px-2'>{t(props.header)}</h6>
             <div className='row'>
                 {inputList.map((elem, j) => {
                     return (
@@ -94,8 +92,12 @@ export default function AddKeyValueComponent(props: Props) {
                             </div>
                             <div className='col-lg-1'>
                                 <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                    <span className="d-inline-block">
-                                        < MdDeleteOutline size={25} className="ms-2 btn-icon" onClick={() => handleRemoveClick(j)} />
+                                    <span className='d-inline-block'>
+                                        <MdDeleteOutline
+                                            size={25}
+                                            className='ms-2 btn-icon'
+                                            onClick={() => handleRemoveClick(j)}
+                                        />
                                     </span>
                                 </OverlayTrigger>
                             </div>
@@ -103,14 +105,14 @@ export default function AddKeyValueComponent(props: Props) {
                     )
                 })}
                 <div className='col-lg-4'>
-                    <button
-                        type='button'
-                        onClick={() => handleAddClick()}
-                        className="btn btn-secondary"
-                    >{t(`Click to add row to ${props.keyName
-                        .split(' ')
-                        .map((elem) => elem[0].toUpperCase() + elem.substring(1))
-                        .join(' ')}`)}</button>
+                    <button type='button' onClick={() => handleAddClick()} className='btn btn-secondary'>
+                        {t(
+                            `Click to add row to ${props.keyName
+                                .split(' ')
+                                .map((elem) => elem[0].toUpperCase() + elem.substring(1))
+                                .join(' ')}`
+                        )}
+                    </button>
                 </div>
             </div>
         </>
