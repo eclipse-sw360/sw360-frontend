@@ -493,3 +493,40 @@ th {
 .spinner {
     color: #f7941e;
 }
+
+.alert-warning {
+    background-color: #fff4ec !important;
+    color: #b95042 !important;
+}
+
+.project_icon {
+    fill: #e6a418;
+}
+
+.component_icon {
+    fill: #6cbb6c;
+}
+
+.license_icon {
+    fill: #6683c2;
+}
+
+.release_icon {
+    fill: #ff7f27;
+}
+
+.package_icon {
+    fill: #ff1493;
+}
+
+.obligation_icon {
+    fill: #009e09;
+}
+
+.user_icon {
+    fill: #ce5a5e;
+}
+
+.vendor_icon {
+    fill: #8a66c2;
+}
