@@ -33,7 +33,7 @@ header:
         - '*.code-workspace'
         - '**/*.diff'
         - '**/*.svg'
-        - .prettierrc.js
+        - .prettierrc
         - '**/*.json'
         - '**/*.css'
         - .dockerignore
