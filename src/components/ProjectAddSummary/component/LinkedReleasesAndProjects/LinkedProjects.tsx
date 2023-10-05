@@ -9,36 +9,37 @@
 
 'use client'
 
-import { Table } from '@/components/sw360'
+// import { Table } from '@/components/sw360'
+// import { Session } from '@/object-types/Session'
 import LinkedProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkedProjectsModal'
 import { useState } from 'react'
 
 export default function LinkedProjects() {
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
-    const [linkedProject, setLinkedProject] = useState([])
+    // const [linkedProject, setLinkedProject] = useState([])
 
-    const columns = [
-        {
-            id: 'name',
-            name: 'Project Name',
-            sort: true,
-        },
-        {
-            id: 'version',
-            name: 'Project Version',
-            sort: true,
-        },
-        {
-            id: 'relation',
-            name: 'Project Relation',
-            sort: true,
-        },
-        {
-            id: 'svm',
-            name: 'Enable SVM',
-            sort: true,
-        }
-    ]
+    // const columns = [
+    //     {
+    //         id: 'name',
+    //         name: 'Project Name',
+    //         sort: true,
+    //     },
+    //     {
+    //         id: 'version',
+    //         name: 'Project Version',
+    //         sort: true,
+    //     },
+    //     {
+    //         id: 'relation',
+    //         name: 'Project Relation',
+    //         sort: true,
+    //     },
+    //     {
+    //         id: 'svm',
+    //         name: 'Enable SVM',
+    //         sort: true,
+    //     }
+    // ]
 
     return (
         <>
@@ -50,9 +51,7 @@ export default function LinkedProjects() {
                         <hr className='my-2 mb-2' style={{ color: '#5D8EA9' }} />
                     </h6>
                 </div>
-                <div style={{paddingLeft: '0px' }}>
-                    <Table data={linkedProject} columns={columns}/>
-                </div>
+                <div style={{ paddingLeft: '0px' }}>{/* <Table data={linkedProject} columns={columns}/> */}</div>
                 <div className='row' style={{ paddingLeft: '0px' }}>
                     <div className='col-lg-4'>
                         <button

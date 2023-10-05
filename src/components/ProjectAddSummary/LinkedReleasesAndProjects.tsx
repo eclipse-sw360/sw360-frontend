@@ -7,18 +7,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
-import LinkedReleases from "./component/LinkedReleasesAndProjects/LinkedReleases"
-import LinkedProjects from "./component/LinkedReleasesAndProjects/LinkedProjects"
+import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
+import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
+// import { Session } from '@/object-types/Session'
 
 export default function LinkedReleasesAndProjects() {
-
     return (
         <>
-            <div className="ms-1">
-                <LinkedProjects/>
-                <LinkedReleases/>
+            <div className='ms-1'>
+                <LinkedProjects />
+                <LinkedReleases />
             </div>
         </>
     )
