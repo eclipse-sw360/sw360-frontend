@@ -10,8 +10,6 @@
 import json
 from pathlib import Path
 
-from rich.pretty import pprint
-
 try:
     with open("./messages/en.json", "r") as f:
         en = json.load(f)
@@ -24,9 +22,13 @@ for lang in Path("./messages/").glob("*.json"):
         continue
     with open(lang, "r") as f:
         data = json.load(f)
-    for key in en['common'].keys():
-        if key not in data['common'].keys():
-            print(f"Adding {key} to {lang.name}")
-            data['common'][key] = "NOT TRANSLATED"
+    for rootkey, value in en.items():
+        for key, value in en[rootkey].items():
+            if rootkey not in data:
+                print(f"Adding root entry {rootkey} with {key} to {lang.name}")
+                data[rootkey] = {}
+            if key not in data[rootkey]:
+                print(f"Adding {rootkey}/{key} to {lang.name}")
+                data[rootkey][key] = "NOT TRANSLATED"
     with open(lang, "w", encoding="utf-8") as f:
-        json.dump(data, f, sort_keys=True, indent=2, ensure_ascii=False)
+        json.dump(data, f, sort_keys=True, indent=4, ensure_ascii=False)
