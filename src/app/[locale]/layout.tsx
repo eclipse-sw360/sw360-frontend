@@ -18,7 +18,7 @@ import React, { ReactNode } from 'react'
 import { NextIntlClientProvider } from 'next-intl'
 import { notFound } from 'next/navigation'
 
-import { Header, Footer } from 'sw360-components'
+import { Header, Footer } from 'next-sw360'
 
 export function generateStaticParams() {
     return [{ locale: 'en' }, { locale: 'ja' }, { locale: 'vi' }, { locale: 'zh' }]

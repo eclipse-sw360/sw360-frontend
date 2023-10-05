@@ -217,7 +217,7 @@ export default function ComponentAddSummary({ session }: Props) {
                                 </div>
                                 <div className='row mb-4'>
                                     <AddKeyValueComponent
-                                        header={t('External ids')}
+                                        header={t('External Ids')}
                                         keyName={'external id'}
                                         setData={setExternalIds}
                                         data={externalIds}
