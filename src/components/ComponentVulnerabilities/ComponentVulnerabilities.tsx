@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { Alert, Button } from 'react-bootstrap'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 import { Form } from 'react-bootstrap'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'

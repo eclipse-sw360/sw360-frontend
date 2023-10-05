@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 import { _, Table } from '../sw360'
 import styles from './ResourceUsing.module.css'
 import { useTranslations } from 'next-intl'

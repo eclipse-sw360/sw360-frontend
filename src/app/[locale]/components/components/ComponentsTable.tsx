@@ -11,7 +11,7 @@
 'use client'
 import CommonUtils from '@/utils/common.utils'
 import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 import React, { useEffect, useState } from 'react'
 import styles from '../components.module.css'
 import ApiUtils from '@/utils/api/api.util'

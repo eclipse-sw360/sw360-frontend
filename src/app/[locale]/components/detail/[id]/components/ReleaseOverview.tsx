@@ -10,26 +10,26 @@
 
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
-import { signOut } from 'next-auth/react'
+import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
 import { notFound } from 'next/navigation'
+import { signOut } from 'next-auth/react'
+import { useEffect, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
+import Link from 'next/link'
+import { HiOutlineLink } from 'react-icons/hi'
 
-import styles from '../detail.module.css'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
-import ReleaseLink from '@/object-types/ReleaseLink'
-import EmbeddedLinkedReleases from '@/object-types/ReleaseLink'
-import fossologyIcon from '@/assets/images/fossology.svg'
-import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import { Table, _ } from '@/components/sw360'
+import { Table, _ } from 'next-sw360'
 import DeleteReleaseModal from './DeleteReleaseModal'
+import EmbeddedLinkedReleases from '@/object-types/ReleaseLink'
+import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
+import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
-import { HiOutlineLink } from 'react-icons/hi'
+import ReleaseLink from '@/object-types/ReleaseLink'
+import styles from '../detail.module.css'
 
 interface Props {
     session: Session

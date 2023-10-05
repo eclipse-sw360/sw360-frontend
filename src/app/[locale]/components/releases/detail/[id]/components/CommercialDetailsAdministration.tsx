@@ -15,7 +15,7 @@ import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import styles from '../detail.module.css'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 
 const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails }) => {
     const t = useTranslations(COMMON_NAMESPACE)

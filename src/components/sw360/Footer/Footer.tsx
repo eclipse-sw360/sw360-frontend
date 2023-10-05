@@ -9,7 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Link from 'next/link'
+import Link from 'next-intl/link'
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.css'
 import '@/styles/globals.css'
@@ -63,9 +63,7 @@ function Footer() {
                         </Link>
                     </div>
                 </div>
-                <div>
-                    Version: 17.0.0-SNAPSHOT | Branch: masterct (f69a224) | Build time: 2023-01-29T14:25:37Z
-                </div>
+                <div>Version: 17.0.0-SNAPSHOT | Branch: masterct (f69a224) | Build time: 2023-01-29T14:25:37Z</div>
             </footer>
         </>
     )

@@ -16,7 +16,7 @@ import { notFound } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useState, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 
 import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, Session } from '@/object-types'
