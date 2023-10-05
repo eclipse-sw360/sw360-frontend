@@ -32,10 +32,12 @@
             "@/assets/*": ["./src/assets/*"],
             "@/components/*": ["./src/components/*"],
             "@/messages": ["./messages"],
+            "@/object-types": ["./src/object-types"],
             "@/object-types/*": ["./src/object-types/*"],
             "@/services/*": ["./src/services/*"],
             "@/styles/*": ["./src/styles/*"],
-            "@/utils/*": ["./src/utils/*"]
+            "@/utils/*": ["./src/utils/*"],
+            "@/utils": ["./src/utils"]
         },
         "plugins": [
             {
