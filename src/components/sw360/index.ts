@@ -11,13 +11,14 @@ import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
 import Footer from './Footer/Footer'
 import Header from './Header/Header'
-import SW360Navbar from './SW360Navbar/SW360Navbar'
+import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import QuickFilter from './QuickFilter/QuickFilter'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import SideBar from './SideBar/SideBar'
 import ToastMessage from './ToastContainer/Toast'
+import SW360Navbar from './SW360Navbar/SW360Navbar'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 
 // Table component
@@ -32,13 +33,14 @@ export {
     AuthScreen,
     Footer,
     Header,
-    SW360Navbar,
+    LanguageSwitcher,
     PageButtonHeader,
     QuickFilter,
     ReactWrapper,
     SearchUsersModal,
     SearchVendorsModal,
     SideBar,
+    SW360Navbar,
     Table,
     ToastMessage,
     TreeTable,
