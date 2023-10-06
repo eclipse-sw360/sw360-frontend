@@ -7,181 +7,193 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-
 import { AdministrationDataType } from '@/object-types/AdministrationDataType'
+import styles from '../detail.module.css'
+import { useState } from 'react'
 
-const Capitalize = (text: string) => text.split("_").reduce((s, c) => s + " " + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), "")
+const Capitalize = (text: string) =>
+    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 export default function Administration({ data }: { data: AdministrationDataType }) {
-
-    const t = useTranslations(COMMON_NAMESPACE)     
+    const t = useTranslations(COMMON_NAMESPACE)
+    const [toggleClearing, setToggleClearing] = useState(false)
+    const [toggleLifecycle, setToggleLifecycle] = useState(false)
+    const [toggleLicenseInfoHeader, setToggleLicenseInfoHeader] = useState(false)
 
     return (
         <>
-            <div className="ms-3 me-2">
-                <div className="row mb-4">
-                    <div className="row header mb-2">
-                        <h6>{t("Clearing")}</h6>
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Project Clearing State")}:</div>
-                        <div className="col">{Capitalize(data.projectClearingState)}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Clearing Details")}:</div>
-                        <div className="col">{data.clearingDetails}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Clearing Team")}:</div>
-                        <div className="col">{data.clearingTeam}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Deadline for pre-evaluation")}:</div>
-                        <div className="col">{data.deadlineForPreEval}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Clearing summary")}:</div>
-                        <div className="col">
+            <table className={`table label-value-table ${styles['summary-table']}`}>
+                <thead
+                    title='Click to expand or collapse'
+                    onClick={() => {
+                        setToggleClearing(!toggleClearing)
+                    }}
+                >
+                    <tr>
+                        <th colSpan={2}>{t('Clearing')}</th>
+                    </tr>
+                </thead>
+                <tbody hidden={toggleClearing}>
+                    <tr>
+                        <td>{t('Project Clearing State')}:</td>
+                        <td>{Capitalize(data.projectClearingState)}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('Clearing Details')}:</td>
+                        <td>{data.clearingDetails}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('Clearing Team')}:</td>
+                        <td>{data.clearingTeam}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('Deadline for pre-evaluation')}:</td>
+                        <td>{data.deadlineForPreEval}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('Clearing summary')}:</td>
+                        <td>
                             <textarea
                                 className='form-control'
                                 id='administration.clearingSummary'
-                                aria-describedby={t("Clearing summary")}
+                                aria-describedby={t('Clearing summary')}
                                 style={{ height: '120px' }}
                                 value={data.clearingSummary}
                                 readOnly
                             />
-                        </div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Special risk Open Source Software")}:</div>
-                        <div className="col">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{t('Special risk Open Source Software')}:</td>
+                        <td>
                             <textarea
                                 className='form-control'
                                 id='administration.specialRiskOSS'
-                                aria-describedby={t("Special risk Open Source Software")}
+                                aria-describedby={t('Special risk Open Source Software')}
                                 style={{ height: '120px' }}
                                 value={data.specialRiskOpenSourceSoftware}
                                 readOnly
                             />
-                        </div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("General risks 3rd party software")}:</div>
-                        <div className="col">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{t('General risks 3rd party software')}:</td>
+                        <td>
                             <textarea
                                 className='form-control'
                                 id='administration.generalRisks3rdPartySoftware'
-                                aria-describedby={t("General risks 3rd party software")}
+                                aria-describedby={t('General risks 3rd party software')}
                                 style={{ height: '120px' }}
                                 value={data.generalRisksThirdPartySoftware}
                                 readOnly
                             />
-                        </div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Special risks 3rd party software")}:</div>
-                        <div className="col">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{t('Special risks 3rd party software')}:</td>
+                        <td>
                             <textarea
                                 className='form-control'
                                 id='administration.specialRisks3rdPartySoftware'
-                                aria-describedby={t("Special risks 3rd party software")}
+                                aria-describedby={t('Special risks 3rd party software')}
                                 style={{ height: '120px' }}
                                 value={data.specialRisksThirdPartySoftware}
                                 readOnly
                             />
-                        </div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Sales and delivery channels")}:</div>
-                        <div className="col">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{t('Sales and delivery channels')}:</td>
+                        <td>
                             <textarea
                                 className='form-control'
                                 id='administration.salesAndDeliveryChannels'
-                                aria-describedby={t("Sales and delivery channels")}
+                                aria-describedby={t('Sales and delivery channels')}
                                 style={{ height: '120px' }}
                                 value={data.salesAndDeliveryChannels}
                                 readOnly
                             />
-                        </div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Remarks additional requirements")}:</div>
-                        <div className="col">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{t('Remarks additional requirements')}:</td>
+                        <td>
                             <textarea
                                 className='form-control'
                                 id='administration.remarksAdditionalRequirements'
-                                aria-describedby={t("Remarks additional requirements")}
+                                aria-describedby={t('Remarks additional requirements')}
                                 style={{ height: '120px' }}
                                 value={data.remarksAdditionalRequirements}
                                 readOnly
                             />
-                        </div>
-                        <hr className="my-2" />
-                    </div>
-                </div>
-                <div className="row mb-4">
-                    <div className="row header mb-2">
-                        <h6>{t("Lifecycle")}</h6>
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Project state")}:</div>
-                        <div className="col">{Capitalize(data.projectState)}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("System State Begin")}:</div>
-                        <div className="col">{data.systemStateBegin}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("System State End")}:</div>
-                        <div className="col">{data.systemStateEnd}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Delivery start")}:</div>
-                        <div className="col">{data.deliveryStart}</div>
-                        <hr className="my-2" />
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-4">{t("Phase-out since")}:</div>
-                        <div className="col">{data.phaseOutSince}</div>
-                        <hr className="my-2" />
-                    </div>
-                </div>
-                <div className="row mb-4">
-                <div className="row header mb-2">
-                    <h6>{t("License Info Header")}</h6>
-                </div>
-                <div className="row">
-                    <div className="col">
-                        <textarea
-                            className='form-control'
-                            id='administration.licenseInfoHeader'
-                            aria-describedby={t("License Info Header")}
-                            style={{ height: '600px' }}
-                            value={data.licenseInfoHeader}
-                            readOnly
-                        />
-                    </div>
-                    <hr className="my-2" />
-                </div>
-            </div>
-
-            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table className={`table label-value-table ${styles['summary-table']}`}>
+                <thead
+                    title='Click to expand or collapse'
+                    onClick={() => {
+                        setToggleLifecycle(!toggleLifecycle)
+                    }}
+                >
+                    <tr>
+                        <th colSpan={2}>{t('Lifecycle')}</th>
+                    </tr>
+                </thead>
+                <tbody hidden={toggleLifecycle}>
+                    <tr>
+                        <td>{t('Project state')}:</td>
+                        <td>{Capitalize(data.projectState)}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('System State Begin')}:</td>
+                        <td>{data.systemStateBegin}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('System State End')}:</td>
+                        <td>{data.systemStateEnd}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('Delivery start')}:</td>
+                        <td>{data.deliveryStart}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('Phase-out since')}:</td>
+                        <td>{data.phaseOutSince}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table className={`table label-value-table ${styles['summary-table']}`}>
+                <thead
+                    title='Click to expand or collapse'
+                    onClick={() => {
+                        setToggleLicenseInfoHeader(!toggleLicenseInfoHeader)
+                    }}
+                >
+                    <tr>
+                        <th colSpan={2}>{t('License Info Header')}</th>
+                    </tr>
+                </thead>
+                <tbody hidden={toggleLicenseInfoHeader}>
+                    <tr>
+                        <td>
+                            <textarea
+                                className='form-control'
+                                id='administration.licenseInfoHeader'
+                                aria-describedby={t('License Info Header')}
+                                style={{ height: '600px' }}
+                                value={data.licenseInfoHeader}
+                                readOnly
+                            />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </>
     )
 }
