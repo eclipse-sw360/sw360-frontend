@@ -18,7 +18,11 @@ import React, { ReactNode } from 'react'
 import { NextIntlClientProvider } from 'next-intl'
 import { notFound } from 'next/navigation'
 
-import { Header, Footer } from '@/components/sw360'
+import { Header, Footer } from 'next-sw360'
+
+export function generateStaticParams() {
+    return [{ locale: 'en' }, { locale: 'ja' }, { locale: 'vi' }, { locale: 'zh' }]
+}
 
 type Props = {
     children: ReactNode
@@ -28,7 +32,7 @@ type Props = {
 async function RootLayout({ children, params: { locale } }: Props) {
     let messages
     try {
-        messages = (await import(`../../../messages/${locale}.json`)).default
+        messages = (await import(`@/messages/${locale}.json`)).default
     } catch (error) {
         notFound()
     }

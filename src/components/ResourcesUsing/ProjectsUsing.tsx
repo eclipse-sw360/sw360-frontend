@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 import { _, Table } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'

@@ -16,7 +16,6 @@ import { MdDeleteOutline } from 'react-icons/md'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-// import { Session } from '@/object-types/Session'
 
 interface Props {
     header: string
@@ -61,7 +60,7 @@ export default function AddKeyValueComponent(props: Props) {
 
     return (
         <>
-            <h6 className='header pb-2 px-2'>{t(props.header)}</h6>
+            <h6 className='header pb-2 px-2'>{props.header}</h6>
             <div className='row'>
                 {inputList.map((elem, j) => {
                     return (
@@ -85,7 +84,7 @@ export default function AddKeyValueComponent(props: Props) {
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     className='form-control'
-                                    placeholder={t(`Enter ${props.keyName.toLowerCase()} value`)}
+                                    placeholder={t('Enter_Args', { args: props.keyName.toLowerCase() + 'value' })}
                                     required
                                     aria-describedby={`${props.keyName.toLowerCase()} value`}
                                 />
@@ -106,12 +105,11 @@ export default function AddKeyValueComponent(props: Props) {
                 })}
                 <div className='col-lg-4'>
                     <button type='button' onClick={() => handleAddClick()} className='btn btn-secondary'>
-                        {t(
-                            `Click to add row to ${props.keyName
+                        {t('Click to add row to') +
+                            ` ${props.keyName
                                 .split(' ')
                                 .map((elem) => elem[0].toUpperCase() + elem.substring(1))
-                                .join(' ')}`
-                        )}
+                                .join(' ')}`}
                     </button>
                 </div>
             </div>

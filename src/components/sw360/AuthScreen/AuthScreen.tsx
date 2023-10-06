@@ -12,15 +12,15 @@
 
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { signIn } from 'next-auth/react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { CREDENTIALS } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import LanguageSwitcher from '@/components/language-switcher/LanguageSwitcher'
+import { LanguageSwitcher } from 'next-sw360'
 
 interface Props {
     session?: Session

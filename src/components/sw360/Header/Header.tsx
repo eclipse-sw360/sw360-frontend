@@ -13,9 +13,9 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 import { useSession } from 'next-auth/react'
-import ProfileDropdown from '@/components/ProfileDropdown/ProfileDropdown'
+import ProfileDropdown from '@/components/sw360/ProfileDropdown/ProfileDropdown'
 
 import { SW360Navbar } from '@/components/sw360'
 import sw360logo from '@/assets/images/sw360-logo.svg'

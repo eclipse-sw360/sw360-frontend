@@ -10,7 +10,7 @@
 
 'use client'
 
-import Link from 'next/link'
+import Link from 'next-intl/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -37,9 +37,9 @@ function SW360Navbar() {
     ]
 
     const NavItems = () => (
-        <Navbar expand="lg">
+        <Navbar expand='lg'>
             <Container fluid>
-                <Nav variant='underline' className="ms-5" activeKey='home'>
+                <Nav variant='underline' className='ms-5' activeKey='home'>
                     {navlist.map((item) => (
                         <Nav.Item key={item.name}>
                             <Link className={`nav-link`} href={item.link} onClick={() => setHeading(item.name)}>
@@ -50,7 +50,6 @@ function SW360Navbar() {
                 </Nav>
             </Container>
         </Navbar>
-
     )
 
     return (

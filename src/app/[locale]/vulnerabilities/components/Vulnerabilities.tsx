@@ -15,7 +15,7 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import Link from 'next-intl/link'
 
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { QuickFilter, AdvancedSearch, _, Table } from '@/components/sw360'

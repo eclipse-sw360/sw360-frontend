@@ -74,7 +74,7 @@ export default function AddValues({
                                     handleChange(e, i)
                                 }}
                                 className='form-control'
-                                placeholder={t(`Enter ${entityName}`)}
+                                placeholder={t('Enter_Args', { args: entityName })}
                             />
                         </div>
                         <div className='col-lg-1 d-flex align-items-end pb-2'>
@@ -84,7 +84,7 @@ export default function AddValues({
                 ))}
                 <div className='col-lg-4 mt-2'>
                     <button type='button' onClick={addValue} className={`fw-bold btn btn-secondary`}>
-                        {t(`Click to add ${entityName}`)}
+                        {t('Click to add') + ` ${entityName}`}
                     </button>
                 </div>
             </div>
