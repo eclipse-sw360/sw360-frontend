@@ -364,12 +364,12 @@ th {
 }
 
 .list-group-item-action {
-    border: none !important;
     color: #6b6c7e !important;
 }
 
 .list-group-item-action.active {
     background-color: #fcba76 !important;
+    border-color: lightgray !important;
     color: black !important;
 }
 
