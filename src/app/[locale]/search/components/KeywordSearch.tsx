@@ -11,7 +11,7 @@
 
 import { PiInfoBold } from 'react-icons/pi'
 import { useState, useReducer, SetStateAction, Dispatch } from 'react'
-import { Session } from '@/object-types/Session'
+import { Session } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ApiUtils from '@/utils/api/api.util'

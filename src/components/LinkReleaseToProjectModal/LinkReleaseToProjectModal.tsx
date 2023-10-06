@@ -9,17 +9,17 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { useEffect, useRef, useState } from 'react'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import ApiUtils from '@/utils/api/api.util'
-import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { Session } from '@/object-types/Session'
 import { Col, Modal, Form, Button, Row, Alert } from 'react-bootstrap'
-import ProjectTable from './ProjectTable'
+
+import { _ } from '@/components/sw360'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { HttpStatus, Session } from '@/object-types'
 import { PiCheckBold } from 'react-icons/pi'
-import { _ } from '../sw360'
+import ProjectTable from './ProjectTable'
 
 interface Props {
     releaseId?: string

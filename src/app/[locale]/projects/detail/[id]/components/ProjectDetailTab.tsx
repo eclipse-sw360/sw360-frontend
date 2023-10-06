@@ -10,26 +10,20 @@
 'use client'
 
 import { Col, Row, ListGroup, Tab, Button, Dropdown, Spinner } from 'react-bootstrap'
-import Summary from './Summary'
-import ChangeLog from './Changelog'
-import Administration from './Administration'
-import React, { useState, useEffect } from 'react'
-
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-
-import ApiUtils from '@/utils/api/api.util'
-import CommonUtils from '@/utils/common.utils'
-import { Session } from '@/object-types/Session'
-import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
-
-import { SummaryDataType } from '@/object-types/SummaryDataType'
-import { AdministrationDataType } from '@/object-types/AdministrationDataType'
-
+import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 
+import { AdministrationDataType } from '@/object-types/AdministrationDataType'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { HttpStatus, Session } from '@/object-types'
+import { SummaryDataType } from '@/object-types/SummaryDataType'
+import Administration from './Administration'
+import ChangeLog from './Changelog'
 import LinkProjects from '../../../components/LinkProjects'
+import Summary from './Summary'
 
 export default function ViewProjects({ session, projectId }: { session: Session; projectId: string }) {
     const t = useTranslations(COMMON_NAMESPACE)

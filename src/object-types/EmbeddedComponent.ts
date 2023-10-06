@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface EmbeddedComponent {
+interface EmbeddedComponent {
     id: string
     name: string
     description: string
@@ -29,3 +29,5 @@ export interface EmbeddedComponent {
         }
     }
 }
+
+export default EmbeddedComponent

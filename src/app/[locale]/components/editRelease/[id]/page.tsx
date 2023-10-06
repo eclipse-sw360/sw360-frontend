@@ -9,18 +9,19 @@
 // License-Filename: LICENSE
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from "next-auth/next"
-import { Session } from '@/object-types/Session'
+import { getServerSession } from 'next-auth/next'
+
+import { Session } from '@/object-types'
 import EditRelease from './components/EditRelease'
 interface Context {
-  params: { id: string }
+    params: { id: string }
 }
 
 const ReleaseEditPage = async ({ params }: Context) => {
-  const session: Session = await getServerSession(authOptions);
-  const releaseId = params.id;
+    const session: Session = await getServerSession(authOptions)
+    const releaseId = params.id
 
-  return <EditRelease session={session} releaseId={releaseId} />
+    return <EditRelease session={session} releaseId={releaseId} />
 }
 
 export default ReleaseEditPage

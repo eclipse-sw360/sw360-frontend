@@ -9,18 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
-import { Session } from '@/object-types/Session'
-import React, { useState, useRef } from 'react'
+
+import { Button, Modal } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
+import React, { useState, useRef } from 'react'
+
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import AttachmentDetail from '@/object-types/AttachmentDetail'
+import { Session } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
+import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import styles from './SelectAttachment.module.css'
-import ReleasePayload from '@/object-types/ReleasePayload'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import styles from './SelectAttachment.module.css'
 
 interface Props {
     show: boolean

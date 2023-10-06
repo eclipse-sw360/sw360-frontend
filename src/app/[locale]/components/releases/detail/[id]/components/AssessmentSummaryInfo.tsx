@@ -10,17 +10,17 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useState } from 'react'
-import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
-import AttachmentType from '@/object-types/enums/AttachmentTypes'
-import styles from '../detail.module.css'
 import { Button } from 'react-bootstrap'
-import ApiUtils from '@/utils/api/api.util'
 import { signOut, useSession } from 'next-auth/react'
-import { Session } from '@/object-types/Session'
-import HttpStatus from '@/object-types/enums/HttpStatus'
+import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+
+import { ApiUtils } from '@/utils'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { HttpStatus, Session } from '@/object-types'
+import AttachmentType from '@/object-types/enums/AttachmentTypes'
+import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
+import styles from '../detail.module.css'
 
 interface Props {
     releaseId: string

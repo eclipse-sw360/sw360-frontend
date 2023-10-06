@@ -8,18 +8,19 @@
 // License-Filename: LICENSE
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from "next-auth/next"
-import { Session } from '@/object-types/Session'
+import { getServerSession } from 'next-auth/next'
+
+import { Session } from '@/object-types'
 import ProjectDetailTab from './components/ProjectDetailTab'
 
 interface Context {
-  params: { id: string }
+    params: { id: string }
 }
 
 const Detail = async ({ params }: Context) => {
-  const session: Session = await getServerSession(authOptions);
+    const session: Session = await getServerSession(authOptions)
 
-  return <ProjectDetailTab session={session} projectId={params.id} />
+    return <ProjectDetailTab session={session} projectId={params.id} />
 }
 
 export default Detail

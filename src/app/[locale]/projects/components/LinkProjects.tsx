@@ -9,20 +9,18 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useState, useRef } from 'react'
-
-import ApiUtils from '@/utils/api/api.util'
-import CommonUtils from '@/utils/common.utils'
-import { Session } from '@/object-types/Session'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { signOut } from 'next-auth/react'
-import { notFound } from 'next/navigation'
-import { Modal, Col, Row, Form, Button, OverlayTrigger, Tooltip, Alert } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
-import { Table, _ } from '@/components/sw360'
+import { Modal, Col, Row, Form, Button, OverlayTrigger, Tooltip, Alert } from 'react-bootstrap'
+import { notFound } from 'next/navigation'
+import { signOut } from 'next-auth/react'
+import { useState, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+
+import { ApiUtils, CommonUtils } from '@/utils'
+import { HttpStatus, Session } from '@/object-types'
+import { Table, _ } from '@/components/sw360'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')

@@ -13,7 +13,7 @@ import EmbeddedUser from './EmbeddedUser'
 import EmbeddedRelease from './EmbeddedRelease'
 import EmbeddedAttachment from './EmbeddedAttachment'
 
-export default interface Component {
+interface Component {
     id?: string
     name?: string
     description?: string
@@ -59,3 +59,5 @@ export default interface Component {
         'sw360:attachments'?: Array<EmbeddedAttachment>
     }
 }
+
+export default Component

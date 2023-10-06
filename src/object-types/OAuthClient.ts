@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface OAuthClient {
+interface OAuthClient {
     description: string,
     client_id: string,
     client_secret: string,
@@ -17,3 +17,5 @@ export default interface OAuthClient {
     access_token_validity: number,
     refresh_token_validity: number
 }
+
+export default OAuthClient

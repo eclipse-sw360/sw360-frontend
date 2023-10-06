@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Session } from '@/object-types/Session'
+import { Session } from '@/object-types'
 import ReleaseGeneral from './ReleaseGeneral'
 import ReleaseVendor from './ReleaseVendor'
 import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'

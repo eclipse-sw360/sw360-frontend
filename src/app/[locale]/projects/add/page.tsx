@@ -9,7 +9,7 @@
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getServerSession } from 'next-auth/next'
-import { Session } from '@/object-types/Session'
+import { Session } from '@/object-types'
 import ProjectAddSummary from './components/ProjectAddSummary'
 
 const Detail = async () => {

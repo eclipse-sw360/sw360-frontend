@@ -10,20 +10,16 @@
 
 'use client'
 import { useSession } from 'next-auth/react'
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
-import Form from 'react-bootstrap/Form'
-import Alert from 'react-bootstrap/Alert'
-import { useEffect, useState } from 'react'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import ApiUtils from '@/utils/api/api.util'
+import { useRouter } from 'next/navigation'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
+import { useEffect, useState, useCallback } from 'react'
 import { signOut } from 'next-auth/react'
-import { useCallback } from 'react'
+
+import { Session, HttpStatus } from '@/object-types'
+import { ApiUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
-import { useRouter } from 'next/navigation'
-import { Session } from '@/object-types/Session'
 import ReleaseDetail from '@/object-types/ReleaseDetail'
 
 const DEFAULT_RELEASE_INFO: ReleaseDetail = { name: '', version: '', _embedded: { 'sw360:attachments': [] } }

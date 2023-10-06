@@ -9,17 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from '../GeneralInfoComponent/SummaryComponent.module.css'
+
 import React, { useCallback, useState } from 'react'
-import { Session } from '@/object-types/Session'
-import ComponentOwner from '@/object-types/ComponentOwner'
-import Moderators from '@/object-types/Moderators'
-import SelectCountryComponent from '@/components/SelectCountry'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import { useTranslations } from 'next-intl'
+
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
+import { Session } from '@/object-types'
+import { useTranslations } from 'next-intl'
+import ComponentOwner from '@/object-types/ComponentOwner'
 import ComponentOwnerDialog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
+import ComponentPayload from '@/object-types/ComponentPayLoad'
+import Moderators from '@/object-types/Moderators'
+import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
+import SelectCountryComponent from '@/components/SelectCountry'
+import styles from '../GeneralInfoComponent/SummaryComponent.module.css'
 interface Props {
     session?: Session
     componentPayload?: ComponentPayload

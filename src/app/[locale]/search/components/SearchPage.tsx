@@ -12,7 +12,7 @@
 import KeywordSearch from './KeywordSearch'
 import { useState } from 'react'
 import { Alert } from 'react-bootstrap'
-import { Session } from '@/object-types/Session'
+import { Session } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SearchResult } from '@/object-types/SearchResult'

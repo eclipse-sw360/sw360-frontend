@@ -9,16 +9,17 @@
 // License-Filename: LICENSE
 
 'use client'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
+
 import { useTranslations } from 'next-intl'
 import React, { useRef, useState } from 'react'
 import { Modal, Button, Alert } from 'react-bootstrap'
-import styles from '../components.module.css'
-import ApiUtils from '@/utils/api/api.util'
-import { Session } from '@/object-types/Session'
-import HttpStatus from '@/object-types/enums/HttpStatus'
 import { useRouter } from 'next/navigation'
+
+import styles from '../components.module.css'
+import { ApiUtils } from '@/utils'
+import { HttpStatus, Session } from '@/object-types'
 import Component from '@/object-types/Component'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     show: boolean

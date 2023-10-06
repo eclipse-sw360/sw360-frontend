@@ -10,18 +10,19 @@
 
 'use client'
 
+import { useCallback, useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+
+import { CommonUtils } from '@/utils'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Session } from '@/object-types'
 import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 import styles from './LinkedReases.module.css'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useCallback, useEffect, useState } from 'react'
-import { Session } from '@/object-types/Session'
 import LinkedRelease from '@/object-types/LinkedRelease'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import ActionType from '@/object-types/enums/ActionType'
-import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     session?: Session

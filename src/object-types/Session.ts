@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface Session{
-  user? : {
-    access_token: string,
-    exp: number,
-    expires_in: number,
-    iat: number,
-    jti: string,
-    refresh_token: string,
-    scope: string
-    token_type: string,
-  }
+interface Session {
+    user?: {
+        access_token: string
+        exp: number
+        expires_in: number
+        iat: number
+        jti: string
+        refresh_token: string
+        scope: string
+        token_type: string
+    }
 }
+
+export default Session

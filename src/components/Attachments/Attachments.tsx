@@ -8,21 +8,19 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Alert from 'react-bootstrap/Alert'
-import { useEffect, useState, useCallback } from 'react'
-import CommonUtils from '@/utils/common.utils'
+import { Alert } from 'react-bootstrap'
 import { FaDownload } from 'react-icons/fa'
-import styles from './Attachment.module.css'
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import ApiUtils from '@/utils/api/api.util'
-import { Session } from '@/object-types/Session'
 import { signOut } from 'next-auth/react'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import Attachment from '@/object-types/Attachment'
+import { useEffect, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
+
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Attachment, HttpStatus, Session } from '@/object-types'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Table, _ } from '@/components/sw360'
 import DownloadService from '@/services/download.service'
 import LinkedAttachments from '@/object-types/LinkedAttachments'
+import styles from './Attachment.module.css'
 
 interface Props {
     documentId: string

@@ -9,24 +9,18 @@
 
 'use client'
 
+import { Check2Circle, XCircle } from 'react-bootstrap-icons'
+import { signOut } from 'next-auth/react'
+import { Spinner } from 'react-bootstrap'
+import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import React, { useEffect, useState, useCallback } from 'react'
 
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { Check2Circle, XCircle } from 'react-bootstrap-icons'
-import { Spinner } from 'react-bootstrap'
-import { signOut } from 'next-auth/react'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { useSearchParams } from 'next/navigation'
-
-// SW360
-import CommonUtils from '@/utils/common.utils'
-import { Session } from '@/object-types/Session'
-import ApiUtils from '@/utils/api/api.util'
-
-// SW360 Components
 import { _, PageButtonHeader, QuickFilter, Table } from '@/components/sw360'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { HttpStatus, Session } from '@/object-types'
 
 const headerButtons = {
     'Add License': { link: '/licenses/add', type: 'primary' },

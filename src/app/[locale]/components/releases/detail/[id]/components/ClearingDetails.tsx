@@ -9,23 +9,24 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import Link from 'next/link'
 import Image from 'next/image'
-import fossologyIcon from '@/assets/images/fossology.svg'
-import styles from '../detail.module.css'
-import ClearingInformationStatus from './ClearingInformationStatus'
-import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import AssessmentSummaryInfo from './AssessmentSummaryInfo'
-import SPDXAttachments from './SPDXAttachments'
+import Link from 'next/link'
 
-import { Session } from '@/object-types/Session'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Session } from '@/object-types'
+import AssessmentSummaryInfo from './AssessmentSummaryInfo'
+import ClearingInformationStatus from './ClearingInformationStatus'
 import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
+import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
+import fossologyIcon from '@/assets/images/fossology.svg'
 import ReleaseDetail from '@/object-types/ReleaseDetail'
-import SupplementalInformation from './SupplementalInformation'
 import RequestInformation from './RequestInformation'
+import SPDXAttachments from './SPDXAttachments'
+import styles from '../detail.module.css'
+import SupplementalInformation from './SupplementalInformation'
 
 interface Props {
     release: ReleaseDetail

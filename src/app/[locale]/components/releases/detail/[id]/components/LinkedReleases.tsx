@@ -10,12 +10,13 @@
 
 'use client'
 
-import { TreeTable } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useState, useEffect } from 'react'
-import { Session } from '@/object-types/Session'
-import ApiUtils from '@/utils/api/api.util'
+
+import { TreeTable } from '@/components/sw360'
+import { COMMON_NAMESPACE } from '@/object-types/Constants'
+import { Session } from '@/object-types'
+import { ApiUtils } from '@/utils'
 import NodeData from '@/object-types/NodeData'
 import ReleaseLink from '@/object-types/ReleaseLink'
 import CommonUtils from '@/utils/common.utils'

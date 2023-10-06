@@ -9,12 +9,13 @@
 // License-Filename: LICENSE
 
 import { useEffect, useState } from 'react'
-import { Session } from '@/object-types/Session'
-import ApiUtils from '@/utils/api/api.util'
+
+import { ApiUtils } from '@/utils'
+import { Resources } from '@/object-types/Resources'
+import { Session } from '@/object-types'
+import ComponentsUsing from './ComponentsUsing'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import ProjectsUsing from './ProjectsUsing'
-import ComponentsUsing from './ComponentsUsing'
-import { Resources } from '@/object-types/Resources'
 
 interface Props {
     documentId: string

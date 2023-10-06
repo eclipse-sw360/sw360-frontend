@@ -7,15 +7,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ToastData from '@/object-types/ToastData'
+'use client'
+
 import React, { SetStateAction } from 'react'
 import Toast from 'react-bootstrap/Toast'
+
+import { ToastData } from '@/object-types'
 
 interface Props {
     show: boolean
     type: string
     message: string
-    contextual: string  // Contextual variations
+    contextual: string // Contextual variations
     onClose: () => void
     setShowToast: React.Dispatch<SetStateAction<ToastData>>
 }
