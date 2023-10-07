@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-ARG VARIANT=19-bullseye-slim
+ARG VARIANT=20-bullseye-slim
 FROM node:${VARIANT}
 
 ARG USERNAME=devel

@@ -7,13 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import styles from '@/css/AddKeyValue.module.css'
 import { FaTrashAlt } from 'react-icons/fa'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import { RolesType } from '@/object-types/RolesType'
 import { useTranslations } from 'next-intl'
+
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import InputKeyValue from '@/object-types/InputKeyValue'
+import { InputKeyValue } from '@/object-types'
+import { RolesType } from '@/object-types/RolesType'
+import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
 interface Props {
     documentType?: string
@@ -52,7 +52,7 @@ export default function AddAdditionalRolesComponent({ documentType, setDataRoles
 
     return (
         <>
-            <div className={`${styles['header']} mb-2`}>
+            <div className='header mb-2'>
                 <p className='fw-bold mt-3'>{t('Additional Roles')}</p>
             </div>
             <div className='row'>
