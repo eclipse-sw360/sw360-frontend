@@ -9,7 +9,7 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-ARG VARIANT=19-alpine
+ARG VARIANT=20-alpine
 FROM node:${VARIANT} as build
 WORKDIR /frontend
 
