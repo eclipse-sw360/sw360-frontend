@@ -8,10 +8,10 @@
 // License-Filename: LICENSE
 
 import React from 'react'
-import styles from '@/css/AddKeyValue.module.css'
 import { FaTrashAlt } from 'react-icons/fa'
+
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
-import InputKeyValue from '@/object-types/InputKeyValue'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     header: string
@@ -51,7 +51,7 @@ export default function AddKeyValueComponent(props: Props) {
 
     return (
         <>
-            <div className={`${styles['header']} mb-2`}>
+            <div className='header mb-2'>
                 <p className='fw-bold mt-3'>{props.header}</p>
             </div>
             <div className='row'>
