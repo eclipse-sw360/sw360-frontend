@@ -11,7 +11,6 @@
 'use client'
 import { useTranslations } from 'next-intl'
 import styles from './CommercialDetails.module.css'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
@@ -20,7 +19,7 @@ interface Props {
 }
 
 const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReleasePayload({
@@ -120,7 +119,7 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='sourceCodeAvailable'
-                                    checked={releasePayload.cotsDetails?.sourceCodeAvailable ?? false }
+                                    checked={releasePayload.cotsDetails?.sourceCodeAvailable ?? false}
                                     onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='sourceCodeAvailable'>

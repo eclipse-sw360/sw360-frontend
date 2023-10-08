@@ -14,7 +14,6 @@ import { Button, Modal } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import React, { useState, useRef } from 'react'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
@@ -50,7 +49,7 @@ const SelectAttachment = ({
     setReleasePayload,
     documentType,
 }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [files, setFiles] = useState([])
     const inputRef = useRef(null)
 

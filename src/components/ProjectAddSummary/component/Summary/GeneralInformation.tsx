@@ -13,7 +13,6 @@ import { GiCancel } from 'react-icons/gi'
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 import { VendorDialog } from '@/components/sw360'
 import Vendor from '@/object-types/Vendor'
@@ -26,7 +25,7 @@ interface Param {
 }
 
 export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
     const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {

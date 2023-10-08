@@ -12,7 +12,6 @@
 
 import React, { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader, Table } from '@/components/sw360'
@@ -27,7 +26,7 @@ interface ProjectType {
 
 function Project() {
     const [data, setData] = useState([])
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const pagination = { limit: 10 }
     const columns = [

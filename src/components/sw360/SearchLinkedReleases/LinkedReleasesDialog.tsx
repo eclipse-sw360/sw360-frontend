@@ -16,7 +16,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import LinkedRelease from '@/object-types/LinkedRelease'
 import ReleasePayload from '@/object-types/ReleasePayload'
@@ -43,7 +42,7 @@ const LinkedReleasesDialog = ({
     releasePayload,
     setReleasePayload,
 }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [data, setData] = useState()
     const [linkedReleases] = useState([])
     const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<LinkedRelease[]>()

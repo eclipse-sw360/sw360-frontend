@@ -14,7 +14,6 @@ import { useState } from 'react'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { FaCopy } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Link from 'next-intl/link'
 import { FaInfoCircle } from 'react-icons/fa'
 import styles from '../detail.module.css'
@@ -29,7 +28,7 @@ interface Props {
 }
 
 const ReleaseGeneral = ({ release, releaseId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     const renderArrayOfUsers = (users: Array<EmbeddedUser>) => {

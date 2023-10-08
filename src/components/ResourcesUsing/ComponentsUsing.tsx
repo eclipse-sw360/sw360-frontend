@@ -13,7 +13,6 @@ import Link from 'next-intl/link'
 import { _, Table } from '../sw360'
 import styles from './ResourceUsing.module.css'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { EmbeddedComponent } from '@/object-types'
 
 interface Props {
@@ -22,7 +21,7 @@ interface Props {
 }
 
 const ComponentsUsing = ({ componentsUsing, documentName }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [tableData, setTableData] = useState([])
 
     const columns = [

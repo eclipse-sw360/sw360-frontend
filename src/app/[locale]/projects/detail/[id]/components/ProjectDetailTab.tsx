@@ -17,7 +17,6 @@ import { notFound } from 'next/navigation'
 
 import { AdministrationDataType } from '@/object-types/AdministrationDataType'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import { SummaryDataType } from '@/object-types/SummaryDataType'
 import Administration from './Administration'
@@ -26,7 +25,7 @@ import LinkProjects from '../../../components/LinkProjects'
 import Summary from './Summary'
 
 export default function ViewProjects({ session, projectId }: { session: Session; projectId: string }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)

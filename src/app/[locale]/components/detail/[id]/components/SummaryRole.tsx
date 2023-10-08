@@ -11,13 +11,12 @@
 import { useTranslations } from 'next-intl'
 import styles from '../detail.module.css'
 import { useState } from 'react'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import CommonUtils from '@/utils/common.utils'
 import Component from '@/object-types/Component'
 import EmbeddedUser from '@/object-types/EmbeddedUser'
 
 const SummaryRole = ({ component }: { component: Component }) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     return (

@@ -11,7 +11,6 @@
 'use client'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import styles from '../detail.module.css'
 import ReleaseDetail from '@/object-types/ReleaseDetail'
 
@@ -20,7 +19,7 @@ interface Props {
 }
 
 const ReleaseVendor = ({ release }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     return (

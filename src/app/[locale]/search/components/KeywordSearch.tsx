@@ -13,7 +13,6 @@ import { PiInfoBold } from 'react-icons/pi'
 import { useState, useReducer, SetStateAction, Dispatch } from 'react'
 import { Session } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ApiUtils from '@/utils/api/api.util'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { signOut } from 'next-auth/react'
@@ -137,7 +136,7 @@ export default function KeywordSearch({
     session: Session
     setData: Dispatch<SetStateAction<SearchResult[]>>
 }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const initialState: SEARCH_STATE = {
         project: false,
         component: false,

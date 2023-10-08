@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Component, InputKeyValue, HttpStatus, Session } from '@/object-types'
 import { SearchUsersModal, SideBar } from 'next-sw360'
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
@@ -36,7 +35,7 @@ interface Props {
 }
 
 export default function ComponentAddSummary({ session }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])

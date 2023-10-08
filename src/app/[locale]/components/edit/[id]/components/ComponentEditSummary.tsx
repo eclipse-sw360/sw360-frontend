@@ -21,7 +21,6 @@ import ComponentPayload from '@/object-types/ComponentPayLoad'
 import { Component, InputKeyValue, HttpStatus, Session } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Vendor from '@/object-types/Vendor'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
@@ -44,7 +43,7 @@ export default function ComponentEditSummary({
     setComponentPayload,
     attachmentData,
 }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])

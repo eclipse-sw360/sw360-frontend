@@ -14,7 +14,6 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 import { useState, useEffect, useRef, useCallback } from 'react'
 
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import styles from './fossologyClearing.module.css'
 import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
@@ -48,7 +47,7 @@ const clearingMessages: { [key: string]: { [key: string]: string } } = {
 }
 
 const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const STEP_PERCENT = 16.66
     const PERCENT_DONE = 99.96
     const RELOAD_ATTACHMENTS_PERCENT = 66.46

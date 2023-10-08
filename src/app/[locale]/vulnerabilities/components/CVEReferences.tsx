@@ -12,7 +12,6 @@
 import { Dispatch, SetStateAction } from 'react'
 
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 import { CVEReference, VulnerabilityData } from '@/object-types/VulnerabilityPayload'
 
@@ -25,7 +24,7 @@ export default function CVEReferences({
     payload: VulnerabilityData
     setPayload: Dispatch<SetStateAction<VulnerabilityData>>
 }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const addReference = () => {
         setPayload((prev: VulnerabilityData) => {

@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Attachment, HttpStatus, Session } from '@/object-types'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Table, _ } from '@/components/sw360'
 import DownloadService from '@/services/download.service'
 import LinkedAttachments from '@/object-types/LinkedAttachments'
@@ -29,7 +28,7 @@ interface Props {
 }
 
 const Attachments = ({ documentId, session, documentType }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [attachmentData, setAttachmentData] = useState([])
     const [totalRows, setTotalRows] = useState(0)
 

@@ -15,7 +15,6 @@ import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import GeneralInformation from './component/Summary/GeneralInformation'
 import Roles from './Roles/Roles'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import Vendor from '@/object-types/Vendor'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
@@ -53,7 +52,7 @@ export default function Summary({
     setAdditionalDataObject,
     setProjectPayload,
 }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     return (
         <>

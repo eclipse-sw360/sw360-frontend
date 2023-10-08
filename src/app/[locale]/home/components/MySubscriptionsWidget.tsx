@@ -8,7 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use-client'
+
 import React, { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+
 import HomeTableHeader from './HomeTableHeader'
 import homePageStyles from '../home.module.css'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
@@ -16,6 +20,7 @@ import { sw360FetchData } from '@/utils/sw360fetchdata'
 function MySubscriptionsWidget() {
     const [componentData, setComponentData] = useState([])
     const [releaseData, setReleaseData] = useState([])
+    const t = useTranslations('default')
 
     useEffect(() => {
         const fetchData = async () => {
@@ -27,12 +32,10 @@ function MySubscriptionsWidget() {
         fetchData()
     }, [])
 
-    const title = 'My Subscriptions'
-
     return (
         <div className='content-container'>
-            <HomeTableHeader title={title} />
-            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>Components</h3>
+            <HomeTableHeader title={t('My Subscriptions')} />
+            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>{t('Components')}</h3>
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
                 {componentData.map((item) => (
                     <li key={''}>
@@ -40,7 +43,7 @@ function MySubscriptionsWidget() {
                     </li>
                 ))}
             </ul>
-            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>Releases</h3>
+            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>{t('Releases')}</h3>
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
                 {releaseData.map((item) => (
                     <li key={''}>

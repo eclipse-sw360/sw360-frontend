@@ -17,7 +17,6 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Licenses, HttpStatus, Session } from '@/object-types'
 import { PageButtonHeader, SideBar } from '@/components/sw360'
 import ActionType from '@/object-types/enums/ActionType'
@@ -50,7 +49,7 @@ interface Props {
 
 const EditRelease = ({ session, releaseId }: Props) => {
     const router = useRouter()
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
     const [release, setRelease] = useState<ReleaseDetail>()

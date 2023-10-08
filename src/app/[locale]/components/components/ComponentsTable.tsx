@@ -20,7 +20,6 @@ import { useSearchParams } from 'next/navigation'
 import DeleteComponentDialog from './DeleteComponentDialog'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Spinner } from 'react-bootstrap'
 import { Table, _ } from '@/components/sw360'
 import { Embedded, EmbeddedComponent, Session } from '@/object-types'
@@ -33,7 +32,7 @@ interface Props {
 
 const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
     const params = useSearchParams()
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [componentData, setComponentData] = useState([])
     const [loading, setLoading] = useState(true)
     const [deletingComponent, setDeletingComponent] = useState<string>('')

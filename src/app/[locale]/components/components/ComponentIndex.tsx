@@ -14,7 +14,6 @@ import { Dropdown } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 import { PageButtonHeader, AdvancedSearch } from '@/components/sw360'
 import DownloadService from '@/services/download.service'
@@ -26,7 +25,7 @@ interface Props {
 }
 
 const ComponentIndex = ({ session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [numberOfComponent, setNumberOfComponent] = useState(0)
     const [importModalOpen, setImportModalOpen] = useState(false)
 

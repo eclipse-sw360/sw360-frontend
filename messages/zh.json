@@ -1,5 +1,5 @@
 {
-    "common": {
+    "default": {
         "": "",
         "=": "=",
         "<=": "<=",
@@ -682,6 +682,9 @@
         "Yes": "是",
         "You need a security responsible to enable monitoring": "NOT TRANSLATED",
         "Your project is created": "NOT TRANSLATED",
-        "There are some errors while creating project": "NOT TRANSLATED"
+        "There are some errors while creating project": "NOT TRANSLATED",
+        "My Subscriptions": "我的订阅",
+        "Recent Components": "最近的组件",
+        "Recent Releases": "最近发布"
     }
 }

@@ -14,7 +14,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 import styles from './LinkedReases.module.css'
@@ -33,7 +32,7 @@ interface Props {
 }
 
 const LinkedReleases = ({ session, release, actionType, releasePayload, setReleasePayload }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
     const handleReRender = () => {

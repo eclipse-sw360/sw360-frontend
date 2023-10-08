@@ -11,24 +11,17 @@ import NavDropdown from 'react-bootstrap/NavDropdown'
 import Image from 'next/image'
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 import navbarStyles from './ProfileDropdown.module.css'
-import { signOut } from 'next-auth/react';
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { useTranslations } from 'next-intl';
+import { signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 
-const UserProfile = (
-    <Image
-        className={navbarStyles.profileImage}
-        src={sw360ProfileIcon}
-        alt='Profile'
-    />
-)
+const UserProfile = <Image className={navbarStyles.profileImage} src={sw360ProfileIcon} alt='Profile' />
 
 function ProfileDropdown() {
-    const t = useTranslations(COMMON_NAMESPACE);
+    const t = useTranslations('default')
     return (
-        <NavDropdown id="profileDropdown" title={UserProfile}>
+        <NavDropdown id='profileDropdown' title={UserProfile}>
             <NavDropdown.Divider />
-            <NavDropdown.Item href='' onClick={() => signOut({callbackUrl: '/'})}>
+            <NavDropdown.Item href='' onClick={() => signOut({ callbackUrl: '/' })}>
                 {t('Logout')}
             </NavDropdown.Item>
         </NavDropdown>

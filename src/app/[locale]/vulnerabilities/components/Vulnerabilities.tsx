@@ -17,7 +17,6 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { QuickFilter, AdvancedSearch, _, Table } from 'next-sw360'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, Session } from '@/object-types'
@@ -26,7 +25,7 @@ import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
 export default function Vulnerabilities({ session }: { session: Session }) {
     const DEFAULT_VULNERABILITIES = 200
     const [num, SetNum] = useState<number>(DEFAULT_VULNERABILITIES)
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [vulnerabilitiesData, setVulnerabilitiesData] = useState<null | any[]>(null)
     const [search, setSearch] = useState({})
     const params = useSearchParams()

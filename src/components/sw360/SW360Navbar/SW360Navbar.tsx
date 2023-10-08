@@ -14,7 +14,6 @@ import Link from 'next-intl/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { LOCALES as locales } from '@/object-types/Constants'
 import { Container, Navbar, Nav } from 'react-bootstrap'
 
@@ -22,7 +21,7 @@ function SW360Navbar() {
     const [heading, setHeading] = useState('Home')
     const pathname = usePathname()
     const isLoginPage = locales.includes(pathname.substring(1)) || pathname.substring(1) === ''
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const navlist = [
         { link: '/home', name: 'Home' },

@@ -17,7 +17,6 @@ import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import { Table, _ } from '@/components/sw360'
 import EmbeddedLinkedReleases from '@/object-types/EmbeddedLinkedReleases'
@@ -29,7 +28,7 @@ interface Props {
 }
 
 const Releases = ({ session, componentId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [linkedReleases, setLinkedReleases] = useState([])
     const router = useRouter()
 

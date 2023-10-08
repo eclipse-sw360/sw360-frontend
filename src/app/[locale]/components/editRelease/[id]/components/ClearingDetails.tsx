@@ -10,7 +10,6 @@
 
 'use client'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import styles from '../EditRelease.module.css'
 import ReleasePayload from '@/object-types/ReleasePayload'
@@ -21,7 +20,7 @@ interface Props {
 }
 
 const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReleasePayload({
@@ -121,7 +120,9 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                     type='checkbox'
                                     className='form-check-input'
                                     name='sourceCodeOriginalFromCommunity'
-                                    checked={releasePayload.clearingInformation?.sourceCodeOriginalFromCommunity ?? false}
+                                    checked={
+                                        releasePayload.clearingInformation?.sourceCodeOriginalFromCommunity ?? false
+                                    }
                                     onChange={updateFieldChecked}
                                 />
                                 <label className='form-label fw-bold' htmlFor='source_code_community'>

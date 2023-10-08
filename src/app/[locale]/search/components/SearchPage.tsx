@@ -14,14 +14,13 @@ import { useState } from 'react'
 import { Alert } from 'react-bootstrap'
 import { Session } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SearchResult } from '@/object-types/SearchResult'
 import { _, Table } from '@/components/sw360'
 import Link from 'next/link'
 import { Spinner } from 'react-bootstrap'
 
 export default function Search({ session }: { session: Session }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [data, setData] = useState<SearchResult[] | null>([])
 
     const columns = [

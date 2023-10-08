@@ -13,7 +13,6 @@
 import React from 'react'
 import { useTranslations } from 'next-intl'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
 
@@ -23,7 +22,7 @@ interface Props {
 }
 
 const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setReleasePayload({

@@ -12,7 +12,6 @@
 
 import React, { useCallback, useState } from 'react'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import ComponentOwner from '@/object-types/ComponentOwner'
@@ -41,7 +40,7 @@ const RolesInformation = ({
     moderator,
     setModerator,
 }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchComponentOwner = useCallback(() => setDialogOpenComponentOwner(true), [])

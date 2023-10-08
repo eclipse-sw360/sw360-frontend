@@ -23,7 +23,6 @@ import CommonTabIds from '@/object-types/enums/CommonTabsIds'
 import ComponentTabIds from '@/object-types/enums/ComponentTabIds'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Component, HttpStatus, Session } from '@/object-types'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { LinkedVulnerability, EmbeddedVulnerabilites } from '@/object-types/LinkedVulnerability'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
@@ -59,7 +58,7 @@ const tabList = [
 ]
 
 const DetailOverview = ({ session, componentId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)

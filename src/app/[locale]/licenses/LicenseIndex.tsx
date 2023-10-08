@@ -19,7 +19,6 @@ import React, { useEffect, useState, useCallback } from 'react'
 
 import { _, PageButtonHeader, QuickFilter, Table } from 'next-sw360'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 
 const headerButtons = {
@@ -34,7 +33,7 @@ interface Props {
 
 function LicensesPage({ session }: Props) {
     const params = useSearchParams()
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [search, setSearch] = useState({})
     const [loading, setLoading] = useState(true)
     const [licenseData, setLicenseData] = useState([])

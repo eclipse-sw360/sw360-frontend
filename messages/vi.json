@@ -1,5 +1,5 @@
 {
-    "common": {
+    "default": {
         "": "",
         "=": "=",
         "<=": "<=",
@@ -686,6 +686,9 @@
         "Yes": "Có",
         "You need a security responsible to enable monitoring": "NOT TRANSLATED",
         "Your project is created": "NOT TRANSLATED",
-        "There are some errors while creating project": "NOT TRANSLATED"
+        "There are some errors while creating project": "NOT TRANSLATED",
+        "My Subscriptions": "Đăng ký của tôi",
+        "Recent Components": "Các thành phần gần đây",
+        "Recent Releases": "Các bản phát hành gần đây"
     }
 }

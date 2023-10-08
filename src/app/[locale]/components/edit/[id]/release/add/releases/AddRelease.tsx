@@ -17,7 +17,6 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { EmbeddedComponent, Licenses, HttpStatus, Session } from '@/object-types'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
@@ -62,7 +61,7 @@ const AddRelease = ({ session, componentId }: Props) => {
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
         name: '',
         cpeid: '',

@@ -15,14 +15,13 @@ import { notFound } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Tab, Nav } from 'react-bootstrap'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, Session } from '@/object-types'
 
 export default function ChangeLog({ projectId, session }: { projectId: string; session: Session }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [key, setKey] = useState('list-change')
     const [changeLogList, setChangeLogList] = useState<Array<any>>([])
     const [changeLogIndex, setChangeLogIndex] = useState(-1)

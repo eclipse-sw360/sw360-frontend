@@ -13,7 +13,6 @@ import React, { useState } from 'react'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import { RolesType } from '@/object-types/RolesType'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { MdDeleteOutline } from 'react-icons/md'
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 
@@ -28,7 +27,7 @@ interface Input {
 }
 
 export default function AddAdditionalRolesComponent({ documentType, setRoles }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {

@@ -11,18 +11,15 @@
 
 import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 
-
-interface Props{
+interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function Lifecycle({projectPayload, setProjectPayload}: Props) {
-
-    const t = useTranslations(COMMON_NAMESPACE)
+export default function Lifecycle({ projectPayload, setProjectPayload }: Props) {
+    const t = useTranslations('default')
     const PROJECT_STATE_INFO = `Active: \n Phaseout: \n Unknown:`
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -38,7 +35,7 @@ export default function Lifecycle({projectPayload, setProjectPayload}: Props) {
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.projectState' className='form-label fw-bold'>
-                        {t('Project State')} <span style={{color:'red'}}>*</span>
+                            {t('Project State')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <select
                             className='form-select'
@@ -59,7 +56,7 @@ export default function Lifecycle({projectPayload, setProjectPayload}: Props) {
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.systemTestBeginDate' className='form-label fw-bold'>
-                        {t('System test begin date')}
+                            {t('System test begin date')}
                         </label>
                         <input
                             type='text'
@@ -80,7 +77,7 @@ export default function Lifecycle({projectPayload, setProjectPayload}: Props) {
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.systemTestEndDate' className='form-label fw-bold'>
-                        {t('System test end date')}
+                            {t('System test end date')}
                         </label>
                         <input
                             type='text'
@@ -104,7 +101,7 @@ export default function Lifecycle({projectPayload, setProjectPayload}: Props) {
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.systemTestBeginDate' className='form-label fw-bold'>
-                        {t('Delivery start date')}
+                            {t('Delivery start date')}
                         </label>
                         <input
                             type='text'
@@ -125,7 +122,7 @@ export default function Lifecycle({projectPayload, setProjectPayload}: Props) {
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.phaseOutDate' className='form-label fw-bold'>
-                        {t('Phase-out date')}
+                            {t('Phase-out date')}
                         </label>
                         <input
                             type='text'

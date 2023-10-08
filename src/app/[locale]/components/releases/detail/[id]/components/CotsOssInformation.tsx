@@ -11,13 +11,12 @@
 import { useState } from 'react'
 import COTSDetails from '@/object-types/COTSDetails'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
 import styles from '../detail.module.css'
 
 const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails }) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     return (

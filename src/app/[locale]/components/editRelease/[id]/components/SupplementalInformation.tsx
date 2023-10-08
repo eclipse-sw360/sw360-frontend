@@ -11,7 +11,6 @@
 'use client'
 import { useTranslations } from 'next-intl'
 import styles from '../EditRelease.module.css'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
@@ -20,7 +19,7 @@ interface Props {
 }
 
 const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReleasePayload({

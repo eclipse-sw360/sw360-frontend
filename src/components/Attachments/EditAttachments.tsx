@@ -13,7 +13,6 @@ import { useTranslations } from 'next-intl'
 import { signOut } from 'next-auth/react'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
@@ -43,7 +42,7 @@ const EditAttachments = ({
     releasePayload,
     setReleasePayload,
 }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
     const [reRender, setReRender] = useState(false)
     const handleReRender = () => {

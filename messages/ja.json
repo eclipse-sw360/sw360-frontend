@@ -1,5 +1,5 @@
 {
-    "common": {
+    "default": {
         "": "",
         "=": "=",
         "<=": "<=",
@@ -687,6 +687,9 @@
         "Yes": "はい",
         "You need a security responsible to enable monitoring": "NOT TRANSLATED",
         "Your project is created": "NOT TRANSLATED",
-        "There are some errors while creating project": "NOT TRANSLATED"
+        "There are some errors while creating project": "NOT TRANSLATED",
+        "My Subscriptions": "私の定期購読",
+        "Recent Components": "最近のコンポーネント",
+        "Recent Releases": "最近のリリース"
     }
 }

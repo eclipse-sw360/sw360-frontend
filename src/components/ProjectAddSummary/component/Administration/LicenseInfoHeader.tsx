@@ -10,7 +10,6 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 
 interface Props {
@@ -19,7 +18,7 @@ interface Props {
 }
 
 export default function LicenseInfoHeader({ projectPayload, setProjectPayload }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,

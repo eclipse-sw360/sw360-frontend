@@ -9,8 +9,7 @@
 
 import React from 'react'
 import { getData } from 'country-list'
-import { useTranslations } from 'next-intl';
-import { COMMON_NAMESPACE } from '@/object-types/Constants';
+import { useTranslations } from 'next-intl'
 
 interface Props {
     selectCountry?: React.ChangeEventHandler<HTMLSelectElement>
@@ -18,7 +17,7 @@ interface Props {
 }
 
 export default function SelectCountryComponent(props: Props) {
-    const t = useTranslations(COMMON_NAMESPACE);
+    const t = useTranslations('default')
     return (
         <>
             <label htmlFor='country' className='form-label fw-bold'>
