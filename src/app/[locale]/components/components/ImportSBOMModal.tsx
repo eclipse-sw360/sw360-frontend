@@ -19,7 +19,6 @@ import styles from '../components.module.css'
 import { ApiUtils } from '@/utils'
 import { HttpStatus, Session } from '@/object-types'
 import Component from '@/object-types/Component'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     show: boolean
@@ -42,7 +41,7 @@ interface PrepareImportData {
 }
 
 const ImportSBOMModal = ({ show, setShow, session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [importState, setImportState] = useState(ImportSBOMState.INIT_STATE)
     const [prepateImportData, setPrepareImportData] = useState<PrepareImportData | undefined>(undefined)
     const [notAllowedMessageDisplayed, setNotAllowedMessageDisplayed] = useState(false)

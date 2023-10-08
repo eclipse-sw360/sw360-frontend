@@ -12,13 +12,12 @@
 import React from 'react'
 import Link from 'next-intl/link'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
 
 function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     let buttonList: JSX.Element[] = []
     if (buttons) {
         buttonList = Object.entries(buttons).map(([key, value]) => {

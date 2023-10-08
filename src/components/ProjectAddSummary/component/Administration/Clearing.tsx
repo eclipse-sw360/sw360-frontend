@@ -11,7 +11,6 @@
 
 import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 
 interface Props {
@@ -20,7 +19,7 @@ interface Props {
 }
 
 export default function Clearing({ projectPayload, setProjectPayload }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {

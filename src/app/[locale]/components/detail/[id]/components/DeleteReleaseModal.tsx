@@ -18,7 +18,6 @@ import { signOut } from 'next-auth/react'
 import { Session, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
 import ReleaseDetail from '@/object-types/ReleaseDetail'
 
@@ -39,7 +38,7 @@ interface DeleteResponse {
 
 const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow }: Props) => {
     const { data: session } = useSession() as { data: Session }
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [release, setRelease] = useState(DEFAULT_RELEASE_INFO)
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState('')

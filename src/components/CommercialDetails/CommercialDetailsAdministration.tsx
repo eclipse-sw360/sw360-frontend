@@ -14,7 +14,6 @@ import { useTranslations } from 'next-intl'
 
 import { useCallback, useState } from 'react'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 import ComponentOwner from '@/object-types/ComponentOwner'
 import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
@@ -36,7 +35,7 @@ const CommercialDetailsAdministration = ({
     cotsResponsible,
     setCotsResponsible,
 }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
     const handleClickSearchComponentOwner = useCallback(() => setDialogOpenComponentOwner(true), [])
 

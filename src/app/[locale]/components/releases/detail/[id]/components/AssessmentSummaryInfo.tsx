@@ -16,7 +16,6 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import AttachmentType from '@/object-types/enums/AttachmentTypes'
 import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
@@ -32,7 +31,7 @@ interface AssessmentSummaryInfo {
 }
 
 const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const { data: session } = useSession() as { data: Session }
     const [toggle, setToggle] = useState(false)
     const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo>(undefined)

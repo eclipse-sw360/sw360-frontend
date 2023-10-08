@@ -17,7 +17,6 @@ import { Alert, Button } from 'react-bootstrap'
 
 import { ApiUtils } from '@/utils'
 import { Attachment, HttpStatus, Session } from '@/object-types'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Table, _ } from '@/components/sw360'
 import AttachmentType from '@/object-types/enums/AttachmentTypes'
 import EmbeddedAttachments from '@/object-types/EmbeddedAttachments'
@@ -42,7 +41,7 @@ interface CellData {
 }
 
 const SPDXAttachments = ({ releaseId, session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<Array<CellData>>>([])
 
     const columns = [

@@ -14,7 +14,6 @@ import { GiCancel } from 'react-icons/gi'
 import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Licenses, Session } from '@/object-types'
 import { VendorDialog } from '@/components/sw360'
 import ActionType from '@/object-types/enums/ActionType'
@@ -69,7 +68,7 @@ const ReleaseSummary = ({
     moderator,
     setModerator,
 }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [currentDate] = useState(getDate())
     const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
     const handleClickSearchMainLicenses = useCallback(() => setDialogOpenMainLicenses(true), [])

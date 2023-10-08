@@ -10,7 +10,6 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { AdministrationDataType } from '@/object-types/AdministrationDataType'
 import styles from '../detail.module.css'
 import { useState } from 'react'
@@ -19,7 +18,7 @@ const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 export default function Administration({ data }: { data: AdministrationDataType }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggleClearing, setToggleClearing] = useState(false)
     const [toggleLifecycle, setToggleLifecycle] = useState(false)
     const [toggleLicenseInfoHeader, setToggleLicenseInfoHeader] = useState(false)

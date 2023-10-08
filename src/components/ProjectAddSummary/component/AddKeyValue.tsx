@@ -15,7 +15,6 @@ import { AddtionalDataType } from '@/object-types/AddtionalDataType'
 import { MdDeleteOutline } from 'react-icons/md'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     header: string
@@ -31,7 +30,7 @@ interface Input {
 }
 
 export default function AddKeyValueComponent(props: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {

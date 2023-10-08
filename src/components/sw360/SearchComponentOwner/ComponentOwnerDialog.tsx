@@ -15,7 +15,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { ComponentOwnerType } from '@/object-types/ComponentOwnerType'
 import { HttpStatus, Session } from '@/object-types'
 import { notFound } from 'next/navigation'
@@ -30,7 +29,7 @@ interface Props {
 }
 
 const ComponentOwnerDialog = ({ show, setShow, session, selectComponentOwner }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [data, setData] = useState()
     const [componentOwner, setComponentOwner] = useState<ComponentOwner>()
     const [users, setUsers] = useState([])

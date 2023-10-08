@@ -16,7 +16,6 @@ import { notFound } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import { VendorType } from '@/object-types/VendorType'
 import SelectTableVendor from './SelectTableVendor'
@@ -30,7 +29,7 @@ interface Props {
 }
 
 const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [data, setData] = useState()
     const [vendor, setVendor] = useState<Vendor>()
     const [vendors, setVendors] = useState([])

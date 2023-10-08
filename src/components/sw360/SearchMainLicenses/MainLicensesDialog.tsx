@@ -15,7 +15,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import { LicensesType } from '@/object-types/LicensesType'
 import Licenses from '@/object-types/Licenses'
@@ -29,7 +28,7 @@ interface Props {
 }
 
 const MainLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [data, setData] = useState([])
     const [licenses] = useState([])
     const [licensesResponse, setLicensesResponse] = useState<Licenses>()

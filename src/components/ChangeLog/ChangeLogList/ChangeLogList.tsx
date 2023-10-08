@@ -11,7 +11,6 @@
 import { useEffect, useState } from 'react'
 import { FaFileAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Table, _ } from '@/components/sw360'
 import { ChangeLog } from '@/object-types/ChangeLogs'
 
@@ -23,7 +22,7 @@ interface Props {
 }
 
 const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [changeLogData, setChangeLogData] = useState([])
 
     useEffect(() => {

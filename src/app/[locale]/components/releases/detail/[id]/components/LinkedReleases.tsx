@@ -14,7 +14,6 @@ import { useTranslations } from 'next-intl'
 import { useState, useEffect } from 'react'
 
 import { TreeTable } from '@/components/sw360'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import NodeData from '@/object-types/NodeData'
@@ -28,7 +27,7 @@ interface Props {
 }
 
 const LinkedReleases = ({ releaseId, session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [data, setData] = useState<Array<NodeData>>([])
 
     useEffect(() => {

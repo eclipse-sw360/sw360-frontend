@@ -11,7 +11,6 @@
 
 import React, { useState } from 'react'
 import { Form, Button } from 'react-bootstrap'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import CommonUtils from '@/utils/common.utils'
@@ -39,7 +38,7 @@ interface SearchParams {
 
 function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     const router = useRouter()
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const params = Object.fromEntries(useSearchParams())
     const [searchParams, setSearchParam] = useState<SearchParams>(params)
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')

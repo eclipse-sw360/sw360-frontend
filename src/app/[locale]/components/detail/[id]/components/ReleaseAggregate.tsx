@@ -12,14 +12,13 @@
 import { useTranslations } from 'next-intl'
 import styles from '../detail.module.css'
 import { useState } from 'react'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import CommonUtils from '@/utils/common.utils'
 import Component from '@/object-types/Component'
 import Vendor from '@/object-types/Vendor'
 
 const ReleaseAgrregate = ({ component }: { component: Component }) => {
     const [toggle, setToggle] = useState(false)
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>

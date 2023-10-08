@@ -16,7 +16,6 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 
 interface Props {
@@ -38,7 +37,7 @@ interface ChangeStatePayload {
 }
 
 const ChangeStateDialog = ({ show, setShow, state, selectedVulner, session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [comment, setComment] = useState('')
 
     const handleCloseDialog = () => {

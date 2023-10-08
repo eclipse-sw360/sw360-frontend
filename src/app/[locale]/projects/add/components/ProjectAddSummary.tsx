@@ -14,7 +14,6 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useRouter } from 'next/navigation'
 import HttpStatus from '@/object-types/enums/HttpStatus'
 import { ToastContainer } from 'react-bootstrap'
@@ -33,7 +32,7 @@ interface Props {
 
 export default function AddProjects({ session }: Props) {
     const router = useRouter()
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',

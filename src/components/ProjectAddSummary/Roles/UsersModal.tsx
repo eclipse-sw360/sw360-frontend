@@ -7,70 +7,65 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
-import { Modal, Form, Row, Col, Button } from "react-bootstrap"
-import { _, Table } from "@/components/sw360"
-import Link from "next/link"
+import { Modal, Form, Row, Col, Button } from 'react-bootstrap'
+import { _, Table } from '@/components/sw360'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface UserType {
-    userId: string;
-    givenName: string;
-    lastName: string;
-    email: string;
-    department: string;
+    userId: string
+    givenName: string
+    lastName: string
+    email: string
+    department: string
 }
 
-export default function UsersModal({ show, setShow }: {
-    show: boolean,
-    setShow: (show: boolean) => void
-}) {
-
-    const t = useTranslations(COMMON_NAMESPACE)
+export default function UsersModal({ show, setShow }: { show: boolean; setShow: (show: boolean) => void }) {
+    const t = useTranslations('default')
 
     const columns = [
         {
             id: 'selectUserRadio',
             name: '',
             formatter: (userId: string) =>
-            _(
-                  <div className="form-check">
-                      <input className="form-check-input" type="radio" name="user" id={userId}/>
-                  </div>
-            ),
-            width: "8%"
+                _(
+                    <div className='form-check'>
+                        <input className='form-check-input' type='radio' name='user' id={userId} />
+                    </div>
+                ),
+            width: '8%',
         },
         {
             id: 'givenName',
             name: t('Given Name'),
             sort: true,
-            width: "20%"
+            width: '20%',
         },
         {
             id: 'lastName',
             name: t('Last Name'),
             sort: true,
-            width: "20%"
+            width: '20%',
         },
         {
             id: 'email',
             name: t('Email'),
             sort: true,
             formatter: (email: string) =>
-            _(
-                <Link href={"#"} className='link'>
-                    {email}
-                </Link>
-            ),
-            width: "30%"
+                _(
+                    <Link href={'#'} className='link'>
+                        {email}
+                    </Link>
+                ),
+            width: '30%',
         },
         {
             id: 'department',
             name: t('Department'),
             sort: true,
-            width: "15%"
+            width: '15%',
         },
     ]
 
@@ -79,41 +74,56 @@ export default function UsersModal({ show, setShow }: {
     return (
         <>
             <Modal
-                size="lg"
+                size='lg'
                 centered
                 show={show}
                 onHide={() => setShow(false)}
                 aria-labelledby={t('Search Users Modal')}
             >
                 <Modal.Header closeButton>
-                    <Modal.Title id="user-modal">
-                        {t('Search Users')}
-                    </Modal.Title>
+                    <Modal.Title id='user-modal'>{t('Search Users')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Col>
-                            <Row className="mb-3">
+                            <Row className='mb-3'>
                                 <Col xs={6}>
-                                    <Form.Control type="text" placeholder={t('Enter search text')} />
+                                    <Form.Control type='text' placeholder={t('Enter search text')} />
                                 </Col>
                                 <Col xs={6}>
-                                    <Button variant="secondary" className="me-2">{t('Search')}</Button>      
-                                    <Button variant="secondary">{t('Reset')}</Button>     
-                                </Col>                      
+                                    <Button variant='secondary' className='me-2'>
+                                        {t('Search')}
+                                    </Button>
+                                    <Button variant='secondary'>{t('Reset')}</Button>
+                                </Col>
                             </Row>
                         </Col>
                     </Form>
                     <Row>
                         <Table
                             columns={columns}
-                            data={data.map((data) => [data.userId, data.givenName, data.lastName, data.email, data.department])}
+                            data={data.map((data) => [
+                                data.userId,
+                                data.givenName,
+                                data.lastName,
+                                data.email,
+                                data.department,
+                            ])}
                         />
                     </Row>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="dark" onClick={() => setShow(false)}>{t('Close')}</Button>
-                    <Button variant="primary" onClick={() => { setShow(false) }}>{t('Select Users')}</Button>
+                    <Button variant='dark' onClick={() => setShow(false)}>
+                        {t('Close')}
+                    </Button>
+                    <Button
+                        variant='primary'
+                        onClick={() => {
+                            setShow(false)
+                        }}
+                    >
+                        {t('Select Users')}
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </>

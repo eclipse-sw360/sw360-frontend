@@ -20,7 +20,6 @@ import Link from 'next/link'
 import { HiOutlineLink } from 'react-icons/hi'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import { Table, _ } from 'next-sw360'
 import DeleteReleaseModal from './DeleteReleaseModal'
@@ -37,7 +36,7 @@ interface Props {
 }
 
 const ReleaseOverview = ({ session, componentId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [data, setData] = useState([])
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)

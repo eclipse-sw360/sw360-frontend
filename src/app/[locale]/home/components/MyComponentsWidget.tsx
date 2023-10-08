@@ -10,7 +10,6 @@
 import React, { useEffect, useState } from 'react'
 
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 import HomeTableHeader from './HomeTableHeader'
 
@@ -19,12 +18,12 @@ import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 function MyComponentsWidget() {
     const [data, setData] = useState([])
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     useEffect(() => {
         const fetchData = async () => {
             const data = await sw360FetchData('/components/mycomponents', 'components')
-            setData(data.map((item: { name: string, description: string }) => [item.name, item.description]))
+            setData(data.map((item: { name: string; description: string }) => [item.name, item.description]))
         }
         fetchData()
     }, [])

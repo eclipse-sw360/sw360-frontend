@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next-intl/link'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Session } from '@/object-types'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 import ClearingInformationStatus from './ClearingInformationStatus'
@@ -36,7 +35,7 @@ interface Props {
 }
 
 const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [show, setShow] = useState(false)
 

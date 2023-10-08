@@ -10,7 +10,6 @@
 import { FaTrashAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { InputKeyValue } from '@/object-types'
 import { RolesType } from '@/object-types/RolesType'
 import DocumentTypes from '@/object-types/enums/DocumentTypes'
@@ -23,7 +22,7 @@ interface Props {
 }
 
 export default function AddAdditionalRolesComponent({ documentType, setDataRoles, roles, setRoles }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     const handleInputKeyValueChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target

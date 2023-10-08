@@ -9,7 +9,6 @@
 // License-Filename: LICENSE
 
 import ClearingInformation from '@/object-types/ClearingInformation'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import styles from '../detail.module.css'
@@ -20,7 +19,7 @@ interface Props {
 
 const SupplementalInformation = ({ clearingInformation }: Props) => {
     const [toggle, setToggle] = useState(false)
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>

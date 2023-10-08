@@ -18,7 +18,6 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import ActionType from '@/object-types/enums/ActionType'
 import { HttpStatus, Session } from '@/object-types'
 import Component from '@/object-types/Component'
@@ -39,7 +38,7 @@ interface DeleteResponse {
 
 const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props) => {
     const { data: session } = useSession() as { data: Session }
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const router = useRouter()
     const [component, setComponent] = useState<Component>(DEFAULT_COMPONENT_INFO)
     const [variant, setVariant] = useState('success')

@@ -13,7 +13,6 @@
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { CommonUtils } from '@/utils'
 import { Licenses, InputKeyValue, Session } from '@/object-types'
 import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
@@ -72,7 +71,7 @@ export default function ReleaseEditSummary({
     eccInformation,
     clearingInformation,
 }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])

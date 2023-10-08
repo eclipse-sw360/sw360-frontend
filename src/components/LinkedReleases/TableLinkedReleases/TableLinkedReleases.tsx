@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import styles from './TableLinkedReleases.module.css'
 import React from 'react'
@@ -18,12 +17,15 @@ import LinkedRelease from '@/object-types/LinkedRelease'
 interface Props {
     setReleaseLinks?: React.Dispatch<React.SetStateAction<LinkedRelease[]>>
     releaseLinks?: LinkedRelease[]
-    setReleaseIdToRelationshipsToReleasePayLoad?: (releaseIdToRelationships: Map<string,string>) => void
+    setReleaseIdToRelationshipsToReleasePayLoad?: (releaseIdToRelationships: Map<string, string>) => void
 }
 
-export default function TableLinkedReleases({ releaseLinks, setReleaseLinks, setReleaseIdToRelationshipsToReleasePayLoad }: Props) {
-
-    const t = useTranslations(COMMON_NAMESPACE)
+export default function TableLinkedReleases({
+    releaseLinks,
+    setReleaseLinks,
+    setReleaseIdToRelationshipsToReleasePayLoad,
+}: Props) {
+    const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
         const list: LinkedRelease[] = [...releaseLinks]

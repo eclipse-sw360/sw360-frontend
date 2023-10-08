@@ -17,7 +17,6 @@ import { notFound, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { Component, HttpStatus, Session } from '@/object-types'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
 import ActionType from '@/object-types/enums/ActionType'
@@ -55,7 +54,7 @@ const tabList = [
 ]
 
 const EditComponent = ({ session, componentId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [component, setComponent] = useState<Component>()

@@ -10,7 +10,6 @@
 import React, { useState, useEffect } from 'react'
 
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 import { Table } from '@/components/sw360'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
@@ -19,7 +18,7 @@ import HomeTableHeader from './HomeTableHeader'
 
 function MyTaskAssignmentsWidget() {
     const [data, setData] = useState([])
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
 
     useEffect(() => {
         const fetchData = async () => {

@@ -10,11 +10,10 @@
 
 import React from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import styles from './TitleAttachment.module.css'
 
 export default function TitleAttachment() {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     return (
         <>
             <div className={`${styles['div-title']}`}>

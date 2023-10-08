@@ -18,7 +18,6 @@ import Link from 'next/link'
 
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ChangeLog, EmbeddedChangeLogs } from '@/object-types/ChangeLogs'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { EmbeddedVulnerabilites, LinkedVulnerability } from '@/object-types/LinkedVulnerability'
 import { HttpStatus, Session } from '@/object-types'
 import { SideBar, PageButtonHeader } from '@/components/sw360'
@@ -49,7 +48,7 @@ interface Props {
 }
 
 const DetailOverview = ({ session, releaseId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])

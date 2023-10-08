@@ -17,7 +17,6 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next-intl/link'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { CREDENTIALS } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import { LanguageSwitcher } from 'next-sw360'
@@ -29,7 +28,7 @@ interface Props {
 const AuthScreen = ({ session }: Props) => {
     const router = useRouter()
     const locale = useLocale()
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [dialogShow, setDialogShow] = useState<boolean>(false)
     const [messageShow, setMessageShow] = useState<boolean>(false)
     const [emailAddress, setEmailAddress] = useState<string>('@sw360.org')

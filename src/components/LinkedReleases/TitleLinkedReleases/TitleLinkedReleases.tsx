@@ -10,15 +10,14 @@
 
 import React from 'react'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import styles from './TitleLinkedReleases.module.css'
 export default function TitleLinkedReleases() {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     return (
         <>
             <div className={`row ${styles['div-title-second']}`}>
                 <div className={`${styles['div-filename']}`}>
-                    <p className='fw-bold mt-2' >{t('Vendor Name')}</p>
+                    <p className='fw-bold mt-2'>{t('Vendor Name')}</p>
                 </div>
                 <div className={`${styles['div-filename']}`}>
                     <p className='fw-bold mt-2'>{t('Release name')}</p>

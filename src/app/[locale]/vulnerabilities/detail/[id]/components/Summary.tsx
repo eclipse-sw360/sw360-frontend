@@ -11,13 +11,12 @@
 
 import { VulnerabilityPayload } from '@/object-types/VulnerabilityPayload'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useState } from 'react'
 import Link from 'next-intl/link'
 import styles from '../detail.module.css'
 
 export default function Summary({ summaryData }: { summaryData: VulnerabilityPayload }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     return (

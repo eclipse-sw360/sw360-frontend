@@ -16,7 +16,6 @@ import { Col, Modal, Form, Button, Row, Alert } from 'react-bootstrap'
 
 import { _ } from '@/components/sw360'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
 import { PiCheckBold } from 'react-icons/pi'
 import ProjectTable from './ProjectTable'
@@ -29,7 +28,7 @@ interface Props {
 }
 
 const LinkReleaseToProjectModal = ({ releaseId, show, setShow, session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const searchText = useRef('')
     const linkedProjectIds = useRef([])
 

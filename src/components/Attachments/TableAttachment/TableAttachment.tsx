@@ -12,7 +12,6 @@ import React from 'react'
 
 import { FaTrashAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import AttachmentDetail from '@/object-types/AttachmentDetail'
 
 import styles from './TableAttachment.module.css'
@@ -34,7 +33,7 @@ export default function TableAttachment({
     setAttachmentToReleasePayload,
     documentType,
 }: Props) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
         const list: AttachmentDetail[] = [...data]

@@ -13,13 +13,12 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { SummaryDataType } from '@/object-types/SummaryDataType'
 import styles from '../detail.module.css'
 import { useState } from 'react'
 
 export default function Summary({ summaryData }: { summaryData: SummaryDataType }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
     const [toggleRoles, setToggleRoles] = useState(false)
     const [toggleVendor, setToggleVendor] = useState(false)

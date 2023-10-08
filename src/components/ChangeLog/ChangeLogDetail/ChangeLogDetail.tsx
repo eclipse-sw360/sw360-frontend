@@ -13,14 +13,13 @@ import CommonUtils from '@/utils/common.utils'
 import PrettyFormatData from '@/components/PrettyFormatData/PrettyFormatData'
 import createChangesCards from '../CreateChangeCard'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 
 interface Props {
     changeLogData: any
 }
 
 const ChangeLogDetail = ({ changeLogData }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     useEffect(() => {

@@ -9,7 +9,6 @@
 
 'use client'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { FaInfoCircle } from 'react-icons/fa'
 import { Modal, Col, Row, Form, Button, OverlayTrigger, Tooltip, Alert } from 'react-bootstrap'
 import { notFound } from 'next/navigation'
@@ -41,7 +40,7 @@ export default function LinkProjects({
     show: boolean
     setShow: (show: boolean) => void
 }) {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [projectData, setProjectData] = useState<any[] | null>(null)
     const [linkProjects, setLinkProjects] = useState<Map<string, any>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)

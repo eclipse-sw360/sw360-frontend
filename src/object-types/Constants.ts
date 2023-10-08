@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export const CREDENTIAL_PROVIDER = "credential_provider"
-export const CREDENTIALS = "credentials"
-export const COMMON_NAMESPACE = "common"
+export const CREDENTIAL_PROVIDER = 'credential_provider'
+export const CREDENTIALS = 'credentials'
 export const LOCALES = ['en', 'ja', 'vi', 'zh']

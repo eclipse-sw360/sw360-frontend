@@ -15,7 +15,6 @@ import { useState } from 'react'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { FaCopy } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import Component from '@/object-types/Component'
 
 interface Props {
@@ -24,7 +23,7 @@ interface Props {
 }
 
 const ComponentGeneral = ({ component, componentId }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>

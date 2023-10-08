@@ -15,7 +15,6 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { FaInfoCircle } from 'react-icons/fa'
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { LinkedVulnerability, VerificationStateInfo } from '@/object-types/LinkedVulnerability'
 import { Session } from '@/object-types'
 import { Table, _ } from '@/components/sw360'
@@ -30,7 +29,7 @@ interface Props {
 }
 
 const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     const [dialogOpen, setDialogOpen] = useState(false)
     const [state, setState] = useState('NOT_CHECKED')
     const [data, setData] = useState([])

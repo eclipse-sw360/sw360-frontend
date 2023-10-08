@@ -7,12 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
 export default function SearchUsersModalComponent() {
-    const t = useTranslations(COMMON_NAMESPACE)
+    const t = useTranslations('default')
     return (
         <>
             <div
@@ -56,11 +55,7 @@ export default function SearchUsersModalComponent() {
                             </div>
                         </div>
                         <div className='modal-footer'>
-                            <button
-                                type='button'
-                                data-bs-dismiss='modal'
-                                className='btn btn-secondary me-2'
-                            >
+                            <button type='button' data-bs-dismiss='modal' className='btn btn-secondary me-2'>
                                 {t('Close')}
                             </button>
                             <button type='button' className='btn btn-primary'>
