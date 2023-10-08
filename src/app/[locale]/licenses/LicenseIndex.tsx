@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
 import React, { useEffect, useState, useCallback } from 'react'
 
-import { _, PageButtonHeader, QuickFilter, Table } from '@/components/sw360'
+import { _, PageButtonHeader, QuickFilter, Table } from 'next-sw360'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
 import { HttpStatus, Session } from '@/object-types'
@@ -105,7 +105,7 @@ function LicensesPage({ session }: Props) {
         <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
             <div className='row'>
                 <div className='col-2 sidebar'>
-                    <QuickFilter key='licensefilter' title={t('Quick Filter')} searchFunction={doSearch} />
+                    <QuickFilter id='licensefilter' title={t('Quick Filter')} searchFunction={doSearch} />
                 </div>
                 <div className='col col-sm-9'>
                     <div className='col'>
