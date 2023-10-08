@@ -10,4 +10,4 @@
 
 export const CREDENTIAL_PROVIDER = 'credential_provider'
 export const CREDENTIALS = 'credentials'
-export const LOCALES = ['en', 'ja', 'vi', 'zh']
+export const LOCALES = ['en', 'ja', 'vi', 'zh', 'pt-BR']

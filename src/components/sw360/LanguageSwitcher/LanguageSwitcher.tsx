@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { VN, GB, JP, CN } from 'country-flag-icons/react/3x2'
+import { VN, GB, JP, CN, BR } from 'country-flag-icons/react/3x2'
 import Link from 'next-intl/link'
 
 function LanguageSwitcher() {
@@ -25,6 +25,9 @@ function LanguageSwitcher() {
             </Link>
             <Link href='/' locale='zh' title='China'>
                 <CN title='Chinese' className='flags' />
+            </Link>
+            <Link href='/' locale='pt-BR' title='Brazil'>
+                <BR title='Brazilian Portuguese' className='flags' />
             </Link>
         </>
     )
