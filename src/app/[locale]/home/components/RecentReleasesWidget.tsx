@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'used-client'
+
 import React, { useState, useEffect } from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
-
-const title = 'Recent Releases'
+import { useTranslations } from 'next-intl'
 
 function RecentReleasesWidget() {
     const [data, setData] = useState([])
+    const t = useTranslations('default')
 
     useEffect(() => {
         const fetchData = async () => {
@@ -35,7 +37,7 @@ function RecentReleasesWidget() {
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={title} />
+            <HomeTableHeader title={t('Recent Releases')} />
             <ul style={{ listStyleType: 'disc', color: 'black' }}>{data}</ul>
         </div>
     )

@@ -695,6 +695,9 @@
         "Yes": "Yes",
         "There are some errors while creating project": "There are some errors while creating project",
         "You need a security responsible to enable monitoring": "You need a security responsible to enable monitoring",
-        "Your project is created": "Your project is created"
+        "Your project is created": "Your project is created",
+        "My Subscriptions": "My Subscriptions",
+        "Recent Components": "Recent Components",
+        "Recent Releases": "Recent Releases"
     }
 }
