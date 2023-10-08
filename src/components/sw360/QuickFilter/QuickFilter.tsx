@@ -11,16 +11,16 @@
 
 import React from 'react'
 import { Form } from 'react-bootstrap'
-import { QuiickFilterProps } from './QuickFilter.types'
+import { QuickFilterProps } from './QuickFilter.types'
 
-function QuickFilter({ key, searchFunction, title = 'Quick Filter' }: QuiickFilterProps) {
+function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilterProps) {
     return (
         <div className='card-deck'>
             <div id='component-quickfilter' className='card'>
                 <div className='card-header'>{title}</div>
                 <div className='card-body'>
                     <Form>
-                        <Form.Group key={key} className='mb-3' controlId={key}>
+                        <Form.Group key={id} className='mb-3' controlId={id}>
                             <Form.Control
                                 className='form-control'
                                 type='text'

@@ -8,14 +8,14 @@
 // License-Filename: LICENSE
 
 import QuickFilter from './QuickFilter'
-import { QuiickFilterProps } from './QuickFilter.types'
+import { QuickFilterProps } from './QuickFilter.types'
 
 const quickfilter = {
     title: 'SW360/QuickFilter',
     component: QuickFilter,
 }
 
-const Template = (args: QuiickFilterProps) => (
+const Template = (args: QuickFilterProps) => (
     <div style={{ width: '10%' }}>
         <QuickFilter {...args} />
     </div>

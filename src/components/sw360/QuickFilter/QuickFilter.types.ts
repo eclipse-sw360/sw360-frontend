@@ -7,8 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface QuiickFilterProps {
-    key: string
+export interface QuickFilterProps {
+    id: string
     searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
     title?: string
 }

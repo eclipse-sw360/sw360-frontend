@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
 
 import { COMMON_NAMESPACE } from '@/object-types/Constants'
-import { QuickFilter, AdvancedSearch, _, Table } from '@/components/sw360'
+import { QuickFilter, AdvancedSearch, _, Table } from 'next-sw360'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, Session } from '@/object-types'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
@@ -168,7 +168,7 @@ export default function Vulnerabilities({ session }: { session: Session }) {
                 <div className='row'>
                     <div className='col-lg-2'>
                         <div className='row mb-3'>
-                            <QuickFilter key='' searchFunction={doSearch} />
+                            <QuickFilter id='' searchFunction={doSearch} />
                         </div>
                         <div className='row'>
                             <AdvancedSearch title='Advanced Filter' fields={advancedSearch} />
