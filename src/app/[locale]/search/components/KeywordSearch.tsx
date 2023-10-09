@@ -159,8 +159,12 @@ export default function KeywordSearch({
             let paramString = ''
             paramString += `?searchText=${encodeURIComponent(searchText)}`
             for (const k in searchOptions) {
-                if (k === 'entireDocument' || searchOptions[k as keyof SEARCH_STATE] === false) continue
-                paramString += `&typeMasks=${encodeURIComponent(k)}`
+                if (searchOptions[k as keyof SEARCH_STATE] === false) continue
+                if (k === 'entireDocument') {
+                    paramString += '&typeMasks=document'
+                } else {
+                    paramString += `&typeMasks=${encodeURIComponent(k)}`
+                }
             }
             queryUrl += paramString
 
