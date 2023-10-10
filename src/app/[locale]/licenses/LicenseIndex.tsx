@@ -14,7 +14,7 @@ import { signOut } from 'next-auth/react'
 import { Spinner } from 'react-bootstrap'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
+import Link from 'next/link'
 import React, { useEffect, useState, useCallback } from 'react'
 
 import { _, PageButtonHeader, QuickFilter, Table } from 'next-sw360'

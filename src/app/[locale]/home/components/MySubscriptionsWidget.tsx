@@ -14,43 +14,54 @@ import React, { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import HomeTableHeader from './HomeTableHeader'
-import homePageStyles from '../home.module.css'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 function MySubscriptionsWidget() {
-    const [componentData, setComponentData] = useState([])
-    const [releaseData, setReleaseData] = useState([])
+    const [componentData] = useState([])
+    const [releaseData] = useState([])
     const t = useTranslations('default')
 
     useEffect(() => {
-        const fetchData = async () => {
-            const componentData = await sw360FetchData('/components/mySubscriptions', 'components')
-            setComponentData(componentData.map((item: { name: string }) => [item.name]))
-            const releaseData = await sw360FetchData('/releases/mySubscriptions', 'releases')
-            setReleaseData(releaseData.map((item: { name: string }) => [item.name]))
-        }
-        fetchData()
+        //     const fetchData = async () => {
+        //         const componentData = await sw360FetchData('/components/mySubscriptions', 'components')
+        //         setComponentData(componentData.map((item: { name: string }) => [item.name]))
+        //         const releaseData = await sw360FetchData('/releases/mySubscriptions', 'releases')
+        //         setReleaseData(releaseData.map((item: { name: string }) => [item.name]))
+        //     }
+        //     fetchData()
     }, [])
 
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('My Subscriptions')} />
-            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>{t('Components')}</h3>
-            <ul style={{ listStyleType: 'disc', color: 'black' }}>
-                {componentData.map((item) => (
-                    <li key={''}>
-                        <span style={{ color: 'orange' }}>{item}</span>
-                    </li>
-                ))}
-            </ul>
-            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>{t('Releases')}</h3>
-            <ul style={{ listStyleType: 'disc', color: 'black' }}>
-                {releaseData.map((item) => (
-                    <li key={''}>
-                        <span style={{ color: 'orange' }}>{item}</span>
-                    </li>
-                ))}
-            </ul>
+            {componentData.length > 0 && (
+                <>
+                    <h3 className='fw-bold titleSubSideBar'>{t('Components')}</h3>
+                    <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                        {componentData.map((item) => (
+                            <li key={''}>
+                                <span style={{ color: 'orange' }}>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+            {releaseData.length > 0 && (
+                <>
+                    <h3 className='fw-bold titleSubSideBar'>{t('Releases')}</h3>
+                    <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                        {releaseData.map((item) => (
+                            <li key={''}>
+                                <span style={{ color: 'orange' }}>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+            {releaseData.length === 0 && componentData.length === 0 && (
+                <>
+                    <div className='subscriptionBox'>{t('No subscriptions available')}</div>
+                </>
+            )}
         </div>
     )
 }

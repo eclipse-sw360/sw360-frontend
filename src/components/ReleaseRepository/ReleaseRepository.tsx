@@ -14,7 +14,7 @@ import React from 'react'
 import { useTranslations } from 'next-intl'
 
 import ReleasePayload from '@/object-types/ReleasePayload'
-import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
+import { ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
     releasePayload?: ReleasePayload

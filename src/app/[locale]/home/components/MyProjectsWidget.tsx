@@ -8,40 +8,38 @@
 // License-Filename: LICENSE
 
 import React, { useEffect, useState } from 'react'
-
 import { useTranslations } from 'next-intl'
 
-import { Table } from '@/components/sw360'
-
+import { Table } from 'next-sw360'
 import HomeTableHeader from './HomeTableHeader'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 function MyProjectsWidget() {
-    const [data, setdata] = useState([])
+    const [data] = useState([])
     const t = useTranslations('default')
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await sw360FetchData('/projects/myprojects', 'projects')
-            data &&
-                setdata(
-                    data.map((item: { name: string; description: string; version: string }) => [
-                        item.name,
-                        item.description,
-                        item.version,
-                    ])
-                )
-        }
-        fetchData()
-    }, [])
+        //     const fetchData = async () => {
+        //         const data = await sw360FetchData('/projects/myprojects', 'projects')
+        //         data &&
+        //             setdata(
+        //                 data.map((item: { name: string; description: string; version: string }) => [
+        //                     item.name,
+        //                     item.description,
+        //                     item.version,
+        //                 ])
+        //             )
+        //     }
+        //     fetchData()
+    })
 
     const title = t('My Projects')
     const columns = [t('Project Name'), t('Description'), t('Approved Releases')]
+    const language = { noRecordsFound: t('NoProjectsFound') }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={data} pagination={{ limit: 5 }} selector={false} />
+            <Table columns={columns} data={data} pagination={{ limit: 5 }} selector={false} language={language} />
         </div>
     )
 }

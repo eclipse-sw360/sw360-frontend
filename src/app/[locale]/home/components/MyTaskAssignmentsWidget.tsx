@@ -8,33 +8,31 @@
 // License-Filename: LICENSE
 
 import React, { useState, useEffect } from 'react'
-
 import { useTranslations } from 'next-intl'
 
-import { Table } from '@/components/sw360'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
-
+import { Table } from 'next-sw360'
 import HomeTableHeader from './HomeTableHeader'
 
 function MyTaskAssignmentsWidget() {
-    const [data, setData] = useState([])
+    const [data] = useState([])
     const t = useTranslations('default')
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await sw360FetchData('/myTaskAssignments')
-            setData(data.map((item: { name: string; status: string }) => [item.name, item.status]))
-        }
-        fetchData()
-    }, [])
+        //     const fetchData = async () => {
+        //         const data = await sw360FetchData('/myTaskAssignments')
+        //         setData(data.map((item: { name: string; status: string }) => [item.name, item.status]))
+        //     }
+        //     fetchData()
+    })
 
     const title = t('My Task Assignments')
     const columns = [t('Document Name'), t('Status')]
+    const language = { noRecordsFound: t('NoTasksAssigned') }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={data} />
+            <Table columns={columns} data={data} language={language} />
         </div>
     )
 }

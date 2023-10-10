@@ -19,7 +19,7 @@ import ComponentOwnerDialog from '@/components/sw360/SearchComponentOwner/Compon
 import ComponentPayload from '@/object-types/ComponentPayLoad'
 import Moderators from '@/object-types/Moderators'
 import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
-import SelectCountryComponent from '@/components/SelectCountry'
+import { SelectCountry } from 'next-sw360'
 import styles from '../GeneralInfoComponent/SummaryComponent.module.css'
 interface Props {
     session?: Session
@@ -168,10 +168,7 @@ const RolesInformation = ({
                 <hr className='my-4' />
                 <div className='row'>
                     <div className='col-lg-4'>
-                        <SelectCountryComponent
-                            selectCountry={updateField}
-                            value={componentPayload.ownerCountry ?? ''}
-                        />
+                        <SelectCountry selectCountry={updateField} value={componentPayload.ownerCountry ?? ''} />
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='moderators' className='form-label fw-bold'>

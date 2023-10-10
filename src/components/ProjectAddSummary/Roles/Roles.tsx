@@ -11,10 +11,11 @@
 
 import { GiCancel } from 'react-icons/gi'
 import { useState } from 'react'
-import SelectCountryComponent from '@/components/SelectCountry'
+import { useTranslations } from 'next-intl'
+
+import { SelectCountry } from 'next-sw360'
 import DepartmentModal from './DepartmentModal'
 import UsersModal from './UsersModal'
-import { useTranslations } from 'next-intl'
 
 export default function Roles() {
     const t = useTranslations('default')
@@ -106,7 +107,7 @@ export default function Roles() {
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <SelectCountryComponent />
+                        <SelectCountry />
                     </div>
                 </div>
                 <hr className='my-2' />

@@ -20,10 +20,13 @@ const defaultOptions = {
     selector: true,
     sort: true,
 }
+type MessageFormat = (...args: []) => string
+type Message = string | MessageFormat
+export type Language = { [key: string]: Message | Language }
 
 interface TableProps extends Partial<Config> {
     selector?: boolean
-    language?: any
+    language?: Language
 }
 
 class Table extends Component<TableProps, unknown> {

@@ -9,8 +9,9 @@
 
 'use client'
 
-import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
+
+import { ShowInfoOnHover } from 'next-sw360'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
 
 interface Props {
@@ -90,11 +91,11 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props) {
                             aria-label='Deadline for pre-evaluation'
                             id='addProjects.deadlinePreEvaluation'
                             placeholder='Pre-evaluation date YYYY-MM-DD'
-                            onFocus={(e) => {
-                                ;(e.target.type as any) = 'date'
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'date'
                             }}
-                            onBlur={(e) => {
-                                ;(e.target.type as any) = 'text'
+                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'text'
                             }}
                             name='preevaluationDeadline'
                             value={projectPayload.preevaluationDeadline}

@@ -11,19 +11,19 @@
 import React from 'react'
 
 import { ArrowRepeat } from 'react-bootstrap-icons'
-import styles from '../home.module.css'
 
 interface HomeTableHeaderProps {
     title: string
 }
 
 function HomeTableHeader({ title = '' }: HomeTableHeaderProps) {
-    return (<>
-        <div className={styles.tableHeader}>
-            <h1 className={styles.title}>{title}</h1>
-            <ArrowRepeat />
-        </div>
-        <hr className={styles.horizontalLine}></hr>
+    return (
+        <>
+            <div className='tableHeader'>
+                <h1 className='tableHeaderTitle'>{title}</h1>
+                <ArrowRepeat />
+            </div>
+            <hr></hr>
         </>
     )
 }

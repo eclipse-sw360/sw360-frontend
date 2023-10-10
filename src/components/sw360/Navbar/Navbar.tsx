@@ -15,9 +15,9 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { LOCALES as locales } from '@/object-types/Constants'
-import { Container, Navbar, Nav } from 'react-bootstrap'
+import { Container, Navbar as BSNavbar, Nav } from 'react-bootstrap'
 
-function SW360Navbar() {
+function Navbar() {
     const [heading, setHeading] = useState('Home')
     const pathname = usePathname()
     const isLoginPage = locales.includes(pathname.substring(1)) || pathname.substring(1) === ''
@@ -36,7 +36,7 @@ function SW360Navbar() {
     ]
 
     const NavItems = () => (
-        <Navbar expand='lg'>
+        <BSNavbar expand='lg'>
             <Container fluid>
                 <Nav variant='underline' className='ms-5' activeKey='home'>
                     {navlist.map((item) => (
@@ -48,7 +48,7 @@ function SW360Navbar() {
                     ))}
                 </Nav>
             </Container>
-        </Navbar>
+        </BSNavbar>
     )
 
     return (
@@ -64,4 +64,4 @@ function SW360Navbar() {
     )
 }
 
-export default SW360Navbar
+export default Navbar

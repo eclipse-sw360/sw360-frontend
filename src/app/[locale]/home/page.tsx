@@ -10,9 +10,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 
-import styles from './home.module.css'
+import { useSession } from 'next-auth/react'
+
 import MyProjectsWidget from './components/MyProjectsWidget'
 import MyComponentsWidget from './components/MyComponentsWidget'
 import MyTaskAssignmentsWidget from './components/MyTaskAssignmentsWidget'
@@ -22,8 +23,19 @@ import RecentComponentsWidget from './components/RecentComponentsWidget'
 import RecentReleasesWidget from './components/RecentReleasesWidget'
 
 function HomePage() {
+    const { status } = useSession()
+
+    if (status === 'unauthenticated') {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        }
+    }
+
     return (
-        <div className={`content-container container-fluid ${styles.homePage}`}>
+        <div className='content-container container-fluid homePage'>
             <div className='row'>
                 <div className='col col-md-10'>
                     <div className='row'>
