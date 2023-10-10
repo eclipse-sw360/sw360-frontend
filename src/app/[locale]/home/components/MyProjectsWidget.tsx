@@ -33,7 +33,7 @@ function MyProjectsWidget() {
                 )
         }
         fetchData()
-    }, [])
+    })
 
     const title = t('My Projects')
     const columns = [t('Project Name'), t('Description'), t('Approved Releases')]

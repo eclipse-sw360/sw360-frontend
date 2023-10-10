@@ -34,22 +34,30 @@ function MySubscriptionsWidget() {
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('My Subscriptions')} />
-            <h3 className='fw-bold titleSubSideBar'>{t('Components')}</h3>
-            <ul style={{ listStyleType: 'disc', color: 'black' }}>
-                {componentData.map((item) => (
-                    <li key={''}>
-                        <span style={{ color: 'orange' }}>{item}</span>
-                    </li>
-                ))}
-            </ul>
-            <h3 className='fw-bold titleSubSideBar'>{t('Releases')}</h3>
-            <ul style={{ listStyleType: 'disc', color: 'black' }}>
-                {releaseData.map((item) => (
-                    <li key={''}>
-                        <span style={{ color: 'orange' }}>{item}</span>
-                    </li>
-                ))}
-            </ul>
+            {componentData.length > 0 && (
+                <>
+                    <h3 className='fw-bold titleSubSideBar'>{t('Components')}</h3>
+                    <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                        {componentData.map((item) => (
+                            <li key={''}>
+                                <span style={{ color: 'orange' }}>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+            {releaseData.length > 0 && (
+                <>
+                    <h3 className='fw-bold titleSubSideBar'>{t('Releases')}</h3>
+                    <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                        {releaseData.map((item) => (
+                            <li key={''}>
+                                <span style={{ color: 'orange' }}>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
         </div>
     )
 }

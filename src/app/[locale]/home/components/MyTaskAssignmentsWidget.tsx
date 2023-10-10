@@ -26,7 +26,7 @@ function MyTaskAssignmentsWidget() {
             setData(data.map((item: { name: string; status: string }) => [item.name, item.status]))
         }
         fetchData()
-    }, [])
+    })
 
     const title = t('My Task Assignments')
     const columns = [t('Document Name'), t('Status')]

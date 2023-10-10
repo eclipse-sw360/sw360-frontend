@@ -26,7 +26,7 @@ function MyComponentsWidget() {
             setData(data.map((item: { name: string; description: string }) => [item.name, item.description]))
         }
         fetchData()
-    }, [])
+    })
 
     const title = t('My Components')
     const columns = [t('Component Name'), t('Description')]

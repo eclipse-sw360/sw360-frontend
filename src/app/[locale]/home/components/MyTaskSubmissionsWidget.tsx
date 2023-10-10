@@ -31,7 +31,7 @@ function MyTaskSubmissionsWidget() {
             )
         }
         fetchData()
-    }, [])
+    })
 
     const title = t('My Task Submissions')
     const columns = [t('Document Name'), t('Status'), t('Actions')]
