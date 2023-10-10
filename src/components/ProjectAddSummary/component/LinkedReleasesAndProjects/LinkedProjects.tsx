@@ -9,41 +9,67 @@
 
 'use client'
 
-// import { Table } from '@/components/sw360'
-// import { Session } from '@/object-types/Session'
-import LinkedProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkedProjectsModal'
+import { Table } from '@/components/sw360'
+import { Session } from '@/object-types'
+import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import ProjectPayload from '@/object-types/CreateProjectPayload'
 
-export default function LinkedProjects() {
+interface Props {
+    session: Session
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+export default function LinkedProjects({ session, projectPayload, setProjectPayload }: Props) {
+    const t = useTranslations('default')
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
-    // const [linkedProject, setLinkedProject] = useState([])
+    const [linkedProjectData, setLinkedProjectData] = useState<Map<string, any>>(new Map())
 
-    // const columns = [
-    //     {
-    //         id: 'name',
-    //         name: 'Project Name',
-    //         sort: true,
-    //     },
-    //     {
-    //         id: 'version',
-    //         name: 'Project Version',
-    //         sort: true,
-    //     },
-    //     {
-    //         id: 'relation',
-    //         name: 'Project Relation',
-    //         sort: true,
-    //     },
-    //     {
-    //         id: 'svm',
-    //         name: 'Enable SVM',
-    //         sort: true,
-    //     }
-    // ]
+    const columns = [
+        {
+            id: 'tableData.name',
+            name: t('Name'),
+            sort: true,
+        },
+        {
+            id: 'tableData.version',
+            name: t('Version'),
+            sort: true,
+        },
+        {
+            id: 'tableData.projectRelationship',
+            name: t('Project Relationship'),
+            sort: true,
+        },
+        {
+            id: 'tableData.enableSvm',
+            name: t('Enable SVM'),
+            sort: true,
+        },
+    ]
+
+    const extractDataFromMap = (map: Map<string, any>) => {
+        const extractedData: any = []
+        map.forEach((value, key) => {
+            const interimData: any = []
+            interimData.push(value.name, value.version, value.projectRelationship, value.enableSvm, key)
+            extractedData.push(interimData)
+        })
+        return extractedData
+    }
 
     return (
         <>
-            <LinkedProjectsModal show={showLinkedProjectsModal} setShow={setShowLinkedProjectsModal} />
+            <LinkProjectsModal
+                session={session}
+                setLinkedProjectData={setLinkedProjectData}
+                projectPayload={projectPayload}
+                setProjectPayload={setProjectPayload}
+                show={showLinkedProjectsModal}
+                setShow={setShowLinkedProjectsModal}
+            />
             <div className='row mb-4'>
                 <div className='row header-1'>
                     <h6 className='fw-medium' style={{ color: '#5D8EA9', paddingLeft: '0px' }}>
@@ -51,7 +77,9 @@ export default function LinkedProjects() {
                         <hr className='my-2 mb-2' style={{ color: '#5D8EA9' }} />
                     </h6>
                 </div>
-                <div style={{ paddingLeft: '0px' }}>{/* <Table data={linkedProject} columns={columns}/> */}</div>
+                <div style={{ paddingLeft: '0px' }}>
+                    <Table columns={columns} data={extractDataFromMap(linkedProjectData)} sort={false} />
+                </div>
                 <div className='row' style={{ paddingLeft: '0px' }}>
                     <div className='col-lg-4'>
                         <button

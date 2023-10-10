@@ -19,7 +19,6 @@ import { useTranslations } from 'next-intl'
 import Vendor from '@/object-types/Vendor'
 import { AddtionalDataType } from '@/object-types/AddtionalDataType'
 import InputKeyValue from '@/object-types/InputKeyValue'
-// import { Session } from '@/object-types/Session'
 
 interface Props {
     vendor: Vendor

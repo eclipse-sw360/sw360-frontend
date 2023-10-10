@@ -11,13 +11,24 @@
 
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
-// import { Session } from '@/object-types/Session'
+import Session from '@/object-types/Session'
+import ProjectPayload from '@/object-types/CreateProjectPayload'
 
-export default function LinkedReleasesAndProjects() {
+interface Props {
+    session: Session
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+export default function LinkedReleasesAndProjects({ session, projectPayload, setProjectPayload }: Props) {
     return (
         <>
             <div className='ms-1'>
-                <LinkedProjects />
+                <LinkedProjects
+                    session={session}
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
                 <LinkedReleases />
             </div>
         </>
