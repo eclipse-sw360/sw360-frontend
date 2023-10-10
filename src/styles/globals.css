@@ -571,3 +571,12 @@ th {
     padding-right: 10px;
     padding-top: 20px;
 }
+
+.subscriptionBox {
+    border: 1px solid #2e5aac;
+    background-color: #eef2fa;
+    color: #2e5aac;
+    padding: 10px;
+    text-align: center;
+    font-size: small;
+}

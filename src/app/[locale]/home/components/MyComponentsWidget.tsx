@@ -8,33 +8,31 @@
 // License-Filename: LICENSE
 
 import React, { useEffect, useState } from 'react'
-
 import { useTranslations } from 'next-intl'
 
 import HomeTableHeader from './HomeTableHeader'
-
-import { Table } from '@/components/sw360'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
+import { Table } from 'next-sw360'
 
 function MyComponentsWidget() {
-    const [data, setData] = useState([])
+    const [data] = useState([])
     const t = useTranslations('default')
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await sw360FetchData('/components/mycomponents', 'components')
-            setData(data.map((item: { name: string; description: string }) => [item.name, item.description]))
-        }
-        fetchData()
+        //     const fetchData = async () => {
+        //         const data = await sw360FetchData('/components/mycomponents', 'components')
+        //         setData(data.map((item: { name: string; description: string }) => [item.name, item.description]))
+        //     }
+        //     fetchData()
     })
 
     const title = t('My Components')
     const columns = [t('Component Name'), t('Description')]
+    const language = { noRecordsFound: t('NotOwnComponent') }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={data} selector={false} />
+            <Table columns={columns} data={data} selector={false} language={language} />
         </div>
     )
 }

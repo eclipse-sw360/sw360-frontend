@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl'
 import { Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader, Table } from '@/components/sw360'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 interface ProjectType {
     name: string
@@ -144,9 +143,8 @@ function Project() {
     }
 
     useEffect(() => {
-        sw360FetchData('/projects?allDetails=true', 'projects').then((fetchedData) => {
-            setData(fetchedData as ProjectType[])
-        })
+        const testData: ProjectType = null
+        setData([testData])
     }, [])
 
     return (

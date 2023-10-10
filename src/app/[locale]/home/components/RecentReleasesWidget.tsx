@@ -13,27 +13,26 @@
 import React, { useState, useEffect } from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
 import { useTranslations } from 'next-intl'
 
 function RecentReleasesWidget() {
-    const [data, setData] = useState([])
+    const [data] = useState([])
     const t = useTranslations('default')
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await sw360FetchData('/releases/recentReleases', 'releases')
-            data &&
-                setData(
-                    data.map((item: { name: string }) => [
-                        <li key={''}>
-                            <span style={{ color: 'orange' }}>{item.name}</span>
-                        </li>,
-                    ])
-                )
-        }
-        fetchData()
-    }, [])
+        //     const fetchData = async () => {
+        //         const data = await sw360FetchData('/releases/recentReleases', 'releases')
+        //         data &&
+        //             setData(
+        //                 data.map((item: { name: string }) => [
+        //                     <li key={''}>
+        //                         <span style={{ color: 'orange' }}>{item.name}</span>
+        //                     </li>,
+        //                 ])
+        //             )
+        //     }
+        //     fetchData()
+    })
 
     return (
         <div className='content-container'>

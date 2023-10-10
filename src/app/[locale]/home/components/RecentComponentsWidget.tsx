@@ -13,26 +13,25 @@
 import React, { useEffect, useState } from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
 import { useTranslations } from 'next-intl'
 
 function RecentComponentsWidget() {
-    const [data, setData] = useState([])
+    const [data] = useState([])
     const t = useTranslations('default')
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await sw360FetchData('/components/recentComponents', 'components')
-            data &&
-                setData(
-                    data.map((item: { name: string }) => [
-                        <li key={item.name}>
-                            <span style={{ color: 'orange' }}>{item.name}</span>
-                        </li>,
-                    ])
-                )
-        }
-        fetchData()
+        //     const fetchData = async () => {
+        //         const data = await sw360FetchData('/components/recentComponents', 'components')
+        //         data &&
+        //             setData(
+        //                 data.map((item: { name: string }) => [
+        //                     <li key={item.name}>
+        //                         <span style={{ color: 'orange' }}>{item.name}</span>
+        //                     </li>,
+        //                 ])
+        //             )
+        //     }
+        //     fetchData()
     }, [])
 
     return (

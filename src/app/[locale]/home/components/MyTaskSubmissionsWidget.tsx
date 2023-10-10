@@ -10,36 +10,36 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
-import { Table } from '@/components/sw360'
-import { sw360FetchData } from '@/utils/sw360fetchdata'
+import { Table } from 'next-sw360'
 
 import HomeTableHeader from './HomeTableHeader'
 
 function MyTaskSubmissionsWidget() {
-    const [data, setData] = useState([])
+    const [data] = useState([])
     const t = useTranslations('default')
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await sw360FetchData('/myTaskSubmissions')
-            setData(
-                data.map((item: { name: string; status: string; actions: string }) => [
-                    item.name,
-                    item.status,
-                    item.actions,
-                ])
-            )
-        }
-        fetchData()
+        //     const fetchData = async () => {
+        //         const data = await sw360FetchData('/myTaskSubmissions')
+        //         setData(
+        //             data.map((item: { name: string; status: string; actions: string }) => [
+        //                 item.name,
+        //                 item.status,
+        //                 item.actions,
+        //             ])
+        //         )
+        //     }
+        //     fetchData()
     })
 
     const title = t('My Task Submissions')
     const columns = [t('Document Name'), t('Status'), t('Actions')]
+    const language = { noRecordsFound: t('NoModerationRequests') }
 
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={data} />
+            <Table columns={columns} data={data} language={language} />
         </div>
     )
 }
