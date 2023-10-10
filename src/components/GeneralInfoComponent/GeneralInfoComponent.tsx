@@ -14,9 +14,8 @@ import React, { useCallback, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { Session } from '@/object-types'
-import { VendorDialog } from '@/components/sw360'
+import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
 import styles from './SummaryComponent.module.css'
 import Vendor from '@/object-types/Vendor'
 

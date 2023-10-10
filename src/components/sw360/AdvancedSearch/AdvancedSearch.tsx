@@ -13,8 +13,9 @@ import React, { useState } from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
+
 import CommonUtils from '@/utils/common.utils'
-import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
+import { ShowInfoOnHover } from 'next-sw360'
 
 interface Option {
     key: string

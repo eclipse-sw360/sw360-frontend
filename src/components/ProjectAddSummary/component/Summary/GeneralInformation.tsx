@@ -11,10 +11,10 @@
 
 import { GiCancel } from 'react-icons/gi'
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
-import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
+
 import ProjectPayload from '@/object-types/CreateProjectPayload'
-import { VendorDialog } from '@/components/sw360'
+import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import Vendor from '@/object-types/Vendor'
 
 interface Param {

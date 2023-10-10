@@ -9,9 +9,9 @@
 
 'use client'
 
-import ShowInfoOnHover from '@/components/ShowInfoOnHover/ShowInfoOnHover'
 import { useTranslations } from 'next-intl'
 import ProjectPayload from '@/object-types/CreateProjectPayload'
+import { ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
     projectPayload: ProjectPayload

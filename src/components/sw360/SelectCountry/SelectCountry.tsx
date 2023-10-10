@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use-client'
+
 import React from 'react'
 import { getData } from 'country-list'
 import { useTranslations } from 'next-intl'
@@ -16,7 +18,12 @@ interface Props {
     value?: string
 }
 
-export default function SelectCountryComponent(props: Props) {
+interface CountryData {
+    code: string
+    name: string
+}
+
+function SelectCountry(props: Props) {
     const t = useTranslations('default')
     return (
         <>
@@ -32,7 +39,7 @@ export default function SelectCountryComponent(props: Props) {
                 value={props.value}
             >
                 <option value=''>{t('Select a country')}</option>
-                {getData().map((country: any) => (
+                {getData().map((country: CountryData) => (
                     <option key={country.code} value={country.code}>
                         {country.name}
                     </option>
@@ -41,3 +48,5 @@ export default function SelectCountryComponent(props: Props) {
         </>
     )
 }
+
+export default SelectCountry

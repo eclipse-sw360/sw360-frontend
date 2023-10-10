@@ -13,12 +13,15 @@ import Footer from './Footer/Footer'
 import Header from './Header/Header'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
+import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
+import SelectCountry from './SelectCountry/SelectCountry'
 import SideBar from './SideBar/SideBar'
+import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
+import Navbar from './Navbar/Navbar'
 import ToastMessage from './ToastContainer/Toast'
-import SW360Navbar from './SW360Navbar/SW360Navbar'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 
 // Table component
@@ -34,13 +37,16 @@ export {
     Footer,
     Header,
     LanguageSwitcher,
+    Navbar,
     PageButtonHeader,
+    ProfileDropdown,
     QuickFilter,
     ReactWrapper,
     SearchUsersModal,
     SearchVendorsModal,
+    SelectCountry,
     SideBar,
-    SW360Navbar,
+    ShowInfoOnHover,
     Table,
     ToastMessage,
     TreeTable,

@@ -15,9 +15,8 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next-intl/link'
 import { useSession } from 'next-auth/react'
-import ProfileDropdown from '@/components/sw360/ProfileDropdown/ProfileDropdown'
 
-import { SW360Navbar } from '@/components/sw360'
+import { Navbar, ProfileDropdown } from 'next-sw360'
 import sw360logo from '@/assets/images/sw360-logo.svg'
 import searchLogo from '@/assets/icons/search.svg'
 
@@ -79,7 +78,7 @@ const Header = () => {
             </div>
 
             <div className='row'>
-                <SW360Navbar />
+                <Navbar />
             </div>
         </div>
     )

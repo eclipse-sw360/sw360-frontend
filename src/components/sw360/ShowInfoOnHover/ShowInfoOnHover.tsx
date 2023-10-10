@@ -10,7 +10,6 @@
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiInfoCircle } from 'react-icons/bi'
 
-
 const ShowInfoOnHover = ({ text }: { text: string }) => {
     return (
         <>
@@ -23,4 +22,4 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
     )
 }
 
-export default ShowInfoOnHover;
+export default ShowInfoOnHover
