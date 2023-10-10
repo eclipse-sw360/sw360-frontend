@@ -64,11 +64,11 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props) 
                             aria-label='Deadline for pre-evaluation'
                             id='addProjects.systemTestBeginDate'
                             placeholder='System test begin date YYYY-MM-DD'
-                            onFocus={(e) => {
-                                ;(e.target.type as any) = 'date'
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'date'
                             }}
-                            onBlur={(e) => {
-                                ;(e.target.type as any) = 'text'
+                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'text'
                             }}
                             name='systemTestStart'
                             value={projectPayload.systemTestStart}
@@ -85,11 +85,11 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props) 
                             aria-label='Deadline for pre-evaluation'
                             id='addProjects.systemTestEndDate'
                             placeholder='System test end date YYYY-MM-DD'
-                            onFocus={(e) => {
-                                ;(e.target.type as any) = 'date'
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'date'
                             }}
                             onBlur={(e) => {
-                                ;(e.target.type as any) = 'text'
+                                e.target.type = 'text'
                             }}
                             name='systemTestEnd'
                             value={projectPayload.systemTestEnd}
@@ -109,11 +109,11 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props) 
                             aria-label='Deadline for pre-evaluation'
                             id='addProjects.systemTestBeginDate'
                             placeholder='Delivery start date YYYY-MM-DD'
-                            onFocus={(e) => {
-                                ;(e.target.type as any) = 'date'
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'date'
                             }}
                             onBlur={(e) => {
-                                ;(e.target.type as any) = 'text'
+                                e.target.type = 'text'
                             }}
                             name='deliveryStart'
                             value={projectPayload.deliveryStart}
@@ -130,11 +130,11 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props) 
                             aria-label='Deadline for pre-evaluation'
                             id='addProjects.phaseOutDate'
                             placeholder='Phase-out since YYYY-MM-DD'
-                            onFocus={(e) => {
-                                ;(e.target.type as any) = 'date'
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'date'
                             }}
                             onBlur={(e) => {
-                                ;(e.target.type as any) = 'text'
+                                e.target.type = 'text'
                             }}
                             name='phaseOutSince'
                             value={projectPayload.phaseOutSince}

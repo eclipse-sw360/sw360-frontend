@@ -91,11 +91,11 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props) {
                             aria-label='Deadline for pre-evaluation'
                             id='addProjects.deadlinePreEvaluation'
                             placeholder='Pre-evaluation date YYYY-MM-DD'
-                            onFocus={(e) => {
-                                ;(e.target.type as any) = 'date'
+                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'date'
                             }}
-                            onBlur={(e) => {
-                                ;(e.target.type as any) = 'text'
+                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                                e.target.type = 'text'
                             }}
                             name='preevaluationDeadline'
                             value={projectPayload.preevaluationDeadline}
