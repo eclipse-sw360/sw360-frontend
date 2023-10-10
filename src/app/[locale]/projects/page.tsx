@@ -16,15 +16,15 @@ import { Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader, Table } from '@/components/sw360'
 
-interface ProjectType {
-    name: string
-    description: string
-    projectResponsible: string
-    state: string
-}
+// interface ProjectType {
+//     name: string
+//     description: string
+//     projectResponsible: string
+//     state: string
+// }
 
 function Project() {
-    const [data, setData] = useState([])
+    const [projectData, setProjectData] = useState([])
     const t = useTranslations('default')
 
     const pagination = { limit: 10 }
@@ -143,8 +143,7 @@ function Project() {
     }
 
     useEffect(() => {
-        const testData: ProjectType = null
-        setData([testData])
+        setProjectData([])
     }, [])
 
     return (
@@ -156,7 +155,7 @@ function Project() {
 
                 <div className='col'>
                     <div className='row'>
-                        <PageButtonHeader title={`${t('Projects')} (${data.length})`} buttons={headerbuttons}>
+                        <PageButtonHeader title={`${t('Projects')} (${projectData.length})`} buttons={headerbuttons}>
                             <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
                                 <Dropdown>
                                     <Dropdown.Toggle variant='secondary' id='project-export'>
@@ -169,12 +168,7 @@ function Project() {
                                 </Dropdown>
                             </div>
                         </PageButtonHeader>
-                        <Table
-                            columns={columns}
-                            data={data.map((data) => [data.name, data.description, data.projectResponsible])}
-                            pagination={pagination}
-                            selector={true}
-                        />
+                        <Table columns={columns} data={projectData} pagination={pagination} selector={true} />
                     </div>
                 </div>
             </div>
