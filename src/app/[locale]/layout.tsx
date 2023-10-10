@@ -21,7 +21,7 @@ import { notFound } from 'next/navigation'
 import { Header, Footer } from 'next-sw360'
 
 export function generateStaticParams() {
-    return [{ locale: 'en' }, { locale: 'ja' }, { locale: 'vi' }, { locale: 'zh' }]
+    return [{ locale: 'en' }, { locale: 'ja' }, { locale: 'vi' }, { locale: 'zh' }, { locale: 'pt-BR' }]
 }
 
 type Props = {
