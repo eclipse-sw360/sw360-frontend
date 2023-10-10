@@ -689,6 +689,11 @@
         "There are some errors while creating project": "NOT TRANSLATED",
         "My Subscriptions": "Đăng ký của tôi",
         "Recent Components": "Các thành phần gần đây",
-        "Recent Releases": "Các bản phát hành gần đây"
+        "Recent Releases": "Các bản phát hành gần đây",
+        "NoModerationRequests": "Bạn không có bất kỳ yêu cầu kiểm duyệt mở nào.",
+        "NoProjectsFound": "Không có dự án nào được tìm thấy với lựa chọn của bạn.",
+        "No subscriptions available": "Không có đăng ký có sẵn.",
+        "NotOwnComponent": "Bạn không sở hữu bất kỳ thành phần nào.",
+        "NoTasksAssigned": "Không có nhiệm vụ nào được giao cho bạn."
     }
 }
