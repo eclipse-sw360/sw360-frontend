@@ -690,6 +690,11 @@
         "There are some errors while creating project": "NOT TRANSLATED",
         "My Subscriptions": "私の定期購読",
         "Recent Components": "最近のコンポーネント",
-        "Recent Releases": "最近のリリース"
+        "Recent Releases": "最近のリリース",
+        "NoModerationRequests": "オープンなモデレーションリクエストはありません。",
+        "NoProjectsFound": "選択したプロジェクトは見つかりませんでした。",
+        "No subscriptions available": "利用できるサブスクリプションはありません。",
+        "NotOwnComponent": "あなたはコンポーネントを所有していません。",
+        "NoTasksAssigned": "あなたに割り当てられたタスクはありません。"
     }
 }

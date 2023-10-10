@@ -429,8 +429,11 @@
         "New Components": "New Components",
         "New Release": "New Release",
         "Name of the component": "Name of the component",
+        "No subscriptions available": "No subscriptions available.",
         "NONE": "NONE",
         "NAME_COMPONENT": "Name of the component",
+        "NoModerationRequests": "You do not have any open moderation requests.",
+        "NoProjectsFound": "There are no projects found with your selection.",
         "Obligations": "Obligations",
         "OPEN": "Open",
         "Open": "Open",
@@ -698,6 +701,8 @@
         "Your project is created": "Your project is created",
         "My Subscriptions": "My Subscriptions",
         "Recent Components": "Recent Components",
-        "Recent Releases": "Recent Releases"
+        "Recent Releases": "Recent Releases",
+        "NotOwnComponent": "You do not own any components.",
+        "NoTasksAssigned": "There are no tasks assigned to you."
     }
 }

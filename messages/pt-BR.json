@@ -697,6 +697,11 @@
         "Your project is created": "Seu projeto foi criado",
         "My Subscriptions": "Minhas assinaturas",
         "Recent Components": "Componentes recentes",
-        "Recent Releases": "Lançamentos recentes"
+        "Recent Releases": "Lançamentos recentes",
+        "NoModerationRequests": "Você não tem nenhuma solicitação de moderação aberta.",
+        "NoProjectsFound": "Não foram encontrados projetos com sua seleção.",
+        "No subscriptions available": "Nenhuma assinatura disponível.",
+        "NotOwnComponent": "Você não possui nenhum componente.",
+        "NoTasksAssigned": "Não há tarefas atribuídas a você."
     }
 }
