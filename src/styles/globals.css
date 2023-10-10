@@ -544,3 +544,30 @@ th {
 .vendor_icon {
     fill: #8a66c2;
 }
+
+.titleSubSideBar {
+    color: #000000;
+    text-transform: capitalize;
+    font-size: medium;
+    margin-top: 10px;
+}
+
+.homePage {
+    margin-top: 1%;
+    min-height: calc(100vh - 30px);
+}
+
+.tableHeaderTitle {
+    color: #5d8ea9;
+    text-transform: uppercase;
+    font-size: medium;
+    font-weight: bold;
+    flex-grow: 1;
+}
+
+.tableHeader {
+    display: flex;
+    margin-left: 5px;
+    padding-right: 10px;
+    padding-top: 20px;
+}

@@ -14,7 +14,6 @@ import React, { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import HomeTableHeader from './HomeTableHeader'
-import homePageStyles from '../home.module.css'
 import { sw360FetchData } from '@/utils/sw360fetchdata'
 
 function MySubscriptionsWidget() {
@@ -35,7 +34,7 @@ function MySubscriptionsWidget() {
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('My Subscriptions')} />
-            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>{t('Components')}</h3>
+            <h3 className='fw-bold titleSubSideBar'>{t('Components')}</h3>
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
                 {componentData.map((item) => (
                     <li key={''}>
@@ -43,7 +42,7 @@ function MySubscriptionsWidget() {
                     </li>
                 ))}
             </ul>
-            <h3 className={`fw-bold ${homePageStyles.titleSubSideBar}`}>{t('Releases')}</h3>
+            <h3 className='fw-bold titleSubSideBar'>{t('Releases')}</h3>
             <ul style={{ listStyleType: 'disc', color: 'black' }}>
                 {releaseData.map((item) => (
                     <li key={''}>
