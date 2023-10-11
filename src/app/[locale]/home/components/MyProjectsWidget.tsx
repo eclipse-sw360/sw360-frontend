@@ -7,30 +7,74 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
 
-import { Table } from 'next-sw360'
+import { HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Table, _ } from 'next-sw360'
+
+import Link from 'next/link'
 import HomeTableHeader from './HomeTableHeader'
 
 function MyProjectsWidget() {
-    const [data] = useState([])
+    const [data, setData] = useState([])
     const t = useTranslations('default')
+    const params = useSearchParams()
+    const [loading, setLoading] = useState(true)
+    const { data: session } = useSession()
+
+    const fetchData = useCallback(
+        async (queryUrl: string, signal: AbortSignal) => {
+            const response = await ApiUtils.GET(queryUrl, session?.user?.access_token, signal)
+            if (response.status == HttpStatus.OK) {
+                const myprojects = await response.json()
+                return myprojects
+            } else {
+                return undefined
+            }
+        },
+        [session]
+    )
 
     useEffect(() => {
-        //     const fetchData = async () => {
-        //         const data = await sw360FetchData('/projects/myprojects', 'projects')
-        //         data &&
-        //             setdata(
-        //                 data.map((item: { name: string; description: string; version: string }) => [
-        //                     item.name,
-        //                     item.description,
-        //                     item.version,
-        //                 ])
-        //             )
-        //     }
-        //     fetchData()
-    })
+        setLoading(true)
+        const searchParams = Object.fromEntries(params)
+        const queryUrl = CommonUtils.createUrlWithParams('projects/myprojects', searchParams)
+
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        fetchData(queryUrl, signal)
+            .then((projects: any) => {
+                if (!CommonUtils.isNullOrUndefined(projects['_embedded']['sw360:projects'])) {
+                    setData(
+                        projects['_embedded']['sw360:projects'].map(
+                            (item: { name: string; description: string; version: string; _links: any }) => [
+                                _(
+                                    <Link href={'projects/detail/' + CommonUtils.getIdFromUrl(item._links.self.href)}>
+                                        {item.name} ({item.version})
+                                    </Link>
+                                ),
+                                CommonUtils.truncateText(item.description, 40),
+                                item.version,
+                            ]
+                        )
+                    )
+                    setLoading(false)
+                }
+            })
+            .catch(() => {
+                console.error('False to fetch components')
+            })
+
+        return () => {
+            controller.abort()
+        }
+    }, [fetchData, params, session])
 
     const title = t('My Projects')
     const columns = [t('Project Name'), t('Description'), t('Approved Releases')]
@@ -39,7 +83,13 @@ function MyProjectsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={data} pagination={{ limit: 5 }} selector={false} language={language} />
+            {loading == false ? (
+                <Table columns={columns} data={data} pagination={{ limit: 5 }} selector={false} language={language} />
+            ) : (
+                <div className='col-12'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
         </div>
     )
 }
