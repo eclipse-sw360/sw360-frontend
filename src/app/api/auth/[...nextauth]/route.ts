@@ -8,11 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import UserCredentialInfo from '@/object-types/UserCredentialInfo'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import AuthService from '@/services/auth.service'
+
 import { CREDENTIAL_PROVIDER } from '@/object-types/Constants'
+import UserCredentialInfo from '@/object-types/UserCredentialInfo'
+import AuthService from '@/services/auth.service'
 
 export const authOptions: NextAuthOptions = {
     secret: process.env.AUTH_SECRET,
@@ -29,6 +30,7 @@ export const authOptions: NextAuthOptions = {
                     password: password,
                 }
                 const authToken = AuthService.generateToken(userCredential)
+
                 return authToken as any
             },
         }),

@@ -7,23 +7,69 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
 
+import { HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Table, _ } from 'next-sw360'
 import HomeTableHeader from './HomeTableHeader'
-import { Table } from 'next-sw360'
 
 function MyComponentsWidget() {
-    const [data] = useState([])
+    const [data, setData] = useState([])
     const t = useTranslations('default')
+    const params = useSearchParams()
+    const [loading, setLoading] = useState(true)
+    const { data: session } = useSession()
+
+    const fetchData = useCallback(
+        async (queryUrl: string, signal: AbortSignal) => {
+            const response = await ApiUtils.GET(queryUrl, session?.user?.access_token, signal)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json()
+                return data
+            } else {
+                return undefined
+            }
+        },
+        [session]
+    )
 
     useEffect(() => {
-        //     const fetchData = async () => {
-        //         const data = await sw360FetchData('/components/mycomponents', 'components')
-        //         setData(data.map((item: { name: string; description: string }) => [item.name, item.description]))
-        //     }
-        //     fetchData()
-    })
+        setLoading(true)
+        const searchParams = Object.fromEntries(params)
+        const queryUrl = CommonUtils.createUrlWithParams('components/mycomponents', searchParams)
+
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        fetchData(queryUrl, signal)
+            .then((components: any) => {
+                console.log(components)
+                if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
+                    setData(
+                        components['_embedded']['sw360:components'].map(
+                            (item: { name: string; description: string; id: string }) => [
+                                _(<Link href={'components/detail/' + item.id}>{item.name}</Link>),
+                                CommonUtils.truncateText(item.description, 40),
+                            ]
+                        )
+                    )
+                    setLoading(false)
+                }
+            })
+            .catch(() => {
+                console.error('False to fetch components')
+            })
+
+        return () => {
+            controller.abort()
+        }
+    }, [fetchData, params, session])
 
     const title = t('My Components')
     const columns = [t('Component Name'), t('Description')]
@@ -32,7 +78,13 @@ function MyComponentsWidget() {
     return (
         <div>
             <HomeTableHeader title={title} />
-            <Table columns={columns} data={data} selector={false} language={language} />
+            {loading == false ? (
+                <Table columns={columns} data={data} pagination={{ limit: 5 }} selector={false} language={language} />
+            ) : (
+                <div className='col-12'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
         </div>
     )
 }

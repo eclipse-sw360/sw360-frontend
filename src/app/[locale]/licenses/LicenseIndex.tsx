@@ -9,34 +9,30 @@
 
 'use client'
 
-import { Check2Circle, XCircle } from 'react-bootstrap-icons'
-import { signOut } from 'next-auth/react'
-import { Spinner } from 'react-bootstrap'
-import { useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import React, { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { Check2Circle, XCircle } from 'react-bootstrap-icons'
 
-import { _, PageButtonHeader, QuickFilter, Table } from 'next-sw360'
+import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
+import { PageButtonHeader, QuickFilter, Table, _ } from 'next-sw360'
 
 const headerButtons = {
     'Add License': { link: '/licenses/add', type: 'primary' },
     'Export Spreadsheet': { link: '/licenses/export', type: 'secondary' },
 }
 
-interface Props {
-    session?: Session
-    length?: number
-}
-
-function LicensesPage({ session }: Props) {
+function LicensesPage() {
     const params = useSearchParams()
     const t = useTranslations('default')
     const [search, setSearch] = useState({})
     const [loading, setLoading] = useState(true)
     const [licenseData, setLicenseData] = useState([])
+    const { data: session } = useSession()
 
     const fetchData: any = useCallback(
         async (queryUrl: string, signal: unknown) => {
@@ -50,7 +46,7 @@ function LicensesPage({ session }: Props) {
                 return []
             }
         },
-        [session.user.access_token]
+        [session]
     )
 
     useEffect(() => {
