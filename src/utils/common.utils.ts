@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,6 +11,11 @@
 
 import { EmbeddedUser, InputKeyValue, Moderators } from '@/object-types'
 
+/**
+ * Checks if the given object is null or undefined.
+ * @param obj - The object to check.
+ * @returns True if the object is null or undefined, false otherwise.
+ */
 const isNullOrUndefined = (obj: unknown) => {
     if (obj === null || obj === undefined) {
         return true
@@ -17,6 +23,11 @@ const isNullOrUndefined = (obj: unknown) => {
     return false
 }
 
+/**
+ * Checks if a string is null, empty or undefined.
+ * @param str - The string to check.
+ * @returns True if the string is null, empty or undefined, false otherwise.
+ */
 const isNullEmptyOrUndefinedString = (str: string) => {
     if (str === null || str === undefined || str.length === 0) {
         return true
@@ -24,11 +35,18 @@ const isNullEmptyOrUndefinedString = (str: string) => {
     return false
 }
 
-interface Params {
+interface UrlWithParams {
     [key: string]: string
 }
 
-const createUrlWithParams = (url: string, params: Params) => {
+/**
+ * Creates a URL with query parameters.
+ *
+ * @param url - The base URL.
+ * @param params - An object containing the query parameters.
+ * @returns The URL with the query parameters.
+ */
+const createUrlWithParams = (url: string, params: UrlWithParams) => {
     const queryString = Object.keys(params)
         .map((key) => {
             return [key, params[key]].map(encodeURIComponent).join('=')
@@ -37,6 +55,11 @@ const createUrlWithParams = (url: string, params: Params) => {
     return `${url}?${queryString}`
 }
 
+/**
+ * Checks if an array is null, empty or undefined.
+ * @param arr - The array to check.
+ * @returns True if the array is null, empty or undefined, false otherwise.
+ */
 const isNullEmptyOrUndefinedArray = (arr: Array<unknown>) => {
     if (arr === null || arr === undefined || arr.length === 0) {
         return true
@@ -44,10 +67,20 @@ const isNullEmptyOrUndefinedArray = (arr: Array<unknown>) => {
     return false
 }
 
+/**
+ * Extracts the ID from a URL string.
+ * @param url - The URL string to extract the ID from.
+ * @returns The ID extracted from the URL string.
+ */
 const getIdFromUrl = (url: string): string => {
     return url.split('/').at(-1)
 }
 
+/**
+ * Returns an object containing the full names and emails of the moderators.
+ * @param users - An array of EmbeddedUser objects representing the moderators.
+ * @returns An object containing the full names and emails of the moderators.
+ */
 const getObjectModerators = (users: EmbeddedUser[]) => {
     const fullNames: string[] = []
     const moderatorsEmail: string[] = []
@@ -66,6 +99,11 @@ const getObjectModerators = (users: EmbeddedUser[]) => {
     return moderatorsResponse
 }
 
+/**
+ * Returns an object containing the full names and emails of the contributors.
+ * @param users An array of EmbeddedUser objects representing the contributors.
+ * @returns An object containing the full names and emails of the contributors.
+ */
 const getObjectContributors = (users: EmbeddedUser[]) => {
     const fullNames: string[] = []
     const contributorsEmail: string[] = []
@@ -84,6 +122,11 @@ const getObjectContributors = (users: EmbeddedUser[]) => {
     return contributorsResponse
 }
 
+/**
+ * Returns an array of email addresses for the given array of users.
+ * @param users - An array of EmbeddedUser objects.
+ * @returns An array of email addresses.
+ */
 const getEmailsModerators = (users: EmbeddedUser[]) => {
     const moderatorsEmail: string[] = []
     if (typeof users === 'undefined') {
@@ -96,6 +139,11 @@ const getEmailsModerators = (users: EmbeddedUser[]) => {
     return moderatorsEmail
 }
 
+/**
+ * Converts an object to a map of key-value pairs.
+ * @param data - The object to convert.
+ * @returns An array of key-value pairs.
+ */
 const convertObjectToMap = (data: { [k: string]: string }) => {
     const map = new Map(Object.entries(data))
     const inputs: InputKeyValue[] = []
@@ -109,6 +157,11 @@ const convertObjectToMap = (data: { [k: string]: string }) => {
     return inputs
 }
 
+/**
+ * Converts an object with string keys and string array values to an array of key-value pairs.
+ * @param data - The object to convert.
+ * @returns An array of key-value pairs.
+ */
 const convertObjectToMapRoles = (data: { [k: string]: Array<string> }) => {
     const inputRoles: InputKeyValue[] = []
     const mapRoles = new Map(Object.entries(data))
@@ -124,6 +177,11 @@ const convertObjectToMapRoles = (data: { [k: string]: Array<string> }) => {
     return inputRoles
 }
 
+/**
+ * Converts an array of key-value pairs into an object with keys for each role type and an array of values for each role.
+ * @param datas - The array of key-value pairs to convert.
+ * @returns An object with keys for each role type and an array of values for each role.
+ */
 const convertRoles = (datas: InputKeyValue[]) => {
     if (datas === null) {
         return null
@@ -148,6 +206,29 @@ const convertRoles = (datas: InputKeyValue[]) => {
     return roles
 }
 
+/**
+ * Truncates a given text to a maximum length while preserving full words.
+ * @param text - The text to truncate.
+ * @param maxLength - The maximum length of the truncated text.
+ * @returns The truncated text.
+ */
+const truncateText = (text: string, maxLength = 80) => {
+    if (text.length <= maxLength) {
+        return text
+    }
+
+    let truncatedText = text.substring(0, maxLength)
+    const lastSpaceIndex = truncatedText.lastIndexOf(' ')
+
+    if (lastSpaceIndex !== -1) {
+        truncatedText = truncatedText.substring(0, lastSpaceIndex)
+    }
+
+    truncatedText = truncatedText + '...'
+
+    return truncatedText
+}
+
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
@@ -160,6 +241,7 @@ const CommonUtils = {
     convertObjectToMap,
     convertObjectToMapRoles,
     convertRoles,
+    truncateText,
 }
 
 export default CommonUtils
