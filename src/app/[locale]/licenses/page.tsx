@@ -7,19 +7,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import LicenseIndex from './LicenseIndex'
 import { Metadata } from 'next'
-import { Session } from '@/object-types'
+import LicenseIndex from './LicenseIndex'
 
 export const metadata: Metadata = {
     title: 'Licenses',
 }
 
 async function LicensesPage() {
-    const session: Session = await getServerSession(authOptions)
-    return <LicenseIndex session={session} />
+    return <LicenseIndex />
 }
 
 export default LicensesPage
