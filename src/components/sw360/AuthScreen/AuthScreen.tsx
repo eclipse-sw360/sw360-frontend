@@ -10,22 +10,18 @@
 
 'use client'
 
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { useLocale, useTranslations } from 'next-intl'
+import Link from 'next-intl/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import Link from 'next-intl/link'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
+import { HttpStatus } from '@/object-types'
 import { CREDENTIALS } from '@/object-types/Constants'
-import { HttpStatus, Session } from '@/object-types'
 import { LanguageSwitcher } from 'next-sw360'
 
-interface Props {
-    session?: Session
-}
-
-const AuthScreen = ({ session }: Props) => {
+function AuthScreen() {
     const router = useRouter()
     const locale = useLocale()
     const t = useTranslations('default')
@@ -33,6 +29,7 @@ const AuthScreen = ({ session }: Props) => {
     const [messageShow, setMessageShow] = useState<boolean>(false)
     const [emailAddress, setEmailAddress] = useState<string>('@sw360.org')
     const [password, setPassword] = useState<string>('')
+    const { status } = useSession()
 
     const handleClose = () => setDialogShow(false)
     const handleShow = () => setDialogShow(true)
@@ -64,7 +61,7 @@ const AuthScreen = ({ session }: Props) => {
                                 <p className='mt-3'>{t('SW360_INFO')}</p>
                                 <hr className='my-4' />
                                 <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
-                                {!session ? (
+                                {status === 'unauthenticated' ? (
                                     <div className='buttons'>
                                         <span>
                                             <a className='btn btn-primary btn-lg' role='button' onClick={handleShow}>
