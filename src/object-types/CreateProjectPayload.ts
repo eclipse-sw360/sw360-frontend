@@ -7,7 +7,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 export default interface ProjectPayload {
     name: string
     description?: string
@@ -26,16 +25,22 @@ export default interface ProjectPayload {
     moderators?: string[]
     contributors?: string[]
     clearingState?: string
-    businessUnit ?: string
-    preevaluationDeadline ?: string
-    clearingSummary ?: string
-    specialRisksOSS ?: string
-    generalRisks3rdParty ?: string
-    specialRisks3rdParty ?: string
-    deliveryChannels ?: string
-    remarksAdditionalRequirements ?: string
-    systemTestStart ?: string
-    systemTestEnd ?: string
-    deliveryStart ?: string
-    licenseInfoHeaderText ?: string
+    businessUnit?: string
+    preevaluationDeadline?: string
+    clearingSummary?: string
+    specialRisksOSS?: string
+    generalRisks3rdParty?: string
+    specialRisks3rdParty?: string
+    deliveryChannels?: string
+    remarksAdditionalRequirements?: string
+    systemTestStart?: string
+    systemTestEnd?: string
+    deliveryStart?: string
+    licenseInfoHeaderText?: string
+    linkedProjects?: {
+        [key: string]: {
+            projectRelationship: string
+            enableSvm: boolean
+        }
+    }
 }

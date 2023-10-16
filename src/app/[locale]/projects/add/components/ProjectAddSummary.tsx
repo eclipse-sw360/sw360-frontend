@@ -85,6 +85,7 @@ export default function AddProjects({ session }: Props) {
         systemTestEnd: '',
         deliveryStart: '',
         licenseInfoHeaderText: '',
+        linkedProjects: {},
     })
     const [toastData, setToastData] = useState<ToastData>({
         show: false,
@@ -230,7 +231,11 @@ export default function AddProjects({ session }: Props) {
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedProjects'>
-                                            <LinkedReleasesAndProjects />
+                                            <LinkedReleasesAndProjects
+                                                session={session}
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
                                         </Tab.Pane>
                                     </Tab.Content>
                                 </Row>
