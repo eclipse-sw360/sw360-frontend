@@ -9,12 +9,12 @@
 
 'use client'
 
-import React, { useState } from 'react'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import { RolesType } from '@/object-types/RolesType'
 import { useTranslations } from 'next-intl'
+import React, { useState } from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
-import { Tooltip, OverlayTrigger } from 'react-bootstrap'
+
+import { DocumentTypes, RolesType } from '@/object-types'
 
 interface Props {
     documentType?: string
@@ -26,7 +26,7 @@ interface Input {
     value: string
 }
 
-export default function AddAdditionalRolesComponent({ documentType, setRoles }: Props) {
+function AddAdditionalRoles({ documentType, setRoles }: Props) {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
 
@@ -126,3 +126,5 @@ export default function AddAdditionalRolesComponent({ documentType, setRoles }: 
         </>
     )
 }
+
+export default AddAdditionalRoles

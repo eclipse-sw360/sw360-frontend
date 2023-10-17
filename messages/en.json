@@ -76,7 +76,7 @@
         "Cancel": "Cancel",
         "complexity": "complexity",
         "Create Vulnerability": "Create Vulnerability",
-        "Click to add row to": "Click to add row to",
+        "Click to add row to": "Click to add row to {named_value}",
         "Click to add row to Additional Data": "Click to add row to Additional Data",
         "Click to add row to External Id": "Click to add row to External Id",
         "Click to add row to External Url": "Click to add row to External Url",

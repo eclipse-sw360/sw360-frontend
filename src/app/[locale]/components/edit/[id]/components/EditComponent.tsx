@@ -10,31 +10,32 @@
 
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { ToastContainer } from 'react-bootstrap'
-import { signOut } from 'next-auth/react'
-import { notFound, useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { notFound, useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { ToastContainer } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { Component, HttpStatus, Session } from '@/object-types'
-import { SideBar, PageButtonHeader } from '@/components/sw360'
-import ActionType from '@/object-types/enums/ActionType'
-import Attachment from '@/object-types/Attachment'
-import AttachmentDetail from '@/object-types/AttachmentDetail'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import ComponentEditSummary from './ComponentEditSummary'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import EditAttachments from '@/components/Attachments/EditAttachments'
+import {
+    ActionType,
+    Attachment,
+    AttachmentDetail,
+    CommonTabIds,
+    Component,
+    ComponentPayload,
+    DocumentTypes,
+    HttpStatus,
+    ToastData,
+} from '@/object-types'
 import EmbeddedAttachments from '@/object-types/EmbeddedAttachments'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
+import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
+import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
-import ToastData from '@/object-types/ToastData'
-import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 
 interface Props {
-    session?: Session
     componentId?: string
 }
 
@@ -53,8 +54,9 @@ const tabList = [
     },
 ]
 
-const EditComponent = ({ session, componentId }: Props) => {
+function EditComponent({ componentId }: Props) {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [component, setComponent] = useState<Component>()
@@ -187,7 +189,6 @@ const EditComponent = ({ session, componentId }: Props) => {
                             </ToastContainer>
                             <ComponentEditSummary
                                 attachmentData={attachmentData}
-                                session={session}
                                 componentId={componentId}
                                 componentPayload={componentPayload}
                                 setComponentPayload={setComponentPayload}

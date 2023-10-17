@@ -10,23 +10,16 @@
 
 'use client'
 
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
-import { CommonUtils } from '@/utils'
-import { Licenses, Session } from '@/object-types'
-import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import AddKeyValueComponent from '@/components/AddKeyValue'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import InputKeyValue from '@/object-types/InputKeyValue'
-import Moderators from '@/object-types/Moderators'
-import ReleasePayload from '@/object-types/ReleasePayload'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import Vendor from '@/object-types/Vendor'
+import { DocumentTypes, InputKeyValue, Licenses, Moderators, Vendor } from '@/object-types'
+import ReleasePayload from '@/object-types/ReleasePayload'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
-    session?: Session
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
     vendor?: Vendor
@@ -41,8 +34,7 @@ interface Props {
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
 }
 
-export default function ReleaseAddSummary({
-    session,
+function ReleaseAddSummary({
     releasePayload,
     setReleasePayload,
     vendor,
@@ -57,17 +49,8 @@ export default function ReleaseAddSummary({
     setModerator,
 }: Props) {
     const t = useTranslations('default')
-    const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
-
-    const setDataRoles = (roles: InputKeyValue[]) => {
-        const roleDatas = CommonUtils.convertRoles(roles)
-        setReleasePayload({
-            ...releasePayload,
-            roles: roleDatas,
-        })
-    }
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -96,7 +79,6 @@ export default function ReleaseAddSummary({
             >
                 <div className='col' style={{ fontSize: '0.875rem' }}>
                     <ReleaseSummary
-                        session={session}
                         releasePayload={releasePayload}
                         setReleasePayload={setReleasePayload}
                         vendor={vendor}
@@ -111,29 +93,24 @@ export default function ReleaseAddSummary({
                         setContributor={setContributor}
                     />
                     <div className='row mb-4'>
-                        <AddAdditionalRolesComponent
-                            documentType={DocumentTypes.COMPONENT}
-                            roles={roles}
-                            setRoles={setRoles}
-                            setDataRoles={setDataRoles}
-                        />
+                        <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
                     </div>
                     <div className='row mb-4'>
-                        <AddKeyValueComponent
+                        <AddKeyValue
                             header={t('External ids')}
                             keyName={'external id'}
                             setData={setExternalIds}
                             data={externalIds}
-                            setMap={setDataExternalIds}
+                            setObject={setDataExternalIds}
                         />
                     </div>
                     <div className='row mb-4'>
-                        <AddKeyValueComponent
+                        <AddKeyValue
                             header={t('Additional Data')}
                             keyName={'additional data'}
                             setData={setAddtionalData}
                             data={addtionalData}
-                            setMap={setDataAddtionalData}
+                            setObject={setDataAddtionalData}
                         />
                     </div>
                     <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
@@ -142,3 +119,5 @@ export default function ReleaseAddSummary({
         </>
     )
 }
+
+export default ReleaseAddSummary

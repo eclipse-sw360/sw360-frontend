@@ -8,4 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export type AddtionalDataType = (additionalDatas: Map<string,string>) => void
+type AddtionalDataType = (additionalDatas: Map<string, string>) => void
+
+export default AddtionalDataType

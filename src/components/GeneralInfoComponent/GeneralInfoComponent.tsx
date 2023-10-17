@@ -10,24 +10,22 @@
 
 'use client'
 
-import React, { useCallback, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import React, { useCallback, useState } from 'react'
 
-import { Session } from '@/object-types'
-import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import ComponentPayload from '@/object-types/ComponentPayLoad'
-import styles from './SummaryComponent.module.css'
 import Vendor from '@/object-types/Vendor'
+import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import styles from './SummaryComponent.module.css'
 
 interface Props {
-    session?: Session
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
 }
 
-const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, vendor, setVendor }: Props) => {
+const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, setVendor }: Props) => {
     const t = useTranslations('default')
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
@@ -192,7 +190,6 @@ const GeneralInfoComponent = ({ session, componentPayload, setComponentPayload, 
                                 show={dialogOpenVendor}
                                 setShow={setDialogOpenVendor}
                                 selectVendor={setVendorId}
-                                session={session}
                             />
                             <span onClick={handleClearVendor}>x</span>
                         </div>

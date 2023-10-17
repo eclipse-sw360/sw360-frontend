@@ -9,13 +9,12 @@
 
 'use client'
 
-import { GiCancel } from 'react-icons/gi'
-import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Dispatch, SetStateAction, useCallback, useState } from 'react'
+import { GiCancel } from 'react-icons/gi'
 
-import ProjectPayload from '@/object-types/CreateProjectPayload'
+import { ProjectPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
-import Vendor from '@/object-types/Vendor'
 
 interface Param {
     vendor: Vendor

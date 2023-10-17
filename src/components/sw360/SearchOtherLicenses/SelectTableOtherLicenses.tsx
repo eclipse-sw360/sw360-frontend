@@ -10,13 +10,13 @@
 
 'use client'
 
-import { Form } from 'react-bootstrap'
 import React from 'react'
-import { _ } from '@/components/sw360'
+import { Form } from 'react-bootstrap'
+
+import { Licenses, LicensesType } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import { _ } from 'next-sw360'
 import LicensesTable from './OtherLicensesTable'
-import { LicensesType } from '@/object-types/LicensesType'
-import Licenses from '@/object-types/Licenses'
-import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     licenseDatas?: any[]

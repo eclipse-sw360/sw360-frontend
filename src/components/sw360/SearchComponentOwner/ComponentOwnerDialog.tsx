@@ -10,26 +10,25 @@
 
 'use client'
 
-import { Button, Modal } from 'react-bootstrap'
-import { useCallback, useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-
-import { ApiUtils, CommonUtils } from '@/utils'
-import { ComponentOwnerType } from '@/object-types/ComponentOwnerType'
-import { HttpStatus, Session } from '@/object-types'
 import { notFound } from 'next/navigation'
-import ComponentOwner from '@/object-types/ComponentOwner'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Modal } from 'react-bootstrap'
+
+import { ComponentOwner, ComponentOwnerType, HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 import SelectTableComponentOwner from './SelectTableComponentOwner'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
     selectComponentOwner: ComponentOwnerType
 }
 
-const ComponentOwnerDialog = ({ show, setShow, session, selectComponentOwner }: Props) => {
+const ComponentOwnerDialog = ({ show, setShow, selectComponentOwner }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState()
     const [componentOwner, setComponentOwner] = useState<ComponentOwner>()
     const [users, setUsers] = useState([])

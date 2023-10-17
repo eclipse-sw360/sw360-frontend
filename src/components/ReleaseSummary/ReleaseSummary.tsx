@@ -10,24 +10,18 @@
 
 'use client'
 
-import { GiCancel } from 'react-icons/gi'
 import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
+import { GiCancel } from 'react-icons/gi'
 
-import { Licenses, Session } from '@/object-types'
+import { ActionType, Licenses, Moderators, ReleasePayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
-import ActionType from '@/object-types/enums/ActionType'
+import ModeratorsDialog from '../sw360/ModeratorsDialog/ModeratorsDialog'
 import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
 import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
-import Moderators from '@/object-types/Moderators'
-import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
 import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialog'
-import ReleasePayload from '@/object-types/ReleasePayload'
-import styles from './ReleaseSummary.module.css'
-import Vendor from '@/object-types/Vendor'
 
 interface Props {
-    session?: Session
     actionType?: string
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
@@ -43,16 +37,7 @@ interface Props {
     setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
 }
 
-const getDate = () => {
-    const today = new Date()
-    const month = today.getMonth() + 1
-    const year = today.getFullYear()
-    const date = today.getDate()
-    return `${month}/${date}/${year}`
-}
-
 const ReleaseSummary = ({
-    session,
     actionType,
     releasePayload,
     setReleasePayload,
@@ -68,7 +53,7 @@ const ReleaseSummary = ({
     setModerator,
 }: Props) => {
     const t = useTranslations('default')
-    const [currentDate] = useState(getDate())
+    const [currentDate] = useState(new Date().toLocaleDateString())
     const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
     const handleClickSearchMainLicenses = useCallback(() => setDialogOpenMainLicenses(true), [])
     const [dialogOpenOtherLicenses, setDialogOpenOtherLicenses] = useState(false)
@@ -183,7 +168,7 @@ const ReleaseSummary = ({
         <>
             <div className='col' style={{ padding: '0px 12px' }}>
                 <div className='row mb-4'>
-                    <div className={`${styles['header']} mb-2`}>
+                    <div className='header  mb-2'>
                         <p className='fw-bold mt-3'>{t('Release Summary')}</p>
                     </div>
                     <div className='row'>
@@ -208,7 +193,6 @@ const ReleaseSummary = ({
                                 show={dialogOpenVendor}
                                 setShow={setDialogOpenVendor}
                                 selectVendor={setVendorId}
-                                session={session}
                             />
                             <div className='form-text' onClick={handleClearVendor}>
                                 {' '}
@@ -361,7 +345,6 @@ const ReleaseSummary = ({
                             <MainLicensesDiaglog
                                 show={dialogOpenMainLicenses}
                                 setShow={setDialogOpenMainLicenses}
-                                session={session}
                                 selectLicenses={setMainLicenses}
                             />
                         </div>
@@ -388,7 +371,6 @@ const ReleaseSummary = ({
                             <OtherLicensesDialog
                                 show={dialogOpenOtherLicenses}
                                 setShow={setDialogOpenOtherLicenses}
-                                session={session}
                                 selectLicenses={setOtherLicenses}
                             />
                         </div>
@@ -514,7 +496,6 @@ const ReleaseSummary = ({
                             <ContributorsDialog
                                 show={dialogOpenContributors}
                                 setShow={setDialogOpenContributors}
-                                session={session}
                                 selectModerators={setContributors}
                             />
                         </div>
@@ -538,7 +519,6 @@ const ReleaseSummary = ({
                             <ModeratorsDialog
                                 show={dialogOpenModerators}
                                 setShow={setDialogOpenModerators}
-                                session={session}
                                 selectModerators={setModerators}
                             />
                         </div>

@@ -9,18 +9,16 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, useRef } from 'react'
-import ApiUtils from '@/utils/api/api.util'
-import CommonUtils from '@/utils/common.utils'
-import { Session } from '@/object-types'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { signOut } from 'next-auth/react'
 import { notFound } from 'next/navigation'
-import { Modal, Col, Row, Form, Button, OverlayTrigger, Tooltip, Alert } from 'react-bootstrap'
+import { useRef, useState } from 'react'
+import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
-import { Table, _ } from '@/components/sw360'
-import ProjectPayload from '@/object-types/CreateProjectPayload'
+
+import { HttpStatus, ProjectPayload } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Table, _ } from 'next-sw360'
 
 interface AlertData {
     variant: string
@@ -28,7 +26,6 @@ interface AlertData {
 }
 
 interface Props {
-    session: Session
     setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, any>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
@@ -37,7 +34,6 @@ interface Props {
 }
 
 export default function LinkProjectsModal({
-    session,
     setLinkedProjectData,
     projectPayload,
     setProjectPayload,
@@ -50,6 +46,7 @@ export default function LinkProjectsModal({
     const [alert, setAlert] = useState<AlertData | null>(null)
     const searchValueRef = useRef<HTMLInputElement>(null)
     const topRef = useRef(null)
+    const { data: session, status } = useSession()
 
     const columns = [
         {
@@ -65,6 +62,8 @@ export default function LinkProjectsModal({
                             name='projectId'
                             value={projectId}
                             id={projectId}
+                            title=''
+                            placeholder='Project Id'
                             checked={linkProjects.has(projectId)}
                             onChange={() => handleCheckboxes(projectId)}
                         />
@@ -143,16 +142,14 @@ export default function LinkProjectsModal({
         }
     }
 
-    const handleSearch = async ({ searchValue, session }: { searchValue: string; session: Session }): Promise<any> => {
+    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<any> => {
         try {
             const queryUrl = CommonUtils.createUrlWithParams('projects', {
                 name: `${searchValue}`,
                 luceneSearch: 'true',
             })
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else if (response.status !== HttpStatus.OK) {
+            if (response.status !== HttpStatus.OK) {
                 return notFound()
             }
             const data = await response.json()
@@ -210,92 +207,96 @@ export default function LinkProjectsModal({
         setLinkProjects(m)
     }
 
-    return (
-        <>
-            <Modal
-                size='lg'
-                centered
-                show={show}
-                onHide={() => {
-                    setShow(false)
-                    setProjectData(null)
-                    setAlert(null)
-                    setLinkProjects(new Map())
-                }}
-                aria-labelledby={t('Link Projects')}
-                scrollable
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title id='linked-projects-modal'>{t('Link Projects')}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body ref={topRef}>
-                    {alert && (
-                        <Alert variant={alert.variant} id='linkProjects.alert'>
-                            {alert.message}
-                        </Alert>
-                    )}
-                    <Form>
-                        <Col>
-                            <Row className='mb-3'>
-                                <Col xs={6}>
-                                    <Form.Control
-                                        type='text'
-                                        placeholder={`${t('Enter Search Text')}...`}
-                                        name='searchValue'
-                                        ref={searchValueRef}
-                                    />
-                                </Col>
-                                <Col xs='auto'>
-                                    <Form.Group controlId='exact-match-group'>
-                                        <Form.Check inline name='exact-match' type='checkbox' id='exact-match' />
-                                        <Form.Label className='pt-2'>
-                                            {t('Exact Match')}{' '}
-                                            <sup>
-                                                <FaInfoCircle />
-                                            </sup>
-                                        </Form.Label>
-                                    </Form.Group>
-                                </Col>
-                                <Col xs='auto'>
-                                    <Button
-                                        variant='secondary'
-                                        onClick={async () => {
-                                            await handleSearch({ searchValue: searchValueRef.current.value, session })
-                                        }}
-                                    >
-                                        {t('Search')}
-                                    </Button>
-                                </Col>
-                            </Row>
-                            <Row>{projectData && <Table columns={columns} data={projectData} sort={false} />}</Row>
-                        </Col>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant='dark'
-                        onClick={() => {
-                            setShow(false)
-                            setProjectData(null)
-                            setAlert(null)
-                            setLinkProjects(new Map())
-                        }}
-                    >
-                        {t('Close')}
-                    </Button>
-                    <Button
-                        variant='primary'
-                        onClick={() => {
-                            setLinkedProjectData(linkProjects)
-                            setShow(false)
-                            projectPayloadSetter(linkProjects)
-                        }}
-                        disabled={linkProjects.size === 0}
-                    >
-                        {t('Link Projects')}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        </>
-    )
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
+        return (
+            <>
+                <Modal
+                    size='lg'
+                    centered
+                    show={show}
+                    onHide={() => {
+                        setShow(false)
+                        setProjectData(null)
+                        setAlert(null)
+                        setLinkProjects(new Map())
+                    }}
+                    aria-labelledby={t('Link Projects')}
+                    scrollable
+                >
+                    <Modal.Header closeButton>
+                        <Modal.Title id='linked-projects-modal'>{t('Link Projects')}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body ref={topRef}>
+                        {alert && (
+                            <Alert variant={alert.variant} id='linkProjects.alert'>
+                                {alert.message}
+                            </Alert>
+                        )}
+                        <Form>
+                            <Col>
+                                <Row className='mb-3'>
+                                    <Col xs={6}>
+                                        <Form.Control
+                                            type='text'
+                                            placeholder={`${t('Enter Search Text')}...`}
+                                            name='searchValue'
+                                            ref={searchValueRef}
+                                        />
+                                    </Col>
+                                    <Col xs='auto'>
+                                        <Form.Group controlId='exact-match-group'>
+                                            <Form.Check inline name='exact-match' type='checkbox' id='exact-match' />
+                                            <Form.Label className='pt-2'>
+                                                {t('Exact Match')}{' '}
+                                                <sup>
+                                                    <FaInfoCircle />
+                                                </sup>
+                                            </Form.Label>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col xs='auto'>
+                                        <Button
+                                            variant='secondary'
+                                            onClick={async () => {
+                                                await handleSearch({ searchValue: searchValueRef.current.value })
+                                            }}
+                                        >
+                                            {t('Search')}
+                                        </Button>
+                                    </Col>
+                                </Row>
+                                <Row>{projectData && <Table columns={columns} data={projectData} sort={false} />}</Row>
+                            </Col>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button
+                            variant='dark'
+                            onClick={() => {
+                                setShow(false)
+                                setProjectData(null)
+                                setAlert(null)
+                                setLinkProjects(new Map())
+                            }}
+                        >
+                            {t('Close')}
+                        </Button>
+                        <Button
+                            variant='primary'
+                            onClick={() => {
+                                setLinkedProjectData(linkProjects)
+                                setShow(false)
+                                projectPayloadSetter(linkProjects)
+                            }}
+                            disabled={linkProjects.size === 0}
+                        >
+                            {t('Link Projects')}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </>
+        )
+    }
 }

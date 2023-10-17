@@ -10,29 +10,27 @@
 
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState } from 'react'
 
+import { ActionType, LinkedRelease, ReleasePayload } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { Session } from '@/object-types'
-import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
+import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
 import styles from './LinkedReases.module.css'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
-import LinkedRelease from '@/object-types/LinkedRelease'
-import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
-import ReleasePayload from '@/object-types/ReleasePayload'
-import ActionType from '@/object-types/enums/ActionType'
+import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
 interface Props {
-    session?: Session
     release?: any
     actionType?: string
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const LinkedReleases = ({ session, release, actionType, releasePayload, setReleasePayload }: Props) => {
+const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
     const handleReRender = () => {

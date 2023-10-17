@@ -580,3 +580,25 @@ th {
     text-align: center;
     font-size: small;
 }
+
+.link-sidebar {
+    background-color: white !important;
+    color: #6b6c7e !important;
+}
+
+.list-group-item-action {
+    background-color: white !important;
+    color: #6b6c7e !important;
+}
+
+.list-group-item-action:hover {
+    border-color: #dbdce4 !important;
+    color: #6b6c7e !important;
+    background-color: #edcaa0 !important;
+}
+
+.sidebar-active {
+    border-color: #dbdce4 !important;
+    color: #6b6c7e !important;
+    background-color: #e89734 !important;
+}

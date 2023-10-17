@@ -9,29 +9,32 @@
 // License-Filename: LICENSE
 
 'use client'
-import { Table, _ } from '@/components/sw360'
-import { Component, Embedded, Session } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
-import { SW360_API_URL } from '@/utils/env'
+
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+
+import { Component, Embedded } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import { SW360_API_URL } from '@/utils/env'
+import { Table, _ } from 'next-sw360'
 import styles from '../components.module.css'
 import DeleteComponentDialog from './DeleteComponentDialog'
 
 interface Props {
-    session?: Session
     setNumberOfComponent: React.Dispatch<React.SetStateAction<number>>
 }
 
-const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
+function ComponentsTable({ setNumberOfComponent }: Props) {
     const t = useTranslations('default')
     const params = useSearchParams()
     const searchParams = Object.fromEntries(params)
     const [deletingComponent, setDeletingComponent] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const { data: session } = useSession()
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)

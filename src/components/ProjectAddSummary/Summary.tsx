@@ -9,16 +9,12 @@
 
 'use client'
 
-import AddAdditionalRolesComponent from '@/components/ProjectAddSummary/component/AddAdditionalRoles'
-import AddKeyValueComponent from '@/components/ProjectAddSummary/component/AddKeyValue'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import GeneralInformation from './component/Summary/GeneralInformation'
-import Roles from './Roles/Roles'
-import ProjectPayload from '@/object-types/CreateProjectPayload'
 import { useTranslations } from 'next-intl'
-import Vendor from '@/object-types/Vendor'
-import { AddtionalDataType } from '@/object-types/AddtionalDataType'
-import InputKeyValue from '@/object-types/InputKeyValue'
+
+import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectPayload, Vendor } from '@/object-types'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
+import Roles from './Roles/Roles'
+import GeneralInformation from './component/Summary/GeneralInformation'
 
 interface Props {
     vendor: Vendor
@@ -63,9 +59,9 @@ export default function Summary({
                     setProjectPayload={setProjectPayload}
                 />
                 <div className='row mb-4'>
-                    <AddKeyValueComponent
+                    <AddKeyValue
                         header={t('External URLs')}
-                        keyName={t('External URL')}
+                        keyName={'External URL'}
                         data={externalUrls}
                         setData={setExternalUrls}
                         setObject={setExternalUrlsData}
@@ -73,21 +69,21 @@ export default function Summary({
                 </div>
                 <Roles />
                 <div className='row mb-4'>
-                    <AddAdditionalRolesComponent documentType={DocumentTypes.PROJECT} />
+                    <AddAdditionalRoles documentType={DocumentTypes.PROJECT} />
                 </div>
                 <div className='row mb-4'>
-                    <AddKeyValueComponent
+                    <AddKeyValue
                         header={t('External Ids')}
-                        keyName={t('External Id')}
+                        keyName={'External Id'}
                         data={externalIds}
                         setData={setExternalIds}
                         setObject={setExternalIdsData}
                     />
                 </div>
                 <div className='row mb-4'>
-                    <AddKeyValueComponent
+                    <AddKeyValue
                         header={t('Additional Data')}
-                        keyName={t('additional data')}
+                        keyName={'additional data'}
                         data={additionalData}
                         setData={setAdditionalData}
                         setObject={setAdditionalDataObject}

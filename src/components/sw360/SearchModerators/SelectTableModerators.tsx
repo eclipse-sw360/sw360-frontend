@@ -10,12 +10,12 @@
 
 'use client'
 
-import { Form } from 'react-bootstrap'
 import React from 'react'
-import { _ } from '@/components/sw360'
+import { Form } from 'react-bootstrap'
+
+import { Moderators, ModeratorsType } from '@/object-types'
+import { _ } from 'next-sw360'
 import ModeratorsTable from './ModeratorsTable'
-import Moderators from '@/object-types/Moderators'
-import { ModeratorsType } from '@/object-types/ModeratorsType'
 
 interface Props {
     users: any[]

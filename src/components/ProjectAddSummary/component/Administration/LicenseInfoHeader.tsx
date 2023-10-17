@@ -10,7 +10,8 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import ProjectPayload from '@/object-types/CreateProjectPayload'
+
+import { ProjectPayload } from '@/object-types'
 
 interface Props {
     projectPayload: ProjectPayload

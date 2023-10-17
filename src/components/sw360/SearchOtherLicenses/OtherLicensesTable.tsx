@@ -9,8 +9,8 @@
 // License-Filename: LICENSE
 
 import { memo } from 'react'
-import Table from '../Table/Table'
 
+import { Table } from 'next-sw360'
 
 interface Props {
     data: any

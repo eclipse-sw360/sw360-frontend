@@ -9,12 +9,12 @@
 
 'use client'
 
-import React from 'react'
-import { useState } from 'react'
-import { AddtionalDataType } from '@/object-types/AddtionalDataType'
-import { MdDeleteOutline } from 'react-icons/md'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
+import React, { useState } from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { MdDeleteOutline } from 'react-icons/md'
+
+import { AddtionalDataType } from '@/object-types'
 
 interface Props {
     header: string
@@ -29,7 +29,7 @@ interface Input {
     value: string
 }
 
-export default function AddKeyValueComponent(props: Props) {
+function AddKeyValue(props: Props) {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
 
@@ -104,14 +104,17 @@ export default function AddKeyValueComponent(props: Props) {
                 })}
                 <div className='col-lg-4'>
                     <button type='button' onClick={() => handleAddClick()} className='btn btn-secondary'>
-                        {t('Click to add row to') +
-                            ` ${props.keyName
+                        {t('Click to add row to', {
+                            named_value: props.keyName
                                 .split(' ')
                                 .map((elem) => elem[0].toUpperCase() + elem.substring(1))
-                                .join(' ')}`}
+                                .join(' '),
+                        })}
                     </button>
                 </div>
             </div>
         </>
     )
 }
+
+export default AddKeyValue

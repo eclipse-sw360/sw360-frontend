@@ -10,26 +10,25 @@
 
 'use client'
 
-import { Button, Modal } from 'react-bootstrap'
+import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { Button, Modal } from 'react-bootstrap'
+import { useSession } from 'next-auth/react'
 
+import { HttpStatus, ModeratorsType, Moderators } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import { ModeratorsType } from '@/object-types/ModeratorsType'
-import Moderators from '@/object-types/Moderators'
 import SelectTableModerators from './SelectTableContributors'
 
 interface Props {
     show?: boolean
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
-    session?: Session
     selectModerators?: ModeratorsType
 }
 
-const ContributorsDialog = ({ show, setShow, session, selectModerators }: Props) => {
+const ContributorsDialog = ({ show, setShow, selectModerators }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState()
     const [moderators] = useState([])
     const [moderatorsResponse, setModeratorsResponse] = useState<Moderators>()

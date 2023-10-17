@@ -9,23 +9,25 @@
 
 'use client'
 
-import { Dropdown, Spinner } from 'react-bootstrap'
-import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { signOut } from 'next-auth/react'
-import { useState, useEffect } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Dropdown, Spinner } from 'react-bootstrap'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 
-import { QuickFilter, AdvancedSearch, _, Table } from 'next-sw360'
+import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
+import { AdvancedSearch, QuickFilter, Table, _ } from 'next-sw360'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
 
-export default function Vulnerabilities({ session }: { session: Session }) {
+function Vulnerabilities() {
+    const t = useTranslations('default')
+    const { data: session } = useSession()
     const DEFAULT_VULNERABILITIES = 200
     const [num, SetNum] = useState<number>(DEFAULT_VULNERABILITIES)
-    const t = useTranslations('default')
+
     const [vulnerabilitiesData, setVulnerabilitiesData] = useState<null | any[]>(null)
     const [search, setSearch] = useState({})
     const params = useSearchParams()
@@ -154,13 +156,12 @@ export default function Vulnerabilities({ session }: { session: Session }) {
         })()
 
         return () => controller.abort()
-    }, [params, session])
+    }, [params])
 
     return (
         <>
             <DeleteVulnerabilityModal
                 vulnerabilityId={vulnerabilityToBeDeleted}
-                session={session}
                 setVulnerability={setVulnerabilityToBeDeleted}
             />
             <div className='mx-3 mt-3'>
@@ -218,3 +219,5 @@ export default function Vulnerabilities({ session }: { session: Session }) {
         </>
     )
 }
+
+export default Vulnerabilities
