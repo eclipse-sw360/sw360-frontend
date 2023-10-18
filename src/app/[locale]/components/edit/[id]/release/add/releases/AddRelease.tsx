@@ -10,33 +10,32 @@
 
 'use client'
 
-import { signOut } from 'next-auth/react'
-import { ToastContainer } from 'react-bootstrap'
-import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { ToastContainer } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { EmbeddedComponent, Licenses, HttpStatus, Session } from '@/object-types'
-import { SideBar, PageButtonHeader } from '@/components/sw360'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import ComponentOwner from '@/object-types/ComponentOwner'
-import COTSDetails from '@/object-types/COTSDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
+import { PageButtonHeader, SideBar } from '@/components/sw360'
+import ToastMessage from '@/components/sw360/ToastContainer/Toast'
+import { EmbeddedComponent, HttpStatus, Licenses } from '@/object-types'
+import COTSDetails from '@/object-types/COTSDetails'
+import ComponentOwner from '@/object-types/ComponentOwner'
 import Moderators from '@/object-types/Moderators'
-import ReleaseAddSummary from './ReleaseAddSummary'
-import ReleaseAddTabs from './ReleaseAddTab'
 import ReleaseDetail from '@/object-types/ReleaseDetail'
 import ReleasePayload from '@/object-types/ReleasePayload'
-import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
 import Repository from '@/object-types/Repository'
 import ToastData from '@/object-types/ToastData'
-import ToastMessage from '@/components/sw360/ToastContainer/Toast'
 import Vendor from '@/object-types/Vendor'
+import CommonTabIds from '@/object-types/enums/CommonTabsIds'
+import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
+import { ApiUtils, CommonUtils } from '@/utils'
+import ReleaseAddSummary from './ReleaseAddSummary'
+import ReleaseAddTabs from './ReleaseAddTab'
 
 interface Props {
-    session?: Session
     componentId?: string
 }
 
@@ -57,11 +56,13 @@ const cotsDetails: COTSDetails = {
     sourceCodeAvailable: false,
 }
 
-const AddRelease = ({ session, componentId }: Props) => {
+function AddRelease({ componentId }: Props) {
+    const t = useTranslations('default')
+    const { data: session } = useSession()
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
-    const t = useTranslations('default')
+
     const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
         name: '',
         cpeid: '',
@@ -202,7 +203,6 @@ const AddRelease = ({ session, componentId }: Props) => {
                         </ToastContainer>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ReleaseAddSummary
-                                session={session}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                                 vendor={vendor}
@@ -218,15 +218,10 @@ const AddRelease = ({ session, componentId }: Props) => {
                             />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases
-                                session={session}
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                            />
+                            <LinkedReleases releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <AddCommercialDetails
-                                session={session}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                                 cotsResponsible={cotsResponsible}

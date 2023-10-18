@@ -14,14 +14,12 @@ import { useTranslations } from 'next-intl'
 
 import { useCallback, useState } from 'react'
 
-import { Session } from '@/object-types'
-import ComponentOwner from '@/object-types/ComponentOwner'
 import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
+import ComponentOwner from '@/object-types/ComponentOwner'
 import ReleasePayload from '@/object-types/ReleasePayload'
 import styles from './CommercialDetails.module.css'
 
 interface Props {
-    session?: Session
     releasePayload?: ReleasePayload
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
     cotsResponsible?: ComponentOwner
@@ -29,7 +27,6 @@ interface Props {
 }
 
 const CommercialDetailsAdministration = ({
-    session,
     releasePayload,
     setReleasePayload,
     cotsResponsible,
@@ -115,7 +112,6 @@ const CommercialDetailsAdministration = ({
                             <ComponentOwnerDiaglog
                                 show={dialogOpenComponentOwner}
                                 setShow={setDialogOpenComponentOwner}
-                                session={session}
                                 selectComponentOwner={setCotsResponsibleUser}
                             />
                         </div>

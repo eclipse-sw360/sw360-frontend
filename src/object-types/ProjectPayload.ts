@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface ProjectPayload {
+interface ProjectPayload {
     name: string
     description?: string
     version?: string
@@ -44,3 +44,5 @@ export default interface ProjectPayload {
         }
     }
 }
+
+export default ProjectPayload

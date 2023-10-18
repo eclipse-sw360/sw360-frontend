@@ -10,19 +10,14 @@
 
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
-import { Session } from '@/object-types'
-import { useTranslations } from 'next-intl'
-import ComponentOwner from '@/object-types/ComponentOwner'
 import ComponentOwnerDialog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import Moderators from '@/object-types/Moderators'
-import ModeratorsDialog from '../sw360/SearchModerators/ModeratorsDialog'
-import { SelectCountry } from 'next-sw360'
-import styles from '../GeneralInfoComponent/SummaryComponent.module.css'
+import { ComponentOwner, ComponentPayload, Moderators } from '@/object-types'
+import { ModeratorsDialog, SelectCountry } from 'next-sw360'
+
 interface Props {
-    session?: Session
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     componentOwner?: ComponentOwner
@@ -32,7 +27,6 @@ interface Props {
 }
 
 const RolesInformation = ({
-    session,
     componentPayload,
     setComponentPayload,
     componentOwner,
@@ -104,7 +98,7 @@ const RolesInformation = ({
     return (
         <>
             <div className='row mb-4' style={{ padding: '0px 12px' }}>
-                <div className={`${styles['header']} mb-2`}>
+                <div className='header mb-2'>
                     <p className='fw-bold mt-3'> {t('Roles')}</p>
                 </div>
                 <div className='row'>
@@ -129,7 +123,6 @@ const RolesInformation = ({
                         <ComponentOwnerDialog
                             show={dialogOpenComponentOwner}
                             setShow={setDialogOpenComponentOwner}
-                            session={session}
                             selectComponentOwner={setComponentOwnerId}
                         />
                         <span onClick={handleClearComponentOwner}>x</span>
@@ -191,7 +184,6 @@ const RolesInformation = ({
                         <ModeratorsDialog
                             show={dialogOpenModerators}
                             setShow={setDialogOpenModerators}
-                            session={session}
                             selectModerators={setModerators}
                         />
                         <span onClick={handleClearModerators}>x</span>

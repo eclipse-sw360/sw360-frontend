@@ -8,20 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from 'next-auth/next'
-
-import { Session } from '@/object-types'
 import EditRelease from './components/EditRelease'
 interface Context {
     params: { id: string }
 }
 
 const ReleaseEditPage = async ({ params }: Context) => {
-    const session: Session = await getServerSession(authOptions)
     const releaseId = params.id
 
-    return <EditRelease session={session} releaseId={releaseId} />
+    return <EditRelease releaseId={releaseId} />
 }
 
 export default ReleaseEditPage

@@ -8,10 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from 'next-auth/next'
-
-import { Session } from '@/object-types'
 import EditComponent from './components/EditComponent'
 
 interface Context {
@@ -19,10 +15,9 @@ interface Context {
 }
 
 const ComponentEditPage = async ({ params }: Context) => {
-    const session: Session = await getServerSession(authOptions)
     const componentId = params.id
 
-    return <EditComponent session={session} componentId={componentId} />
+    return <EditComponent componentId={componentId} />
 }
 
 export default ComponentEditPage

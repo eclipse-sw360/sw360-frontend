@@ -8,11 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { Metadata } from 'next'
 
-import { Session } from '@/object-types'
 import ComponentIndex from './components/ComponentIndex'
 
 export const metadata: Metadata = {
@@ -20,6 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default async function ComponentIndexPage() {
-    const session: Session = await getServerSession(authOptions)
-    return <ComponentIndex session={session} />
+    return <ComponentIndex />
 }

@@ -10,25 +10,24 @@
 
 'use client'
 
-import { Button, Modal } from 'react-bootstrap'
-import { useCallback, useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Modal } from 'react-bootstrap'
 
+import { HttpStatus, Licenses, LicensesType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import { LicensesType } from '@/object-types/LicensesType'
-import Licenses from '@/object-types/Licenses'
 import SelectTableOtherLicenses from './SelectTableOtherLicenses'
 
 interface Props {
     show?: boolean
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
-    session?: Session
     selectLicenses?: LicensesType
 }
 
-const OtherLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) => {
+const OtherLicensesDialog = ({ show, setShow, selectLicenses }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState([])
     const [licenses] = useState([])
     const [licensesResponse, setLicensesResponse] = useState<Licenses>()
@@ -52,7 +51,7 @@ const OtherLicensesDialog = ({ show, setShow, session, selectLicenses }: Props) 
                 return []
             }
         },
-        [session.user.access_token]
+        [session]
     )
 
     useEffect(() => {

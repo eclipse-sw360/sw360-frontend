@@ -10,4 +10,6 @@
 
 import Vendor from './Vendor'
 
-export type VendorType = (Vendor: Vendor) => void
+type VendorType = (Vendor: Vendor) => void
+
+export default VendorType

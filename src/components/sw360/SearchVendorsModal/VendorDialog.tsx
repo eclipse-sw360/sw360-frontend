@@ -10,26 +10,25 @@
 
 'use client'
 
+import { useTranslations } from 'next-intl'
+import { notFound } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
-import { notFound } from 'next/navigation'
-import { useTranslations } from 'next-intl'
 
+import { HttpStatus, Vendor, VendorType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import { VendorType } from '@/object-types/VendorType'
+import { useSession } from 'next-auth/react'
 import SelectTableVendor from './SelectTableVendor'
-import Vendor from '@/object-types/Vendor'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session?: Session
     selectVendor: VendorType
 }
 
-const VendorDialog = ({ show, setShow, session, selectVendor }: Props) => {
+const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState()
     const [vendor, setVendor] = useState<Vendor>()
     const [vendors, setVendors] = useState([])

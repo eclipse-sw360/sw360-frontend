@@ -10,36 +10,35 @@
 
 'use client'
 
-import { ToastContainer } from 'react-bootstrap'
-import { useState } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { ToastContainer } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { Component, InputKeyValue, HttpStatus, Session } from '@/object-types'
-import { SearchUsersModal, SideBar } from 'next-sw360'
-import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import AddKeyValueComponent from '@/components/AddKeyValue'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import ComponentOwner from '@/object-types/ComponentOwner'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
-import Moderators from '@/object-types/Moderators'
-import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
-import ToastData from '@/object-types/ToastData'
-import ToastMessage from '@/components/sw360/ToastContainer/Toast'
-import Vendor from '@/object-types/Vendor'
-interface Props {
-    session: Session
-}
+import RolesInformation from '@/components/RolesInformation/RolesInformation'
+import {
+    CommonTabIds,
+    Component,
+    ComponentOwner,
+    ComponentPayload,
+    DocumentTypes,
+    HttpStatus,
+    InputKeyValue,
+    Moderators,
+    ToastData,
+    Vendor,
+} from '@/object-types'
+import { ApiUtils } from '@/utils'
+import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar, ToastMessage } from 'next-sw360'
 
-export default function ComponentAddSummary({ session }: Props) {
+export default function ComponentAddSummary() {
     const t = useTranslations('default')
+    const { data: session, status } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
-    const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -115,14 +114,6 @@ export default function ComponentAddSummary({ session }: Props) {
         })
     }
 
-    const setDataRoles = (roles: InputKeyValue[]) => {
-        const roleDatas = CommonUtils.convertRoles(roles)
-        setComponentPayload({
-            ...componentPayload,
-            roles: roleDatas,
-        })
-    }
-
     const handleCancelClick = () => {
         router.push('/components')
     }
@@ -138,105 +129,101 @@ export default function ComponentAddSummary({ session }: Props) {
             alert(true, 'Duplicate', t('Component is Duplicate'), 'danger')
         }
     }
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
+        return (
+            <>
+                <SearchUsersModal />
+                <form
+                    action=''
+                    id='form_submit'
+                    method='post'
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        void submit()
+                    }}
+                >
+                    <ToastContainer position='top-start'>
+                        <ToastMessage
+                            show={toastData.show}
+                            type={toastData.type}
+                            message={toastData.message}
+                            contextual={toastData.contextual}
+                            onClose={() => setToastData({ ...toastData, show: false })}
+                            setShowToast={setToastData}
+                        />
+                    </ToastContainer>
+                    <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+                        <div className='row'>
+                            <div className='col-2 sidebar'>
+                                <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                            </div>
 
-    return (
-        <>
-            <SearchUsersModal />
-            <form
-                action=''
-                id='form_submit'
-                method='post'
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    void submit()
-                }}
-            >
-                <ToastContainer position='top-start'>
-                    <ToastMessage
-                        show={toastData.show}
-                        type={toastData.type}
-                        message={toastData.message}
-                        contextual={toastData.contextual}
-                        onClose={() => setToastData({ ...toastData, show: false })}
-                        setShowToast={setToastData}
-                    />
-                </ToastContainer>
-                <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
-                    <div className='row'>
-                        <div className='col-2 sidebar'>
-                            <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
-                        </div>
-
-                        <div className='col'>
-                            <div className='row' style={{ marginBottom: '20px' }}>
-                                <div className='col-auto'>
-                                    <div className='btn-toolbar' role='toolbar'>
-                                        <div className='btn-group' role='group'>
-                                            <button type='submit' className='btn btn-primary'>
-                                                {t('Create Component')}
-                                            </button>
-                                        </div>
-                                        <div className='btn-group' role='group'>
-                                            <button
-                                                type='button'
-                                                id='mergeButton'
-                                                className='btn btn-secondary'
-                                                onClick={handleCancelClick}
-                                            >
-                                                {t('Cancel')}
-                                            </button>
+                            <div className='col'>
+                                <div className='row' style={{ marginBottom: '20px' }}>
+                                    <div className='col-auto'>
+                                        <div className='btn-toolbar' role='toolbar'>
+                                            <div className='btn-group' role='group'>
+                                                <button type='submit' className='btn btn-primary'>
+                                                    {t('Create Component')}
+                                                </button>
+                                            </div>
+                                            <div className='btn-group' role='group'>
+                                                <button
+                                                    type='button'
+                                                    id='mergeButton'
+                                                    className='btn btn-secondary'
+                                                    onClick={handleCancelClick}
+                                                >
+                                                    {t('Cancel')}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className='col'>
-                                <GeneralInfoComponent
-                                    session={session}
-                                    vendor={vendor}
-                                    setVendor={setVendor}
-                                    componentPayload={componentPayload}
-                                    setComponentPayload={setComponentPayload}
-                                />
-                                <RolesInformation
-                                    session={session}
-                                    componentOwner={componentOwner}
-                                    setComponentOwner={setComponentOwner}
-                                    moderator={moderator}
-                                    setModerator={setModerator}
-                                    componentPayload={componentPayload}
-                                    setComponentPayload={setComponentPayload}
-                                />
-                                <div className='row mb-4'>
-                                    <AddAdditionalRolesComponent
-                                        documentType={DocumentTypes.COMPONENT}
-                                        setDataRoles={setDataRoles}
-                                        roles={roles}
-                                        setRoles={setRoles}
+                                <div className='col'>
+                                    <GeneralInfoComponent
+                                        vendor={vendor}
+                                        setVendor={setVendor}
+                                        componentPayload={componentPayload}
+                                        setComponentPayload={setComponentPayload}
                                     />
-                                </div>
-                                <div className='row mb-4'>
-                                    <AddKeyValueComponent
-                                        header={t('External Ids')}
-                                        keyName={'external id'}
-                                        setData={setExternalIds}
-                                        data={externalIds}
-                                        setMap={setDataExternalIds}
+                                    <RolesInformation
+                                        componentOwner={componentOwner}
+                                        setComponentOwner={setComponentOwner}
+                                        moderator={moderator}
+                                        setModerator={setModerator}
+                                        componentPayload={componentPayload}
+                                        setComponentPayload={setComponentPayload}
                                     />
-                                </div>
-                                <div className='row mb-4'>
-                                    <AddKeyValueComponent
-                                        header={t('Additional Data')}
-                                        keyName={'additional data'}
-                                        setData={setAddtionalData}
-                                        data={addtionalData}
-                                        setMap={setDataAddtionalData}
-                                    />
+                                    <div className='row mb-4'>
+                                        <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
+                                    </div>
+                                    <div className='row mb-4'>
+                                        <AddKeyValue
+                                            header={t('External Ids')}
+                                            keyName={'external id'}
+                                            setData={setExternalIds}
+                                            data={externalIds}
+                                            setObject={setDataExternalIds}
+                                        />
+                                    </div>
+                                    <div className='row mb-4'>
+                                        <AddKeyValue
+                                            header={t('Additional Data')}
+                                            keyName={'additional data'}
+                                            setData={setAddtionalData}
+                                            data={addtionalData}
+                                            setObject={setDataAddtionalData}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </form>
-        </>
-    )
+                </form>
+            </>
+        )
+    }
 }

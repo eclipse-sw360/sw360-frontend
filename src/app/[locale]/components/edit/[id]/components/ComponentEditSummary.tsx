@@ -10,26 +10,28 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { signOut } from 'next-auth/react'
 
-import AddKeyValueComponent from '@/components/AddKeyValue'
-import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import { Component, InputKeyValue, HttpStatus, Session } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import Vendor from '@/object-types/Vendor'
-import ComponentOwner from '@/object-types/ComponentOwner'
-import Moderators from '@/object-types/Moderators'
-import AttachmentDetail from '@/object-types/AttachmentDetail'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
-import RolesInformation from '@/components/RolesInformationComponent/RolesInformation'
+import RolesInformation from '@/components/RolesInformation/RolesInformation'
+import {
+    AttachmentDetail,
+    Component,
+    ComponentOwner,
+    ComponentPayload,
+    DocumentTypes,
+    HttpStatus,
+    InputKeyValue,
+    Moderators,
+    Vendor,
+} from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
-    session?: Session
     componentId?: string
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
@@ -37,14 +39,13 @@ interface Props {
 }
 
 export default function ComponentEditSummary({
-    session,
     componentId,
     componentPayload,
     setComponentPayload,
     attachmentData,
 }: Props) {
     const t = useTranslations('default')
-    const [roles, setRoles] = useState<InputKeyValue[]>([])
+    const { data: session } = useSession()
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
     const [vendor, setVendor] = useState<Vendor>({
@@ -79,10 +80,6 @@ export default function ComponentEditSummary({
 
     useEffect(() => {
         void fetchData(`components/${componentId}`).then((component: Component) => {
-            if (typeof component.roles !== 'undefined') {
-                setRoles(CommonUtils.convertObjectToMapRoles(component.roles))
-            }
-
             if (typeof component.externalIds !== 'undefined') {
                 setExternalIds(CommonUtils.convertObjectToMap(component.externalIds))
             }
@@ -169,14 +166,6 @@ export default function ComponentEditSummary({
         })
     }
 
-    const setDataRoles = (roles: InputKeyValue[]) => {
-        const roleDatas = CommonUtils.convertRoles(roles)
-        setComponentPayload({
-            ...componentPayload,
-            roles: roleDatas,
-        })
-    }
-
     return (
         <>
             <form
@@ -190,14 +179,12 @@ export default function ComponentEditSummary({
                 <div className='col'>
                     <div className='col'>
                         <GeneralInfoComponent
-                            session={session}
                             vendor={vendor}
                             setVendor={setVendor}
                             componentPayload={componentPayload}
                             setComponentPayload={setComponentPayload}
                         />
                         <RolesInformation
-                            session={session}
                             componentOwner={componentOwner}
                             setComponentOwner={setComponentOwner}
                             moderator={moderator}
@@ -206,29 +193,24 @@ export default function ComponentEditSummary({
                             setComponentPayload={setComponentPayload}
                         />
                         <div className='row mb-4'>
-                            <AddAdditionalRolesComponent
-                                documentType={DocumentTypes.COMPONENT}
-                                setDataRoles={setDataRoles}
-                                roles={roles}
-                                setRoles={setRoles}
-                            />
+                            <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
                         </div>
                         <div className='row mb-4'>
-                            <AddKeyValueComponent
+                            <AddKeyValue
                                 header={t('External ids')}
                                 keyName={'external id'}
                                 setData={setExternalIds}
                                 data={externalIds}
-                                setMap={setDataExternalIds}
+                                setObject={setDataExternalIds}
                             />
                         </div>
                         <div className='row mb-4'>
-                            <AddKeyValueComponent
+                            <AddKeyValue
                                 header={t('Additional Data')}
                                 keyName={'additional data'}
                                 setData={setAddtionalData}
                                 data={addtionalData}
-                                setMap={setDataAddtionalData}
+                                setObject={setDataAddtionalData}
                             />
                         </div>
                     </div>

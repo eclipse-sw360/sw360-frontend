@@ -9,20 +9,19 @@
 
 'use client'
 
-import { Table } from '@/components/sw360'
-import { Session } from '@/object-types'
-import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import ProjectPayload from '@/object-types/CreateProjectPayload'
+import { useState } from 'react'
+
+import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
+import { ProjectPayload } from '@/object-types'
+import { Table } from 'next-sw360'
 
 interface Props {
-    session: Session
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LinkedProjects({ session, projectPayload, setProjectPayload }: Props) {
+export default function LinkedProjects({ projectPayload, setProjectPayload }: Props) {
     const t = useTranslations('default')
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
     const [linkedProjectData, setLinkedProjectData] = useState<Map<string, any>>(new Map())
@@ -63,7 +62,6 @@ export default function LinkedProjects({ session, projectPayload, setProjectPayl
     return (
         <>
             <LinkProjectsModal
-                session={session}
                 setLinkedProjectData={setLinkedProjectData}
                 projectPayload={projectPayload}
                 setProjectPayload={setProjectPayload}

@@ -10,26 +10,25 @@
 
 'use client'
 
-import { Button, Modal } from 'react-bootstrap'
+import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { Button, Modal } from 'react-bootstrap'
 
+import { HttpStatus, Moderators, ModeratorsType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import { ModeratorsType } from '@/object-types/ModeratorsType'
-import Moderators from '@/object-types/Moderators'
-import SelectTableModerators from './SelectTableModerators'
+import SelectTableModerators from '../SearchModerators/SelectTableModerators'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
     selectModerators: ModeratorsType
 }
 
-const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) => {
+const ModeratorsDialog = ({ show, setShow, selectModerators }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState()
     const [moderators] = useState([])
     const [moderatorsResponse, setModeratorsResponse] = useState<Moderators>()
@@ -53,11 +52,11 @@ const ModeratorsDialog = ({ show, setShow, session, selectModerators }: Props) =
                 notFound()
             }
         },
-        [session.user.access_token]
+        [session]
     )
 
     useEffect(() => {
-        fetchData(`users`).then((users: any) => {
+        fetchData('users').then((users: any) => {
             if (
                 !CommonUtils.isNullOrUndefined(users['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])

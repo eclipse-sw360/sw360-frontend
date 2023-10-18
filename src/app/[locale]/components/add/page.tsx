@@ -8,11 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getServerSession } from 'next-auth'
 import { Metadata } from 'next'
-
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { Session } from '@/object-types'
 
 import ComponentAddSummary from './components/ComponentAddSummary'
 
@@ -21,6 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default async function ComponentAddPage() {
-    const session: Session = await getServerSession(authOptions)
-    return <ComponentAddSummary session={session} />
+    return <ComponentAddSummary />
 }

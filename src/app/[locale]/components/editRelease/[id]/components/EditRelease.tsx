@@ -10,46 +10,48 @@
 
 'use client'
 
-import { signOut } from 'next-auth/react'
-import { ToastContainer } from 'react-bootstrap'
-import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { ToastContainer } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { Licenses, HttpStatus, Session } from '@/object-types'
-import { PageButtonHeader, SideBar } from '@/components/sw360'
-import ActionType from '@/object-types/enums/ActionType'
-import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
-import ClearingInformation from '@/object-types/ClearingInformation'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import ComponentOwner from '@/object-types/ComponentOwner'
-import COTSDetails from '@/object-types/COTSDetails'
-import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import ECCInformation from '@/object-types/ECCInformation'
 import EditAttachments from '@/components/Attachments/EditAttachments'
+import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
+import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
+import {
+    ActionType,
+    COTSDetails,
+    ClearingInformation,
+    CommonTabIds,
+    ComponentOwner,
+    DocumentTypes,
+    ECCInformation,
+    HttpStatus,
+    Licenses,
+    Moderators,
+    ReleaseDetail,
+    ReleasePayload,
+    ReleaseTabIds,
+    ToastData,
+    Vendor,
+} from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
+import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
-import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
-import Moderators from '@/object-types/Moderators'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
-import ReleasePayload from '@/object-types/ReleasePayload'
-import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
-import ToastData from '@/object-types/ToastData'
-import ToastMessage from '@/components/sw360/ToastContainer/Toast'
-import Vendor from '@/object-types/Vendor'
 
 interface Props {
-    session?: Session
     releaseId?: string
 }
 
-const EditRelease = ({ session, releaseId }: Props) => {
+const EditRelease = ({ releaseId }: Props) => {
     const router = useRouter()
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
     const [release, setRelease] = useState<ReleaseDetail>()
@@ -292,7 +294,6 @@ const EditRelease = ({ session, releaseId }: Props) => {
                         </ToastContainer>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ReleaseEditSummary
-                                session={session}
                                 release={release}
                                 releaseId={releaseId}
                                 actionType={ActionType.EDIT}
@@ -316,7 +317,6 @@ const EditRelease = ({ session, releaseId }: Props) => {
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases
                                 actionType={ActionType.EDIT}
-                                session={session}
                                 release={release}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
@@ -342,7 +342,6 @@ const EditRelease = ({ session, releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <AddCommercialDetails
-                                session={session}
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                                 cotsResponsible={cotsResponsible}

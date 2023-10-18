@@ -13,23 +13,24 @@
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
-import { CommonUtils } from '@/utils'
-import { Licenses, InputKeyValue, Session } from '@/object-types'
-import AddAdditionalRolesComponent from '@/components/AddAdditionalRoles'
-import AddKeyValueComponent from '@/components/AddKeyValue'
-import ClearingInformation from '@/object-types/ClearingInformation'
-import COTSDetails from '@/object-types/COTSDetails'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import ECCInformation from '@/object-types/ECCInformation'
-import Moderators from '@/object-types/Moderators'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
-import ReleasePayload from '@/object-types/ReleasePayload'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import Vendor from '@/object-types/Vendor'
+import {
+    ClearingInformation,
+    COTSDetails,
+    DocumentTypes,
+    ECCInformation,
+    InputKeyValue,
+    Licenses,
+    Moderators,
+    ReleaseDetail,
+    ReleasePayload,
+    Vendor,
+} from '@/object-types'
+import { CommonUtils } from '@/utils'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
-    session?: Session
     release?: ReleaseDetail
     releaseId?: string
     actionType?: string
@@ -50,8 +51,7 @@ interface Props {
     clearingInformation?: ClearingInformation
 }
 
-export default function ReleaseEditSummary({
-    session,
+function ReleaseEditSummary({
     release,
     releaseId,
     actionType,
@@ -72,7 +72,6 @@ export default function ReleaseEditSummary({
     clearingInformation,
 }: Props) {
     const t = useTranslations('default')
-    const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
 
@@ -92,19 +91,7 @@ export default function ReleaseEditSummary({
         })
     }
 
-    const setDataRoles = (roles: InputKeyValue[]) => {
-        const roleDatas = CommonUtils.convertRoles(roles)
-        setReleasePayload({
-            ...releasePayload,
-            roles: roleDatas,
-        })
-    }
-
     useEffect(() => {
-        if (typeof release.roles !== 'undefined') {
-            setRoles(CommonUtils.convertObjectToMapRoles(release.roles))
-        }
-
         if (typeof release.externalIds !== 'undefined') {
             setExternalIds(CommonUtils.convertObjectToMap(release.externalIds))
         }
@@ -202,7 +189,6 @@ export default function ReleaseEditSummary({
             >
                 <div className='col' style={{ fontSize: '0.875rem' }}>
                     <ReleaseSummary
-                        session={session}
                         actionType={actionType}
                         releasePayload={releasePayload}
                         setReleasePayload={setReleasePayload}
@@ -218,29 +204,24 @@ export default function ReleaseEditSummary({
                         setModerator={setModerator}
                     />
                     <div className='row mb-4'>
-                        <AddAdditionalRolesComponent
-                            documentType={DocumentTypes.COMPONENT}
-                            roles={roles}
-                            setRoles={setRoles}
-                            setDataRoles={setDataRoles}
-                        />
+                        <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
                     </div>
                     <div className='row mb-4'>
-                        <AddKeyValueComponent
+                        <AddKeyValue
                             header={t('External ids')}
                             keyName={'external id'}
                             setData={setExternalIds}
                             data={externalIds}
-                            setMap={setDataExternalIds}
+                            setObject={setDataExternalIds}
                         />
                     </div>
                     <div className='row mb-4'>
-                        <AddKeyValueComponent
+                        <AddKeyValue
                             header={t('Additional Data')}
                             keyName={'additional data'}
                             setData={setAddtionalData}
                             data={addtionalData}
-                            setMap={setDataAddtionalData}
+                            setObject={setDataAddtionalData}
                         />
                     </div>
                     <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
@@ -249,3 +230,5 @@ export default function ReleaseEditSummary({
         </>
     )
 }
+
+export default ReleaseEditSummary

@@ -8,6 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Licenses from "./Licenses";
+import Licenses from './Licenses'
 
-export type LicensesType = (licenses: Licenses) => void
+type LicensesType = (licenses: Licenses) => void
+
+export default LicensesType
