@@ -9,9 +9,9 @@
 
 'use client'
 
-import * as React from 'react'
-import { Component, createRef, RefObject } from 'react'
 import { Config, Grid } from 'gridjs'
+import * as React from 'react'
+import { Component, RefObject, createRef } from 'react'
 import { Form } from 'react-bootstrap'
 
 const defaultOptions = {
@@ -36,8 +36,23 @@ class Table extends Component<TableProps, unknown> {
 
     constructor(props: TableProps) {
         super(props)
+        let tableProps = { ...defaultOptions, ...props }
 
-        this.instance = new Grid({ ...defaultOptions, ...props })
+        if (tableProps.server) {
+            tableProps = {
+                ...tableProps,
+                pagination: {
+                    limit: 10,
+                    server: {
+                        url: (prev: string, page: number, limit: number) =>
+                            `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
+                    },
+                },
+                data: undefined,
+            }
+        }
+
+        this.instance = new Grid(tableProps)
     }
 
     getInstance(): Grid {
@@ -62,7 +77,13 @@ class Table extends Component<TableProps, unknown> {
         const pageSize = parseInt(event.target.value, 10)
         this.instance
             .updateConfig({
-                pagination: { limit: pageSize },
+                pagination: {
+                    limit: pageSize,
+                    server: {
+                        url: (prev: string, page: number, limit: number) =>
+                            `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
+                    },
+                },
             })
             .forceRender()
     }

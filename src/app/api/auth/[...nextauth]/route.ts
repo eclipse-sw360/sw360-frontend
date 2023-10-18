@@ -16,7 +16,7 @@ import UserCredentialInfo from '@/object-types/UserCredentialInfo'
 import AuthService from '@/services/auth.service'
 
 export const authOptions: NextAuthOptions = {
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
     // Configure one or more authentication providers
     providers: [
         CredentialsProvider({
