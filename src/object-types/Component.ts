@@ -8,10 +8,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Vendor from './Vendor'
-import EmbeddedUser from './EmbeddedUser'
-import EmbeddedRelease from './EmbeddedRelease'
 import EmbeddedAttachment from './EmbeddedAttachment'
+import EmbeddedRelease from './EmbeddedRelease'
+import EmbeddedUser from './EmbeddedUser'
+import Vendor from './Vendor'
 
 interface Component {
     id?: string
@@ -43,6 +43,12 @@ interface Component {
     roles?: { [k: string]: Array<string> }
     setBusinessUnit?: boolean
     setVisbility?: boolean
+    defaultVendor?: {
+        type: string
+        url: string
+        shortName: string
+        fullName: string
+    }
     _links?: {
         self: {
             href: string

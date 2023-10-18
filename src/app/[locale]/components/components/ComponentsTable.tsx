@@ -9,21 +9,17 @@
 // License-Filename: LICENSE
 
 'use client'
-import CommonUtils from '@/utils/common.utils'
-import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
-import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
-import styles from '../components.module.css'
-import ApiUtils from '@/utils/api/api.util'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { useSearchParams } from 'next/navigation'
-import DeleteComponentDialog from './DeleteComponentDialog'
-import { useCallback } from 'react'
-import { useTranslations } from 'next-intl'
-import { Spinner } from 'react-bootstrap'
 import { Table, _ } from '@/components/sw360'
-import { Embedded, EmbeddedComponent, Session } from '@/object-types'
-import { signOut } from 'next-auth/react'
+import { Component, Embedded, Session } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
+import { SW360_API_URL } from '@/utils/env'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import React, { useState } from 'react'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import styles from '../components.module.css'
+import DeleteComponentDialog from './DeleteComponentDialog'
 
 interface Props {
     session?: Session
@@ -31,10 +27,9 @@ interface Props {
 }
 
 const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
-    const params = useSearchParams()
     const t = useTranslations('default')
-    const [componentData, setComponentData] = useState([])
-    const [loading, setLoading] = useState(true)
+    const params = useSearchParams()
+    const searchParams = Object.fromEntries(params)
     const [deletingComponent, setDeletingComponent] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
@@ -42,58 +37,6 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         setDeletingComponent(componentId)
         setDeleteDialogOpen(true)
     }
-
-    const fetchData = useCallback(
-        async (queryUrl: string, signal: AbortSignal) => {
-            const componentsResponse = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-            if (componentsResponse.status == HttpStatus.OK) {
-                const components = (await componentsResponse.json()) as Embedded<EmbeddedComponent, 'sw360:components'>
-                return components
-            } else if (componentsResponse.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        [session]
-    )
-
-    useEffect(() => {
-        setLoading(true)
-        const searchParams = Object.fromEntries(params)
-        const queryUrl = CommonUtils.createUrlWithParams('components', searchParams)
-        const data: Array<unknown> = []
-
-        const parseTableRowData = (item: EmbeddedComponent) => {
-            data.push([
-                !CommonUtils.isNullOrUndefined(item.defaultVendor) ? item.defaultVendor.shortName : '',
-                [item.id, item.name],
-                !CommonUtils.isNullOrUndefined(item.mainLicenseIds) ? item.mainLicenseIds : [],
-                item.componentType,
-                item.id,
-            ])
-        }
-
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        fetchData(queryUrl, signal)
-            .then((components: Embedded<EmbeddedComponent, 'sw360:components'>) => {
-                if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
-                    components['_embedded']['sw360:components'].forEach(parseTableRowData)
-                    setComponentData(data)
-                    setNumberOfComponent(data.length)
-                    setLoading(false)
-                }
-            })
-            .catch(() => {
-                console.error('False to fetch components')
-            })
-
-        return () => {
-            controller.abort()
-        }
-    }, [fetchData, params, setNumberOfComponent])
 
     const columns = [
         {
@@ -152,16 +95,26 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
         },
     ]
 
+    const server = {
+        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, searchParams),
+        then: (data: Embedded<Component, 'sw360:components'>) => {
+            setNumberOfComponent(data.page.totalElements)
+            return data._embedded['sw360:components'].map((item: Component) => [
+                !CommonUtils.isNullOrUndefined(item.defaultVendor) ? item.defaultVendor.shortName : '',
+                [item.id, item.name],
+                !CommonUtils.isNullOrUndefined(item.mainLicenseIds) ? item.mainLicenseIds : [],
+                item.componentType,
+                item.id,
+            ])
+        },
+        total: (data: Embedded<Component, 'sw360:components'>) => data.page.totalElements,
+        headers: { Authorization: `Bearer ${session.user.access_token}` },
+    }
+
     return (
         <>
             <div className='row'>
-                {loading == false ? (
-                    <Table data={componentData} columns={columns} selector={true} />
-                ) : (
-                    <div className='col-12' style={{ textAlign: 'center' }}>
-                        <Spinner className='spinner' />
-                    </div>
-                )}
+                <Table columns={columns} selector={true} server={server} />
             </div>
             <DeleteComponentDialog
                 componentId={deletingComponent}
@@ -172,4 +125,4 @@ const ComponentsTable = ({ session, setNumberOfComponent }: Props) => {
     )
 }
 
-export default ComponentsTable
+export default React.memo(ComponentsTable)
