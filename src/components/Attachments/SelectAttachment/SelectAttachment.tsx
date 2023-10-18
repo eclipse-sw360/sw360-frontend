@@ -10,22 +10,18 @@
 
 'use client'
 
-import { Button, Modal } from 'react-bootstrap'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useState, useRef } from 'react'
+import React, { useRef, useState } from 'react'
+import { Button, Modal } from 'react-bootstrap'
 
-import { Session } from '@/object-types'
+import { AttachmentDetail, ComponentPayload, DocumentTypes, ReleasePayload } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
-import AttachmentDetail from '@/object-types/AttachmentDetail'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import ReleasePayload from '@/object-types/ReleasePayload'
 import styles from './SelectAttachment.module.css'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
     attachmentUpload: AttachmentDetail[]
     setAttachmentFromUpload: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
     onReRender: () => void
@@ -36,10 +32,9 @@ interface Props {
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const SelectAttachment = ({
+function SelectAttachment({
     show,
     setShow,
-    session,
     attachmentUpload,
     setAttachmentFromUpload,
     onReRender,
@@ -48,8 +43,9 @@ const SelectAttachment = ({
     releasePayload,
     setReleasePayload,
     documentType,
-}: Props) => {
+}: Props) {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [files, setFiles] = useState([])
     const inputRef = useRef(null)
 
@@ -126,6 +122,7 @@ const SelectAttachment = ({
                                 className={`${styles['input']}`}
                                 ref={inputRef}
                                 type='file'
+                                placeholder={t('Upload Attachment')}
                                 multiple
                                 onChange={handleFileChange}
                             />

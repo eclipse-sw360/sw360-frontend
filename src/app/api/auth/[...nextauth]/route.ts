@@ -11,8 +11,8 @@
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-import { CREDENTIAL_PROVIDER } from '@/object-types/Constants'
-import UserCredentialInfo from '@/object-types/UserCredentialInfo'
+import { CREDENTIAL_PROVIDER } from '@/constants'
+import { UserCredentialInfo } from '@/object-types'
 import AuthService from '@/services/auth.service'
 
 export const authOptions: NextAuthOptions = {

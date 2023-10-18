@@ -10,38 +10,35 @@
 
 'use client'
 
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import Image from 'next/image'
 import Link from 'next-intl/link'
+import Image from 'next/image'
+import { useState } from 'react'
 
-import { Session } from '@/object-types'
+import fossologyIcon from '@/assets/images/fossology.svg'
+import { EmbeddedAttachment, ReleaseDetail } from '@/object-types'
+import { FossologyClearing } from 'next-sw360'
+import styles from '../detail.module.css'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 import ClearingInformationStatus from './ClearingInformationStatus'
-import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
-import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import fossologyIcon from '@/assets/images/fossology.svg'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
 import RequestInformation from './RequestInformation'
 import SPDXAttachments from './SPDXAttachments'
-import styles from '../detail.module.css'
 import SupplementalInformation from './SupplementalInformation'
 
 interface Props {
     release: ReleaseDetail
-    session: Session
     releaseId: string
     embeddedAttachments: Array<EmbeddedAttachment>
 }
 
-const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: Props) => {
+const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [show, setShow] = useState(false)
 
     return (
         <div className='col'>
-            <SPDXAttachments releaseId={releaseId} session={session} />
+            <SPDXAttachments releaseId={releaseId} />
             <AssessmentSummaryInfo releaseId={releaseId} embeddedAttachments={embeddedAttachments} />
             <table className={`table label-value-table ${styles['summary-table']}`}>
                 <thead
@@ -242,7 +239,7 @@ const ClearingDetails = ({ release, session, releaseId, embeddedAttachments }: P
             </table>
             <RequestInformation clearingInformation={release.clearingInformation} />
             <SupplementalInformation clearingInformation={release.clearingInformation} />
-            <FossologyClearing show={show} setShow={setShow} session={session} releaseId={releaseId} />
+            <FossologyClearing show={show} setShow={setShow} releaseId={releaseId} />
         </div>
     )
 }

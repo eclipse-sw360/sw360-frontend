@@ -7,11 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from 'next-auth/next'
 import { Metadata } from 'next'
 
-import { Session } from '@/object-types'
 import VulnerabilityDetailsTab from './components/VulnerabilityDetailsTab'
 
 export const metadata: Metadata = {
@@ -23,9 +20,7 @@ interface Context {
 }
 
 const Detail = async ({ params }: Context) => {
-    const session: Session = await getServerSession(authOptions)
-
-    return <VulnerabilityDetailsTab session={session} vulnerabilityId={params.id} />
+    return <VulnerabilityDetailsTab vulnerabilityId={params.id} />
 }
 
 export default Detail

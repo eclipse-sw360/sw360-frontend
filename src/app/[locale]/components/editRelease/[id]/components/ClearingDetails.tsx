@@ -10,9 +10,8 @@
 
 'use client'
 
+import { ReleasePayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import styles from '../EditRelease.module.css'
-import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
     releasePayload?: ReleasePayload
@@ -46,7 +45,7 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
         <>
             <div className='col' style={{ padding: '0px 12px' }}>
                 <div className='row mb-4'>
-                    <div className={`${styles['header']} mb-2`}>
+                    <div className='header mb-2'>
                         <p className='fw-bold mt-3'>{t('Clearing Details')}</p>
                     </div>
                     <div className='row'>

@@ -21,11 +21,6 @@ import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, QuickFilter, Table, _ } from 'next-sw360'
 
-const headerButtons = {
-    'Add License': { link: '/licenses/add', type: 'primary' },
-    'Export Spreadsheet': { link: '/licenses/export', type: 'secondary' },
-}
-
 function LicensesPage() {
     const params = useSearchParams()
     const t = useTranslations('default')
@@ -33,6 +28,11 @@ function LicensesPage() {
     const [loading, setLoading] = useState(true)
     const [licenseData, setLicenseData] = useState([])
     const { data: session } = useSession()
+
+    const headerButtons = {
+        'Add License': { link: '/licenses/add', type: 'primary', name: t('Add License') },
+        'Export Spreadsheet': { link: '/licenses/export', type: 'secondary', name: t('Export Spreadsheet') },
+    }
 
     const fetchData: any = useCallback(
         async (queryUrl: string, signal: unknown) => {

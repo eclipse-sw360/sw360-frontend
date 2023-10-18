@@ -18,7 +18,7 @@ import { Button, Modal } from 'react-bootstrap'
 
 import { ComponentOwner, ComponentOwnerType, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import SelectTableComponentOwner from './SelectTableComponentOwner'
+import SelectTableComponentOwner from '../SelectTableComponentOwner/SelectTableComponentOwner'
 
 interface Props {
     show: boolean
@@ -26,7 +26,7 @@ interface Props {
     selectComponentOwner: ComponentOwnerType
 }
 
-const ComponentOwnerDialog = ({ show, setShow, selectComponentOwner }: Props) => {
+function ComponentOwnerDialog({ show, setShow, selectComponentOwner }: Props) {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [data, setData] = useState()

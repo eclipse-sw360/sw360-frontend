@@ -8,13 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useEffect, useState } from 'react'
-import Link from 'next-intl/link'
-import { _, Table } from '@/components/sw360'
+import { Table, _ } from '@/components/sw360'
+import { EmbeddedProject, RestrictedResource } from '@/object-types'
 import { useTranslations } from 'next-intl'
+import Link from 'next-intl/link'
+import { useEffect, useState } from 'react'
 import { Alert } from 'react-bootstrap'
-import EmbeddedProject from '@/object-types/EmbeddedProject'
-import { RestrictedResource } from '@/object-types/Resources'
 
 interface Props {
     projectUsings: Array<EmbeddedProject>

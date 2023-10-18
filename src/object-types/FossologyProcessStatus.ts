@@ -8,26 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface ProcessStep {
-    stepName: string,
-    stepStatus: string,
-    startedBy: string,
-    startedByGroup: string,
-    startedOn: string,
-    processStepIdInTool: string,
-    finishedOn: string,
-    result: string
-}
+import { FossologyProcessInfo } from '@/object-types'
 
-export interface FossologyProcessInfo {
-    externalTool: string
-    processStatus: string
-    attachmentId: string
-    attachmentHash: string
-    processSteps: Array<ProcessStep>
-}
-
-export interface FossologyProcessStatus {
+interface FossologyProcessStatus {
     fossologyProcessInfo: FossologyProcessInfo | null
     status: string
 }
+
+export default FossologyProcessStatus

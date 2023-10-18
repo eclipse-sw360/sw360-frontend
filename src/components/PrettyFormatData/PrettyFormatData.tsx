@@ -9,44 +9,43 @@
 // License-Filename: LICENSE
 
 const getJsonPrettyFormat = (obj: any) => {
-  let jsonView: any = JSON.stringify(obj, undefined, 5);
-  if (obj !== null && obj !== undefined) {
-    jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {jsonView} </pre>;
-  }
-  return jsonView;
+    let jsonView: any = JSON.stringify(obj, undefined, 5)
+    if (obj !== null && obj !== undefined) {
+        jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {jsonView} </pre>
+    }
+    return jsonView
 }
 
 const getJsonArrPrettyFormat = (obj: any) => {
-  let jsonView: any = JSON.stringify(obj, undefined, 5);
-  if (obj !== null && obj !== undefined && obj.length > 0) {
-    jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {jsonView} </pre>;
-  }
-  return jsonView;
+    let jsonView: any = JSON.stringify(obj, undefined, 5)
+    if (obj !== null && obj !== undefined && obj.length > 0) {
+        jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {jsonView} </pre>
+    }
+    return jsonView
 }
 
 const getStringPrettyFormat = (string: string) => {
-  const jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {`"${string}"`} </pre>;
+    const jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {`"${string}"`} </pre>
 
-  return jsonView;
+    return jsonView
 }
 
-const PrettyFormatData = ({ data }: any) => {
-
-  if (data === null || data === undefined) {
-    return (<pre> </pre>)
-  }
-
-  if (typeof (data) === 'string') {
-    return getStringPrettyFormat(data)
-  }
-
-  if (typeof (data) === 'object') {
-    if (Array.isArray(data)) {
-      return getJsonArrPrettyFormat(data);
+function PrettyFormatData({ data }: any) {
+    if (data === null || data === undefined) {
+        return <pre> </pre>
     }
 
-    return getJsonPrettyFormat(data);
-  }
+    if (typeof data === 'string') {
+        return getStringPrettyFormat(data)
+    }
+
+    if (typeof data === 'object') {
+        if (Array.isArray(data)) {
+            return getJsonArrPrettyFormat(data)
+        }
+
+        return getJsonPrettyFormat(data)
+    }
 }
 
 export default PrettyFormatData

@@ -9,17 +9,16 @@
 
 'use client'
 
-import KeywordSearch from './KeywordSearch'
-import { useState } from 'react'
-import { Alert } from 'react-bootstrap'
-import { Session } from '@/object-types'
-import { useTranslations } from 'next-intl'
-import { SearchResult } from '@/object-types/SearchResult'
-import { _, Table } from '@/components/sw360'
 import Link from 'next/link'
-import { Spinner } from 'react-bootstrap'
+import { useState } from 'react'
+import { Alert, Spinner } from 'react-bootstrap'
 
-export default function Search({ session }: { session: Session }) {
+import { SearchResult } from '@/object-types'
+import { useTranslations } from 'next-intl'
+import { _, Table } from 'next-sw360'
+import KeywordSearch from './KeywordSearch'
+
+export default function Search() {
     const t = useTranslations('default')
     const [data, setData] = useState<SearchResult[] | null>([])
 
@@ -86,12 +85,12 @@ export default function Search({ session }: { session: Session }) {
             <div className='mx-5 mt-3'>
                 <div className='row mt-2'>
                     <div className='col-lg-2'>
-                        <KeywordSearch session={session} setData={setData} />
+                        <KeywordSearch setData={setData} />
                     </div>
                     <div className='col'>
                         <div className='row d-flex justify-content-end'>
                             <div className='col text-truncate buttonheader-title'>
-                                {`${t('SEARCH RESULTS')} (${data ? data.length : 0})`}
+                                {t('SEARCH RESULTS', { datalength: data ? data.length : 0 })}
                             </div>
                         </div>
                         <div className='row mt-5'>

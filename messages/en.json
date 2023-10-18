@@ -132,7 +132,7 @@
         "Component is created": "Component is created",
         "Component is Duplicate": "Component is Duplicate",
         "Components with releases": "Components With Releases",
-        "Complexitty": "Complexitty",
+        "Complexity": "Complexitty",
         "Contributor": "Contributor",
         "Contains Open Source Software": "Contains Open Source Software",
         "Count of Security Vulnerabilities": "Count of Security Vulnerabilities",
@@ -632,7 +632,7 @@
         "The new Component and new Release will be created, do you want to import?": "The new Component and new Release will be created, do you want to import?",
         "This release contains": "This release <strong>{name}</strong> contains: ",
         "This currently only supports SPDX RDF/XML files with a uniq described top level node": "This currently only supports SPDX RDF/XML files with a uniq described top level node",
-        "The release has been successfully linked to project": "The release <strong>{releaseName}</strong> has been successfully linked to project <strong>{projectName}</strong>",
+        "The release has been successfully linked to project": "The release <strong>{releaseName}</strong> has been successfully linked to project <str7ong>{projectName}</strong>",
         "Test and Diagnostics": "Test and Diagnostics",
         "Tag": "Tag",
         "Text": "Text",
@@ -711,6 +711,14 @@
         "Recent Components": "Recent Components",
         "Recent Releases": "Recent Releases",
         "NotOwnComponent": "You do not own any components.",
-        "NoTasksAssigned": "There are no tasks assigned to you."
+        "NoTasksAssigned": "There are no tasks assigned to you.",
+        "Click to add": "Click to Add",
+        "owner_account_unit": "Enter owner's accounting unit",
+        "project_cannot_be_created": "Project cannot be created/updated",
+        "Edit Component Fail": "Edit Component Fail",
+        "current_spdx_only_supports": "This currently only supports SPDX RDF/XML files with a unique described top level node",
+        "wrong_spdx_information": "If the wrong SPDX is entered, the information will not be registered correctly",
+        "Components With Releases": "Components With Releases",
+        "conclude_license_id": "Main / Concluded License Ids"
     }
 }

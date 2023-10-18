@@ -9,22 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { FiAlertTriangle } from 'react-icons/fi'
-import { signOut } from 'next-auth/react'
+import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
+import { FiAlertTriangle } from 'react-icons/fi'
 
+import { Attachment, AttachmentType, EmbeddedAttachments, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { Attachment, HttpStatus, Session } from '@/object-types'
-import { Table, _ } from '@/components/sw360'
-import AttachmentType from '@/object-types/enums/AttachmentTypes'
-import EmbeddedAttachments from '@/object-types/EmbeddedAttachments'
+import { Table, _ } from 'next-sw360'
 import SPDXLicenseView from './SPDXLicenseView'
 
 interface Props {
     releaseId: string
-    session: Session
 }
 
 interface CellData {
@@ -40,8 +37,9 @@ interface CellData {
     addLicensesState?: { [key: string]: string }
 }
 
-const SPDXAttachments = ({ releaseId, session }: Props) => {
+const SPDXAttachments = ({ releaseId }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [tableData, setTableData] = useState<Array<Array<CellData>>>([])
 
     const columns = [
@@ -89,13 +87,14 @@ const SPDXAttachments = ({ releaseId, session }: Props) => {
                     licenseInfo && (
                         <>
                             {addLicensesState ? (
-                                <Alert variant={addLicensesState.variant}>{t(addLicensesState.message)}</Alert>
+                                <Alert variant={addLicensesState.variant}>
+                                    {t('VALUE', { value: addLicensesState.message })}
+                                </Alert>
                             ) : (
                                 <SPDXLicenseView
                                     isISR={isISR}
                                     licenseInfo={licenseInfo}
                                     attachmentName={attachmentName}
-                                    t={t}
                                 />
                             )}
                         </>

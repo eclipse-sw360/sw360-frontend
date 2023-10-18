@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ReleasePayload from '@/object-types/ReleasePayload'
+import { ReleasePayload } from '@/object-types'
 import ClearingDetails from './ClearingDetails'
 import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'

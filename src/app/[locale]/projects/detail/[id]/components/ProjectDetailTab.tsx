@@ -9,23 +9,22 @@
 
 'use client'
 
-import { Col, Row, ListGroup, Tab, Button, Dropdown, Spinner } from 'react-bootstrap'
-import { signOut } from 'next-auth/react'
-import React, { useState, useEffect } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 
-import { AdministrationDataType } from '@/object-types/AdministrationDataType'
+import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import { SummaryDataType } from '@/object-types/SummaryDataType'
+import LinkProjects from '../../../components/LinkProjects'
 import Administration from './Administration'
 import ChangeLog from './Changelog'
-import LinkProjects from '../../../components/LinkProjects'
 import Summary from './Summary'
 
-export default function ViewProjects({ session, projectId }: { session: Session; projectId: string }) {
+export default function ViewProjects({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
@@ -210,7 +209,7 @@ export default function ViewProjects({ session, projectId }: { session: Session;
 
     return (
         <>
-            <LinkProjects show={show} setShow={setShow} session={session} projectId={projectId} />
+            <LinkProjects show={show} setShow={setShow} projectId={projectId} />
             <div className='ms-5 mt-2'>
                 <Tab.Container defaultActiveKey='summary'>
                     <Row>
@@ -300,7 +299,7 @@ export default function ViewProjects({ session, projectId }: { session: Session;
                                     <Tab.Pane eventKey='attachmentUsages'></Tab.Pane>
                                     <Tab.Pane eventKey='vulnerabilities'></Tab.Pane>
                                     <Tab.Pane eventKey='changeLog'>
-                                        <ChangeLog projectId={projectId} session={session} />
+                                        <ChangeLog projectId={projectId} />
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Row>

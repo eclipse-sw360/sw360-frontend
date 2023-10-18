@@ -8,9 +8,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ClearingInformation from '@/object-types/ClearingInformation'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+
+import { ClearingInformation } from '@/object-types'
 import styles from '../detail.module.css'
 
 interface Props {

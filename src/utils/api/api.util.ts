@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { RequestContent } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
-import RequestContent from '@/object-types/RequestContent'
 
 const base = SW360_API_URL + '/resource/api'
 

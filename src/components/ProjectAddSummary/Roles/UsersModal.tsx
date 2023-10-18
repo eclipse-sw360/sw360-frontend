@@ -9,10 +9,10 @@
 
 'use client'
 
-import { Modal, Form, Row, Col, Button } from 'react-bootstrap'
-import { _, Table } from '@/components/sw360'
-import Link from 'next/link'
+import { Table, _ } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
 interface UserType {
     userId: string
@@ -73,13 +73,7 @@ export default function UsersModal({ show, setShow }: { show: boolean; setShow: 
 
     return (
         <>
-            <Modal
-                size='lg'
-                centered
-                show={show}
-                onHide={() => setShow(false)}
-                aria-labelledby={t('Search Users Modal')}
-            >
+            <Modal size='lg' centered show={show} onHide={() => setShow(false)} aria-label='Search Users Modal'>
                 <Modal.Header closeButton>
                     <Modal.Title id='user-modal'>{t('Search Users')}</Modal.Title>
                 </Modal.Header>

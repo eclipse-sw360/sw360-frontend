@@ -15,8 +15,7 @@ import { useState } from 'react'
 
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import { DocumentTypes, InputKeyValue, Licenses, Moderators, Vendor } from '@/object-types'
-import ReleasePayload from '@/object-types/ReleasePayload'
+import { DocumentTypes, InputKeyValue, Licenses, Moderators, ReleasePayload, Vendor } from '@/object-types'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {

@@ -9,17 +9,17 @@
 
 'use client'
 
-import { FaInfoCircle } from 'react-icons/fa'
-import { Modal, Col, Row, Form, Button, OverlayTrigger, Tooltip, Alert } from 'react-bootstrap'
-import { notFound } from 'next/navigation'
-import { signOut } from 'next-auth/react'
-import { useState, useRef } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
+import { notFound } from 'next/navigation'
+import { useRef, useState } from 'react'
+import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
+import { FaInfoCircle } from 'react-icons/fa'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
 import { Table, _ } from '@/components/sw360'
+import { HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -31,16 +31,15 @@ interface AlertData {
 
 export default function LinkProjects({
     projectId,
-    session,
     show,
     setShow,
 }: {
     projectId: string
-    session: Session
     show: boolean
     setShow: (show: boolean) => void
 }) {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [projectData, setProjectData] = useState<any[] | null>(null)
     const [linkProjects, setLinkProjects] = useState<Map<string, any>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
@@ -135,7 +134,7 @@ export default function LinkProjects({
         },
     ]
 
-    const handleSearch = async ({ searchValue, session }: { searchValue: string; session: Session }): Promise<any> => {
+    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<any> => {
         try {
             const response = await ApiUtils.GET(
                 `projects?name=${searchValue}&luceneSearch=true`,
@@ -175,13 +174,7 @@ export default function LinkProjects({
         setLinkProjects(m)
     }
 
-    const handleLinkProjects = async ({
-        projectId,
-        session,
-    }: {
-        projectId: string
-        session: Session
-    }): Promise<any> => {
+    const handleLinkProjects = async ({ projectId }: { projectId: string }): Promise<any> => {
         try {
             const data = { linkedProjects: Object.fromEntries(linkProjects) }
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.user.access_token)
@@ -194,7 +187,7 @@ export default function LinkProjects({
                     message: (
                         <>
                             <p>
-                                {t('Project cannot be created/updated')}. {res.message}
+                                {t('project_cannot_be_created')}. {res.message}
                             </p>
                         </>
                     ),
@@ -275,7 +268,7 @@ export default function LinkProjects({
                                     <Button
                                         variant='secondary'
                                         onClick={async () => {
-                                            await handleSearch({ searchValue: searchValueRef.current.value, session })
+                                            await handleSearch({ searchValue: searchValueRef.current.value })
                                         }}
                                     >
                                         {t('Search')}
@@ -301,7 +294,7 @@ export default function LinkProjects({
                     <Button
                         variant='primary'
                         onClick={async () => {
-                            await handleLinkProjects({ projectId, session })
+                            await handleLinkProjects({ projectId })
                             scrollToTop()
                         }}
                         disabled={linkProjects.size === 0}

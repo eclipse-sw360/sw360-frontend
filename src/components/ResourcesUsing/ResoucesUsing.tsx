@@ -8,23 +8,22 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
+import { DocumentTypes, Resources } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { Resources } from '@/object-types/Resources'
-import { Session } from '@/object-types'
 import ComponentsUsing from './ComponentsUsing'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
 import ProjectsUsing from './ProjectsUsing'
 
 interface Props {
     documentId: string
-    session: Session
     documentType: DocumentTypes
     documentName: string
 }
 
-const ResoucesUsing = ({ documentId, session, documentType, documentName }: Props) => {
+const ResoucesUsing = ({ documentId, documentType, documentName }: Props) => {
+    const { data: session } = useSession()
     const [resourcesUsing, setResourceUsing] = useState<Resources>(undefined)
 
     useEffect(() => {

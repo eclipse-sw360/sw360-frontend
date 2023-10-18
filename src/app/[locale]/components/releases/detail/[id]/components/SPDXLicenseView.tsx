@@ -8,26 +8,25 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
 'use client'
 
-import CommonUtils from '@/utils/common.utils'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
+import Modal from 'react-bootstrap/Modal'
 import { FaInfoCircle } from 'react-icons/fa'
+
+import { CommonUtils } from '@/utils'
 import styles from '../detail.module.css'
 
 interface Props {
     licenseInfo: { [key: string]: string | Array<string> | number }
     isISR: boolean
     attachmentName: string
-    t: any
 }
 
-const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName, t }: Props) => {
+const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) => {
+    const t = useTranslations('default')
     const [selectedLicenseId, setSelectedLicenseId] = useState<string>()
     const [modalShow, setModalShow] = useState(false)
 
@@ -79,7 +78,7 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName, t }: Props) => {
                         {t('Total Number Of Files')}: <b>{licenseInfo['totalFileCount']}</b>
                     </div>
                     <div>
-                        {t('Complexitty')}: <b>{caculateComplexity(licenseInfo.totalFileCount as number)}</b> (
+                        {t('Complexity')}: <b>{caculateComplexity(licenseInfo.totalFileCount as number)}</b> (
                         {t('based on license file count')})
                     </div>
                 </>
@@ -87,7 +86,7 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName, t }: Props) => {
             {CommonUtils.isNullEmptyOrUndefinedArray(licenseInfo['licenseIds'] as Array<unknown>) ? (
                 <>
                     <div>
-                        <b>{t('Main / Concluded License Ids')}:</b>
+                        <b>{t('conclude_license_id')}:</b>
                         <br /> N/A
                     </div>
                 </>
@@ -109,7 +108,7 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName, t }: Props) => {
             ) : (
                 <>
                     <div>
-                        <b>{t(licenseInfo.otherLicense)}</b>
+                        <b>{t(licenseInfo.otherLicense as string)}</b>
                     </div>
                     <ul>{renderLicenseIds(licenseInfo['otherLicenseIds'] as Array<string>)}</ul>
                 </>

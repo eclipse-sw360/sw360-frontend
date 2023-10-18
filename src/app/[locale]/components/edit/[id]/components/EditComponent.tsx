@@ -25,10 +25,10 @@ import {
     Component,
     ComponentPayload,
     DocumentTypes,
+    EmbeddedAttachments,
     HttpStatus,
     ToastData,
 } from '@/object-types'
-import EmbeddedAttachments from '@/object-types/EmbeddedAttachments'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
@@ -195,11 +195,10 @@ function EditComponent({ componentId }: Props) {
                             />
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>
-                            <Releases componentId={componentId} session={session} />
+                            <Releases componentId={componentId} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
                             <EditAttachments
-                                session={session}
                                 documentId={componentId}
                                 documentType={DocumentTypes.COMPONENT}
                                 componentPayload={componentPayload}

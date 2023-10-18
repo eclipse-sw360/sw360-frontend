@@ -8,6 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ComponentOwner from "./ComponentOwner";
+import ComponentOwner from './ComponentOwner'
 
-export type ComponentOwnerType = (ComponentOwner: ComponentOwner) => void
+type ComponentOwnerType = (ComponentOwner: ComponentOwner) => void
+
+export default ComponentOwnerType

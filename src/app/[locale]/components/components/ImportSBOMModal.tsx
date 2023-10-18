@@ -10,20 +10,19 @@
 
 'use client'
 
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useRef, useState } from 'react'
-import { Modal, Button, Alert } from 'react-bootstrap'
 import { useRouter } from 'next/navigation'
+import React, { useRef, useState } from 'react'
+import { Alert, Button, Modal } from 'react-bootstrap'
 
-import styles from '../components.module.css'
+import { Component, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import Component from '@/object-types/Component'
+import styles from '../components.module.css'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
 }
 
 enum ImportSBOMState {
@@ -40,8 +39,9 @@ interface PrepareImportData {
     releasesName?: string
 }
 
-const ImportSBOMModal = ({ show, setShow, session }: Props) => {
+const ImportSBOMModal = ({ show, setShow }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [importState, setImportState] = useState(ImportSBOMState.INIT_STATE)
     const [prepateImportData, setPrepareImportData] = useState<PrepareImportData | undefined>(undefined)
     const [notAllowedMessageDisplayed, setNotAllowedMessageDisplayed] = useState(false)
@@ -151,9 +151,9 @@ const ImportSBOMModal = ({ show, setShow, session }: Props) => {
                             <h4>
                                 <b>{t('Upload BOM document as')}</b>
                             </h4>
-                            {t('This currently only supports SPDX RDF/XML files with a uniq described top level node')}.
+                            {t('current_spdx_only_supports')}.
                             <br />
-                            {t('If the wrong SPDX is entered, the information will not be registered correctly')}.
+                            {t('wrong_spdx_information')}.
                         </div>
                         <div>
                             <div className={`${styles['modal-body-first']}`}>
@@ -172,6 +172,7 @@ const ImportSBOMModal = ({ show, setShow, session }: Props) => {
                                         type='file'
                                         accept='.rdf,.spdx'
                                         onChange={handleFileChange}
+                                        placeholder={t('Drop a File Here')}
                                     />
                                     <button className={`${styles['button-browse']}`} onClick={handleBrowseFile}>
                                         {t('Browse')}

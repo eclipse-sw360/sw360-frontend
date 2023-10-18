@@ -7,10 +7,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from 'next-auth/next'
-
-import { Session } from '@/object-types'
 import ProjectDetailTab from './components/ProjectDetailTab'
 
 interface Context {
@@ -18,9 +14,7 @@ interface Context {
 }
 
 const Detail = async ({ params }: Context) => {
-    const session: Session = await getServerSession(authOptions)
-
-    return <ProjectDetailTab session={session} projectId={params.id} />
+    return <ProjectDetailTab projectId={params.id} />
 }
 
 export default Detail

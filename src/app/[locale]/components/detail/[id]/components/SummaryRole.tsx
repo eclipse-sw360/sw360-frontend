@@ -9,11 +9,11 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import styles from '../detail.module.css'
 import { useState } from 'react'
-import CommonUtils from '@/utils/common.utils'
-import Component from '@/object-types/Component'
-import EmbeddedUser from '@/object-types/EmbeddedUser'
+
+import { Component, EmbeddedUser } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import styles from '../detail.module.css'
 
 const SummaryRole = ({ component }: { component: Component }) => {
     const t = useTranslations('default')

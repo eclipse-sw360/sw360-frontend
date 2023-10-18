@@ -10,13 +10,11 @@
 
 import React from 'react'
 
-import { FaTrashAlt } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
-import AttachmentDetail from '@/object-types/AttachmentDetail'
+import { FaTrashAlt } from 'react-icons/fa'
 
+import { AttachmentDetail, AttachmentType, DocumentTypes } from '@/object-types'
 import styles from './TableAttachment.module.css'
-import { AttachmentType } from '@/object-types/AttachmentType'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
 
 interface Props {
     setAttachmentData?: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
@@ -26,11 +24,11 @@ interface Props {
     documentType?: string
 }
 
-export default function TableAttachment({
+function TableAttachment({
     data,
     setAttachmentData,
-    setAttachmentToComponentData,
-    setAttachmentToReleasePayload,
+    // setAttachmentToComponentData,
+    // setAttachmentToReleasePayload,
     documentType,
 }: Props) {
     const t = useTranslations('default')
@@ -40,9 +38,9 @@ export default function TableAttachment({
         list[index][name as keyof AttachmentDetail] = value
         setAttachmentData(list)
         if (documentType === DocumentTypes.COMPONENT) {
-            setAttachmentToComponentData(list)
+            // setAttachmentToComponentData(list)
         } else if (documentType === DocumentTypes.RELEASE) {
-            setAttachmentToReleasePayload(list)
+            // setAttachmentToReleasePayload(list)
         }
     }
 
@@ -51,9 +49,9 @@ export default function TableAttachment({
         list.splice(index, 1)
         setAttachmentData(list)
         if (documentType === DocumentTypes.COMPONENT) {
-            setAttachmentToComponentData(list)
+            // setAttachmentToComponentData(list)
         } else if (documentType === DocumentTypes.RELEASE) {
-            setAttachmentToReleasePayload(list)
+            // setAttachmentToReleasePayload(list)
         }
     }
 
@@ -138,7 +136,8 @@ export default function TableAttachment({
                                     type='button'
                                     onClick={() => handleClickDelete(index)}
                                     style={{ border: 'none' }}
-                                    className={`fw-bold btn btn-light button-plain`}
+                                    className='button-plain'
+                                    title={t('Comment')}
                                 >
                                     <FaTrashAlt className='bi bi-trash3-fill' />
                                 </button>
@@ -151,3 +150,5 @@ export default function TableAttachment({
         </>
     )
 }
+
+export default TableAttachment

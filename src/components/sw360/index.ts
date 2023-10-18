@@ -11,7 +11,9 @@ import AddAdditionalRoles from './AddAdditionalRoles/AddAdditionalRoles'
 import AddKeyValue from './AddKeyValue/AddKeyValue'
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
+import ComponentOwnerDialog from './ComponentOwnerDialog/ComponentOwnerDialog'
 import Footer from './Footer/Footer'
+import FossologyClearing from './FossologyClearing/FossologyClearing'
 import Header from './Header/Header'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import ModeratorsDialog from './ModeratorsDialog/ModeratorsDialog'
@@ -23,13 +25,13 @@ import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
+import SelectTableComponentOwner from './SelectTableComponentOwner/SelectTableComponentOwner'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
 import ToastMessage from './ToastContainer/Toast'
 
 // Table component
-// IS strictly derived from gridjs-react with dedicated changes
-
+// Strictly derived from gridjs-react with dedicated changes
 import Table from './Table/Table'
 import { ReactWrapper, _ } from './Table/wrapper'
 import TreeTable from './TreeTable/TreeTable'
@@ -39,7 +41,9 @@ export {
     AddKeyValue,
     AdvancedSearch,
     AuthScreen,
+    ComponentOwnerDialog,
     Footer,
+    FossologyClearing,
     Header,
     LanguageSwitcher,
     ModeratorsDialog,
@@ -51,6 +55,7 @@ export {
     SearchUsersModal,
     SearchVendorsModal,
     SelectCountry,
+    SelectTableComponentOwner,
     ShowInfoOnHover,
     SideBar,
     Table,

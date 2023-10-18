@@ -8,8 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
+import { CommonTabIds, ReleaseTabIds } from '@/object-types'
 
 const WITHOUT_COMMERCIAL_DETAILS = [
     {

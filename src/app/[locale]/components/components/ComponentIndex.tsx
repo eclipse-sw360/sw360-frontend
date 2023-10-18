@@ -31,8 +31,8 @@ const ComponentIndex = () => {
     }
 
     const headerbuttons = {
-        'Add Component': { link: '/components/add', type: 'primary' },
-        'Import SBOM': { link: '#', type: 'secondary', onClick: handleClickImportSBOM },
+        'Add Component': { link: '/components/add', type: 'primary', name: t('Add Component') },
+        'Import SBOM': { link: '#', type: 'secondary', onClick: handleClickImportSBOM, name: t('Import SBOM') },
     }
 
     const advancedSearch = [
@@ -183,7 +183,7 @@ const ComponentIndex = () => {
                         <div className='row' style={{ marginBottom: '20px' }}>
                             <ComponentsTable setNumberOfComponent={setNumberOfComponent} />
                         </div>
-                        <ImportSBOMModal show={importModalOpen} setShow={setImportModalOpen} session={session} />
+                        <ImportSBOMModal show={importModalOpen} setShow={setImportModalOpen} />
                     </div>
                 </div>
             </div>

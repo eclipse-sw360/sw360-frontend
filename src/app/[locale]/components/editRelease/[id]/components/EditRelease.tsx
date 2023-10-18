@@ -255,13 +255,14 @@ const EditRelease = ({ releaseId }: Props) => {
     }
 
     const headerButtons = {
-        'Update Release': { link: '', type: 'primary', onClick: submit },
+        'Update Release': { link: '', type: 'primary', onClick: submit, name: t('Update Release') },
         'Delete Release': {
             link: '',
             type: 'danger',
             onClick: handleDeleteRelease,
+            name: t('Delete Release'),
         },
-        Cancel: { link: '/components/releases/detail/' + releaseId, type: 'secondary' },
+        Cancel: { link: '/components/releases/detail/' + releaseId, type: 'secondary', name: t('Cancel') },
     }
 
     return (
@@ -333,7 +334,6 @@ const EditRelease = ({ releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
                             <EditAttachments
-                                session={session}
                                 documentId={releaseId}
                                 documentType={DocumentTypes.RELEASE}
                                 releasePayload={releasePayload}

@@ -10,20 +10,18 @@
 
 'use client'
 
-import { Button, Form, Modal } from 'react-bootstrap'
-import { useCallback } from 'react'
-import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useCallback, useState } from 'react'
+import { Button, Form, Modal } from 'react-bootstrap'
 
 import { ApiUtils } from '@/utils'
-import { Session } from '@/object-types'
 
 interface Props {
     show?: boolean
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
     state: string
     selectedVulner: Array<any>
-    session: Session
 }
 
 interface ChangeStatePayload {
@@ -36,8 +34,9 @@ interface ChangeStatePayload {
     verificationState: string
 }
 
-const ChangeStateDialog = ({ show, setShow, state, selectedVulner, session }: Props) => {
+const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [comment, setComment] = useState('')
 
     const handleCloseDialog = () => {
@@ -82,7 +81,7 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner, session }: Pr
                         number: selectedVulner.length,
                         strong: (chunks) => <b>{chunks}</b>,
                     })}
-                    : <b>{t(state)}</b>.
+                    : <b>{t('VALUE', { value: state })}</b>.
                     <hr />
                     <Form.Group className='mb-3'>
                         <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>

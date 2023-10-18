@@ -8,13 +8,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useState } from 'react'
-import COTSDetails from '@/object-types/COTSDetails'
 import { useTranslations } from 'next-intl'
-import styles from '../detail.module.css'
+import Link from 'next-intl/link'
+import { useState } from 'react'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
-import Link from 'next-intl/link'
+
+import { COTSDetails } from '@/object-types'
+import styles from '../detail.module.css'
 
 const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails }) => {
     const t = useTranslations('default')

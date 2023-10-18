@@ -9,15 +9,14 @@
 
 'use client'
 
-import { PiInfoBold } from 'react-icons/pi'
-import { useState, useReducer, SetStateAction, Dispatch } from 'react'
-import { Session } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import ApiUtils from '@/utils/api/api.util'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { signOut } from 'next-auth/react'
 import { notFound } from 'next/navigation'
-import { SearchResult } from '@/object-types/SearchResult'
+import { Dispatch, SetStateAction, useReducer, useState } from 'react'
+import { PiInfoBold } from 'react-icons/pi'
+
+import { HttpStatus, SearchResult } from '@/object-types'
+import { ApiUtils } from '@/utils'
 
 interface SEARCH_STATE {
     project: boolean
@@ -129,14 +128,10 @@ function reducer(state: SEARCH_STATE, action: SEARCH_ACTIONS): SEARCH_STATE {
     }
 }
 
-export default function KeywordSearch({
-    session,
-    setData,
-}: {
-    session: Session
-    setData: Dispatch<SetStateAction<SearchResult[]>>
-}) {
+function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchResult[]>> }) {
     const t = useTranslations('default')
+    const { data: session } = useSession()
+
     const initialState: SEARCH_STATE = {
         project: false,
         component: false,
@@ -193,6 +188,7 @@ export default function KeywordSearch({
                             type='text'
                             className='form-control'
                             value={searchText}
+                            placeholder={t('Keyword Search')}
                             onChange={(e) => setSearchText(e.target.value)}
                         />
                         <div className='row mt-2 header-1 border-bottom'>
@@ -362,3 +358,4 @@ export default function KeywordSearch({
         </>
     )
 }
+export default KeywordSearch

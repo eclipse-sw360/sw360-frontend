@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import LinkedRelease from './LinkedRelease'
+import { LinkedRelease } from '@/object-types'
 
-export default interface EmbeddedLinkedReleases {
+interface EmbeddedLinkedReleases {
     _embedded: {
         'sw360:releaseLinks': Array<LinkedRelease>
     }
@@ -24,3 +24,5 @@ export default interface EmbeddedLinkedReleases {
         ]
     }
 }
+
+export default EmbeddedLinkedReleases

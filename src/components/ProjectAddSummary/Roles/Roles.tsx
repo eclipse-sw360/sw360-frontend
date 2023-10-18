@@ -9,9 +9,9 @@
 
 'use client'
 
-import { GiCancel } from 'react-icons/gi'
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import { GiCancel } from 'react-icons/gi'
 
 import { SelectCountry } from 'next-sw360'
 import DepartmentModal from './DepartmentModal'
@@ -89,7 +89,7 @@ export default function Roles() {
                             className='form-control'
                             aria-label={t('Owner Accounting Unit')}
                             id='addProjects.ownerAccountingUnit'
-                            placeholder={t("Enter owner's accounting unit")}
+                            placeholder={t('owner_account_unit')}
                             readOnly={true}
                         />
                     </div>

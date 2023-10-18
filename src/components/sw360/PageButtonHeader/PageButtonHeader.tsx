@@ -9,15 +9,12 @@
 
 'use client'
 
-import React from 'react'
 import Link from 'next-intl/link'
-import { useTranslations } from 'next-intl'
 
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
 
 function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
-    const t = useTranslations('default')
     let buttonList: JSX.Element[] = []
     if (buttons) {
         buttonList = Object.entries(buttons).map(([key, value]) => {
@@ -31,7 +28,7 @@ function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
                         style={{ marginRight: '10px' }}
                         onClick={value.onClick}
                     >
-                        {t(key)}
+                        {value?.name}
                     </button>
                 </Link>
             )

@@ -8,22 +8,26 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface ReleaseLink {
-  id: string
-  name: string
-  version: string
-  mainlineState?: string | undefined
-  clearingReport?: {
-    clearingReportStatus: string
-  } | undefined
-  clearingState?: string
-  vendor?: string
-  longName?: string
-  releaseRelationship: string
-  hasSubreleases?: boolean
-  licenseIds: Array<string> | undefined
-  accessible?: boolean
-  _embedded?: {
-    'sw360:releaseLinks': Array<ReleaseLink>
-  }
+interface ReleaseLink {
+    id: string
+    name: string
+    version: string
+    mainlineState?: string | undefined
+    clearingReport?:
+        | {
+              clearingReportStatus: string
+          }
+        | undefined
+    clearingState?: string
+    vendor?: string
+    longName?: string
+    releaseRelationship: string
+    hasSubreleases?: boolean
+    licenseIds?: Array<string>
+    accessible?: boolean
+    _embedded?: {
+        'sw360:releaseLinks': Array<ReleaseLink>
+    }
 }
+
+export default ReleaseLink

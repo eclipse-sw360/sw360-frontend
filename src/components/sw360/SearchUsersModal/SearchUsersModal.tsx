@@ -8,9 +8,8 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import React from 'react'
 
-export default function SearchUsersModalComponent() {
+function SearchUsersModal() {
     const t = useTranslations('default')
     return (
         <>
@@ -68,3 +67,5 @@ export default function SearchUsersModalComponent() {
         </>
     )
 }
+
+export default SearchUsersModal

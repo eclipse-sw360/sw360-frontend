@@ -13,7 +13,7 @@
 import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
-import ComponentOwnerDialog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
+import ComponentOwnerDialog from '@/components/sw360/ComponentOwnerDialog/ComponentOwnerDialog'
 import { ComponentOwner, ComponentPayload, Moderators } from '@/object-types'
 import { ModeratorsDialog, SelectCountry } from 'next-sw360'
 

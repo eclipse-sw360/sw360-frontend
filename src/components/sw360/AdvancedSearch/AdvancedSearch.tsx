@@ -75,10 +75,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                 return (
                     <div key='createdOn'>
                         <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                            <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
+                            <Form.Label className='label'>{field.fieldName}</Form.Label>
                             <Form.Select
-                                aria-label={t(field.fieldName)}
-                                title={t(field.fieldName)}
+                                aria-label={field.fieldName}
+                                title={field.fieldName}
                                 className='form-control'
                                 size='sm'
                                 name={field.paramName}
@@ -88,7 +88,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                                 <option defaultValue='' />
                                 {field.value.map((option) => (
                                     <option key={option.key} value={option.key}>
-                                        {t(option.text)}
+                                        {option.text}
                                     </option>
                                 ))}
                             </Form.Select>
@@ -116,7 +116,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
             } else if (typeof field.value === 'string') {
                 return (
                     <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                        <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
+                        <Form.Label className='label'>{field.fieldName}</Form.Label>
                         <Form.Control
                             className='form-control'
                             type='text'
@@ -130,7 +130,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
             } else if (Array.isArray(field.value)) {
                 return (
                     <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                        <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
+                        <Form.Label className='label'>{field.fieldName}</Form.Label>
                         <Form.Select
                             className={'form-control'}
                             size='sm'
@@ -141,7 +141,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                             <option defaultValue='' />
                             {field.value.map((option) => (
                                 <option key={option.key} value={option.key}>
-                                    {t(option.text)}
+                                    {option.text}
                                 </option>
                             ))}
                         </Form.Select>
@@ -154,7 +154,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     return (
         <div className='card-deck'>
             <div id='advanced-search' className='card'>
-                <div className='card-header'>{t(title)}</div>
+                <div className='card-header'>{title}</div>
 
                 <div className='card-body'>
                     <Form>{fieldList}</Form>

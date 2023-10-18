@@ -10,29 +10,29 @@
 
 'use client'
 
-import Link from 'next-intl/link'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { LOCALES as locales } from '@/constants'
 import { useTranslations } from 'next-intl'
-import { LOCALES as locales } from '@/object-types/Constants'
-import { Container, Navbar as BSNavbar, Nav } from 'react-bootstrap'
+import Link from 'next-intl/link'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import { Navbar as BSNavbar, Container, Nav } from 'react-bootstrap'
 
 function Navbar() {
-    const [heading, setHeading] = useState('Home')
+    const [heading, setHeading] = useState('home')
     const pathname = usePathname()
     const isLoginPage = locales.includes(pathname.substring(1)) || pathname.substring(1) === ''
     const t = useTranslations('default')
 
     const navlist = [
-        { link: '/home', name: 'Home' },
-        { link: '/projects', name: 'Projects' },
-        { link: '/components', name: 'Components' },
-        { link: '/licenses', name: 'Licenses' },
-        { link: '/ecc', name: 'ECC' },
-        { link: '/vulnerabilities', name: 'Vulnerabilities' },
-        { link: '/requests', name: 'Requests' },
-        { link: '/search', name: 'Search' },
-        { link: '/preferences', name: 'Preferences' },
+        { link: '/home', name: t('Home') },
+        { link: '/projects', name: t('Projects') },
+        { link: '/components', name: t('Components') },
+        { link: '/licenses', name: t('Licenses') },
+        { link: '/ecc', name: t('ECC') },
+        { link: '/vulnerabilities', name: t('Vulnerabilities') },
+        { link: '/requests', name: t('Requests') },
+        { link: '/search', name: t('Search') },
+        { link: '/preferences', name: t('Preferences') },
     ]
 
     const NavItems = () => (
@@ -41,8 +41,8 @@ function Navbar() {
                 <Nav variant='underline' className='ms-5' activeKey='home'>
                     {navlist.map((item) => (
                         <Nav.Item key={item.name}>
-                            <Link className={`nav-link`} href={item.link} onClick={() => setHeading(item.name)}>
-                                {t(item.name)}
+                            <Link className={`nav-link`} href={item.link} onClick={() => setHeading(item.link[-1])}>
+                                {item.name}
                             </Link>
                         </Nav.Item>
                     ))}
@@ -57,7 +57,7 @@ function Navbar() {
                 <NavItems />
 
                 <div className={`heading-div`}>
-                    <div>{t(heading)}</div>
+                    <div>{heading}</div>
                 </div>
             </>
         )
