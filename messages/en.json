@@ -632,7 +632,7 @@
         "The new Component and new Release will be created, do you want to import?": "The new Component and new Release will be created, do you want to import?",
         "This release contains": "This release <strong>{name}</strong> contains: ",
         "This currently only supports SPDX RDF/XML files with a uniq described top level node": "This currently only supports SPDX RDF/XML files with a uniq described top level node",
-        "The release has been successfully linked to project": "The release <strong>{releaseName}</strong> has been successfully linked to project <str7ong>{projectName}</strong>",
+        "The release has been successfully linked to project": "The release <strong>{releaseName}</strong> has been successfully linked to project <strong>{projectName}</strong>",
         "Test and Diagnostics": "Test and Diagnostics",
         "Tag": "Tag",
         "Text": "Text",
