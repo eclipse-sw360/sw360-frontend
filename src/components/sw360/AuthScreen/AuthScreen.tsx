@@ -19,7 +19,7 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { CREDENTIALS } from '@/constants'
 import { HttpStatus } from '@/object-types'
-import { LanguageSwitcher } from 'next-sw360'
+import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 
 function AuthScreen() {
     const router = useRouter()
@@ -52,42 +52,50 @@ function AuthScreen() {
         <>
             <section className='portlet' id='portlet_sw360_portlet_welcome'>
                 <div>
-                    <div className='portlet-content-container p-1' style={{ background: '#f1f2f5' }}>
-                        <div className='portlet-body p-5'>
-                            <div className='jumbotron'>
-                                <h1 className='display-4'>{t('Welcome to SW360!')}</h1>
-                                <LanguageSwitcher />
-                                <br />
-                                <p className='mt-3'>{t('SW360_INFO')}</p>
-                                <hr className='my-4' />
-                                <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
-                                {status === 'unauthenticated' ? (
-                                    <div className='buttons'>
-                                        <span>
-                                            <a className='btn btn-primary btn-lg' role='button' onClick={handleShow}>
-                                                {t('Sign In')}
+                    {status == 'loading' ? (
+                        <PageSpinner />
+                    ) : (
+                        <div className='portlet-content-container p-1' style={{ background: '#f1f2f5' }}>
+                            <div className='portlet-body p-5'>
+                                <div className='jumbotron'>
+                                    <h1 className='display-4'>{t('Welcome to SW360!')}</h1>
+                                    <LanguageSwitcher />
+                                    <br />
+                                    <p className='mt-3'>{t('SW360_INFO')}</p>
+                                    <hr className='my-4' />
+                                    <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
+                                    {status === 'unauthenticated' ? (
+                                        <div className='buttons'>
+                                            <span>
+                                                <a
+                                                    className='btn btn-primary btn-lg'
+                                                    role='button'
+                                                    onClick={handleShow}
+                                                >
+                                                    {t('Sign In')}
+                                                </a>
+                                            </span>
+                                            <a
+                                                className='btn btn-outline-primary btn-lg'
+                                                style={{ marginLeft: '3rem' }}
+                                                role='button'
+                                            >
+                                                {t('Create Account')}
                                             </a>
-                                        </span>
-                                        <a
-                                            className='btn btn-outline-primary btn-lg'
-                                            style={{ marginLeft: '3rem' }}
-                                            role='button'
-                                        >
-                                            {t('Create Account')}
-                                        </a>
-                                    </div>
-                                ) : (
-                                    <div className='buttons'>
-                                        <span>
-                                            <Link className='btn btn-primary btn-lg' role='button' href='/home'>
-                                                {t('Start')}
-                                            </Link>
-                                        </span>
-                                    </div>
-                                )}
+                                        </div>
+                                    ) : (
+                                        <div className='buttons'>
+                                            <span>
+                                                <Link className='btn btn-primary btn-lg' role='button' href='/home'>
+                                                    {t('Start')}
+                                                </Link>
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </section>
 
