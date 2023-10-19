@@ -135,10 +135,10 @@ const DetailOverview = ({ componentId }: Props) => {
     }, [componentId, fetchData])
 
     const headerButtons = {
-        'Edit component': { link: `/components/edit/${componentId}`, type: 'primary' },
-        Merge: { link: '', type: 'secondary' },
-        Split: { link: '', type: 'secondary' },
-        Subscribe: { link: '', type: 'outline-success' },
+        Edit: { link: `/components/edit/${componentId}`, type: 'primary', name: t('Edit component') },
+        Merge: { link: '', type: 'secondary', name: t('Merge') },
+        Split: { link: '', type: 'secondary', name: t('Split') },
+        Subscribe: { link: '', type: 'outline-success', name: t('Subscribe') },
     }
 
     return (
