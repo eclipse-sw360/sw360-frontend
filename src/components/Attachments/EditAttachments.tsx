@@ -8,24 +8,19 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useEffect, useState, useCallback } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { signOut } from 'next-auth/react'
+import { useCallback, useEffect, useState } from 'react'
 
+import { AttachmentDetail, ComponentPayload, DocumentTypes, HttpStatus, ReleasePayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import AttachmentDetail from '@/object-types/AttachmentDetail'
-import ComponentPayload from '@/object-types/ComponentPayLoad'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import ReleasePayload from '@/object-types/ReleasePayload'
-import SelectAttachment from './SelectAttachment/SelectAttachment'
 import styles from './Attachment.module.css'
+import SelectAttachment from './SelectAttachment/SelectAttachment'
 import TableAttachment from './TableAttachment/TableAttachment'
 import TitleAttachment from './TiltleAttachment/TitleAttachment'
 
 interface Props {
     documentId?: string
-    session?: Session
     documentType?: string
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
@@ -33,16 +28,16 @@ interface Props {
     setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
 }
 
-const EditAttachments = ({
+function EditAttachments({
     documentId,
-    session,
     documentType,
     componentPayload,
     setComponentPayload,
     releasePayload,
     setReleasePayload,
-}: Props) => {
+}: Props) {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
     const [reRender, setReRender] = useState(false)
     const handleReRender = () => {
@@ -51,19 +46,19 @@ const EditAttachments = ({
     const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
 
-    const setAttachmentToComponentData = (attachmentDatas: AttachmentDetail[]) => {
-        setComponentPayload({
-            ...componentPayload,
-            attachmentDTOs: attachmentDatas,
-        })
-    }
+    // const setAttachmentToComponentData = (attachmentDatas: AttachmentDetail[]) => {
+    //     setComponentPayload({
+    //         ...componentPayload,
+    //         attachmentDTOs: attachmentDatas,
+    //     })
+    // }
 
-    const setAttachmentToReleasePayload = (attachmentDatas: AttachmentDetail[]) => {
-        setReleasePayload({
-            ...releasePayload,
-            attachmentDTOs: attachmentDatas,
-        })
-    }
+    // const setAttachmentToReleasePayload = (attachmentDatas: AttachmentDetail[]) => {
+    //     setReleasePayload({
+    //         ...releasePayload,
+    //         attachmentDTOs: attachmentDatas,
+    //     })
+    // }
 
     const fetchData: any = useCallback(
         async (url: string) => {
@@ -110,7 +105,6 @@ const EditAttachments = ({
                 setAttachmentFromUpload={setAttachmentData}
                 show={dialogOpenSelectAttachment}
                 setShow={setDialogOpenSelectAttachment}
-                session={session}
                 onReRender={handleReRender}
                 documentType={documentType}
                 releasePayload={releasePayload}
@@ -121,9 +115,9 @@ const EditAttachments = ({
                 <TableAttachment
                     data={attachmentData}
                     setAttachmentData={setAttachmentData}
-                    setAttachmentToComponentData={setAttachmentToComponentData}
+                    // setAttachmentToComponentData={setAttachmentToComponentData}
                     documentType={documentType}
-                    setAttachmentToReleasePayload={setAttachmentToReleasePayload}
+                    // setAttachmentToReleasePayload={setAttachmentToReleasePayload}
                 />
             </div>
 

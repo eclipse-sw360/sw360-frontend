@@ -9,10 +9,10 @@
 
 'use client'
 
+import { AdministrationDataType } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { AdministrationDataType } from '@/object-types/AdministrationDataType'
-import styles from '../detail.module.css'
 import { useState } from 'react'
+import styles from '../detail.module.css'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')

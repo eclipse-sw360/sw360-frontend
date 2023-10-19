@@ -7,64 +7,66 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface SummaryDataType {
-    description: string;
+interface SummaryDataType {
+    description: string
 
     // General Information
-    id: string;
-    name: string;
-    version: string;
-    visibility: string;
-    createdOn: string;
+    id: string
+    name: string
+    version: string
+    visibility: string
+    createdOn: string
     createdBy: {
-        name: string;
-        email: string;
-    };
-    modifiedOn: string;
+        name: string
+        email: string
+    }
+    modifiedOn: string
     modifiedBy: {
-        name: string;
-        email: string;
-    };
-    projectType: string;
-    domain: string;
-    tag: string;
-    externalIds: Map<string, string>;
-    additionalData: Map<string, string>;
-    externalUrls: Map<string, string>;
+        name: string
+        email: string
+    }
+    projectType: string
+    domain: string
+    tag: string
+    externalIds: Map<string, string>
+    additionalData: Map<string, string>
+    externalUrls: Map<string, string>
 
     // Roles
-    group: string;
+    group: string
     projectResponsible: {
-        name: string;
-        email: string;
-    };
+        name: string
+        email: string
+    }
     projectOwner: {
-        name: string;
-        email: string;
-    };
-    ownerAccountingUnit: string;
-    ownerBillingGroup: string;
-    ownerCountry: string;
+        name: string
+        email: string
+    }
+    ownerAccountingUnit: string
+    ownerBillingGroup: string
+    ownerCountry: string
     leadArchitect: {
-        name: string;
-        email: string;
-    };
+        name: string
+        email: string
+    }
     moderators: {
-        name: string;
-        email: string;
-    }[];
+        name: string
+        email: string
+    }[]
     contributors: {
-        name: string;
-        email: string;
-    }[];
+        name: string
+        email: string
+    }[]
     securityResponsibles: {
-        name: string;
-        email: string;
-    }[];
-    additionalRoles: Map<string, string>;
+        name: string
+        email: string
+    }[]
+    additionalRoles: Map<string, string>
 
     // Project Vendor
-    vendorFullName: string;
-    vendorShortName: string;
-    vendorUrl: string;
+    vendorFullName: string
+    vendorShortName: string
+    vendorUrl: string
 }
+
+export default SummaryDataType

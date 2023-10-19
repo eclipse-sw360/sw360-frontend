@@ -8,11 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useState } from 'react'
-import COTSDetails from '@/object-types/COTSDetails'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
+
+import { COTSDetails } from '@/object-types'
 import styles from '../detail.module.css'
 
 const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails }) => {

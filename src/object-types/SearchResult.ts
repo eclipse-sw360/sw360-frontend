@@ -8,8 +8,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface SearchResult {
+interface SearchResult {
     id: string
     type: string
     name: string
 }
+
+export default SearchResult

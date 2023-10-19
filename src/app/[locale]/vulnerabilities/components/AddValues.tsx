@@ -9,13 +9,11 @@
 
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
-
 import { useTranslations } from 'next-intl'
-
-import { VulnerabilityData } from '@/object-types/VulnerabilityPayload'
-
+import { Dispatch, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
+
+import { VulnerabilityData } from '@/object-types'
 
 export default function AddValues({
     componentName,

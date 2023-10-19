@@ -8,17 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { FaFileAlt } from 'react-icons/fa'
-import { useTranslations } from 'next-intl'
-import { Table, _ } from '@/components/sw360'
-import { ChangeLog } from '@/object-types/ChangeLogs'
+
+import { Changelogs } from '@/object-types'
+import { Table, _ } from 'next-sw360'
 
 interface Props {
     documentId: string
     setChangeLogIndex: React.Dispatch<React.SetStateAction<number>>
     setChangesLogTab: React.Dispatch<React.SetStateAction<string>>
-    changeLogList: Array<ChangeLog>
+    changeLogList: Array<Changelogs>
 }
 
 const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props) => {
@@ -26,7 +27,7 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
     const [changeLogData, setChangeLogData] = useState([])
 
     useEffect(() => {
-        const data = Object.entries(changeLogList).map(([index, item]: [index: string, item: ChangeLog]) => [
+        const data = Object.entries(changeLogList).map(([index, item]: [index: string, item: Changelogs]) => [
             item.changeTimestamp,
             item.id,
             item.documentId === documentId

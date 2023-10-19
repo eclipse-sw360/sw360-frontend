@@ -17,8 +17,8 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
+import { CREDENTIALS } from '@/constants'
 import { HttpStatus } from '@/object-types'
-import { CREDENTIALS } from '@/object-types/Constants'
 import { LanguageSwitcher } from 'next-sw360'
 
 function AuthScreen() {

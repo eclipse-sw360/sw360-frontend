@@ -8,20 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Session } from '@/object-types'
+import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
+import { DocumentTypes, ReleaseDetail } from '@/object-types'
 import ReleaseGeneral from './ReleaseGeneral'
 import ReleaseVendor from './ReleaseVendor'
-import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
 
 interface Props {
     release: ReleaseDetail
     releaseId: string
-    session: Session
 }
 
-const Summary = ({ release, releaseId, session }: Props) => {
+const Summary = ({ release, releaseId }: Props) => {
     return (
         <div className='col'>
             <div>
@@ -31,7 +28,6 @@ const Summary = ({ release, releaseId, session }: Props) => {
                 <ReleaseGeneral release={release} releaseId={releaseId} />
                 <ReleaseVendor release={release} />
                 <ResoucesUsing
-                    session={session}
                     documentId={releaseId}
                     documentType={DocumentTypes.RELEASE}
                     documentName={`${release.name} (${release.version})`}

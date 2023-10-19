@@ -7,26 +7,28 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export interface AdministrationDataType {
+interface AdministrationDataType {
     // Clearing
-    projectClearingState: string;
-    clearingDetails: string;
-    clearingTeam: string;
-    deadlineForPreEval: string;
-    clearingSummary: string;
-    specialRiskOpenSourceSoftware: string;
-    generalRisksThirdPartySoftware: string;
-    specialRisksThirdPartySoftware: string;
-    salesAndDeliveryChannels: string;
-    remarksAdditionalRequirements: string; 
+    projectClearingState: string
+    clearingDetails: string
+    clearingTeam: string
+    deadlineForPreEval: string
+    clearingSummary: string
+    specialRiskOpenSourceSoftware: string
+    generalRisksThirdPartySoftware: string
+    specialRisksThirdPartySoftware: string
+    salesAndDeliveryChannels: string
+    remarksAdditionalRequirements: string
 
     // Lifecycle
-    projectState: string;
-    systemStateBegin: string;
-    systemStateEnd: string;
-    deliveryStart: string;
-    phaseOutSince: string;
-    
+    projectState: string
+    systemStateBegin: string
+    systemStateEnd: string
+    deliveryStart: string
+    phaseOutSince: string
+
     // LicenseInfoHeader
-    licenseInfoHeader: string;
+    licenseInfoHeader: string
 }
+
+export default AdministrationDataType

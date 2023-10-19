@@ -9,16 +9,13 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 import styles from './SideBar.module.css'
 
-import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-
-import { useState, useEffect } from 'react'
-import CommonUtils from '@/utils/common.utils'
-import VulnerabilitiesVerificationState from '@/object-types/enums/VulnerabilitiesVerificationState'
-import { LinkedVulnerability } from '@/object-types/LinkedVulnerability'
+import { CommonTabIds, LinkedVulnerability, ReleaseTabIds, VulnerabilitiesVerificationState } from '@/object-types'
+import { CommonUtils } from '@/utils'
 
 interface Tab {
     name: string
@@ -87,7 +84,7 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                         id={tab.id}
                         onClick={handleSelectTab}
                     >
-                        {t(tab.name)} <span className={`${styles[eccStatus]}`}></span>
+                        {tab.name} <span className={`${styles[eccStatus]}`}></span>
                     </a>
                 )
             }

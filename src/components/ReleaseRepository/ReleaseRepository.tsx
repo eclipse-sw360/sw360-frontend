@@ -10,10 +10,10 @@
 
 'use client'
 
-import React from 'react'
 import { useTranslations } from 'next-intl'
+import React from 'react'
 
-import ReleasePayload from '@/object-types/ReleasePayload'
+import { ReleasePayload } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
 
 interface Props {

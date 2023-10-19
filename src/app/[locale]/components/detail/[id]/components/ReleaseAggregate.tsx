@@ -10,11 +10,11 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-import styles from '../detail.module.css'
 import { useState } from 'react'
-import CommonUtils from '@/utils/common.utils'
-import Component from '@/object-types/Component'
-import Vendor from '@/object-types/Vendor'
+
+import { Component, Vendor } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import styles from '../detail.module.css'
 
 const ReleaseAgrregate = ({ component }: { component: Component }) => {
     const [toggle, setToggle] = useState(false)

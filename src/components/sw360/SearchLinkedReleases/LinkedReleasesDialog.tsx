@@ -10,21 +10,19 @@
 
 'use client'
 
-import { Button, Modal } from 'react-bootstrap'
+import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { Button, Modal } from 'react-bootstrap'
 
+import { HttpStatus, LinkedRelease, ReleasePayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import LinkedRelease from '@/object-types/LinkedRelease'
-import ReleasePayload from '@/object-types/ReleasePayload'
 import SelectTableLinkedReleases from './SelectTableLinkedReleases'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
     onReRender: () => void
     releaseLinks: LinkedRelease[]
     setReleaseLinks: React.Dispatch<React.SetStateAction<LinkedRelease[]>>
@@ -35,7 +33,6 @@ interface Props {
 const LinkedReleasesDialog = ({
     show,
     setShow,
-    session,
     onReRender,
     releaseLinks,
     setReleaseLinks,
@@ -43,6 +40,7 @@ const LinkedReleasesDialog = ({
     setReleasePayload,
 }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState()
     const [linkedReleases] = useState([])
     const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<LinkedRelease[]>()

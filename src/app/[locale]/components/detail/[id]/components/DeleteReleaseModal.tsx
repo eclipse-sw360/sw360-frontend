@@ -9,17 +9,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
-import { useEffect, useState, useCallback } from 'react'
-import { signOut } from 'next-auth/react'
 
-import { Session, HttpStatus } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
+
+import { ActionType, HttpStatus, ReleaseDetail } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
-import ActionType from '@/object-types/enums/ActionType'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
 
 const DEFAULT_RELEASE_INFO: ReleaseDetail = { name: '', version: '', _embedded: { 'sw360:attachments': [] } }
 
@@ -37,7 +35,7 @@ interface DeleteResponse {
 }
 
 const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow }: Props) => {
-    const { data: session } = useSession() as { data: Session }
+    const { data: session } = useSession()
     const t = useTranslations('default')
     const [release, setRelease] = useState(DEFAULT_RELEASE_INFO)
     const [variant, setVariant] = useState('success')

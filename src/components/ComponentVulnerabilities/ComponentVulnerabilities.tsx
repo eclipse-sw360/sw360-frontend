@@ -8,27 +8,23 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Alert, Button } from 'react-bootstrap'
-import Link from 'next-intl/link'
-import { Form } from 'react-bootstrap'
-import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import Link from 'next-intl/link'
+import { useEffect, useState } from 'react'
+import { Alert, Button, Form } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
-import { LinkedVulnerability, VerificationStateInfo } from '@/object-types/LinkedVulnerability'
-import { Session } from '@/object-types'
-import { Table, _ } from '@/components/sw360'
-import ChangeStateDialog from './ChangeStateDialog'
 import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
+import { LinkedVulnerability, VerificationStateInfo, VulnerabilitiesVerificationState } from '@/object-types'
+import { Table, _ } from 'next-sw360'
+import ChangeStateDialog from './ChangeStateDialog'
 import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
-import VulnerabilitiesVerificationState from '@/object-types/enums/VulnerabilitiesVerificationState'
 
 interface Props {
     vulnerData: Array<LinkedVulnerability>
-    session: Session
 }
 
-const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
+const ComponentVulnerabilities = ({ vulnerData }: Props) => {
     const t = useTranslations('default')
     const [dialogOpen, setDialogOpen] = useState(false)
     const [state, setState] = useState('NOT_CHECKED')
@@ -132,7 +128,7 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
                 _(
                     <VerificationTooltip verificationStateInfos={verificationStateInfos}>
                         <FaInfoCircle style={{ marginRight: '5px', color: 'gray', width: '15px', height: '15px' }} />
-                        {t(verificationStateInfos.at(-1).verificationState)}
+                        {verificationStateInfos.at(-1).verificationState}
                     </VerificationTooltip>
                 ),
             sort: true,
@@ -213,7 +209,6 @@ const ComponentVulnerabilities = ({ vulnerData, session }: Props) => {
                 setShow={setDialogOpen}
                 state={state}
                 selectedVulner={selectedVulner}
-                session={session}
             />
         </div>
     )

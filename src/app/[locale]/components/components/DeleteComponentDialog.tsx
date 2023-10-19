@@ -10,17 +10,14 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
-import { useEffect, useState, useCallback } from 'react'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import ActionType from '@/object-types/enums/ActionType'
-import { HttpStatus, Session } from '@/object-types'
-import Component from '@/object-types/Component'
+import { ActionType, Component, HttpStatus } from '@/object-types'
+import { ApiUtils } from '@/utils'
 
 const DEFAULT_COMPONENT_INFO: Component = { name: '', _embedded: { 'sw360:releases': [] } }
 
@@ -37,7 +34,7 @@ interface DeleteResponse {
 }
 
 const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props) => {
-    const { data: session } = useSession() as { data: Session }
+    const { data: session } = useSession()
     const t = useTranslations('default')
     const router = useRouter()
     const [component, setComponent] = useState<Component>(DEFAULT_COMPONENT_INFO)
@@ -53,7 +50,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     }
 
     const handleError = useCallback(() => {
-        displayMessage('danger', 'Error when processing!')
+        displayMessage('danger', t('Error when processing'))
         setReloadPage(true)
     }, [])
 
@@ -64,18 +61,20 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 const body = (await response.json()) as Array<DeleteResponse>
                 const deleteStatus = body[0].status
                 if (deleteStatus == HttpStatus.OK) {
-                    displayMessage('success', 'Delete component success!')
+                    displayMessage('success', t('Delete component success!'))
                     actionType === ActionType.EDIT && router.push('/components')
                     setReloadPage(true)
                 } else if (deleteStatus == HttpStatus.CONFLICT) {
                     displayMessage(
                         'danger',
-                        'The component cannot be deleted, since it contains releases Please delete the releases first'
+                        t(
+                            'The component cannot be deleted, since it contains releases Please delete the releases first'
+                        )
                     )
                 } else if (deleteStatus == HttpStatus.ACCEPTED) {
-                    displayMessage('success', 'Created moderation request!')
+                    displayMessage('success', t('Created moderation request'))
                 } else {
-                    displayMessage('danger', 'Error when processing!')
+                    displayMessage('danger', t('Error when processing'))
                 }
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 await signOut()
@@ -143,13 +142,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
             </Modal.Header>
             <Modal.Body>
                 <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
-                    {t.rich(message, {
-                        name: component.name,
-                        releaseCount: !CommonUtils.isNullOrUndefined(component['_embedded']['sw360:releases'])
-                            ? component['_embedded']['sw360:releases'].length
-                            : 0,
-                        strong: (chunks) => <b>{chunks}</b>,
-                    })}
+                    {message}
                 </Alert>
                 <Form>
                     {t.rich('Do you really want to delete the component?', {

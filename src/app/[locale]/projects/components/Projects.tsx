@@ -10,24 +10,26 @@
 
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { AdvancedSearch, Table, _ } from '@/components/sw360'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import { notFound, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { FaTrashAlt, FaPencilAlt, FaClipboard } from 'react-icons/fa'
-import { MdOutlineTask } from 'react-icons/md'
-import { signOut } from 'next-auth/react'
+import { notFound, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { MdOutlineTask } from 'react-icons/md'
+
+import { HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { AdvancedSearch, Table, _ } from 'next-sw360'
+import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-function Project({ session }: { session: Session }) {
+function Project() {
     const [data, setData] = useState<any[]>([])
+    const { data: session } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
 

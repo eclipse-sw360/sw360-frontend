@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 'use client'
+import { ReleasePayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import styles from './CommercialDetails.module.css'
-import ReleasePayload from '@/object-types/ReleasePayload'
 
 interface Props {
     releasePayload?: ReleasePayload

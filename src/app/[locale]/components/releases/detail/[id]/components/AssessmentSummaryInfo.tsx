@@ -10,15 +10,13 @@
 
 'use client'
 
-import { Button } from 'react-bootstrap'
 import { signOut, useSession } from 'next-auth/react'
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import { Button } from 'react-bootstrap'
 
+import { AttachmentType, EmbeddedAttachment, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import AttachmentType from '@/object-types/enums/AttachmentTypes'
-import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
 import styles from '../detail.module.css'
 
 interface Props {
@@ -32,7 +30,7 @@ interface AssessmentSummaryInfo {
 
 const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
     const t = useTranslations('default')
-    const { data: session } = useSession() as { data: Session }
+    const { data: session } = useSession()
     const [toggle, setToggle] = useState(false)
     const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo>(undefined)
 

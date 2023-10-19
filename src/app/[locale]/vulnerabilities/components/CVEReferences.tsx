@@ -9,15 +9,13 @@
 
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
-
 import { useTranslations } from 'next-intl'
-
-import { CVEReference, VulnerabilityData } from '@/object-types/VulnerabilityPayload'
-
+import { Dispatch, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-export default function CVEReferences({
+import { CVEReference, VulnerabilityData } from '@/object-types'
+
+function CVEReferences({
     payload,
     setPayload,
 }: {
@@ -127,3 +125,5 @@ export default function CVEReferences({
         </>
     )
 }
+
+export default CVEReferences

@@ -10,33 +10,31 @@
 
 'use client'
 
-import { FaTrashAlt, FaPencilAlt } from 'react-icons/fa'
-import { notFound } from 'next/navigation'
-import { signOut } from 'next-auth/react'
-import { useEffect, useState, useCallback } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { HiOutlineLink } from 'react-icons/hi'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
-import { Table, _ } from 'next-sw360'
-import DeleteReleaseModal from './DeleteReleaseModal'
-import EmbeddedLinkedReleases from '@/object-types/ReleaseLink'
-import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
-import ReleaseLink from '@/object-types/ReleaseLink'
+import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
+import { EmbeddedLinkedReleases, HttpStatus, ReleaseLink } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Table, _ } from 'next-sw360'
 import styles from '../detail.module.css'
+import DeleteReleaseModal from './DeleteReleaseModal'
 
 interface Props {
-    session: Session
     componentId: string
 }
 
-const ReleaseOverview = ({ session, componentId }: Props) => {
+const ReleaseOverview = ({ componentId }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState([])
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -163,7 +161,6 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                 <FossologyClearing
                     show={fossologyClearingModelOpen}
                     setShow={setFossologyClearingModelOpen}
-                    session={session}
                     releaseId={clearingReleaseId}
                 />
             )}
@@ -171,7 +168,6 @@ const ReleaseOverview = ({ session, componentId }: Props) => {
                 <LinkReleaseToProjectModal
                     show={linkToProjectModalOpen}
                     setShow={setLinkToProjectModalOpen}
-                    session={session}
                     releaseId={linkingReleaseId}
                 />
             )}

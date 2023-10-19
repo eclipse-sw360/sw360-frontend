@@ -20,7 +20,7 @@ export interface ReferenceDoc {
     refDocOperation: string
 }
 
-export interface ChangeLog {
+interface Changelogs {
     id: string
     type: string
     documentId: string
@@ -33,29 +33,4 @@ export interface ChangeLog {
     info?: { [k: string]: string }
 }
 
-export interface EmbeddedChangeLogs {
-    _embedded: {
-        'sw360:changeLogs': Array<ChangeLog>
-    }
-    _links: {
-        first?: {
-            href: string
-        }
-        last?: {
-            href: string
-        }
-        curies?: [
-            {
-                href: string
-                name: string
-                templated: boolean
-            }
-        ]
-    }
-    page?: {
-        size: number
-        totalElements: number
-        totalPages: number
-        number: number
-    }
-}
+export default Changelogs

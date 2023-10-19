@@ -10,7 +10,6 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -30,7 +29,6 @@ interface Props {
 
 const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
     const handleReRender = () => {
@@ -64,7 +62,6 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
         <>
             <div className='col' style={{ fontSize: '0.875rem' }}>
                 <LinkedReleasesDialog
-                    session={session}
                     show={linkedReleasesDiaglog}
                     releaseLinks={releaseLinks}
                     setReleaseLinks={setReleaseLinks}

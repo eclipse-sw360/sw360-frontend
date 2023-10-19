@@ -8,20 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getServerSession } from 'next-auth/next'
-import { Session } from '@/object-types'
-import Projects from './components/Projects'
 import { Metadata } from 'next'
+
+import Projects from './components/Projects'
 
 export const metadata: Metadata = {
     title: 'Projects',
 }
 
 const ProjectsList = async () => {
-    const session: Session = await getServerSession(authOptions)
-
-    return <Projects session={session} />
+    return <Projects />
 }
 
 export default ProjectsList

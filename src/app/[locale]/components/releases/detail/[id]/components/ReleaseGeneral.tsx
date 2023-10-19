@@ -9,18 +9,16 @@
 // License-Filename: LICENSE
 
 'use client'
-import AdditionalData from '@/components/AdditionalData/AdditionalData'
-import { useState } from 'react'
-import ExternalIds from '@/components/ExternalIds/ExternalIds'
-import { FaCopy } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
-import { FaInfoCircle } from 'react-icons/fa'
+import { useState } from 'react'
+import { FaCopy, FaInfoCircle } from 'react-icons/fa'
+
+import AdditionalData from '@/components/AdditionalData/AdditionalData'
+import ExternalIds from '@/components/ExternalIds/ExternalIds'
+import { EmbeddedLicense, EmbeddedUser, ReleaseDetail } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import styles from '../detail.module.css'
-import CommonUtils from '@/utils/common.utils'
-import EmbeddedUser from '@/object-types/EmbeddedUser'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
-import EmbeddedLicense from '@/object-types/EmbeddedLicense'
 
 interface Props {
     release: ReleaseDetail

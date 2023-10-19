@@ -71,7 +71,7 @@ function AddKeyValue(props: Props) {
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     className='form-control'
-                                    placeholder={t(`Enter ${props.keyName.toLowerCase()} key`)}
+                                    placeholder={t('ENTER_VALUE_KEY', { value: props.keyName.toLowerCase() })}
                                     required
                                     aria-describedby={`${props.keyName.toLowerCase()} key`}
                                 />

@@ -10,12 +10,13 @@
 
 'use client'
 
-import { Form } from 'react-bootstrap'
 import React from 'react'
-import { _ } from '@/components/sw360'
-import LinkedRelease from '@/object-types/LinkedRelease'
+import { Form } from 'react-bootstrap'
+
+import { LinkedRelease } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import { _ } from 'next-sw360'
 import LinkedReleasesTable from './LinkedReleasesTable'
-import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     releases?: any[]
@@ -39,8 +40,8 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
                 version: item.version,
                 mainlineState: item.mainlineState,
                 clearingState: item.clearingState,
-                vendor: item.vendor ? item.vendor.fullName : "",
-                releaseRelationship: "CONTAINED",
+                vendor: item.vendor ? item.vendor.fullName : '',
+                releaseRelationship: 'CONTAINED',
             }
             releaseLinks.push(releaseLink)
         })

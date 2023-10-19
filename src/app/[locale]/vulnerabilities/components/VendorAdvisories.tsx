@@ -9,15 +9,13 @@
 
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
-
 import { useTranslations } from 'next-intl'
-
-import { VulnerabilityData, VendorAdvisory } from '@/object-types/VulnerabilityPayload'
-
+import { Dispatch, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-export default function AddVendorAdvisory({
+import { VendorAdvisory, VulnerabilityData } from '@/object-types'
+
+function AddVendorAdvisory({
     payload,
     setPayload,
 }: {
@@ -136,3 +134,5 @@ export default function AddVendorAdvisory({
         </>
     )
 }
+
+export default AddVendorAdvisory

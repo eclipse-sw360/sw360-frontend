@@ -14,9 +14,8 @@ import { useTranslations } from 'next-intl'
 
 import { useCallback, useState } from 'react'
 
-import ComponentOwnerDiaglog from '@/components/sw360/SearchComponentOwner/ComponentOwnerDialog'
-import ComponentOwner from '@/object-types/ComponentOwner'
-import ReleasePayload from '@/object-types/ReleasePayload'
+import { ComponentOwner, ReleasePayload } from '@/object-types'
+import { ComponentOwnerDialog } from 'next-sw360'
 import styles from './CommercialDetails.module.css'
 
 interface Props {
@@ -109,7 +108,7 @@ const CommercialDetailsAdministration = ({
                                 name='COTS_responsible'
                                 value={cotsResponsible.fullName ?? ''}
                             />
-                            <ComponentOwnerDiaglog
+                            <ComponentOwnerDialog
                                 show={dialogOpenComponentOwner}
                                 setShow={setDialogOpenComponentOwner}
                                 selectComponentOwner={setCotsResponsibleUser}

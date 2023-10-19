@@ -9,19 +9,20 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { signOut } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Tab, Nav } from 'react-bootstrap'
+import { Nav, Tab } from 'react-bootstrap'
 
-import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
+import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
+import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
 
-export default function ChangeLog({ projectId, session }: { projectId: string; session: Session }) {
+function ChangeLog({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [key, setKey] = useState('list-change')
     const [changeLogList, setChangeLogList] = useState<Array<any>>([])
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
@@ -95,3 +96,5 @@ export default function ChangeLog({ projectId, session }: { projectId: string; s
         </>
     )
 }
+
+export default ChangeLog

@@ -8,11 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { AuthToken, HttpStatus, OAuthClient, RequestContent, UserCredentialInfo } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
-import RequestContent from '@/object-types/RequestContent'
-import UserCredentialInfo from '@/object-types/UserCredentialInfo'
-import HttpStatus from '@/object-types/enums/HttpStatus'
-import { AuthToken, OAuthClient } from '@/object-types'
 
 const generateToken = async (userData: UserCredentialInfo) => {
     const clientManagementURL: string = SW360_API_URL + '/authorization/client-management'

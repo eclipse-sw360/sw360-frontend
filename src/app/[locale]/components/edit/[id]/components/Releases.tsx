@@ -10,25 +10,23 @@
 
 'use client'
 
-import { notFound, useRouter } from 'next/navigation'
-import { signOut } from 'next-auth/react'
-import { useEffect, useState, useCallback } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
+import { notFound, useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { HttpStatus, Session } from '@/object-types'
 import { Table, _ } from '@/components/sw360'
-import EmbeddedLinkedReleases from '@/object-types/EmbeddedLinkedReleases'
-import LinkedRelease from '@/object-types/LinkedRelease'
+import { EmbeddedLinkedReleases, HttpStatus, LinkedRelease } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
-    session: Session
     componentId: string
 }
 
-const Releases = ({ session, componentId }: Props) => {
+const Releases = ({ componentId }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [linkedReleases, setLinkedReleases] = useState([])
     const router = useRouter()
 
@@ -44,7 +42,7 @@ const Releases = ({ session, componentId }: Props) => {
                 notFound()
             }
         },
-        [session.user.access_token]
+        [session]
     )
 
     useEffect(() => {

@@ -8,27 +8,26 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState } from 'react'
 import { Alert } from 'react-bootstrap'
 import { FaDownload } from 'react-icons/fa'
-import { signOut } from 'next-auth/react'
-import { useEffect, useState, useCallback } from 'react'
-import { useTranslations } from 'next-intl'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { Attachment, HttpStatus, Session } from '@/object-types'
-import { Table, _ } from '@/components/sw360'
+import { Attachment, HttpStatus, LinkedAttachments } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import LinkedAttachments from '@/object-types/LinkedAttachments'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Table, _ } from 'next-sw360'
 import styles from './Attachment.module.css'
 
 interface Props {
     documentId: string
-    session: Session
     documentType: string
 }
 
-const Attachments = ({ documentId, session, documentType }: Props) => {
+const Attachments = ({ documentId, documentType }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [attachmentData, setAttachmentData] = useState([])
     const [totalRows, setTotalRows] = useState(0)
 

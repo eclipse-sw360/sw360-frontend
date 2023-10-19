@@ -10,24 +10,21 @@
 
 'use client'
 
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { TreeTable } from '@/components/sw360'
-import { Session } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import NodeData from '@/object-types/NodeData'
-import ReleaseLink from '@/object-types/ReleaseLink'
-import CommonUtils from '@/utils/common.utils'
-import EmbeddedReleaseLinks from '@/object-types/EmbeddedReleaseLinks'
+import { EmbeddedReleaseLinks, NodeData, ReleaseLink } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     releaseId: string
-    session: Session
 }
 
-const LinkedReleases = ({ releaseId, session }: Props) => {
+const LinkedReleases = ({ releaseId }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [data, setData] = useState<Array<NodeData>>([])
 
     useEffect(() => {

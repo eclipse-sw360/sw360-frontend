@@ -10,45 +10,49 @@
 
 'use client'
 
-import { Dropdown } from 'react-bootstrap'
-import { signOut } from 'next-auth/react'
-import { useEffect, useState, useCallback } from 'react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
+import { Dropdown } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
-import { ChangeLog, EmbeddedChangeLogs } from '@/object-types/ChangeLogs'
-import { EmbeddedVulnerabilites, LinkedVulnerability } from '@/object-types/LinkedVulnerability'
-import { HttpStatus, Session } from '@/object-types'
-import { SideBar, PageButtonHeader } from '@/components/sw360'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
+import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
+import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
+import { PageButtonHeader, SideBar } from '@/components/sw360'
+import {
+    Changelogs,
+    CommonTabIds,
+    DocumentTypes,
+    EmbeddedAttachment,
+    EmbeddedChangelogs,
+    EmbeddedReleaseLinks,
+    EmbeddedVulnerabilities,
+    HttpStatus,
+    LinkedVulnerability,
+    ReleaseDetail,
+    ReleaseLink,
+    ReleaseTabIds,
+} from '@/object-types'
+import DownloadService from '@/services/download.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import styles from '../detail.module.css'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
-import DocumentTypes from '@/object-types/enums/DocumentTypes'
-import DownloadService from '@/services/download.service'
 import ECCDetails from './ECCDetails'
-import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
-import EmbeddedReleaseLinks from '@/object-types/EmbeddedReleaseLinks'
 import LinkedReleases from './LinkedReleases'
-import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
 import ReleaseDetailTabs from './ReleaseDetailTabs'
-import ReleaseLink from '@/object-types/ReleaseLink'
-import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
-import styles from '../detail.module.css'
 import Summary from './Summary'
 
 interface Props {
-    session: Session
     releaseId: string
 }
 
-const DetailOverview = ({ session, releaseId }: Props) => {
+const DetailOverview = ({ releaseId }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
@@ -56,7 +60,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
-    const [changeLogList, setChangeLogList] = useState<Array<ChangeLog>>([])
+    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
 
     const [tabList, setTabList] = useState(ReleaseDetailTabs.WITHOUT_COMMERCIAL_DETAILS)
@@ -66,8 +70,8 @@ const DetailOverview = ({ session, releaseId }: Props) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as ReleaseDetail &
-                    EmbeddedVulnerabilites &
-                    EmbeddedChangeLogs &
+                    EmbeddedVulnerabilities &
+                    EmbeddedChangelogs &
                     EmbeddedReleaseLinks
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
@@ -76,7 +80,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                 return null
             }
         },
-        [session.user.access_token]
+        [session]
     )
 
     useEffect(() => {
@@ -107,7 +111,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
             .catch((err) => console.error(err))
 
         fetchData(`releases/${releaseId}/vulnerabilities`)
-            .then((vulnerabilities: EmbeddedVulnerabilites) => {
+            .then((vulnerabilities: EmbeddedVulnerabilities) => {
                 if (
                     vulnerabilities &&
                     !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
@@ -121,7 +125,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
             .catch((err) => console.error(err))
 
         fetchData(`changelog/document/${releaseId}`)
-            .then((changeLogs: EmbeddedChangeLogs) => {
+            .then((changeLogs: EmbeddedChangelogs) => {
                 changeLogs &&
                     setChangeLogList(
                         CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
@@ -141,16 +145,17 @@ const DetailOverview = ({ session, releaseId }: Props) => {
     }
 
     const headerButtons = {
-        'Edit release': { link: `/components/editRelease/${releaseId}`, type: 'primary' },
+        'Edit release': { link: `/components/editRelease/${releaseId}`, type: 'primary', name: t('Edit release') },
         'Link To Project': {
             link: '',
             type: 'secondary',
             onClick: () => {
                 setLinkProjectModalShow(true)
             },
+            name: t('Link To Project'),
         },
-        Merge: { link: '', type: 'secondary' },
-        Subscribe: { link: '', type: 'outline-success' },
+        Merge: { link: '', type: 'secondary', name: t('Merge') },
+        Subscribe: { link: '', type: 'outline-success', name: t('Subscribe') },
     }
 
     return (
@@ -241,16 +246,15 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             </PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary release={release} releaseId={releaseId} session={session} />
+                            <Summary release={release} releaseId={releaseId} />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases releaseId={releaseId} session={session} />
+                            <LinkedReleases releaseId={releaseId} />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
                             <ClearingDetails
                                 release={release}
                                 releaseId={releaseId}
-                                session={session}
                                 embeddedAttachments={embeddedAttachments}
                             />
                         </div>
@@ -258,11 +262,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             <ECCDetails release={release} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments
-                                session={session}
-                                documentId={releaseId}
-                                documentType={DocumentTypes.RELEASE}
-                            />
+                            <Attachments documentId={releaseId} documentType={DocumentTypes.RELEASE} />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <CommercialDetails
@@ -272,7 +272,7 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                             />
                         </div>
                         <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
-                            <ComponentVulnerabilities vulnerData={vulnerData} session={session} />
+                            <ComponentVulnerabilities vulnerData={vulnerData} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
                             <div className='col'>
@@ -295,7 +295,6 @@ const DetailOverview = ({ session, releaseId }: Props) => {
                 <LinkReleaseToProjectModal
                     show={linkProjectModalShow}
                     setShow={setLinkProjectModalShow}
-                    session={session}
                     releaseId={releaseId}
                 />
             </div>

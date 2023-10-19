@@ -18,20 +18,23 @@ import { ToastContainer } from 'react-bootstrap'
 
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
-import { PageButtonHeader, SideBar } from '@/components/sw360'
-import ToastMessage from '@/components/sw360/ToastContainer/Toast'
-import { EmbeddedComponent, HttpStatus, Licenses } from '@/object-types'
-import COTSDetails from '@/object-types/COTSDetails'
-import ComponentOwner from '@/object-types/ComponentOwner'
-import Moderators from '@/object-types/Moderators'
-import ReleaseDetail from '@/object-types/ReleaseDetail'
-import ReleasePayload from '@/object-types/ReleasePayload'
-import Repository from '@/object-types/Repository'
-import ToastData from '@/object-types/ToastData'
-import Vendor from '@/object-types/Vendor'
-import CommonTabIds from '@/object-types/enums/CommonTabsIds'
-import ReleaseTabIds from '@/object-types/enums/ReleaseTabIds'
+import {
+    COTSDetails,
+    CommonTabIds,
+    ComponentOwner,
+    EmbeddedComponent,
+    HttpStatus,
+    Licenses,
+    Moderators,
+    ReleaseDetail,
+    ReleasePayload,
+    ReleaseTabIds,
+    Repository,
+    ToastData,
+    Vendor,
+} from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
 import ReleaseAddSummary from './ReleaseAddSummary'
 import ReleaseAddTabs from './ReleaseAddTab'
 

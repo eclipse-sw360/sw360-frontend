@@ -11,10 +11,11 @@
 
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { _, Table } from '@/components/sw360'
-import { CaretRightFill, CaretDownFill } from 'react-bootstrap-icons'
-import NodeData from '@/object-types/NodeData'
+import React, { useEffect, useState } from 'react'
+import { CaretDownFill, CaretRightFill } from 'react-bootstrap-icons'
+
+import { NodeData } from '@/object-types'
+import { Table, _ } from 'next-sw360'
 
 interface Props {
     children: React.ReactNode

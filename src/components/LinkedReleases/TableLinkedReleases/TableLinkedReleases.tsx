@@ -9,10 +9,11 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import styles from './TableLinkedReleases.module.css'
 import React from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
-import LinkedRelease from '@/object-types/LinkedRelease'
+
+import { LinkedRelease } from '@/object-types'
+import styles from './TableLinkedReleases.module.css'
 
 interface Props {
     setReleaseLinks?: React.Dispatch<React.SetStateAction<LinkedRelease[]>>

@@ -48,3 +48,6 @@ pnpm-lock.yaml
 
 # vscode
 .vscode
+
+# Aria
+.hintrc

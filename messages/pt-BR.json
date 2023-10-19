@@ -31,7 +31,6 @@
         "Additional request Info": "Pedido Adicional",
         "AdditionalNotes": "Notas Adicionais ",
         "Administration": "Administração",
-        "Advance Search": "Busca Avançada",
         "Advanced Filter": "Filtro Avançado",
         "Advanced Search": "Pesquisa Avançada",
         "Advisory Name": "Nome do Consultor",
@@ -138,7 +137,7 @@
         "Commercial Details Administration": "Administração de Detalhes Comerciais",
         "Committer": "--committer",
         "Common weakness enumeration": "Enumeração de fraqueza comum",
-        "Complexitty": "Complexitty",
+        "Complexity": "Complexity",
         "Component Clearing Report": "Relatório de Compensação de Componentes",
         "Component License Information": "Informações de Licença de Componente",
         "Component Name": "Nome do Componente",
@@ -283,7 +282,7 @@
         "Export SBOM": "Exportar SBOM",
         "Export Spreadsheet": "Exportar Planilha",
         "ExportRestrictionsFound": "Restrições de exportação encontradas",
-        "Extended Description": "Descrição Estendida",
+        "Extended Description": "Descrição Extendida",
         "External Id": "ID externo",
         "External Ids": "Ids externos",
         "External Supplier ID": "Fornecedor externo",
@@ -713,6 +712,13 @@
         "number of the vulnerabilities were matched by": "<strong>{count}</strong> das vulnerabilidades foram correspondidas por <strong>{matchedBy}</strong>",
         "number_of_attachments_not_match_condition": "Tem que haver exatamente um anexo de origem, mas há {count} nesta versão. Por favor, volte depois de corrigir isso.",
         "to edit the project relation": "para editar a relação do projeto",
-        "vector": "vector"
+        "vector": "vector",
+        "Click to add": "Clique para adicionar",
+        "owner_account_unit": "Insira a unidade contábil do proprietário",
+        "project_cannot_be_created": "O projeto não pode ser criado/atualizado",
+        "Edit Component Fail": "Falha na edição do componente",
+        "current_spdx_only_supports": "Atualmente, isso suporta apenas arquivos SPDX RDF/XML com um nó de nível superior descrito exclusivo",
+        "wrong_spdx_information": "Se for inserido o SPDX errado, as informações não serão registradas corretamente",
+        "conclude_license_id": "IDs de licença principais/concluídas"
     }
 }

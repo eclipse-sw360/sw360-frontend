@@ -10,8 +10,7 @@
 
 'use client'
 
-import ComponentOwner from '@/object-types/ComponentOwner'
-import ReleasePayload from '@/object-types/ReleasePayload'
+import { ComponentOwner, ReleasePayload } from '@/object-types'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 

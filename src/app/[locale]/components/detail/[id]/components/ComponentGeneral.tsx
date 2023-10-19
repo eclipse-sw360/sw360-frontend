@@ -9,13 +9,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from '../detail.module.css'
-import AdditionalData from '@/components/AdditionalData/AdditionalData'
-import { useState } from 'react'
-import ExternalIds from '@/components/ExternalIds/ExternalIds'
-import { FaCopy } from 'react-icons/fa'
+
 import { useTranslations } from 'next-intl'
-import Component from '@/object-types/Component'
+import { useState } from 'react'
+import { FaCopy } from 'react-icons/fa'
+
+import AdditionalData from '@/components/AdditionalData/AdditionalData'
+import ExternalIds from '@/components/ExternalIds/ExternalIds'
+import { Component } from '@/object-types'
+import styles from '../detail.module.css'
 
 interface Props {
     component: Component

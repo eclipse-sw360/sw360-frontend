@@ -9,12 +9,13 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { useTranslations } from 'next-intl'
-import styles from '../EditRelease.module.css'
+import React from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiInfoCircle } from 'react-icons/bi'
-import React from 'react'
-import ReleasePayload from '@/object-types/ReleasePayload'
+
+import { ReleasePayload } from '@/object-types'
 
 interface Props {
     releasePayload?: ReleasePayload
@@ -50,7 +51,7 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
                 <div className='col' style={{ padding: '0px 12px', fontSize: '0.875rem' }}>
                     <div className='row mb-4'>
-                        <div className={`${styles['header']} mb-2`}>
+                        <div className='header mb-2'>
                             <p className='fw-bold mt-3'>{t('ECC Information')}</p>
                         </div>
                         <div className='row'>

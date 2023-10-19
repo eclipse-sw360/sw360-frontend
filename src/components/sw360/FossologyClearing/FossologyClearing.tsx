@@ -10,20 +10,18 @@
 
 'use client'
 
-import { Alert, Button, Modal } from 'react-bootstrap'
-import { useState, useEffect, useRef, useCallback } from 'react'
-
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { HttpStatus, Session } from '@/object-types'
-import styles from './fossologyClearing.module.css'
-import EmbeddedAttachment from '@/object-types/EmbeddedAttachment'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, Button, Modal } from 'react-bootstrap'
+
+import { EmbeddedAttachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { FossologyProcessInfo, FossologyProcessStatus } from '@/object-types/FossologyProcessStatus'
+import styles from './fossologyClearing.module.css'
 
 interface Props {
     show?: boolean
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
-    session: Session
     releaseId: string
 }
 
@@ -46,8 +44,9 @@ const clearingMessages: { [key: string]: { [key: string]: string } } = {
     },
 }
 
-const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
+const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
     const t = useTranslations('default')
+    const { data: session } = useSession()
     const STEP_PERCENT = 16.66
     const PERCENT_DONE = 99.96
     const RELOAD_ATTACHMENTS_PERCENT = 66.46
@@ -314,9 +313,7 @@ const FossologyClearing = ({ show, setShow, session, releaseId }: Props) => {
                 </Modal.Header>
                 <Modal.Body>
                     <Alert variant={message.variant} onClose={hideMessage} dismissible show={message.show}>
-                        {t.rich(message.content, {
-                            count: numberOfSourceAttachment.current,
-                        })}
+                        {message.content}
                     </Alert>
                     <div className={`${styles.guide} form-text`}>
                         <h3>{t('How it works')}:</h3>

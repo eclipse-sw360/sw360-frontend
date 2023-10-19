@@ -9,10 +9,11 @@
 
 'use client'
 
-import { VulnerabilityPayload } from '@/object-types/VulnerabilityPayload'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 import Link from 'next-intl/link'
+import { useState } from 'react'
+
+import { VulnerabilityPayload } from '@/object-types'
 import styles from '../detail.module.css'
 
 export default function Summary({ summaryData }: { summaryData: VulnerabilityPayload }) {
@@ -72,7 +73,7 @@ export default function Summary({ summaryData }: { summaryData: VulnerabilityPay
                                 {summaryData.impact &&
                                     Object.entries(summaryData.impact).map(([key, val]) => (
                                         <li key={key}>
-                                            <b>{`${t(key)}: `}</b>
+                                            <b>{`${t('VALUE', { value: key })}: `}</b>
                                             {val}
                                         </li>
                                     ))}
@@ -142,7 +143,7 @@ export default function Summary({ summaryData }: { summaryData: VulnerabilityPay
                                 {summaryData.access &&
                                     Object.entries(summaryData.access).map(([key, val]) => (
                                         <li key={key}>
-                                            <b>{`${t(key)}: `}</b>
+                                            <b>{`${t('VALUE', { value: key })}: `}</b>
                                             {val}
                                         </li>
                                     ))}
