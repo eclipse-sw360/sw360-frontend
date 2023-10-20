@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import EmbeddedUser from './EmbeddedUser'
+import User from './User'
 
 interface EmbeddedProject {
     id?: string
@@ -27,8 +27,8 @@ interface EmbeddedProject {
         }
     }
     _embedded?: {
-        leadArchitect?: EmbeddedUser
-        createdBy?: EmbeddedUser
+        leadArchitect?: User
+        createdBy?: User
     }
 }
 

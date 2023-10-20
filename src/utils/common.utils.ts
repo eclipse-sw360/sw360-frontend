@@ -9,7 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { EmbeddedUser, InputKeyValue, Moderators } from '@/object-types'
+import { InputKeyValue, Moderators, User } from '@/object-types'
 
 /**
  * Checks if the given object is null or undefined.
@@ -78,16 +78,16 @@ const getIdFromUrl = (url: string): string => {
 
 /**
  * Returns an object containing the full names and emails of the moderators.
- * @param users - An array of EmbeddedUser objects representing the moderators.
+ * @param users - An array of User objects representing the moderators.
  * @returns An object containing the full names and emails of the moderators.
  */
-const getObjectModerators = (users: EmbeddedUser[]) => {
+const getObjectModerators = (users: User[]) => {
     const fullNames: string[] = []
     const moderatorsEmail: string[] = []
     if (users.length == 0) {
         return
     }
-    users.forEach((item: EmbeddedUser) => {
+    users.forEach((item: User) => {
         fullNames.push(item.fullName)
         moderatorsEmail.push(item.email)
     })
@@ -101,16 +101,16 @@ const getObjectModerators = (users: EmbeddedUser[]) => {
 
 /**
  * Returns an object containing the full names and emails of the contributors.
- * @param users An array of EmbeddedUser objects representing the contributors.
+ * @param users An array of User objects representing the contributors.
  * @returns An object containing the full names and emails of the contributors.
  */
-const getObjectContributors = (users: EmbeddedUser[]) => {
+const getObjectContributors = (users: User[]) => {
     const fullNames: string[] = []
     const contributorsEmail: string[] = []
     if (users.length == 0) {
         return
     }
-    users.forEach((item: EmbeddedUser) => {
+    users.forEach((item: User) => {
         fullNames.push(item.fullName)
         contributorsEmail.push(item.email)
     })
@@ -124,15 +124,15 @@ const getObjectContributors = (users: EmbeddedUser[]) => {
 
 /**
  * Returns an array of email addresses for the given array of users.
- * @param users - An array of EmbeddedUser objects.
+ * @param users - An array of User objects.
  * @returns An array of email addresses.
  */
-const getEmailsModerators = (users: EmbeddedUser[]) => {
+const getEmailsModerators = (users: User[]) => {
     const moderatorsEmail: string[] = []
     if (typeof users === 'undefined') {
         return
     }
-    users.forEach((item: EmbeddedUser) => {
+    users.forEach((item: User) => {
         moderatorsEmail.push(item.email)
     })
 

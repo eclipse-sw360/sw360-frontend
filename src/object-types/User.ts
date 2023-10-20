@@ -8,13 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface EmbeddedUser {
-    email: string,
+import { Links } from '@/object-types'
+
+interface User {
+    email: string
+    department: string
     deactivated: boolean
     fullName: string
-    _links: {
-        self: {
-            href: string
-        }
-    }
+    givenName: string
+    lastName: string
+    _links: Links
 }
+
+export default User

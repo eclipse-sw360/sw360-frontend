@@ -16,7 +16,7 @@ import { FaCopy, FaInfoCircle } from 'react-icons/fa'
 
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
-import { EmbeddedUser, Licenses, ReleaseDetail } from '@/object-types'
+import { Licenses, ReleaseDetail, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import styles from '../detail.module.css'
 
@@ -29,10 +29,10 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
-    const renderArrayOfUsers = (users: Array<EmbeddedUser>) => {
+    const renderArrayOfUsers = (users: Array<User>) => {
         return Object.entries(users)
             .map(
-                ([index, item]: [string, EmbeddedUser]): React.ReactNode => (
+                ([index, item]: [string, User]): React.ReactNode => (
                     <Link key={index} className='link' href={`mailto:${item.email}`}>
                         {item.fullName}
                     </Link>

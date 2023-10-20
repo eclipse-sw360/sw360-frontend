@@ -13,10 +13,10 @@ import {
     ClearingInformation,
     ECCInformation,
     EmbeddedAttachment,
-    EmbeddedUser,
     Licenses,
     ReleaseLink,
     Repository,
+    User,
     Vendor,
 } from '@/object-types'
 
@@ -62,15 +62,15 @@ export default interface ReleaseDetail {
         ]
     }
     _embedded?: {
-        'sw360:modifiedBy'?: EmbeddedUser
-        'sw360:createdBy'?: EmbeddedUser
-        'sw360:moderators'?: EmbeddedUser[]
+        'sw360:modifiedBy'?: User
+        'sw360:createdBy'?: User
+        'sw360:moderators'?: User[]
         'sw360:vendors'?: Vendor[]
-        'sw360:contributors'?: EmbeddedUser[]
+        'sw360:contributors'?: User[]
         'sw360:cotsDetail'?: COTSDetails
         'sw360:releaseLinks'?: ReleaseLink[]
         'sw360:attachments'?: EmbeddedAttachment[]
         'sw360:license'?: Licenses[]
-        'sw360:subscribers'?: EmbeddedUser[]
+        'sw360:subscribers'?: User[]
     }
 }

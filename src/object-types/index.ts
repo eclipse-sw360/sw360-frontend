@@ -30,7 +30,6 @@ import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
 import EmbeddedProject from './EmbeddedProject'
 import EmbeddedRelease from './EmbeddedRelease'
 import EmbeddedReleaseLinks from './EmbeddedReleaseLinks'
-import EmbeddedUser from './EmbeddedUser'
 import EmbeddedVulnerabilities from './EmbeddedVulnerabilities'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
@@ -58,6 +57,7 @@ import SearchResult from './SearchResult'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
 import ToastData from './ToastData'
+import User from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
 import VendorAdvisory from './VendorAdvisory'
@@ -89,7 +89,6 @@ export type {
     EmbeddedProject,
     EmbeddedRelease,
     EmbeddedReleaseLinks,
-    EmbeddedUser,
     EmbeddedVulnerabilities,
     FossologyProcessInfo,
     FossologyProcessStatus,
@@ -117,6 +116,7 @@ export type {
     Session,
     SummaryDataType,
     ToastData,
+    User,
     UserCredentialInfo,
     Vendor,
     VendorAdvisory,
