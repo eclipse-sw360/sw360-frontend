@@ -52,7 +52,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     const handleError = useCallback(() => {
         displayMessage('danger', t('Error when processing'))
         setReloadPage(true)
-    }, [])
+    }, [t])
 
     const deleteComponent = async () => {
         const response = await ApiUtils.DELETE(`components/${componentId}`, session.user.access_token)

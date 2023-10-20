@@ -16,7 +16,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import fossologyIcon from '@/assets/images/fossology.svg'
-import { EmbeddedAttachment, ReleaseDetail } from '@/object-types'
+import { Attachment, ReleaseDetail } from '@/object-types'
 import { FossologyClearing } from 'next-sw360'
 import styles from '../detail.module.css'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
@@ -28,7 +28,7 @@ import SupplementalInformation from './SupplementalInformation'
 interface Props {
     release: ReleaseDetail
     releaseId: string
-    embeddedAttachments: Array<EmbeddedAttachment>
+    embeddedAttachments: Array<Attachment>
 }
 
 const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) => {

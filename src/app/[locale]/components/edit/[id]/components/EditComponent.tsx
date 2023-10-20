@@ -20,11 +20,11 @@ import EditAttachments from '@/components/Attachments/EditAttachments'
 import {
     ActionType,
     Attachment,
-    AttachmentDetail,
     CommonTabIds,
     Component,
     ComponentPayload,
     DocumentTypes,
+    Embedded,
     HttpStatus,
     ToastData,
 } from '@/object-types'
@@ -37,6 +37,8 @@ import Releases from './Releases'
 interface Props {
     componentId?: string
 }
+
+type embeddedAttachments = Embedded<Attachment, 'sw360:attachmentDTOes'>
 
 const tabList = [
     {
@@ -60,7 +62,7 @@ const EditComponent = ({ componentId }: Props) => {
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [component, setComponent] = useState<Component>()
-    const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
+    const [attachmentData, setAttachmentData] = useState<Array<Attachment>>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
@@ -135,18 +137,9 @@ const EditComponent = ({ componentId }: Props) => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const dataAttachments = await response.json()
-                if (
-                    !CommonUtils.isNullOrUndefined(
-                        dataAttachments._embedded &&
-                            !CommonUtils.isNullOrUndefined(dataAttachments._embedded['sw360:attachmentDTOes'])
-                    )
-                ) {
-                    const attachmentDetails: AttachmentDetail[] = []
-                    dataAttachments._embedded['sw360:attachmentDTOes'].forEach((item: Attachment) => {
-                        attachmentDetails.push(item)
-                    })
-                    setAttachmentData(attachmentDetails)
+                const dataAttachments: embeddedAttachments = await response.json()
+                if (!CommonUtils.isNullOrUndefined(dataAttachments)) {
+                    setAttachmentData(dataAttachments._embedded['sw360:attachmentDTOes'])
                 }
             } catch (e) {
                 console.error(e)

@@ -11,7 +11,6 @@
 import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
-import AttachmentDetail from './AttachmentDetail'
 import AuthToken from './AuthToken'
 import COTSDetails from './COTSDetails'
 import CVEReference from './CVEReference'
@@ -23,8 +22,6 @@ import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
-import EmbeddedAttachment from './EmbeddedAttachment'
-import EmbeddedAttachments from './EmbeddedAttachments'
 import EmbeddedChangelogs from './EmbeddedChangelogs'
 import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
 import EmbeddedProject from './EmbeddedProject'
@@ -70,7 +67,6 @@ export type {
     AddtionalDataType,
     AdministrationDataType,
     Attachment,
-    AttachmentDetail,
     AuthToken,
     COTSDetails,
     CVEReference,
@@ -82,8 +78,6 @@ export type {
     ComponentPayload,
     ECCInformation,
     Embedded,
-    EmbeddedAttachment,
-    EmbeddedAttachments,
     EmbeddedChangelogs,
     EmbeddedLinkedReleases,
     EmbeddedProject,

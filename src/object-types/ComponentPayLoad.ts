@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import AttachmentDetail from "./AttachmentDetail"
+import { Attachment } from '@/object-types'
 export default interface ComponentPayload {
     name?: string | undefined
     createBy?: string | undefined
@@ -29,5 +29,5 @@ export default interface ComponentPayload {
     mailinglist?: string | undefined
     wiki?: string | undefined
     blog?: string | undefined
-    attachmentDTOs?: AttachmentDetail[] | undefined
+    attachmentDTOs?: Array<Attachment> | undefined
 }

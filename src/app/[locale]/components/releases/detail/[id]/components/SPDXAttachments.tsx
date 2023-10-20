@@ -15,7 +15,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
 import { FiAlertTriangle } from 'react-icons/fi'
 
-import { Attachment, AttachmentType, EmbeddedAttachments, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentType, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 import SPDXLicenseView from './SPDXLicenseView'
@@ -158,7 +158,10 @@ const SPDXAttachments = ({ releaseId }: Props) => {
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as { [key: string]: string | Array<string> } & EmbeddedAttachments
+                const data = (await response.json()) as { [key: string]: string | Array<string> } & Embedded<
+                    Attachment,
+                    'sw360:attachmentDTOes'
+                >
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 await signOut()
@@ -221,7 +224,7 @@ const SPDXAttachments = ({ releaseId }: Props) => {
         }
 
         fetchData(`releases/${releaseId}/attachments`)
-            .then((response: EmbeddedAttachments) =>
+            .then((response: Embedded<Attachment, 'sw360:attachmentDTOes'>) =>
                 response._embedded ? response._embedded['sw360:attachmentDTOes'] : []
             )
             .then((attachments: Array<Attachment>) => {

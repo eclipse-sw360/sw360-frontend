@@ -15,13 +15,13 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Button } from 'react-bootstrap'
 
-import { AttachmentType, EmbeddedAttachment, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentType, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import styles from '../detail.module.css'
 
 interface Props {
     releaseId: string
-    embeddedAttachments: Array<EmbeddedAttachment>
+    embeddedAttachments: Array<Attachment>
 }
 
 interface AssessmentSummaryInfo {

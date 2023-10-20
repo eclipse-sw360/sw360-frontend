@@ -154,7 +154,7 @@ function AddRelease({ componentId }: Props) {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const component: EmbeddedComponent = await response.json()
+                const component: Component = await response.json()
                 setReleasePayload({
                     ...releasePayload,
                     name: component.name,

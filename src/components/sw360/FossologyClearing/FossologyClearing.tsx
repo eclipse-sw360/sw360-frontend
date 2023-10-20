@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
 
-import { EmbeddedAttachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus } from '@/object-types'
+import { Attachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import styles from './fossologyClearing.module.css'
 
@@ -259,7 +259,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
         return true
     }
 
-    const countSourceAttachment = (attachments: Array<EmbeddedAttachment> | undefined) => {
+    const countSourceAttachment = (attachments: Array<Attachment> | undefined) => {
         if (CommonUtils.isNullEmptyOrUndefinedArray(attachments)) {
             return 0
         }
@@ -330,7 +330,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
                         {t('Found source attachment')}:
                         {release && numberOfSourceAttachment.current === 1
                             ? release._embedded['sw360:attachments']
-                                  .filter((attachment: EmbeddedAttachment) => attachment.attachmentType === 'SOURCE')
+                                  .filter((attachment: Attachment) => attachment.attachmentType === 'SOURCE')
                                   .at(0).filename
                             : 'unknown'}
                     </div>

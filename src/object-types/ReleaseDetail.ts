@@ -9,10 +9,10 @@
 // License-Filename: LICENSE
 
 import {
+    Attachment,
     COTSDetails,
     ClearingInformation,
     ECCInformation,
-    EmbeddedAttachment,
     Licenses,
     ReleaseLink,
     Repository,
@@ -69,7 +69,7 @@ export default interface ReleaseDetail {
         'sw360:contributors'?: User[]
         'sw360:cotsDetail'?: COTSDetails
         'sw360:releaseLinks'?: ReleaseLink[]
-        'sw360:attachments'?: EmbeddedAttachment[]
+        'sw360:attachments'?: Array<Attachment>
         'sw360:license'?: Licenses[]
         'sw360:subscribers'?: User[]
     }

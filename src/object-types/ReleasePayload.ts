@@ -8,11 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import AttachmentDetail from "./AttachmentDetail"
-import COTSDetails from "./COTSDetails"
-import ClearingInformation from "./ClearingInformation"
-import ECCInformation from "./ECCInformation"
-import Repository from "./Repository"
+import { Attachment, COTSDetails, ClearingInformation, ECCInformation, Repository } from '@/object-types'
 
 export default interface ReleasePayload {
     name?: string
@@ -20,29 +16,29 @@ export default interface ReleasePayload {
     version?: string
     componentId?: string
     releaseDate?: string
-    externalIds?: any
-    additionalData?: any
-    clearingState?:string
+    externalIds?: { [k: string]: string }
+    additionalData?: { [k: string]: string }
+    clearingState?: string
     createdOn?: string
     createBy?: string
     modifiedBy?: string
     modifiedOn?: string
     mainlineState?: string
-    contributors?: string[]
-    moderators?: string[]
-    roles?: any
-    mainLicenseIds?: string[]
-    otherLicenseIds?: string[]
+    contributors?: Array<string>
+    moderators?: Array<string>
+    roles?: { [k: string]: Array<string> }
+    mainLicenseIds?: Array<string>
+    otherLicenseIds?: Array<string>
     vendorId?: string
-    languages?: string[]
-    operatingSystems?: string[]
-    softwarePlatforms?: string[]
+    languages?: Array<string>
+    operatingSystems?: Array<string>
+    softwarePlatforms?: Array<string>
     sourceCodeDownloadurl?: string
     binaryDownloadurl?: string
     repository?: Repository
     releaseIdToRelationship?: any
     clearingInformation?: ClearingInformation
     cotsDetails?: COTSDetails
-    attachmentDTOs?: AttachmentDetail[]
+    attachmentDTOs?: Array<Attachment>
     eccInformation?: ECCInformation
 }
