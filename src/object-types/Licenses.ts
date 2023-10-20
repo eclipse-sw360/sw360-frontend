@@ -8,7 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Links } from '@/object-types'
+
 export default interface Licenses {
+    shortName?: string
     fullName?: string
-    id?: string[]
+    id?: string[] | null
+    text?: string
+    checked?: boolean
+    OSIApproved?: string
+    FSFLibre?: string
+    externalIds?: { [k: string]: string }
+    _links?: Links
 }

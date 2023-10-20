@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import COTSDetails from './COTSDetails'
-import ClearingInformation from './ClearingInformation'
-import ECCInformation from './ECCInformation'
-import ReleaseLink from './ReleaseLink'
-import Repository from './Repository'
-import Vendor from './Vendor'
-import EmbeddedUser from './EmbeddedUser'
-import EmbeddedAttachment from './EmbeddedAttachment'
-import EmbeddedLicense from './EmbeddedLicense'
+import {
+    COTSDetails,
+    ClearingInformation,
+    ECCInformation,
+    EmbeddedAttachment,
+    EmbeddedUser,
+    Licenses,
+    ReleaseLink,
+    Repository,
+    Vendor,
+} from '@/object-types'
 
 export default interface ReleaseDetail {
     name?: string
@@ -68,7 +70,7 @@ export default interface ReleaseDetail {
         'sw360:cotsDetail'?: COTSDetails
         'sw360:releaseLinks'?: ReleaseLink[]
         'sw360:attachments'?: EmbeddedAttachment[]
-        'sw360:license'?: EmbeddedLicense[]
+        'sw360:license'?: Licenses[]
         'sw360:subscribers'?: EmbeddedUser[]
     }
 }
