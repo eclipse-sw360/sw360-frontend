@@ -19,6 +19,7 @@ import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import ModeratorsDialog from './ModeratorsDialog/ModeratorsDialog'
 import Navbar from './Navbar/Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
+import PageSpinner from './PageSpinner/PageSpinner'
 import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
@@ -49,6 +50,7 @@ export {
     ModeratorsDialog,
     Navbar,
     PageButtonHeader,
+    PageSpinner,
     ProfileDropdown,
     QuickFilter,
     ReactWrapper,
