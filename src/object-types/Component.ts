@@ -8,10 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import EmbeddedAttachment from './EmbeddedAttachment'
-import EmbeddedRelease from './EmbeddedRelease'
-import EmbeddedUser from './EmbeddedUser'
-import Vendor from './Vendor'
+import { EmbeddedAttachment, EmbeddedRelease, EmbeddedUser, Links, Vendor } from '@/object-types'
 
 interface Component {
     id?: string
@@ -49,11 +46,7 @@ interface Component {
         shortName: string
         fullName: string
     }
-    _links?: {
-        self: {
-            href: string
-        }
-    }
+    _links?: Links
     _embedded?: {
         createdBy?: EmbeddedUser
         'sw360:moderators'?: Array<EmbeddedUser>

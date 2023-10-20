@@ -21,8 +21,8 @@ import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
     COTSDetails,
     CommonTabIds,
+    Component,
     ComponentOwner,
-    EmbeddedComponent,
     HttpStatus,
     Licenses,
     Moderators,

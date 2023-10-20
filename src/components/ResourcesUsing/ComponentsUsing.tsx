@@ -8,15 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useEffect, useState } from 'react'
-import Link from 'next-intl/link'
-import { _, Table } from '../sw360'
-import styles from './ResourceUsing.module.css'
+import { Component } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { EmbeddedComponent } from '@/object-types'
+import Link from 'next-intl/link'
+import { useEffect, useState } from 'react'
+import { Table, _ } from '../sw360'
+import styles from './ResourceUsing.module.css'
 
 interface Props {
-    componentsUsing: Array<EmbeddedComponent>
+    componentsUsing: Array<Component>
     documentName: string
 }
 
@@ -44,7 +44,7 @@ const ComponentsUsing = ({ componentsUsing, documentName }: Props) => {
     ]
 
     useEffect(() => {
-        const data = componentsUsing.map((component: EmbeddedComponent) => [
+        const data = componentsUsing.map((component: Component) => [
             component.defaultVendor?.shortName,
             _(
                 <Link

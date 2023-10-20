@@ -26,7 +26,6 @@ import Embedded from './Embedded'
 import EmbeddedAttachment from './EmbeddedAttachment'
 import EmbeddedAttachments from './EmbeddedAttachments'
 import EmbeddedChangelogs from './EmbeddedChangelogs'
-import EmbeddedComponent from './EmbeddedComponent'
 import EmbeddedLicense from './EmbeddedLicense'
 import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
 import EmbeddedProject from './EmbeddedProject'
@@ -87,7 +86,6 @@ export type {
     EmbeddedAttachment,
     EmbeddedAttachments,
     EmbeddedChangelogs,
-    EmbeddedComponent,
     EmbeddedLicense,
     EmbeddedLinkedReleases,
     EmbeddedProject,
