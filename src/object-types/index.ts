@@ -30,6 +30,7 @@ import EmbeddedComponent from './EmbeddedComponent'
 import EmbeddedLicense from './EmbeddedLicense'
 import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
 import EmbeddedProject from './EmbeddedProject'
+import EmbeddedRelease from './EmbeddedRelease'
 import EmbeddedReleaseLinks from './EmbeddedReleaseLinks'
 import EmbeddedUser from './EmbeddedUser'
 import EmbeddedVulnerabilities from './EmbeddedVulnerabilities'
@@ -41,6 +42,7 @@ import LicensesType from './LicensesType'
 import LinkedAttachments from './LinkedAttachments'
 import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
+import Links from './Links'
 import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
 import NodeData from './NodeData'
@@ -89,6 +91,7 @@ export type {
     EmbeddedLicense,
     EmbeddedLinkedReleases,
     EmbeddedProject,
+    EmbeddedRelease,
     EmbeddedReleaseLinks,
     EmbeddedUser,
     EmbeddedVulnerabilities,
@@ -100,6 +103,7 @@ export type {
     LinkedAttachments,
     LinkedRelease,
     LinkedVulnerability,
+    Links,
     Moderators,
     ModeratorsType,
     NodeData,
