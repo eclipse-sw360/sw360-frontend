@@ -33,7 +33,7 @@ import {
 import { ApiUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar, ToastMessage } from 'next-sw360'
 
-export default function ComponentAddSummary() {
+export default function AddComponent() {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)

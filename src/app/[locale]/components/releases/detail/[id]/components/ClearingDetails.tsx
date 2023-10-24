@@ -11,8 +11,8 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import fossologyIcon from '@/assets/images/fossology.svg'

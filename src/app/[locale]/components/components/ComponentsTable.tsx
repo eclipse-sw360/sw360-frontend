@@ -34,7 +34,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
     const searchParams = Object.fromEntries(params)
     const [deletingComponent, setDeletingComponent] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)
@@ -111,7 +111,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
             ])
         },
         total: (data: Embedded<Component, 'sw360:components'>) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${session.user.access_token}` },
+        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 
     return (

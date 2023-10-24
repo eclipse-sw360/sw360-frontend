@@ -12,12 +12,12 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
-import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import { Table, _ } from '@/components/sw360'
-import { EmbeddedLinkedReleases, HttpStatus, LinkedRelease } from '@/object-types'
+import { HttpStatus, LinkedRelease } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
@@ -26,46 +26,54 @@ interface Props {
 
 const Releases = ({ componentId }: Props) => {
     const t = useTranslations('default')
+    const params = useSearchParams()
     const { data: session } = useSession()
     const [linkedReleases, setLinkedReleases] = useState([])
     const router = useRouter()
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as EmbeddedLinkedReleases
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },
-        [session]
-    )
-
     useEffect(() => {
-        void fetchData(`components/${componentId}/releases`).then((releaseLinks: EmbeddedLinkedReleases) => {
-            if (
-                !CommonUtils.isNullOrUndefined(releaseLinks._embedded) &&
-                !CommonUtils.isNullOrUndefined(releaseLinks._embedded['sw360:releaseLinks'])
-            ) {
-                const data = releaseLinks._embedded['sw360:releaseLinks'].map((item: LinkedRelease) => [
-                    item.name,
-                    [item.id, item.version],
-                ])
-                setLinkedReleases(data)
+        const controller = new AbortController()
+        const signal = controller.signal
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `components/${componentId}/releases`,
+                    Object.fromEntries(params)
+                )
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const releaseLinks = await response.json()
+                if (
+                    !CommonUtils.isNullOrUndefined(releaseLinks._embedded) &&
+                    !CommonUtils.isNullOrUndefined(releaseLinks._embedded['sw360:releaseLinks'])
+                ) {
+                    setLinkedReleases(
+                        releaseLinks._embedded['sw360:releaseLinks'].map((item: LinkedRelease) => [
+                            item.name,
+                            [item.id, item.version],
+                        ])
+                    )
+                }
+            } catch (e) {
+                console.error(e)
             }
-        })
-    }, [componentId, fetchData])
+        })()
+
+        return () => controller.abort()
+    }, [params, session, componentId])
 
     const columns = [
         {
+            id: 'name',
             name: t('Name'),
             sort: true,
         },
         {
+            id: 'version',
             name: t('Version'),
             formatter: ([id, version]: Array<string>) =>
                 _(

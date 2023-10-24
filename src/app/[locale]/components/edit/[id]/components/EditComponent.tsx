@@ -12,8 +12,8 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -25,7 +25,6 @@ import {
     Component,
     ComponentPayload,
     DocumentTypes,
-    EmbeddedAttachments,
     HttpStatus,
     ToastData,
 } from '@/object-types'
@@ -54,9 +53,10 @@ const tabList = [
     },
 ]
 
-function EditComponent({ componentId }: Props) {
+const EditComponent = ({ componentId }: Props) => {
     const t = useTranslations('default')
     const { data: session } = useSession()
+    const params = useSearchParams()
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [component, setComponent] = useState<Component>()
@@ -102,38 +102,59 @@ function EditComponent({ componentId }: Props) {
         })
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as Component & EmbeddedAttachments
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },
-        [session.user.access_token]
-    )
-
     useEffect(() => {
-        void fetchData(`components/${componentId}`).then((component: Component) => {
-            setComponent(component)
-        })
-        void fetchData(`components/${componentId}/attachments`).then((attachments: EmbeddedAttachments) => {
-            if (
-                !CommonUtils.isNullOrUndefined(attachments._embedded) &&
-                !CommonUtils.isNullOrUndefined(attachments._embedded['sw360:attachmentDTOes'])
-            ) {
-                const attachmentDetails: AttachmentDetail[] = []
-                attachments._embedded['sw360:attachmentDTOes'].forEach((item: Attachment) => {
-                    attachmentDetails.push(item)
-                })
-                setAttachmentData(attachmentDetails)
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `components/${componentId}`,
+                    Object.fromEntries(params)
+                )
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                setComponent(await response.json())
+            } catch (e) {
+                console.error(e)
             }
-        })
-    }, [componentId, fetchData])
+        })()
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `components/${componentId}/attachments`,
+                    Object.fromEntries(params)
+                )
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const dataAttachments = await response.json()
+                if (
+                    !CommonUtils.isNullOrUndefined(
+                        dataAttachments._embedded &&
+                            !CommonUtils.isNullOrUndefined(dataAttachments._embedded['sw360:attachmentDTOes'])
+                    )
+                ) {
+                    const attachmentDetails: AttachmentDetail[] = []
+                    dataAttachments._embedded['sw360:attachmentDTOes'].forEach((item: Attachment) => {
+                        attachmentDetails.push(item)
+                    })
+                    setAttachmentData(attachmentDetails)
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [params, session, componentId])
 
     const submit = async () => {
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
@@ -150,13 +171,19 @@ function EditComponent({ componentId }: Props) {
     }
 
     const headerButtons = {
-        'Update Component': { link: '/components/edit/' + componentId, type: 'primary', onClick: submit },
+        'Update Component': {
+            link: '/components/edit/' + componentId,
+            type: 'primary',
+            name: t('Update Component'),
+            onClick: submit,
+        },
         'Delete Component': {
             link: '/components/edit/' + componentId,
             type: 'danger',
+            name: t('Delete Component'),
             onClick: handleDeleteComponent,
         },
-        Cancel: { link: '/components/detail/' + componentId, type: 'secondary' },
+        Cancel: { link: '/components/detail/' + componentId, type: 'secondary', name: t('Cancel') },
     }
 
     return (
