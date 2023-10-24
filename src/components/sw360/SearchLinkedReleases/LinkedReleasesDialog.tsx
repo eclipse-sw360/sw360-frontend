@@ -10,9 +10,9 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
+import { notFound, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
@@ -42,6 +42,7 @@ const LinkedReleasesDialog = ({
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [data, setData] = useState()
+    const params = useSearchParams()
     const [linkedReleases] = useState([])
     const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<LinkedRelease[]>()
     const [releases, setReleases] = useState([])
@@ -54,37 +55,40 @@ const LinkedReleasesDialog = ({
         setReleases(data)
     }
 
-    const fetchData: any = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else {
-                notFound()
-            }
-        },
-        [session]
-    )
-
     useEffect(() => {
-        fetchData(`releases?allDetails=true`).then((users: any) => {
-            if (
-                !CommonUtils.isNullOrUndefined(users['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:releases'])
-            ) {
-                const data = users['_embedded']['sw360:releases'].map((item: any) => [
-                    item,
-                    item.vendor ? item.vendor.fullName : ' ',
-                    item.name,
-                    item.version,
-                    item.clearingState,
-                    item.mainlineState,
-                ])
-                setData(data)
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(`releases?allDetails=true`, Object.fromEntries(params))
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const releases = await response.json()
+                if (
+                    !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
+                ) {
+                    const data = releases['_embedded']['sw360:releases'].map((item: any) => [
+                        item,
+                        item.vendor ? item.vendor.fullName : ' ',
+                        item.name,
+                        item.version,
+                        item.clearingState,
+                        item.mainlineState,
+                    ])
+                    setData(data)
+                }
+            } catch (e) {
+                console.error(e)
             }
-        })
-    }, [fetchData])
+        })()
+        return () => controller.abort()
+    }, [params, session])
 
     const handleClickSelectLinkedReleases = () => {
         linkedReleasesResponse.forEach((linkedRelease: LinkedRelease) => {

@@ -11,13 +11,13 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
+import { notFound, useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { HttpStatus, Vendor, VendorType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import SelectTableVendor from './SelectTableVendor'
 
 interface Props {
@@ -29,6 +29,7 @@ interface Props {
 const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
     const t = useTranslations('default')
     const { data: session } = useSession()
+    const params = useSearchParams()
     const [data, setData] = useState()
     const [vendor, setVendor] = useState<Vendor>()
     const [vendors, setVendors] = useState([])
@@ -40,36 +41,39 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
         setVendors(data)
     }
 
-    const fetchData: any = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else {
-                notFound()
-            }
-        },
-        [session]
-    )
-
     useEffect(() => {
-        fetchData(`vendors`).then((vendors: any) => {
-            if (
-                !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
-            ) {
-                const data = vendors['_embedded']['sw360:vendors'].map((item: any) => [
-                    item,
-                    item.fullName,
-                    item.shortName,
-                    item.url,
-                    '',
-                ])
-                setData(data)
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(`vendors`, Object.fromEntries(params))
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const vendors = await response.json()
+                if (
+                    !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
+                ) {
+                    const data = vendors['_embedded']['sw360:vendors'].map((item: Vendor) => [
+                        item,
+                        item.fullName,
+                        item.shortName,
+                        item.url,
+                        '',
+                    ])
+                    setData(data)
+                }
+            } catch (e) {
+                console.error(e)
             }
-        })
-    }, [fetchData])
+        })()
+        return () => controller.abort()
+    }, [params, session])
 
     const handleClickSelectVendor = () => {
         selectVendor(vendor)

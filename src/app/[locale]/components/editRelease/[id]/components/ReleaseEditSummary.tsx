@@ -72,6 +72,7 @@ function ReleaseEditSummary({
     clearingInformation,
 }: Props) {
     const t = useTranslations('default')
+    const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
 
@@ -91,7 +92,19 @@ function ReleaseEditSummary({
         })
     }
 
+    const setDataRoles = (roles: InputKeyValue[]) => {
+        const roleDatas = CommonUtils.convertRoles(roles)
+        setReleasePayload({
+            ...releasePayload,
+            roles: roleDatas,
+        })
+    }
+
     useEffect(() => {
+        if (typeof release.roles !== 'undefined') {
+            setRoles(CommonUtils.convertObjectToMapRoles(release.roles))
+        }
+
         if (typeof release.externalIds !== 'undefined') {
             setExternalIds(CommonUtils.convertObjectToMap(release.externalIds))
         }
@@ -204,7 +217,12 @@ function ReleaseEditSummary({
                         setModerator={setModerator}
                     />
                     <div className='row mb-4'>
-                        <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
+                        <AddAdditionalRoles
+                            documentType={DocumentTypes.COMPONENT}
+                            inputList={roles}
+                            setInputList={setRoles}
+                            setDataInputList={setDataRoles}
+                        />
                     </div>
                     <div className='row mb-4'>
                         <AddKeyValue

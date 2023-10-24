@@ -7,41 +7,33 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import React, { useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
 
-import { DocumentTypes, RolesType } from '@/object-types'
-
 interface Props {
     documentType?: string
-    setRoles?: RolesType
+    setDataInputList?: RolesType
+    setInputList?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
+    inputList?: InputKeyValue[]
 }
 
-interface Input {
-    key: string
-    value: string
-}
-
-function AddAdditionalRoles({ documentType, setRoles }: Props) {
+function AddAdditionalRoles({ documentType, setDataInputList, inputList, setInputList }: Props) {
     const t = useTranslations('default')
-    const [inputList, setInputList] = useState<Input[]>([])
-
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: Input[] = [...inputList]
-        list[index][name as keyof Input] = value
+        const list: InputKeyValue[] = [...inputList]
+        list[index][name as keyof InputKeyValue] = value
         setInputList(list)
-        if (setRoles) setRoles(list)
+        setDataInputList(list)
     }
 
     const handleRemoveClick = (index: number) => {
         const list = [...inputList]
         list.splice(index, 1)
         setInputList(list)
+        setDataInputList(list)
     }
 
     const handleAddClick = () => {
@@ -60,7 +52,7 @@ function AddAdditionalRoles({ documentType, setRoles }: Props) {
             <div className='row'>
                 {inputList.map((elem, j) => {
                     return (
-                        <div className='row mb-2' key=''>
+                        <div className='row mb-2' key={j}>
                             <div className='col-lg-5'>
                                 <select
                                     className='form-select'

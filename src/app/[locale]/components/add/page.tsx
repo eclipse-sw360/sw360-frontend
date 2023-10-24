@@ -9,13 +9,12 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
-import ComponentAddSummary from './components/ComponentAddSummary'
+import AddComponent from './components/AddComponent'
 
 export const metadata: Metadata = {
     title: 'Components',
 }
 
 export default async function ComponentAddPage() {
-    return <ComponentAddSummary />
+    return <AddComponent />
 }

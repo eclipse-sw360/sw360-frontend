@@ -12,8 +12,8 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
 
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
@@ -62,6 +62,7 @@ const cotsDetails: COTSDetails = {
 function AddRelease({ componentId }: Props) {
     const t = useTranslations('default')
     const { data: session } = useSession()
+    const params = useSearchParams()
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
@@ -137,32 +138,36 @@ function AddRelease({ componentId }: Props) {
         })
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const component = (await response.json()) as EmbeddedComponent
-                return component
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return null
-            }
-        },
-        [session.user.access_token]
-    )
-
     useEffect(() => {
-        void fetchData(`components/${componentId}`).then((component: EmbeddedComponent) => {
-            setReleasePayload({
-                ...releasePayload,
-                name: component.name,
-            })
-            if (component.componentType === 'COTS') {
-                setTabList(ReleaseAddTabs.WITH_COMMERCIAL_DETAILS)
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `components/${componentId}`,
+                    Object.fromEntries(params)
+                )
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const component: EmbeddedComponent = await response.json()
+                setReleasePayload({
+                    ...releasePayload,
+                    name: component.name,
+                })
+                if (component.componentType === 'COTS') {
+                    setTabList(ReleaseAddTabs.WITH_COMMERCIAL_DETAILS)
+                }
+            } catch (e) {
+                console.error(e)
             }
-        })
-    }, [componentId, fetchData, releasePayload])
+        })()
+        return () => controller.abort()
+    }, [params, session, componentId, releasePayload])
 
     const submit = async () => {
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)
@@ -179,8 +184,8 @@ function AddRelease({ componentId }: Props) {
     }
 
     const headerButtons = {
-        'Create Release': { link: '', type: 'primary', onClick: submit },
-        Cancel: { link: '/components/detail/' + componentId, type: 'secondary' },
+        'Create Release': { link: '', type: 'primary', name: t('Create Release'), onClick: submit },
+        Cancel: { link: '/components/detail/' + componentId, type: 'secondary', name: t('Cancel') },
     }
 
     return (
