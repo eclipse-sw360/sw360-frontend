@@ -12,8 +12,8 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -52,6 +52,7 @@ const EditRelease = ({ releaseId }: Props) => {
     const router = useRouter()
     const t = useTranslations('default')
     const { data: session } = useSession()
+    const params = useSearchParams()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
     const [release, setRelease] = useState<ReleaseDetail>()
@@ -59,52 +60,54 @@ const EditRelease = ({ releaseId }: Props) => {
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const release = (await response.json()) as ReleaseDetail
-                return release
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return null
-            }
-        },
-        [session.user.access_token]
-    )
-
     useEffect(() => {
-        void fetchData(`releases/${releaseId}`).then((release: ReleaseDetail) => {
-            setRelease(release)
-            setDeletingRelease(releaseId)
-            setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
+        const controller = new AbortController()
+        const signal = controller.signal
 
-            if (release.componentType === 'COTS') {
-                setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
-            }
-
-            if (typeof release.eccInformation !== 'undefined') {
-                const eccInformation: ECCInformation = release.eccInformation
-                setEccInformation(eccInformation)
-            }
-
-            if (typeof release['_embedded']['sw360:cotsDetail'] !== 'undefined') {
-                const cotsDetails: COTSDetails = release['_embedded']['sw360:cotsDetail']
-                const cotsResponsible: ComponentOwner = {
-                    email: cotsDetails._embedded['sw360:cotsResponsible'].email,
-                    fullName: cotsDetails._embedded['sw360:cotsResponsible'].fullName,
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(`releases/${releaseId}`, Object.fromEntries(params))
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
                 }
-                setCotsResponsible(cotsResponsible)
-                setCotsDetails(cotsDetails)
-            }
+                const release: ReleaseDetail = await response.json()
+                setRelease(release)
+                setDeletingRelease(releaseId)
+                setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
 
-            if (typeof release.clearingInformation !== 'undefined') {
-                const clearingInformation: ClearingInformation = release.clearingInformation
-                setClearingInformation(clearingInformation)
+                if (release.componentType === 'COTS') {
+                    setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
+                }
+
+                if (typeof release.eccInformation !== 'undefined') {
+                    const eccInformation: ECCInformation = release.eccInformation
+                    setEccInformation(eccInformation)
+                }
+
+                if (typeof release['_embedded']['sw360:cotsDetail'] !== 'undefined') {
+                    const cotsDetails: COTSDetails = release['_embedded']['sw360:cotsDetail']
+                    const cotsResponsible: ComponentOwner = {
+                        email: cotsDetails._embedded['sw360:cotsResponsible'].email,
+                        fullName: cotsDetails._embedded['sw360:cotsResponsible'].fullName,
+                    }
+                    setCotsResponsible(cotsResponsible)
+                    setCotsDetails(cotsDetails)
+                }
+
+                if (typeof release.clearingInformation !== 'undefined') {
+                    const clearingInformation: ClearingInformation = release.clearingInformation
+                    setClearingInformation(clearingInformation)
+                }
+            } catch (e) {
+                console.error(e)
             }
-        })
-    }, [releaseId, fetchData])
+        })()
+
+        return () => controller.abort()
+    }, [params, session, releaseId])
 
     const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
         name: '',
