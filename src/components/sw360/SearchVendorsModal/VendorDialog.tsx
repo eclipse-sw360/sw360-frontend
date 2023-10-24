@@ -59,7 +59,7 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
                     !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
                 ) {
-                    const data = vendors['_embedded']['sw360:vendors'].map((item: any) => [
+                    const data = vendors['_embedded']['sw360:vendors'].map((item: Vendor) => [
                         item,
                         item.fullName,
                         item.shortName,

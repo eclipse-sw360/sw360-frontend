@@ -10,13 +10,13 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
+import { notFound, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
-import { useSession } from 'next-auth/react'
 
-import { HttpStatus, ModeratorsType, Moderators } from '@/object-types'
+import { HttpStatus, Moderators, ModeratorsType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import SelectTableModerators from './SelectTableContributors'
 
@@ -30,6 +30,7 @@ const ContributorsDialog = ({ show, setShow, selectModerators }: Props) => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [data, setData] = useState()
+    const params = useSearchParams()
     const [moderators] = useState([])
     const [moderatorsResponse, setModeratorsResponse] = useState<Moderators>()
     const [users, setUsers] = useState([])
@@ -42,36 +43,39 @@ const ContributorsDialog = ({ show, setShow, selectModerators }: Props) => {
         setUsers(data)
     }
 
-    const fetchData: any = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else {
-                notFound()
-            }
-        },
-        [session]
-    )
-
     useEffect(() => {
-        fetchData(`users`).then((users: any) => {
-            if (
-                !CommonUtils.isNullOrUndefined(users['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])
-            ) {
-                const data = users['_embedded']['sw360:users'].map((item: any) => [
-                    item,
-                    item.givenName,
-                    item.lastName,
-                    item.email,
-                    item.department,
-                ])
-                setData(data)
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const queryUrl = CommonUtils.createUrlWithParams(`users`, Object.fromEntries(params))
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const users = await response.json()
+                if (
+                    !CommonUtils.isNullOrUndefined(users['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])
+                ) {
+                    const data = users['_embedded']['sw360:users'].map((item: any) => [
+                        item,
+                        item.givenName,
+                        item.lastName,
+                        item.email,
+                        item.department,
+                    ])
+                    setData(data)
+                }
+            } catch (e) {
+                console.error(e)
             }
-        })
-    }, [fetchData])
+        })()
+        return () => controller.abort()
+    }, [params, session])
 
     const handleClickSelectModerators = () => {
         selectModerators(moderatorsResponse)

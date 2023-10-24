@@ -23,8 +23,7 @@ interface Props {
 }
 
 const SelectTableVendor = ({ vendors, setVendor }: Props) => {
-    // item._links.self.href
-    const handlerRadioButton = (item: any) => {
+    const handlerRadioButton = (item: Vendor) => {
         const vendorId: string = CommonUtils.getIdFromUrl(item._links.self.href)
         const vendorResponse: Vendor = {
             id: vendorId,
@@ -60,7 +59,7 @@ const SelectTableVendor = ({ vendors, setVendor }: Props) => {
     return (
         <>
             <div className='row'>
-                <Table data={vendors} columns={columns} />
+                <Table data={vendors} columns={columns} sort={true} selector={true} />
             </div>
         </>
     )

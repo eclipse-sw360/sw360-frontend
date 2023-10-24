@@ -16,6 +16,7 @@ import { useState } from 'react'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import { DocumentTypes, InputKeyValue, Licenses, Moderators, ReleasePayload, Vendor } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
@@ -50,6 +51,15 @@ function ReleaseAddSummary({
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
+    const [roles, setRoles] = useState<InputKeyValue[]>([])
+
+    const setDataRoles = (roles: InputKeyValue[]) => {
+        const roleDatas = CommonUtils.convertRoles(roles)
+        setReleasePayload({
+            ...releasePayload,
+            roles: roleDatas,
+        })
+    }
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -92,7 +102,12 @@ function ReleaseAddSummary({
                         setContributor={setContributor}
                     />
                     <div className='row mb-4'>
-                        <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
+                        <AddAdditionalRoles
+                            documentType={DocumentTypes.COMPONENT}
+                            inputList={roles}
+                            setInputList={setRoles}
+                            setDataInputList={setDataRoles}
+                        />
                     </div>
                     <div className='row mb-4'>
                         <AddKeyValue
