@@ -19,6 +19,7 @@ interface ProjectPayload {
     defaultVendorId?: string
     externalUrls?: object
     externalIds?: object
+    projectResponsible?: string
     additionalData?: object
     state: string
     phaseOutSince?: string
@@ -41,6 +42,11 @@ interface ProjectPayload {
         [key: string]: {
             projectRelationship: string
             enableSvm: boolean
+        }
+    }
+    _links?: {
+        self: {
+            href: string
         }
     }
 }
