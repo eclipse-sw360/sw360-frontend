@@ -10,26 +10,23 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { Embedded, ProjectPayload } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import { SW360_API_URL } from '@/utils/env'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { notFound, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { useSearchParams } from 'next/navigation'
+import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
-
-import { HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { AdvancedSearch, Table, _ } from 'next-sw360'
-import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 function Project() {
-    const [data, setData] = useState<any[]>([])
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
 
@@ -148,6 +145,25 @@ function Project() {
         },
     ]
 
+    const server = {
+        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
+        then: (data: Embedded<ProjectPayload, 'sw360:projects'>) => {
+            return data._embedded['sw360:projects'].map((elem: ProjectPayload) => [
+                {
+                    id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+                    name: elem.name ?? '',
+                },
+                elem.description ?? '',
+                elem.projectResponsible ?? '',
+                { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
+                '',
+                elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+            ])
+        },
+        total: (data: Embedded<ProjectPayload, 'sw360:components'>) => data.page.totalElements,
+        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+    }
+
     const advancedSearch = [
         {
             fieldName: 'Project Name',
@@ -248,50 +264,6 @@ function Project() {
         },
     ]
 
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        ;(async () => {
-            try {
-                const queryUrl = CommonUtils.createUrlWithParams('projects', Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-
-                const data = await response.json()
-
-                const dataTableFormat =
-                    CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
-                        ? []
-                        : data['_embedded']['sw360:projects'].map((elem: any) => [
-                              {
-                                  id: elem['_links']['self']['href'].substring(
-                                      elem['_links']['self']['href'].lastIndexOf('/') + 1
-                                  ),
-                                  name: elem.name ?? '',
-                              },
-                              elem.description ?? '',
-                              elem.projectResponsible ?? '',
-                              { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
-                              '',
-                              elem['_links']['self']['href'].substring(
-                                  elem['_links']['self']['href'].lastIndexOf('/') + 1
-                              ),
-                          ])
-                setData(dataTableFormat)
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [params, session])
-
     return (
         <div className='mx-3 mt-3'>
             <div className='row'>
@@ -323,15 +295,7 @@ function Project() {
                         </div>
                         <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
                     </div>
-                    {data ? (
-                        <div className='row ps-3'>
-                            <Table columns={columns} data={data} selector={true} sort={false} />
-                        </div>
-                    ) : (
-                        <div className='col-12' style={{ textAlign: 'center' }}>
-                            <Spinner className='spinner' />
-                        </div>
-                    )}
+                    <Table columns={columns} server={server} selector={true} sort={false} />
                 </div>
             </div>
         </div>
