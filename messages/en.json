@@ -734,6 +734,8 @@
         "Import Export": "Import & Export",
         "Admin": "Admin",
         "Error when processing": "Error when processing",
-        "Created moderation request": "Created moderation request"
+        "Created moderation request": "Created moderation request",
+        "Related": "Related",
+        "Is a subproject": "Is a subproject"
     }
 }

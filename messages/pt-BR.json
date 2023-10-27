@@ -734,6 +734,8 @@
         "ENTER_VALUE_KEY": "Insira a chave do valor",
         "Import Export": "Importar / Exportar",
         "Schedule": "Agendar",
-        "VALUE": "Valor"
+        "VALUE": "Valor",
+        "Related": "NOT TRANSLATED",
+        "Is a subproject": "NOT TRANSLATED"
     }
 }

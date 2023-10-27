@@ -9,12 +9,11 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-
+import { Table, _ } from '@/components/sw360'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import { Project } from '@/object-types'
-import { Table } from 'next-sw360'
+import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 interface Props {
     projectPayload: Project
@@ -25,36 +24,85 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
     const t = useTranslations('default')
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
     const [linkedProjectData, setLinkedProjectData] = useState<Map<string, any>>(new Map())
+    const [tableData, setTableData] = useState<Array<any>>([])
+
+    const updateProjectData = (
+        projectId: string,
+        updatedProjectRelationship: string,
+        linkedProjectData: Map<string, any>
+    ) => {
+        try {
+            if (linkedProjectData.has(projectId)) {
+                linkedProjectData.forEach((value, key) => {
+                    if (key === projectId) {
+                        value.projectRelationship = updatedProjectRelationship
+                        setLinkedProjectData(linkedProjectData)
+                        projectPayload.linkedProjects[projectId].projectRelationship = updatedProjectRelationship
+                        const data: any = extractDataFromMap(linkedProjectData)
+                        setTableData(data)
+                    }
+                })
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
     const columns = [
         {
-            id: 'tableData.name',
+            id: 'linkedProjectData.name',
             name: t('Name'),
             sort: true,
         },
         {
-            id: 'tableData.version',
+            id: 'linkedProjectData.version',
             name: t('Version'),
             sort: true,
         },
         {
-            id: 'tableData.projectRelationship',
+            id: 'linkedProjectData.projectRelationship',
             name: t('Project Relationship'),
             sort: true,
+            formatter: ({ projectRelationship, key }: { projectRelationship: string; key: string }) =>
+                _(
+                    <div className='form-dropdown'>
+                        <select
+                            className='form-select'
+                            id={projectRelationship}
+                            aria-describedby='projectRelationship'
+                            name={projectRelationship}
+                            value={projectRelationship}
+                            onChange={(event) => {
+                                const updatedProjectRelationship = event.target.value
+                                updateProjectData(key, updatedProjectRelationship, linkedProjectData)
+                            }}
+                            required
+                        >
+                            <option value='UNKNOWN'>{t('Unknown')}</option>
+                            <option value='REFERRED'>{t('Related')}</option>
+                            <option value='CONTAINED'>{t('Is a subproject')}</option>
+                            <option value='DUPLICATE'>{t('Duplicate')}</option>
+                        </select>
+                    </div>
+                ),
         },
         {
-            id: 'tableData.enableSvm',
+            id: 'linkedProjectData.enableSvm',
             name: t('Enable SVM'),
             sort: true,
         },
     ]
 
-    const extractDataFromMap = (map: Map<string, any>) => {
+    useEffect(() => {
+        const data = extractDataFromMap(linkedProjectData)
+        setTableData(data)
+    }, [linkedProjectData])
+
+    const extractDataFromMap = (linkedProjectData: Map<string, any>) => {
         const extractedData: any = []
-        map.forEach((value, key) => {
-            const interimData: any = []
-            interimData.push(value.name, value.version, value.projectRelationship, value.enableSvm, key)
-            extractedData.push(interimData)
+        linkedProjectData.forEach((value, key) => {
+            const updatedProjectRelationship = value.projectRelationship
+            extractedData.push([value.name, value.version, { updatedProjectRelationship, key }, value.enableSvm])
         })
         return extractedData
     }
@@ -76,7 +124,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                     </h6>
                 </div>
                 <div style={{ paddingLeft: '0px' }}>
-                    <Table columns={columns} data={extractDataFromMap(linkedProjectData)} sort={false} />
+                    <Table columns={columns} data={tableData} sort={false} />
                 </div>
                 <div className='row' style={{ paddingLeft: '0px' }}>
                     <div className='col-lg-4'>
@@ -85,7 +133,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                             className='btn btn-secondary'
                             onClick={() => setShowLinkedProjectsModal(true)}
                         >
-                            Link Projects
+                            Add Projects
                         </button>
                     </div>
                 </div>

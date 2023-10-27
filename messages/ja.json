@@ -734,6 +734,9 @@
         "ENTER_VALUE_KEY": "値を入力キー",
         "Import Export": "輸入",
         "Schedule": "スケジュール",
-        "VALUE": "価値"
+        "VALUE": "価値",
+        "Complexitty": "複雑",
+        "Related": "NOT TRANSLATED",
+        "Is a subproject": "NOT TRANSLATED"
     }
 }
