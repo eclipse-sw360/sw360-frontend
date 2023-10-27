@@ -521,6 +521,10 @@ th {
     fill: #6cbb6c;
 }
 
+.fossology_icon {
+    fill: currentColor;
+}
+
 .license_icon {
     fill: #6683c2;
 }
