@@ -12,11 +12,11 @@ import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
 import { CREDENTIAL_PROVIDER } from '@/constants'
-import { UserCredentialInfo } from '@/object-types'
+import { HttpStatus, UserCredentialInfo } from '@/object-types'
 import AuthService from '@/services/auth.service'
+import { ApiUtils } from '@/utils'
 
 export const authOptions: NextAuthOptions = {
-    secret: process.env.NEXTAUTH_SECRET,
     // Configure one or more authentication providers
     providers: [
         CredentialsProvider({
@@ -24,14 +24,27 @@ export const authOptions: NextAuthOptions = {
             credentials: {},
             async authorize(credentials) {
                 // Add logic here to look up the user from the credentials supplied
-                const { username, password } = credentials as any
-                const userCredential: UserCredentialInfo = {
-                    username: username,
-                    password: password,
-                }
-                const authToken = AuthService.generateToken(userCredential)
+                try {
+                    const { username, password } = credentials as any
+                    const userCredential: UserCredentialInfo = {
+                        username: username,
+                        password: password,
+                    }
+                    const authToken = await AuthService.generateToken(userCredential)
 
-                return authToken as any
+                    if (authToken === null) throw new Error('Error while fetching Auth Token')
+
+                    const response = await ApiUtils.GET(`users/${username}`, authToken.access_token)
+                    if (response.status !== HttpStatus.OK) {
+                        throw new Error('Error while fetching User Group')
+                    }
+
+                    const data = await response.json()
+                    return { ...authToken, userGroup: data.userGroup } as any
+                } catch (e) {
+                    console.error(e)
+                    return null
+                }
             },
         }),
     ],

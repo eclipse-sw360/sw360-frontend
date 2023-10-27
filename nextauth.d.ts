@@ -9,6 +9,16 @@
 
 import 'next-auth'
 
+enum UserGroupType {
+    USER = 'USER',
+    ADMIN = 'ADMIN',
+    CLEARING_ADMIN = 'CLEARING_ADMIN',
+    ECC_ADMIN = 'ECC_ADMIN',
+    SECURITY_ADMIN = 'SECURITY_ADMIN',
+    SW360_ADMIN = 'SW360_ADMIN',
+    CLEARING_EXPERT = 'CLEARING_EXPERT',
+}
+
 interface SW360User extends DefaultUser {
     access_token: string
     exp: number
@@ -18,6 +28,7 @@ interface SW360User extends DefaultUser {
     refresh_token: string
     scope: string
     token_type: string
+    userGroup: UserGroupType
 }
 
 declare module 'next-auth' {
