@@ -268,7 +268,7 @@
         "Enter email": "Digite o e-mail",
         "Enter external id key": "Insira a chave de identificação externa",
         "Enter external id value": "Insira o valor da identificação externa",
-        "Enter external url key": "Digite a chave de URL externa",
+        "Enter external url key": "Insira a chave da URL externa",
         "Enter external url value": "Insira o valor da URL externa",
         "Enter one word tag": "Insira uma tag de palavra",
         "Enter owner's accounting unit": "Insira a unidade contábil do proprietário",
@@ -728,8 +728,12 @@
         "current_spdx_only_supports": "Atualmente, isso suporta apenas arquivos SPDX RDF/XML com um nó de nível superior descrito exclusivo",
         "wrong_spdx_information": "Se for inserido o SPDX errado, as informações não serão registradas corretamente",
         "conclude_license_id": "IDs de licença principais/concluídas",
-        "Import Export": "Import & Export",
-        "Schedule": "Schedule",
-        "Admin": "Admin"
+        "Error when processing": "Erro ao processar",
+        "Created moderation request": "Solicitação de moderação criada",
+        "Admin": "Administrador",
+        "ENTER_VALUE_KEY": "Insira a chave do valor",
+        "Import Export": "Importar / Exportar",
+        "Schedule": "Agendar",
+        "VALUE": "Valor"
     }
 }

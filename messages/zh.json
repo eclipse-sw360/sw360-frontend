@@ -727,8 +727,12 @@
         "to edit the project relation": "编辑项目关系",
         "vector": "向量",
         "conclude_license_id": "主/最终许可证 ID",
-        "Import Export": "Import & Export",
-        "Schedule": "Schedule",
-        "Admin": "Admin"
+        "Error when processing": "处理时出错",
+        "Created moderation request": "创建了审核请求",
+        "Admin": "行政",
+        "ENTER_VALUE_KEY": "输入值键",
+        "Import Export": "进口",
+        "Schedule": "日程",
+        "VALUE": "价值"
     }
 }
