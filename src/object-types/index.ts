@@ -27,7 +27,6 @@ import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
 import EmbeddedProject from './EmbeddedProject'
 import EmbeddedRelease from './EmbeddedRelease'
 import EmbeddedReleaseLinks from './EmbeddedReleaseLinks'
-import EmbeddedVulnerabilities from './EmbeddedVulnerabilities'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
@@ -60,8 +59,7 @@ import Vendor from './Vendor'
 import VendorAdvisory from './VendorAdvisory'
 import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
-import VulnerabilityData from './VulnerabilityData'
-import VulnerabilityPayload from './VulnerabilityPayload'
+import Vulnerability from './Vulnerability'
 
 export type {
     AddtionalDataType,
@@ -83,7 +81,6 @@ export type {
     EmbeddedProject,
     EmbeddedRelease,
     EmbeddedReleaseLinks,
-    EmbeddedVulnerabilities,
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,
@@ -116,8 +113,7 @@ export type {
     VendorAdvisory,
     VendorType,
     VerificationStateInfo,
-    VulnerabilityData,
-    VulnerabilityPayload,
+    Vulnerability,
 }
 
 // Enums

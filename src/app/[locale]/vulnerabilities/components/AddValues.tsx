@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { VulnerabilityData } from '@/object-types'
+import { Vulnerability } from '@/object-types'
 
 export default function AddValues({
     componentName,
@@ -24,14 +24,14 @@ export default function AddValues({
 }: {
     componentName: string
     entityName: string
-    payloadKeyName: keyof VulnerabilityData
-    payload: VulnerabilityData
-    setPayload: Dispatch<SetStateAction<VulnerabilityData>>
+    payloadKeyName: keyof Vulnerability
+    payload: Vulnerability
+    setPayload: Dispatch<SetStateAction<Vulnerability>>
 }) {
     const t = useTranslations('default')
 
     const addValue = () => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             return { ...prev, [payloadKeyName]: [...(prev[payloadKeyName] as string[]), ''] }
         })
     }
@@ -40,7 +40,7 @@ export default function AddValues({
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
         i: number
     ) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = prev[payloadKeyName] as string[]
             refs[i] = e.target.value
             return { ...prev, [payloadKeyName]: refs }
@@ -48,7 +48,7 @@ export default function AddValues({
     }
 
     const deleteValue = (i: number) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = (prev[payloadKeyName] as string[]).slice()
             refs.splice(i, 1)
             return { ...prev, [payloadKeyName]: refs }

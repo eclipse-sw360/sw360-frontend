@@ -25,8 +25,8 @@ import {
     Component,
     ComponentTabIds,
     DocumentTypes,
+    Embedded,
     EmbeddedChangelogs,
-    EmbeddedVulnerabilities,
     HttpStatus,
     LinkedVulnerability,
 } from '@/object-types'
@@ -34,6 +34,8 @@ import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
+
+type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
 
 interface Props {
     componentId: string
@@ -122,13 +124,8 @@ const DetailOverview = ({ componentId }: Props) => {
 
         fetchData(`components/${componentId}/vulnerabilities`)
             .then((data: EmbeddedVulnerabilities) => {
-                if (
-                    !CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(data['_embedded']['sw360:vulnerabilityDTOes'])
-                ) {
+                if (!CommonUtils.isNullOrUndefined(data)) {
                     setVulnerData(data['_embedded']['sw360:vulnerabilityDTOes'])
-                } else {
-                    setVulnerData([])
                 }
             })
             .catch((err) => console.error(err))

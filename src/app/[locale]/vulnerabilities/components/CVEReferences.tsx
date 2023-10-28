@@ -13,19 +13,19 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { CVEReference, VulnerabilityData } from '@/object-types'
+import { CVEReference, Vulnerability } from '@/object-types'
 
 function CVEReferences({
     payload,
     setPayload,
 }: {
-    payload: VulnerabilityData
-    setPayload: Dispatch<SetStateAction<VulnerabilityData>>
+    payload: Vulnerability
+    setPayload: Dispatch<SetStateAction<Vulnerability>>
 }) {
     const t = useTranslations('default')
 
     const addReference = () => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             return { ...prev, cveReferences: [...prev.cveReferences, { year: '', number: '' }] }
         })
     }
@@ -34,7 +34,7 @@ function CVEReferences({
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
         i: number
     ) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = prev.cveReferences
             refs[i][e.target.name as keyof CVEReference] = e.target.value
             return { ...prev, cveReferences: refs }
@@ -42,7 +42,7 @@ function CVEReferences({
     }
 
     const deleteReference = (i: number) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = prev.cveReferences.slice()
             refs.splice(i, 1)
             return { ...prev, cveReferences: refs }
