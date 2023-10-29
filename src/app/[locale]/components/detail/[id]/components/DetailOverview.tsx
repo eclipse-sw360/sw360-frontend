@@ -26,7 +26,6 @@ import {
     ComponentTabIds,
     DocumentTypes,
     Embedded,
-    EmbeddedChangelogs,
     HttpStatus,
     LinkedVulnerability,
 } from '@/object-types'
@@ -35,6 +34,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
 
+type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
 
 interface Props {

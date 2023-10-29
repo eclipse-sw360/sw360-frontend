@@ -22,7 +22,6 @@ import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
-import EmbeddedChangelogs from './EmbeddedChangelogs'
 import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
 import EmbeddedProject from './EmbeddedProject'
 import EmbeddedRelease from './EmbeddedRelease'
@@ -76,7 +75,6 @@ export type {
     ComponentPayload,
     ECCInformation,
     Embedded,
-    EmbeddedChangelogs,
     EmbeddedLinkedReleases,
     EmbeddedProject,
     EmbeddedRelease,
