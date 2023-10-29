@@ -730,6 +730,7 @@
         "conclude_license_id": "メイン/終了ライセンス ID",
         "Complexitty": "複雑",
         "Import Export": "Import & Export",
-        "Schedule": "Schedule"
+        "Schedule": "Schedule",
+        "Admin": "Admin"
     }
 }

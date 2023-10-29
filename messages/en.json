@@ -731,6 +731,7 @@
         "wrong_spdx_information": "If the wrong SPDX is entered, the information will not be registered correctly",
         "Components With Releases": "Components With Releases",
         "conclude_license_id": "Main / Concluded License Ids",
-        "Import Export": "Import & Export"
+        "Import Export": "Import & Export",
+        "Admin": "Admin"
     }
 }

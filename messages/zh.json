@@ -728,6 +728,7 @@
         "vector": "向量",
         "conclude_license_id": "主/最终许可证 ID",
         "Import Export": "Import & Export",
-        "Schedule": "Schedule"
+        "Schedule": "Schedule",
+        "Admin": "Admin"
     }
 }

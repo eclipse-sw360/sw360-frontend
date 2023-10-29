@@ -729,6 +729,7 @@
         "wrong_spdx_information": "Se for inserido o SPDX errado, as informações não serão registradas corretamente",
         "conclude_license_id": "IDs de licença principais/concluídas",
         "Import Export": "Import & Export",
-        "Schedule": "Schedule"
+        "Schedule": "Schedule",
+        "Admin": "Admin"
     }
 }

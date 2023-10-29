@@ -728,6 +728,7 @@
         "wrong_spdx_information": "Nếu nhập sai SPDX thì thông tin sẽ không được đăng ký chính xác",
         "conclude_license_id": "Id giấy phép chính/kết thúc",
         "Import Export": "Import & Export",
-        "Schedule": "Schedule"
+        "Schedule": "Schedule",
+        "Admin": "Admin"
     }
 }
