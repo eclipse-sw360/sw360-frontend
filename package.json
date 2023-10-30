@@ -17,7 +17,7 @@
         "country-list": "^2.3.0",
         "dotenv": "^16.3.1",
         "gridjs": "^6.0.6",
-        "next": "^13.5.6",
+        "next": "^14.0.0",
         "next-auth": "^4.24.4",
         "next-intl": "^2.21.0",
         "npm": "^10.2.1",
@@ -31,12 +31,12 @@
     "devDependencies": {
         "@commitlint/cli": "^17.8.1",
         "@commitlint/config-conventional": "^17.8.1",
-        "@storybook/addon-essentials": "^7.5.1",
-        "@storybook/addon-interactions": "^7.5.1",
-        "@storybook/addon-links": "^7.5.1",
+        "@storybook/addon-essentials": "^7.5.2",
+        "@storybook/addon-interactions": "^7.5.2",
+        "@storybook/addon-links": "^7.5.2",
         "@storybook/addon-onboarding": "^1.0.8",
         "@storybook/blocks": "^7.4.4",
-        "@storybook/nextjs": "^7.5.1",
+        "@storybook/nextjs": "^7.5.2",
         "@storybook/react": "^7.4.4",
         "@storybook/testing-library": "^0.2.2",
         "@types/country-list": "^2.1.3",
@@ -65,6 +65,11 @@
         "ts-node": "^10.9.1",
         "tsc-files": "^1.1.4",
         "typescript": "^5.2.2"
+    },
+    "overrides": {
+        "next-intl": {
+            "next": "^14.0.0"
+        }
     },
     "lint-staged": {
         "**/*.{js,jsx,ts,tsx}": [
