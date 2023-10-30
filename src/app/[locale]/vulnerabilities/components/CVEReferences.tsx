@@ -55,7 +55,7 @@ function CVEReferences({
                 <div className='row header mb-2 pb-2 px-2'>
                     <h6>{t('CVE References')}</h6>
                 </div>
-                {payload.cveReferences.map((elem, i) => (
+                {payload?.cveReferences.map((elem, i) => (
                     <div className='row mb-2' key={i}>
                         <div className='col-lg-5'>
                             <label htmlFor='vulnerabilityDetail.cveReferences.year' className='form-label fw-medium'>
