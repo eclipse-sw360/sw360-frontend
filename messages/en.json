@@ -723,7 +723,7 @@
         "Recent Releases": "Recent Releases",
         "NotOwnComponent": "You do not own any components.",
         "NoTasksAssigned": "There are no tasks assigned to you.",
-        "Click to add": "Click to Add",
+        "Click to add": "Click to Add {args}",
         "owner_account_unit": "Enter owner's accounting unit",
         "project_cannot_be_created": "Project cannot be created/updated",
         "Edit Component Fail": "Edit Component Fail",
