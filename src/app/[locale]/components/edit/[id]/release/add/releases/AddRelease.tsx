@@ -21,13 +21,13 @@ import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
     COTSDetails,
     CommonTabIds,
+    Component,
     ComponentOwner,
-    EmbeddedComponent,
     HttpStatus,
     Licenses,
     Moderators,
+    Release,
     ReleaseDetail,
-    ReleasePayload,
     ReleaseTabIds,
     Repository,
     ToastData,
@@ -67,7 +67,7 @@ function AddRelease({ componentId }: Props) {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
 
-    const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
+    const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
         cpeid: '',
         version: '',
@@ -154,7 +154,7 @@ function AddRelease({ componentId }: Props) {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const component: EmbeddedComponent = await response.json()
+                const component: Component = await response.json()
                 setReleasePayload({
                     ...releasePayload,
                     name: component.name,
@@ -174,7 +174,7 @@ function AddRelease({ componentId }: Props) {
         if (response.status == HttpStatus.CREATED) {
             const release = (await response.json()) as ReleaseDetail
             alert(true, 'Success', t('Release is created'), 'success')
-            const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
+            const releaseId: string = CommonUtils.getIdFromUrl(release._links?.self?.href)
             router.push('/components/releases/detail/' + releaseId)
         } else if (response.status == HttpStatus.CONFLICT) {
             alert(true, 'Duplicate', t('Release is Duplicate'), 'warning')

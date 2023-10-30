@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { ActionType, Licenses, Moderators, ReleasePayload, Vendor } from '@/object-types'
+import { ActionType, Licenses, Moderators, Release, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import ModeratorsDialog from '../sw360/ModeratorsDialog/ModeratorsDialog'
 import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
@@ -23,8 +23,8 @@ import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialo
 
 interface Props {
     actionType?: string
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
     mainLicensesId?: Licenses

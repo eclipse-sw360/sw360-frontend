@@ -13,10 +13,10 @@ import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
 import { useState } from 'react'
 
-import { VulnerabilityPayload } from '@/object-types'
+import { Vulnerability } from '@/object-types'
 import styles from '../detail.module.css'
 
-export default function Summary({ summaryData }: { summaryData: VulnerabilityPayload }) {
+export default function Summary({ summaryData }: { summaryData: Vulnerability }) {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 

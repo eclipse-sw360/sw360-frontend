@@ -13,19 +13,19 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { VendorAdvisory, VulnerabilityData } from '@/object-types'
+import { VendorAdvisory, Vulnerability } from '@/object-types'
 
 function AddVendorAdvisory({
     payload,
     setPayload,
 }: {
-    payload: VulnerabilityData
-    setPayload: Dispatch<SetStateAction<VulnerabilityData>>
+    payload: Vulnerability
+    setPayload: Dispatch<SetStateAction<Vulnerability>>
 }) {
     const t = useTranslations('default')
 
     const addAdvisory = () => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             return { ...prev, vendorAdvisories: [...prev.vendorAdvisories, { vendor: '', name: '', url: '' }] }
         })
     }
@@ -34,7 +34,7 @@ function AddVendorAdvisory({
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
         i: number
     ) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = prev.vendorAdvisories
             refs[i][e.target.name as keyof VendorAdvisory] = e.target.value
             return { ...prev, vendorAdvisories: refs }
@@ -42,7 +42,7 @@ function AddVendorAdvisory({
     }
 
     const deleteAdvisory = (i: number) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = prev.vendorAdvisories.slice()
             refs.splice(i, 1)
             return { ...prev, vendorAdvisories: refs }

@@ -49,7 +49,6 @@ function MyComponentsWidget() {
 
         fetchData(queryUrl, signal)
             .then((components: any) => {
-                console.log(components)
                 if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
                     setData(
                         components['_embedded']['sw360:components'].map(

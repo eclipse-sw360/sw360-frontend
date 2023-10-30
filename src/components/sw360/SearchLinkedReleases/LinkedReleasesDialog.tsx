@@ -16,7 +16,7 @@ import { notFound, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { HttpStatus, LinkedRelease, ReleasePayload } from '@/object-types'
+import { HttpStatus, LinkedRelease, Release } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import SelectTableLinkedReleases from './SelectTableLinkedReleases'
 
@@ -26,8 +26,8 @@ interface Props {
     onReRender: () => void
     releaseLinks: LinkedRelease[]
     setReleaseLinks: React.Dispatch<React.SetStateAction<LinkedRelease[]>>
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 const LinkedReleasesDialog = ({

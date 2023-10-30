@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { VulnerabilityData } from '@/object-types'
+import { Vulnerability } from '@/object-types'
 
 export default function AddValues({
     componentName,
@@ -24,15 +24,15 @@ export default function AddValues({
 }: {
     componentName: string
     entityName: string
-    payloadKeyName: keyof VulnerabilityData
-    payload: VulnerabilityData
-    setPayload: Dispatch<SetStateAction<VulnerabilityData>>
+    payloadKeyName: keyof Vulnerability
+    payload: Vulnerability
+    setPayload: Dispatch<SetStateAction<Vulnerability>>
 }) {
     const t = useTranslations('default')
 
     const addValue = () => {
-        setPayload((prev: VulnerabilityData) => {
-            return { ...prev, [payloadKeyName]: [...(prev[payloadKeyName] as string[]), ''] }
+        setPayload((prev: Vulnerability) => {
+            return { ...prev, [payloadKeyName]: [...(prev[payloadKeyName] as Array<string>), ''] }
         })
     }
 
@@ -40,7 +40,7 @@ export default function AddValues({
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
         i: number
     ) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = prev[payloadKeyName] as string[]
             refs[i] = e.target.value
             return { ...prev, [payloadKeyName]: refs }
@@ -48,7 +48,7 @@ export default function AddValues({
     }
 
     const deleteValue = (i: number) => {
-        setPayload((prev: VulnerabilityData) => {
+        setPayload((prev: Vulnerability) => {
             const refs = (prev[payloadKeyName] as string[]).slice()
             refs.splice(i, 1)
             return { ...prev, [payloadKeyName]: refs }
@@ -61,7 +61,7 @@ export default function AddValues({
                 <div className='row header mb-2 pb-2 px-2'>
                     <h6>{t(componentName)}</h6>
                 </div>
-                {(payload[payloadKeyName] as string[]).map((elem, i) => (
+                {(payload[payloadKeyName] as Array<string>).map((elem, i) => (
                     <div className='row mb-2' key={i}>
                         <div className='col-lg-5'>
                             <input
@@ -81,7 +81,7 @@ export default function AddValues({
                 ))}
                 <div className='col-lg-4 mt-2'>
                     <button type='button' onClick={addValue} className={`fw-bold btn btn-secondary`}>
-                        {t('Click to add') + ` ${entityName}`}
+                        {t('Click to add', { args: entityName })}
                     </button>
                 </div>
             </div>

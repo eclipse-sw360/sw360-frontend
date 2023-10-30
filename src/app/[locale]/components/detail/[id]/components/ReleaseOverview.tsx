@@ -22,11 +22,13 @@ import { HiOutlineLink } from 'react-icons/hi'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import { EmbeddedLinkedReleases, HttpStatus, ReleaseLink } from '@/object-types'
+import { Embedded, HttpStatus, LinkedRelease, ReleaseLink } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 import styles from '../detail.module.css'
 import DeleteReleaseModal from './DeleteReleaseModal'
+
+type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
 
 interface Props {
     componentId: string

@@ -8,10 +8,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import EmbeddedUser from "./EmbeddedUser"
+import { User } from '@/object-types'
 
 export default interface COTSDetails {
-    usedLicense?: string,
+    usedLicense?: string
     licenseClearingReportURL?: string
     containsOSS?: boolean
     ossContractSigned?: boolean
@@ -21,6 +21,6 @@ export default interface COTSDetails {
     clearingDeadline?: string
     sourceCodeAvailable?: boolean
     _embedded?: {
-        'sw360:cotsResponsible': EmbeddedUser
+        'sw360:cotsResponsible': User
     }
 }

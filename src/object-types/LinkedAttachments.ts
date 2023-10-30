@@ -8,19 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Attachment from './Attachment'
+import { Attachment, Links } from '@/object-types'
 
 export default interface LinkedAttachments {
     _embedded: {
         'sw360:attachmentDTOes': Array<Attachment>
     }
-    _links: {
-        curies: [
-            {
-                href: string
-                name: string
-                templated: boolean
-            }
-        ]
-    }
+    _links: Links
 }

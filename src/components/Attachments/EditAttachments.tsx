@@ -12,7 +12,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
-import { AttachmentDetail, ComponentPayload, DocumentTypes, HttpStatus, ReleasePayload } from '@/object-types'
+import { Attachment, ComponentPayload, DocumentTypes, HttpStatus, Release } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import styles from './Attachment.module.css'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
@@ -24,8 +24,8 @@ interface Props {
     documentType?: string
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 function EditAttachments({
@@ -38,7 +38,7 @@ function EditAttachments({
 }: Props) {
     const t = useTranslations('default')
     const { data: session } = useSession()
-    const [attachmentData, setAttachmentData] = useState<AttachmentDetail[]>([])
+    const [attachmentData, setAttachmentData] = useState<Array<Attachment>>([])
     const [reRender, setReRender] = useState(false)
     const handleReRender = () => {
         setReRender(!reRender)
@@ -81,7 +81,7 @@ function EditAttachments({
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
             ) {
-                const attachmentDetails: AttachmentDetail[] = []
+                const attachmentDetails: Array<Attachment> = []
                 attachments['_embedded']['sw360:attachmentDTOes'].map((item: any) => {
                     attachmentDetails.push(item)
                 })

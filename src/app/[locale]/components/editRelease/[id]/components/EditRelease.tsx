@@ -30,8 +30,8 @@ import {
     HttpStatus,
     Licenses,
     Moderators,
+    Release,
     ReleaseDetail,
-    ReleasePayload,
     ReleaseTabIds,
     ToastData,
     Vendor,
@@ -109,7 +109,7 @@ const EditRelease = ({ releaseId }: Props) => {
         return () => controller.abort()
     }, [params, session, releaseId])
 
-    const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
+    const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
         cpeid: '',
         version: '',

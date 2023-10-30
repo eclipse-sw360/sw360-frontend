@@ -16,7 +16,7 @@ import { useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
-import { HttpStatus, ProjectPayload } from '@/object-types'
+import { HttpStatus, Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 
@@ -27,8 +27,8 @@ interface AlertData {
 
 interface Props {
     setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, any>>>
-    projectPayload: ProjectPayload
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    projectPayload: Project
+    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
     show: boolean
     setShow: (show: boolean) => void
 }

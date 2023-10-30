@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Vendor from './Vendor'
+import { Vendor } from '@/object-types'
 
 type VendorType = (Vendor: Vendor) => void
 

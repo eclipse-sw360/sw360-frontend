@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface LinkedRelease {
+interface LinkedRelease {
     id: string
     name: string
     version: string
@@ -17,3 +17,5 @@ export default interface LinkedRelease {
     vendor: string
     releaseRelationship: string
 }
+
+export default LinkedRelease

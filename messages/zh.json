@@ -35,7 +35,7 @@
         "Type": "类型",
         "Text": "文本",
         "SEARCH RESULTS": "搜索结果",
-        "SEARCH_NOTE": "<p>注意：如果未选中<bold>整个文档</bold>复选框，则搜索将仅限于：</p><ul><li><bold>Name</bold> for <underline>Project< \n<underline>许可证的 /underline>、<underline>组件</underline>、<underline>发布</underline>和<underline>软件包</underline></li><li><bold>全名</bold> \n</underline>、<underline>用户</underline>和<underline>供应商</underline></li> <li><bold>标题</bold>用于<underline>义务</underline></li> \n</ul>",
+        "SEARCH_NOTE": "",
         "Select Vendor": "选择供应商",
         "Search Vendor": "搜寻供应商",
         "Enter search text": "输入搜索文字...",
@@ -197,7 +197,7 @@
         "Clearing summary": "清算总结",
         "Click": "点击",
         "Click here to edit the release relation as well as the project mainline state in the project": "点击<link>这里</link>可以编辑项目中的发布关系以及项目主线状态",
-        "Click to add": "点击添加",
+        "Click to add": "点击添加 {args}",
         "Click to add Assigned External Component Id": "单击以添加分配的外部组件 ID",
         "Click to add CVE Reference": "单击添加 CVE 参考",
         "Click to add Releases": "点击添加版本",
@@ -727,8 +727,12 @@
         "to edit the project relation": "编辑项目关系",
         "vector": "向量",
         "conclude_license_id": "主/最终许可证 ID",
-        "Import Export": "Import & Export",
-        "Schedule": "Schedule",
-        "Admin": "Admin"
+        "Error when processing": "处理时出错",
+        "Created moderation request": "创建了审核请求",
+        "Admin": "行政",
+        "ENTER_VALUE_KEY": "输入值键",
+        "Import Export": "进口",
+        "Schedule": "日程",
+        "VALUE": "价值"
     }
 }

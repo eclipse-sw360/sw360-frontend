@@ -9,13 +9,13 @@
 
 'use client'
 
-import { ProjectPayload } from '@/object-types'
+import { Project } from '@/object-types'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
 
 interface Props {
-    projectPayload: ProjectPayload
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    projectPayload: Project
+    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
 }
 
 export default function LinkedReleasesAndProjects({ projectPayload, setProjectPayload }: Props) {

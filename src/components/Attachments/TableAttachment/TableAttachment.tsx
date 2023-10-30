@@ -13,12 +13,12 @@ import React from 'react'
 import { useTranslations } from 'next-intl'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { AttachmentDetail, AttachmentType, DocumentTypes } from '@/object-types'
+import { Attachment, AttachmentType, DocumentTypes } from '@/object-types'
 import styles from './TableAttachment.module.css'
 
 interface Props {
-    setAttachmentData?: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
-    data?: AttachmentDetail[]
+    setAttachmentData?: React.Dispatch<React.SetStateAction<Array<Attachment>>>
+    data?: Array<Attachment>
     setAttachmentToComponentData?: AttachmentType
     setAttachmentToReleasePayload?: AttachmentType
     documentType?: string
@@ -33,9 +33,10 @@ function TableAttachment({
 }: Props) {
     const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
-        const { name, value } = e.target
-        const list: AttachmentDetail[] = [...data]
-        list[index][name as keyof AttachmentDetail] = value
+        // const { name, value } = e.target
+        const list: Array<Attachment> = [...data]
+        // list[index][name as keyof Attachment] = value
+        index
         setAttachmentData(list)
         if (documentType === DocumentTypes.COMPONENT) {
             // setAttachmentToComponentData(list)
@@ -45,7 +46,7 @@ function TableAttachment({
     }
 
     const handleClickDelete = (index: number) => {
-        const list: AttachmentDetail[] = [...data]
+        const list: Array<Attachment> = [...data]
         list.splice(index, 1)
         setAttachmentData(list)
         if (documentType === DocumentTypes.COMPONENT) {
@@ -58,7 +59,7 @@ function TableAttachment({
     return (
         <>
             <div className='row'>
-                {data.map((item: AttachmentDetail, index: number) => {
+                {data.map((item: Attachment, index: number) => {
                     return (
                         <div key={item.attachmentContentId}>
                             <div className={`${styles['div-row']}`}>

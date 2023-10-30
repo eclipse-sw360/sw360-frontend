@@ -9,14 +9,14 @@
 // License-Filename: LICENSE
 
 import { Table, _ } from '@/components/sw360'
-import { EmbeddedProject, RestrictedResource } from '@/object-types'
+import { Project, RestrictedResource } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
 import { useEffect, useState } from 'react'
 import { Alert } from 'react-bootstrap'
 
 interface Props {
-    projectUsings: Array<EmbeddedProject>
+    projectUsings: Array<Project>
     documentName: string
     restrictedResource: RestrictedResource
 }
@@ -41,7 +41,7 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
     ]
 
     useEffect(() => {
-        const data = projectUsings.map((project: EmbeddedProject) => [
+        const data = projectUsings.map((project: Project) => [
             _(
                 <Link
                     key={project._links.self.href.split('/').at(-1)}

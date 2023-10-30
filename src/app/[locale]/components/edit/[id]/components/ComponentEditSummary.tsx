@@ -18,7 +18,7 @@ import { useCallback, useEffect, useState } from 'react'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
 import {
-    AttachmentDetail,
+    Attachment,
     Component,
     ComponentOwner,
     ComponentPayload,
@@ -35,7 +35,7 @@ interface Props {
     componentId?: string
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    attachmentData?: AttachmentDetail[]
+    attachmentData?: Array<Attachment>
 }
 
 export default function ComponentEditSummary({

@@ -15,11 +15,11 @@ import React from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiInfoCircle } from 'react-icons/bi'
 
-import { ReleasePayload } from '@/object-types'
+import { Release } from '@/object-types'
 
 interface Props {
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 const ShowInfoOnHover = ({ text }: { text: string }) => {

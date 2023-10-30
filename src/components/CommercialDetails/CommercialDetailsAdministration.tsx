@@ -14,13 +14,13 @@ import { useTranslations } from 'next-intl'
 
 import { useCallback, useState } from 'react'
 
-import { ComponentOwner, ReleasePayload } from '@/object-types'
+import { ComponentOwner, Release } from '@/object-types'
 import { ComponentOwnerDialog } from 'next-sw360'
 import styles from './CommercialDetails.module.css'
 
 interface Props {
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     cotsResponsible?: ComponentOwner
     setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
 }

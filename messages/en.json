@@ -135,7 +135,7 @@
         "Component is created": "Component is created",
         "Component is Duplicate": "Component is Duplicate",
         "Components with releases": "Components With Releases",
-        "Complexity": "Complexitty",
+        "Complexity": "Complexity",
         "Contributor": "Contributor",
         "Contains Open Source Software": "Contains Open Source Software",
         "Count of Security Vulnerabilities": "Count of Security Vulnerabilities",
@@ -723,7 +723,7 @@
         "Recent Releases": "Recent Releases",
         "NotOwnComponent": "You do not own any components.",
         "NoTasksAssigned": "There are no tasks assigned to you.",
-        "Click to add": "Click to Add",
+        "Click to add": "Click to Add {args}",
         "owner_account_unit": "Enter owner's accounting unit",
         "project_cannot_be_created": "Project cannot be created/updated",
         "Edit Component Fail": "Edit Component Fail",
@@ -732,6 +732,8 @@
         "Components With Releases": "Components With Releases",
         "conclude_license_id": "Main / Concluded License Ids",
         "Import Export": "Import & Export",
-        "Admin": "Admin"
+        "Admin": "Admin",
+        "Error when processing": "Error when processing",
+        "Created moderation request": "Created moderation request"
     }
 }

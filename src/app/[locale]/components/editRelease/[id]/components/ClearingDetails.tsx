@@ -10,12 +10,12 @@
 
 'use client'
 
-import { ReleasePayload } from '@/object-types'
+import { Release } from '@/object-types'
 import { useTranslations } from 'next-intl'
 
 interface Props {
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {

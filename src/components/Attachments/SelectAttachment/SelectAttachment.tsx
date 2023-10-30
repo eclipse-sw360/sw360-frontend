@@ -15,21 +15,21 @@ import { useTranslations } from 'next-intl'
 import React, { useRef, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { AttachmentDetail, ComponentPayload, DocumentTypes, ReleasePayload } from '@/object-types'
+import { Attachment, ComponentPayload, DocumentTypes, Release } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import styles from './SelectAttachment.module.css'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    attachmentUpload: AttachmentDetail[]
-    setAttachmentFromUpload: React.Dispatch<React.SetStateAction<AttachmentDetail[]>>
+    attachmentUpload: Array<Attachment>
+    setAttachmentFromUpload: React.Dispatch<React.SetStateAction<Array<Attachment>>>
     onReRender: () => void
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     documentType?: string
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 function SelectAttachment({
@@ -81,7 +81,7 @@ function SelectAttachment({
         })
             .then((res) => res.json())
             .then((json) => {
-                json.map((item: AttachmentDetail) => attachmentUpload.push(item))
+                json.map((item: Attachment) => attachmentUpload.push(item))
                 setAttachmentFromUpload(attachmentUpload)
                 if (documentType === DocumentTypes.COMPONENT) {
                     setComponentPayload({

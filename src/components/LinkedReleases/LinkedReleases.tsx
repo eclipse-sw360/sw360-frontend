@@ -13,7 +13,7 @@
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
-import { ActionType, LinkedRelease, ReleasePayload } from '@/object-types'
+import { ActionType, LinkedRelease, Release } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
 import styles from './LinkedReases.module.css'
@@ -23,8 +23,8 @@ import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 interface Props {
     release?: any
     actionType?: string
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) => {

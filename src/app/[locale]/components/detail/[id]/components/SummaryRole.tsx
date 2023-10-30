@@ -11,7 +11,7 @@
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { Component, EmbeddedUser } from '@/object-types'
+import { Component, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import styles from '../detail.module.css'
 
@@ -56,7 +56,7 @@ const SummaryRole = ({ component }: { component: Component }) => {
                                 {!CommonUtils.isNullEmptyOrUndefinedArray(component['_embedded']['sw360:moderators']) &&
                                     Object.values(component['_embedded']['sw360:moderators'])
                                         .map(
-                                            (user: EmbeddedUser): React.ReactNode => (
+                                            (user: User): React.ReactNode => (
                                                 <a key={user.email} href={`mailto:${user.email}`}>
                                                     {user.fullName}
                                                 </a>

@@ -23,13 +23,11 @@ import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/Comp
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import { PageButtonHeader, SideBar } from '@/components/sw360'
 import {
+    Attachment,
     Changelogs,
     CommonTabIds,
     DocumentTypes,
-    EmbeddedAttachment,
-    EmbeddedChangelogs,
-    EmbeddedReleaseLinks,
-    EmbeddedVulnerabilities,
+    Embedded,
     HttpStatus,
     LinkedVulnerability,
     ReleaseDetail,
@@ -46,6 +44,10 @@ import LinkedReleases from './LinkedReleases'
 import ReleaseDetailTabs from './ReleaseDetailTabs'
 import Summary from './Summary'
 
+type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
+type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
+type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
+
 interface Props {
     releaseId: string
 }
@@ -56,7 +58,7 @@ const DetailOverview = ({ releaseId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
-    const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<EmbeddedAttachment>>([])
+    const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)

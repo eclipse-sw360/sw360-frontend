@@ -8,6 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import AttachmentDetail from "./AttachmentDetail";
+import { Attachment } from '@/object-types'
 
-export type AttachmentType = (attachmentDatas: AttachmentDetail[]) => void
+export type AttachmentType = (attachmentDatas: Array<Attachment>) => void

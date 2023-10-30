@@ -11,28 +11,17 @@
 import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
-import AttachmentDetail from './AttachmentDetail'
 import AuthToken from './AuthToken'
-import COTSDetails from './COTSDetails'
-import CVEReference from './CVEReference'
 import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
 import Component from './Component'
 import ComponentOwner from './ComponentOwner'
 import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
+import COTSDetails from './COTSDetails'
+import CVEReference from './CVEReference'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
-import EmbeddedAttachment from './EmbeddedAttachment'
-import EmbeddedAttachments from './EmbeddedAttachments'
-import EmbeddedChangelogs from './EmbeddedChangelogs'
-import EmbeddedComponent from './EmbeddedComponent'
-import EmbeddedLicense from './EmbeddedLicense'
-import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
-import EmbeddedProject from './EmbeddedProject'
-import EmbeddedReleaseLinks from './EmbeddedReleaseLinks'
-import EmbeddedUser from './EmbeddedUser'
-import EmbeddedVulnerabilities from './EmbeddedVulnerabilities'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
@@ -41,14 +30,15 @@ import LicensesType from './LicensesType'
 import LinkedAttachments from './LinkedAttachments'
 import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
+import Links from './Links'
 import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import ProjectPayload from './ProjectPayload'
+import Project from './Project'
+import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
-import ReleasePayload from './ReleasePayload'
 import Repository from './Repository'
 import RequestContent from './RequestContent'
 import Resources from './Resources'
@@ -58,40 +48,29 @@ import SearchResult from './SearchResult'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
 import ToastData from './ToastData'
+import User from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
 import VendorAdvisory from './VendorAdvisory'
 import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
-import VulnerabilityData from './VulnerabilityData'
-import VulnerabilityPayload from './VulnerabilityPayload'
+import Vulnerability from './Vulnerability'
 
 export type {
     AddtionalDataType,
     AdministrationDataType,
     Attachment,
-    AttachmentDetail,
     AuthToken,
-    COTSDetails,
-    CVEReference,
     Changelogs,
     ClearingInformation,
     Component,
     ComponentOwner,
     ComponentOwnerType,
     ComponentPayload,
+    COTSDetails,
+    CVEReference,
     ECCInformation,
     Embedded,
-    EmbeddedAttachment,
-    EmbeddedAttachments,
-    EmbeddedChangelogs,
-    EmbeddedComponent,
-    EmbeddedLicense,
-    EmbeddedLinkedReleases,
-    EmbeddedProject,
-    EmbeddedReleaseLinks,
-    EmbeddedUser,
-    EmbeddedVulnerabilities,
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,
@@ -100,14 +79,15 @@ export type {
     LinkedAttachments,
     LinkedRelease,
     LinkedVulnerability,
+    Links,
     Moderators,
     ModeratorsType,
     NodeData,
     OAuthClient,
-    ProjectPayload,
+    Project,
+    Release,
     ReleaseDetail,
     ReleaseLink,
-    ReleasePayload,
     Repository,
     RequestContent,
     Resources,
@@ -117,13 +97,13 @@ export type {
     Session,
     SummaryDataType,
     ToastData,
+    User,
     UserCredentialInfo,
     Vendor,
     VendorAdvisory,
     VendorType,
     VerificationStateInfo,
-    VulnerabilityData,
-    VulnerabilityPayload,
+    Vulnerability,
 }
 
 // Enums

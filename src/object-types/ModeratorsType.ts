@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Moderators from './Moderators'
+import { Moderators } from '@/object-types'
 
 type ModeratorsType = (moderators: Moderators) => void
 

@@ -8,26 +8,29 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Links } from '@/object-types'
+
 interface Attachment {
-    attachmentContentId: string | undefined
-    filename: string | undefined
-    sha1: string | undefined
-    attachmentType: string | undefined
-    createdBy: string | undefined
-    createdTeam: string | undefined
-    createdComment: string | undefined
-    createdOn: string | undefined
-    checkedTeam: string | undefined
-    checkedComment: string | undefined
-    checkedOn: string | undefined
-    checkStatus: string | undefined
-    checkedBy: string | undefined
-    usageAttachment:
+    attachmentContentId?: string
+    filename: string
+    sha1: string
+    attachmentType?: string
+    createdBy?: string
+    createdTeam?: string
+    createdComment?: string
+    createdOn?: string
+    checkedTeam?: string
+    checkedComment?: string
+    checkedOn?: string
+    checkStatus?: string
+    checkedBy?: string
+    usageAttachment?:
         | {
               visible: number
               restricted: number
           }
         | undefined
+    _links: Links
 }
 
 export default Attachment

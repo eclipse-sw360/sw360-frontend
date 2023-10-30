@@ -8,19 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ReleaseLink from './ReleaseLink'
+import { Links } from '@/object-types'
 
-export default interface EmbeddedReleaseLinks {
-    _embedded: {
-        'sw360:releaseLinks': Array<ReleaseLink>
-    }
-    _links: {
-        curies: [
-            {
-                href: string
-                name: string
-                templated: boolean
-            }
-        ]
-    }
+interface User {
+    email: string
+    department: string
+    deactivated: boolean
+    fullName: string
+    givenName: string
+    lastName: string
+    _links: Links
 }
+
+export default User

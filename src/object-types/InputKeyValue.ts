@@ -8,7 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface InputKeyValue {
+interface InputKeyValue {
     key: string
     value: string
 }
+
+export default InputKeyValue
