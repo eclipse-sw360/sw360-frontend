@@ -22,10 +22,8 @@ import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
-import EmbeddedLinkedReleases from './EmbeddedLinkedReleases'
 import EmbeddedProject from './EmbeddedProject'
 import EmbeddedRelease from './EmbeddedRelease'
-import EmbeddedReleaseLinks from './EmbeddedReleaseLinks'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
@@ -75,10 +73,8 @@ export type {
     ComponentPayload,
     ECCInformation,
     Embedded,
-    EmbeddedLinkedReleases,
     EmbeddedProject,
     EmbeddedRelease,
-    EmbeddedReleaseLinks,
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,

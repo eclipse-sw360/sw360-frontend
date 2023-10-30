@@ -28,7 +28,6 @@ import {
     CommonTabIds,
     DocumentTypes,
     Embedded,
-    EmbeddedReleaseLinks,
     HttpStatus,
     LinkedVulnerability,
     ReleaseDetail,
@@ -47,6 +46,7 @@ import Summary from './Summary'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
+type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
 
 interface Props {
     releaseId: string

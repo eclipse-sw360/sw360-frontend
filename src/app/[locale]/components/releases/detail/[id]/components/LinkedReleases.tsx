@@ -15,9 +15,10 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { TreeTable } from '@/components/sw360'
-import { EmbeddedReleaseLinks, NodeData, ReleaseLink } from '@/object-types'
+import { Embedded, NodeData, ReleaseLink } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
+type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
 interface Props {
     releaseId: string
 }
