@@ -26,8 +26,8 @@ import {
     HttpStatus,
     Licenses,
     Moderators,
+    Release,
     ReleaseDetail,
-    ReleasePayload,
     ReleaseTabIds,
     Repository,
     ToastData,
@@ -67,7 +67,7 @@ function AddRelease({ componentId }: Props) {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
 
-    const [releasePayload, setReleasePayload] = useState<ReleasePayload>({
+    const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
         cpeid: '',
         version: '',

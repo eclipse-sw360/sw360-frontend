@@ -15,13 +15,13 @@ import { useState } from 'react'
 
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import { DocumentTypes, InputKeyValue, Licenses, Moderators, ReleasePayload, Vendor } from '@/object-types'
+import { DocumentTypes, InputKeyValue, Licenses, Moderators, Release, Vendor } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
     mainLicensesId?: Licenses

@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import React, { useRef, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { Attachment, ComponentPayload, DocumentTypes, ReleasePayload } from '@/object-types'
+import { Attachment, ComponentPayload, DocumentTypes, Release } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import styles from './SelectAttachment.module.css'
 
@@ -28,8 +28,8 @@ interface Props {
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     documentType?: string
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 function SelectAttachment({

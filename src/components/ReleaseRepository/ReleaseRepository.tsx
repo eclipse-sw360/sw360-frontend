@@ -13,12 +13,12 @@
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
-import { ReleasePayload } from '@/object-types'
+import { Release } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) => {

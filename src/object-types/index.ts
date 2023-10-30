@@ -12,17 +12,16 @@ import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
 import AuthToken from './AuthToken'
-import COTSDetails from './COTSDetails'
-import CVEReference from './CVEReference'
 import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
 import Component from './Component'
 import ComponentOwner from './ComponentOwner'
 import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
+import COTSDetails from './COTSDetails'
+import CVEReference from './CVEReference'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
-import EmbeddedRelease from './EmbeddedRelease'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
@@ -37,9 +36,9 @@ import ModeratorsType from './ModeratorsType'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
 import Project from './Project'
+import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
-import ReleasePayload from './ReleasePayload'
 import Repository from './Repository'
 import RequestContent from './RequestContent'
 import Resources from './Resources'
@@ -62,17 +61,16 @@ export type {
     AdministrationDataType,
     Attachment,
     AuthToken,
-    COTSDetails,
-    CVEReference,
     Changelogs,
     ClearingInformation,
     Component,
     ComponentOwner,
     ComponentOwnerType,
     ComponentPayload,
+    COTSDetails,
+    CVEReference,
     ECCInformation,
     Embedded,
-    EmbeddedRelease,
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,
@@ -87,9 +85,9 @@ export type {
     NodeData,
     OAuthClient,
     Project,
+    Release,
     ReleaseDetail,
     ReleaseLink,
-    ReleasePayload,
     Repository,
     RequestContent,
     Resources,

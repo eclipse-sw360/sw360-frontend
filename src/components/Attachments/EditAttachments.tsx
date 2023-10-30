@@ -12,7 +12,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
-import { Attachment, ComponentPayload, DocumentTypes, HttpStatus, ReleasePayload } from '@/object-types'
+import { Attachment, ComponentPayload, DocumentTypes, HttpStatus, Release } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import styles from './Attachment.module.css'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
@@ -24,8 +24,8 @@ interface Props {
     documentType?: string
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
 function EditAttachments({

@@ -16,15 +16,15 @@ import { useEffect, useState } from 'react'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import {
-    ClearingInformation,
     COTSDetails,
+    ClearingInformation,
     DocumentTypes,
     ECCInformation,
     InputKeyValue,
     Licenses,
     Moderators,
+    Release,
     ReleaseDetail,
-    ReleasePayload,
     Vendor,
 } from '@/object-types'
 import { CommonUtils } from '@/utils'
@@ -34,8 +34,8 @@ interface Props {
     release?: ReleaseDetail
     releaseId?: string
     actionType?: string
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
     mainLicensesId?: Licenses
@@ -146,7 +146,7 @@ function ReleaseEditSummary({
             componentId = CommonUtils.getIdFromUrl(release._links['sw360:component'].href)
         }
 
-        const releasePayload: ReleasePayload = {
+        const releasePayload: Release = {
             name: release.name,
             cpeid: release.cpeId,
             version: release.version,

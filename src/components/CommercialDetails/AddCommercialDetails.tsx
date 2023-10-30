@@ -10,13 +10,13 @@
 
 'use client'
 
-import { ComponentOwner, ReleasePayload } from '@/object-types'
+import { ComponentOwner, Release } from '@/object-types'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 
 interface Props {
-    releasePayload?: ReleasePayload
-    setReleasePayload?: React.Dispatch<React.SetStateAction<ReleasePayload>>
+    releasePayload?: Release
+    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     cotsResponsible?: ComponentOwner
     setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
 }

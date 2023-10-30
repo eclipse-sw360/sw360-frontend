@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Attachment, EmbeddedRelease, Links, User, Vendor } from '@/object-types'
+import { Attachment, Links, Release, User, Vendor } from '@/object-types'
 
 interface Component {
     id?: string
@@ -51,7 +51,7 @@ interface Component {
         createdBy?: User
         'sw360:moderators'?: Array<User>
         'sw360:vendors'?: Array<Vendor>
-        'sw360:releases'?: Array<EmbeddedRelease>
+        'sw360:releases'?: Array<Release>
         defaultVendor?: Vendor
         modifiedBy?: User
         componentOwner?: User
