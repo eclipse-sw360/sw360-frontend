@@ -10,7 +10,7 @@
 
 'use client'
 
-import { Embedded, ProjectPayload } from '@/object-types'
+import { Embedded, Project } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { useSession } from 'next-auth/react'
@@ -21,6 +21,8 @@ import { useSearchParams } from 'next/navigation'
 import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
+
+type EmbeddedProjects = Embedded<Project, 'sw360:components'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -147,8 +149,8 @@ function Project() {
 
     const server = {
         url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
-        then: (data: Embedded<ProjectPayload, 'sw360:projects'>) => {
-            return data._embedded['sw360:projects'].map((elem: ProjectPayload) => [
+        then: (data: Embedded<Project, 'sw360:projects'>) => {
+            return data._embedded['sw360:projects'].map((elem: Project) => [
                 {
                     id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                     name: elem.name ?? '',
@@ -160,7 +162,7 @@ function Project() {
                 elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
             ])
         },
-        total: (data: Embedded<ProjectPayload, 'sw360:components'>) => data.page.totalElements,
+        total: (data: EmbeddedProjects) => data.page.totalElements,
         headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 

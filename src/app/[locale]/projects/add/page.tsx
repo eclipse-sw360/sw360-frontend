@@ -18,7 +18,7 @@ import { Button, Col, ListGroup, Row, Tab, ToastContainer } from 'react-bootstra
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, ProjectPayload, ToastData, Vendor } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, ToastData, Vendor } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { ToastMessage } from 'next-sw360'
 
@@ -48,7 +48,7 @@ function AddProjects() {
             value: '',
         },
     ])
-    const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
+    const [projectPayload, setProjectPayload] = useState<Project>({
         name: '',
         description: '',
         version: '',

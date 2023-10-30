@@ -8,11 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Component, EmbeddedProject, RestrictedResource } from '@/object-types'
+import { Component, Project, RestrictedResource } from '@/object-types'
 
 interface Resources {
     _embedded: {
-        'sw360:projects': Array<EmbeddedProject>
+        'sw360:projects': Array<Project>
         'sw360:components': Array<Component>
         'sw360:restrictedResources': Array<RestrictedResource>
     }

@@ -13,12 +13,12 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
-import { ProjectPayload } from '@/object-types'
+import { Project } from '@/object-types'
 import { Table } from 'next-sw360'
 
 interface Props {
-    projectPayload: ProjectPayload
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    projectPayload: Project
+    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
 }
 
 export default function LinkedProjects({ projectPayload, setProjectPayload }: Props) {

@@ -22,7 +22,6 @@ import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
-import EmbeddedProject from './EmbeddedProject'
 import EmbeddedRelease from './EmbeddedRelease'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
@@ -37,7 +36,7 @@ import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import ProjectPayload from './ProjectPayload'
+import Project from './Project'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
 import ReleasePayload from './ReleasePayload'
@@ -73,7 +72,6 @@ export type {
     ComponentPayload,
     ECCInformation,
     Embedded,
-    EmbeddedProject,
     EmbeddedRelease,
     FossologyProcessInfo,
     FossologyProcessStatus,
@@ -88,7 +86,7 @@ export type {
     ModeratorsType,
     NodeData,
     OAuthClient,
-    ProjectPayload,
+    Project,
     ReleaseDetail,
     ReleaseLink,
     ReleasePayload,

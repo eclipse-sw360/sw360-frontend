@@ -11,12 +11,12 @@
 
 import { useTranslations } from 'next-intl'
 
-import { ProjectPayload } from '@/object-types'
+import { Project } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
-    projectPayload: ProjectPayload
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    projectPayload: Project
+    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
 }
 
 export default function Lifecycle({ projectPayload, setProjectPayload }: Props) {
