@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Component, Project, RestrictedResource } from '@/object-types'
+import { Component, Links, Project, RestrictedResource } from '@/object-types'
 
 interface Resources {
     _embedded: {
@@ -16,15 +16,7 @@ interface Resources {
         'sw360:components': Array<Component>
         'sw360:restrictedResources': Array<RestrictedResource>
     }
-    _links: {
-        curies: [
-            {
-                href: string
-                name: string
-                templated: boolean
-            }
-        ]
-    }
+    _links: Links
 }
 
 export default Resources

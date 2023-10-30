@@ -8,14 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Links } from '@/object-types'
 export default interface Vendor {
     id?: string
     fullName?: string
     shortName?: string
     url?: string
-    _links?: {
-        self: {
-            href: string
-        }
-    }
+    _links?: Links
 }

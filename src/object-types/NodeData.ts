@@ -8,8 +8,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface NodeData {
+interface NodeData {
     rowData: Array<any>
     isExpanded?: boolean
     children: Array<NodeData>
 }
+
+export default NodeData

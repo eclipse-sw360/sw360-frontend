@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface ECCInformation {
+interface ECCInformation {
     eccStatus?: string
     al?: string
     eccn?: string
@@ -18,3 +18,5 @@ export default interface ECCInformation {
     materialIndexNumber?: string
     assessmentDate?: string
 }
+
+export default ECCInformation

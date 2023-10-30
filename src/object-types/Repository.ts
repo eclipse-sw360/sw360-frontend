@@ -8,7 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface Repository {
+interface Repository {
     repositorytype?: string
     url?: string
 }
+
+export default Repository

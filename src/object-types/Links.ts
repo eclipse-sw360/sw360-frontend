@@ -8,9 +8,16 @@
 // License-Filename: LICENSE
 
 interface Links {
-    self: {
+    self?: {
         href: string
     }
+    curies?: [
+        {
+            href: string
+            name: string
+            templated: boolean
+        }
+    ]
 }
 
 export default Links

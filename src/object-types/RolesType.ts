@@ -10,6 +10,6 @@
 
 import { InputKeyValue } from '@/object-types'
 
-type RolesType = (roles: InputKeyValue[]) => void
+type RolesType = (roles: Array<InputKeyValue>) => void
 
 export default RolesType

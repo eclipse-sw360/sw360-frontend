@@ -10,7 +10,7 @@
 
 import { Links } from '@/object-types'
 
-export default interface Licenses {
+interface Licenses {
     shortName?: string
     fullName?: string
     id?: string[] | null
@@ -21,3 +21,5 @@ export default interface Licenses {
     externalIds?: { [k: string]: string }
     _links?: Links
 }
+
+export default Licenses

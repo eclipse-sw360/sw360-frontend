@@ -174,7 +174,7 @@ function AddRelease({ componentId }: Props) {
         if (response.status == HttpStatus.CREATED) {
             const release = (await response.json()) as ReleaseDetail
             alert(true, 'Success', t('Release is created'), 'success')
-            const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
+            const releaseId: string = CommonUtils.getIdFromUrl(release._links?.self?.href)
             router.push('/components/releases/detail/' + releaseId)
         } else if (response.status == HttpStatus.CONFLICT) {
             alert(true, 'Duplicate', t('Release is Duplicate'), 'warning')

@@ -9,25 +9,25 @@
 
 import { Attachment } from '@/object-types'
 export default interface ComponentPayload {
-    name?: string | undefined
-    createBy?: string | undefined
-    description?: string | undefined
-    componentType?: string | undefined
-    modifiedBy?: string | undefined
-    modifiedOn?: string | undefined
-    moderators?: string[] | undefined
-    componentOwner?: string | undefined
-    ownerAccountingUnit?: string | undefined
-    ownerGroup?: string | undefined
-    ownerCountry?: string | undefined
-    roles?: any | undefined
-    externalIds?: any | undefined
-    additionalData?: any | undefined
-    defaultVendorId?: string | undefined
-    categories?: string[] | undefined
-    homepage?: string | undefined
-    mailinglist?: string | undefined
-    wiki?: string | undefined
-    blog?: string | undefined
-    attachmentDTOs?: Array<Attachment> | undefined
+    name?: string
+    createBy?: string
+    description?: string
+    componentType?: string
+    modifiedBy?: string
+    modifiedOn?: string
+    moderators?: Array<string>
+    componentOwner?: string
+    ownerAccountingUnit?: string
+    ownerGroup?: string
+    ownerCountry?: string
+    roles?: { [k: string]: Array<string> }
+    externalIds?: { [k: string]: string }
+    additionalData?: { [k: string]: string }
+    defaultVendorId?: string
+    categories?: Array<string>
+    homepage?: string
+    mailinglist?: string
+    wiki?: string
+    blog?: string
+    attachmentDTOs?: Array<Attachment>
 }
