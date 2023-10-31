@@ -16,6 +16,8 @@ export const metadata: Metadata = {
     title: 'Components',
 }
 
-export default async function ComponentIndexPage() {
+async function ComponentIndexPage() {
     return <ComponentIndex />
 }
+
+export default ComponentIndexPage

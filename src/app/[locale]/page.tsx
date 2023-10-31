@@ -16,6 +16,8 @@ export const metadata: Metadata = {
     title: 'Welcome - SW360',
 }
 
-export default async function AuthPage() {
+async function AuthPage() {
     return <AuthScreen />
 }
+
+export default AuthPage

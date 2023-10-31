@@ -10,71 +10,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
+import { Metadata } from 'next'
 
-import { useSession } from 'next-auth/react'
+import HomePage from './HomePage'
 
-import { PageSpinner } from 'next-sw360'
-
-import MyComponentsWidget from './components/MyComponentsWidget'
-import MyProjectsWidget from './components/MyProjectsWidget'
-import MySubscriptionsWidget from './components/MySubscriptionsWidget'
-import MyTaskAssignmentsWidget from './components/MyTaskAssignmentsWidget'
-import MyTaskSubmissionsWidget from './components/MyTaskSubmissionsWidget'
-import RecentComponentsWidget from './components/RecentComponentsWidget'
-import RecentReleasesWidget from './components/RecentReleasesWidget'
-
-function HomePage() {
-    const { status } = useSession()
-
-    if (status === 'unauthenticated') {
-        return {
-            redirect: {
-                destination: '/',
-                permanent: false,
-            },
-        }
-    }
-
-    return (
-        <div className='content-container container-fluid homePage'>
-            {status == 'loading' ? (
-                <PageSpinner />
-            ) : (
-                <div className='row'>
-                    <div className='col col-md-10'>
-                        <div className='row'>
-                            <div className='col-sm' id='sw360_table_col'>
-                                <MyProjectsWidget />
-                            </div>
-                            <div className='col-sm' id='sw360_table_col'>
-                                <MyComponentsWidget />
-                            </div>
-                        </div>
-                        <div className='row'>
-                            <div className='col-sm' id='sw360_table_col'>
-                                <MyTaskAssignmentsWidget />
-                            </div>
-                            <div className='col-sm' id='sw360_table_col'>
-                                <MyTaskSubmissionsWidget />
-                            </div>
-                        </div>
-                    </div>
-                    <div className='col col-md-2'>
-                        <div className='col-sm' id='sw360_table_col'>
-                            <MySubscriptionsWidget />
-                        </div>
-                        <div className='col-sm' id='sw360_table_col'>
-                            <RecentComponentsWidget />
-                        </div>
-                        <div className='col-sm' id='sw360_table_col'>
-                            <RecentReleasesWidget />
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    )
+export const metadata: Metadata = {
+    title: 'Home',
 }
 
-export default HomePage
+async function Home() {
+    return <HomePage />
+}
+
+export default Home

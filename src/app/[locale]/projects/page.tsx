@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: 'Projects',
 }
 
-const ProjectsList = async () => {
+async function ProjectsList() {
     return <Projects />
 }
 

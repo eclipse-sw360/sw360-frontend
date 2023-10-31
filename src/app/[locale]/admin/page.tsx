@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: 'Admin',
 }
 
-const Admin = async () => {
+async function Admin() {
     return <AdminMainPage />
 }
 

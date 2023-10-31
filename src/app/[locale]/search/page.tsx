@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     title: 'Search',
 }
 
-const Vulnerability = async () => {
+async function Search() {
     return <SearchPage />
 }
 
-export default Vulnerability
+export default Search
