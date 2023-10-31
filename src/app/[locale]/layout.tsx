@@ -8,17 +8,27 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import 'bootstrap/dist/css/bootstrap.min.css'
-import '@/styles/globals.css'
 import '@/styles/auth.css'
+import '@/styles/globals.css'
 import '@/styles/gridjs/sw360.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import { ReactNode } from 'react'
 import { Providers } from '../provider'
-import React, { ReactNode } from 'react'
 
+import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { notFound } from 'next/navigation'
 
-import { Header, Footer } from 'next-sw360'
+import { Footer, Header } from 'next-sw360'
+
+export const metadata: Metadata = {
+    title: {
+        template: '%s | SW360 Frontend',
+        default: 'SW360 Frontend',
+    },
+    description: 'SW360 Compliance Management System Graphical Interface.',
+    metadataBase: new URL('https://eclipse.org/sw360/'),
+}
 
 export function generateStaticParams() {
     return [{ locale: 'en' }, { locale: 'ja' }, { locale: 'vi' }, { locale: 'zh' }, { locale: 'pt-BR' }]

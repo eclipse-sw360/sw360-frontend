@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     title: 'Vulnerabilites',
 }
 
-const Vulnerability = async () => {
+async function Vulnerability() {
     return <Vulnerabilities />
 }
 
