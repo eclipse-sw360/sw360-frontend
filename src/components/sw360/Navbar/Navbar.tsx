@@ -28,64 +28,90 @@ function Navbar() {
     const [show, setShow] = useState(false)
 
     const navlist = [
-        { link: '/home', name: t('Home') },
-        { link: '/projects', name: t('Projects') },
-        { link: '/components', name: t('Components') },
-        { link: '/licenses', name: t('Licenses') },
-        { link: '/ecc', name: t('ECC') },
-        { link: '/vulnerabilities', name: t('Vulnerabilities') },
-        { link: '/requests', name: t('Requests') },
-        { link: '/search', name: t('Search') },
-        { link: '/admin', name: t('Admin') },
-        { link: '/preferences', name: t('Preferences') },
+        { href: '/home', name: t('Home'), id: 'home' },
+        { href: '/projects', name: t('Projects'), id: 'projects' },
+        { href: '/components', name: t('Components'), id: 'components' },
+        { href: '/licenses', name: t('Licenses'), id: 'licenses' },
+        { href: '/ecc', name: t('ECC'), id: 'ecc' },
+        { href: '/vulnerabilities', name: t('Vulnerabilities'), id: 'vulnerabilities' },
+        { href: '/requests', name: t('Requests'), id: 'requests' },
+        { href: '/search', name: t('Search'), id: 'search' },
+        {
+            href: '/admin',
+            name: t('Admin'),
+            id: 'admin',
+            visibility: 'ADMIN',
+            childs: [
+                { href: '#', name: t('User'), id: 'admin_user' },
+                { href: '#', name: t('Vendors'), id: 'admin_vendors' },
+                { href: '#', name: t('Bulk Release Edit'), id: 'admin_bulk_edit' },
+                { href: '#', name: t('Licenses'), id: 'admin_licenses' },
+                { href: '#', name: t('Obligations'), id: 'admin_obligations' },
+                { href: '#', name: t('Schedule'), id: 'admin_schedule' },
+                { href: '#', name: t('Fossology'), id: 'admin_fossology' },
+                { href: '#', name: t('Import Export'), id: 'admin_import_export' },
+                { href: '#', name: t('Database Sanitation'), id: 'admin_database_sanitation' },
+                { href: '#', name: t('Attachment Cleanup'), id: 'admin_attachment_cleanup' },
+                { href: '#', name: t('OAuth Client'), id: 'admin_oauth_client' },
+                { href: '#', name: t('License Types'), id: 'admin_license_types' },
+                { href: '#', name: t('Department'), id: 'admin_department' },
+            ],
+        },
+        {
+            href: '/preferences',
+            name: t('Preferences'),
+            id: 'preferences',
+        },
     ]
+
+    // NavItems receives an array of links with possible entries:
+    // href: the link (mandatory)
+    // name: the name of the link (mandatory)
+    // id: the id of the link (mandatory)
+    // visibility: the userGroup that is allowed to see the link (optional)
+    // childs: an array of links that are shown as dropdown menu (optional)
 
     const NavItems = () => (
         <BSNavbar expand='lg'>
             <Container fluid>
                 <Nav variant='underline' className='ms-5' activeKey='home'>
                     {navlist.map((item) => {
-                        if (item.name === 'Admin') {
-                            if (status === 'authenticated' && session.user.userGroup === 'ADMIN') {
-                                return (
-                                    <NavDropdown
-                                        title={item.name}
-                                        id='admin-dropdown'
-                                        show={show}
-                                        onMouseEnter={() => setShow(true)}
-                                        onMouseLeave={() => setShow(false)}
-                                        key={item.name}
-                                        onClick={(e) => {
-                                            // hack to route to /admin when clicked on dropdown title
-                                            if ((e.target as HTMLElement).attributes[0].name === 'id') {
-                                                e.preventDefault()
-                                                router.push(item.link)
-                                            }
-                                        }}
-                                    >
-                                        <NavDropdown.Item href='#'>{t('User')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Vendors')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Bulk Release Edit')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Licenses')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Obligations')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Schedule')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Fossology')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Import Export')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Database Sanitation')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Attachment Cleanup')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('OAuth Client')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('License Types')}</NavDropdown.Item>
-                                        <NavDropdown.Item href='#'>{t('Department')}</NavDropdown.Item>
-                                    </NavDropdown>
-                                )
+                        if ('visibility' in item) {
+                            if (status === 'authenticated' && session.user.userGroup !== item.visibility) {
+                                return
                             }
+                        }
+                        if ('childs' in item) {
+                            return (
+                                <NavDropdown
+                                    title={item.name}
+                                    id={item.id}
+                                    show={show}
+                                    onMouseEnter={() => setShow(true)}
+                                    onMouseLeave={() => setShow(false)}
+                                    key={item.name}
+                                    onClick={(e) => {
+                                        // hack to route to /admin when clicked on dropdown title
+                                        if ((e.target as HTMLElement).attributes[0].name === 'id') {
+                                            e.preventDefault()
+                                            router.push(item.href)
+                                        }
+                                    }}
+                                >
+                                    {item.childs.map((child) => (
+                                        <NavDropdown.Item href={child.href} key={child.id}>
+                                            {child.name}
+                                        </NavDropdown.Item>
+                                    ))}
+                                </NavDropdown>
+                            )
                         } else {
                             return (
                                 <Nav.Item key={item.name}>
                                     <Link
                                         className={`nav-link`}
-                                        href={item.link}
-                                        onClick={() => setHeading(item.link[-1])}
+                                        href={item.href}
+                                        onClick={() => setHeading(item.href[-1])}
                                     >
                                         {item.name}
                                     </Link>
