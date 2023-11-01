@@ -12,6 +12,8 @@ import '@/styles/auth.css'
 import '@/styles/globals.css'
 import '@/styles/gridjs/sw360.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import 'flag-icons/css/flag-icons.min.css'
+
 import { ReactNode } from 'react'
 import { Providers } from '../provider'
 

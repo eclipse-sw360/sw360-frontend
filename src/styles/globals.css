@@ -105,10 +105,27 @@ footer {
     text-decoration-line: none;
 }
 
-.flags {
-    width: 30px;
+.flag {
+    background-size: contain;
+    background-position: 50%;
+    background-repeat: no-repeat;
+    line-height: 1em;
     margin-left: 3px;
     margin-right: 3px;
+    position: relative;
+    display: inline-block;
+    width: 1.33333333em;
+    line-height: 1em;
+    background-color: 'rgba(0, 0, 0, .1)';
+    border-radius: '10%';
+}
+
+.flag:hover {
+    border: '4px';
+}
+
+.flag:before {
+    content: '\00a0';
 }
 
 .table {

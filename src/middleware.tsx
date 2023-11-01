@@ -12,11 +12,13 @@
 import { withAuth } from 'next-auth/middleware'
 import createIntlMiddleware from 'next-intl/middleware'
 import { NextRequest } from 'next/server'
-import { LOCALES as locales } from './object-types/Constants'
+import { LOCALES } from './object-types/Constants'
 
 const publicPages = ['/']
 
 const adminPages = ['/admin']
+
+const locales = LOCALES.map((locale) => locale.i18n)
 
 const intlMiddleware = createIntlMiddleware({
     locales,

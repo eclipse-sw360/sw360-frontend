@@ -16,6 +16,7 @@ import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
 import Header from './Header/Header'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
+import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
 import ModeratorsDialog from './ModeratorsDialog/ModeratorsDialog'
 import Navbar from './Navbar/Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
@@ -47,6 +48,7 @@ export {
     FossologyClearing,
     Header,
     LanguageSwitcher,
+    LocaleSwitcher,
     ModeratorsDialog,
     Navbar,
     PageButtonHeader,

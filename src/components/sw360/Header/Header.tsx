@@ -11,14 +11,14 @@
 
 'use client'
 
-import React, { useState } from 'react'
-import Image from 'next/image'
-import Link from 'next-intl/link'
 import { useSession } from 'next-auth/react'
+import Link from 'next-intl/link'
+import Image from 'next/image'
+import React, { useState } from 'react'
 
-import { Navbar, ProfileDropdown } from 'next-sw360'
-import sw360logo from '@/assets/images/sw360-logo.svg'
 import searchLogo from '@/assets/icons/search.svg'
+import sw360logo from '@/assets/images/sw360-logo.svg'
+import { LocaleSwitcher, Navbar, ProfileDropdown } from 'next-sw360'
 
 const Header = () => {
     const { data: session } = useSession()
@@ -42,8 +42,8 @@ const Header = () => {
                         </Link>
                     </div>
                     <div className='col-md-5 col-md-offset-1'></div>
-                    <div className='col-md-2 pt-2'>
-                        {session ? (
+                    {session && (
+                        <div className='col-md-2 pt-2'>
                             <form className='d-flex input-group w-auto'>
                                 <input
                                     type='text'
@@ -61,19 +61,19 @@ const Header = () => {
                                     <Image src={searchLogo} alt='Search Icon' />
                                 </button>
                             </form>
-                        ) : (
-                            <></>
-                        )}
-                    </div>
-                    <div className='col-md-1 pt-1' style={{ float: 'left' }}>
-                        {session ? (
+                        </div>
+                    )}
+
+                    {session && (
+                        <div className='col-md-1 pt-1' style={{ float: 'left' }}>
                             <div>
                                 <ProfileDropdown />
                             </div>
-                        ) : (
-                            <></>
-                        )}
-                    </div>
+                            <div>
+                                <LocaleSwitcher />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

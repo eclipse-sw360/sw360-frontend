@@ -10,4 +10,10 @@
 
 export const CREDENTIAL_PROVIDER = 'credential_provider'
 export const CREDENTIALS = 'credentials'
-export const LOCALES = ['en', 'ja', 'vi', 'zh', 'pt-BR']
+export const LOCALES = [
+    { i18n: 'en', flag: 'gb' },
+    { i18n: 'ja', flag: 'jp' },
+    { i18n: 'vn', flag: 'vn' },
+    { i18n: 'cn', flag: 'cn' },
+    { i18n: 'pt-BR', flag: 'br' },
+]
