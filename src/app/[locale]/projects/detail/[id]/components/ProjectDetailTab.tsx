@@ -24,12 +24,14 @@ import Summary from './Summary'
 
 export default function ViewProjects({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
 
     useEffect(() => {
+        if (status !== 'authenticated') return
+
         const controller = new AbortController()
         const signal = controller.signal
 

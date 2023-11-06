@@ -22,12 +22,14 @@ import { ApiUtils, CommonUtils } from '@/utils'
 
 function ChangeLog({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [key, setKey] = useState('list-change')
     const [changeLogList, setChangeLogList] = useState<Array<any>>([])
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
 
     useEffect(() => {
+        if (status !== 'authenticated') return
+
         const controller = new AbortController()
         const signal = controller.signal
 
