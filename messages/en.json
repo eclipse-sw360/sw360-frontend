@@ -744,6 +744,10 @@
         "Enter vendor short name": "Enter vendor short name",
         "VENDORS": "VENDORS",
         "Enter vendor url": "Enter vendor url",
-        "A vendor with same name already exists": "A vendor with same name already exists"
+        "A vendor with same name already exists": "A vendor with same name already exists",
+        "Creator Group": "Creator Group",
+        "ECC Assessor": "ECC Assessor",
+        "ECC Assessor Group": "ECC Assessor Group",
+        "ECC Assessment Date": "ECC Assessment Date"
     }
 }
