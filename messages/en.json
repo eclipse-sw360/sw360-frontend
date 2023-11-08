@@ -736,6 +736,14 @@
         "Error when processing": "Error when processing",
         "Created moderation request": "Created moderation request",
         "Related": "Related",
-        "Is a subproject": "Is a subproject"
+        "Is a subproject": "Is a subproject",
+        "Vendor is created": "Vendor is created",
+        "Create Vendor": "Create Vendor",
+        "Edit Vendor": "Edit Vendor",
+        "Enter vendor full name": "Enter vendor full name",
+        "Enter vendor short name": "Enter vendor short name",
+        "VENDORS": "VENDORS",
+        "Enter vendor url": "Enter vendor url",
+        "A vendor with same name already exists": "A vendor with same name already exists"
     }
 }
