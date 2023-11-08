@@ -43,7 +43,7 @@ function Navbar() {
             visibility: 'ADMIN',
             childs: [
                 { href: '#', name: t('User'), id: 'admin_user' },
-                { href: '#', name: t('Vendors'), id: 'admin_vendors' },
+                { href: '/admin/vendors', name: t('Vendors'), id: 'admin_vendors' },
                 { href: '#', name: t('Bulk Release Edit'), id: 'admin_bulk_edit' },
                 { href: '#', name: t('Licenses'), id: 'admin_licenses' },
                 { href: '#', name: t('Obligations'), id: 'admin_obligations' },

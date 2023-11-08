@@ -19,7 +19,7 @@ import { ImUsers } from 'react-icons/im'
 import { RiArrowUpDownFill, RiOrganizationChart } from 'react-icons/ri'
 import { RxCalendar } from 'react-icons/rx'
 
-const AdminMainPage = async () => {
+const AdminMainPage = () => {
     const t = useTranslations('default')
 
     return (
@@ -37,7 +37,7 @@ const AdminMainPage = async () => {
                             <RiOrganizationChart /> {t('Department')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/vendors'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <BsBag /> {t('Vendors')}
                         </button>
