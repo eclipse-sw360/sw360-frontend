@@ -18,11 +18,11 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
 
-type EmbeddedProjects = Embedded<Project, 'sw360:components'>
+type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -149,7 +149,7 @@ function Project() {
 
     const server = {
         url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
-        then: (data: Embedded<Project, 'sw360:projects'>) => {
+        then: (data: EmbeddedProjects) => {
             return data._embedded['sw360:projects'].map((elem: Project) => [
                 {
                     id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
@@ -297,7 +297,13 @@ function Project() {
                         </div>
                         <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
                     </div>
-                    <Table columns={columns} server={server} selector={true} sort={false} />
+                    {status === 'authenticated' ? (
+                        <Table columns={columns} server={server} selector={true} sort={false} />
+                    ) : (
+                        <div className='col-12' style={{ textAlign: 'center' }}>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -12,14 +12,14 @@ import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
 import AuthToken from './AuthToken'
+import COTSDetails from './COTSDetails'
+import CVEReference from './CVEReference'
 import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
 import Component from './Component'
 import ComponentOwner from './ComponentOwner'
 import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
-import COTSDetails from './COTSDetails'
-import CVEReference from './CVEReference'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
 import FossologyProcessInfo from './FossologyProcessInfo'
@@ -36,6 +36,7 @@ import ModeratorsType from './ModeratorsType'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
 import Project from './Project'
+import ProjectReleaseEcc from './ProjectReleaseEcc'
 import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
@@ -61,14 +62,14 @@ export type {
     AdministrationDataType,
     Attachment,
     AuthToken,
+    COTSDetails,
+    CVEReference,
     Changelogs,
     ClearingInformation,
     Component,
     ComponentOwner,
     ComponentOwnerType,
     ComponentPayload,
-    COTSDetails,
-    CVEReference,
     ECCInformation,
     Embedded,
     FossologyProcessInfo,
@@ -85,6 +86,7 @@ export type {
     NodeData,
     OAuthClient,
     Project,
+    ProjectReleaseEcc,
     Release,
     ReleaseDetail,
     ReleaseLink,

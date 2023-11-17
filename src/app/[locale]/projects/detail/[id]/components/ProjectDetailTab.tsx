@@ -20,16 +20,19 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import LinkProjects from '../../../components/LinkProjects'
 import Administration from './Administration'
 import ChangeLog from './Changelog'
+import EccDetails from './Ecc'
 import Summary from './Summary'
 
 export default function ViewProjects({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
 
     useEffect(() => {
+        if (status !== 'authenticated') return
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -293,7 +296,9 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='licenseClearing'></Tab.Pane>
                                     <Tab.Pane eventKey='obligations'></Tab.Pane>
-                                    <Tab.Pane eventKey='ecc'></Tab.Pane>
+                                    <Tab.Pane eventKey='ecc'>
+                                        <EccDetails projectId={projectId} />
+                                    </Tab.Pane>
                                     <Tab.Pane eventKey='vulnerabilityTrackingStatus'></Tab.Pane>
                                     <Tab.Pane eventKey='attachments'></Tab.Pane>
                                     <Tab.Pane eventKey='attachmentUsages'></Tab.Pane>
