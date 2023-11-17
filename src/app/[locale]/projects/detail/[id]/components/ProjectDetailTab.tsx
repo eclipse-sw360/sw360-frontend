@@ -9,30 +9,29 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ComponentType, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 
+import { withAuth } from '@/components/sw360'
 import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { Session } from 'next-auth'
 import LinkProjects from '../../../components/LinkProjects'
 import Administration from './Administration'
 import ChangeLog from './Changelog'
 import EccDetails from './Ecc'
 import Summary from './Summary'
 
-export default function ViewProjects({ projectId }: { projectId: string }) {
+const ViewProjects: ComponentType<{ projectId: string; session: Session }> = ({ projectId, session }) => {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
 
     useEffect(() => {
-        if (status !== 'authenticated') return
-
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -315,3 +314,5 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
         </>
     )
 }
+
+export default withAuth(ViewProjects)

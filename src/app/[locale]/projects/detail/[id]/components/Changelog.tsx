@@ -9,27 +9,25 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Nav, Tab } from 'react-bootstrap'
-
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
+import { withAuth } from '@/components/sw360'
 import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { Session } from 'next-auth'
+import { signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { notFound } from 'next/navigation'
+import { ComponentType, useEffect, useState } from 'react'
+import { Nav, Tab } from 'react-bootstrap'
 
-function ChangeLog({ projectId }: { projectId: string }) {
+const ChangeLog: ComponentType<{ projectId: string; session: Session }> = ({ projectId, session }) => {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [key, setKey] = useState('list-change')
     const [changeLogList, setChangeLogList] = useState<Array<any>>([])
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
 
     useEffect(() => {
-        if (status !== 'authenticated') return
-
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -99,4 +97,4 @@ function ChangeLog({ projectId }: { projectId: string }) {
     )
 }
 
-export default ChangeLog
+export default withAuth(ChangeLog)

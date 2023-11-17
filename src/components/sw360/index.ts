@@ -30,6 +30,7 @@ import SelectTableComponentOwner from './SelectTableComponentOwner/SelectTableCo
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
 import ToastMessage from './ToastContainer/Toast'
+import withAuth from './WithAuth/WithAuth'
 
 // Table component
 // Strictly derived from gridjs-react with dedicated changes
@@ -65,4 +66,5 @@ export {
     TreeTable,
     VendorDialog,
     _,
+    withAuth,
 }

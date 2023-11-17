@@ -9,22 +9,22 @@
 
 'use client'
 
+import { withAuth } from '@/components/sw360'
 import { Embedded, ProjectReleaseEcc } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { Session } from 'next-auth'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { Spinner } from 'react-bootstrap'
+import { ComponentType } from 'react'
 
 type EmbeddedProjectReleaseEcc = Embedded<ProjectReleaseEcc, 'sw360:releases'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function EccDetails({ projectId }: { projectId: string }) {
+const EccDetails: ComponentType<{ projectId: string; session: Session }> = ({ projectId, session }) => {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
 
     const columns = [
         {
@@ -104,18 +104,14 @@ export default function EccDetails({ projectId }: { projectId: string }) {
             ])
         },
         total: (data: EmbeddedProjectReleaseEcc) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+        headers: { Authorization: `Bearer ${session.user.access_token}` },
     }
 
     return (
         <>
-            {status === 'authenticated' ? (
-                <Table columns={columns} server={server} selector={true} sort={false} />
-            ) : (
-                <div className='col-12' style={{ textAlign: 'center' }}>
-                    <Spinner className='spinner' />
-                </div>
-            )}
+            <Table columns={columns} server={server} selector={true} sort={false} />
         </>
     )
 }
+
+export default withAuth(EccDetails)

@@ -10,15 +10,17 @@
 
 'use client'
 
+import { withAuth } from '@/components/sw360'
 import { Embedded, Project } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { Session } from 'next-auth'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ComponentType } from 'react'
+import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
 
@@ -27,8 +29,7 @@ type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-function Project() {
-    const { data: session, status } = useSession()
+const Project: ComponentType<{ session: Session }> = ({ session }) => {
     const t = useTranslations('default')
     const params = useSearchParams()
 
@@ -163,7 +164,7 @@ function Project() {
             ])
         },
         total: (data: EmbeddedProjects) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+        headers: { Authorization: `Bearer ${session.user.access_token}` },
     }
 
     const advancedSearch = [
@@ -297,17 +298,11 @@ function Project() {
                         </div>
                         <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
                     </div>
-                    {status === 'authenticated' ? (
-                        <Table columns={columns} server={server} selector={true} sort={false} />
-                    ) : (
-                        <div className='col-12' style={{ textAlign: 'center' }}>
-                            <Spinner className='spinner' />
-                        </div>
-                    )}
+                    <Table columns={columns} server={server} selector={true} sort={false} />
                 </div>
             </div>
         </div>
     )
 }
 
-export default Project
+export default withAuth(Project)
