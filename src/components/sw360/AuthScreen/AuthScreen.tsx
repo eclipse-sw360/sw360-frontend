@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
-import { CREDENTIALS } from '@/constants'
+import { CREDENTIALS, KEYCLOAK } from '@/constants'
 import { HttpStatus } from '@/object-types'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 
@@ -32,7 +32,7 @@ function AuthScreen() {
     const { status } = useSession()
 
     const handleClose = () => setDialogShow(false)
-    const handleShow = () => setDialogShow(true)
+    // const handleShow = () => setDialogShow(true)
 
     const handleLogin = async () => {
         await signIn(CREDENTIALS, {
@@ -70,11 +70,21 @@ function AuthScreen() {
                                                 <a
                                                     className='btn btn-primary btn-lg'
                                                     role='button'
-                                                    onClick={handleShow}
+                                                    onClick={() => signIn(KEYCLOAK)}
                                                 >
                                                     {t('Sign In')}
                                                 </a>
                                             </span>
+                                            {/* <span>
+                                                <a
+                                                    className='btn btn-primary btn-lg'
+                                                    role='button'
+                                                    style={{ marginLeft: '3rem' }}
+                                                    onClick={handleShow}
+                                                >
+                                                    {t('Sign In')}
+                                                </a>
+                                            </span> */}
                                             <a
                                                 className='btn btn-outline-primary btn-lg'
                                                 style={{ marginLeft: '3rem' }}

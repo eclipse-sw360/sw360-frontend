@@ -11,11 +11,14 @@
 
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import KeycloakProvider from 'next-auth/providers/keycloak'
 
 import { CREDENTIAL_PROVIDER } from '@/constants'
 import { HttpStatus, UserCredentialInfo } from '@/object-types'
 import AuthService from '@/services/auth.service'
 import { ApiUtils } from '@/utils'
+import { jwtDecode } from 'jwt-decode'
+// import {encrypt, decrypt} from '@/utils/encryption';
 
 export const authOptions: NextAuthOptions = {
     // Configure one or more authentication providers
@@ -48,6 +51,14 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
+
+        KeycloakProvider({
+            clientId: `${process.env.SW360_KEYCLOAK_CLIENT_ID}`,
+            clientSecret: `${process.env.SW360_KEYCLOAK_CLIENT_SECRET}`,
+            issuer: `${process.env.AUTH_ISSUER}`,
+            checks: 'state',
+            // authorization: { params: { scope: "openid" } },
+        }),
     ],
 
     session: {
@@ -55,13 +66,28 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user }) {
-            return { ...token, ...user }
+        async jwt({ token, account }) {
+            const nowTimeStamp = Math.floor(Date.now() / 1000)
+            if (account) {
+                token.decoded = jwtDecode(account.access_token)
+                token.access_token = account.id_token
+                token.expires_in = account.expires_at
+                token.refresh_token = account.refresh_token
+                return token
+            } else if (nowTimeStamp < token.expires_in) {
+                return token
+            } else {
+                console.log('Token is expired!!')
+            }
+
+            // return { ...token, ...account }
         },
         async session({ session, token }) {
             // Send properties to the client, like an access_token from a provider.
-            session.user = token
-
+            // session.user.access_token = encrypt(token.access_token);
+            session.user.access_token = token.access_token
+            // session.user.id_token = encrypt(token.id_token);
+            // session.user.scope = token.decoded.realm_access.roles;
             return session
         },
     },

@@ -30,6 +30,8 @@ interface SW360User extends DefaultUser {
     scope: string
     token_type: string
     userGroup: UserGroupType
+    id_token: string
+    decoded: string
 }
 
 declare module 'next-auth' {

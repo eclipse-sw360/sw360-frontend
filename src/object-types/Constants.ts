@@ -10,4 +10,5 @@
 
 export const CREDENTIAL_PROVIDER = 'credential_provider'
 export const CREDENTIALS = 'credentials'
+export const KEYCLOAK = 'keycloak'
 export const LOCALES = ['en', 'ja', 'vi', 'zh', 'pt-BR']
