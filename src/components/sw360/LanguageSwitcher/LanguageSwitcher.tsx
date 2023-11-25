@@ -8,27 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { VN, GB, JP, CN, BR } from 'country-flag-icons/react/3x2'
+// import { BR, CN, GB, JP, VN } from 'country-flag-icons/react/3x2'
+import { LOCALES } from '@/constants'
 import Link from 'next-intl/link'
 
 function LanguageSwitcher() {
     return (
         <>
-            <Link href='/' locale='en' title='Great Britain'>
-                <GB title='English' className='flags' />
-            </Link>
-            <Link href='/' locale='ja' title='Japan'>
-                <JP title='Japanese' className='flags' />
-            </Link>
-            <Link href='/' locale='vi' title='Vietnam'>
-                <VN title='Vietnamese' className='flags' />
-            </Link>
-            <Link href='/' locale='zh' title='China'>
-                <CN title='Chinese' className='flags' />
-            </Link>
-            <Link href='/' locale='pt-BR' title='Brazil'>
-                <BR title='Brazilian Portuguese' className='flags' />
-            </Link>
+            {LOCALES.map((locale) => (
+                <Link href='/' locale={locale.i18n} key={locale.i18n}>
+                    <span className={`fi fi-${locale.flag} flag`} />
+                </Link>
+            ))}
         </>
     )
 }

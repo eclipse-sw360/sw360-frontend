@@ -10,7 +10,7 @@
 
 'use client'
 
-import { LOCALES as locales } from '@/constants'
+import { LOCALES } from '@/constants'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next-intl/link'
@@ -22,6 +22,7 @@ function Navbar() {
     const [heading, setHeading] = useState('home')
     const router = useRouter()
     const pathname = usePathname()
+    const locales = LOCALES.map((locale) => locale.i18n)
     const isLoginPage = locales.includes(pathname.substring(1)) || pathname.substring(1) === ''
     const t = useTranslations('default')
     const { data: session, status } = useSession()
