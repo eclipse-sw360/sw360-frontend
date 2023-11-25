@@ -10,10 +10,16 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { useState, useTransition } from 'react'
+import React, { useTransition } from 'react'
+import { Dropdown } from 'react-bootstrap'
 
 import { LOCALES } from '@/constants'
 import { usePathname, useRouter } from '../../../navigation'
+
+interface Option {
+    i18n: string
+    flag: string
+}
 
 function LocaleSwitcher() {
     const [, startTransition] = useTransition()
@@ -21,67 +27,45 @@ function LocaleSwitcher() {
     const locale = useLocale()
     const pathname = usePathname()
 
-    interface Option {
-        i18n: string
-        flag: string
+    const [, setSelectedOption] = React.useState<Option | null>(null)
+
+    function getCurrentFlag() {
+        const current = LOCALES.find((cur) => cur.i18n === locale)
+        return current ? current.flag : undefined
     }
 
-    interface DropdownProps {
-        options: Option[]
+    function getLanguageName(lang: string) {
+        const langName = new Intl.DisplayNames([locale], { type: 'language' })
+        return langName.of(lang)
+    }
+    const handleSelect = (selectedId: string) => {
+        const option = LOCALES.find((option) => option.i18n === selectedId)
+        const nextLocale = option.i18n
+        setSelectedOption(option || null)
+
+        startTransition(() => {
+            router.replace(pathname, { locale: nextLocale })
+        })
+        setSelectedOption(option)
     }
 
-    const Dropdown: React.FC<DropdownProps> = ({ options }) => {
-        const [, setSelectedOption] = useState<Option | null>(null)
-        const [isOpen, setIsOpen] = useState(false)
+    return (
+        <Dropdown onSelect={handleSelect}>
+            <Dropdown.Toggle variant='secondary' id='dropdown-basic'>
+                <span className={`fi fi-${getCurrentFlag()}`} />
+            </Dropdown.Toggle>
 
-        const handleOptionClick = (option: Option) => {
-            const nextLocale = option.i18n
-            startTransition(() => {
-                router.replace(pathname, { locale: nextLocale })
-            })
-            setSelectedOption(option)
-            setIsOpen(false)
-        }
-
-        const toggleDropdown = () => {
-            setIsOpen(!isOpen)
-        }
-
-        function getCurrentFlag() {
-            const current = LOCALES.find((cur) => cur.i18n === locale)
-            return current ? current.flag : undefined
-        }
-
-        return (
-            <div>
-                <span onClick={toggleDropdown} className={`fi fi-${getCurrentFlag()}`} />
-                {isOpen && (
-                    <div
-                        className='flag'
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            position: 'absolute',
-                            backgroundColor: 'white',
-                            zIndex: 1,
-                        }}
-                    >
-                        {options.map((option) => (
-                            <div className='flag' key={option.i18n}>
-                                <span
-                                    className={`fi fi-${option.flag}`}
-                                    key={option.i18n}
-                                    onClick={() => handleOptionClick(option)}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        )
-    }
-
-    return <Dropdown options={LOCALES} />
+            <Dropdown.Menu>
+                {LOCALES.map((option) => (
+                    <Dropdown.Item eventKey={option.i18n} key={option.i18n} className='dropdown-item'>
+                        <span className={`fi fi-${option.flag}`} />
+                        {/* <span>{regionName.of(option.i18n)}</span> */}
+                        <span>{getLanguageName(option.i18n)}</span>
+                    </Dropdown.Item>
+                ))}
+            </Dropdown.Menu>
+        </Dropdown>
+    )
 }
 
 export default LocaleSwitcher

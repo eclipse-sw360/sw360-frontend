@@ -623,3 +623,7 @@ th {
     color: #6b6c7e !important;
     background-color: #e89734 !important;
 }
+
+.dropdown-item span {
+    margin-right: 10px;
+}

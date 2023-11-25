@@ -7,9 +7,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const withNextIntl = require('next-intl/plugin')()
+
 const nextConfig = {
-  reactStrictMode: true,
-  output: 'standalone'
+    reactStrictMode: true,
+    output: 'standalone',
 }
 
-module.exports = nextConfig
+module.exports = withNextIntl(nextConfig)

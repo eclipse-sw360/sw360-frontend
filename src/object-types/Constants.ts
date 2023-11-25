@@ -13,8 +13,8 @@ export const CREDENTIALS = 'credentials'
 export const LOCALES = [
     { i18n: 'en', flag: 'gb' },
     { i18n: 'ja', flag: 'jp' },
-    { i18n: 'vn', flag: 'vn' },
-    { i18n: 'cn', flag: 'cn' },
+    { i18n: 'vi', flag: 'vn' },
+    { i18n: 'zh-CN', flag: 'cn' },
     { i18n: 'pt-BR', flag: 'br' },
 ]
 export const locales = LOCALES.map((locale) => locale.i18n)
