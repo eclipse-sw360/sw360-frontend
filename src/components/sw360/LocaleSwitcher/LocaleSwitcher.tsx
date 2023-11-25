@@ -10,10 +10,10 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { usePathname, useRouter } from 'next-intl/client'
 import { useState, useTransition } from 'react'
 
 import { LOCALES } from '@/constants'
+import { usePathname, useRouter } from '../../../navigation'
 
 function LocaleSwitcher() {
     const [, startTransition] = useTransition()
