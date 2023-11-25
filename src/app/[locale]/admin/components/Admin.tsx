@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
+import Link from 'next/link'
 import { AiOutlineTags, AiOutlineUnorderedList } from 'react-icons/ai'
 import { BsBag, BsFileEarmarkText, BsFilter, BsSearch } from 'react-icons/bs'
 import { FiEdit2 } from 'react-icons/fi'

@@ -10,7 +10,7 @@
 
 // import { BR, CN, GB, JP, VN } from 'country-flag-icons/react/3x2'
 import { LOCALES } from '@/constants'
-import Link from 'next-intl/link'
+import Link from 'next/link'
 
 function LanguageSwitcher() {
     return (

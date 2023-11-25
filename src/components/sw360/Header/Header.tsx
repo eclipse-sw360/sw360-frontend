@@ -12,8 +12,8 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import Link from 'next-intl/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useState } from 'react'
 
 import searchLogo from '@/assets/icons/search.svg'

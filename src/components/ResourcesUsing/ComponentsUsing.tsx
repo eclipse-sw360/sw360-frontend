@@ -10,7 +10,7 @@
 
 import { Component } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Table, _ } from '../sw360'
 import styles from './ResourceUsing.module.css'

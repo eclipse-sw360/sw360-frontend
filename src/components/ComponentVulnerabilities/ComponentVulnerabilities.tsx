@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Alert, Button, Form } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
