@@ -43,8 +43,6 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     const params = Object.fromEntries(useSearchParams())
     const [searchParams, setSearchParam] = useState<SearchParams>(params)
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')
-    // @ts-expect-error: TS2345 invalidate translation even if is valid under
-    const labelTitle = t(title)
 
     const handleSearchParam = (event: React.ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         setSearchParam((prev: SearchParams) => ({
@@ -79,7 +77,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                 return (
                     <div key='createdOn'>
                         <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                            <Form.Label className='label'>{t(eval(field.fieldName.valueOf()))}</Form.Label>
+                            <Form.Label className='label'>{fieldLabel}</Form.Label>
                             <Form.Select
                                 aria-label={field.fieldName}
                                 title={'blob'}
@@ -158,7 +156,12 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     return (
         <div className='card-deck'>
             <div id='advanced-search' className='card'>
-                <div className='card-header'>{labelTitle}</div>
+                <div className='card-header'>
+                    {
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                        t(title)
+                    }
+                </div>
 
                 <div className='card-body'>
                     <Form>{fieldList}</Form>
