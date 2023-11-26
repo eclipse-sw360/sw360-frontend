@@ -43,6 +43,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     const params = Object.fromEntries(useSearchParams())
     const [searchParams, setSearchParam] = useState<SearchParams>(params)
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')
+    // @ts-expect-error: TS2345 invalidate translation even if is valid under
+    const labelTitle = t(title)
 
     const handleSearchParam = (event: React.ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         setSearchParam((prev: SearchParams) => ({
@@ -71,11 +73,13 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     let fieldList: JSX.Element[] = []
     if (fields) {
         fieldList = fields.map((field: Field) => {
+            // @ts-expect-error: TS2345 invalidate translation even if is valid under
+            const fieldLabel = t(field.fieldName)
             if (field.paramName === 'createdOn' && Array.isArray(field.value)) {
                 return (
                     <div key='createdOn'>
                         <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                            <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
+                            <Form.Label className='label'>{t(eval(field.fieldName.valueOf()))}</Form.Label>
                             <Form.Select
                                 aria-label={field.fieldName}
                                 title={'blob'}
@@ -116,7 +120,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
             } else if (typeof field.value === 'string') {
                 return (
                     <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                        <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
+                        <Form.Label className='label'>{fieldLabel}</Form.Label>
                         <Form.Control
                             className='form-control'
                             type='text'
@@ -130,7 +134,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
             } else if (Array.isArray(field.value)) {
                 return (
                     <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
-                        <Form.Label className='label'>{t(field.fieldName)}</Form.Label>
+                        <Form.Label className='label'>{fieldLabel}</Form.Label>
                         <Form.Select
                             className={'form-control'}
                             size='sm'
@@ -154,7 +158,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     return (
         <div className='card-deck'>
             <div id='advanced-search' className='card'>
-                <div className='card-header'>{t(title)}</div>
+                <div className='card-header'>{labelTitle}</div>
 
                 <div className='card-body'>
                     <Form>{fieldList}</Form>

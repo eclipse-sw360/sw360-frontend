@@ -55,9 +55,11 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) => 
                     <tr>
                         <td>{t('Clearing State')}:</td>
                         <td>
-                            {t(release.clearingState)}
+                            {
+                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                                t(release.clearingState)
+                            }
                             <Image
-                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                                 src={fossologyIcon}
                                 width={15}
                                 height={15}

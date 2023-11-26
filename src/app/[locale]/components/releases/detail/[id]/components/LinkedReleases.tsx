@@ -38,8 +38,10 @@ const LinkedReleases = ({ releaseId }: Props) => {
                             key={child.id}
                             href={`components/releases/details/${child.id}`}
                         >{`${child.name} ${child.version}`}</a>,
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
                         t(child.releaseRelationship),
                         CommonUtils.isNullEmptyOrUndefinedArray(child.licenseIds) ? '' : child.licenseIds.join(', '),
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
                         t(child.clearingState),
                     ],
                     children: child._embedded ? convertNodeData(child._embedded['sw360:releaseLinks']) : [],
@@ -61,10 +63,12 @@ const LinkedReleases = ({ releaseId }: Props) => {
                                     key={node.id}
                                     href={`components/releases/details/${node.id}`}
                                 >{`${node.name} ${node.version}`}</a>,
+                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
                                 t(node.releaseRelationship),
                                 CommonUtils.isNullEmptyOrUndefinedArray(node.licenseIds)
                                     ? ''
                                     : node.licenseIds.join(', '),
+                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
                                 t(node.clearingState),
                             ],
                             children: node._embedded ? convertNodeData(node._embedded['sw360:releaseLinks']) : [],
