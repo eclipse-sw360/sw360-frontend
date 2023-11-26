@@ -16,6 +16,7 @@ import 'flag-icons/css/flag-icons.min.css'
 
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
+import { unstable_setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { ReactNode } from 'react'
 
@@ -47,6 +48,9 @@ async function RootLayout({ children, params: { locale } }: Props) {
     } catch (error) {
         notFound()
     }
+
+    unstable_setRequestLocale(locale)
+
     return (
         <html lang={locale}>
             <body>
