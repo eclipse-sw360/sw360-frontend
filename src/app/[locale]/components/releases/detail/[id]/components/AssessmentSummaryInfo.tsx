@@ -55,7 +55,12 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
             if (key !== '#text') {
                 return (
                     <tr key={key}>
-                        <td>{t(key)}</td>
+                        <td>
+                            {
+                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                                t(key)
+                            }
+                        </td>
                         <td>{assessmentSummaryInfo[key]}</td>
                     </tr>
                 )

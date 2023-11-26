@@ -12,13 +12,11 @@
 import { withAuth } from 'next-auth/middleware'
 import createIntlMiddleware from 'next-intl/middleware'
 import { NextRequest } from 'next/server'
-import { LOCALES } from './object-types/Constants'
+import { locales } from './object-types/Constants'
 
 const publicPages = ['/']
 
 const adminPages = ['/admin']
-
-const locales = LOCALES.map((locale) => locale.i18n)
 
 const intlMiddleware = createIntlMiddleware({
     locales,
@@ -56,10 +54,16 @@ const authAdminMiddleware = withAuth(
 )
 
 export default function middleware(req: NextRequest) {
-    const publicPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${publicPages.join('|')})?/?$`, 'i')
+    const publicPathnameRegex = RegExp(
+        `^(/(${locales.join('|')}))?(${publicPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})/?$`,
+        'i'
+    )
     const isPublicPage = publicPathnameRegex.test(req.nextUrl.pathname)
 
-    const adminPathnameRegex = RegExp(`^(/(${locales.join('|')}))?(${adminPages.join('|')})?/?$`, 'i')
+    const adminPathnameRegex = RegExp(
+        `^(/(${locales.join('|')}))?(${adminPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})/?$`,
+        'i'
+    )
     const isAdminPage = adminPathnameRegex.test(req.nextUrl.pathname)
 
     if (isPublicPage) {

@@ -133,7 +133,10 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
             </Modal.Header>
             <Modal.Body>
                 <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
-                    {t(message)}
+                    {
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                        t(message)
+                    }
                 </Alert>
                 <Form>
                     {t.rich('Do you really want to delete the release?', {

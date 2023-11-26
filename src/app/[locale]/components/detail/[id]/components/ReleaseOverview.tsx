@@ -85,8 +85,11 @@ const ReleaseOverview = ({ componentId }: Props) => {
                     const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
                         item.name,
                         [item.id, item.version],
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
                         t(item.clearingState),
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
                         t(item.clearingReport.clearingReportStatus),
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
                         t(item.mainlineState),
                         item.id,
                     ])

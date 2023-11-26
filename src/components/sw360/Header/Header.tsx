@@ -12,8 +12,8 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import Link from 'next-intl/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useState } from 'react'
 
 import searchLogo from '@/assets/icons/search.svg'
@@ -66,11 +66,13 @@ const Header = () => {
 
                     {session && (
                         <div className='col-md-1 pt-1' style={{ float: 'left' }}>
-                            <div>
-                                <ProfileDropdown />
-                            </div>
-                            <div>
-                                <LocaleSwitcher />
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ marginRight: '10px' }}>
+                                    <ProfileDropdown />
+                                </div>
+                                <div>
+                                    <LocaleSwitcher />
+                                </div>
                             </div>
                         </div>
                     )}

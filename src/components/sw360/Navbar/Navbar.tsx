@@ -13,7 +13,7 @@
 import { LOCALES } from '@/constants'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
+import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Navbar as BSNavbar, Container, Nav, NavDropdown } from 'react-bootstrap'

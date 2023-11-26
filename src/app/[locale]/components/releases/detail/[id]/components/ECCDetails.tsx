@@ -38,7 +38,12 @@ const ECCDetails = ({ release }: Props) => {
                 <tbody hidden={toggle}>
                     <tr>
                         <td>{t('ECC Status')}:</td>
-                        <td>{t(release.eccInformation.eccStatus)}</td>
+                        <td>
+                            {
+                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                                t(release.eccInformation.eccStatus)
+                            }
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('AL')}:</td>

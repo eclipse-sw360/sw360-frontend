@@ -108,7 +108,12 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) => {
             ) : (
                 <>
                     <div>
-                        <b>{t(licenseInfo.otherLicense as string)}</b>
+                        <b>
+                            {
+                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                                t(licenseInfo.otherLicense as string)
+                            }
+                        </b>
                     </div>
                     <ul>{renderLicenseIds(licenseInfo['otherLicenseIds'] as Array<string>)}</ul>
                 </>

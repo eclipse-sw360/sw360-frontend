@@ -14,14 +14,14 @@ import '@/styles/gridjs/sw360.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'flag-icons/css/flag-icons.min.css'
 
-import { ReactNode } from 'react'
-import { Providers } from '../provider'
-
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
+import { unstable_setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
+import { ReactNode } from 'react'
 
 import { Footer, Header } from 'next-sw360'
+import { Providers } from '../provider'
 
 export const metadata: Metadata = {
     title: {
@@ -48,6 +48,9 @@ async function RootLayout({ children, params: { locale } }: Props) {
     } catch (error) {
         notFound()
     }
+
+    unstable_setRequestLocale(locale)
+
     return (
         <html lang={locale}>
             <body>

@@ -8,17 +8,40 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-// import { BR, CN, GB, JP, VN } from 'country-flag-icons/react/3x2'
+'use client'
+
+import { useTransition } from 'react'
+import { usePathname, useRouter } from '../../../navigation'
+
 import { LOCALES } from '@/constants'
-import Link from 'next-intl/link'
 
 function LanguageSwitcher() {
+    const [, startTransition] = useTransition()
+    const router = useRouter()
+    const pathname = usePathname()
+
+    interface Option {
+        i18n: string
+        flag: string
+    }
+
+    const handleOptionClick = (option: Option) => {
+        const nextLocale = option.i18n
+        startTransition(() => {
+            router.replace(pathname, { locale: nextLocale })
+        })
+    }
+
     return (
         <>
             {LOCALES.map((locale) => (
-                <Link href='/' locale={locale.i18n} key={locale.i18n}>
-                    <span className={`fi fi-${locale.flag} flag`} />
-                </Link>
+                <div className='flag' key={locale.i18n}>
+                    <span
+                        className={`fi fi-${locale.flag}`}
+                        key={locale.i18n}
+                        onClick={() => handleOptionClick(locale)}
+                    />
+                </div>
             ))}
         </>
     )

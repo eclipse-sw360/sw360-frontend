@@ -12,7 +12,7 @@
 
 import { signIn, useSession } from 'next-auth/react'
 import { useLocale, useTranslations } from 'next-intl'
-import Link from 'next-intl/link'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'

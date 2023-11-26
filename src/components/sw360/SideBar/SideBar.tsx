@@ -70,7 +70,10 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                         id={tab.id}
                         onClick={handleSelectTab}
                     >
-                        {t(tab.name)}
+                        {
+                            // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                            t(tab.name)
+                        }
                         <span id={styles.numberOfVulnerabilitiesDiv} className='badge badge-light'>
                             {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
                         </span>
@@ -95,7 +98,10 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                     id={tab.id}
                     onClick={handleSelectTab}
                 >
-                    {t(tab.name)}
+                    {
+                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
+                        t(tab.name)
+                    }
                 </a>
             )
         })

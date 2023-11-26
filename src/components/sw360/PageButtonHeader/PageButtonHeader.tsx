@@ -9,7 +9,7 @@
 
 'use client'
 
-import Link from 'next-intl/link'
+import Link from 'next/link'
 
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
