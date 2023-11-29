@@ -74,7 +74,7 @@ export default function AddVendor() {
 
     return (
         <>
-            <div className='mx-5 mt-3'>
+            <div className='page-content container'>
                 <form
                     action=''
                     id='add_vulnerability'

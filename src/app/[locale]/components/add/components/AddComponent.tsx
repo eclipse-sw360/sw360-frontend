@@ -154,7 +154,7 @@ export default function AddComponent() {
                             setShowToast={setToastData}
                         />
                     </ToastContainer>
-                    <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+                    <div className='container page-content'>
                         <div className='row'>
                             <div className='col-2 sidebar'>
                                 <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />

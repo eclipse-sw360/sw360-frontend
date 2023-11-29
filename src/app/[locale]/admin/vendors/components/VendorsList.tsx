@@ -23,7 +23,7 @@ export default function VendorsList() {
 
     return (
         <>
-            <div className='mx-3 mt-3'>
+            <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
                         <QuickFilter id='vendorSearch' />

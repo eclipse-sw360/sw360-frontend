@@ -164,7 +164,7 @@ function Vulnerabilities() {
                 vulnerabilityId={vulnerabilityToBeDeleted}
                 setVulnerability={setVulnerabilityToBeDeleted}
             />
-            <div className='mx-3 mt-3'>
+            <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
                         <div className='row mb-3'>

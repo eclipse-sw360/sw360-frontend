@@ -275,10 +275,10 @@ th {
 
 .card-header {
     border-bottom: 0px solid rgba(0, 0, 0, 0.125);
-    padding: 0.75rem 1.25rem;
-    color: white;
-    background-color: var(--sw360-primary-background-color);
-    font-weight: bold;
+    padding: 0.75rem 1.25rem !important;
+    color: white !important;
+    background-color: var(--sw360-primary-background-color) !important;
+    font-weight: bold !important;
 }
 
 .card-body {
@@ -294,7 +294,7 @@ th {
     width: 100%;
 }
 
-.nav-link {
+.nav-item > .nav-link {
     color: var(--sw360-navlink-color);
     font-size: 0.95rem;
     font-weight: 600;
@@ -311,7 +311,7 @@ th {
     border-style: solid none solid none;
     border-width: 1px;
     border-color: #e7e7ed;
-    padding-left: 64px;
+    padding-left: 68px !important;
     padding-top: 5px;
     padding-bottom: 5px;
     font-size: 14px;
@@ -626,4 +626,9 @@ th {
 
 .dropdown-item span {
     margin-right: 10px;
+}
+
+.page-content {
+    max-width: 96vw !important;
+    margin-top: 10px;
 }
