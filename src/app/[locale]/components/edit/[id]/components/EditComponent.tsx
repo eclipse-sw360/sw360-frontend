@@ -181,7 +181,7 @@ const EditComponent = ({ componentId }: Props) => {
 
     return (
         component && (
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+            <div className='container page-content'>
                 <div className='row'>
                     <DeleteComponentDialog
                         componentId={componentId}

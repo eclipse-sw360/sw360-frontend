@@ -10,19 +10,19 @@
 
 'use client'
 
-import { Embedded, Project } from '@/object-types'
+import { Embedded, Project as TypeProject } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { AdvancedSearch, Table, _ } from 'next-sw360'
+import { AdvancedSearch, PageButtonHeader, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
 
-type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
+type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -50,7 +50,7 @@ function Project() {
         {
             id: 'projects.description',
             name: t('Description'),
-            width: '30%',
+            width: '20%',
             sort: true,
         },
         {
@@ -150,7 +150,7 @@ function Project() {
     const server = {
         url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
         then: (data: EmbeddedProjects) => {
-            return data._embedded['sw360:projects'].map((elem: Project) => [
+            return data._embedded['sw360:projects'].map((elem: TypeProject) => [
                 {
                     id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                     name: elem.name ?? '',
@@ -266,26 +266,27 @@ function Project() {
         },
     ]
 
+    const headerbuttons = {
+        'Add Project': { link: '/projects/add', type: 'primary', name: t('Add Project') },
+    }
+
     return (
-        <div className='mx-3 mt-3'>
+        <div className='container page-content'>
             <div className='row'>
                 <div className='col-lg-2'>
                     <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                 </div>
                 <div className='col-lg-10'>
-                    <div className='row d-flex justify-content-between ms-1'>
-                        <div className='col-lg-5'>
-                            <div className='row'>
-                                <div className='btn-group col-auto' role='group'>
-                                    <button className='btn btn-primary'>{t('Add Project')}</button>
-                                    <Dropdown>
-                                        <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item>{t('SPDX')}</Dropdown.Item>
-                                            <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                </div>
+                    <div className='row'>
+                        <PageButtonHeader title={`${t('PROJECTS')}`} buttons={headerbuttons}>
+                            <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
+                                <Dropdown>
+                                    <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item>{t('SPDX')}</Dropdown.Item>
+                                        <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
@@ -294,16 +295,17 @@ function Project() {
                                     </Dropdown.Menu>
                                 </Dropdown>
                             </div>
-                        </div>
-                        <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
+                        </PageButtonHeader>
                     </div>
-                    {status === 'authenticated' ? (
-                        <Table columns={columns} server={server} selector={true} sort={false} />
-                    ) : (
-                        <div className='col-12' style={{ textAlign: 'center' }}>
-                            <Spinner className='spinner' />
-                        </div>
-                    )}
+                    <div className='row'>
+                        {status === 'authenticated' ? (
+                            <Table columns={columns} server={server} selector={true} sort={false} />
+                        ) : (
+                            <div className='col-12' style={{ textAlign: 'center' }}>
+                                <Spinner className='spinner' />
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

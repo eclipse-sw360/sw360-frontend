@@ -82,7 +82,7 @@ export default function Search() {
 
     return (
         <>
-            <div className='mx-5 mt-3'>
+            <div className='container page-content'>
                 <div className='row mt-2'>
                     <div className='col-lg-2'>
                         <KeywordSearch setData={setData} />

@@ -97,33 +97,22 @@ function LicensesPage() {
     }
 
     return (
-        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+        <div className='container page-content'>
             <div className='row'>
                 <div className='col-2 sidebar'>
                     <QuickFilter id='licensefilter' title={t('Quick Filter')} searchFunction={doSearch} />
                 </div>
-                <div className='col col-sm-9'>
-                    <div className='col'>
-                        <div className='row'>
-                            <PageButtonHeader
-                                buttons={headerButtons}
-                                title={`${t('Licenses')} (${licenseData.length})`}
-                            />
-                            {loading == false ? (
-                                <Table
-                                    data={licenseData}
-                                    columns={columns}
-                                    sort={true}
-                                    search={search}
-                                    selector={true}
-                                />
-                            ) : (
-                                <div className='col-12' style={{ textAlign: 'center' }}>
-                                    <Spinner className='spinner' />
-                                </div>
-                            )}
-                            <div className='row mt-2'></div>
-                        </div>
+                <div className='col'>
+                    <div className='row'>
+                        <PageButtonHeader buttons={headerButtons} title={`${t('Licenses')} (${licenseData.length})`} />
+                        {loading == false ? (
+                            <Table data={licenseData} columns={columns} sort={true} search={search} selector={true} />
+                        ) : (
+                            <div className='col-12' style={{ textAlign: 'center' }}>
+                                <Spinner className='spinner' />
+                            </div>
+                        )}
+                        <div className='row mt-2'></div>
                     </div>
                 </div>
             </div>

@@ -140,7 +140,7 @@ function AddProjects() {
         signOut()
     } else {
         return (
-            <>
+            <div className='container page-content'>
                 <form
                     action=''
                     id='form_submit'
@@ -159,7 +159,7 @@ function AddProjects() {
                             setShowToast={setToastData}
                         />
                     </ToastContainer>
-                    <div className='ms-5 mt-2'>
+                    <div>
                         <Tab.Container defaultActiveKey='summary'>
                             <Row>
                                 <Col sm='auto' className='me-3'>
@@ -238,7 +238,7 @@ function AddProjects() {
                         </Tab.Container>
                     </div>
                 </form>
-            </>
+            </div>
         )
     }
 }
