@@ -33,14 +33,15 @@ class Table extends Component<TableProps, unknown> {
     private wrapper: RefObject<HTMLDivElement> = createRef()
     // Grid.js instance
     private readonly instance: Grid = null
+    private tableProps: TableProps = {}
 
     constructor(props: TableProps) {
         super(props)
-        let tableProps = { ...defaultOptions, ...props }
+        this.tableProps = { ...defaultOptions, ...props }
 
-        if (tableProps.server) {
-            tableProps = {
-                ...tableProps,
+        if (this.tableProps.server) {
+            this.tableProps = {
+                ...this.tableProps,
                 pagination: {
                     limit: 10,
                     server: {
@@ -52,7 +53,7 @@ class Table extends Component<TableProps, unknown> {
             }
         }
 
-        this.instance = new Grid(tableProps)
+        this.instance = new Grid(this.tableProps)
     }
 
     getInstance(): Grid {
@@ -79,10 +80,12 @@ class Table extends Component<TableProps, unknown> {
             .updateConfig({
                 pagination: {
                     limit: pageSize,
-                    server: {
-                        url: (prev: string, page: number, limit: number) =>
-                            `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                    },
+                    server: this.tableProps.server
+                        ? {
+                              url: (prev: string, page: number, limit: number) =>
+                                  `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
+                          }
+                        : undefined,
                 },
             })
             .forceRender()
