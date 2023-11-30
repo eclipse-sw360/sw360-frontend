@@ -21,6 +21,7 @@ const adminPages = ['/admin']
 const intlMiddleware = createIntlMiddleware({
     locales,
     defaultLocale: 'en',
+    localePrefix: 'never',
 })
 
 const authMiddleware = withAuth(
