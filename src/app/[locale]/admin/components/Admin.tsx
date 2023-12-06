@@ -47,7 +47,7 @@ const AdminMainPage = () => {
                             <FiEdit2 /> {t('Bulk Release Edit')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/licenses'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <BsFileEarmarkText /> {t('Licenses')}
                         </button>

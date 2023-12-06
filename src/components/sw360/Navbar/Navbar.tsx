@@ -46,7 +46,7 @@ function Navbar() {
                 { href: '#', name: t('User'), id: 'admin_user' },
                 { href: '/admin/vendors', name: t('Vendors'), id: 'admin_vendors' },
                 { href: '#', name: t('Bulk Release Edit'), id: 'admin_bulk_edit' },
-                { href: '#', name: t('Licenses'), id: 'admin_licenses' },
+                { href: '/admin/licenses', name: t('Licenses'), id: 'admin_licenses' },
                 { href: '#', name: t('Obligations'), id: 'admin_obligations' },
                 { href: '#', name: t('Schedule'), id: 'admin_schedule' },
                 { href: '#', name: t('Fossology'), id: 'admin_fossology' },
