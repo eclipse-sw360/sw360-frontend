@@ -1,4 +1,7 @@
 {
     "i18n-ally.localesPaths": ["messages"],
-    "i18n-ally.keystyle": "nested"
+    "i18n-ally.keystyle": "nested",
+    "i18n-ally.sortKeys": true,
+    "i18n-ally.translate.engines": ["libretranslate"],
+    "i18n-ally.translate.libre.apiRoot": "http://127.0.0.1:5555/"
 }
