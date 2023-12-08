@@ -10,6 +10,7 @@
 'use client'
 
 import { HttpStatus, ToastData } from '@/object-types'
+import DownloadService from '@/services/download.service'
 import { ApiUtils } from '@/utils'
 import { getSession, signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -56,7 +57,9 @@ export default function AddVendor() {
             formData.append('licenseFile', file.current, file.current.name)
 
             const session = await getSession()
-
+            if (!session) {
+                return signIn()
+            }
             const response = await ApiUtils.POST('licenses/upload', formData, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 signIn()
@@ -72,6 +75,16 @@ export default function AddVendor() {
         }
     }
 
+    const downloadLicenseArchive = async () => {
+        try {
+            const session = await getSession()
+            if (!session) return signIn()
+            DownloadService.download('licenses/downloadLicenses', session, `LicensesBackup.lics`)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     return (
         <>
             <DeleteAllLicenseInformationModal
@@ -81,7 +94,11 @@ export default function AddVendor() {
             <div className='mt-4 mx-5'>
                 <div className='row'>
                     <div className='col-lg-8'>
-                        <button type='button' className='btn btn-primary col-auto me-2'>
+                        <button
+                            type='button'
+                            className='btn btn-primary col-auto me-2'
+                            onClick={downloadLicenseArchive}
+                        >
                             {t('Download License Archive')}
                         </button>
                         <button type='button' className='btn btn-primary col-auto me-2'>

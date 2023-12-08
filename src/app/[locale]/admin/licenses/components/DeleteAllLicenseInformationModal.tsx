@@ -37,6 +37,9 @@ export default function DeleteAllLicenseInformationModal({
         try {
             setDeleting(true)
             const session = await getSession()
+            if (!session) {
+                return signIn()
+            }
             const response = await ApiUtils.DELETE('licenses/deleteAll', session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signIn()
@@ -68,7 +71,7 @@ export default function DeleteAllLicenseInformationModal({
                 scrollable
             >
                 <Modal.Header style={{ backgroundColor: '#feefef', color: '#da1414' }} closeButton>
-                    <Modal.Title id='linked-projects-modal'>
+                    <Modal.Title id='delete-all-license-info-modal'>
                         <AiOutlineQuestionCircle /> {t('Delete All Licenses')}
                     </Modal.Title>
                 </Modal.Header>
