@@ -16,5 +16,9 @@ export const LOCALES = [
     { i18n: 'vi', flag: 'vn' },
     { i18n: 'zh-CN', flag: 'cn' },
     { i18n: 'pt-BR', flag: 'br' },
+    { i18n: 'ko', flag: 'kr' },
+    { i18n: 'de', flag: 'de' },
+    { i18n: 'es', flag: 'es' },
+    { i18n: 'fr', flag: 'fr' },
 ]
 export const locales = LOCALES.map((locale) => locale.i18n)

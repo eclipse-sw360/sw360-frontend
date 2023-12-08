@@ -20,6 +20,7 @@ import { unstable_setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { ReactNode } from 'react'
 
+import { LOCALES } from '@/constants'
 import { Footer, Header } from 'next-sw360'
 import { Providers } from '../provider'
 
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 }
 
 export function generateStaticParams() {
-    return [{ locale: 'en' }, { locale: 'ja' }, { locale: 'vi' }, { locale: 'zh' }, { locale: 'pt-BR' }]
+    return LOCALES.map((locale) => ({ locale: locale.i18n }))
 }
 
 type Props = {

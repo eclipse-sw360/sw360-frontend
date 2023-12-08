@@ -632,3 +632,8 @@ th {
     max-width: 96vw !important;
     margin-top: 10px;
 }
+
+.fi.custom-class,
+.fi-flag.custom-class {
+    cursor: pointer;
+}

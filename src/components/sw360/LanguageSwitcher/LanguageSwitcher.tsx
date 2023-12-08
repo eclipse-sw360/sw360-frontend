@@ -37,7 +37,7 @@ function LanguageSwitcher() {
             {LOCALES.map((locale) => (
                 <div className='flag' key={locale.i18n}>
                     <span
-                        className={`fi fi-${locale.flag}`}
+                        className={`fi fi-${locale.flag} custom-class`}
                         key={locale.i18n}
                         onClick={() => handleOptionClick(locale)}
                     />
