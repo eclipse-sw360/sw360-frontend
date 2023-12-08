@@ -16,10 +16,12 @@ import { useTranslations } from 'next-intl'
 import { ToastMessage } from 'next-sw360'
 import { useRef, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
+import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
 export default function AddVendor() {
     const t = useTranslations('default')
     const file = useRef<File | undefined>()
+    const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)
 
     const [toastData, setToastData] = useState<ToastData>({
         show: false,
@@ -72,6 +74,10 @@ export default function AddVendor() {
 
     return (
         <>
+            <DeleteAllLicenseInformationModal
+                show={deleteAllLicenseInformationModal}
+                setShow={showDeleteAllLicenseInformationModal}
+            />
             <div className='mt-4 mx-5'>
                 <div className='row'>
                     <div className='col-lg-8'>
@@ -84,7 +90,11 @@ export default function AddVendor() {
                         <button type='button' className='btn btn-primary col-auto me-2'>
                             {t('Import OSADL Information')}
                         </button>
-                        <button type='button' className='btn btn-danger col-auto me-2'>
+                        <button
+                            type='button'
+                            className='btn btn-danger col-auto me-2'
+                            onClick={() => showDeleteAllLicenseInformationModal(true)}
+                        >
                             {t('Delete all License Information')}
                         </button>
                     </div>

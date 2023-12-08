@@ -758,6 +758,13 @@
         "Overwrite if external ids match": "Overwrite if external ids match",
         "Overwrite if ids match": "Overwrite if ids match",
         "Licenses uploaded successfully": "Licenses uploaded successfully",
-        "Please select a file": "Please select a file!"
+        "Please select a file": "Please select a file!",
+        "Delete All Licenses": "Delete All Licenses?",
+        "other documents might use the licenses": "Note: other documents might use the licenses.",
+        "Delete All License Information": "Delete All License Information",
+        "DELETE_ALL_LICENSE": "Do you really want to delete all licenses, license types, obligations, obligations, risks, risk categories and oblig custom properties from the database?",
+        "This function is meant to be followed by a new license import": "This function is meant to be followed by a new license import.",
+        "DELETE_ALL_LICENCES_ERROR": "Something went wrong. Try again.",
+        "DELETE_ALL_LICENCES_SUCCESS": "All license information deleted successfully."
     }
 }
