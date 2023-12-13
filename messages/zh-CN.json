@@ -747,17 +747,6 @@
         "Creator Group": "Creator Group",
         "ECC Assessor": "ECC Assessor",
         "ECC Assessor Group": "ECC Assessor Group",
-        "ECC Assessment Date": "ECC Assessment Date",
-        "License Administration": "License Administration",
-        "Download License Archive": "Download License Archive",
-        "Import SPDX Information": "Import SPDX Information",
-        "Import OSADL Information": "Import OSADL Information",
-        "Delete all License Information": "Delete all License Information",
-        "Upload License Archive": "Upload License Archive",
-        "Upload Licenses": "Upload Licenses",
-        "Overwrite if external ids match": "Overwrite if external ids match",
-        "Overwrite if ids match": "Overwrite if ids match",
-        "Licenses uploaded successfully": "Licenses uploaded successfully",
-        "Please select a file": "Please select a file!"
+        "ECC Assessment Date": "ECC Assessment Date"
     }
 }
