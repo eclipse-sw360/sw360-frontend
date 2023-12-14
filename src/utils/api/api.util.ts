@@ -11,7 +11,7 @@
 import { RequestContent } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 
-const base = SW360_API_URL + '/api'
+const base = SW360_API_URL + '/rest/api'
 
 async function send({
     method,

@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
             clientId: `${process.env.SW360_KEYCLOAK_CLIENT_ID}`,
             clientSecret: `${process.env.SW360_KEYCLOAK_CLIENT_SECRET}`,
             issuer: `${process.env.AUTH_ISSUER}`,
-            checks: 'state',
+            // checks: 'state',
             // authorization: { params: { scope: "openid" } },
         }),
     ],

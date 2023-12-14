@@ -71,7 +71,7 @@ function SelectAttachment({
             formData.append('files', iterator)
         }
 
-        const url = SW360_API_URL + '/resource/api/attachments'
+        const url = SW360_API_URL + '/rest/api/attachments'
         fetch(url, {
             method: 'POST',
             body: formData,

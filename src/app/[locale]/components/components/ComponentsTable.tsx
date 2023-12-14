@@ -99,7 +99,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
     ]
 
     const server = {
-        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, searchParams),
+        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/rest/api/components`, searchParams),
         then: (data: Embedded<Component, 'sw360:components'>) => {
             setNumberOfComponent(data.page.totalElements)
             return data._embedded['sw360:components'].map((item: Component) => [

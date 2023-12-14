@@ -86,7 +86,7 @@ export default function EccDetails({ projectId }: { projectId: string }) {
     ]
 
     const server = {
-        url: `${SW360_API_URL}/resource/api/projects/${projectId}/releases/ecc?transitive=true`,
+        url: `${SW360_API_URL}/rest/api/projects/${projectId}/releases/ecc?transitive=true`,
         then: (data: EmbeddedProjectReleaseEcc) => {
             return data._embedded['sw360:releases'].map((elem: ProjectReleaseEcc) => [
                 Capitalize(elem.eccInformation.eccStatus ?? ''),

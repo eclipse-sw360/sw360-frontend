@@ -9,10 +9,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Link from 'next-intl/link'
-import React from 'react'
-import 'bootstrap/dist/css/bootstrap.css'
 import '@/styles/globals.css'
+import 'bootstrap/dist/css/bootstrap.css'
+import Link from 'next-intl/link'
 import styles from './footer.module.css'
 
 function Footer() {
@@ -34,7 +33,7 @@ function Footer() {
                         |
                         <Link
                             className={styles.footerHref}
-                            href='/resource/mkdocs/index.html'
+                            href='/mkdocs/index.html'
                             rel='noopener noreferrer'
                             target='_blank'
                         >
@@ -44,7 +43,7 @@ function Footer() {
                         |
                         <Link
                             className={styles.footerHref}
-                            href='/resource/docs/api-guide.html'
+                            href='/docs/api-guide.html'
                             rel='noopener noreferrer'
                             target='_blank'
                         >

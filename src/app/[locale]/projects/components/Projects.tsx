@@ -148,7 +148,7 @@ function Project() {
     ]
 
     const server = {
-        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
+        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/rest/api/projects`, Object.fromEntries(params)),
         then: (data: EmbeddedProjects) => {
             return data._embedded['sw360:projects'].map((elem: Project) => [
                 {
