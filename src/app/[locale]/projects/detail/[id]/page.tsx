@@ -7,10 +7,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Metadata } from 'next'
 import ProjectDetailTab from './components/ProjectDetailTab'
 
 interface Context {
     params: { id: string }
+}
+
+export const metadata: Metadata = {
+    title: 'Projects',
 }
 
 const Detail = async ({ params }: Context) => {

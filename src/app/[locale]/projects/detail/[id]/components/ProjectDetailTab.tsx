@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 
 import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiUtils } from '@/utils'
 import LinkProjects from '../../../components/LinkProjects'
 import Administration from './Administration'
 import ChangeLog from './Changelog'
@@ -51,157 +51,8 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
 
                 const data = await response.json()
 
-                const projectResponsibleResponse = CommonUtils.isNullEmptyOrUndefinedString(data.projectResponsible)
-                    ? null
-                    : await ApiUtils.GET(`users/${data.projectResponsible}`, session.user.access_token, signal)
-
-                const modifiedByResponse = CommonUtils.isNullEmptyOrUndefinedString(data.modifiedBy)
-                    ? null
-                    : await ApiUtils.GET(`users/${data.modifiedBy}`, session.user.access_token, signal)
-
-                const projectOwnerResponse = CommonUtils.isNullEmptyOrUndefinedString(data.projectOwner)
-                    ? null
-                    : await ApiUtils.GET(`users/${data.projectOwner}`, session.user.access_token, signal)
-
-                const securityResponsibles: any = []
-                for (const responsible of data.securityResponsibles) {
-                    if (CommonUtils.isNullEmptyOrUndefinedString(responsible)) continue
-                    securityResponsibles.push(ApiUtils.GET(`users/${responsible}`, session.user.access_token, signal))
-                }
-                const res = await Promise.all(securityResponsibles)
-
-                if (
-                    (projectResponsibleResponse !== null &&
-                        projectResponsibleResponse.status === HttpStatus.UNAUTHORIZED) ||
-                    (modifiedByResponse !== null && modifiedByResponse.status === HttpStatus.UNAUTHORIZED) ||
-                    (modifiedByResponse !== null && modifiedByResponse.status === HttpStatus.UNAUTHORIZED)
-                ) {
-                    return signOut()
-                } else if (
-                    (projectResponsibleResponse !== null && projectResponsibleResponse.status !== HttpStatus.OK) ||
-                    (modifiedByResponse !== null && modifiedByResponse.status !== HttpStatus.OK) ||
-                    (modifiedByResponse !== null && modifiedByResponse.status !== HttpStatus.OK)
-                ) {
-                    return notFound()
-                }
-
-                for (const elem of res) {
-                    if (elem.status === HttpStatus.UNAUTHORIZED) {
-                        return signOut()
-                    } else if (elem.status !== HttpStatus.OK) {
-                        return notFound()
-                    }
-                }
-
-                const responsibles = await Promise.all(res.map((r) => r.json()))
-                const projectResponsible = CommonUtils.isNullOrUndefined(projectResponsibleResponse)
-                    ? null
-                    : await projectResponsibleResponse.json()
-                const modifiedBy = CommonUtils.isNullOrUndefined(modifiedByResponse)
-                    ? null
-                    : await modifiedByResponse.json()
-                const projectOwner = CommonUtils.isNullOrUndefined(projectOwnerResponse)
-                    ? null
-                    : await projectOwnerResponse.json()
-
-                setSummaryData({
-                    description: data.description,
-
-                    // General Information
-                    id: projectId,
-                    name: data.name,
-                    version: data.version,
-                    visibility: data.visibility,
-                    createdOn: data.createdOn,
-                    createdBy: {
-                        name: CommonUtils.isNullOrUndefined(data['_embedded']['createdBy'])
-                            ? ''
-                            : data['_embedded']['createdBy']['fullName'],
-                        email: CommonUtils.isNullOrUndefined(data['_embedded']['createdBy'])
-                            ? ''
-                            : data['_embedded']['createdBy']['email'],
-                    },
-                    modifiedOn: data.modifiedOn,
-                    modifiedBy: CommonUtils.isNullOrUndefined(modifiedBy)
-                        ? { name: '', email: '' }
-                        : { name: modifiedBy.fullName, email: modifiedBy.email },
-                    projectType: data.projectType,
-                    domain: data.domain,
-                    tag: data.tag,
-                    externalIds: new Map<string, string>(Object.entries(data.externalIds)),
-                    additionalData: new Map<string, string>(Object.entries(data.additionalData)),
-                    externalUrls: new Map<string, string>(Object.entries(data.externalUrls)),
-
-                    // Roles
-                    group: data.businessUnit,
-                    projectResponsible: CommonUtils.isNullOrUndefined(projectResponsible)
-                        ? { name: '', email: '' }
-                        : { name: projectResponsible.fullName, email: projectResponsible.email },
-                    projectOwner: CommonUtils.isNullOrUndefined(projectOwner)
-                        ? { name: '', email: '' }
-                        : { name: projectOwner.fullName, email: projectOwner.email },
-                    ownerAccountingUnit: data.ownerAccountingUnit,
-                    ownerBillingGroup: data.ownerGroup,
-                    ownerCountry: data.ownerCountry,
-                    leadArchitect: {
-                        name: CommonUtils.isNullOrUndefined(data['_embedded']['leadArchitect'])
-                            ? ''
-                            : data['_embedded']['leadArchitect']['fullName'],
-                        email: CommonUtils.isNullOrUndefined(data['_embedded']['leadArchitect'])
-                            ? ''
-                            : data['_embedded']['leadArchitect']['email'],
-                    },
-                    moderators: CommonUtils.isNullOrUndefined(data['_embedded']['sw360:moderators'])
-                        ? []
-                        : data['_embedded']['sw360:moderators'].map((moderator: any) => ({
-                              name: moderator.fullName,
-                              email: moderator.email,
-                          })),
-                    contributors: CommonUtils.isNullOrUndefined(data['_embedded']['sw360:contributors'])
-                        ? []
-                        : data['_embedded']['sw360:contributors'].map((contributor: any) => ({
-                              name: contributor.fullName,
-                              email: contributor.email,
-                          })),
-                    securityResponsibles: responsibles.map((elem: any) => {
-                        return { name: elem.fullName, email: elem.email }
-                    }),
-                    additionalRoles: new Map<string, string>(Object.entries(data.roles)),
-
-                    // Project Vendor
-                    vendorFullName: CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:vendors'])
-                        ? ''
-                        : data['_embedded']['sw360:vendors'][0]['fullName'],
-                    vendorShortName: CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:vendors'])
-                        ? ''
-                        : data['_embedded']['sw360:vendors'][0]['shortName'],
-                    vendorUrl: CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:vendors'])
-                        ? ''
-                        : data['_embedded']['sw360:vendors'][0]['url'],
-                })
-                setAdministrationData({
-                    // Clearing
-                    projectClearingState: data.clearingState,
-                    clearingDetails: '',
-                    clearingTeam: '',
-                    deadlineForPreEval: data.preevaluationDeadline,
-                    clearingSummary: data.clearingSummary,
-                    specialRiskOpenSourceSoftware: data.specialRisksOSS,
-                    generalRisksThirdPartySoftware: data.generalRisks3rdParty,
-                    specialRisksThirdPartySoftware: data.specialRisks3rdParty,
-                    salesAndDeliveryChannels: data.deliveryChannels,
-                    remarksAdditionalRequirements: data.remarksAdditionalRequirements,
-
-                    // Lifecycle
-                    projectState: data.state,
-                    systemStateBegin: data.systemTestStart,
-                    systemStateEnd: data.systemTestEnd,
-                    deliveryStart: data.deliveryStart,
-                    phaseOutSince: data.phaseOutSince,
-
-                    // LicenseInfoHeader
-                    licenseInfoHeader: '',
-                })
+                setSummaryData({ id: projectId, ...data })
+                setAdministrationData(data)
             } catch (e) {
                 console.error(e)
             }
