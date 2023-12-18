@@ -8,27 +8,26 @@
 // License-Filename: LICENSE
 
 interface AdministrationDataType {
-    // Clearing
-    projectClearingState: string
+    clearingState: string
     clearingDetails: string
-    clearingTeam: string
-    deadlineForPreEval: string
+    preevaluationDeadline: string
     clearingSummary: string
-    specialRiskOpenSourceSoftware: string
-    generalRisksThirdPartySoftware: string
-    specialRisksThirdPartySoftware: string
-    salesAndDeliveryChannels: string
+    specialRisksOSS: string
+    generalRisks3rdParty: string
+    specialRisks3rdParty: string
+    deliveryChannels: string
     remarksAdditionalRequirements: string
-
-    // Lifecycle
-    projectState: string
-    systemStateBegin: string
-    systemStateEnd: string
+    state: string
+    systemTestStart: string
+    systemTestEnd: string
     deliveryStart: string
     phaseOutSince: string
-
-    // LicenseInfoHeader
     licenseInfoHeader: string
+    _embedded: {
+        clearingTeam: {
+            email: string
+        }
+    }
 }
 
 export default AdministrationDataType

@@ -7,66 +7,43 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Vendor } from '@/object-types'
+
+interface User {
+    email: string
+    fullName: string
+}
+
 interface SummaryDataType {
     description: string
-
-    // General Information
     id: string
     name: string
     version: string
     visibility: string
     createdOn: string
-    createdBy: {
-        name: string
-        email: string
-    }
     modifiedOn: string
-    modifiedBy: {
-        name: string
-        email: string
-    }
     projectType: string
     domain: string
     tag: string
-    externalIds: Map<string, string>
-    additionalData: Map<string, string>
-    externalUrls: Map<string, string>
-
-    // Roles
-    group: string
-    projectResponsible: {
-        name: string
-        email: string
-    }
-    projectOwner: {
-        name: string
-        email: string
-    }
+    externalIds: object
+    additionalData: object
+    externalUrls: object
+    businessUnit: string
     ownerAccountingUnit: string
-    ownerBillingGroup: string
+    ownerGroup: string
     ownerCountry: string
-    leadArchitect: {
-        name: string
-        email: string
+    roles: object
+    _embedded: {
+        leadArchitect: User
+        createdBy: User
+        modifiedBy: User
+        projectResponsible: User
+        projectOwner: User
+        securityResponsibles: User[]
+        'sw360:moderators': User[]
+        'sw360:contributors': User[]
+        'sw360:vendors': Vendor[]
     }
-    moderators: {
-        name: string
-        email: string
-    }[]
-    contributors: {
-        name: string
-        email: string
-    }[]
-    securityResponsibles: {
-        name: string
-        email: string
-    }[]
-    additionalRoles: Map<string, string>
-
-    // Project Vendor
-    vendorFullName: string
-    vendorShortName: string
-    vendorUrl: string
 }
 
 export default SummaryDataType
