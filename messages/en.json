@@ -705,6 +705,7 @@
         "There are some errors while creating project": "There are some errors while creating project",
         "This currently only supports SPDX RDF/XML files with a uniq described top level node": "This currently only supports SPDX RDF/XML files with a uniq described top level node",
         "This function is meant to be followed by a new license import": "This function is meant to be followed by a new license import.",
+        "This project contains": "This project <strong>{name}</strong> contains",
         "This release contains": "This release <strong>{name}</strong> contains: ",
         "Title": "Title",
         "To": "To",

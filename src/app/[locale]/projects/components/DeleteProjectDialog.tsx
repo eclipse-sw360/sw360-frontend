@@ -24,7 +24,15 @@ const DEFAULT_PROJECT_DATA: Project = {
         'sw360:releases': [],
         'sw360:projects': [],
         'sw360:attachments': [],
+        'sw360:packages': [],
     },
+}
+
+interface Data {
+    attachment?: number
+    project?: number
+    release?: number
+    package?: number
 }
 
 interface Props {
@@ -38,10 +46,12 @@ const DeleteProjectDialog = ({ projectId, show, setShow }: Props) => {
     const t = useTranslations('default')
     const router = useRouter()
     const [project, setProject] = useState<Project>(DEFAULT_PROJECT_DATA)
+    const [internalData, setInternalData] = useState<Data>({ attachment: 0, project: 0, release: 0, package: 0 })
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
+    const [visuallyHideLinkedData, setVisuallyHideLinkedData] = useState(true)
     const [comment, setComment] = useState('')
 
     const displayMessage = (variant: string, message: string) => {
@@ -76,35 +86,27 @@ const DeleteProjectDialog = ({ projectId, show, setShow }: Props) => {
         }
     }
 
-    const fetchData = useCallback(
-        async (signal: AbortSignal) => {
-            if (session) {
-                const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token, signal)
-                if (projectsResponse.status == HttpStatus.OK) {
-                    const project = (await projectsResponse.json()) as Project
-                    setProject(project)
-                } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
-                    await signOut()
-                } else {
-                    setProject(DEFAULT_PROJECT_DATA)
-                    handleError()
-                }
+    const fetchData = async (projectId: string) => {
+        if (session) {
+            const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
+            if (projectsResponse.status == HttpStatus.OK) {
+                const projectData = (await projectsResponse.json()) as Project
+                setProject(projectData)
+                handleInternalDataCount(projectData)
+            } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            } else {
+                setProject(DEFAULT_PROJECT_DATA)
+                handleError()
             }
-        },
-        [projectId, handleError, session]
-    )
+        }
+    }
 
     useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-        fetchData(signal).catch((err) => {
+        fetchData(projectId).catch((err) => {
             console.error(err)
         })
-
-        return () => {
-            controller.abort()
-        }
-    }, [show, projectId, fetchData])
+    }, [show, projectId])
 
     const handleSubmit = () => {
         deleteProject().catch((err) => {
@@ -116,9 +118,31 @@ const DeleteProjectDialog = ({ projectId, show, setShow }: Props) => {
         setShow(!show)
         setShowMessage(false)
         setComment('')
+        setVisuallyHideLinkedData(!visuallyHideLinkedData)
         if (reloadPage === true) {
             window.location.reload()
         }
+    }
+
+    const handleInternalDataCount = (projectData: Project) => {
+        const dataCount: Data = {}
+        if (projectData._embedded['sw360:attachments']) {
+            dataCount.attachment = projectData._embedded['sw360:attachments'].length
+            setVisuallyHideLinkedData(false)
+        }
+        if (projectData._embedded['sw360:projects']) {
+            dataCount.project = projectData._embedded['sw360:projects'].length
+            setVisuallyHideLinkedData(false)
+        }
+        if (projectData._embedded['sw360:releases']) {
+            dataCount.release = projectData._embedded['sw360:releases'].length
+            setVisuallyHideLinkedData(false)
+        }
+        if (projectData._embedded['sw360:packages']) {
+            dataCount.package = projectData._embedded['sw360:packages'].length
+            setVisuallyHideLinkedData(false)
+        }
+        setInternalData(dataCount)
     }
 
     const handleUserComment = (e: any) => {
@@ -144,6 +168,19 @@ const DeleteProjectDialog = ({ projectId, show, setShow }: Props) => {
                                 name: project.name,
                                 strong: (data) => <b>{data}</b>,
                             })}
+                        </Form.Label>
+                        <br />
+                        <Form.Label className='mb-1' visuallyHidden={visuallyHideLinkedData}>
+                            {t.rich('This project contains', {
+                                name: project.name,
+                                strong: (data) => <b>{data}</b>,
+                                visuallyHideLinkedData,
+                            })}
+                            <ul>
+                                {Object.entries(internalData).map(([key, value]) => (
+                                    <li key={key}>{`${value} linked ${key}`}</li>
+                                ))}
+                            </ul>
                         </Form.Label>
                     </Form.Group>
                     <hr />

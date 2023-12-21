@@ -38,6 +38,7 @@ import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
 import Preferences from './Preferences'
+import Package from './Package'
 import Project from './Project'
 import ProjectReleaseEcc from './ProjectReleaseEcc'
 import Release from './Release'
@@ -89,6 +90,7 @@ export type {
     ModeratorsType,
     NodeData,
     OAuthClient,
+    Package,
     Project,
     ProjectReleaseEcc,
     Release,
