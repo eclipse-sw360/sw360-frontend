@@ -748,6 +748,25 @@
         "Creator Group": "Creator Group",
         "ECC Assessor": "ECC Assessor",
         "ECC Assessor Group": "ECC Assessor Group",
-        "ECC Assessment Date": "ECC Assessment Date"
+        "ECC Assessment Date": "ECC Assessment Date",
+        "DELETE_ALL_LICENCES_ERROR": "何かが間違っていた。 もう一度お試しください。",
+        "DELETE_ALL_LICENCES_SUCCESS": "すべてのライセンス情報が正常に削除されました。",
+        "DELETE_ALL_LICENSE": "データベースからのすべてのライセンス、ライセンスの種類、義務、義務、リスク、リスクカテゴリ、および義務のカスタムプロパティを削除したいですか?",
+        "Delete All License Information": "すべてのライセンス情報を削除します。",
+        "Delete All Licenses": "すべてのライセンスを削除します。",
+        "Delete all License Information": "すべてのライセンス情報を削除します。",
+        "Download License Archive": "ライセンスアーカイブのダウンロード",
+        "Import OSADL Information": "インポートOSADL情報",
+        "Import SPDX Information": "インポートSPDX インフォメーション",
+        "License Administration": "ライセンス管理",
+        "Licenses uploaded successfully": "正常にアップロードされたライセンス",
+        "Overwrite if external ids match": "外部の ID のマッチが一致すれば上書き",
+        "Overwrite if ids match": "id のマッチが一致すれば上書き",
+        "Please select a file": "ファイルを選択してください!",
+        "Something went wrong": "何かが間違っていた",
+        "This function is meant to be followed by a new license import": "この関数は、新しいライセンスのインポートに従うことを目的としています。",
+        "Upload License Archive": "ライセンスアーカイブのアップロード",
+        "Upload Licenses": "ライセンスのアップロード",
+        "other documents might use the licenses": "注意:その他の文書はライセンスを使用する場合があります。"
     }
 }
