@@ -48,6 +48,7 @@ function AddProjects() {
         },
     ])
     const [projectPayload, setProjectPayload] = useState<Project>({
+        id: '',
         name: '',
         description: '',
         version: '',

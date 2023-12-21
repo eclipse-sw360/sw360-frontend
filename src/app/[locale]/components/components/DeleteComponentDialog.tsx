@@ -19,7 +19,7 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { ActionType, Component, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
 
-const DEFAULT_COMPONENT_INFO: Component = { name: '', _embedded: { 'sw360:releases': [] } }
+const DEFAULT_COMPONENT_INFO: Component = { id: '', name: '', _embedded: { 'sw360:releases': [] } }
 
 interface Props {
     componentId?: string
