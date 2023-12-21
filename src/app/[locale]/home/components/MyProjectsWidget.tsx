@@ -18,7 +18,11 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 
 import Link from 'next/link'
+
+import { Embedded, Project } from '@/object-types'
 import HomeTableHeader from './HomeTableHeader'
+
+type EmbeddedProject = Embedded<Project, 'sw360:projects'>
 
 function MyProjectsWidget() {
     const [data, setData] = useState([])
@@ -49,20 +53,18 @@ function MyProjectsWidget() {
         const signal = controller.signal
 
         fetchData(queryUrl, signal)
-            .then((projects: any) => {
+            .then((projects: EmbeddedProject) => {
                 if (!CommonUtils.isNullOrUndefined(projects['_embedded']['sw360:projects'])) {
                     setData(
-                        projects['_embedded']['sw360:projects'].map(
-                            (item: { name: string; description: string; version: string; _links: any }) => [
-                                _(
-                                    <Link href={'projects/detail/' + CommonUtils.getIdFromUrl(item._links.self.href)}>
-                                        {item.name} ({item.version})
-                                    </Link>
-                                ),
-                                CommonUtils.truncateText(item.description, 40),
-                                item.version,
-                            ]
-                        )
+                        projects['_embedded']['sw360:projects'].map((item: Project) => [
+                            _(
+                                <Link href={'projects/detail/' + CommonUtils.getIdFromUrl(item._links.self.href)}>
+                                    {item.name} ({item.version})
+                                </Link>
+                            ),
+                            CommonUtils.truncateText(item.description, 40),
+                            item.version,
+                        ])
                     )
                     setLoading(false)
                 }

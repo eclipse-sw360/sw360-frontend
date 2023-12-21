@@ -12,7 +12,8 @@
 import { Links, User } from '@/object-types'
 
 interface Project {
-    id?: string
+    id: string
+    name: string
     considerReleasesFromExternalList?: boolean
     additionalData?: object
     businessUnit?: string
@@ -30,7 +31,6 @@ interface Project {
     leadArchitect?: string
     licenseInfoHeaderText?: string
     moderators?: string[]
-    name: string
     phaseOutSince?: string
     preevaluationDeadline?: string
     projectResponsible?: string
