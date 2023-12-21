@@ -750,6 +750,10 @@
         "project_cannot_be_created": "O projeto não pode ser criado/atualizado",
         "to edit the project relation": "para editar a relação do projeto",
         "vector": "vector",
-        "wrong_spdx_information": "Se for inserido o SPDX errado, as informações não serão registradas corretamente"
+        "wrong_spdx_information": "Se for inserido o SPDX errado, as informações não serão registradas corretamente",
+        "DELETE_ALL_LICENCES_ERROR": "Algo errado aconteceu. Tente de novo.",
+        "DELETE_ALL_LICENCES_SUCCESS": "Todos os dados de licenças foram removidos com sucesso.",
+        "DELETE_ALL_LICENSE": "Você realmente quer remover todos os dados relacionados a licenças ?",
+        "Upload Licenses": "Upload das Licenças"
     }
 }

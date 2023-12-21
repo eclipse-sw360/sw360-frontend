@@ -759,6 +759,14 @@
         "project_cannot_be_created": "프로젝트는 만들 수 없습니다/업데이트",
         "to edit the project relation": "프로젝트 관계 편집",
         "vector": "벡터 벡터",
-        "wrong_spdx_information": "잘못된 SPDX가 입력되면 정보가 올바르게 등록되지 않습니다."
+        "wrong_spdx_information": "잘못된 SPDX가 입력되면 정보가 올바르게 등록되지 않습니다.",
+        "DELETE_ALL_LICENCES_ERROR": "뭔가 잘못되었습니다. 다시 시도하십시오.",
+        "DELETE_ALL_LICENCES_SUCCESS": "모든 라이센스 정보는 성공적으로 삭제됩니다.",
+        "DELETE_ALL_LICENSE": "모든 라이센스, 라이센스 유형, 의무, 의무, 위험, 위험 범주 및 데이터베이스에서 사용자 정의 속성을 삭제하고 싶습니까?",
+        "Delete All License Information": "모든 라이센스 정보 삭제",
+        "Delete All Licenses": "모든 라이센스 삭제?",
+        "Please select a file": "파일을 선택하십시오!",
+        "This function is meant to be followed by a new license import": "이 기능은 새로운 라이센스 수입에 의해 따를 수 없습니다.",
+        "other documents might use the licenses": "참고 : 다른 문서는 라이센스를 사용할 수 있습니다."
     }
 }

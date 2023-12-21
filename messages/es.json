@@ -759,6 +759,14 @@
         "project_cannot_be_created": "El proyecto no puede crearse ni actualizarse",
         "to edit the project relation": "para editar la relación del proyecto",
         "vector": "vector",
-        "wrong_spdx_information": "Si se introduce el SPDX incorrecto, la información no se registrará correctamente"
+        "wrong_spdx_information": "Si se introduce el SPDX incorrecto, la información no se registrará correctamente",
+        "DELETE_ALL_LICENCES_ERROR": "Algo salió mal. Prueba otra vez.",
+        "DELETE_ALL_LICENCES_SUCCESS": "Toda la información de licencia se elimina con éxito.",
+        "DELETE_ALL_LICENSE": "¿De verdad quieres eliminar todas las licencias, tipos de licencias, obligaciones, riesgos, categorías de riesgo y obligar propiedades personalizadas de la base de datos?",
+        "Delete All License Information": "Eliminar toda la información de licencia",
+        "Delete All Licenses": "Eliminar todas las licencias?",
+        "Please select a file": "Por favor, seleccione un archivo!",
+        "This function is meant to be followed by a new license import": "Esta función debe ser seguida por una nueva importación de licencias.",
+        "other documents might use the licenses": "Nota: otros documentos podrían usar las licencias."
     }
 }
