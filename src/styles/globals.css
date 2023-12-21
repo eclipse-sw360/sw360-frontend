@@ -48,7 +48,8 @@ code {
     --sw360-primary-background-color: #5d8ea9;
     --sw360-primary-color: #f7941e;
     --sw360-navlink-color: #6c757d;
-    --sw360-navlink-hover-color: #272833;
+    --sw360-navlink-hover-color: #f7941e;
+    --sw360-navlink-active-color: #272833;
 }
 
 .header {
@@ -215,28 +216,25 @@ th {
     border-radius: 0px;
 }
 
-.nav-pills .nav-link {
-    background-color: #f2f2f2 !important;
-    color: #f2a922 !important;
+.nav-link {
+    color: var(--sw360-navlink-color) !important;
+    font-size: 0.95rem;
+    font-weight: 600;
 }
 
-.nav-pills .nav-link:hover {
-    background-color: #f2f2f2 !important;
-    color: #21719c !important;
+.nav-link:hover {
+    color: var(--sw360-navlink-hover-color) !important;
+    border-bottom-color: var(--sw360-primary-color) !important;
 }
 
-.nav-pills .nav-link.active {
-    background-color: #0c70f2 !important;
-    color: white !important;
+.nav-link.active {
+    color: var(--sw360-navlink-active-color);
+    font-weight: bold;
 }
 
 .link {
     color: var(--sw360-primary-color);
     text-decoration: none;
-}
-
-.dropdown-item:focus {
-    background-color: lightgray !important;
 }
 
 .loaded {
@@ -292,17 +290,6 @@ th {
 .sw360-button {
     background-color: var(--sw360-primary-color);
     width: 100%;
-}
-
-.nav-item > .nav-link {
-    color: var(--sw360-navlink-color);
-    font-size: 0.95rem;
-    font-weight: 600;
-}
-
-.nav-link:hover {
-    color: var(--sw360-navlink-hover-color) !important;
-    border-bottom-color: var(--sw360-primary-color) !important;
 }
 
 .heading-div {
@@ -480,21 +467,6 @@ th {
     font-weight: bold;
 }
 
-.nav-pills .nav-link {
-    background-color: #f2f2f2 !important;
-    color: #f2a922 !important;
-}
-
-.nav-pills .nav-link:hover {
-    background-color: #f2f2f2 !important;
-    color: #21719c !important;
-}
-
-.nav-pills .nav-link.active {
-    background-color: #0c70f2 !important;
-    color: white !important;
-}
-
 .capsule-left {
     border-top-right-radius: 0%;
     border-bottom-right-radius: 0%;
@@ -622,10 +594,6 @@ th {
     border-color: #dbdce4 !important;
     color: #6b6c7e !important;
     background-color: #e89734 !important;
-}
-
-.dropdown-item span {
-    margin-right: 10px;
 }
 
 .page-content {
