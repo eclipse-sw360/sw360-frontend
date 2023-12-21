@@ -17,9 +17,11 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Check2Circle, XCircle } from 'react-bootstrap-icons'
 
-import { HttpStatus } from '@/object-types'
+import { Embedded, HttpStatus, Licenses } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, QuickFilter, Table, _ } from 'next-sw360'
+
+type EmbeddedLicenses = Embedded<Licenses, 'sw360:licenses'>
 
 function LicensesPage() {
     const params = useSearchParams()
@@ -56,24 +58,18 @@ function LicensesPage() {
         const controller = new AbortController()
         const signal = controller.signal
 
-        fetchData(queryUrl, signal).then((licenses: any) => {
+        fetchData(queryUrl, signal).then((licenses: EmbeddedLicenses) => {
             if (!CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])) {
                 setLicenseData(
-                    licenses['_embedded']['sw360:licenses'].map(
-                        (item: { _links: { self: { href: string } }; fullName: string; checked: boolean }) => [
-                            _(<Link href={item._links.self.href}>{item._links.self.href.split('/').pop()}</Link>),
-                            item.fullName,
-                            _(
-                                <center>
-                                    {item.checked ? (
-                                        <Check2Circle color='#287d3c' size='16' />
-                                    ) : (
-                                        <XCircle color='red' />
-                                    )}
-                                </center>
-                            ),
-                        ]
-                    )
+                    licenses['_embedded']['sw360:licenses'].map((item: Licenses) => [
+                        _(<Link href={item._links.self.href}>{item._links.self.href.split('/').pop()}</Link>),
+                        item.fullName,
+                        _(
+                            <center>
+                                {item.checked ? <Check2Circle color='#287d3c' size='16' /> : <XCircle color='red' />}
+                            </center>
+                        ),
+                    ])
                 )
                 // setNumberOfComponent(data.length)
                 setLoading(false)
