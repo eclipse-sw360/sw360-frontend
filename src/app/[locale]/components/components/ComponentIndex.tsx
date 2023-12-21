@@ -37,45 +37,45 @@ const ComponentIndex = () => {
 
     const advancedSearch = [
         {
-            fieldName: 'Component Name',
+            fieldName: t('Component Name'),
             value: '',
             paramName: 'name',
         },
         {
-            fieldName: 'Categories',
+            fieldName: t('Categories'),
             value: '',
             paramName: 'categories',
         },
         {
-            fieldName: 'Component Type',
+            fieldName: t('Component Type'),
             value: [
                 {
                     key: 'OSS',
-                    text: 'OSS',
+                    text: t('OSS'),
                 },
                 {
                     key: 'COTS',
-                    text: 'COTS',
+                    text: t('COTS'),
                 },
                 {
                     key: 'INTERNAL',
-                    text: 'Internal',
+                    text: t('Internal'),
                 },
                 {
                     key: 'INNER_SOURCE',
-                    text: 'Inner Source',
+                    text: t('Inner Source'),
                 },
                 {
                     key: 'SERVICE',
-                    text: 'Service',
+                    text: t('Service'),
                 },
                 {
                     key: 'FREESOFTWARE',
-                    text: 'Freeware',
+                    text: t('Freeware'),
                 },
                 {
                     key: 'CODE_SNIPPET',
-                    text: 'Code Snippet',
+                    text: t('Code Snippet'),
                 },
             ],
             paramName: 'type',
@@ -85,43 +85,43 @@ const ComponentIndex = () => {
             value: [
                 {
                     key: 'None',
-                    text: 'None',
+                    text: t('None'),
                 },
             ],
             paramName: 'group',
         },
         {
-            fieldName: 'Languages',
+            fieldName: t('Languages'),
             value: '',
             paramName: 'languages',
         },
         {
-            fieldName: 'Software Platforms',
+            fieldName: t('Software Platforms'),
             value: '',
             paramName: 'softwarePlatform',
         },
         {
-            fieldName: 'Vendors',
+            fieldName: t('Vendors'),
             value: '',
             paramName: 'vendors',
         },
         {
-            fieldName: 'Operating Systems',
+            fieldName: t('Operating Systems'),
             value: '',
             paramName: 'operatingSystem',
         },
         {
-            fieldName: 'Main Licenses',
+            fieldName: t('Main Licenses'),
             value: '',
             paramName: 'mainLicenses',
         },
         {
-            fieldName: 'Created By (Email)',
+            fieldName: t('Created By (Email)'),
             value: '',
             paramName: 'createdBy',
         },
         {
-            fieldName: 'Created On',
+            fieldName: t('Created On'),
             value: [
                 {
                     key: 'EQUAL',
@@ -137,7 +137,7 @@ const ComponentIndex = () => {
                 },
                 {
                     key: 'BETWEEN',
-                    text: 'Between',
+                    text: t('Between'),
                 },
             ],
             paramName: 'createdOn',

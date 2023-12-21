@@ -1,9 +1,5 @@
 {
     "default": {
-        "": "",
-        "<=": "<=",
-        "=": "=",
-        ">=": ">=",
         "A vendor with same name already exists": "已存在同名小贩",
         "ACCEPTED": "接受",
         "ADJACENT_NETWORK": "ADJACENT_網路",
@@ -122,7 +118,7 @@
         "Click to add Releases": "點擊以新增放行",
         "Click to add Vendor Advisory": "點擊以新增供应商咨詢",
         "Click to add Vulnerability Reference": "點擊以新增脆弱性 參考",
-        "Click to add row to": "點擊以新增行到 {name_value}",
+        "Click to add row to": "點擊以新增行到 {named_value}",
         "Click to add row to Additional Data": "點擊以新增列至附加資料",
         "Click to add row to Additional Roles": "點擊以新增列到附加角色",
         "Click to add row to External Id": "點擊以新增列到外部 ID",
@@ -143,7 +139,6 @@
         "Commercial Details Administration": "商業資訊管理",
         "Committer": "提交者",
         "Common weakness enumeration": "常见的弱點",
-        "Complexitty": "",
         "Complexity": "复杂性",
         "Component Clearing Report": "元件清除報告",
         "Component License Information": "元件授權資訊",
