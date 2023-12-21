@@ -42,7 +42,7 @@ export default interface ReleaseDetail {
     softwarePlatforms?: string[]
     sourceCodeDownloadurl?: string
     binaryDownloadurl?: string
-    releaseIdToRelationship?: Map<string, string>
+    releaseIdToRelationship?: { [k: string]: string }
     modifiedOn?: string
     cpeId?: string
     eccInformation?: ECCInformation

@@ -18,8 +18,10 @@ import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'r
 import { FaInfoCircle } from 'react-icons/fa'
 
 import { Table, _ } from '@/components/sw360'
-import { HttpStatus } from '@/object-types'
+import { Embedded, HttpStatus, Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+
+type EmbeddedProject = Embedded<Project, 'sw360:projects'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -134,7 +136,7 @@ export default function LinkProjects({
         },
     ]
 
-    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<any> => {
+    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<EmbeddedProject> => {
         try {
             const response = await ApiUtils.GET(
                 `projects?name=${searchValue}&luceneSearch=true`,
@@ -150,7 +152,7 @@ export default function LinkProjects({
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
                 CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
                     ? []
-                    : data['_embedded']['sw360:projects'].map((elem: any) => [
+                    : data['_embedded']['sw360:projects'].map((elem: Project) => [
                           elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                           elem.name,
                           elem.version,

@@ -17,7 +17,11 @@ import { Spinner } from 'react-bootstrap'
 import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
+
+import { Component, Embedded } from '@/object-types'
 import HomeTableHeader from './HomeTableHeader'
+
+type EmbeddedComponent = Embedded<Component, 'sw360:components'>
 
 function MyComponentsWidget() {
     const [data, setData] = useState([])
@@ -48,15 +52,13 @@ function MyComponentsWidget() {
         const signal = controller.signal
 
         fetchData(queryUrl, signal)
-            .then((components: any) => {
+            .then((components: EmbeddedComponent) => {
                 if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
                     setData(
-                        components['_embedded']['sw360:components'].map(
-                            (item: { name: string; description: string; id: string }) => [
-                                _(<Link href={'components/detail/' + item.id}>{item.name}</Link>),
-                                CommonUtils.truncateText(item.description, 40),
-                            ]
-                        )
+                        components['_embedded']['sw360:components'].map((item: Component) => [
+                            _(<Link href={'components/detail/' + item.id}>{item.name}</Link>),
+                            CommonUtils.truncateText(item.description, 40),
+                        ])
                     )
                     setLoading(false)
                 }

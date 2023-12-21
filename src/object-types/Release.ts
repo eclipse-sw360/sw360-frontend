@@ -36,7 +36,7 @@ interface Release {
     sourceCodeDownloadurl?: string
     binaryDownloadurl?: string
     repository?: Repository
-    releaseIdToRelationship?: any
+    releaseIdToRelationship?: { [k: string]: string }
     clearingInformation?: ClearingInformation
     cotsDetails?: COTSDetails
     attachmentDTOs?: Array<Attachment>
