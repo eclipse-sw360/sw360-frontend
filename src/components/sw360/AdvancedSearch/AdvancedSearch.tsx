@@ -71,8 +71,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     let fieldList: JSX.Element[] = []
     if (fields) {
         fieldList = fields.map((field: Field) => {
-            // @ts-expect-error: TS2345 invalidate translation even if is valid under
-            const fieldLabel = t(field.fieldName)
+            const fieldLabel = field.fieldName
             if (field.paramName === 'createdOn' && Array.isArray(field.value)) {
                 return (
                     <div key='createdOn'>
@@ -156,12 +155,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     return (
         <div className='card-deck'>
             <div id='advanced-search' className='card'>
-                <div className='card-header'>
-                    {
-                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                        t(title)
-                    }
-                </div>
+                <div className='card-header'>{title}</div>
 
                 <div className='card-body'>
                     <Form>{fieldList}</Form>

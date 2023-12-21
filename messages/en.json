@@ -1,9 +1,5 @@
 {
     "default": {
-        "": "",
-        "<=": "<=",
-        "=": "=",
-        ">=": ">=",
         "A vendor with same name already exists": "A vendor with same name already exists",
         "ACCEPTED": "Accepted",
         "ADJACENT_NETWORK": "ADJACENT_NETWORK",
@@ -143,7 +139,6 @@
         "Commercial Details Administration": "Commercial Details Administration",
         "Committer": "Committer",
         "Common weakness enumeration": "Common weakness enumeration",
-        "Complexitty": "",
         "Complexity": "Complexity",
         "Component Clearing Report": "Component Clearing Report",
         "Component License Information": "Component License Information",
