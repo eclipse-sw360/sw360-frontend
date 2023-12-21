@@ -11,8 +11,8 @@
 import { Attachment, Links, Release, User, Vendor } from '@/object-types'
 
 interface Component {
-    id?: string
-    name?: string
+    id: string
+    name: string
     description?: string
     createdOn?: string
     componentType?: string
