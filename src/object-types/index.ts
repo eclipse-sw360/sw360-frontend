@@ -33,6 +33,7 @@ import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
 import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
+import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
 import Project from './Project'
@@ -107,6 +108,10 @@ export type {
     VerificationStateInfo,
     Vulnerability,
 }
+
+// NavList is special function
+// For the base menu
+export { NavList }
 
 // Enums
 import ActionType from './enums/ActionType'
