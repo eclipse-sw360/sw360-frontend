@@ -1,0 +1,115 @@
+/*
+  Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
+  Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.summary-table {
+    border: 1px solid lightgray;
+    margin-bottom: 2rem !important;
+}
+
+.summary-table tbody td:first-child {
+    width: 30%;
+}
+
+.summary-table tbody a {
+    color: #f7941e !important;
+    text-decoration-line: none;
+}
+
+.summary-table tbody td {
+    word-wrap: break-word;
+}
+
+#preferences-tittle {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    color: #fff;
+    background-color: #5d8ea9;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.checkbox {
+    cursor: pointer;
+    height: 14px;
+    width: 14px;
+    border: 1px solid gray !important;
+}
+
+.checkbox + label {
+    position: relative;
+    top: -0.1rem;
+}
+
+.label {
+    color: #272833;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.label:hover {
+    cursor: pointer;
+    color: #5d8ea9;
+}
+
+.checkbox:disabled:checked {
+    background-color: gray;
+}
+
+.checkbox:disabled + label:hover {
+    cursor: not-allowed;
+}
+
+.section {
+    border: 1px solid #cdced9;
+    box-shadow: 0 1px 3px -1px rgb(0 0 0 / 60%);
+}
+
+.section-header {
+    background-color: #fff;
+    font-size: 1rem;
+    padding: 0.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #6b6c7e;
+}
+
+.section-header.selected {
+    background-color: rgba(247, 148, 30, 0.4) !important;
+    color: black;
+}
+
+.section-header:hover {
+    cursor: pointer;
+    background-color: rgba(247, 148, 30, 0.12);
+}
+
+.section-body {
+    background-color: white;
+    padding: 1rem 1rem 1.5rem 1rem;
+}
+
+.body-wrapper {
+    overflow: hidden;
+    transition: max-height 0.5s;
+}
+
+.body-wrapper.show {
+    max-height: 500px;
+}
+
+.body-wrapper.collapse {
+    max-height: 0px;
+}

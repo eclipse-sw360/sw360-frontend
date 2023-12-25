@@ -17,6 +17,11 @@ interface User {
     fullName: string
     givenName: string
     lastName: string
+    wantsMailNotification?: boolean
+    notificationPreferences?: { [key: string]: boolean }
+    secondaryDepartmentsAndRoles?: { [key: string]: Array<string> }
+    externalid?: string
+    userGroup?: string
     _links: Links
 }
 
