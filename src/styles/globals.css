@@ -160,7 +160,7 @@ th {
 }
 
 .btn {
-    font-weight: 500 !important;
+    font-weight: 700 !important;
     border-radius: 3px !important;
 }
 
@@ -604,4 +604,11 @@ th {
 .fi.custom-class,
 .fi-flag.custom-class {
     cursor: pointer;
+}
+
+.alert-info {
+    background-color: #eef2fa !important;
+    border-color: #89a7e0 !important;
+    color: #2e5aac !important;
+    font-size: 0.875rem !important;
 }

@@ -23,3 +23,4 @@ export const LOCALES = [
     { i18n: 'zh-TW', flag: 'tw' },
 ]
 export const locales = LOCALES.map((locale) => locale.i18n)
+export const INTL_NAMESPACE = 'default'
