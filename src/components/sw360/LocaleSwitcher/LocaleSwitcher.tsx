@@ -51,15 +51,15 @@ function LocaleSwitcher() {
 
     return (
         <Dropdown onSelect={handleSelect}>
-            <Dropdown.Toggle variant='secondary' id='dropdown-basic'>
+            <Dropdown.Toggle className='no-border' id='dropdown-basic'>
                 <span className={`fi fi-${getCurrentFlag()}`} />
             </Dropdown.Toggle>
 
             <Dropdown.Menu align={'end'}>
                 {LOCALES.map((option) => (
                     <Dropdown.Item eventKey={option.i18n} key={option.i18n}>
-                        <span className={`fi fi-${option.flag}`} />
-                        <span style={{ marginLeft: '4px' }}>{getLanguageName(option.i18n)}</span>
+                        <span className={`fi fi-${option.flag} me-2`} />
+                        <span>{getLanguageName(option.i18n)}</span>
                     </Dropdown.Item>
                 ))}
             </Dropdown.Menu>

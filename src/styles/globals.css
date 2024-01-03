@@ -616,3 +616,8 @@ th {
     color: #2e5aac !important;
     font-size: 0.875rem !important;
 }
+
+.no-border {
+    border: none !important;
+    background: none !important;
+}
