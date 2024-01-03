@@ -43,11 +43,6 @@ function NavList() {
                 { href: '#', name: t('Department'), id: 'admin_department' },
             ],
         },
-        {
-            href: '/preferences',
-            name: t('Preferences'),
-            id: 'preferences',
-        },
     ]
 
     return navlist

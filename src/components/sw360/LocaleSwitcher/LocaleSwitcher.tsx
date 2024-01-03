@@ -11,7 +11,7 @@
 
 import { useLocale } from 'next-intl'
 import React, { useTransition } from 'react'
-import { Dropdown } from 'react-bootstrap'
+import { NavDropdown } from 'react-bootstrap'
 
 import { LOCALES } from '@/constants'
 import { usePathname, useRouter } from '../../../navigation'
@@ -50,20 +50,19 @@ function LocaleSwitcher() {
     }
 
     return (
-        <Dropdown onSelect={handleSelect}>
-            <Dropdown.Toggle className='no-border' id='dropdown-basic'>
-                <span className={`fi fi-${getCurrentFlag()}`} />
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu align={'end'}>
-                {LOCALES.map((option) => (
-                    <Dropdown.Item eventKey={option.i18n} key={option.i18n}>
-                        <span className={`fi fi-${option.flag} me-2`} />
-                        <span>{getLanguageName(option.i18n)}</span>
-                    </Dropdown.Item>
-                ))}
-            </Dropdown.Menu>
-        </Dropdown>
+        <NavDropdown
+            onSelect={handleSelect}
+            id='localeSwitcherDropdown'
+            title={<span className={`fi fi-${getCurrentFlag()}`} />}
+            align='end'
+        >
+            {LOCALES.map((option) => (
+                <NavDropdown.Item eventKey={option.i18n} key={option.i18n}>
+                    <span className={`fi fi-${option.flag} me-2`} />
+                    <span>{getLanguageName(option.i18n)}</span>
+                </NavDropdown.Item>
+            ))}
+        </NavDropdown>
     )
 }
 

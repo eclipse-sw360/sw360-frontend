@@ -15,7 +15,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSelectedLayoutSegment } from 'next/navigation'
 import { useState } from 'react'
-import { Navbar as BSNavbar, Col, Container, Form, Nav, NavDropdown, Row } from 'react-bootstrap'
+import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
 
 import sw360logo from '@/assets/images/sw360-logo.svg'
 import { NavList } from '@/object-types'
@@ -87,32 +87,27 @@ function Navbar() {
 
     return (
         <>
-            <BSNavbar className={`${pathname != '/' ? 'bg-body-tertiary' : ''}`}>
-                <Container style={{ marginLeft: 0 }}>
+            <BSNavbar expand='lg' className='bg-body-tertiary'>
+                <Container fluid>
                     <BSNavbar.Brand href='/'>
                         <Image src={sw360logo} height={57} width={147} alt='SW360 Logo' />
                     </BSNavbar.Brand>
-                    {pathname != '/' && (
-                        <Nav className='me-auto'>
-                            <NavItems />
-                        </Nav>
-                    )}
-                </Container>
-                {pathname != '/' && (
-                    <Form>
-                        <Row>
-                            <Col xs='auto'>
-                                <Form.Control type='text' placeholder='Search' className=' mr-sm-2' />
-                            </Col>
-                            <Col xs='auto'>
+                    <BSNavbar.Toggle aria-controls='navbarScroll' />
+                    <BSNavbar.Collapse id='navbarScroll'>
+                        {pathname != '/' && (
+                            <Nav className='me-auto my-2 my-lg-0' navbarScroll>
+                                <NavItems />
+                            </Nav>
+                        )}
+                        {pathname != '/' && (
+                            <Form className='d-flex gap-3'>
+                                <Form.Control type='text' placeholder='Search' className='me-2' />
                                 <ProfileDropdown />
-                            </Col>
-                            <Col xs='auto'>
                                 <LocaleSwitcher />
-                            </Col>
-                        </Row>
-                    </Form>
-                )}
+                            </Form>
+                        )}
+                    </BSNavbar.Collapse>
+                </Container>
             </BSNavbar>
         </>
     )

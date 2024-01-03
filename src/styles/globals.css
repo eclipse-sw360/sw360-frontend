@@ -617,7 +617,7 @@ th {
     font-size: 0.875rem !important;
 }
 
-.no-border {
-    border: none !important;
-    background: none !important;
+.profile-image {
+    width: 32px;
+    height: 32px;
 }
