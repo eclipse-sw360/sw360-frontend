@@ -60,6 +60,10 @@ code {
     padding-top: 1rem;
 }
 
+.authscreen {
+    background-color: #f1f2f5;
+}
+
 html,
 body {
     height: 100%;
