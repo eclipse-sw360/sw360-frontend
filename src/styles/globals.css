@@ -75,36 +75,6 @@ body {
     flex-direction: column;
 }
 
-#content {
-    flex: 1;
-}
-
-/* Footer component need stay always on bottom floating */
-footer {
-    color: white;
-    background-color: #30313f;
-    text-align: center;
-    flex-shrink: 0;
-    padding-top: 40px;
-    padding-bottom: 40px;
-    left: 0;
-    width: 100%;
-    position: absolute;
-    margin-top: 20px;
-}
-
-.footerAlignment {
-    background-color: #30313f;
-    position: relative;
-    bottom: '0px';
-    width: '100%';
-}
-
-#footer a {
-    color: var(--sw360-primary-color) !important;
-    text-decoration-line: none;
-}
-
 .header a {
     color: var(--sw360-primary-color) !important;
     text-decoration-line: none;
@@ -629,4 +599,8 @@ th {
 .overlay-trugger {
     font-size: 18px;
     color: gray !important;
+}
+
+.footer {
+    margin-top: auto;
 }

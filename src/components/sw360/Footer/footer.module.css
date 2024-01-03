@@ -18,9 +18,18 @@
     color: white;
 }
 
-.poweredBy {
-    color: white;
-    background-color: #30313f;
+.footerVersion {
+    color: #9e9e9e;
 }
 
+.poweredBy {
+    color: white;
+}
 
+.sw360footer {
+    background-color: #30313f;
+    height: 8vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
