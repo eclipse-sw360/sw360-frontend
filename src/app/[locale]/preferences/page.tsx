@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { ApiUtils } from '@/utils/index'
 import { Metadata } from 'next'
 import { getServerSession } from 'next-auth'
