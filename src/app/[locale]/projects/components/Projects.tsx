@@ -75,13 +75,9 @@ function Project() {
                     <>
                         <OverlayTrigger overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}>
                             {state === 'ACTIVE' ? (
-                                <span className='badge bg-success capsule-left' style={{ fontSize: '0.8rem' }}>
-                                    {'PS'}
-                                </span>
+                                <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
                             ) : (
-                                <span className='badge bg-secondary capsule-left' style={{ fontSize: '0.8rem' }}>
-                                    {'PS'}
-                                </span>
+                                <span className='badge bg-secondary capsule-left overlay-badge'>{'PS'}</span>
                             )}
                         </OverlayTrigger>
 
@@ -91,17 +87,11 @@ function Project() {
                             }
                         >
                             {clearingState === 'OPEN' ? (
-                                <span className='badge bg-danger capsule-right' style={{ fontSize: '0.8rem' }}>
-                                    {'CS'}
-                                </span>
+                                <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
                             ) : clearingState === 'IN_PROGRESS' ? (
-                                <span className='badge bg-warning capsule-right' style={{ fontSize: '0.8rem' }}>
-                                    {'CS'}
-                                </span>
+                                <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
                             ) : (
-                                <span className='badge bg-success capsule-right' style={{ fontSize: '0.8rem' }}>
-                                    {'CS'}
-                                </span>
+                                <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
                             )}
                         </OverlayTrigger>
                     </>
@@ -118,26 +108,26 @@ function Project() {
                     <>
                         <span className='d-flex justify-content-evenly'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                                <Link href={`/projects/edit/${id}`} style={{ color: 'gray', fontSize: '18px' }}>
+                                <Link href={`/projects/edit/${id}`} className='overlay-trigger'>
                                     <FaPencilAlt className='btn-icon' />
                                 </Link>
                             </OverlayTrigger>
 
                             <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
                                 <span className='d-inline-block'>
-                                    <MdOutlineTask className='btn-icon' style={{ color: 'gray', fontSize: '20px' }} />
+                                    <MdOutlineTask className='btn-icon overlay-trigger' />
                                 </span>
                             </OverlayTrigger>
 
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
                                 <span className='d-inline-block'>
-                                    <FaClipboard className='btn-icon' style={{ color: 'gray', fontSize: '18px' }} />
+                                    <FaClipboard className='btn-icon overlay-trigger' />
                                 </span>
                             </OverlayTrigger>
 
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                 <span className='d-inline-block'>
-                                    <FaTrashAlt className='btn-icon' style={{ color: 'gray', fontSize: '18px' }} />
+                                    <FaTrashAlt className='btn-icon overlay-trigger' />
                                 </span>
                             </OverlayTrigger>
                         </span>
@@ -279,7 +269,7 @@ function Project() {
                 <div className='col-lg-10'>
                     <div className='row'>
                         <PageButtonHeader title={`${t('PROJECTS')}`} buttons={headerbuttons}>
-                            <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
+                            <div className='btn-group' role='group'>
                                 <Dropdown>
                                     <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
@@ -301,7 +291,7 @@ function Project() {
                         {status === 'authenticated' ? (
                             <Table columns={columns} server={server} selector={true} sort={false} />
                         ) : (
-                            <div className='col-12' style={{ textAlign: 'center' }}>
+                            <div className='col-12 d-flex justify-content-center align-items-center'>
                                 <Spinner className='spinner' />
                             </div>
                         )}

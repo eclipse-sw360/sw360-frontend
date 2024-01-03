@@ -621,3 +621,12 @@ th {
     width: 32px;
     height: 32px;
 }
+
+.overlay-badge {
+    font-size: 0.8rem;
+}
+
+.overlay-trugger {
+    font-size: 18px;
+    color: gray !important;
+}
