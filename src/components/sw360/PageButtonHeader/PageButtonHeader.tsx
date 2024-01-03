@@ -14,6 +14,8 @@ import Link from 'next/link'
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
 
+import { Button } from 'react-bootstrap'
+
 function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
     let buttonList: JSX.Element[] = []
     if (buttons) {
@@ -22,29 +24,18 @@ function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
                 // Button needs to link to the referenced page from props (value)
                 // and switch to the correct tab (key)
                 <Link href={value['link']} key={key}>
-                    <button
-                        key={key}
-                        className={`btn btn-${value['type']}`}
-                        style={{ marginRight: '10px' }}
-                        onClick={value.onClick}
-                    >
+                    <Button key={key} variant={`${value['type']}`}>
                         {value?.name}
-                    </button>
+                    </Button>
                 </Link>
             )
         })
     }
 
     return (
-        <div className={`row ${styles['buttonheader-toolbar']}`}>
-            <div className='col-auto'>
-                <div className='btn-toolbar' role='toolbar'>
-                    <div key='buttongroup' className='btn-group' role='group'>
-                        {buttonList}
-                        {children}
-                    </div>
-                </div>
-            </div>
+        <div className='d-flex gap-2'>
+            {buttonList}
+            {children}
             {title && <div className={`col text-truncate ${styles['buttonheader-title']}`}>{title}</div>}
         </div>
     )
