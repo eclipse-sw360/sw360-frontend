@@ -1,6 +1,5 @@
 {
     "default": {
-        "": "",
         "A vendor with same name already exists": "A vendor with same name already exists",
         "ACCEPTED": "Accepted",
         "ADJACENT_NETWORK": "ADJACENT_NETWORK",
@@ -308,6 +307,7 @@
         "Evaluation Start": "Evaluation Start",
         "Everyone": "Everyone",
         "Exact Match": "Exact Match",
+        "Exact_Match_Info": "The search result will display elements exactly matching the input. Equivalent to using (\") around the search keyword. Applied on Component Name.",
         "Expert": "Expert",
         "Export SBOM": "Export SBOM",
         "Export Spreadsheet": "Export Spreadsheet",

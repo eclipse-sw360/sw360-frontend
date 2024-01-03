@@ -168,99 +168,99 @@ function Project() {
 
     const advancedSearch = [
         {
-            fieldName: 'Project Name',
+            fieldName: t('Project Name'),
             value: '',
             paramName: 'name',
         },
         {
-            fieldName: 'Project Version',
+            fieldName: t('Project Version'),
             value: '',
             paramName: 'version',
         },
         {
-            fieldName: 'Project Type',
+            fieldName: t('Project Type'),
             value: [
                 {
                     key: 'Customer Project',
-                    text: 'Customer Project',
+                    text: t('Customer Project'),
                 },
                 {
                     key: 'Internal Project',
-                    text: 'Internal Project',
+                    text: t('Internal Project'),
                 },
                 {
                     key: 'Product',
-                    text: 'Product',
+                    text: t('Product'),
                 },
                 {
                     key: 'Service',
-                    text: 'Service',
+                    text: t('Service'),
                 },
                 {
                     key: 'Inner Source',
-                    text: 'Inner Source',
+                    text: t('Inner Source'),
                 },
             ],
             paramName: 'type',
         },
         {
-            fieldName: 'Project Responsible (Email)',
+            fieldName: t('Project Responsible (Email)'),
             value: '',
             paramName: 'projectResponsible',
         },
         {
-            fieldName: 'Group',
+            fieldName: t('Group'),
             value: [
                 {
                     key: 'None',
-                    text: 'None',
+                    text: t('None'),
                 },
             ],
             paramName: 'group',
         },
         {
-            fieldName: 'State',
+            fieldName: t('State'),
             value: [
                 {
                     key: 'Active',
-                    text: 'Active',
+                    text: t('Active'),
                 },
                 {
                     key: 'PhaseOut',
-                    text: 'PhaseOut',
+                    text: t('PhaseOut'),
                 },
                 {
                     key: 'Unknown',
-                    text: 'Unknown',
+                    text: t('Unknown'),
                 },
             ],
             paramName: 'state',
         },
         {
-            fieldName: 'Clearing State',
+            fieldName: t('Clearing State'),
             value: [
                 {
                     key: 'Open',
-                    text: 'Open',
+                    text: t('Open'),
                 },
                 {
                     key: 'In Progress',
-                    text: 'In Progress',
+                    text: t('In Progress'),
                 },
                 {
                     key: 'Closed',
-                    text: 'Closed',
+                    text: t('Closed'),
                 },
             ],
             paramName: 'clearingState',
         },
         {
-            fieldName: 'Tag',
+            fieldName: t('Tag'),
             value: '',
             paramName: 'tag',
         },
         {
-            fieldName: 'Additional Data',
+            fieldName: t('Additional Data'),
             value: '',
             paramName: 'additionalData',
         },
@@ -274,7 +274,7 @@ function Project() {
         <div className='container page-content'>
             <div className='row'>
                 <div className='col-lg-2'>
-                    <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+                    <AdvancedSearch title={t('Advanced Search')} fields={advancedSearch} />
                 </div>
                 <div className='col-lg-10'>
                     <div className='row'>
