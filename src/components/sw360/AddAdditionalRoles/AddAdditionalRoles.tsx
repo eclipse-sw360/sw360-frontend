@@ -7,8 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
 
@@ -19,27 +22,46 @@ interface Props {
     inputList?: InputKeyValue[]
 }
 
-function AddAdditionalRoles({ documentType, setDataInputList, inputList, setInputList }: Props) {
+function AddAdditionalRoles({
+    documentType,
+    setDataInputList,
+    inputList: propInputList,
+    setInputList: propSetInputList,
+}: Props) {
     const t = useTranslations('default')
+    const [inputList, setInputList] = useState<InputKeyValue[]>(
+        propInputList || [
+            {
+                key: documentType === DocumentTypes.COMPONENT ? 'Commiter' : 'Stakeholder',
+                value: '',
+            },
+        ]
+    )
+    const setInputData = propSetInputList || setInputList
+
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: InputKeyValue[] = [...inputList]
         list[index][name as keyof InputKeyValue] = value
-        setInputList(list)
-        setDataInputList(list)
+        setInputData(list)
+        if (setDataInputList) {
+            setDataInputList(list)
+        }
     }
 
     const handleRemoveClick = (index: number) => {
         const list = [...inputList]
         list.splice(index, 1)
-        setInputList(list)
-        setDataInputList(list)
+        setInputData(list)
+        if (setDataInputList) {
+            setDataInputList(list)
+        }
     }
 
     const handleAddClick = () => {
         documentType === DocumentTypes.COMPONENT
-            ? setInputList([...inputList, { key: 'Committer', value: '' }])
-            : setInputList([...inputList, { key: 'Stakeholder', value: '' }])
+            ? setInputData([...inputList, { key: 'Committer', value: '' }])
+            : setInputData([...inputList, { key: 'Stakeholder', value: '' }])
     }
 
     const defaultValue = () => {
@@ -58,7 +80,7 @@ function AddAdditionalRoles({ documentType, setDataInputList, inputList, setInpu
                                     <select
                                         className='form-select'
                                         key=''
-                                        name='role'
+                                        name='key'
                                         value={elem.key}
                                         aria-label={t('Additional Role')}
                                         defaultValue={defaultValue()}
@@ -87,7 +109,7 @@ function AddAdditionalRoles({ documentType, setDataInputList, inputList, setInpu
                                 </div>
                                 <div className='col-lg-5'>
                                     <input
-                                        name='email'
+                                        name='value'
                                         value={elem.value}
                                         type='email'
                                         onChange={(e) => handleInputChange(e, j)}
