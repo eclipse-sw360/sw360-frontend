@@ -171,10 +171,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                                 marginRight: '5px',
                             }}
                         />
-                        <ShowInfoOnHover
-                            text='The search result will display elements exactly matching the input. Equivalent to using
-                            (") around the search keyword. Applied on Component Name.'
-                        />
+                        <ShowInfoOnHover text={t('Exact_Match_Info')} />
                     </Form.Group>
                     <Form.Group>
                         <Button size='sm' variant='primary' className='w-100' onClick={submitSearch}>

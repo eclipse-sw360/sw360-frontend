@@ -12,7 +12,6 @@
 
 import { signIn, useSession } from 'next-auth/react'
 import { useLocale, useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
@@ -55,7 +54,7 @@ function AuthScreen() {
                     {status == 'loading' ? (
                         <PageSpinner />
                     ) : (
-                        <div className='portlet-content-container p-1' style={{ background: '#f1f2f5' }}>
+                        <div className='authscreen'>
                             <div className='portlet-body p-5'>
                                 <div className='jumbotron'>
                                     <h1 className='display-4'>{t('Welcome to SW360!')}</h1>
@@ -65,32 +64,20 @@ function AuthScreen() {
                                     <hr className='my-4' />
                                     <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
                                     {status === 'unauthenticated' ? (
-                                        <div className='buttons'>
-                                            <span>
-                                                <a
-                                                    className='btn btn-primary btn-lg'
-                                                    role='button'
-                                                    onClick={handleShow}
-                                                >
-                                                    {t('Sign In')}
-                                                </a>
-                                            </span>
-                                            <a
-                                                className='btn btn-outline-primary btn-lg'
-                                                style={{ marginLeft: '3rem' }}
-                                                role='button'
-                                            >
+                                        <>
+                                            <Button className='me-3' variant='primary' size='lg' onClick={handleShow}>
+                                                {t('Sign In')}
+                                            </Button>
+                                            <Button variant='outline-primary' size='lg'>
                                                 {t('Create Account')}
-                                            </a>
-                                        </div>
+                                            </Button>
+                                        </>
                                     ) : (
-                                        <div className='buttons'>
-                                            <span>
-                                                <Link className='btn btn-primary btn-lg' role='button' href='/home'>
-                                                    {t('Start')}
-                                                </Link>
-                                            </span>
-                                        </div>
+                                        <>
+                                            <Button variant='primary' size='lg' href='/home'>
+                                                {t('Start')}
+                                            </Button>
+                                        </>
                                     )}
                                 </div>
                             </div>

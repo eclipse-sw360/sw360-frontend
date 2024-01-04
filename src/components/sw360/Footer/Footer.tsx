@@ -17,52 +17,52 @@ import styles from './footer.module.css'
 function Footer() {
     return (
         <>
-            <footer className='footerAlignment'>
-                <div>
-                    <div className={`${styles.poweredBy} "pt-3"`}>
-                        Powered-by
-                        <Link
-                            className={styles.footerHref}
-                            href='http://www.github.com/eclipse/sw360'
-                            rel='noopener noreferrer'
-                            target='_blank'
-                        >
-                            {' '}
-                            SW360
-                        </Link>{' '}
-                        |
-                        <Link
-                            className={styles.footerHref}
-                            href='/resource/mkdocs/index.html'
-                            rel='noopener noreferrer'
-                            target='_blank'
-                        >
-                            {' '}
-                            SW360 Docs
-                        </Link>{' '}
-                        |
-                        <Link
-                            className={styles.footerHref}
-                            href='/resource/docs/api-guide.html'
-                            rel='noopener noreferrer'
-                            target='_blank'
-                        >
-                            {' '}
-                            REST API Docs
-                        </Link>{' '}
-                        |
-                        <Link
-                            className={styles.footerHref}
-                            href='https://github.com/eclipse/sw360/issues'
-                            rel='noopener noreferrer'
-                            target='_blank'
-                        >
-                            {' '}
-                            Public Issue Tracker
-                        </Link>
-                    </div>
+            <footer className={`${styles.sw360footer} footer d-flex flex-column`}>
+                <div className={`${styles.poweredBy} "pt-3"`}>
+                    Powered-by
+                    <Link
+                        className={styles.footerHref}
+                        href='http://www.github.com/eclipse/sw360'
+                        rel='noopener noreferrer'
+                        target='_blank'
+                    >
+                        {' '}
+                        SW360
+                    </Link>{' '}
+                    |
+                    <Link
+                        className={styles.footerHref}
+                        href='/resource/mkdocs/index.html'
+                        rel='noopener noreferrer'
+                        target='_blank'
+                    >
+                        {' '}
+                        SW360 Docs
+                    </Link>{' '}
+                    |
+                    <Link
+                        className={styles.footerHref}
+                        href='/resource/docs/api-guide.html'
+                        rel='noopener noreferrer'
+                        target='_blank'
+                    >
+                        {' '}
+                        REST API Docs
+                    </Link>{' '}
+                    |
+                    <Link
+                        className={styles.footerHref}
+                        href='https://github.com/eclipse/sw360/issues'
+                        rel='noopener noreferrer'
+                        target='_blank'
+                    >
+                        {' '}
+                        Public Issue Tracker
+                    </Link>
                 </div>
-                <div>Version: 17.0.0-SNAPSHOT | Branch: masterct (f69a224) | Build time: 2023-01-29T14:25:37Z</div>
+                <div className={styles.footerVersion}>
+                    Version: 17.0.0-SNAPSHOT | Branch: main (f69a224) | Build time: 2023-01-29T14:25:37Z
+                </div>
             </footer>
         </>
     )

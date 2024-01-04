@@ -57,12 +57,10 @@ async function RootLayout({ children, params: { locale } }: Props) {
             <body>
                 <Providers>
                     <NextIntlClientProvider locale={locale} messages={messages}>
-                        <div id='container'>
-                            <div id='content'>
-                                <Navbar />
-                                {children}
-                                <Footer />
-                            </div>
+                        <div id='container' className='d-flex flex-column min-vh-100'>
+                            <Navbar />
+                            {children}
+                            <Footer />
                         </div>
                     </NextIntlClientProvider>
                 </Providers>

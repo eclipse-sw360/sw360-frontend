@@ -60,6 +60,10 @@ code {
     padding-top: 1rem;
 }
 
+.authscreen {
+    background-color: #f1f2f5;
+}
+
 html,
 body {
     height: 100%;
@@ -69,36 +73,6 @@ body {
     min-height: 100%;
     display: flex;
     flex-direction: column;
-}
-
-#content {
-    flex: 1;
-}
-
-/* Footer component need stay always on bottom floating */
-footer {
-    color: white;
-    background-color: #30313f;
-    text-align: center;
-    flex-shrink: 0;
-    padding-top: 40px;
-    padding-bottom: 40px;
-    left: 0;
-    width: 100%;
-    position: absolute;
-    margin-top: 20px;
-}
-
-.footerAlignment {
-    background-color: #30313f;
-    position: relative;
-    bottom: '0px';
-    width: '100%';
-}
-
-#footer a {
-    color: var(--sw360-primary-color) !important;
-    text-decoration-line: none;
 }
 
 .header a {
@@ -611,4 +585,30 @@ th {
     border-color: #89a7e0 !important;
     color: #2e5aac !important;
     font-size: 0.875rem !important;
+}
+
+.profile-image {
+    width: 32px;
+    height: 32px;
+}
+
+.overlay-badge {
+    font-size: 0.8rem;
+}
+
+.overlay-trugger {
+    font-size: 18px;
+    color: gray !important;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.licadmin-upload {
+    color: #5d8ea9;
+    border: 1px solid #5d8ea9;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
 }

@@ -120,17 +120,7 @@ export default function AddVendor() {
                     </div>
                 </div>
                 <div className='mt-4'>
-                    <h5
-                        style={{
-                            color: '#5D8EA9',
-                            borderBottom: '1px solid #5D8EA9',
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            textTransform: 'uppercase',
-                        }}
-                    >
-                        {t('Upload License Archive')}
-                    </h5>
+                    <h5 className='licadmin-upload'>{t('Upload License Archive')}</h5>
                     <ToastContainer position='top-start'>
                         <ToastMessage
                             show={toastData.show}
