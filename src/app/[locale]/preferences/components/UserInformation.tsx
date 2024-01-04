@@ -52,18 +52,18 @@ const UserInformation = ({ user }: Props) => {
                 <tr>
                     <td className={styles.tag}>{t('Secondary Departments and Roles')}: </td>
                     <td id='user-secondary-departments-roles'>
-                        {user.secondaryDepartmentsAndRoles &&
-                            Object.keys(user.secondaryDepartmentsAndRoles).map((department) => (
-                                <li key={department}>
-                                    <span className='mapDisplayChildItemLeft' style={{ fontWeight: 'bold' }}>
-                                        {department}
-                                    </span>
-                                    <span className='mapDisplayChildItemRight'>
-                                        {' -> '}
-                                        {user.secondaryDepartmentsAndRoles[department]}
-                                    </span>
-                                </li>
-                            ))}
+                        <ul>
+                            {user.secondaryDepartmentsAndRoles &&
+                                Object.keys(user.secondaryDepartmentsAndRoles).map((department) => (
+                                    <li key={department}>
+                                        <span className='mapDisplayChildItemLeft bold-text'>{department}</span>
+                                        <span className='mapDisplayChildItemRight'>
+                                            {' -> '}
+                                            {user.secondaryDepartmentsAndRoles[department]}
+                                        </span>
+                                    </li>
+                                ))}
+                        </ul>
                     </td>
                 </tr>
             </tbody>

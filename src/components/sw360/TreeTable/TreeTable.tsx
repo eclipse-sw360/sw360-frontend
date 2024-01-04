@@ -112,7 +112,7 @@ const TreeTable = ({ data, setData, columns }: any) => {
     }
 
     return (
-        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+        <div className='container mt-3'>
             <div className='row'>
                 <div className='row'>
                     <Table data={tabledata} pagination={false} columns={columns} sort={false} />
