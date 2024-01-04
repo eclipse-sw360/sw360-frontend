@@ -10,7 +10,6 @@
 
 'use client'
 
-import { INTL_NAMESPACE } from '@/constants'
 import { useTranslations } from 'next-intl'
 import { Alert } from 'react-bootstrap'
 import styles from '../preferences.module.css'
@@ -27,7 +26,7 @@ interface Props {
 }
 
 const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props) => {
-    const t = useTranslations(INTL_NAMESPACE)
+    const t = useTranslations('default')
 
     return (
         <>

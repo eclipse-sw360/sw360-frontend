@@ -10,19 +10,17 @@
 
 'use client'
 
-import { INTL_NAMESPACE } from '@/constants'
-import { useTranslations } from 'next-intl'
-import { ToastMessage } from 'next-sw360'
 import { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
-import ToastData from '../../../../object-types/ToastData'
+
+import { ToastData } from '@/object-types'
+import { ToastMessage } from 'next-sw360'
 
 interface Props {
     state: { [key: string]: string | undefined }
 }
 
 const UpdateMessage = ({ state }: Props) => {
-    const t = useTranslations(INTL_NAMESPACE)
     const [toastData, setToastData] = useState<ToastData>({
         show: false,
         type: '',
@@ -46,10 +44,8 @@ const UpdateMessage = ({ state }: Props) => {
         <ToastContainer position='top-start'>
             <ToastMessage
                 show={toastData.show}
-                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                type={t(toastData?.type)}
-                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                message={t(toastData?.message)}
+                type={toastData?.type}
+                message={toastData?.message}
                 contextual={toastData?.contextual}
                 onClose={() => setToastData({ ...toastData, show: false })}
                 setShowToast={setToastData}

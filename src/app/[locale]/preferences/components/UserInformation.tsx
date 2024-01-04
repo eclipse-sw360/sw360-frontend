@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { INTL_NAMESPACE } from '@/constants'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import User from '../../../../object-types/User'
@@ -19,7 +18,7 @@ interface Props {
 }
 
 const UserInformation = ({ user }: Props) => {
-    const t = useTranslations(INTL_NAMESPACE)
+    const t = useTranslations('default')
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>
             <thead>

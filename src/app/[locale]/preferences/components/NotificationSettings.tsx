@@ -10,18 +10,10 @@
 
 'use client'
 
-import {
-    CLEARING_PREFERENCES,
-    COMPONENT_PREFERENCES,
-    MODERATION_PREFERENCES,
-    PROJECT_PREFERENCES,
-    RELEASE_PREFERENCES,
-} from '../DocumentsPreferences'
-
-import { INTL_NAMESPACE } from '@/constants'
-import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import styles from '../preferences.module.css'
+
+import { Preferences } from '@/object-types'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
@@ -33,32 +25,33 @@ interface Props {
     setNotificationSetting: React.Dispatch<React.SetStateAction<NotificationSetting>>
 }
 
-const PREFERENCES = [
-    {
-        documentType: 'Project',
-        setting: PROJECT_PREFERENCES,
-    },
-    {
-        documentType: 'Component',
-        setting: COMPONENT_PREFERENCES,
-    },
-    {
-        documentType: 'Release',
-        setting: RELEASE_PREFERENCES,
-    },
-    {
-        documentType: 'Moderation',
-        setting: MODERATION_PREFERENCES,
-    },
-    {
-        documentType: 'Clearing',
-        setting: CLEARING_PREFERENCES,
-    },
-]
-
 const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props) => {
-    const t = useTranslations(INTL_NAMESPACE)
     const [selectedType, setSelectedType] = useState('Project')
+
+    const preferences = Preferences()
+
+    const PREFERENCES = [
+        {
+            documentType: 'Project',
+            setting: preferences.PROJECT,
+        },
+        {
+            documentType: 'Component',
+            setting: preferences.COMPONENT,
+        },
+        {
+            documentType: 'Release',
+            setting: preferences.RELEASE,
+        },
+        {
+            documentType: 'Moderation',
+            setting: preferences.MODERATION,
+        },
+        {
+            documentType: 'Clearing',
+            setting: preferences.CLEARING,
+        },
+    ]
 
     const setPreferences = (event: React.ChangeEvent<HTMLInputElement>) => {
         setNotificationSetting({
@@ -83,10 +76,7 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
                             setSelectedType(selectedType === value.documentType ? 'None' : value.documentType)
                         }}
                     >
-                        {
-                            /* @ts-expect-error: TS2345 invalidate translation even if is valid under */
-                            t(value.documentType)
-                        }
+                        {value.documentType}
                     </div>
                     <div
                         id={value.documentType}
@@ -108,10 +98,7 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
                                             onChange={setPreferences}
                                         />
                                         <label className={`form-check-label ${styles.label}`} htmlFor={entry.id}>
-                                            {
-                                                /* @ts-expect-error: TS2345 invalidate translation even if is valid under */
-                                                t(entry.name)
-                                            }
+                                            {entry.name}
                                         </label>
                                     </div>
                                 </div>
