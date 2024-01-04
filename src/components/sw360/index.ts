@@ -29,6 +29,7 @@ import SelectCountry from './SelectCountry/SelectCountry'
 import SelectTableComponentOwner from './SelectTableComponentOwner/SelectTableComponentOwner'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
+import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 
 // Table component
@@ -61,6 +62,7 @@ export {
     ShowInfoOnHover,
     SideBar,
     Table,
+    ThemeSwitcher,
     ToastMessage,
     TreeTable,
     VendorDialog,
