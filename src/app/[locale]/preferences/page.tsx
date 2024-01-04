@@ -13,7 +13,10 @@ import { ApiUtils } from '@/utils/index'
 import { Metadata } from 'next'
 import { getServerSession } from 'next-auth'
 import User from '../../../object-types/User'
+import MessageContextProvider from './components/MessageContextProvider'
 import NotificationSettingForm from './components/NotificationSettingForm'
+import UpdateMessage from './components/UpdateMessage'
+import UserAccessToken from './components/UserAccessToken'
 
 export const metadata: Metadata = {
     title: 'Preferences',
@@ -28,7 +31,16 @@ const PreferencesPage = async () => {
     const session = await getServerSession(authOptions)
     const userPreferences: User = await getUserPreferences(session.user.access_token)
 
-    return <NotificationSettingForm user={userPreferences} />
+    return (
+        <div className='container page-content'>
+            <MessageContextProvider>
+                <NotificationSettingForm user={userPreferences} />
+                <br />
+                <UserAccessToken />
+                <UpdateMessage />
+            </MessageContextProvider>
+        </div>
+    )
 }
 
 export default PreferencesPage

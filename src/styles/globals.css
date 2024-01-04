@@ -425,7 +425,7 @@ th {
 .form-control.focus {
     background-color: #f0f5ff;
     border-color: #80acff;
-    box-shadow: 0 0 0 0.125rem #fff, 0 0 0 0.25rem #fbca8f;
+    box-shadow: 0 0 0 0.125rem #fff, 0 0 0 0.25rem #fbca8f !important;
     color: #272833;
     outline: 0;
 }
@@ -662,4 +662,61 @@ th {
 
 .bold-text {
     font-weight: bold;
+}
+
+.form-check-input[type='checkbox'] {
+    cursor: pointer;
+    height: 14px;
+    width: 14px;
+    border: 1px solid gray;
+}
+
+.form-check-input[type='checkbox'] + label {
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.form-check-label:hover {
+    color: #5d8ea9;
+}
+
+.form-check-input[type='checkbox']:checked:disabled {
+    background-color: gray;
+}
+
+.form-check-input[disabled] ~ .form-check-label, .form-check-input:disabled ~ .form-check-label {
+    cursor: not-allowed !important;
+}
+
+.invalid-feedback {
+    color: #da1414;
+    font-weight: 600;
+    margin-top: 0.25rem;
+    font-size: 0.875rem !important;
+}
+
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+    border-color: var(--bs-form-invalid-border-color);
+    padding-right: calc(1.5em + 0.75rem);
+    background-color: #feefef;
+}
+
+.was-validated .form-control:valid,
+.was-validated .form-control.is-valid {
+    background-color: #edf9f0;
+    border-color: #5aca75;
+    box-shadow: 0 0 rgb(0 0 0 / 0%);
+    color: #272833;
+}
+
+.form-control {
+    padding-bottom: 0.4375rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 0.4375rem !important;
+}
+
+.toast-container {
+    position: fixed !important;
 }
