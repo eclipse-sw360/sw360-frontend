@@ -10,8 +10,7 @@
 
 'use client'
 
-import { useState } from 'react'
-import styles from '../preferences.module.css'
+import { Accordion, Form } from 'react-bootstrap'
 
 import { Preferences } from '@/object-types'
 
@@ -26,8 +25,6 @@ interface Props {
 }
 
 const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props) => {
-    const [selectedType, setSelectedType] = useState('Project')
-
     const preferences = Preferences()
 
     const PREFERENCES = [
@@ -64,50 +61,32 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
     }
 
     return (
-        <>
+        <Accordion defaultActiveKey='Project'>
             {Object.values(PREFERENCES).map((value) => (
-                <div className={styles.section} key={value.documentType}>
-                    <div
-                        className={`${styles['section-header']} ${
-                            selectedType === value.documentType && styles.selected
-                        }`}
-                        id={`${value.documentType}Heading`}
-                        onClick={() => {
-                            setSelectedType(selectedType === value.documentType ? 'None' : value.documentType)
-                        }}
-                    >
-                        {value.documentType}
-                    </div>
-                    <div
-                        id={value.documentType}
-                        className={`${styles['body-wrapper']} ${
-                            selectedType === value.documentType ? styles.show : styles.collapse
-                        }`}
-                    >
-                        <div className={`${styles['section-body']}`}>
-                            {Object.values(value.setting).map((entry) => (
-                                <div className='form-group' key={entry.id}>
-                                    <div className='form-check'>
-                                        <input
-                                            id={entry.id}
+                <>
+                    <Accordion.Item eventKey={value.documentType}>
+                        <Accordion.Header>{value.documentType}</Accordion.Header>
+                        <Accordion.Body>
+                            <Form name={value.documentType}>
+                                <div className='mb-3'>
+                                    {Object.values(value.setting).map((entry) => (
+                                        <Form.Check
                                             type='checkbox'
-                                            className={`form-check-input ${styles.checkbox}`}
-                                            name={entry.id}
-                                            defaultChecked={notificationSetting.notificationPreferences?.[entry.id]}
+                                            label={entry.name}
+                                            title={entry.name}
+                                            key={`${value.documentType}_${entry.id}`}
                                             disabled={!notificationSetting.wantsMailNotification}
+                                            defaultChecked={notificationSetting.notificationPreferences?.[entry.id]}
                                             onChange={setPreferences}
                                         />
-                                        <label className={`form-check-label ${styles.label}`} htmlFor={entry.id}>
-                                            {entry.name}
-                                        </label>
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                            </Form>
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </>
             ))}
-        </>
+        </Accordion>
     )
 }
 

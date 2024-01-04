@@ -54,12 +54,11 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
             <Alert variant='info'>
                 {t('You will be notified on changes of an item if you have the selected role in the changed item')}.
             </Alert>
-            <div className='accordion' id='notificationSettings'>
-                <NotificationSettings
-                    notificationSetting={notificationSetting}
-                    setNotificationSetting={setNotificationSetting}
-                />
-            </div>
+
+            <NotificationSettings
+                notificationSetting={notificationSetting}
+                setNotificationSetting={setNotificationSetting}
+            />
         </>
     )
 }

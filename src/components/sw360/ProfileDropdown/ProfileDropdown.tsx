@@ -23,7 +23,7 @@ function ProfileDropdown() {
     const user_data = session
         ? JSON.parse(Buffer.from(session.user.access_token.split('.')[1], 'base64').toString())
         : null
-    const emailhash = MD5(user_data?.user_name)
+    const emailhash = MD5(user_data ? user_data.user_name : 'admin@sw360.org')
     const [profileImage, setProfileImage] = useState(`https://www.gravatar.com/avatar/${emailhash}?d=404`)
 
     useEffect(() => {

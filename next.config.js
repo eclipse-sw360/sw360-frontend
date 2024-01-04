@@ -11,7 +11,7 @@
 const withNextIntl = require('next-intl/plugin')()
 
 const nextConfig = {
-    reactStrictMode: true,
+    reactStrictMode: false,
     output: 'standalone',
 }
 
