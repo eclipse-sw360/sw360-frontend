@@ -9,34 +9,28 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { Embedded, Vulnerability } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import { SW360_API_URL } from '@/utils/env'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Dropdown, Spinner } from 'react-bootstrap'
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
-
-import { HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { AdvancedSearch, QuickFilter, Table, _ } from 'next-sw360'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
+
+type EmbeddedVulnerabilities = Embedded<Vulnerability, 'sw360:vulnerabilityApiDTOes'>
 
 function Vulnerabilities() {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const DEFAULT_VULNERABILITIES = 200
-    const [num, SetNum] = useState<number>(DEFAULT_VULNERABILITIES)
-
-    const [vulnerabilitiesData, setVulnerabilitiesData] = useState<null | any[]>(null)
-    const [search, setSearch] = useState({})
+    const { data: session, status } = useSession()
     const params = useSearchParams()
+    const [numVulnerabilities, setNumVulnerabilities] = useState<null | number>(null)
     const [vulnerabilityToBeDeleted, setVulnerabilityToBeDeleted] = useState<null | string>(null)
     const router = useRouter()
-
-    const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        setSearch({ keyword: event.currentTarget.value })
-    }
 
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
@@ -121,42 +115,25 @@ function Vulnerabilities() {
         },
     ]
 
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        ;(async () => {
-            try {
-                const queryUrl = CommonUtils.createUrlWithParams('vulnerabilities', Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-
-                const data = await response.json()
-
-                const dataTableFormat =
-                    CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:vulnerabilityApiDTOes'])
-                        ? []
-                        : data['_embedded']['sw360:vulnerabilityApiDTOes'].map((elem: any) => [
-                              elem.externalId ?? '',
-                              elem.title ?? '',
-                              { cvss: elem.cvss ?? '', cvssTime: elem.cvssTime ?? '' },
-                              elem.publishDate?.substring(0, elem.publishDate.lastIndexOf('T')) ?? '',
-                              elem.lastExternalUpdate?.substring(0, elem.lastExternalUpdate.lastIndexOf('T')) ?? '',
-                              elem.externalId ?? '',
-                          ])
-                setVulnerabilitiesData(dataTableFormat)
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [params])
+    const server = {
+        url: CommonUtils.createUrlWithParams(
+            `${SW360_API_URL}/resource/api/vulnerabilities`,
+            Object.fromEntries(params)
+        ),
+        then: (data: EmbeddedVulnerabilities) => {
+            setNumVulnerabilities(data.page.totalElements)
+            return data._embedded['sw360:vulnerabilityApiDTOes'].map((elem: Vulnerability) => [
+                elem.externalId ?? '',
+                elem.title ?? '',
+                { cvss: elem.cvss ?? '', cvssTime: elem.cvssTime ?? '' },
+                elem.publishDate?.substring(0, elem.publishDate.lastIndexOf('T')) ?? '',
+                elem.lastExternalUpdate?.substring(0, elem.lastExternalUpdate.lastIndexOf('T')) ?? '',
+                elem.externalId ?? '',
+            ])
+        },
+        total: (data: EmbeddedVulnerabilities) => data.page.totalElements,
+        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+    }
 
     return (
         <>
@@ -168,7 +145,7 @@ function Vulnerabilities() {
                 <div className='row'>
                     <div className='col-lg-2'>
                         <div className='row mb-3'>
-                            <QuickFilter id='' searchFunction={doSearch} />
+                            <QuickFilter id='vunerabilities.quickSearch' />
                         </div>
                         <div className='row'>
                             <AdvancedSearch title='Advanced Filter' fields={advancedSearch} />
@@ -181,34 +158,17 @@ function Vulnerabilities() {
                                     <button className='btn btn-primary col-auto' onClick={handleAddVulnerability}>
                                         {t('Add Vulnerability')}
                                     </button>
-                                    <Dropdown className='col-auto'>
-                                        <Dropdown.Toggle variant='secondary'>
-                                            {num !== -1 ? `${t('Show latest')} ${num}` : t('Show All')}
-                                        </Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => SetNum(200)}>200</Dropdown.Item>
-                                            <Dropdown.Item onClick={() => SetNum(500)}>500</Dropdown.Item>
-                                            <Dropdown.Item onClick={() => SetNum(1000)}>1000</Dropdown.Item>
-                                            <Dropdown.Item onClick={() => SetNum(-1)}>{t('All')}</Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
                                 </div>
                             </div>
                             <div className='col-auto buttonheader-title'>
-                                {`${t('VULNERABILITIES')} (${
-                                    vulnerabilitiesData
-                                        ? num === -1
-                                            ? vulnerabilitiesData.length
-                                            : Math.min(vulnerabilitiesData.length, num)
-                                        : '0'
-                                })`}
+                                {`${t('VULNERABILITIES')} (${numVulnerabilities ?? ''})`}
                             </div>
                         </div>
                         <div className='row mt-3'>
-                            {vulnerabilitiesData ? (
-                                <Table columns={columns} data={vulnerabilitiesData} sort={false} search={search} />
+                            {status === 'authenticated' ? (
+                                <Table columns={columns} server={server} selector={true} sort={false} />
                             ) : (
-                                <div className='col-12' style={{ textAlign: 'center' }}>
+                                <div className='col-12 d-flex justify-content-center align-items-center'>
                                     <Spinner className='spinner' />
                                 </div>
                             )}
