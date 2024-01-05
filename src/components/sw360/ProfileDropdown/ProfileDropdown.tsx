@@ -15,30 +15,23 @@ import { useEffect, useState } from 'react'
 import { Image, NavDropdown } from 'react-bootstrap'
 
 import sw360ProfileIcon from '@/assets/images/profile.svg'
+import { useLocalStorage } from '@/hooks'
 
 function ProfileDropdown() {
     const t = useTranslations('default')
-    const [useGravatar] = useState(() => {
-        const state = localStorage.getItem('useGravatar')
-        const initialValue = JSON.parse(state)
-        return initialValue || false
-    })
     const [profileImage, setProfileImage] = useState(sw360ProfileIcon.src)
-    const cachedImage = localStorage.getItem('gravatarImage')
+    const [useGravatar] = useLocalStorage('useGravatar', false)
+    const [gravatarImage] = useLocalStorage('gravatarImage', null)
 
     useEffect(() => {
         if (useGravatar) {
-            if (cachedImage) {
-                setProfileImage(cachedImage)
-            } else {
-                setProfileImage(sw360ProfileIcon.src)
+            if (gravatarImage) {
+                setProfileImage(gravatarImage ? gravatarImage : sw360ProfileIcon.src)
             }
         } else {
             setProfileImage(sw360ProfileIcon.src)
         }
-    }, [profileImage, useGravatar, cachedImage])
-
-    console.log(profileImage)
+    }, [gravatarImage, useGravatar])
 
     return (
         <NavDropdown

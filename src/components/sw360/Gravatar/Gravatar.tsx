@@ -10,61 +10,46 @@
 'use client'
 
 import { MD5 } from 'crypto-js'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Form, Image } from 'react-bootstrap'
 import { BsArrowCounterclockwise } from 'react-icons/bs'
 
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 
+import { useLocalStorage } from '@/hooks'
 import styles from './Gravatar.module.css'
 
-function Gravatar({ email, noCache = false }: { email: string; noCache: boolean }) {
-    const [useGravatar, setUseGravatar] = useState(() => {
-        const state = localStorage.getItem('useGravatar')
-        const initialValue = JSON.parse(state)
-        return initialValue || false
-    })
-    const [gravatarImage, setGravatarImage] = useState(null)
+function Gravatar({ email, noCache = false }: { email: string; noCache?: boolean }) {
+    const [gravatarImage, setGravatarImage] = useLocalStorage('gravatarImage', null)
+    const [useGravatar, setUseGravatar] = useLocalStorage('useGravatar', false)
 
     function handleCheckboxChange() {
-        setUseGravatar((prevValue: string) => {
+        setUseGravatar((prevValue: boolean) => {
             const newValue = !prevValue
-            localStorage.setItem('useGravatar', JSON.stringify(newValue))
             return newValue
         })
     }
 
     const downloadGravatarImage = useCallback(() => {
-        const gravatarUrl = `https://www.gravatar.com/avatar/${MD5(email)}?d=identicon`
+        const gravatarUrl = `https://www.gravatar.com/avatar/${MD5(email)}?d=404`
 
         fetch(gravatarUrl)
             .then((response) => response.blob())
             .then((blob) => {
                 const imageUrl = URL.createObjectURL(blob)
-                setGravatarImage(imageUrl)
-                // Cache the image URL in localStorage
-                localStorage.setItem('gravatarImage', imageUrl)
+                setGravatarImage(gravatarUrl)
+                console.log(imageUrl)
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
-    }, [email])
-
-    const handleRefreshGravatar = () => {
-        localStorage.removeItem('gravatarImage')
-        downloadGravatarImage()
-    }
+    }, [email, setGravatarImage])
 
     useEffect(() => {
         if (useGravatar) {
-            const cachedImage = localStorage.getItem('gravatarImage')
-            if (cachedImage || noCache) {
-                setGravatarImage(cachedImage)
-            } else {
+            if (!gravatarImage && noCache) {
                 downloadGravatarImage()
             }
-        } else {
-            setGravatarImage(sw360ProfileIcon.src)
         }
-    }, [useGravatar, email, downloadGravatarImage, noCache])
+    }, [useGravatar, gravatarImage, setGravatarImage, downloadGravatarImage, noCache])
 
     const iconSize = 64
 
@@ -80,8 +65,14 @@ function Gravatar({ email, noCache = false }: { email: string; noCache: boolean 
                     />
                 </div>
                 <div className='gap-2 d-flex align-items-center justify-contents-end'>
-                    <Image src={gravatarImage} width={iconSize} height={iconSize} alt='Gravatar' roundedCircle />
-                    {useGravatar && <BsArrowCounterclockwise onClick={handleRefreshGravatar} />}
+                    <Image
+                        src={useGravatar ? gravatarImage : sw360ProfileIcon.src}
+                        width={iconSize}
+                        height={iconSize}
+                        alt='Gravatar'
+                        roundedCircle
+                    />
+                    {useGravatar && <BsArrowCounterclockwise onClick={downloadGravatarImage} />}
                 </div>
             </div>
         </>

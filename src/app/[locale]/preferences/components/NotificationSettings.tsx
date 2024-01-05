@@ -10,6 +10,7 @@
 
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Accordion, Form } from 'react-bootstrap'
 
 import { Preferences } from '@/object-types'
@@ -26,29 +27,7 @@ interface Props {
 
 const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props) => {
     const preferences = Preferences()
-
-    const PREFERENCES = [
-        {
-            documentType: 'Project',
-            setting: preferences.PROJECT,
-        },
-        {
-            documentType: 'Component',
-            setting: preferences.COMPONENT,
-        },
-        {
-            documentType: 'Release',
-            setting: preferences.RELEASE,
-        },
-        {
-            documentType: 'Moderation',
-            setting: preferences.MODERATION,
-        },
-        {
-            documentType: 'Clearing',
-            setting: preferences.CLEARING,
-        },
-    ]
+    const [isClient, setIsClient] = useState(false)
 
     const setPreferences = (event: React.ChangeEvent<HTMLInputElement>) => {
         setNotificationSetting({
@@ -60,30 +39,34 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
         })
     }
 
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
     return (
-        <Accordion defaultActiveKey='Project'>
-            {Object.values(PREFERENCES).map((value) => (
+        // We always use the first key as initial key
+        <Accordion defaultActiveKey={preferences[0].key}>
+            {preferences.map((value) => (
                 <>
-                    <Accordion.Item eventKey={value.documentType}>
-                        <Accordion.Header>{value.documentType}</Accordion.Header>
-                        <Accordion.Body>
-                            <Form name={value.documentType}>
-                                <div className='mb-3'>
-                                    {Object.values(value.setting).map((entry) => (
-                                        <Form.Check
-                                            type='checkbox'
-                                            label={entry.name}
-                                            title={entry.name}
-                                            key={`${value.documentType}_${entry.id}`}
-                                            disabled={!notificationSetting.wantsMailNotification}
-                                            defaultChecked={notificationSetting.notificationPreferences?.[entry.id]}
-                                            onChange={setPreferences}
-                                        />
-                                    ))}
-                                </div>
-                            </Form>
-                        </Accordion.Body>
-                    </Accordion.Item>
+                    {' '}
+                    {isClient && (
+                        <Accordion.Item eventKey={value.key} key={value.key}>
+                            <Accordion.Header>{value.documentType}</Accordion.Header>
+                            <Accordion.Body>
+                                {value.entries.map((entry) => (
+                                    <Form.Check
+                                        type='checkbox'
+                                        label={entry.name}
+                                        title={entry.name}
+                                        key={`${entry.id}`}
+                                        disabled={!notificationSetting.wantsMailNotification}
+                                        defaultChecked={notificationSetting.notificationPreferences?.[entry.id]}
+                                        onChange={setPreferences}
+                                    />
+                                ))}
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    )}
                 </>
             ))}
         </Accordion>

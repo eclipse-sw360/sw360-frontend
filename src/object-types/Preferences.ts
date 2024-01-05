@@ -14,107 +14,124 @@ import { useTranslations } from 'next-intl'
 function Preferences() {
     const t = useTranslations('default')
 
-    const PROJECT_PREFERENCES = [
+    const PREFERENCES = [
         {
-            id: 'projectPROJECT_RESPONSIBLE',
-            name: t('Project Responsible'),
+            key: 'project',
+            documentType: t('Project'),
+            entries: [
+                {
+                    id: 'projectPROJECT_RESPONSIBLE',
+                    name: t('Project Responsible'),
+                },
+                {
+                    id: 'projectPROJECT_OWNER',
+                    name: t('Project Owner'),
+                },
+                {
+                    id: 'projectLEAD_ARCHITECT',
+                    name: t('Lead Architect'),
+                },
+                {
+                    id: 'projectMODERATORS',
+                    name: t('Moderator'),
+                },
+                {
+                    id: 'projectCONTRIBUTORS',
+                    name: t('Contributor'),
+                },
+                {
+                    id: 'projectSECURITY_RESPONSIBLES',
+                    name: t('Security Responsible'),
+                },
+                {
+                    id: 'projectROLES',
+                    name: t('Additional Role'),
+                },
+            ],
         },
+
         {
-            id: 'projectPROJECT_OWNER',
-            name: t('Project Owner'),
+            key: 'release',
+            documentType: t('Release'),
+            entries: [
+                {
+                    id: 'releaseCREATED_BY',
+                    name: t('Creator'),
+                },
+                {
+                    id: 'releaseCONTRIBUTORS',
+                    name: t('Contributor'),
+                },
+                {
+                    id: 'releaseMODERATORS',
+                    name: t('Moderator'),
+                },
+                {
+                    id: 'releaseSUBSCRIBERS',
+                    name: t('Subcriber'),
+                },
+                {
+                    id: 'releaseROLES',
+                    name: t('Additional Role'),
+                },
+            ],
         },
+
         {
-            id: 'projectLEAD_ARCHITECT',
-            name: t('Lead Architect'),
+            key: 'clearing',
+            documentType: t('Clearing'),
+            entries: [
+                {
+                    id: 'clearingREQUESTING_USER',
+                    name: t('Requesting User'),
+                },
+            ],
         },
+
         {
-            id: 'projectMODERATORS',
-            name: t('Moderator'),
+            key: 'moderation',
+            documentType: t('Moderation'),
+            entries: [
+                {
+                    id: 'moderationREQUESTING_USER',
+                    name: t('Requesting User'),
+                },
+                {
+                    id: 'moderationMODERATORS',
+                    name: t('Moderator'),
+                },
+            ],
         },
+
         {
-            id: 'projectCONTRIBUTORS',
-            name: t('Contributor'),
-        },
-        {
-            id: 'projectSECURITY_RESPONSIBLES',
-            name: t('Security Responsible'),
-        },
-        {
-            id: 'projectROLES',
-            name: t('Additional Role'),
+            key: 'component',
+            documentType: t('Component'),
+            entries: [
+                {
+                    id: 'componentCREATED_BY',
+                    name: t('Creator'),
+                },
+                {
+                    id: 'componentCOMPONENT_OWNER',
+                    name: t('Component Owner'),
+                },
+                {
+                    id: 'componentMODERATORS',
+                    name: t('Moderator'),
+                },
+                {
+                    id: 'componentSUBSCRIBERS',
+                    name: t('Subcriber'),
+                },
+                {
+                    id: 'componentROLES',
+                    name: t('Additional Role'),
+                },
+            ],
         },
     ]
 
-    const RELEASE_PREFERENCES = [
-        {
-            id: 'releaseCREATED_BY',
-            name: t('Creator'),
-        },
-        {
-            id: 'releaseCONTRIBUTORS',
-            name: t('Contributor'),
-        },
-        {
-            id: 'releaseMODERATORS',
-            name: t('Moderator'),
-        },
-        {
-            id: 'releaseSUBSCRIBERS',
-            name: t('Subcriber'),
-        },
-        {
-            id: 'releaseROLES',
-            name: t('Additional Role'),
-        },
-    ]
-    const CLEARING_PREFERENCES = [
-        {
-            id: 'clearingREQUESTING_USER',
-            name: t('Requesting User'),
-        },
-    ]
-
-    const MODERATION_PREFERENCES = [
-        {
-            id: 'moderationREQUESTING_USER',
-            name: t('Requesting User'),
-        },
-        {
-            id: 'moderationMODERATORS',
-            name: t('Moderator'),
-        },
-    ]
-
-    const COMPONENT_PREFERENCES = [
-        {
-            id: 'componentCREATED_BY',
-            name: t('Creator'),
-        },
-        {
-            id: 'componentCOMPONENT_OWNER',
-            name: t('Component Owner'),
-        },
-        {
-            id: 'componentMODERATORS',
-            name: t('Moderator'),
-        },
-        {
-            id: 'componentSUBSCRIBERS',
-            name: t('Subcriber'),
-        },
-        {
-            id: 'componentROLES',
-            name: t('Additional Role'),
-        },
-    ]
-
-    return {
-        PROJECT: PROJECT_PREFERENCES,
-        RELEASE: RELEASE_PREFERENCES,
-        MODERATION: MODERATION_PREFERENCES,
-        COMPONENT: COMPONENT_PREFERENCES,
-        CLEARING: CLEARING_PREFERENCES,
-    }
+    return PREFERENCES
 }
 
 export default Preferences
