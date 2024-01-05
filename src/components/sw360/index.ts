@@ -14,6 +14,7 @@ import AuthScreen from './AuthScreen/AuthScreen'
 import ComponentOwnerDialog from './ComponentOwnerDialog/ComponentOwnerDialog'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
+import Gravatar from './Gravatar/Gravatar'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
 import ModeratorsDialog from './ModeratorsDialog/ModeratorsDialog'
@@ -46,6 +47,7 @@ export {
     ComponentOwnerDialog,
     Footer,
     FossologyClearing,
+    Gravatar,
     LanguageSwitcher,
     LocaleSwitcher,
     ModeratorsDialog,

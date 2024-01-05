@@ -9,8 +9,7 @@
 
 'use client'
 
-import { MD5 } from 'crypto-js'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { Image, NavDropdown } from 'react-bootstrap'
@@ -19,24 +18,25 @@ import sw360ProfileIcon from '@/assets/images/profile.svg'
 
 function ProfileDropdown() {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const user_data = session
-        ? JSON.parse(Buffer.from(session.user.access_token.split('.')[1], 'base64').toString())
-        : null
-    const emailhash = MD5(user_data ? user_data.user_name : 'admin@sw360.org')
-    const [profileImage, setProfileImage] = useState(`https://www.gravatar.com/avatar/${emailhash}?d=404`)
+    const [useGravatar] = useState(() => {
+        const state = localStorage.getItem('useGravatar')
+        const initialValue = JSON.parse(state)
+        return initialValue || false
+    })
+    const [profileImage, setProfileImage] = useState(sw360ProfileIcon.src)
+    const cachedImage = localStorage.getItem('gravatarImage')
 
     useEffect(() => {
-        fetch(profileImage)
-            .then((response) => {
-                if (!response.ok) {
-                    setProfileImage(sw360ProfileIcon.src)
-                }
-            })
-            .catch(() => {
+        if (useGravatar) {
+            if (cachedImage) {
+                setProfileImage(cachedImage)
+            } else {
                 setProfileImage(sw360ProfileIcon.src)
-            })
-    }, [profileImage])
+            }
+        } else {
+            setProfileImage(sw360ProfileIcon.src)
+        }
+    }, [profileImage, useGravatar, cachedImage])
 
     console.log(profileImage)
 

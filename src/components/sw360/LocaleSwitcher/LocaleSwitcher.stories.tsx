@@ -15,7 +15,7 @@ const localeswitcher = {
 }
 
 const Template = () => (
-    <div style={{ width: '10%' }}>
+    <div>
         <LocaleSwitcher />
     </div>
 )
