@@ -12,7 +12,7 @@
 import { HttpStatus, ToastData } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils } from '@/utils'
-import { getSession, signIn } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ToastMessage } from 'next-sw360'
 import { useRef, useState } from 'react'
@@ -58,11 +58,11 @@ export default function AddVendor() {
 
             const session = await getSession()
             if (!session) {
-                return signIn()
+                return signOut()
             }
             const response = await ApiUtils.POST('licenses/upload', formData, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
-                signIn()
+                signOut()
             } else if (response.status === HttpStatus.OK) {
                 alert(true, 'Success', t('Licenses uploaded successfully'), 'success')
             } else {
@@ -78,7 +78,7 @@ export default function AddVendor() {
     const downloadLicenseArchive = async () => {
         try {
             const session = await getSession()
-            if (!session) return signIn()
+            if (!session) return signOut()
             DownloadService.download('licenses/downloadLicenses', session, `LicensesBackup.lics`)
         } catch (e) {
             console.error(e)
