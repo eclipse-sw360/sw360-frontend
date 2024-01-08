@@ -9,16 +9,86 @@
 
 'use client'
 
+import { Embedded, Vendor } from '@/object-types'
+import { SW360_API_URL } from '@/utils/env'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { QuickFilter } from 'next-sw360'
+import { QuickFilter, Table, _ } from 'next-sw360'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { FaTrashAlt } from 'react-icons/fa'
+import { FiEdit2 } from 'react-icons/fi'
+import { IoMdGitMerge } from 'react-icons/io'
+
+type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
 export default function VendorsList() {
     const t = useTranslations('default')
     const router = useRouter()
+    const { data: session, status } = useSession()
+
+    const [numVendors, setNumVendors] = useState<null | number>(null)
 
     const handleAddVendor = () => {
         router.push('/admin/vendors/add')
+    }
+
+    const columns = [
+        {
+            id: 'vendors.fullName',
+            name: t('Full Name'),
+            formatter: (name: string) =>
+                _(
+                    <>
+                        <Link href='#' className='text-link'>
+                            {name}
+                        </Link>
+                    </>
+                ),
+            sort: true,
+        },
+        {
+            id: 'vendors.shortName',
+            name: t('Short Name'),
+            sort: true,
+        },
+        {
+            id: 'vendors.url',
+            name: t('URL'),
+            sort: true,
+        },
+        {
+            id: 'vendors.actions',
+            name: t('Actions'),
+            width: '8%',
+            formatter: () =>
+                _(
+                    <div className='d-flex justify-content-between'>
+                        <Link href='#' className='text-link'>
+                            <FiEdit2 className='btn-icon' />
+                        </Link>
+                        <FaTrashAlt className='btn-icon' />
+                        <IoMdGitMerge className='btn-icon' />
+                    </div>
+                ),
+            sort: true,
+        },
+    ]
+
+    const server = {
+        url: `${SW360_API_URL}/resource/api/vendors`,
+        then: (data: EmbeddedVendors) => {
+            setNumVendors(data.page.totalElements)
+            return data._embedded['sw360:vendors'].map((elem: Vendor) => [
+                elem.fullName ?? '',
+                elem.shortName ?? '',
+                elem.url ?? '',
+            ])
+        },
+        total: (data: EmbeddedVendors) => data.page.totalElements,
+        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 
     return (
@@ -36,8 +106,15 @@ export default function VendorsList() {
                                 </button>
                                 <button className='btn btn-secondary col-auto'>{t('Export Spreadsheet')}</button>
                             </div>
-                            <div className='col-auto buttonheader-title'>{`${t('VENDORS')} ()`}</div>
+                            <div className='col-auto buttonheader-title'>{`${t('VENDORS')} (${numVendors ?? ''})`}</div>
                         </div>
+                        {status === 'authenticated' ? (
+                            <Table columns={columns} server={server} selector={true} sort={false} />
+                        ) : (
+                            <div className='col-12 d-flex justify-content-center align-items-center'>
+                                <Spinner className='spinner' />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
