@@ -11,7 +11,7 @@
 
 import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { getSession, signIn } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
@@ -38,11 +38,11 @@ export default function DeleteAllLicenseInformationModal({
             setDeleting(true)
             const session = await getSession()
             if (!session) {
-                return signIn()
+                return signOut()
             }
             const response = await ApiUtils.DELETE('licenses/deleteAll', session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signIn()
+                return signOut()
             } else if (response.status !== HttpStatus.OK) {
                 setMessage({ type: 'danger', message: t('DELETE_ALL_LICENCES_ERROR') })
                 return
