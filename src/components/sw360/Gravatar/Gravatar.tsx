@@ -60,6 +60,7 @@ function Gravatar({ email, noCache = false }: { email: string; noCache?: boolean
                     <Form.Check
                         type='checkbox'
                         checked={useGravatar}
+                        id='gravatar'
                         onChange={handleCheckboxChange}
                         label='Use Gravatar Profile Images'
                     />
