@@ -29,10 +29,12 @@ const config: StorybookConfig = {
         if (config.resolve) {
             config.resolve.alias = {
                 ...config.resolve.alias,
-                '@': path.resolve(__dirname, '../src'),
+                '@/': path.resolve(__dirname, '../src'),
                 '@/constants': path.resolve(__dirname, '../src/object-types/Constants'),
+                '@/assets': path.resolve(__dirname, '../src/assets'),
             }
         }
+
         return config
     },
 }

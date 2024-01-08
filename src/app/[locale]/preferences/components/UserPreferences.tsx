@@ -10,10 +10,10 @@
 
 'use client'
 
-import { INTL_NAMESPACE } from '@/constants'
 import { useTranslations } from 'next-intl'
 import { Alert } from 'react-bootstrap'
 import styles from '../preferences.module.css'
+
 import NotificationSettings from './NotificationSettings'
 
 interface NotificationSetting {
@@ -27,7 +27,7 @@ interface Props {
 }
 
 const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props) => {
-    const t = useTranslations(INTL_NAMESPACE)
+    const t = useTranslations('default')
 
     return (
         <>
@@ -55,12 +55,11 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
             <Alert variant='info'>
                 {t('You will be notified on changes of an item if you have the selected role in the changed item')}.
             </Alert>
-            <div className='accordion' id='notificationSettings'>
-                <NotificationSettings
-                    notificationSetting={notificationSetting}
-                    setNotificationSetting={setNotificationSetting}
-                />
-            </div>
+
+            <NotificationSettings
+                notificationSetting={notificationSetting}
+                setNotificationSetting={setNotificationSetting}
+            />
         </>
     )
 }

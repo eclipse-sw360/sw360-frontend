@@ -14,6 +14,7 @@ import AuthScreen from './AuthScreen/AuthScreen'
 import ComponentOwnerDialog from './ComponentOwnerDialog/ComponentOwnerDialog'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
+import Gravatar from './Gravatar/Gravatar'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
 import ModeratorsDialog from './ModeratorsDialog/ModeratorsDialog'
@@ -29,6 +30,7 @@ import SelectCountry from './SelectCountry/SelectCountry'
 import SelectTableComponentOwner from './SelectTableComponentOwner/SelectTableComponentOwner'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
+import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 
 // Table component
@@ -45,6 +47,7 @@ export {
     ComponentOwnerDialog,
     Footer,
     FossologyClearing,
+    Gravatar,
     LanguageSwitcher,
     LocaleSwitcher,
     ModeratorsDialog,
@@ -61,6 +64,7 @@ export {
     ShowInfoOnHover,
     SideBar,
     Table,
+    ThemeSwitcher,
     ToastMessage,
     TreeTable,
     VendorDialog,

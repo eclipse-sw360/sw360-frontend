@@ -10,7 +10,6 @@
 
 'use client'
 
-import { INTL_NAMESPACE } from '@/constants'
 import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
@@ -23,7 +22,7 @@ import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
 
 const NotificationSettingForm = ({ user }: { user: User }) => {
-    const t = useTranslations(INTL_NAMESPACE)
+    const t = useTranslations('default')
     const [notificationSetting, setNotificationSetting] = useState({
         wantsMailNotification: user.wantsMailNotification,
         notificationPreferences: user.notificationPreferences,

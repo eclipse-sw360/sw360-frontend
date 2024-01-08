@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { Check2Circle, XCircle } from 'react-bootstrap-icons'
+import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 
 import { Embedded, HttpStatus, Licenses } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -66,7 +66,11 @@ function LicensesPage() {
                         item.fullName,
                         _(
                             <center>
-                                {item.checked ? <Check2Circle color='#287d3c' size='16' /> : <XCircle color='red' />}
+                                {item.checked ? (
+                                    <BsCheck2Circle color='#287d3c' size='16' />
+                                ) : (
+                                    <BsXCircle color='red' />
+                                )}
                             </center>
                         ),
                     ])
@@ -104,7 +108,7 @@ function LicensesPage() {
                         {loading == false ? (
                             <Table data={licenseData} columns={columns} sort={true} search={search} selector={true} />
                         ) : (
-                            <div className='col-12' style={{ textAlign: 'center' }}>
+                            <div className='col-12d-flex justify-content-center align-items-center'>
                                 <Spinner className='spinner' />
                             </div>
                         )}

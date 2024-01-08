@@ -8,9 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
-
-import { ArrowRepeat } from 'react-bootstrap-icons'
+import { BsArrowRepeat } from 'react-icons/bs'
 
 interface HomeTableHeaderProps {
     title: string
@@ -21,7 +19,7 @@ function HomeTableHeader({ title = '' }: HomeTableHeaderProps) {
         <>
             <div className='tableHeader'>
                 <h1 className='tableHeaderTitle'>{title}</h1>
-                <ArrowRepeat />
+                <BsArrowRepeat />
             </div>
             <hr></hr>
         </>

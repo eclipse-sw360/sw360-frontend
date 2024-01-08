@@ -16,7 +16,7 @@ const quickfilter = {
 }
 
 const Template = (args: QuickFilterProps) => (
-    <div style={{ width: '10%' }}>
+    <div>
         <QuickFilter {...args} />
     </div>
 )

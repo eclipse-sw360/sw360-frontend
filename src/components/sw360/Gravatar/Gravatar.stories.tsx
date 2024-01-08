@@ -7,19 +7,24 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import LocaleSwitcher from './LocaleSwitcher'
+import Gravatar from './Gravatar'
+import './Gravatar.module.css'
 
-const localeswitcher = {
-    title: 'SW360/LocaleSwitcher',
-    component: LocaleSwitcher,
+interface GravatarProps {
+    email: string
 }
 
-const Template = () => (
-    <div>
-        <LocaleSwitcher />
+const gravatar = {
+    title: 'SW360/Gravatar',
+    component: Gravatar,
+}
+
+const Template = (args: GravatarProps) => (
+    <div className='gravatar-container'>
+        <Gravatar {...args} />
     </div>
 )
 
 export const Primary = Template.bind({})
 
-export default localeswitcher
+export default gravatar

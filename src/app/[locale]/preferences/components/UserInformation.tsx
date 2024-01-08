@@ -8,10 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { INTL_NAMESPACE } from '@/constants'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import User from '../../../../object-types/User'
+
+import { User } from '@/object-types'
+import { Gravatar } from 'next-sw360'
+
 import styles from '../preferences.module.css'
 
 interface Props {
@@ -19,7 +22,13 @@ interface Props {
 }
 
 const UserInformation = ({ user }: Props) => {
-    const t = useTranslations(INTL_NAMESPACE)
+    const t = useTranslations('default')
+    const { data: session } = useSession()
+    const user_data = session
+        ? JSON.parse(Buffer.from(session.user.access_token.split('.')[1], 'base64').toString())
+        : null
+    const email_by_token = user_data ? user_data.user_name : 'admin@sw360.org'
+
     return (
         <table className={`table label-value-table ${styles['summary-table']}`}>
             <thead>
@@ -53,18 +62,23 @@ const UserInformation = ({ user }: Props) => {
                 <tr>
                     <td className={styles.tag}>{t('Secondary Departments and Roles')}: </td>
                     <td id='user-secondary-departments-roles'>
-                        {user.secondaryDepartmentsAndRoles &&
-                            Object.keys(user.secondaryDepartmentsAndRoles).map((department) => (
-                                <li key={department}>
-                                    <span className='mapDisplayChildItemLeft' style={{ fontWeight: 'bold' }}>
-                                        {department}
-                                    </span>
-                                    <span className='mapDisplayChildItemRight'>
-                                        {' -> '}
-                                        {user.secondaryDepartmentsAndRoles[department]}
-                                    </span>
-                                </li>
-                            ))}
+                        <ul>
+                            {user.secondaryDepartmentsAndRoles &&
+                                Object.keys(user.secondaryDepartmentsAndRoles).map((department) => (
+                                    <li key={department}>
+                                        <span className='mapDisplayChildItemLeft bold-text'>{department}</span>
+                                        <span className='mapDisplayChildItemRight'>
+                                            {' -> '}
+                                            {user.secondaryDepartmentsAndRoles[department]}
+                                        </span>
+                                    </li>
+                                ))}
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td colSpan={2}>
+                        <Gravatar email={email_by_token} />
                     </td>
                 </tr>
             </tbody>

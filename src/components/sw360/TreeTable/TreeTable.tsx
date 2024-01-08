@@ -12,7 +12,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { CaretDownFill, CaretRightFill } from 'react-bootstrap-icons'
+import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 import { NodeData } from '@/object-types'
 import { Table, _ } from 'next-sw360'
@@ -34,14 +34,13 @@ const PaddedCell: React.FC<Props> = ({
     expandRow,
     collapseRow,
 }) => {
-    const style = { paddingLeft: `${padLength}em` }
     return (
-        <div style={style}>
+        <div className={`pl-${padLength}`}>
             {parent &&
                 (needExpand ? (
-                    <CaretDownFill color='gray' onClick={collapseRow} />
+                    <BsCaretDownFill color='gray' onClick={collapseRow} />
                 ) : (
-                    <CaretRightFill color='gray' onClick={expandRow} />
+                    <BsCaretRightFill color='gray' onClick={expandRow} />
                 ))}{' '}
             {children}
         </div>
@@ -113,7 +112,7 @@ const TreeTable = ({ data, setData, columns }: any) => {
     }
 
     return (
-        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+        <div className='container mt-3'>
             <div className='row'>
                 <div className='row'>
                     <Table data={tabledata} pagination={false} columns={columns} sort={false} />

@@ -32,6 +32,7 @@
             "@/assets/*": ["./src/assets/*"],
             "@/components/*": ["./src/components/*"],
             "@/constants": ["./src/object-types/Constants"],
+            "@/hooks": ["./src/hooks"],
             "@/messages": ["./messages"],
             "@/object-types": ["./src/object-types"],
             "@/services/*": ["./src/services/*"],

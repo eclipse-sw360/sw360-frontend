@@ -7,19 +7,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import LocaleSwitcher from './LocaleSwitcher'
+import useLocalStorage from './useLocalStorage'
 
-const localeswitcher = {
-    title: 'SW360/LocaleSwitcher',
-    component: LocaleSwitcher,
-}
-
-const Template = () => (
-    <div>
-        <LocaleSwitcher />
-    </div>
-)
-
-export const Primary = Template.bind({})
-
-export default localeswitcher
+export { useLocalStorage }

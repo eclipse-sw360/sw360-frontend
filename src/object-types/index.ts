@@ -36,6 +36,7 @@ import ModeratorsType from './ModeratorsType'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
+import Preferences from './Preferences'
 import Project from './Project'
 import ProjectReleaseEcc from './ProjectReleaseEcc'
 import Release from './Release'
@@ -109,9 +110,8 @@ export type {
     Vulnerability,
 }
 
-// NavList is special function
-// For the base menu
-export { NavList }
+// Special functions for populate data
+export { NavList, Preferences }
 
 // Enums
 import ActionType from './enums/ActionType'

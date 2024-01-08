@@ -8,11 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'flag-icons/css/flag-icons.min.css'
+
 import '@/styles/auth.css'
 import '@/styles/globals.css'
 import '@/styles/gridjs/sw360.css'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'flag-icons/css/flag-icons.min.css'
 
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
