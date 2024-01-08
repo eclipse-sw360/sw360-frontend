@@ -10,35 +10,13 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
-
-import { ToastData } from '@/object-types'
 import { ToastMessage } from 'next-sw360'
+import { useContext } from 'react'
+import { ToastContainer } from 'react-bootstrap'
+import { MessageContext } from './MessageContextProvider'
 
-interface Props {
-    state: { [key: string]: string | undefined }
-}
-
-const UpdateMessage = ({ state }: Props) => {
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    useEffect(() => {
-        if (state.status !== undefined) {
-            const preparedToastData = {
-                show: true,
-                message: state.message,
-                type: state.status,
-                contextual: state.status === 'Success' ? 'success' : 'danger',
-            }
-            setToastData(preparedToastData)
-        }
-    }, [state])
+const UpdateMessage = () => {
+    const { toastData, setToastData } = useContext(MessageContext)
 
     return (
         <ToastContainer position='top-start'>

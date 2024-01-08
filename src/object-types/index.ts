@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 // Interfaces
+import AccessToken from './AccessToken'
 import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
@@ -60,6 +61,7 @@ import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
 
 export type {
+    AccessToken,
     AddtionalDataType,
     AdministrationDataType,
     Attachment,

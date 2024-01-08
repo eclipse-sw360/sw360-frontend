@@ -14,66 +14,64 @@ import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { Button } from 'react-bootstrap'
 import User from '../../../../object-types/User'
-import UpdateMessage from './UpdateMessage'
+import { MessageContext } from './MessageContextProvider'
 import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
 
 const NotificationSettingForm = ({ user }: { user: User }) => {
     const t = useTranslations('default')
+    const { setToastData } = useContext(MessageContext)
+
     const [notificationSetting, setNotificationSetting] = useState({
         wantsMailNotification: user.wantsMailNotification,
         notificationPreferences: user.notificationPreferences,
-    })
-
-    const [updateState, setUpdateState] = useState({
-        message: undefined,
-        status: undefined,
     })
 
     const updateNotificationSetting = async () => {
         const session = await getSession()
         const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
         if (response.status === HttpStatus.OK) {
-            setUpdateState({
-                message: 'Your request completed successfully',
-                status: 'Success',
+            setToastData({
+                show: true,
+                message: t('Your request completed successfully'),
+                type: t('Success'),
+                contextual: 'success',
             })
             return
         }
-        setUpdateState({
-            message: 'Error while processing',
-            status: 'Error',
+        setToastData({
+            show: true,
+            message: t('Error while processing'),
+            type: t('Error'),
+            contextual: 'danger',
         })
     }
 
     return (
-        <>
-            <form className='container page-content'>
-                <div className='row'>
-                    <div className='col-auto'>
-                        <Button variant='primary' onClick={() => updateNotificationSetting()}>
-                            {t('Update Setting')}
-                        </Button>
-                    </div>
+        <form>
+            <div className='row'>
+                <div className='col-auto'>
+                    <Button variant='primary' onClick={() => updateNotificationSetting()}>
+                        {t('Update Setting')}
+                    </Button>
                 </div>
-                <br />
-                <div className='row'>
-                    <div className='col-6'>
-                        <UserPreferences
-                            notificationSetting={notificationSetting}
-                            setNotificationSetting={setNotificationSetting}
-                        />
-                    </div>
-                    <div className='col-6'>
-                        <UserInformation user={user} />
-                    </div>
+            </div>
+            <br />
+            <div className='row'>
+                <div className='col-6'>
+                    <UserPreferences
+                        notificationSetting={notificationSetting}
+                        setNotificationSetting={setNotificationSetting}
+                    />
                 </div>
-            </form>
-            <UpdateMessage state={updateState} />
-        </>
+                <div className='col-6'>
+                    <UserInformation user={user} />
+                </div>
+            </div>
+        </form>
     )
 }
 

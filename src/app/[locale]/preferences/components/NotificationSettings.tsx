@@ -10,10 +10,10 @@
 
 'use client'
 
+import { Preferences } from '@/object-types'
 import { useEffect, useState } from 'react'
 import { Accordion, Form } from 'react-bootstrap'
-
-import { Preferences } from '@/object-types'
+import styles from '../preferences.module.css'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
@@ -47,18 +47,20 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
         // We always use the first key as initial key
         <Accordion defaultActiveKey={preferences[0].key}>
             {preferences.map((value) => (
-                <>
-                    {' '}
+                <div key={value.key}>
                     {isClient && (
-                        <Accordion.Item eventKey={value.key} key={value.key}>
-                            <Accordion.Header>{value.documentType}</Accordion.Header>
-                            <Accordion.Body>
+                        <Accordion.Item eventKey={value.key} key={value.key} className={styles['accordion-item']}>
+                            <Accordion.Header className={styles['accordion-header']}>
+                                {value.documentType}
+                            </Accordion.Header>
+                            <Accordion.Body className={styles['accordion-body']}>
                                 {value.entries.map((entry) => (
                                     <Form.Check
                                         type='checkbox'
                                         label={entry.name}
                                         title={entry.name}
                                         key={`${entry.id}`}
+                                        id={`${entry.id}`}
                                         disabled={!notificationSetting.wantsMailNotification}
                                         defaultChecked={notificationSetting.notificationPreferences?.[entry.id]}
                                         onChange={setPreferences}
@@ -67,7 +69,7 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
                             </Accordion.Body>
                         </Accordion.Item>
                     )}
-                </>
+                </div>
             ))}
         </Accordion>
     )

@@ -77,39 +77,53 @@
     box-shadow: 0 1px 3px -1px rgb(0 0 0 / 60%);
 }
 
-.section-header {
+.accordion-header {
     background-color: #fff;
     font-size: 1rem;
-    padding: 0.75rem;
     font-weight: 700;
     line-height: 1.2;
     color: #6b6c7e;
+    border-bottom: 1px solid lightgray;
 }
 
-.section-header.selected {
-    background-color: rgba(247, 148, 30, 0.4) !important;
-    color: black;
+.accordion-header button:focus {
+    box-shadow: none !important;
 }
 
-.section-header:hover {
-    cursor: pointer;
-    background-color: rgba(247, 148, 30, 0.12);
+.accordion-header button{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 15px;
+    justify-content: left;
+    background-color: #fff;
 }
 
-.section-body {
+.accordion-header button[aria-expanded='true'] {
+    color: #000000;
+}
+
+.accordion-header button[aria-expanded='false'] {
+    background-color: #ffffff !important;
+}
+
+.accordion-header button[aria-expanded='false']:hover {
+    background-color: rgba(247, 148, 30, 0.12) !important;
+}
+
+.accordion-body {
     background-color: white;
     padding: 1rem 1rem 1.5rem 1rem;
+    font-size: 0.910rem;
 }
 
-.body-wrapper {
-    overflow: hidden;
-    transition: max-height 0.5s;
+.accordion-item {
+    box-shadow: 0 1px 3px -1px rgb(0 0 0 / 60%);
 }
 
-.body-wrapper.show {
-    max-height: 500px;
-}
-
-.body-wrapper.collapse {
-    max-height: 0px;
+.decorator {
+    color: #5d8ea9;
+    border-bottom: 1px solid #5d8ea9;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
 }
