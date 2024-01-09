@@ -794,6 +794,7 @@
         "project_cannot_be_created": "プロジェクトを作成/更新できない",
         "to edit the project relation": "プロジェクト関係を編集するには",
         "vector": "ベクター",
-        "wrong_spdx_information": "間違ったSPDXを入力すると情報が正しく登録されません"
+        "wrong_spdx_information": "間違ったSPDXを入力すると情報が正しく登録されません",
+        "User preferences": "ユーザー設定"
     }
 }

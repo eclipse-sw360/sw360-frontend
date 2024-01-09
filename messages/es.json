@@ -795,6 +795,7 @@
         "project_cannot_be_created": "El proyecto no puede crearse ni actualizarse",
         "to edit the project relation": "para editar la relación del proyecto",
         "vector": "vector",
-        "wrong_spdx_information": "Si se introduce el SPDX incorrecto, la información no se registrará correctamente"
+        "wrong_spdx_information": "Si se introduce el SPDX incorrecto, la información no se registrará correctamente",
+        "User preferences": "Preferencias del usuario"
     }
 }

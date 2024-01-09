@@ -794,6 +794,7 @@
         "project_cannot_be_created": "无法创建/更新项目",
         "to edit the project relation": "编辑项目关系",
         "vector": "向量",
-        "wrong_spdx_information": "如果输入错误的SPDX，信息将无法正确注册"
+        "wrong_spdx_information": "如果输入错误的SPDX，信息将无法正确注册",
+        "User preferences": "用户偏好"
     }
 }

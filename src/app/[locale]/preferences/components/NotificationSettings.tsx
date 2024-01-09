@@ -61,6 +61,7 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
                                         title={entry.name}
                                         key={`${entry.id}`}
                                         id={`${entry.id}`}
+                                        name={entry.id}
                                         disabled={!notificationSetting.wantsMailNotification}
                                         defaultChecked={notificationSetting.notificationPreferences?.[entry.id]}
                                         onChange={setPreferences}

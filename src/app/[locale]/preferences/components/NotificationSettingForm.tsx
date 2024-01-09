@@ -14,8 +14,8 @@ import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { PageButtonHeader } from 'next-sw360'
 import { useContext, useState } from 'react'
-import { Button } from 'react-bootstrap'
 import User from '../../../../object-types/User'
 import { MessageContext } from './MessageContextProvider'
 import UserInformation from './UserInformation'
@@ -50,13 +50,15 @@ const NotificationSettingForm = ({ user }: { user: User }) => {
         })
     }
 
+    const buttonHeaders = {
+        'Update Setting': { name: t('Update Setting'), link: '#', type: 'primary', onClick: updateNotificationSetting },
+    }
+
     return (
         <form>
             <div className='row'>
-                <div className='col-auto'>
-                    <Button variant='primary' onClick={() => updateNotificationSetting()}>
-                        {t('Update Setting')}
-                    </Button>
+                <div className='col-12'>
+                    <PageButtonHeader buttons={buttonHeaders} title={t('User preferences')} />
                 </div>
             </div>
             <br />

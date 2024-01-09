@@ -794,6 +794,7 @@
         "project_cannot_be_created": "專案無法建立/ 更新",
         "to edit the project relation": "要編輯專案關係",
         "vector": "向量",
-        "wrong_spdx_information": "如果輸入錯誤的 SPDX , 資訊將無法正確登記"
+        "wrong_spdx_information": "如果輸入錯誤的 SPDX , 資訊將無法正確登記",
+        "User preferences": "使用者偏好"
     }
 }
