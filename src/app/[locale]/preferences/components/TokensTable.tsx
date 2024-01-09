@@ -34,6 +34,7 @@ const TokensTable = ({ generatedToken }: Props) => {
         if (response.status == HttpStatus.OK) {
             const data = (await response.json()) as Embedded<AccessToken, 'sw360:restApiTokens'>
             if (data._embedded === undefined) {
+                setTableData([])
                 return
             }
             const tableData = Object.values(data._embedded['sw360:restApiTokens']).map((token: AccessToken) => {

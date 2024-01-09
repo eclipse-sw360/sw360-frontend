@@ -794,6 +794,7 @@
         "project_cannot_be_created": "Dự án không thể được tạo/cập nhật",
         "to edit the project relation": "để chỉnh sửa mối quan hệ dự án",
         "vector": "vectơ",
-        "wrong_spdx_information": "Nếu nhập sai SPDX thì thông tin sẽ không được đăng ký chính xác"
+        "wrong_spdx_information": "Nếu nhập sai SPDX thì thông tin sẽ không được đăng ký chính xác",
+        "User preferences": "Sở thích của người sử dụng"
     }
 }

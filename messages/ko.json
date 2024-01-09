@@ -794,6 +794,7 @@
         "project_cannot_be_created": "프로젝트는 만들 수 없습니다/업데이트",
         "to edit the project relation": "프로젝트 관계 편집",
         "vector": "벡터 벡터",
-        "wrong_spdx_information": "잘못된 SPDX가 입력되면 정보가 올바르게 등록되지 않습니다."
+        "wrong_spdx_information": "잘못된 SPDX가 입력되면 정보가 올바르게 등록되지 않습니다.",
+        "User preferences": "사용자 환경설정"
     }
 }
