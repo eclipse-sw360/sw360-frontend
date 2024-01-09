@@ -10,14 +10,15 @@
 
 'use client'
 
-import { Embedded, Project as TypeProject } from '@/object-types'
-import { CommonUtils } from '@/utils'
+import { Embedded, HttpStatus, Project as TypeProject } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageButtonHeader, Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { notFound, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
@@ -26,6 +27,60 @@ type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+
+interface LicenseClearingData {
+    'Release Count': number
+    'Approved Count': number
+}
+
+function LicenseClearing({ projectId }: { projectId: string }) {
+    const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (!session) {
+                    return signOut()
+                }
+
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/licenseClearingCount`,
+                    session.user.access_token,
+                    signal
+                )
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+
+                const data = await response.json()
+
+                setLcData(data)
+            } catch (e) {
+                console.error(e)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [])
+
+    return (
+        <>
+            {lcData ? (
+                <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
+            ) : (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </>
+    )
+}
 
 function Project() {
     const { data: session, status } = useSession()
@@ -98,7 +153,12 @@ function Project() {
                 ),
             sort: true,
         },
-        t('License Clearing'),
+        {
+            id: 'projects.licenseClearing',
+            name: t('License Clearing'),
+            formatter: (id: string) => _(<LicenseClearing projectId={id} />),
+            sort: true,
+        },
         {
             id: 'projects.actions',
             name: t('Actions'),
@@ -148,7 +208,7 @@ function Project() {
                 elem.description ?? '',
                 elem.projectResponsible ?? '',
                 { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
-                '',
+                elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                 elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
             ])
         },
