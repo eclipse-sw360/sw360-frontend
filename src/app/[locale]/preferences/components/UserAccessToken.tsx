@@ -14,6 +14,7 @@ import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { ShowInfoOnHover } from 'next-sw360'
 import React, { useContext, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from '../preferences.module.css'
@@ -161,8 +162,9 @@ const UserAccessToken = () => {
                                 </tr>
                                 <tr>
                                     <td>
-                                        {t('Token')}:
-                                        <span title='Authorization Header (Authorization: Token <API-Token>)'></span>
+                                        {t('Token')}{' '}
+                                        <ShowInfoOnHover text='Authorization Header (Authorization: Token <API-Token>)' />
+                                        :
                                     </td>
                                     <td>
                                         <label id='accesstoken' className='inlinelabel'>
