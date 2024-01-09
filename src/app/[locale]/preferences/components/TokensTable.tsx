@@ -37,13 +37,17 @@ const TokensTable = ({ generatedToken }: Props) => {
                 return
             }
             const tableData = Object.values(data._embedded['sw360:restApiTokens']).map((token: AccessToken) => {
-                const createDate = new Date(token.createdOn)
                 const expirationDate = new Date(
-                    Date.parse(token.createdOn) + token.numberOfDaysValid * 24 * 60 * 60 * 1000
+                    Date.parse(token.createdOn + ' +0000') +
+                        token.numberOfDaysValid * 24 * 60 * 60 * 1000 -
+                        new Date().getTimezoneOffset() * 60000
                 )
                 return [
                     token.name,
-                    createDate.toISOString().slice(0, 19).replace('T', ' '),
+                    new Date(Date.parse(token.createdOn + ' +0000') - new Date().getTimezoneOffset() * 60000)
+                        .toISOString()
+                        .slice(0, 19)
+                        .replace('T', ' '),
                     expirationDate.toISOString().slice(0, 19).replace('T', ' '),
                     '[' + token.authorities.join(', ') + ']',
                     _(
