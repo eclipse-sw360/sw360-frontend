@@ -39,7 +39,7 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
                         className={`form-check-input ${styles.checkbox}`}
                         id='wants_mail_notification'
                         name='wantsMailNotification'
-                        defaultChecked={notificationSetting.wantsMailNotification}
+                        checked={notificationSetting.wantsMailNotification}
                         onChange={(e) =>
                             setNotificationSetting({
                                 ...notificationSetting,

@@ -39,37 +39,37 @@ const UserInformation = ({ user }: Props) => {
             <tbody>
                 <tr>
                     <td className={styles.tag}>{t('Name')}:</td>
-                    <td id='user-name'>{user.fullName}</td>
+                    <td id='user-name'>{user?.fullName}</td>
                 </tr>
                 <tr>
                     <td className={styles.tag}>{t('Email')}:</td>
                     <td id='user-email'>
-                        <Link href={`mailto:${user.email}`}>{user.email}</Link>
+                        <Link href={`mailto:${user?.email}`}>{user?.email}</Link>
                     </td>
                 </tr>
                 <tr>
                     <td className={styles.tag}>{t('Primary Department')}:</td>
-                    <td id='user-department'>{user.department}</td>
+                    <td id='user-department'>{user?.department}</td>
                 </tr>
                 <tr>
                     <td className={styles.tag}>{t('External Id')}:</td>
-                    <td id='user-external-id'>{user.externalid}</td>
+                    <td id='user-external-id'>{user?.externalid}</td>
                 </tr>
                 <tr>
                     <td className={styles.tag}>{t('Primary Department Role')}:</td>
-                    <td id='user-role'>{user.userGroup}</td>
+                    <td id='user-role'>{user?.userGroup}</td>
                 </tr>
                 <tr>
                     <td className={styles.tag}>{t('Secondary Departments and Roles')}: </td>
                     <td id='user-secondary-departments-roles'>
                         <ul>
-                            {user.secondaryDepartmentsAndRoles &&
-                                Object.keys(user.secondaryDepartmentsAndRoles).map((department) => (
+                            {user?.secondaryDepartmentsAndRoles &&
+                                Object.keys(user?.secondaryDepartmentsAndRoles).map((department) => (
                                     <li key={department}>
                                         <span className='mapDisplayChildItemLeft bold-text'>{department}</span>
                                         <span className='mapDisplayChildItemRight'>
                                             {' -> '}
-                                            {user.secondaryDepartmentsAndRoles[department]}
+                                            {user?.secondaryDepartmentsAndRoles[department]}
                                         </span>
                                     </li>
                                 ))}
