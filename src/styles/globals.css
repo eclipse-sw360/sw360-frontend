@@ -684,7 +684,8 @@ th {
     background-color: gray;
 }
 
-.form-check-input[disabled] ~ .form-check-label, .form-check-input:disabled ~ .form-check-label {
+.form-check-input[disabled] ~ .form-check-label,
+.form-check-input:disabled ~ .form-check-label {
     cursor: not-allowed !important;
 }
 
@@ -719,4 +720,19 @@ th {
 
 .toast-container {
     position: fixed !important;
+}
+
+.nav-pills .nav-link {
+    background-color: #f2f2f2 !important;
+    color: #f2a922 !important;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #f2f2f2 !important;
+    color: #21719c !important;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #0c70f2 !important;
+    color: white !important;
 }
