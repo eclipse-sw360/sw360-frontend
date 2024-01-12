@@ -9,18 +9,18 @@
 
 'use client'
 
+import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
+import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
-
-import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
-import { ApiUtils } from '@/utils'
 import LinkProjects from '../../../components/LinkProjects'
 import Administration from './Administration'
 import ChangeLog from './Changelog'
 import EccDetails from './Ecc'
+import LicenseClearing from './LicenseClearing'
 import Summary from './Summary'
 
 export default function ViewProjects({ projectId }: { projectId: string }) {
@@ -145,7 +145,15 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                             <Administration data={administrationData} />
                                         )}
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey='licenseClearing'></Tab.Pane>
+                                    <Tab.Pane eventKey='licenseClearing'>
+                                        {summaryData && (
+                                            <LicenseClearing
+                                                projectId={projectId}
+                                                projectName={summaryData.name ?? ''}
+                                                projectVersion={summaryData.version ?? ''}
+                                            />
+                                        )}
+                                    </Tab.Pane>
                                     <Tab.Pane eventKey='obligations'></Tab.Pane>
                                     <Tab.Pane eventKey='ecc'>
                                         <EccDetails projectId={projectId} />

@@ -232,6 +232,7 @@ th.gridjs-th {
     white-space: nowrap;
     outline: none;
     vertical-align: bottom;
+    white-space: break-spaces;
 }
 th.gridjs-th .gridjs-th-content {
     text-overflow: ellipsis;
@@ -362,7 +363,6 @@ th.gridjs-th:last-child {
     background-color: #9bc2f7;
 }
 
-
 .gridjs a:link {
     text-decoration: none;
     color: var(--sw360-primary-color);
@@ -372,7 +372,6 @@ th.gridjs-th:last-child {
     text-decoration: none;
     color: var(--sw360-primary-color);
 }
-
 
 .gridjs a:hover {
     text-decoration: underline;
