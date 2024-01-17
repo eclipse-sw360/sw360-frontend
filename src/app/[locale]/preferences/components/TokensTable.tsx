@@ -124,11 +124,7 @@ function TokensTable({ generatedToken }: Props) {
         },
     ]
 
-    return (
-        <div className='row'>
-            <Table columns={columns} data={tableData} />
-        </div>
-    )
+    return <div className='row'>{tableData.length > 0 && <Table columns={columns} data={tableData} />}</div>
 }
 
 export default TokensTable
