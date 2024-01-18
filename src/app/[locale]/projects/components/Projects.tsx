@@ -15,13 +15,14 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { AdvancedSearch, PageButtonHeader, Table, _ } from 'next-sw360'
+import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { notFound, useSearchParams } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
+import DeleteProjectDialog from './DeleteProjectDialog'
 
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
@@ -86,6 +87,18 @@ function Project() {
     const { data: session, status } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
+    const router = useRouter()
+    const [deleteProjectId, setDeleteProjectId] = useState<string>('')
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+    const handleDeleteProject = (projectId: string) => {
+        setDeleteProjectId(projectId)
+        setDeleteDialogOpen(true)
+    }
+
+    const handleAddProject = () => {
+        router.push('/projects/add')
+    }
 
     const columns = [
         {
@@ -187,7 +200,11 @@ function Project() {
 
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                 <span className='d-inline-block'>
-                                    <FaTrashAlt className='btn-icon overlay-trigger' />
+                                    <FaTrashAlt
+                                        className='btn-icon'
+                                        onClick={() => handleDeleteProject(id)}
+                                        style={{ color: 'gray', fontSize: '18px' }}
+                                    />
                                 </span>
                             </OverlayTrigger>
                         </span>
@@ -316,38 +333,41 @@ function Project() {
         },
     ]
 
-    const headerbuttons = {
-        'Add Project': { link: '/projects/add', type: 'primary', name: t('Add Project') },
-    }
-
     return (
-        <div className='container page-content'>
-            <div className='row'>
-                <div className='col-lg-2'>
-                    <AdvancedSearch title={t('Advanced Search')} fields={advancedSearch} />
-                </div>
-                <div className='col-lg-10'>
-                    <div className='row'>
-                        <PageButtonHeader title={`${t('PROJECTS')}`} buttons={headerbuttons}>
-                            <div className='btn-group' role='group'>
-                                <Dropdown>
-                                    <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item>{t('SPDX')}</Dropdown.Item>
-                                        <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                                <Dropdown className='col-auto'>
-                                    <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
-                                        <Dropdown.Item>{t('Projects with linked releases')}</Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </div>
-                        </PageButtonHeader>
+        <>
+            <DeleteProjectDialog projectId={deleteProjectId} show={deleteDialogOpen} setShow={setDeleteDialogOpen} />
+            <div className='mx-3 mt-3'>
+                <div className='row'>
+                    <div className='col-lg-2'>
+                        <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                     </div>
-                    <div className='row'>
+                    <div className='col-lg-10'>
+                        <div className='row d-flex justify-content-between ms-1'>
+                            <div className='col-lg-5'>
+                                <div className='row'>
+                                    <div className='btn-group col-auto' role='group'>
+                                        <button className='btn btn-primary' onClick={handleAddProject}>
+                                            {t('Add Project')}
+                                        </button>
+                                        <Dropdown>
+                                            <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
+                                            <Dropdown.Menu>
+                                                <Dropdown.Item>{t('SPDX')}</Dropdown.Item>
+                                                <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </div>
+                                    <Dropdown className='col-auto'>
+                                        <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
+                                            <Dropdown.Item>{t('Projects with linked releases')}</Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </div>
+                            </div>
+                            <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
+                        </div>
                         {status === 'authenticated' ? (
                             <Table columns={columns} server={server} selector={true} sort={false} />
                         ) : (
@@ -358,7 +378,7 @@ function Project() {
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 
