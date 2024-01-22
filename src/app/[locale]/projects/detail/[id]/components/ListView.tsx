@@ -79,8 +79,8 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             relation: '',
             mainLicenses: [],
             state: {
-                clearingState: p.clearingState,
-                state: p.state,
+                clearingState: p.clearingState ?? '',
+                state: p.state ?? '',
             },
             releaseMainlineState: '',
             projectMainlineState: '',
@@ -109,7 +109,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                 projectPath: path.slice(),
                 releasePath: [],
                 relation: l.relation ?? '',
-                mainLicenses: res[0].mainLicenseIds ?? '',
+                mainLicenses: res[0].mainLicenseIds ?? [],
                 state: {
                     clearingState: res[0].clearingState ?? '',
                 },

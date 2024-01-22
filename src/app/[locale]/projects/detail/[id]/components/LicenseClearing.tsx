@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
 import ListView from './ListView'
+import TreeView from './TreeView'
 
 export default function LicenseClearing({
     projectId,
@@ -46,7 +47,9 @@ export default function LicenseClearing({
                     </div>
                 </div>
                 <Tab.Content className='mt-3'>
-                    <Tab.Pane eventKey='tree-view'></Tab.Pane>
+                    <Tab.Pane eventKey='tree-view'>
+                        <TreeView projectId={projectId} />
+                    </Tab.Pane>
                     <Tab.Pane eventKey='list-view'>
                         <ListView projectId={projectId} projectName={projectName} projectVersion={projectVersion} />
                     </Tab.Pane>
