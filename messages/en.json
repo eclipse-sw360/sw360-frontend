@@ -601,7 +601,7 @@
         "SBOM": "SBOM",
         "SCAN_AVAILABLE": "Scan available",
         "SEARCH RESULTS": "SEARCH RESULTS",
-        "SEARCH_NOTE": "",
+        "SEARCH_NOTE": "<p>Note: If <bold>Entire Document</bold> checkbox is unchecked, then search will be restricted to:</p><ul><li><bold>Name</bold> for <underline>Project</underline>, <underline>Component</underline>, <underline>Release</underline> and <underline>Package</underline></li><li><bold>Fullname</bold> for <underline>License</underline>, <underline>User</underline> and <underline>Vendor</underline></li> <li><bold>Title</bold> for <underline>Obligation</underline></li></ul>",
         "SENT_TO_CLEARING_TOOL": "Sent to clearing tool",
         "SIDE_BY_SIDE": "Side by side",
         "SINGLE": "SINGLE",
