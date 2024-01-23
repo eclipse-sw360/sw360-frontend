@@ -39,15 +39,12 @@ next-env.d.ts
 # Diff files
 *.diff
 
-# Workspace files
-*.code-workspace
-
 # Other Lock files
 yarn.lock
 pnpm-lock.yaml
 
 # vscode
-#.vscode
+
 
 # Aria
 .hintrc
