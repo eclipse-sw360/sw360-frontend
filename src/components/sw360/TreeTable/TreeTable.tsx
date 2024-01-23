@@ -35,7 +35,7 @@ const PaddedCell: React.FC<Props> = ({
     collapseRow,
 }) => {
     return (
-        <div className={`pl-${padLength}`}>
+        <div className={`ps-${padLength}`}>
             {parent &&
                 (needExpand ? (
                     <BsCaretDownFill color='gray' onClick={collapseRow} />
@@ -49,7 +49,6 @@ const PaddedCell: React.FC<Props> = ({
 
 const TreeTable = ({ data, setData, columns }: any) => {
     const [tabledata, setTableData] = useState([])
-
     useEffect(() => {
         const newData: any = []
         data.forEach((item: NodeData) => {
@@ -111,14 +110,6 @@ const TreeTable = ({ data, setData, columns }: any) => {
         }
     }
 
-    return (
-        <div className='container mt-3'>
-            <div className='row'>
-                <div className='row'>
-                    <Table data={tabledata} pagination={false} columns={columns} sort={false} />
-                </div>
-            </div>
-        </div>
-    )
+    return <Table data={tabledata} pagination={false} columns={columns} sort={false} />
 }
 export default TreeTable
