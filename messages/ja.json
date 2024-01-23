@@ -594,7 +594,7 @@
         "SBOM": "SBOM",
         "SCAN_AVAILABLE": "Scan available",
         "SEARCH RESULTS": "の検索結果",
-        "SEARCH_NOTE": "<p>注: <bold>ドキュメント全体</bold> チェックボックスがオフの場合、検索は以下に制限されます:</p><ul><li><underline>プロジェクト<の<bold>名前</bold> \n/underline>、<underline>コンポーネント</underline>、<underline>リリース</underline>、および<underline>パッケージ</underline></li><li><bold>ライセンスのフルネーム</bold> \n</underline>、<underline>ユーザー</underline>、および<underline>ベンダー</underline></li> <li><underline>義務</underline>の<li><bold>タイトル</bold></li> \n</ul>",
+        "SEARCH_NOTE": "",
         "SENT_TO_CLEARING_TOOL": "クリアリングツールに送る",
         "SIDE_BY_SIDE": "横に並んで",
         "SINGLE": "SINGLE",

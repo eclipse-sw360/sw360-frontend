@@ -594,7 +594,7 @@
         "SBOM": "SBOM:",
         "SCAN_AVAILABLE": "Digitalização disponível",
         "SEARCH RESULTS": "RESULTADOS DA PESQUISA",
-        "SEARCH_NOTE": "<p>Observação: se a caixa de seleção <bold>Documento inteiro</bold> estiver desmarcada, a pesquisa será restrita a:</p><ul><li><bold>Nome</bold> para <underline>Projeto< \n/underline>, <underline>Component</underline>, <underline>Release</underline> e <underline>Package</underline></li><li><bold>Fullname</bold> para <underline>License \n</underline>, <underline>Usuário</underline> e <underline>Fornecedor</underline></li> <li><bold>Título</bold> para <underline>Obrigação</underline></li> \n</ul>",
+        "SEARCH_NOTE": "",
         "SENT_TO_CLEARING_TOOL": "Enviado para a ferramenta de compensação",
         "SIDE_BY_SIDE": "Lado a lado",
         "SINGLE": "úNICO",

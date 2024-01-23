@@ -594,7 +594,7 @@
         "SBOM": "사이트맵",
         "SCAN_AVAILABLE": "스캔 가능",
         "SEARCH RESULTS": "검색 결과",
-        "SEARCH_NOTE": "<p>참고 : <bold>전체 문서</bold> 체크 박스는 체크되지 않습니다, 다음 검색은 제한됩니다 :</p><ul><li><bold>이름 *</bold> 제품정보 <underline>회사연혁</underline>· <underline>회사연혁</underline>· <underline>제품정보</underline> · <underline>제품 정보</underline></li><li><bold>이름 *</bold> 제품정보 <underline>이름 *</underline>· <underline>사용자 이름</underline> · <underline>회사 소개</underline></li> <li><bold>이름 *</bold> 제품정보 <underline>관련 링크</underline></li></ul>",
+        "SEARCH_NOTE": "",
         "SENT_TO_CLEARING_TOOL": "연락처",
         "SIDE_BY_SIDE": "옆 측",
         "SINGLE": "이름 *",

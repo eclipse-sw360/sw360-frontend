@@ -594,7 +594,7 @@
         "SBOM": "SBOM",
         "SCAN_AVAILABLE": "扫描可用",
         "SEARCH RESULTS": "搜索结果",
-        "SEARCH_NOTE": "<p>注意：如果未选中<bold>整个文档</bold>复选框，则搜索将仅限于：</p><ul><li><bold>Name</bold> for <underline>Project< \n<underline>许可证的 /underline>、<underline>组件</underline>、<underline>发布</underline>和<underline>软件包</underline></li><li><bold>全名</bold> \n</underline>、<underline>用户</underline>和<underline>供应商</underline></li> <li><underline>义务</underline>的<bold>标题</bold></li> \n</ul>",
+        "SEARCH_NOTE": "",
         "SENT_TO_CLEARING_TOOL": "发送至清算工具",
         "SIDE_BY_SIDE": "并排",
         "SINGLE": "单身的",
