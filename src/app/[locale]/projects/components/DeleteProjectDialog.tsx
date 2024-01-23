@@ -41,7 +41,7 @@ interface Props {
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const DeleteProjectDialog = ({ projectId, show, setShow }: Props) => {
+function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
     const { data: session } = useSession()
     const t = useTranslations('default')
     const router = useRouter()
@@ -86,27 +86,27 @@ const DeleteProjectDialog = ({ projectId, show, setShow }: Props) => {
         }
     }
 
-    const fetchData = async (projectId: string) => {
-        if (session) {
-            const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
-            if (projectsResponse.status == HttpStatus.OK) {
-                const projectData = (await projectsResponse.json()) as Project
-                setProject(projectData)
-                handleInternalDataCount(projectData)
-            } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
-                await signOut()
-            } else {
-                setProject(DEFAULT_PROJECT_DATA)
-                handleError()
+    useEffect(() => {
+        const fetchData = async (projectId: string) => {
+            if (session) {
+                const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
+                if (projectsResponse.status == HttpStatus.OK) {
+                    const projectData = (await projectsResponse.json()) as Project
+                    setProject(projectData)
+                    handleInternalDataCount(projectData)
+                } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
+                    await signOut()
+                } else {
+                    setProject(DEFAULT_PROJECT_DATA)
+                    handleError()
+                }
             }
         }
-    }
 
-    useEffect(() => {
         fetchData(projectId).catch((err) => {
             console.error(err)
         })
-    }, [show, projectId])
+    }, [show, projectId, handleError, session])
 
     const handleSubmit = () => {
         deleteProject().catch((err) => {

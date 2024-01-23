@@ -428,7 +428,7 @@ export default function ListView({
         })()
 
         return () => controller.abort()
-    }, [status])
+    }, [projectId, projectName, projectVersion, session, status])
 
     return (
         <>
