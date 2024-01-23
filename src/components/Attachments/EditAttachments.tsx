@@ -94,7 +94,7 @@ function EditAttachments({
                 }
             }
         })
-    }, [documentId, documentType, fetchData])
+    }, [documentId, documentType, fetchData, setComponentPayload, componentPayload])
 
     return (
         <>

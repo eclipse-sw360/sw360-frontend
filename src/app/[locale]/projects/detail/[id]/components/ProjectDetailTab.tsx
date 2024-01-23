@@ -59,7 +59,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
         })()
 
         return () => controller.abort()
-    }, [projectId, session])
+    }, [projectId, session, status])
 
     return (
         <>

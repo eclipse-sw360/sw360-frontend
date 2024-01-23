@@ -59,7 +59,7 @@ function ChangeLog({ projectId }: { projectId: string }) {
         })()
 
         return () => controller.abort()
-    }, [projectId, session])
+    }, [projectId, session, status])
 
     return (
         <>

@@ -68,7 +68,7 @@ function LicenseClearing({ projectId }: { projectId: string }) {
         })()
 
         return () => controller.abort()
-    }, [])
+    }, [projectId])
 
     return (
         <>
