@@ -65,7 +65,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
         <>
             <LinkProjects show={show} setShow={setShow} projectId={projectId} />
             <div className='ms-5 mt-2'>
-                <Tab.Container defaultActiveKey='summary'>
+                <Tab.Container defaultActiveKey='summary' mountOnEnter={true} unmountOnExit={true}>
                     <Row>
                         <Col sm='auto' className='me-3'>
                             <ListGroup>
