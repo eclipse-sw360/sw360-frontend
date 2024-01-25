@@ -51,6 +51,33 @@ function Preferences() {
         },
 
         {
+            key: 'component',
+            documentType: t('Component'),
+            entries: [
+                {
+                    id: 'componentCREATED_BY',
+                    name: t('Creator'),
+                },
+                {
+                    id: 'componentCOMPONENT_OWNER',
+                    name: t('Component Owner'),
+                },
+                {
+                    id: 'componentMODERATORS',
+                    name: t('Moderator'),
+                },
+                {
+                    id: 'componentSUBSCRIBERS',
+                    name: t('Subcriber'),
+                },
+                {
+                    id: 'componentROLES',
+                    name: t('Additional Role'),
+                },
+            ],
+        },
+
+        {
             key: 'release',
             documentType: t('Release'),
             entries: [
@@ -78,17 +105,6 @@ function Preferences() {
         },
 
         {
-            key: 'clearing',
-            documentType: t('Clearing'),
-            entries: [
-                {
-                    id: 'clearingREQUESTING_USER',
-                    name: t('Requesting User'),
-                },
-            ],
-        },
-
-        {
             key: 'moderation',
             documentType: t('Moderation'),
             entries: [
@@ -104,28 +120,12 @@ function Preferences() {
         },
 
         {
-            key: 'component',
-            documentType: t('Component'),
+            key: 'clearing',
+            documentType: t('Clearing'),
             entries: [
                 {
-                    id: 'componentCREATED_BY',
-                    name: t('Creator'),
-                },
-                {
-                    id: 'componentCOMPONENT_OWNER',
-                    name: t('Component Owner'),
-                },
-                {
-                    id: 'componentMODERATORS',
-                    name: t('Moderator'),
-                },
-                {
-                    id: 'componentSUBSCRIBERS',
-                    name: t('Subcriber'),
-                },
-                {
-                    id: 'componentROLES',
-                    name: t('Additional Role'),
+                    id: 'clearingREQUESTING_USER',
+                    name: t('Requesting User'),
                 },
             ],
         },
