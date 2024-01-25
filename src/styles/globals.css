@@ -736,3 +736,30 @@ th {
     background-color: #0c70f2 !important;
     color: white !important;
 }
+
+input[type='date']::-webkit-calendar-picker-indicator {
+    color: rgba(0, 0, 0, 0);
+    opacity: 1;
+    display: block;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    border-width: thin;
+}
+input[type='date']::-webkit-calendar-picker-indicator {
+    position: absolute;
+    left: 5px;
+}
+
+input[type='date'] {
+    position: relative;
+}
+
+input::-webkit-datetime-edit-fields-wrapper {
+    position: relative;
+    left: 10px;
+}
+input::-webkit-datetime-edit {
+    position: relative;
+    left: 10px;
+}

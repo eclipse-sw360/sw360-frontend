@@ -511,7 +511,7 @@
     "Platforms": "プラットフォーム",
     "Please comment your changes": "変更点にコメントしてください",
     "Please enter a token name": "トークン名を入力してください",
-    "Please enter an expiration date": "有効期限を入力してください",
+    "Please enter a valid expiration date": "有効な有効期限を入力してください",
     "Please select a file": "ファイルを選択してください!",
     "Preferences": "環境設定",
     "Primary Department": "初等科",

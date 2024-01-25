@@ -156,7 +156,7 @@ const UserAccessToken = () => {
                                             value={tokenData.expirationDate}
                                         />
                                         <Form.Control.Feedback type='invalid'>
-                                            {t('Please enter an expiration date')}!
+                                            {t('Please enter a valid expiration date')}!
                                         </Form.Control.Feedback>
                                     </td>
                                 </tr>

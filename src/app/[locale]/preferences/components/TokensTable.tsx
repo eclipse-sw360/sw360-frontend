@@ -11,7 +11,7 @@
 'use client'
 
 import { AccessToken, Embedded, HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
@@ -23,37 +23,13 @@ interface Props {
     generatedToken: string
 }
 
-function TokensTable({ generatedToken }: Props) {
+const TokensTable = ({ generatedToken }: Props) => {
     const t = useTranslations('default')
     const { setToastData } = useContext(MessageContext)
     const [tableData, setTableData] = useState([])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-
-        const revokeToken = async (tokenName: string) => {
-            const session = await getSession()
-            const response = await ApiUtils.DELETE(`users/tokens?name=${tokenName}`, session.user.access_token)
-            if (response.status === HttpStatus.NO_CONTENT) {
-                setToastData({
-                    show: true,
-                    message: t('Revoke token sucessfully'),
-                    type: t('Success'),
-                    contextual: 'success',
-                })
-                fetchData('users/tokens')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                signOut()
-            } else {
-                setToastData({
-                    show: true,
-                    message: t('Error while processing'),
-                    type: t('Error'),
-                    contextual: 'danger',
-                })
-            }
-        }
-
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             const data = (await response.json()) as Embedded<AccessToken, 'sw360:restApiTokens'>
@@ -88,9 +64,33 @@ function TokensTable({ generatedToken }: Props) {
         } else {
             setTableData([])
         }
-    }, [setToastData, t])
+    }, [])
 
-
+    const revokeToken = async (tokenName: string) => {
+        const session = await getSession()
+        const response = await ApiUtils.DELETE(
+            CommonUtils.createUrlWithParams('users/tokens', { name: tokenName }),
+            session.user.access_token
+        )
+        if (response.status === HttpStatus.NO_CONTENT) {
+            setToastData({
+                show: true,
+                message: t('Revoke token sucessfully'),
+                type: t('Success'),
+                contextual: 'success',
+            })
+            fetchData('users/tokens')
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            signOut()
+        } else {
+            setToastData({
+                show: true,
+                message: t('Error while processing'),
+                type: t('Error'),
+                contextual: 'danger',
+            })
+        }
+    }
 
     useEffect(() => {
         fetchData('users/tokens')
@@ -124,11 +124,7 @@ function TokensTable({ generatedToken }: Props) {
         },
     ]
 
-    return (
-        <div className='row'>
-            <Table columns={columns} data={tableData} />
-        </div>
-    )
+    return <div className='row'>{tableData.length > 0 && <Table columns={columns} data={tableData} />}</div>
 }
 
-export default TokensTable
+export default React.memo(TokensTable)

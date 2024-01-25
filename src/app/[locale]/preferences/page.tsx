@@ -8,11 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import { ApiUtils } from '@/utils/index'
 import { Metadata } from 'next'
-import { getServerSession } from 'next-auth'
-import User from '../../../object-types/User'
 import MessageContextProvider from './components/MessageContextProvider'
 import NotificationSettingForm from './components/NotificationSettingForm'
 import UpdateMessage from './components/UpdateMessage'
@@ -22,19 +18,11 @@ export const metadata: Metadata = {
     title: 'Preferences',
 }
 
-const getUserPreferences = async (token: string) => {
-    const res = await ApiUtils.GET(`users/profile`, token)
-    return res.json()
-}
-
-const PreferencesPage = async () => {
-    const session = await getServerSession(authOptions)
-    const userPreferences: User = await getUserPreferences(session.user.access_token)
-
+const PreferencesPage = () => {
     return (
         <div className='container page-content'>
             <MessageContextProvider>
-                <NotificationSettingForm user={userPreferences} />
+                <NotificationSettingForm />
                 <br />
                 <UserAccessToken />
                 <UpdateMessage />

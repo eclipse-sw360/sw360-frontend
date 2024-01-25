@@ -12,22 +12,22 @@
 
 import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { useContext, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import User from '../../../../object-types/User'
 import { MessageContext } from './MessageContextProvider'
 import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
 
-const NotificationSettingForm = ({ user }: { user: User }) => {
+const NotificationSettingForm = () => {
     const t = useTranslations('default')
+    const [user, setUser] = useState<User>(undefined)
     const { setToastData } = useContext(MessageContext)
-
     const [notificationSetting, setNotificationSetting] = useState({
-        wantsMailNotification: user.wantsMailNotification,
-        notificationPreferences: user.notificationPreferences,
+        wantsMailNotification: undefined,
+        notificationPreferences: {},
     })
 
     const updateNotificationSetting = async () => {
@@ -40,6 +40,10 @@ const NotificationSettingForm = ({ user }: { user: User }) => {
                 type: t('Success'),
                 contextual: 'success',
             })
+
+            if (!notificationSetting.wantsMailNotification) {
+                fetchData('users/profile')
+            }
             return
         }
         setToastData({
@@ -50,9 +54,30 @@ const NotificationSettingForm = ({ user }: { user: User }) => {
         })
     }
 
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = await response.json()
+            setUser(data)
+            setNotificationSetting({
+                wantsMailNotification: data.wantsMailNotification,
+                notificationPreferences: data.notificationPreferences,
+            })
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            await signOut()
+        } else {
+            setUser(undefined)
+        }
+    }, [])
+
     const buttonHeaders = {
         'Update Setting': { name: t('Update Setting'), link: '#', type: 'primary', onClick: updateNotificationSetting },
     }
+
+    useEffect(() => {
+        fetchData('users/profile')
+    }, [fetchData])
 
     return (
         <form>
