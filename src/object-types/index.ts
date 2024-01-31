@@ -37,10 +37,11 @@ import ModeratorsType from './ModeratorsType'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import Preferences from './Preferences'
 import Package from './Package'
+import Preferences from './Preferences'
 import Project from './Project'
 import ProjectReleaseEcc from './ProjectReleaseEcc'
+import { ProjectData, ProjectVulnerability } from './ProjectVulnerabilityTypes'
 import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
@@ -92,7 +93,9 @@ export type {
     OAuthClient,
     Package,
     Project,
+    ProjectData,
     ProjectReleaseEcc,
+    ProjectVulnerability,
     Release,
     ReleaseDetail,
     ReleaseLink,

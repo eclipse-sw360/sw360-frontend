@@ -32,6 +32,8 @@ interface SummaryDataType {
     ownerAccountingUnit: string
     ownerGroup: string
     ownerCountry: string
+    enableVulnerabilitiesDisplay: boolean
+    enableSvm: boolean
     roles: object
     _embedded: {
         leadArchitect: User

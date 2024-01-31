@@ -21,6 +21,7 @@ import Administration from './Administration'
 import ChangeLog from './Changelog'
 import EccDetails from './Ecc'
 import LicenseClearing from './LicenseClearing'
+import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 
 export default function ViewProjects({ projectId }: { projectId: string }) {
@@ -161,7 +162,20 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                     <Tab.Pane eventKey='vulnerabilityTrackingStatus'></Tab.Pane>
                                     <Tab.Pane eventKey='attachments'></Tab.Pane>
                                     <Tab.Pane eventKey='attachmentUsages'></Tab.Pane>
-                                    <Tab.Pane eventKey='vulnerabilities'></Tab.Pane>
+                                    <Tab.Pane eventKey='vulnerabilities'>
+                                        {summaryData && (
+                                            <ProjectVulnerabilities
+                                                projectData={{
+                                                    id: projectId,
+                                                    name: summaryData.name ?? '',
+                                                    version: summaryData.version ?? '',
+                                                    enableSvm: summaryData.enableSvm ?? false,
+                                                    enableVulnerabilitiesDisplay:
+                                                        summaryData.enableVulnerabilitiesDisplay ?? false,
+                                                }}
+                                            />
+                                        )}
+                                    </Tab.Pane>
                                     <Tab.Pane eventKey='changeLog'>
                                         <ChangeLog projectId={projectId} />
                                     </Tab.Pane>
