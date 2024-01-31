@@ -10,9 +10,16 @@
     "settings": {
         "next": {
             "rootDir": "src"
+        },
+        "import/resolver": {
+            "typescript": {
+                "alwaysTryTypes": true,
+                "project": "tsconfig.json"
+            }
         }
+
     },
-    "plugins": ["@typescript-eslint", "react"],
+    "plugins": ["@typescript-eslint", "react", "import"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": true,

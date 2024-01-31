@@ -13,6 +13,9 @@ const withNextIntl = require('next-intl/plugin')()
 const nextConfig = {
     reactStrictMode: true,
     output: 'standalone',
+    experimental: {
+        missingSuspenseWithCSRBailout: false,
+    },
 }
 
 module.exports = withNextIntl(nextConfig)
