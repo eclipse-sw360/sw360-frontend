@@ -20,7 +20,7 @@ COPY . .
 RUN npm run build --production
 
 # Runtime
-ARG VARIANT=19-alpine
+ARG VARIANT=20-alpine
 FROM node:${VARIANT}
 WORKDIR /frontend
 
