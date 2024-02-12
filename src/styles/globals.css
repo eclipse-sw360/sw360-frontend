@@ -763,3 +763,22 @@ input::-webkit-datetime-edit {
     position: relative;
     left: 10px;
 }
+
+.tree-table-padding-0 {
+    padding-left: 0rem;
+}
+.tree-table-padding-1 {
+    padding-left: 2rem;
+}
+.tree-table-padding-2 {
+    padding-left: 4rem;
+}
+.tree-table-padding-3 {
+    padding-left: 6rem;
+}
+.tree-table-padding-4 {
+    padding-left: 8rem;
+}
+.tree-table-padding-5 {
+    padding-left: 10rem;
+}
