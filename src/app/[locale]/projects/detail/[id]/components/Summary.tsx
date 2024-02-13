@@ -103,9 +103,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>
                             <Link
                                 className={`text-link`}
-                                href={`mailto:${summaryData._embedded?.modifiedBy.email ?? ''}`}
+                                href={`mailto:${summaryData._embedded?.modifiedBy?.email ?? ''}`}
                             >
-                                {summaryData._embedded?.modifiedBy.fullName ?? ''}
+                                {summaryData._embedded?.modifiedBy?.fullName ?? ''}
                             </Link>
                         </td>
                     </tr>
@@ -177,9 +177,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>
                             <Link
                                 className='text-link'
-                                href={`mailto:${summaryData._embedded?.projectResponsible.email ?? ''}`}
+                                href={`mailto:${summaryData._embedded?.projectResponsible?.email ?? ''}`}
                             >
-                                {summaryData._embedded?.projectResponsible.fullName ?? ''}
+                                {summaryData._embedded?.projectResponsible?.fullName ?? ''}
                             </Link>
                         </td>
                     </tr>
@@ -188,9 +188,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>
                             <Link
                                 className='text-link'
-                                href={`mailto:${summaryData._embedded?.projectOwner.email ?? ''}`}
+                                href={`mailto:${summaryData._embedded?.projectOwner?.email ?? ''}`}
                             >
-                                {summaryData._embedded?.projectOwner.fullName ?? ''}
+                                {summaryData._embedded?.projectOwner?.fullName ?? ''}
                             </Link>
                         </td>
                     </tr>
@@ -212,9 +212,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>
                             <Link
                                 className='text-link'
-                                href={`mailto:${summaryData._embedded?.leadArchitect.email ?? ''}`}
+                                href={`mailto:${summaryData._embedded?.leadArchitect?.email ?? ''}`}
                             >
-                                {summaryData._embedded?.leadArchitect.fullName ?? ''}
+                                {summaryData._embedded?.leadArchitect?.fullName ?? ''}
                             </Link>
                         </td>
                     </tr>
