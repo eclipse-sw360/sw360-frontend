@@ -236,7 +236,12 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         <label htmlFor='addProjects.modifiedOn' className='form-label fw-medium'>
                             {t('Modified On')}
                         </label>
-                        <input type='date' className='form-control' id='addProjects.modifiedOn' readOnly={true} />
+                        <input type='date'
+                               className='form-control'
+                               id='addProjects.modifiedOn'
+                               readOnly={true}
+                               value={projectPayload.modifiedOn ? projectPayload.modifiedOn : ""}
+                        />
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.modifiedBy' className='form-label fw-medium'>
@@ -248,6 +253,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.modifiedBy'
                             placeholder={t('Will be set automatically')}
                             readOnly={true}
+                            value={projectPayload.modifiedBy ? projectPayload.modifiedBy : ""}
                         />
                     </div>
                 </div>

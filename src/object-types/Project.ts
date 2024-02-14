@@ -25,6 +25,8 @@ interface Project {
     deliveryStart?: string
     description?: string
     domain?: string
+    modifiedOn?: string
+    modifiedBy?: string
     externalIds?: { [k: string]: string }
     externalUrls?: { [k: string]: string }
     generalRisks3rdParty?: string

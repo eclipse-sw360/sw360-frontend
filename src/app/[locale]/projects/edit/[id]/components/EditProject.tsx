@@ -140,6 +140,8 @@ function EditProject({ projectId }: { projectId: string }) {
                 tag: project.tag,
                 description: project.description,
                 domain: project.domain,
+                modifiedOn: project.modifiedOn,
+                modifiedBy: project.modifiedBy,
                 externalIds: project.externalIds,
                 externalUrls:project.externalUrls,
                 additionalData: project.additionalData
