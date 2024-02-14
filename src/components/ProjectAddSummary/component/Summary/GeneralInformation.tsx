@@ -13,14 +13,14 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { Project, Vendor } from '@/object-types'
+import { ProjectSummaryPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 
 interface Param {
     vendor: Vendor
     setVendor: Dispatch<SetStateAction<Vendor>>
-    projectPayload: Project
-    setProjectPayload: Dispatch<SetStateAction<Project>>
+    projectPayload: ProjectSummaryPayload
+    setProjectPayload: Dispatch<SetStateAction<ProjectSummaryPayload>>
 }
 
 export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param) {
@@ -128,6 +128,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.createdBy'
                             placeholder={t('Will be set automatically')}
                             readOnly={true}
+                            value={projectPayload.createdBy}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>

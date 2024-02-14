@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 
-import { AddtionalDataType, DocumentTypes, InputKeyValue, Project, Vendor } from '@/object-types'
+import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectSummaryPayload, Vendor } from '@/object-types'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import Roles from './Roles/Roles'
 import GeneralInformation from './component/Summary/GeneralInformation'
@@ -21,7 +21,7 @@ interface Props {
     externalUrls: InputKeyValue[]
     externalIds: InputKeyValue[]
     additionalData: InputKeyValue[]
-    projectPayload: Project
+    projectPayload: ProjectSummaryPayload
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     setExternalUrls: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setExternalUrlsData: AddtionalDataType
@@ -29,7 +29,7 @@ interface Props {
     setExternalIdsData: AddtionalDataType
     setAdditionalData: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setAdditionalDataObject: AddtionalDataType
-    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectSummaryPayload>>
 }
 
 export default function Summary({

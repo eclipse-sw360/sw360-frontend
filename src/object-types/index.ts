@@ -40,6 +40,7 @@ import OAuthClient from './OAuthClient'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
+import ProjectSummaryPayload from './ProjectSummaryPayload'
 import ProjectReleaseEcc from './ProjectReleaseEcc'
 import { ProjectData, ProjectVulnerability } from './ProjectVulnerabilityTypes'
 import Release from './Release'
@@ -94,6 +95,7 @@ export type {
     Package,
     Project,
     ProjectData,
+    ProjectSummaryPayload,
     ProjectReleaseEcc,
     ProjectVulnerability,
     Release,

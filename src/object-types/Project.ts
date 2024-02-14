@@ -15,7 +15,7 @@ interface Project {
     id?: string
     name: string
     considerReleasesFromExternalList?: boolean
-    additionalData?: object
+    additionalData?: { [k: string]: string }
     businessUnit?: string
     clearingState?: string
     clearingSummary?: string
@@ -25,8 +25,8 @@ interface Project {
     deliveryStart?: string
     description?: string
     domain?: string
-    externalIds?: object
-    externalUrls?: object
+    externalIds?: { [k: string]: string }
+    externalUrls?: { [k: string]: string }
     generalRisks3rdParty?: string
     leadArchitect?: string
     licenseInfoHeaderText?: string

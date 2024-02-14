@@ -12,31 +12,25 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ToastData, Vendor } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { HttpStatus, InputKeyValue, Project, ToastData, Vendor, ProjectSummaryPayload } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ToastMessage } from 'next-sw360'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { notFound, useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab, ToastContainer } from 'react-bootstrap'
 
-function EditProjects({ projectId }: { projectId: string }) {
+function EditProject({ projectId }: { projectId: string }) {
     const router = useRouter()
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    console.log('projectId...', projectId)
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
     })
 
-    const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([
-        {
-            key: '',
-            value: '',
-        },
-    ])
+    const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
 
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([
         {
@@ -52,37 +46,21 @@ function EditProjects({ projectId }: { projectId: string }) {
         },
     ])
 
-    const [projectPayload, setProjectPayload] = useState<Project>({
+    const [projectPayload, setProjectPayload] = useState<ProjectSummaryPayload>({
         name: '',
-        description: '',
         version: '',
         visibility: 'EVERYONE',
+        createdBy: '',
         projectType: 'PRODUCT',
         tag: '',
+        description: '',
         domain: '',
-        leadArchitect: '',
         defaultVendorId: '',
+        modifiedOn: '',
+        modifiedBy: '',
         externalUrls: null,
+        additionalData: {},
         externalIds: null,
-        additionalData: null,
-        state: 'ACTIVE',
-        phaseOutSince: '',
-        moderators: null,
-        contributors: null,
-        clearingState: 'OPEN',
-        businessUnit: 'CT',
-        preevaluationDeadline: '',
-        clearingSummary: '',
-        specialRisksOSS: '',
-        generalRisks3rdParty: '',
-        specialRisks3rdParty: '',
-        deliveryChannels: '',
-        remarksAdditionalRequirements: '',
-        systemTestStart: '',
-        systemTestEnd: '',
-        deliveryStart: '',
-        licenseInfoHeaderText: '',
-        linkedProjects: {},
     })
 
     const [toastData, setToastData] = useState<ToastData>({
@@ -101,7 +79,7 @@ function EditProjects({ projectId }: { projectId: string }) {
         })
     }
 
-    const setExternalUrlsData = (externalUrls: Map<string, string>) => {
+    const setDataExternalUrls = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
         setProjectPayload({
             ...projectPayload,
@@ -109,7 +87,7 @@ function EditProjects({ projectId }: { projectId: string }) {
         })
     }
 
-    const setExternalIdsData = (externalIds: Map<string, string>) => {
+    const setDataExternalIds = (externalIds: Map<string, string>) => {
         const obj = Object.fromEntries(externalIds)
         setProjectPayload({
             ...projectPayload,
@@ -117,7 +95,7 @@ function EditProjects({ projectId }: { projectId: string }) {
         })
     }
 
-    const setAdditionalDataObject = (additionalData: Map<string, string>) => {
+    const setDataAdditionalData = (additionalData: Map<string, string>) => {
         const obj = Object.fromEntries(additionalData)
         setProjectPayload({
             ...projectPayload,
@@ -125,9 +103,53 @@ function EditProjects({ projectId }: { projectId: string }) {
         })
     }
 
-    const updateProject = async () => {
-        const response = await ApiUtils.PATCH('projects', projectPayload, session.user.access_token)
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = (await response.json()) as Project
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[]
+    )
 
+    useEffect(() => {
+        void fetchData(`projects/${projectId}`).then((project: Project) => {
+            if (typeof project.externalIds !== 'undefined') {
+                setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
+            }
+
+            if (typeof project.externalUrls !== 'undefined') {
+                setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
+            }
+
+            if (typeof project.additionalData !== 'undefined') {
+                setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
+            }
+
+            const projectPayloadData: ProjectSummaryPayload = {
+                name: project.name,
+                version: project.version,
+                visibility: project.visibility,
+                createdBy: project._embedded.createdBy.fullName,
+                projectType: project.projectType,
+                tag: project.tag,
+                description: project.description,
+                domain: project.domain,
+                externalIds: project.externalIds,
+                externalUrls:project.externalUrls,
+                additionalData: project.additionalData
+            }
+            setProjectPayload(projectPayloadData)
+        })
+    }, [projectId, fetchData, setProjectPayload])
+
+    const updateProject = async () => {
+        const response = await ApiUtils.PATCH(`projects/${projectId}`, projectPayload, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             await response.json()
             alert(true, 'success', t('Your project is updated'), 'success')
@@ -206,7 +228,7 @@ function EditProjects({ projectId }: { projectId: string }) {
                                                     variant='danger'
                                                     type='submit'
                                                     className='me-2 col-auto'
-                                                    onClick={updateProject}
+                                                    onClick={handleCancelClick}
                                                 >
                                                     {t('Delete Project')}
                                                 </Button>
@@ -231,13 +253,13 @@ function EditProjects({ projectId }: { projectId: string }) {
                                                     setVendor={setVendor}
                                                     externalUrls={externalUrls}
                                                     setExternalUrls={setExternalUrls}
-                                                    setExternalUrlsData={setExternalUrlsData}
+                                                    setExternalUrlsData={setDataExternalUrls}
                                                     externalIds={externalIds}
                                                     setExternalIds={setExternalIds}
-                                                    setExternalIdsData={setExternalIdsData}
+                                                    setExternalIdsData={setDataExternalIds}
                                                     additionalData={additionalData}
                                                     setAdditionalData={setAdditionalData}
-                                                    setAdditionalDataObject={setAdditionalDataObject}
+                                                    setAdditionalDataObject={setDataAdditionalData}
                                                     projectPayload={projectPayload}
                                                     setProjectPayload={setProjectPayload}
                                                 />
@@ -268,4 +290,4 @@ function EditProjects({ projectId }: { projectId: string }) {
     }
 }
 
-export default EditProjects
+export default EditProject
