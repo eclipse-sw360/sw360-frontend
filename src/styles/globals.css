@@ -782,3 +782,11 @@ input::-webkit-datetime-edit {
 .tree-table-padding-5 {
     padding-left: 10rem;
 }
+
+.header-underlined {
+    color: #5D8EA9;
+    border-bottom: 1px solid #5D8EA9;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}

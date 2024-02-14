@@ -27,7 +27,7 @@ const AdminMainPage = () => {
             <div className='mx-5 mt-3'>
                 <div className='row d-flex justify-content-end buttonheader-title'>{t('ADMINISTRATION')}</div>
                 <div className='mt-4 d-flex flex-wrap justify-content-center px-5 mx-auto'>
-                    <Link href='#'>
+                    <Link href='/admin/users'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <ImUsers /> {t('User')}
                         </button>
