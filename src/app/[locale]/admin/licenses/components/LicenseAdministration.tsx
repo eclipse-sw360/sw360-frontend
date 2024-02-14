@@ -19,7 +19,7 @@ import { useRef, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
-export default function AddVendor() {
+export default function LicenseAdministration() {
     const t = useTranslations('default')
     const file = useRef<File | undefined>()
     const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)

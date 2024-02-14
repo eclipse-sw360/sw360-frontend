@@ -28,7 +28,7 @@ function NavList() {
             id: 'admin',
             visibility: 'ADMIN',
             childs: [
-                { href: '#', name: t('User'), id: 'admin_user' },
+                { href: '/admin/users', name: t('User'), id: 'admin_user' },
                 { href: '/admin/vendors', name: t('Vendors'), id: 'admin_vendors' },
                 { href: '#', name: t('Bulk Release Edit'), id: 'admin_bulk_edit' },
                 { href: '/admin/licenses', name: t('Licenses'), id: 'admin_licenses' },
