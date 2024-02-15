@@ -49,6 +49,7 @@ interface UrlWithParams {
  */
 const createUrlWithParams = (url: string, params: UrlWithParams) => {
     const queryString = Object.keys(params)
+        .filter((key) => params[key] !== undefined)
         .map((key) => {
             return [key, params[key]].map(encodeURIComponent).join('=')
         })

@@ -165,8 +165,12 @@ body {
     font-size: bold;
 }
 
-.table td,
-th {
+.table td {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+}
+
+.table th {
     padding: 14px !important;
 }
 
@@ -1160,7 +1164,8 @@ a.text-primary {
 
 .tooltip-inner {
     max-width: 600px !important;
-    font-size: 13px !important;
+    font-size: 14px !important;
+    text-align: left !important;
 }
 
 .summary-table {
@@ -1207,4 +1212,26 @@ a.text-primary {
     background-color: #ffffff !important;
     border-color: #ffffff !important;
     color: #000000 !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.modal-danger .modal-header {
+    background-color: #feefef;
+    border-color: #f48989;
+    color: #da1414;
+}
+
+hr {
+    opacity: 1 !important;
+}
+
+.node-have-diff > td{
+    background-color: rgb(255, 212, 170) !important;
+}
+
+.node-have-diff > td:first-child{
+    color: red !important;
 }

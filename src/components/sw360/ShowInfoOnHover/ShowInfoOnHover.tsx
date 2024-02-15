@@ -7,15 +7,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
-const ShowInfoOnHover = ({ text }: { text: string }) => {
+const ShowInfoOnHover = ({ text }: { text: string | ReactNode}) => {
     return (
         <>
-            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
+            <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>} placement='bottom'>
                 <span className='d-inline-block'>
-                    <FaInfoCircle />
+                    <FaInfoCircle size={13}/>
                 </span>
             </OverlayTrigger>
         </>

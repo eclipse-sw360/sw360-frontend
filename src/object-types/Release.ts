@@ -11,6 +11,7 @@
 import { Attachment, COTSDetails, ClearingInformation, ECCInformation, Links, Repository } from '@/object-types'
 
 interface Release {
+    id?: string
     name?: string
     cpeid?: string
     version?: string

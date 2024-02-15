@@ -52,6 +52,7 @@ import { ProjectData, ProjectVulnerability, ProjectsPayloadElement, Vulnerabilit
 import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
+import ReleaseNode from './ReleaseNode'
 import Repository from './Repository'
 import RequestContent from './RequestContent'
 import Resources from './Resources'
@@ -177,7 +178,8 @@ export type {
     ProjectVulnerabilityTrackingStatus,
     SearchDuplicatesResponse,
     AttachmentUsages,
-    AttachmentUsage
+    AttachmentUsage,
+    ReleaseNode,
 }
 
 // Special functions for populate data
