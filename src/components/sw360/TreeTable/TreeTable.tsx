@@ -16,6 +16,10 @@ import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 import { NodeData } from '@/object-types'
 import { Table, _ } from 'next-sw360'
+import { OneDArray, TColumn } from 'gridjs/dist/src/types'
+import { ComponentChild } from 'preact'
+import { SearchConfig } from 'gridjs/dist/src/view/plugin/search/search'
+import { Language } from '../Table/Table'
 
 interface Props {
     children: React.ReactNode
@@ -35,20 +39,32 @@ const PaddedCell: React.FC<Props> = ({
     collapseRow,
 }) => {
     return (
-        // style={{paddingLeft: `${padLength * 1.5}rem`}}
-        <div className={`tree-table-padding-${padLength}`}>
-            {parent &&
-                (needExpand ? (
-                    <BsCaretDownFill color='gray' onClick={collapseRow} />
-                ) : (
-                    <BsCaretRightFill color='gray' onClick={expandRow} />
-                ))}{' '}
+        <div className='d-flex'>
+            <span className='indenter' style={{paddingLeft: `${padLength * 1}rem`}} role='button'>
+                {parent &&
+                    (needExpand ? (
+                        <BsCaretDownFill color='gray' onClick={collapseRow} />
+                    ) : (
+                        <BsCaretRightFill color='gray' onClick={expandRow} />
+                    ))}{' '}
+            </span>
             {children}
         </div>
     )
 }
 
-const TreeTable = ({ data, setData, columns }: any) => {
+interface TreeTableProps {
+    data: Array<any>
+    setData: React.Dispatch<React.SetStateAction<Array<any>>>
+    columns: OneDArray<TColumn | string | ComponentChild>
+    onExpand?: (item: NodeData) => void
+    search?: SearchConfig | boolean
+    language?: Language
+    selector?: boolean
+    sort?: boolean
+}
+
+const TreeTable = ({ data, setData, columns, onExpand, search, language, selector, sort }: TreeTableProps) => {
     const [tabledata, setTableData] = useState([])
     useEffect(() => {
         const newData: any = []
@@ -60,8 +76,12 @@ const TreeTable = ({ data, setData, columns }: any) => {
     }, [data])
 
     const expandRow = (item: NodeData) => {
-        item.isExpanded = true
-        setData([...data])
+        if (!onExpand) {
+            item.isExpanded = true
+            setData([...data])
+            return
+        }
+        onExpand(item)
     }
 
     const collapseRow = (item: NodeData) => {
@@ -99,7 +119,7 @@ const TreeTable = ({ data, setData, columns }: any) => {
     }
 
     const manipulateData = (item: NodeData, level = 0, newData: any = []) => {
-        if (item.children.length > 0) {
+        if (item.children.length > 0 || item.isExpandable) {
             const isExpanded: boolean = item.isExpanded
             newData.push(parseRowData(item, isExpanded, true, level))
             if (isExpanded) {
@@ -111,6 +131,6 @@ const TreeTable = ({ data, setData, columns }: any) => {
         }
     }
 
-    return <Table data={tabledata} pagination={false} columns={columns} sort={false} />
+    return <Table data={tabledata} pagination={false} columns={columns} sort={sort} search={search} language={language} selector={selector}/>
 }
 export default TreeTable

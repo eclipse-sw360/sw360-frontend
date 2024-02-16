@@ -31,6 +31,7 @@ import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 import GlobalMessages from './GlobalMessages'
 import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
+import EnumValueWithToolTip from './EnumValueWithToolTip/EnumValueWIthToolTip'
 
 // Table component
 // Strictly derived from gridjs-react with dedicated changes
@@ -66,5 +67,6 @@ export {
     VendorDialog,
     GlobalMessages,
     SelectUsersDialog,
+    EnumValueWithToolTip,
     _,
 }
