@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 
-import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectSummaryPayload, Vendor } from '@/object-types'
+import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectSummaryPayload, RolesType, Vendor } from '@/object-types'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import Roles from './Roles/Roles'
 import GeneralInformation from './component/Summary/GeneralInformation'
@@ -21,6 +21,7 @@ interface Props {
     externalUrls: InputKeyValue[]
     externalIds: InputKeyValue[]
     additionalData: InputKeyValue[]
+    additionalRoles?: InputKeyValue[]
     projectPayload: ProjectSummaryPayload
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     setExternalUrls: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
@@ -30,6 +31,8 @@ interface Props {
     setAdditionalData: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setAdditionalDataObject: AddtionalDataType
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectSummaryPayload>>
+    setAdditionalRoles?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
+    setDataAdditionalRoles?: RolesType
 }
 
 export default function Summary({
@@ -37,6 +40,7 @@ export default function Summary({
     externalUrls,
     externalIds,
     additionalData,
+    additionalRoles,
     projectPayload,
     setVendor,
     setExternalUrls,
@@ -46,6 +50,8 @@ export default function Summary({
     setAdditionalData,
     setAdditionalDataObject,
     setProjectPayload,
+    setAdditionalRoles,
+    setDataAdditionalRoles,
 }: Props) {
     const t = useTranslations('default')
 
@@ -69,7 +75,12 @@ export default function Summary({
                 </div>
                 <Roles />
                 <div className='row mb-4'>
-                    <AddAdditionalRoles documentType={DocumentTypes.PROJECT} />
+                    <AddAdditionalRoles
+                        documentType={DocumentTypes.PROJECT}
+                        inputList={additionalRoles}
+                        setInputList={setAdditionalRoles}
+                        setDataInputList={setDataAdditionalRoles}
+                    />
                 </div>
                 <div className='row mb-4'>
                     <AddKeyValue

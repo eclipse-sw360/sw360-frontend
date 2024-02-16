@@ -11,7 +11,7 @@
 
 import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
 
@@ -29,19 +29,21 @@ function AddAdditionalRoles({
     setInputList: propSetInputList,
 }: Props) {
     const t = useTranslations('default')
-    const [inputList, setInputList] = useState<InputKeyValue[]>(
-        propInputList || [
+    const [inputListData, setInputListData] = useState<InputKeyValue[]>([])
+    useEffect(()=>{
+        setInputListData(propInputList !== null ? propInputList : [
             {
                 key: documentType === DocumentTypes.COMPONENT ? 'Commiter' : 'Stakeholder',
                 value: '',
             },
-        ]
-    )
-    const setInputData = propSetInputList || setInputList
+        ]);
+    },[propInputList])
+    const setInputData = propSetInputList || setInputListData
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: InputKeyValue[] = [...inputList]
+        const list: InputKeyValue[] = [...inputListData]
         list[index][name as keyof InputKeyValue] = value
         setInputData(list)
         if (setDataInputList) {
@@ -50,7 +52,7 @@ function AddAdditionalRoles({
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList]
+        const list = [...inputListData]
         list.splice(index, 1)
         setInputData(list)
         if (setDataInputList) {
@@ -60,8 +62,8 @@ function AddAdditionalRoles({
 
     const handleAddClick = () => {
         documentType === DocumentTypes.COMPONENT
-            ? setInputData([...inputList, { key: 'Committer', value: '' }])
-            : setInputData([...inputList, { key: 'Stakeholder', value: '' }])
+            ? setInputData([...inputListData, { key: 'Committer', value: '' }])
+            : setInputData([...inputListData, { key: 'Stakeholder', value: '' }])
     }
 
     const defaultValue = () => {
@@ -72,8 +74,8 @@ function AddAdditionalRoles({
         <>
             <h6 className='header pb-2 px-2'>{t('Additional Roles')}</h6>
             <div className='row'>
-                {inputList &&
-                    inputList.map((elem, j) => {
+                {inputListData &&
+                    inputListData.map((elem, j) => {
                         return (
                             <div className='row mb-2' key={j}>
                                 <div className='col-lg-5'>
@@ -98,11 +100,11 @@ function AddAdditionalRoles({
                                                 <option value='Analyst'>{t('Analyst')}</option>
                                                 <option value='Contributor'>{t('Contributor')}</option>
                                                 <option value='Accountant'>{t('Accountant')}</option>
-                                                <option value='End User'>{t('End User')}</option>
-                                                <option value='Quality Manager'>{t('Quality Manager')}</option>
-                                                <option value='Test Manager'>{t('Test Manager')}</option>
-                                                <option value='Technical writer'>{t('Technical writer')}</option>
-                                                <option value='Key User'>{t('Key User')}</option>
+                                                <option value='EndUser'>{t('End User')}</option>
+                                                <option value='QualityManager'>{t('Quality Manager')}</option>
+                                                <option value='TestManager'>{t('Test Manager')}</option>
+                                                <option value='TechnicalWriter'>{t('Technical Writer')}</option>
+                                                <option value='KeyUser'>{t('Key User')}</option>
                                             </>
                                         )}
                                     </select>

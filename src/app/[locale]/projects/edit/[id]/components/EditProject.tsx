@@ -46,6 +46,8 @@ function EditProject({ projectId }: { projectId: string }) {
         },
     ])
 
+    const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
+
     const [projectPayload, setProjectPayload] = useState<ProjectSummaryPayload>({
         name: '',
         version: '',
@@ -61,6 +63,7 @@ function EditProject({ projectId }: { projectId: string }) {
         externalUrls: null,
         additionalData: {},
         externalIds: null,
+        roles: null,
     })
 
     const [toastData, setToastData] = useState<ToastData>({
@@ -103,6 +106,14 @@ function EditProject({ projectId }: { projectId: string }) {
         })
     }
 
+    const setDataAdditionalRoles = (additionalRoles: InputKeyValue[]) => {
+        const obj = CommonUtils.convertRoles(additionalRoles)
+        setProjectPayload({
+            ...projectPayload,
+            roles: obj,
+        })
+    }
+
     const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -131,6 +142,10 @@ function EditProject({ projectId }: { projectId: string }) {
                 setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
             }
 
+            if (typeof project.roles !== 'undefined') {
+                setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
+            }
+
             const projectPayloadData: ProjectSummaryPayload = {
                 name: project.name,
                 version: project.version,
@@ -144,7 +159,8 @@ function EditProject({ projectId }: { projectId: string }) {
                 modifiedBy: project.modifiedBy,
                 externalIds: project.externalIds,
                 externalUrls:project.externalUrls,
-                additionalData: project.additionalData
+                additionalData: project.additionalData,
+                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)),
             }
             setProjectPayload(projectPayloadData)
         })
@@ -264,6 +280,9 @@ function EditProject({ projectId }: { projectId: string }) {
                                                     setAdditionalDataObject={setDataAdditionalData}
                                                     projectPayload={projectPayload}
                                                     setProjectPayload={setProjectPayload}
+                                                    additionalRoles={additionalRoles}
+                                                    setAdditionalRoles={setAdditionalRoles}
+                                                    setDataAdditionalRoles={setDataAdditionalRoles}
                                                 />
                                             </Tab.Pane>
                                             <Tab.Pane eventKey='administration'>

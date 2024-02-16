@@ -19,6 +19,7 @@ interface ProjectSummaryPayload {
     defaultVendorId?: string
     modifiedOn?: string
     modifiedBy?: string
+    roles?: { [k: string]: Array<string> }
     externalUrls?: { [k: string]: string }
     additionalData?: { [k: string]: string }
     externalIds?: { [k: string]: string }
