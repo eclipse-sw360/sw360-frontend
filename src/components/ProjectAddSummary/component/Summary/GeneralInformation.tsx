@@ -13,14 +13,14 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { ProjectSummaryPayload, Vendor } from '@/object-types'
+import { ProjectPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 
 interface Param {
     vendor: Vendor
     setVendor: Dispatch<SetStateAction<Vendor>>
-    projectPayload: ProjectSummaryPayload
-    setProjectPayload: Dispatch<SetStateAction<ProjectSummaryPayload>>
+    projectPayload: ProjectPayload
+    setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
 
 export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param) {

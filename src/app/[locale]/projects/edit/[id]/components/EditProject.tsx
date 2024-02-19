@@ -12,7 +12,7 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ToastData, Vendor, ProjectSummaryPayload } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, ToastData, Vendor, ProjectPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -48,7 +48,7 @@ function EditProject({ projectId }: { projectId: string }) {
 
     const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
 
-    const [projectPayload, setProjectPayload] = useState<ProjectSummaryPayload>({
+    const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
         version: '',
         visibility: 'EVERYONE',
@@ -64,6 +64,21 @@ function EditProject({ projectId }: { projectId: string }) {
         additionalData: {},
         externalIds: null,
         roles: null,
+        clearingState : '',
+        businessUnit : '',
+        preevaluationDeadline : '',
+        clearingSummary : '',
+        specialRisksOSS : '',
+        generalRisks3rdParty : '',
+        specialRisks3rdParty : '',
+        deliveryChannels : '',
+        remarksAdditionalRequirements : '',
+        state : '',
+        systemTestStart : '',
+        systemTestEnd : '',
+        deliveryStart : '',
+        phaseOutSince : '',
+        licenseInfoHeaderText : '',
     })
 
     const [toastData, setToastData] = useState<ToastData>({
@@ -146,7 +161,7 @@ function EditProject({ projectId }: { projectId: string }) {
                 setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
             }
 
-            const projectPayloadData: ProjectSummaryPayload = {
+            const projectPayloadData: ProjectPayload = {
                 name: project.name,
                 version: project.version,
                 visibility: project.visibility,
@@ -161,6 +176,21 @@ function EditProject({ projectId }: { projectId: string }) {
                 externalUrls:project.externalUrls,
                 additionalData: project.additionalData,
                 roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)),
+                clearingState: project.clearingState,
+                businessUnit: project.businessUnit,
+                preevaluationDeadline: project.preevaluationDeadline,
+                clearingSummary: project.clearingSummary,
+                specialRisksOSS: project.specialRisksOSS,
+                generalRisks3rdParty: project.generalRisks3rdParty,
+                specialRisks3rdParty: project.specialRisks3rdParty,
+                deliveryChannels: project.deliveryChannels,
+                remarksAdditionalRequirements: project.remarksAdditionalRequirements,
+                state: project.state,
+                systemTestStart: project.systemTestStart,
+                systemTestEnd: project.systemTestEnd,
+                deliveryStart: project.deliveryStart,
+                phaseOutSince: project.phaseOutSince,
+                licenseInfoHeaderText: project.licenseInfoHeaderText
             }
             setProjectPayload(projectPayloadData)
         })

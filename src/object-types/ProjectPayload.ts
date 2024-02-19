@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-interface ProjectSummaryPayload {
+interface ProjectPayload {
     name: string
     version?: string
     visibility?: string
@@ -23,6 +23,21 @@ interface ProjectSummaryPayload {
     externalUrls?: { [k: string]: string }
     additionalData?: { [k: string]: string }
     externalIds?: { [k: string]: string }
+    clearingState?: string
+    businessUnit?: string
+    preevaluationDeadline?: string
+    clearingSummary?: string
+    specialRisksOSS?: string
+    generalRisks3rdParty?: string
+    specialRisks3rdParty?: string
+    deliveryChannels?: string
+    remarksAdditionalRequirements?: string
+    state?: string
+    systemTestStart?: string
+    systemTestEnd?: string
+    deliveryStart?: string
+    phaseOutSince?: string
+    licenseInfoHeaderText?: string
 }
 
-export default ProjectSummaryPayload
+export default ProjectPayload

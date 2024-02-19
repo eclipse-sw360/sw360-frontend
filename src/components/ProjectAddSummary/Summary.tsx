@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 
-import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectSummaryPayload, RolesType, Vendor } from '@/object-types'
+import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectPayload, RolesType, Vendor } from '@/object-types'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import Roles from './Roles/Roles'
 import GeneralInformation from './component/Summary/GeneralInformation'
@@ -22,7 +22,7 @@ interface Props {
     externalIds: InputKeyValue[]
     additionalData: InputKeyValue[]
     additionalRoles?: InputKeyValue[]
-    projectPayload: ProjectSummaryPayload
+    projectPayload: ProjectPayload
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     setExternalUrls: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setExternalUrlsData: AddtionalDataType
@@ -30,7 +30,7 @@ interface Props {
     setExternalIdsData: AddtionalDataType
     setAdditionalData: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setAdditionalDataObject: AddtionalDataType
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectSummaryPayload>>
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     setAdditionalRoles?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setDataAdditionalRoles?: RolesType
 }
