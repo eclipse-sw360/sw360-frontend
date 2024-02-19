@@ -13,7 +13,7 @@ import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-ty
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import LinkProjects from '../../../components/LinkProjects'
@@ -31,6 +31,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
+    const router = useRouter()
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -62,6 +63,10 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
 
         return () => controller.abort()
     }, [projectId, session, status])
+
+    const handleEditProject = (projectId: string) => {
+        router.push(`/projects/edit/${projectId}`)
+    }
 
     return (
         <>
@@ -107,7 +112,11 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                             <Row className='d-flex justify-content-between'>
                                 <Col lg={6}>
                                     <Row>
-                                        <Button variant='primary' className='me-2 col-auto'>
+                                        <Button
+                                            variant='primary'
+                                            className='me-2 col-auto'
+                                            onClick={() => handleEditProject(projectId)}
+                                        >
                                             {t('Edit Projects')}
                                         </Button>
                                         <Button variant='secondary' className='col-auto' onClick={() => setShow(true)}>

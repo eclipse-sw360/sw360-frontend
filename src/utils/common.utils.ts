@@ -1,6 +1,7 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -192,6 +193,16 @@ const convertRoles = (datas: InputKeyValue[]) => {
     const contributors: string[] = []
     const commiters: string[] = []
     const expecters: string[] = []
+    const stakeholder: string[] = []
+    const analyst: string[] = []
+    const accountant: string[] = []
+    const endUser: string[] = []
+    const qualityManager: string[] = []
+    const testManager: string[] = []
+    const technicalWriter: string[] = []
+    const keyUser: string[] = []
+
+
     datas.forEach((data) => {
         if (data.key === 'Contributor') {
             contributors.push(data.value)
@@ -199,12 +210,36 @@ const convertRoles = (datas: InputKeyValue[]) => {
             commiters.push(data.value)
         } else if (data.key === 'Expert') {
             expecters.push(data.value)
+        } else if (data.key === 'Stakeholder') {
+            stakeholder.push(data.value)
+        } else if (data.key === 'Analyst') {
+            analyst.push(data.value)
+        } else if (data.key === 'Accountant') {
+            accountant.push(data.value)
+        } else if (data.key === 'EndUser') {
+            endUser.push(data.value)
+        } else if (data.key === 'QualityManager') {
+            qualityManager.push(data.value)
+        } else if (data.key === 'TestManager') {
+            testManager.push(data.value)
+        } else if (data.key === 'TechnicalWriter') {
+            technicalWriter.push(data.value)
+        } else if (data.key === 'KeyUser') {
+            keyUser.push(data.value)
         }
     })
     const roles = {
         Contributor: contributors,
         Committer: commiters,
         Expert: expecters,
+        Stakeholder: stakeholder,
+        Analyst: analyst,
+        Accountant: accountant,
+        EndUser: endUser,
+        QualityManager: qualityManager,
+        TestManager: testManager,
+        TechnicalWriter: technicalWriter,
+        KeyUser: keyUser,
     }
     return roles
 }

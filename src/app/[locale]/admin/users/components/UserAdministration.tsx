@@ -165,8 +165,8 @@ export default function UserAdminstration() {
                         <div className='row d-flex justify-content-between ms-1'>
                             <button className='btn btn-primary col-auto' onClick={handleAddUsers}>
                                 {t('Add User')}
-                            </button>       
-                            <div className='col-auto buttonheader-title'>{`${t('USERS')} (${num ? num : ''})`}</div>
+                            </button>
+                            <div className='col-auto buttonheader-title'>{`${t('Users')} (${num ? num : ''})`}</div>
                         </div>
                         <h5 className="mt-3 mb-1 ms-1 header-underlined">
                             {t('Users')}

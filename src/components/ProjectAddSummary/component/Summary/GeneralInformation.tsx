@@ -13,14 +13,14 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { Project, Vendor } from '@/object-types'
+import { ProjectPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 
 interface Param {
     vendor: Vendor
     setVendor: Dispatch<SetStateAction<Vendor>>
-    projectPayload: Project
-    setProjectPayload: Dispatch<SetStateAction<Project>>
+    projectPayload: ProjectPayload
+    setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
 
 export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param) {
@@ -128,6 +128,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.createdBy'
                             placeholder={t('Will be set automatically')}
                             readOnly={true}
+                            value={projectPayload.createdBy}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -235,7 +236,12 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         <label htmlFor='addProjects.modifiedOn' className='form-label fw-medium'>
                             {t('Modified On')}
                         </label>
-                        <input type='date' className='form-control' id='addProjects.modifiedOn' readOnly={true} />
+                        <input type='date'
+                               className='form-control'
+                               id='addProjects.modifiedOn'
+                               readOnly={true}
+                               value={projectPayload.modifiedOn ? projectPayload.modifiedOn : ""}
+                        />
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.modifiedBy' className='form-label fw-medium'>
@@ -247,6 +253,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.modifiedBy'
                             placeholder={t('Will be set automatically')}
                             readOnly={true}
+                            value={projectPayload.modifiedBy ? projectPayload.modifiedBy : ""}
                         />
                     </div>
                 </div>

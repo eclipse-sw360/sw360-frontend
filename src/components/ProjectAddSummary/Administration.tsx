@@ -9,14 +9,14 @@
 
 'use client'
 
-import { Project } from '@/object-types'
+import { ProjectPayload } from '@/object-types'
 import Clearing from './component/Administration/Clearing'
 import LicenseInfoHeader from './component/Administration/LicenseInfoHeader'
 import Lifecycle from './component/Administration/LifeCycle'
 
 interface Props {
-    projectPayload: Project
-    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
 export default function Administration({ projectPayload, setProjectPayload }: Props) {

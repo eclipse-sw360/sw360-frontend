@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
 
@@ -32,6 +32,9 @@ interface Input {
 function AddKeyValue(props: Props) {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
+    useEffect(()=>{
+        setInputList(props.data !== null ? props.data : []);
+    },[props.data])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target

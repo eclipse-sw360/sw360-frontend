@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -40,6 +41,7 @@ import OAuthClient from './OAuthClient'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
+import ProjectPayload from './ProjectPayload'
 import ProjectReleaseEcc from './ProjectReleaseEcc'
 import { ProjectData, ProjectVulnerability } from './ProjectVulnerabilityTypes'
 import Release from './Release'
@@ -94,6 +96,7 @@ export type {
     Package,
     Project,
     ProjectData,
+    ProjectPayload,
     ProjectReleaseEcc,
     ProjectVulnerability,
     Release,
