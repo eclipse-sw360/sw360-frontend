@@ -20,6 +20,9 @@ interface ProjectPayload {
     modifiedOn?: string
     modifiedBy?: string
     roles?: { [k: string]: Array<string> }
+    ownerAccountingUnit?: string
+    ownerGroup?: string
+    ownerCountry?: string
     externalUrls?: { [k: string]: string }
     additionalData?: { [k: string]: string }
     externalIds?: { [k: string]: string }
