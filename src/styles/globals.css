@@ -790,3 +790,7 @@ input::-webkit-datetime-edit {
     font-weight: bold;
     text-transform: uppercase;
 }
+
+.required {
+    color: #F7941E;
+}

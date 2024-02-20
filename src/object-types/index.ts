@@ -56,7 +56,7 @@ import SearchResult from './SearchResult'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
 import ToastData from './ToastData'
-import User from './User'
+import { User, CreateUserPayload } from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
 import VendorAdvisory from './VendorAdvisory'
@@ -112,6 +112,7 @@ export type {
     SummaryDataType,
     ToastData,
     User,
+    CreateUserPayload,
     UserCredentialInfo,
     Vendor,
     VendorAdvisory,
