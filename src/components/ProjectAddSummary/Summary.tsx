@@ -73,7 +73,9 @@ export default function Summary({
                         setObject={setExternalUrlsData}
                     />
                 </div>
-                <Roles />
+                <Roles projectPayload={projectPayload}
+                       setProjectPayload={setProjectPayload}
+                />
                 <div className='row mb-4'>
                     <AddAdditionalRoles
                         documentType={DocumentTypes.PROJECT}

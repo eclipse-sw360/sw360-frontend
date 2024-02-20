@@ -16,12 +16,26 @@ import { GiCancel } from 'react-icons/gi'
 import { SelectCountry } from 'next-sw360'
 import DepartmentModal from './DepartmentModal'
 import UsersModal from './UsersModal'
+import {ProjectPayload} from '@/object-types'
 
-export default function Roles() {
+interface Props{
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+
+export default function Roles({projectPayload, setProjectPayload}:Props) {
     const t = useTranslations('default')
 
     const [showDepartmentModal, setShowDepartmentModal] = useState<boolean>(false)
     const [showUsersModal, setShowUsersModal] = useState<boolean>(false)
+
+    const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+        setProjectPayload({
+            ...projectPayload,
+            [e.target.name]: e.target.value,
+        })
+    }
 
     return (
         <>
@@ -90,7 +104,9 @@ export default function Roles() {
                             aria-label={t('Owner Accounting Unit')}
                             id='addProjects.ownerAccountingUnit'
                             placeholder={t('owner_account_unit')}
-                            readOnly={true}
+                            name='ownerAccountingUnit'
+                            onChange={updateField}
+                            value={projectPayload.ownerAccountingUnit ?? ''}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -101,13 +117,15 @@ export default function Roles() {
                             type='text'
                             className='form-control'
                             aria-label={t('Owner Billing Group')}
-                            id='addProjects.ownerBillingGroup'
+                            id='addProjects.ownerGroup'
                             placeholder={t('Enter Owner Billing Group')}
-                            readOnly={true}
+                            name='ownerGroup'
+                            onChange={updateField}
+                            value={projectPayload.ownerGroup ?? ''}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <SelectCountry />
+                        <SelectCountry selectCountry={updateField} value={projectPayload.ownerCountry ?? ''} />
                     </div>
                 </div>
                 <hr className='my-2' />

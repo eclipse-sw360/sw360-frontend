@@ -30,6 +30,9 @@ interface Project {
     externalIds?: { [k: string]: string }
     externalUrls?: { [k: string]: string }
     roles?: { [k: string]: Array<string> }
+    ownerAccountingUnit?: string
+    ownerGroup?: string
+    ownerCountry?: string
     generalRisks3rdParty?: string
     leadArchitect?: string
     licenseInfoHeaderText?: string
