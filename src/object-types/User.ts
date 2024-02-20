@@ -10,7 +10,7 @@
 
 import { Links } from '@/object-types'
 
-interface User {
+export interface User {
     email: string
     department: string
     deactivated: boolean
@@ -25,4 +25,11 @@ interface User {
     _links: Links
 }
 
-export default User
+export interface CreateUserPayload {
+    email: string,
+    givenName: string
+    lastName: string
+    fullName: string
+    password: string
+    department: string
+}
