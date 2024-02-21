@@ -239,8 +239,8 @@ th {
 
 .nav-link {
     color: var(--sw360-navlink-color) !important;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
 }
 
 .nav-link:hover {
@@ -249,7 +249,7 @@ th {
 }
 
 .nav-link.active {
-    color: var(--sw360-navlink-active-color);
+    color: var(--sw360-navlink-active-color) !important;
     font-weight: bold;
 }
 

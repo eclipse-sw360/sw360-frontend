@@ -12,7 +12,6 @@
 
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter, useSelectedLayoutSegment } from 'next/navigation'
 import { useState } from 'react'
 import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
@@ -74,11 +73,9 @@ function Navbar() {
                     )
                 } else {
                     return (
-                        <Nav.Item key={item.name}>
-                            <Link className={`nav-link ${pathname == item.href ? 'active' : ''}`} href={item.href}>
-                                {item.name}
-                            </Link>
-                        </Nav.Item>
+                        <Nav.Link key={item.name} className={`${pathname == item.href ? 'active' : ''}`} href={item.href}>
+                            {item.name}
+                        </Nav.Link>
                     )
                 }
             })}
