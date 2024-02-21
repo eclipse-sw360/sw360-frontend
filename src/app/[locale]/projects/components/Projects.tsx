@@ -193,9 +193,9 @@ function Project() {
                             </OverlayTrigger>
 
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
-                                <span className='d-inline-block'>
-                                    <FaClipboard className='btn-icon overlay-trigger' />
-                                </span>
+                                <Link href={`/projects/duplicate/${id}`} className='overlay-trigger'>
+                                    <FaClipboard className='btn-icon' />
+                                </Link>
                             </OverlayTrigger>
 
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
