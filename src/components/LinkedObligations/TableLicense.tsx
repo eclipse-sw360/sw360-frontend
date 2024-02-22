@@ -14,6 +14,7 @@ import { Config, Grid } from 'gridjs'
 import * as React from 'react'
 import { Component, RefObject, createRef } from 'react'
 import { Form } from 'react-bootstrap'
+import styles from './TableLinkedObligations/TableLinkedObligations.module.css'
 
 const defaultOptions = {
     pagination: { limit: 10 },
@@ -97,13 +98,13 @@ class TableLicense extends Component<TableProps, unknown> {
     render(): React.ReactElement {
         return (
             <>
-                <div style={{ display: 'flex', width: '1455px' }}>
+                <div className={styles['div-table-license']}>
                     {this.props.selector && (
                         <>
                             <div className='col-auto' style={{ fontSize: '14px' }}>
                                 <div className='dataTables_length' style={{ fontSize: '0.875rem' }}>
                                     <span className='my-2'>Show</span>
-                                    <label style={{ marginLeft: '5px', marginRight: '5px' }}>
+                                    <label className={styles['lable-table-license']}>
                                         <Form.Select size='sm' onChange={this.handlePageSizeChange}>
                                             <option defaultValue={defaultOptions.pagination.limit}>
                                                 {defaultOptions.pagination.limit}

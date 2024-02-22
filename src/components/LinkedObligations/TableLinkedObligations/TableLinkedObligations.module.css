@@ -35,3 +35,27 @@
 .delete-btn:hover {
     cursor: pointer;
 }
+
+.div-table-license {
+    display: flex;
+    width: 1455px;
+}
+
+.lable-table-license {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.div-filter {
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+}
+
+.input-filter {
+    width: 238px;
+    height: 32px;
+}

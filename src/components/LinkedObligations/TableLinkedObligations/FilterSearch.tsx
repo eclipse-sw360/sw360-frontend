@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 'use client'
+import styles from './TableLinkedObligations.module.css'
 
 interface Props {
     title?: string
@@ -16,23 +17,15 @@ interface Props {
 function FilterSearch({ title, searchFunction }: Props) {
     return (
         <div
-            style={{
-                fontSize: '14px',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginLeft: 'auto',
-            }}
+        className={styles['div-filter']}
         >
             <label>Search: </label>
             &nbsp;&nbsp;
             <input
-                className='form-control'
                 type='text'
                 name={title}
                 onInput={searchFunction}
-                style={{ width: '238px', height: '32px' }}
+                className={`form-control ${styles['input-filter']}`}
             />
         </div>
     )

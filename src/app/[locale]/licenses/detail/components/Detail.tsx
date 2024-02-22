@@ -80,8 +80,7 @@ const Detail = ({ license, setLicense }: Props) => {
             </ToastContainer>
             {!license.checked && (
                 <div
-                    className='alert'
-                    style={{ backgroundColor: '#feefef', borderColor: '#f48989', color: '#da1414', fontSize: '14px' }}
+                    className={`alert ${styles['isChecked']}`}
                 >
                     {t('This license is')} <b>UNCHECKED</b>
                 </div>
@@ -168,7 +167,7 @@ const Detail = ({ license, setLicense }: Props) => {
                                 />
                                 <Button
                                     variant='secondary'
-                                    style={{ marginLeft: '20px', backgroundColor: 'white' }}
+                                    className={`${styles['button-save']}`}
                                     type='submit'
                                     onClick={updateExternalLicenseLink}
                                 >

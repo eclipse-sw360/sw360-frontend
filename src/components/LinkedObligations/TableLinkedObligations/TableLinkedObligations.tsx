@@ -11,7 +11,6 @@
 import React, { useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import DeleteObligationDialog from '@/app/[locale]/licenses/components/DeleteObligationDialog'
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
 import Obligation from '../../../object-types/Obligation'
@@ -19,19 +18,11 @@ import TableLicense from '../TableLicense'
 import styles from './TableLinkedObligations.module.css'
 
 interface Props {
-    data: Array<any>
-    setData: (data: Array<any>) => void
-    setObligationIdToLicensePayLoad?: (releaseIdToRelationships: Array<string>) => void
+    data?: Array<any>
 }
 
-export default function TableLinkedObligations({ data, setData, setObligationIdToLicensePayLoad }: Props) {
+export default function TableLinkedObligations({ data }: Props) {
     const t = useTranslations('default')
-    const [obligation, setObligation] = useState<Obligation>()
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const deleteObligation = (item: Obligation) => {
-        setObligation(item)
-        setDeleteDialogOpen(true)
-    }
 
     const buildAttachmentDetail = (item: Obligation) => {
         return (event: React.MouseEvent<HTMLElement>) => {
@@ -104,11 +95,11 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
         {
             id: 'action',
             name: t('Action'),
-            formatter: (item: Obligation) =>
+            formatter: () =>
                 _(
                     <div style={{ textAlign: 'left' }}>
                         <span>
-                            <FaTrashAlt className={styles['delete-btn']} onClick={() => deleteObligation(item)} />
+                            <FaTrashAlt className={styles['delete-btn']} />
                         </span>
                     </div>
                 ),
@@ -121,21 +112,13 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
 
     return (
         <div className='row'>
-            <DeleteObligationDialog
-                data={data}
-                setData={setData}
-                setObligationIdToLicensePayLoad={setObligationIdToLicensePayLoad}
-                obligation={obligation}
-                show={deleteDialogOpen}
-                setShow={setDeleteDialogOpen}
-            />
             <TableLicense
                 data={data}
                 search={search}
                 columns={columns}
                 selector={true}
                 style={style}
-                title={t('search')}
+                title={t('Search')}
                 searchFunction={doSearch}
             />
         </div>

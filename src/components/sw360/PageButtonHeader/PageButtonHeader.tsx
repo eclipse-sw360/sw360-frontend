@@ -62,11 +62,11 @@ function PageButtonHeader({
                         {checked != undefined && (
                             <>
                                 {checked ? (
-                                    <span className='badge' style={{ fontSize: '45%', backgroundColor: '#287d3c' }}>
+                                    <span className={`badge ${styles['checked']}`}>
                                         CHECKED
                                     </span>
                                 ) : (
-                                    <span className='badge' style={{ fontSize: '45%', backgroundColor: '#da1414' }}>
+                                    <span className={`badge ${styles['un-checked']}`}>
                                         UNCHECKED
                                     </span>
                                 )}
@@ -76,7 +76,7 @@ function PageButtonHeader({
                 </div>
             )}
             {changesLogTab && (
-                <div className='list-group-companion' style={{ width: 'auto', maxWidth: '100%' }}>
+                <div className={`list-group-companion ${styles['div-changelog']}`}>
                     <div
                         className='nav nav-pills justify-content-center bg-light font-weight-bold'
                         id='pills-tab'
@@ -85,20 +85,19 @@ function PageButtonHeader({
                     >
                         <div>
                             <a
-                                className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''}`}
+                                className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''} ${styles['a-changelog']}`}
                                 onClick={() => setChangesLogTab('list-change')}
-                                style={{ color: '#F7941E', fontWeight: 'bold' }}
+                               
                             >
                                 {t('Change Log')}
                             </a>
                         </div>
                         <div>
                             <a
-                                className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''}`}
+                                className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''} ${styles['a-changes']}`}
                                 onClick={() => {
                                     changeLogIndex !== -1 && setChangesLogTab('view-log')
                                 }}
-                                style={{ color: '#F7941E', fontWeight: 'bold' }}
                             >
                                 {t('Changes')}
                             </a>

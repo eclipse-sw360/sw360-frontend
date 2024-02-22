@@ -23,6 +23,7 @@ import { ToastContainer } from 'react-bootstrap'
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
+import styles from '../detail.module.css'
 
 interface Props {
     licenseId?: string
@@ -174,7 +175,7 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
     } else {
         return (
             license && (
-                <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+                <div className={`container ${styles['row-license-detail']}`}>
                     <div className='row'>
                         <ToastContainer position='top-start'>
                             <ToastMessage
