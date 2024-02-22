@@ -34,6 +34,7 @@ import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
 import LicensePayload from './LicensePayload'
+import LicenseDetail from './LicenseDetail'
 import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
 import NavList from './NavList'
@@ -92,6 +93,7 @@ export type {
     LinkedVulnerability,
     Links,
     LicensePayload,
+    LicenseDetail,
     Moderators,
     ModeratorsType,
     NodeData,
@@ -135,6 +137,7 @@ import AttachmentType from './enums/AttachmentTypes'
 import CommonTabIds from './enums/CommonTabsIds'
 import ComponentTabIds from './enums/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
+import LicenseTabIds from './enums/LicenseTabIds'
 import HttpStatus from './enums/HttpStatus'
 import ReleaseTabIds from './enums/ReleaseTabIds'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
@@ -145,6 +148,7 @@ export {
     CommonTabIds,
     ComponentTabIds,
     DocumentTypes,
+    LicenseTabIds,
     HttpStatus,
     ReleaseTabIds,
     VulnerabilitiesVerificationState,

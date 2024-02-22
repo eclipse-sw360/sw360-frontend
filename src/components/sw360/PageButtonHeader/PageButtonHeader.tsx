@@ -11,12 +11,19 @@
 
 import Link from 'next/link'
 
+import { useTranslations } from 'next-intl'
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
 
-import { Button } from 'react-bootstrap'
-
-function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
+function PageButtonHeader({
+    title,
+    buttons,
+    children,
+    checked,
+    changesLogTab,
+    changeLogIndex,
+    setChangesLogTab,
+}: PageButtonHeaderProps) {
     let buttonList: JSX.Element[] = []
     if (buttons) {
         buttonList = Object.entries(buttons).map(([key, value]) => {
@@ -24,19 +31,81 @@ function PageButtonHeader({ title, buttons, children }: PageButtonHeaderProps) {
                 // Button needs to link to the referenced page from props (value)
                 // and switch to the correct tab (key)
                 <Link href={value['link']} key={key}>
-                    <Button key={key} variant={`${value['type']}`} onClick={value.onClick}>
+                    <button
+                        key={key}
+                        className={`btn btn-${value['type']}`}
+                        style={{ marginRight: '10px' }}
+                        onClick={value.onClick}
+                    >
                         {value?.name}
-                    </Button>
+                    </button>
                 </Link>
             )
         })
     }
 
+    const t = useTranslations('default')
     return (
-        <div className='d-flex gap-2'>
-            {buttonList}
-            {children}
-            {title && <div className={`col text-truncate ${styles['buttonheader-title']}`}>{title}</div>}
+        <div className={`row ${styles['buttonheader-toolbar']}`} style={{ display: 'flex' }}>
+            <div className='col-auto'>
+                <div className='btn-toolbar' role='toolbar'>
+                    <div key='buttongroup' className='btn-group' role='group'>
+                        {buttonList}
+                        {children}
+                    </div>
+                </div>
+            </div>
+            {title && (
+                <div className={`col text-truncate ${styles['buttonheader-title']}`}>
+                    <div>
+                        {title}
+                        {checked != undefined && (
+                            <>
+                                {checked ? (
+                                    <span className='badge' style={{ fontSize: '45%', backgroundColor: '#287d3c' }}>
+                                        CHECKED
+                                    </span>
+                                ) : (
+                                    <span className='badge' style={{ fontSize: '45%', backgroundColor: '#da1414' }}>
+                                        UNCHECKED
+                                    </span>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+            {changesLogTab && (
+                <div className='list-group-companion' style={{ width: 'auto', maxWidth: '100%' }}>
+                    <div
+                        className='nav nav-pills justify-content-center bg-light font-weight-bold'
+                        id='pills-tab'
+                        role='tablist'
+                        style={{ marginRight: '0px' }}
+                    >
+                        <div>
+                            <a
+                                className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''}`}
+                                onClick={() => setChangesLogTab('list-change')}
+                                style={{ color: '#F7941E', fontWeight: 'bold' }}
+                            >
+                                {t('Change Log')}
+                            </a>
+                        </div>
+                        <div>
+                            <a
+                                className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''}`}
+                                onClick={() => {
+                                    changeLogIndex !== -1 && setChangesLogTab('view-log')
+                                }}
+                                style={{ color: '#F7941E', fontWeight: 'bold' }}
+                            >
+                                {t('Changes')}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
