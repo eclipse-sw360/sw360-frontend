@@ -33,11 +33,13 @@ import LinkedAttachments from './LinkedAttachments'
 import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
+import LicensePayload from './LicensePayload'
 import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
+import Obligation from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
@@ -89,10 +91,12 @@ export type {
     LinkedRelease,
     LinkedVulnerability,
     Links,
+    LicensePayload,
     Moderators,
     ModeratorsType,
     NodeData,
     OAuthClient,
+    Obligation,
     Package,
     Project,
     ProjectData,

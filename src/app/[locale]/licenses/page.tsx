@@ -8,14 +8,14 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import LicensePage from './LicensePage'
+import LicensePage from './components/LicensePage'
 
 export const metadata: Metadata = {
     title: 'Licenses',
 }
 
-async function Licenses() {
+async function LicensesPage() {
     return <LicensePage />
 }
 
-export default Licenses
+export default LicensesPage
