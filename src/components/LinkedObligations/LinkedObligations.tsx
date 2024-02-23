@@ -9,31 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
-import LicensePayload from '../../object-types/LicensePayload'
 import TableLinkedObligations from './TableLinkedObligations/TableLinkedObligations'
 
 interface Props {
-    data: Array<any>
-    setData: (data: Array<any>) => void
-    licensePayload?: LicensePayload
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
+    data?: Array<any>
 }
 
-const LinkedObligations = ({ data, setData, licensePayload, setLicensePayload }: Props) => {
-    const setObligationIdToLicensePayLoad = (obligationIds: Array<string>) => {
-        setLicensePayload({
-            ...licensePayload,
-            obligationDatabaseIds: obligationIds,
-        })
-    }
+const LinkedObligations = ({ data }: Props) => {
 
     return (
         <div className='col' style={{ fontSize: '0.875rem' }}>
             <div>
                 <TableLinkedObligations
                     data={data}
-                    setData={setData}
-                    setObligationIdToLicensePayLoad={setObligationIdToLicensePayLoad}
                 />
             </div>
         </div>
