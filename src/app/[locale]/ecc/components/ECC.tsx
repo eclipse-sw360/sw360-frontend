@@ -13,87 +13,70 @@ import { Embedded, ECC } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import Link from 'next/link'
+import { QuickFilter, Table, _ } from 'next-sw360'
 import { Spinner } from 'react-bootstrap'
 
-type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
+type EmbeddedECC = Embedded<ECC, 'sw360:releases'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function EccDetails({ projectId }: { projectId: string }) {
+export default function ECC() {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
     const columns = [
         {
-            id: 'releases.status',
+            id: 'ecc.status',
             name: t('Status'),
             sort: true,
         },
         {
-            id: 'releases.name',
+            id: 'ecc.releaseName',
             name: t('Release name'),
-            formatter: ({ id, name, version }: { id: string; name: string; version: string }) =>
-                _(
-                    <>
-                        <Link href={`/components/releases/detail/${id}`} className='text-link'>
-                            {`${name} (${version})`}
-                        </Link>
-                    </>
-                ),
+            formatter: ({ name, version }: { id: string; name: string; version: string }) =>
+            _(
+                <div>
+                        {`${name} (${version})`}
+                </div>
+            ),
             sort: true,
         },
         {
-            id: 'releases.version',
+            id: 'ecc.releaseVersion',
             name: t('Release version'),
             sort: true,
         },
         {
-            id: 'releases.creatorGroup',
+            id: 'ecc.creatorGroup',
             name: t('Creator Group'),
             sort: true,
         },
         {
-            id: 'releases.eccAssessor',
+            id: 'ecc.eccAssessor',
             name: t('ECC Assessor'),
-            formatter: (email: string) =>
-                _(
-                    <>
-                        <Link href={`mailto:${email}`} className='text-link'>
-                            {email}
-                        </Link>
-                    </>
-                ),
             sort: true,
         },
         {
-            id: 'releases.eccAssessorGroup',
+            id: 'ecc.eccAssessorGroup',
             name: t('ECC Assessor Group'),
             sort: true,
         },
         {
-            id: 'releases.eccAssessmentDate',
+            id: 'ecc.eccAssessmentDate',
             name: t('ECC Assessment Date'),
-            sort: true,
-        },
-        {
-            id: 'releases.eccn',
-            name: t('ECCN'),
             sort: true,
         },
     ]
 
     const server = {
-        url: `${SW360_API_URL}/resource/api/projects/${projectId}/releases/ecc?transitive=true`,
-        then: (data: EmbeddedProjectReleaseEcc) => {
+        url: `${SW360_API_URL}/resource/api/ecc`,
+        then: (data: EmbeddedECC) => {
             return data._embedded['sw360:releases'].map((elem: ECC) => [
                 Capitalize(elem.eccInformation.eccStatus ?? ''),
                 {
                     version: elem.version ?? '',
                     name: elem.name ?? '',
-                    id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                 },
                 elem.version ?? '',
                 elem.eccInformation.creatorGroup ?? '',
@@ -103,19 +86,35 @@ export default function EccDetails({ projectId }: { projectId: string }) {
                 elem.eccInformation.eccn ?? '',
             ])
         },
-        total: (data: EmbeddedProjectReleaseEcc) => data.page.totalElements,
+        total: (data: EmbeddedECC) => data.page.totalElements,
         headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 
     return (
         <>
-            {status === 'authenticated' ? (
-                <Table columns={columns} server={server} selector={true} sort={false} />
-            ) : (
-                <div className='col-12' style={{ textAlign: 'center' }}>
-                    <Spinner className='spinner' />
+            <div className='container page-content'>
+                <div className='row'>
+                    <div className='col-lg-2'>
+                        <div className='row mb-3'>
+                            <QuickFilter id='vunerabilities.quickSearch' />
+                        </div>
+                    </div>
+                    <div className='col-lg-10'>
+                        <div className='buttonheader-title ms-1'>
+                            {t('ECC Overview')}
+                        </div>
+                        <div className='row mt-3'>
+                            {status === 'authenticated' ? (
+                                <Table columns={columns} server={server} selector={true} sort={false} />
+                            ) : (
+                                <div className='col-12 d-flex justify-content-center align-items-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            )}
+            </div>
         </>
     )
 }
