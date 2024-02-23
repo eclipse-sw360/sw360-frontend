@@ -9,7 +9,7 @@
 
 import { Links } from '@/object-types'
 
-interface ProjectReleaseEcc {
+interface ECC {
     name: string
     version: string
     eccInformation: {
@@ -23,4 +23,4 @@ interface ProjectReleaseEcc {
     _links?: Links
 }
 
-export default ProjectReleaseEcc
+export default ECC
