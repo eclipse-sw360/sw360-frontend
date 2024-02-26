@@ -10,36 +10,80 @@
 
 'use-client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
 import { useTranslations } from 'next-intl'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { signOut, useSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
+import { Component, HttpStatus, Embedded } from '@/object-types'
+import { Spinner } from 'react-bootstrap'
+import Link from 'next/link'
+
+type EmbeddedComponent = Embedded<Component, 'sw360:components'>
+
 
 function RecentComponentsWidget() {
-    const [data] = useState([])
+    const [recentComponent, setRecentComponent] = useState([])
     const t = useTranslations('default')
+    const [loading, setLoading] = useState(true)
+    const { data: session, status } = useSession()
+
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedComponent
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
+    )
 
     useEffect(() => {
-        //     const fetchData = async () => {
-        //         const data = await sw360FetchData('/components/recentComponents', 'components')
-        //         data &&
-        //             setData(
-        //                 data.map((item: { name: string }) => [
-        //                     <li key={item.name}>
-        //                         <span style={{ color: 'orange' }}>{item.name}</span>
-        //                     </li>,
-        //                 ])
-        //             )
-        //     }
-        //     fetchData()
-    }, [])
+        setLoading(true)
+        void fetchData('components/recentComponents').then((components: EmbeddedComponent) => {
+            if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
+                setRecentComponent(
+                    components['_embedded']['sw360:components'].map((item: Component) => [
+                        <li key={item.name}>
+                            <Link href={'components/detail/' + item.id}
+                                  style={{ color: 'orange', textDecoration: 'none' }}
+                                >
+                                {item.name}
+                            </Link>
+                        </li>,
+                        ])
+                    )
+                    setLoading(false)
+                }})
+    }, [fetchData, session])
 
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('Recent Components')} />
-            <ul style={{ listStyleType: 'disc', color: 'black' }}>{data}</ul>
+            {loading == false ? (
+                <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentComponent}</ul>
+            ) : (
+                <div className='col-12'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+            {recentComponent.length === 0 && (
+                <>
+                    <div className='subscriptionBox'>{t('No recent components available')}</div>
+                </>
+            )}
         </div>
-    )
+        )
+    }
 }
 
 // We need use this to override typescript issue
