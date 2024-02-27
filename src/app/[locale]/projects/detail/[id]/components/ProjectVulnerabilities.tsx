@@ -9,13 +9,31 @@
 
 'use client'
 
-import { HttpStatus, ProjectData } from '@/object-types'
+import { HttpStatus, ProjectData, ProjectsPayloadElement } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import VulnerabilityTab from './VulnerabilityTab'
+
+const extractLinkedProjects = (projectPayload: ProjectsPayloadElement[], projectData: ProjectData[]) => {
+    if(!projectPayload) {
+        return
+    }
+    for (const x of projectPayload) {
+        projectData.push({
+            id: x['_links']['self']['href'].substring(x['_links']['self']['href'].lastIndexOf('/') + 1),
+            name: x.name,
+            version: x.version,
+            enableSvm: x.enableSvm,
+            enableVulnerabilitiesDisplay: x.enableVulnerabilitiesDisplay,
+        })
+        if(x._embedded?.['sw360:linkedProjects']) {
+            extractLinkedProjects(x._embedded?.['sw360:linkedProjects'], projectData)
+        }
+    }
+}
 
 export default function ProjectVulnerabilities({ projectData }: { projectData: ProjectData }) {
     const { data: session, status } = useSession()
@@ -45,15 +63,8 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                 const d: ProjectData[] = []
                 d.push(projectData)
 
-                for (const x of data?.['_embedded']?.['sw360:projects'] ?? ([] as any[])) {
-                    d.push({
-                        id: x['_links']['self']['href'].substring(x['_links']['self']['href'].lastIndexOf('/') + 1),
-                        name: x.name,
-                        version: x.version,
-                        enableSvm: x.enableSvm,
-                        enableVulnerabilitiesDisplay: x.enableVulnerabilitiesDisplay,
-                    })
-                }
+                extractLinkedProjects(data._embedded?.['sw360:projects'], d)
+
                 setData(d)
             } catch (e) {
                 console.error(e)

@@ -43,7 +43,7 @@ import Preferences from './Preferences'
 import Project from './Project'
 import ProjectPayload from './ProjectPayload'
 import ECC from './ECC'
-import { ProjectData, ProjectVulnerability } from './ProjectVulnerabilityTypes'
+import { ProjectData, ProjectVulnerability, ProjectsPayloadElement } from './ProjectVulnerabilityTypes'
 import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
@@ -99,6 +99,7 @@ export type {
     ProjectPayload,
     ECC,
     ProjectVulnerability,
+    ProjectsPayloadElement,
     Release,
     ReleaseDetail,
     ReleaseLink,
