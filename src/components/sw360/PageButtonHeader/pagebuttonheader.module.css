@@ -8,3 +8,33 @@
     white-space: nowrap;
     color: rgba(108, 117, 125, 0.4);
 }
+
+.buttonheader-toolbar {
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.checked {
+    font-size: 45%;
+    background-color: #287d3c;
+}
+
+.un-checked {
+    font-size: 45%;
+    background-color: #da1414;
+}
+
+.div-changelog {
+    width: auto;
+    max-width: 100%;
+}
+
+.a-changelog {
+    color: #F7941E;
+    font-weight: bold;
+}
+
+.a-changes {
+    color: #F7941E;
+    font-weight: bold;
+}

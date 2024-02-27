@@ -33,11 +33,14 @@ import LinkedAttachments from './LinkedAttachments'
 import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
+import LicensePayload from './LicensePayload'
+import LicenseDetail from './LicenseDetail'
 import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
+import Obligation from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
@@ -89,10 +92,13 @@ export type {
     LinkedRelease,
     LinkedVulnerability,
     Links,
+    LicensePayload,
+    LicenseDetail,
     Moderators,
     ModeratorsType,
     NodeData,
     OAuthClient,
+    Obligation,
     Package,
     Project,
     ProjectData,
@@ -131,6 +137,7 @@ import AttachmentType from './enums/AttachmentTypes'
 import CommonTabIds from './enums/CommonTabsIds'
 import ComponentTabIds from './enums/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
+import LicenseTabIds from './enums/LicenseTabIds'
 import HttpStatus from './enums/HttpStatus'
 import ReleaseTabIds from './enums/ReleaseTabIds'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
@@ -141,6 +148,7 @@ export {
     CommonTabIds,
     ComponentTabIds,
     DocumentTypes,
+    LicenseTabIds,
     HttpStatus,
     ReleaseTabIds,
     VulnerabilitiesVerificationState,

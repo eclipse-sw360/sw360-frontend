@@ -1,0 +1,20 @@
+.isChecked {
+    background-color: #feefef;
+    border-color: #f48989;
+    color: #da1414; 
+    font-size: 14px;
+}
+
+.button-save {
+    margin-left: 20px;
+    background-color: white;
+}
+
+.row-license-detail {
+    max-width: 98vw;
+    margin-top: 10px;
+}
+
+.pre-text {
+    white-space: pre-wrap;
+}
