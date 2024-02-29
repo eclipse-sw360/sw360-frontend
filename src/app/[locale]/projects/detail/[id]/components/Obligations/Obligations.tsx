@@ -1,0 +1,58 @@
+// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+
+// This program and the accompanying materials are made
+// available under the terms of the Eclipse Public License 2.0
+// which is available at https://www.eclipse.org/legal/epl-2.0/
+
+// SPDX-License-Identifier: EPL-2.0
+// License-Filename: LICENSE
+
+'use client'
+
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import { Nav, Tab, Dropdown } from 'react-bootstrap'
+import ObligationView from './ObligationsView/ObligationsView'
+
+export default function Obligations({ projectId }: { projectId: string }) {
+    const t = useTranslations('default')
+    const [key, setKey] = useState('obligations-view')
+
+    return (
+        <>
+            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
+                <div className='row'>
+                    <div className='col ps-0'>
+                        <Nav variant='pills' className='d-inline-flex'>
+                            <Nav.Item>
+                                <Nav.Link eventKey='obligations-view'>
+                                    <span className='fw-medium'>{t('Obligations View')}</span>
+                                </Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey='release-view'>
+                                    <span className='fw-medium'>{t('Release View')}</span>
+                                </Nav.Link>
+                            </Nav.Item>
+                        </Nav>
+                    </div>
+                    <Dropdown className='col-auto'>
+                        <Dropdown.Toggle variant='primary'>{t('Create Project Clearing Report')}</Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item eventKey={key}>{t('Project only')}</Dropdown.Item>
+                            <Dropdown.Item eventKey={key}>{t('Project with sub project')}</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </div>
+                <Tab.Content className='mt-4'>
+                    <Tab.Pane eventKey='obligations-view'>
+                        <ObligationView projectId={projectId}/>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey='release-view'>
+                        
+                    </Tab.Pane>
+                </Tab.Content>
+            </Tab.Container>
+        </>
+    )
+}

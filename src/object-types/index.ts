@@ -39,7 +39,7 @@ import ModerationRequestPayload from './ModerationRequestPayload'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import Obligation from './Obligation'
+import { Obligation, ProjectObligationsList, LicenseObligationRelease } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
@@ -161,6 +161,8 @@ export type {
     VerificationStateInfo,
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
+    ProjectObligationsList,
+    LicenseObligationRelease,
     Message,
     MessageOptions,
     VulnerabilityTrackingStatus,
