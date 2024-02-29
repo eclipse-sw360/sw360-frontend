@@ -13,16 +13,25 @@ import { FaTrashAlt } from 'react-icons/fa'
 
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
-import Obligation from '../../../object-types/Obligation'
+import { Obligation } from '@/object-types'
 import TableLicense from '../TableLicense'
 import styles from './TableLinkedObligations.module.css'
+import DeleteObligationDialog from './DeleteObligationDialog'
 
 interface Props {
-    data?: Array<any>
+    data: Array<any>
+    setData: (data: Array<any>) => void
+    setObligationIdToLicensePayLoad?: (releaseIdToRelationships: Array<string>) => void
 }
 
-export default function TableLinkedObligations({ data }: Props) {
+export default function TableLinkedObligations({ data, setData, setObligationIdToLicensePayLoad }: Props) {
     const t = useTranslations('default')
+    const [obligation, setObligation] = useState<Obligation>()
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const deleteObligation = (item: Obligation) => {
+        setObligation(item)
+        setDeleteDialogOpen(true)
+    }
 
     const buildAttachmentDetail = (item: Obligation) => {
         return (event: React.MouseEvent<HTMLElement>) => {
@@ -95,11 +104,11 @@ export default function TableLinkedObligations({ data }: Props) {
         {
             id: 'action',
             name: t('Action'),
-            formatter: () =>
+            formatter: (item: Obligation) =>
                 _(
                     <div style={{ textAlign: 'left' }}>
                         <span>
-                            <FaTrashAlt className={styles['delete-btn']} />
+                            <FaTrashAlt className={styles['delete-btn']} onClick={() => deleteObligation(item)} />
                         </span>
                     </div>
                 ),
@@ -112,6 +121,14 @@ export default function TableLinkedObligations({ data }: Props) {
 
     return (
         <div className='row'>
+            <DeleteObligationDialog
+                data={data}
+                setData={setData}
+                setObligationIdToLicensePayLoad={setObligationIdToLicensePayLoad}
+                obligation={obligation}
+                show={deleteDialogOpen}
+                setShow={setDeleteDialogOpen}
+            />
             <TableLicense
                 data={data}
                 search={search}
