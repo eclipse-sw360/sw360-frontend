@@ -1,0 +1,27 @@
+{
+    "scoped": true,
+    "authorities": [
+        "BASIC"
+    ],
+    "secretRequired": true,
+    "description": "SW360_client",
+    "resource_ids": [
+        "sw360-REST-API"
+    ],
+    "authorized_grant_types": [
+        "refresh_token",
+        "client_credentials",
+        "password"
+    ],
+    "autoapprove": [
+        "true"
+    ],
+    "access_token_validity": 307584000,
+    "refresh_token_validity": 630720000,
+    "client_id": "ff0343b1a22beffebde5c940a100067c",
+    "client_secret": "da97dc63-a8fe-4595-bcf2-57f14c3470d9",
+    "scope": [
+        "READ",
+        "WRITE"
+    ]
+}
