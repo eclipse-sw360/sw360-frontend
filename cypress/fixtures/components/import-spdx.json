@@ -1,0 +1,18 @@
+{
+    "IMPORT_SPDX_001": {
+        "filePath": "cypress/fixtures/components/attachments/test-import.spdx.rdf",
+        "component": "Component RDF",
+        "release": {
+            "name": "Component RDF",
+            "version": "v1"
+        }
+    },
+    "IMPORT_SPDX_002": {
+        "filePath": "cypress/fixtures/components/attachments/test-import.spdx",
+        "component": "Component SPDX",
+        "release": {
+            "name": "Component SPDX",
+            "version": "v1"
+        }
+    }
+}

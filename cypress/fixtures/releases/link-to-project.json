@@ -1,0 +1,28 @@
+{
+    "001_LINK_TO_PROJECT": {
+        "linkedProject": {
+            "name": "Test Linked Project 1",
+            "version": "v1"
+        },
+        "release": {
+            "componentType": "OSS",
+            "categories": ["library"],
+            "name": "Comp1",
+            "version": "v1"
+        },
+        "isComponentPage": true
+    },
+    "002_LINK_TO_PROJECT": {
+        "linkedProject": {
+            "name": "Test Linked Project 2",
+            "version": "v1"
+        },
+        "release": {
+            "componentType": "OSS",
+            "categories": ["library"],
+            "name": "Comp2",
+            "version": "v2"
+        },
+        "isComponentPage": false
+    }
+}
