@@ -12,6 +12,7 @@
 
 import { LicensePayload } from '@/object-types'
 import EditLicenseDetail from './EditLicenseDetail'
+import EditLicenseText from './EditLicenseText'
 
 interface Props {
     errorFullName?: boolean
@@ -36,6 +37,11 @@ export default function EditLicenseSummary({
                 inputValid={inputValid}
                 errorFullName={errorFullName}
                 setErrorFullName={setErrorFullName}
+            />
+            <EditLicenseText
+                licensePayload={licensePayload}
+                setLicensePayload={setLicensePayload}
+                inputValid={inputValid}
             />
         </div>
     )

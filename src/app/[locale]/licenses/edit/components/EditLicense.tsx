@@ -13,10 +13,12 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
 
-import { HttpStatus, LicensePayload, LicenseTabIds, ToastData } from '@/object-types'
+import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
+import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
+import { HttpStatus, LicensePayload, LicenseTabIds, Obligation, ToastData } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
@@ -30,8 +32,16 @@ export default function EditLicense({ licenseId }: Props) {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
+    const [data, setData] = useState([])
+    const [reRender, setReRender] = useState(false)
     const params = useSearchParams()
+    const handleReRender = () => {
+        setReRender(!reRender)
+    }
+    const [addObligationDiaglog, setAddObligationDiaglog] = useState(false)
+    const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [obligations, setObligations] = useState([])
     const router = useRouter()
     const [inputValid, setInputValid] = useState(false)
     const [errorFullName, setErrorFullName] = useState(false)
@@ -62,6 +72,16 @@ export default function EditLicense({ licenseId }: Props) {
                 }
                 const license = await response.json()
                 setLicensePayload(license)
+                if (license._embedded !== undefined) {
+                    const data = license._embedded['sw360:obligations'].map((item: Obligation) => [
+                        item,
+                        item.title,
+                        item.obligationType &&
+                            item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase(),
+                        item,
+                    ])
+                    setData(data)
+                }
             } catch (e) {
                 console.error(e)
             }
@@ -77,6 +97,19 @@ export default function EditLicense({ licenseId }: Props) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
+                }
+
+                const obligations = await response.json()
+                if (!CommonUtils.isNullEmptyOrUndefinedString(obligations._embedded['sw360:obligations'])) {
+                    const data = obligations._embedded['sw360:obligations'].map((item: Obligation) => [
+                        item,
+                        item,
+                        item.title,
+                        item.obligationType &&
+                            item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase(),
+                        item.text,
+                    ])
+                    setObligations(data)
                 }
             } catch (e) {
                 console.error(e)
@@ -145,6 +178,7 @@ export default function EditLicense({ licenseId }: Props) {
         'Add Obligation': {
             link: '',
             type: 'secondary',
+            onClick: handleClickAddObligations,
             name: t('Add Obligation'),
         },
         Cancel: { link: `/licenses/detail?id=${licenseId}`, type: 'light', name: t('Cancel') },
@@ -200,6 +234,24 @@ export default function EditLicense({ licenseId }: Props) {
                                     errorFullName={errorFullName}
                                     inputValid={inputValid}
                                     setErrorFullName={setErrorFullName}
+                                    licensePayload={licensePayload}
+                                    setLicensePayload={setLicensePayload}
+                                />
+                            </div>
+                            <div className='row' hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}>
+                                <LinkedObligationsDialog
+                                    show={addObligationDiaglog}
+                                    data={data}
+                                    setData={setData}
+                                    obligations={obligations}
+                                    setShow={setAddObligationDiaglog}
+                                    onReRender={handleReRender}
+                                    licensePayload={licensePayload}
+                                    setLicensePayload={setLicensePayload}
+                                />
+                                <LinkedObligations
+                                    data={data}
+                                    setData={setData}
                                     licensePayload={licensePayload}
                                     setLicensePayload={setLicensePayload}
                                 />
