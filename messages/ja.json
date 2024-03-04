@@ -331,6 +331,7 @@
     "Found source attachment": "検出された添付ソースコードファイル",
     "Freeware": "フリーウェア",
     "Full Name": "氏名",
+    "Fullname not null or empty": "フルネームが null または空ではありません!",
     "GNU arch": "GNU アーチ",
     "General": "一般的な",
     "General Information": "一般情報",
@@ -711,6 +712,7 @@
     "Unknown": "未知",
     "Update": "アップデート",
     "Update Component": "コンポーネントの更新",
+    "Update License": "ライセンスの更新",
     "Update Project": "プロジェクトを更新する",
     "Update Release": "Update Release",
     "Update Setting": "",
@@ -731,6 +733,7 @@
     "UsageRestrictionsFound": "使用制限が見つかりました",
     "Used License": "使用済みライセンス",
     "User": "用户",
+    "User preferences": "ユーザー設定",
     "Users": "Users",
     "VALUE": "価値",
     "VENDORS": "VENDORS",
@@ -772,8 +775,8 @@
     "You need a security responsible to enable monitoring": "監視を有効にするにはセキュリティ担当者が必要です",
     "You will be notified on changes of an item if you have the selected role in the changed item": "",
     "Your project is created": "プロジェクトが作成されました",
-    "Your request completed successfully": "",
     "Your project is updated": "",
+    "Your request completed successfully": "リクエストは正常に完了しました",
     "additional data": "追加データ",
     "as of": "as of",
     "authentication": "authentication",
@@ -800,7 +803,6 @@
     "project_cannot_be_created": "プロジェクトを作成/更新できない",
     "to edit the project relation": "プロジェクト関係を編集するには",
     "vector": "ベクター",
-    "wrong_spdx_information": "間違ったSPDXを入力すると情報が正しく登録されません",
-    "User preferences": "ユーザー設定"
+    "wrong_spdx_information": "間違ったSPDXを入力すると情報が正しく登録されません"
   }
 }

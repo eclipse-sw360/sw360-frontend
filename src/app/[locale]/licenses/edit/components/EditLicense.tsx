@@ -149,7 +149,7 @@ export default function EditLicense({ licenseId }: Props) {
         setInputValid(true)
         if (CommonUtils.isNullEmptyOrUndefinedString(licensePayload.fullName)) {
             setErrorFullName(true)
-            alert(true, 'Require!', t('Fullname not null or empty!'), 'danger')
+            alert(true, 'Require!', t('Fullname not null or empty'), 'danger')
         } else {
             const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
             if (response.status == HttpStatus.OK) {

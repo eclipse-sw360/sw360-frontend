@@ -332,6 +332,7 @@
     "Found source attachment": "Pièce jointe source trouvée",
     "Freeware": "Logiciels libres",
     "Full Name": "Nom complet",
+    "Fullname not null or empty": "Nom complet ni nul ni vide !",
     "GNU arch": "Arche GNU",
     "General": "Généralités",
     "General Information": "Informations générales",
@@ -712,6 +713,7 @@
     "Unknown": "Inconnu",
     "Update": "Mise à jour",
     "Update Component": "Composante mise à jour",
+    "Update License": "Mettre à jour la licence",
     "Update Project": "Mettre à jour le projet",
     "Update Release": "Mise à jour",
     "Update Setting": "",
@@ -732,6 +734,7 @@
     "UsageRestrictionsFound": "Restrictions d'utilisation trouvées",
     "Used License": "Licence utilisée",
     "User": "Utilisateur",
+    "User preferences": "Préférences de l'utilisateur",
     "Users": "Utilisateur",
     "VALUE": "valeur",
     "VENDORS": "VENDEURS",
@@ -773,8 +776,8 @@
     "You need a security responsible to enable monitoring": "Vous avez besoin d'un responsable de la sécurité pour permettre le contrôle",
     "You will be notified on changes of an item if you have the selected role in the changed item": "",
     "Your project is created": "Votre projet est créé",
-    "Your request completed successfully": "",
     "Your project is updated": "",
+    "Your request completed successfully": "Votre demande a été complétée avec succès",
     "additional data": "données supplémentaires",
     "as of": "à partir de",
     "authentication": "authentification",
@@ -801,7 +804,6 @@
     "project_cannot_be_created": "Le projet ne peut pas être créé/mise à jour",
     "to edit the project relation": "pour modifier la relation du projet",
     "vector": "vecteur",
-    "wrong_spdx_information": "Si le SPDX incorrect est entré, les informations ne seront pas enregistrées correctement",
-    "User preferences": "Préférences de l'utilisateur"
+    "wrong_spdx_information": "Si le SPDX incorrect est entré, les informations ne seront pas enregistrées correctement"
   }
 }

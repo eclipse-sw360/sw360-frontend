@@ -331,6 +331,7 @@
     "Found source attachment": "找到來源附件",
     "Freeware": "自由软件",
     "Full Name": "全名",
+    "Fullname not null or empty": "全名不為空！",
     "GNU arch": "GNU 拱門",
     "General": "一般",
     "General Information": "一般信息",
@@ -711,6 +712,7 @@
     "Unknown": "未知",
     "Update": "更新",
     "Update Component": "更新元件",
+    "Update License": "更新許可證",
     "Update Project": "",
     "Update Release": "更新发行",
     "Update Setting": "",
@@ -731,6 +733,7 @@
     "UsageRestrictionsFound": "找到使用限制",
     "Used License": "已使用駕照",
     "User": "使用者",
+    "User preferences": "使用者偏好",
     "Users": "使用者",
     "VALUE": "值",
     "VENDORS": "选民",
@@ -772,8 +775,8 @@
     "You need a security responsible to enable monitoring": "你需要一個負責監控的保安",
     "You will be notified on changes of an item if you have the selected role in the changed item": "",
     "Your project is created": "您的專案已建立",
-    "Your request completed successfully": "",
     "Your project is updated": "",
+    "Your request completed successfully": "您的請求已成功完成",
     "additional data": "其他資料",
     "as of": "截至",
     "authentication": "認證",
@@ -800,7 +803,6 @@
     "project_cannot_be_created": "專案無法建立/ 更新",
     "to edit the project relation": "要編輯專案關係",
     "vector": "向量",
-    "wrong_spdx_information": "如果輸入錯誤的 SPDX , 資訊將無法正確登記",
-    "User preferences": "使用者偏好"
+    "wrong_spdx_information": "如果輸入錯誤的 SPDX , 資訊將無法正確登記"
   }
 }
