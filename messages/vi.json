@@ -331,6 +331,7 @@
     "Found source attachment": "Đã tìm thấy tệp đính kèm nguồn",
     "Freeware": "Phần mềm miễn phí",
     "Full Name": "Họ và tên",
+    "Fullname not null or empty": "Tên đầy đủ không rỗng hoặc trống!",
     "GNU arch": "Vòm GNU",
     "General": "Tổng quan",
     "General Information": "Thông tin chung",
@@ -711,6 +712,7 @@
     "Unknown": "không xác định",
     "Update": "Cập nhật",
     "Update Component": "Cập nhật thành phần",
+    "Update License": "Cập nhật giấy phép",
     "Update Project": "Cập nhật dự án",
     "Update Release": "Cập nhật bản phát hành",
     "Update Setting": "",
@@ -731,6 +733,7 @@
     "UsageRestrictionsFound": "Đã tìm thấy hạn chế sử dụng",
     "Used License": "Giấy phép đã sử dụng",
     "User": "Người dùng",
+    "User preferences": "Sở thích của người sử dụng",
     "Users": "Người dùng",
     "VALUE": "giá trị",
     "VENDORS": "VENDORS",
@@ -772,8 +775,8 @@
     "You need a security responsible to enable monitoring": "Bạn cần một cơ quan bảo mật chịu trách nhiệm kích hoạt tính năng giám sát",
     "You will be notified on changes of an item if you have the selected role in the changed item": "",
     "Your project is created": "Dự án của bạn được tạo",
-    "Your request completed successfully": "",
     "Your project is updated": "",
+    "Your request completed successfully": "Yêu cầu của bạn đã hoàn thành thành công",
     "additional data": "dữ liệu bổ sung",
     "as of": "kể từ",
     "authentication": "xác thực",
@@ -800,7 +803,6 @@
     "project_cannot_be_created": "Dự án không thể được tạo/cập nhật",
     "to edit the project relation": "để chỉnh sửa mối quan hệ dự án",
     "vector": "vectơ",
-    "wrong_spdx_information": "Nếu nhập sai SPDX thì thông tin sẽ không được đăng ký chính xác",
-    "User preferences": "Sở thích của người sử dụng"
+    "wrong_spdx_information": "Nếu nhập sai SPDX thì thông tin sẽ không được đăng ký chính xác"
   }
 }

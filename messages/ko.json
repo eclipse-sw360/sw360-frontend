@@ -331,6 +331,7 @@
     "Found source attachment": "회사 소개",
     "Freeware": "무료웨어",
     "Full Name": "이름 *",
+    "Fullname not null or empty": "전체 이름은 null이거나 비어 있지 않습니다!",
     "GNU arch": "GNU 아카이브",
     "General": "주요사업",
     "General Information": "일반 정보",
@@ -711,6 +712,7 @@
     "Unknown": "이름 *",
     "Update": "(주)",
     "Update Component": "업데이트 구성",
+    "Update License": "라이선스 업데이트",
     "Update Project": "프로젝트 업데이트",
     "Update Release": "업데이트",
     "Update Setting": "",
@@ -731,6 +733,7 @@
     "UsageRestrictionsFound": "사용 제한",
     "Used License": "사용권",
     "User": "사용자 이름",
+    "User preferences": "사용자 환경설정",
     "Users": "이름 *",
     "VALUE": "제품정보",
     "VENDORS": "회사연혁",
@@ -772,8 +775,8 @@
     "You need a security responsible to enable monitoring": "모니터링 할 책임있는 보안이 필요합니다.",
     "You will be notified on changes of an item if you have the selected role in the changed item": "",
     "Your project is created": "당신의 프로젝트는",
-    "Your request completed successfully": "",
     "Your project is updated": "",
+    "Your request completed successfully": "귀하의 요청이 성공적으로 완료되었습니다",
     "additional data": "더 많은 데이터",
     "as of": "이름 *",
     "authentication": "인증 및 인증",
@@ -800,7 +803,6 @@
     "project_cannot_be_created": "프로젝트는 만들 수 없습니다/업데이트",
     "to edit the project relation": "프로젝트 관계 편집",
     "vector": "벡터 벡터",
-    "wrong_spdx_information": "잘못된 SPDX가 입력되면 정보가 올바르게 등록되지 않습니다.",
-    "User preferences": "사용자 환경설정"
+    "wrong_spdx_information": "잘못된 SPDX가 입력되면 정보가 올바르게 등록되지 않습니다."
   }
 }

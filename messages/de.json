@@ -332,6 +332,7 @@
     "Found source attachment": "Gefundene Quellenangabe",
     "Freeware": "Freeware",
     "Full Name": "Vollständiger Name",
+    "Fullname not null or empty": "Vollständiger Name ist nicht null oder leer!",
     "GNU arch": "GNU arch",
     "General": "Allgemeines",
     "General Information": "Allgemeine Informationen",
@@ -712,6 +713,7 @@
     "Unknown": "Unbekannt",
     "Update": "Aktualisierung",
     "Update Component": "Update Component",
+    "Update License": "Lizenz aktualisieren",
     "Update Project": "Projekt aktualisieren",
     "Update Release": "Update Release",
     "Update Setting": "",
@@ -732,6 +734,7 @@
     "UsageRestrictionsFound": "Nutzungsbeschränkungen gefunden",
     "Used License": "Gebrauchte Lizenz",
     "User": "Benutzer",
+    "User preferences": "Nutzerpreferenzen",
     "Users": "Benutzer",
     "VALUE": "Wert",
     "VENDORS": "VENDOREN",
@@ -773,8 +776,8 @@
     "You need a security responsible to enable monitoring": "Sie benötigen eine Sicherheit, die die Überwachung ermöglicht",
     "You will be notified on changes of an item if you have the selected role in the changed item": "",
     "Your project is created": "Ihr Projekt wird erstellt",
-    "Your request completed successfully": "",
     "Your project is updated": "",
+    "Your request completed successfully": "Ihre Anfrage wurde erfolgreich abgeschlossen",
     "additional data": "zusätzliche Daten",
     "as of": "als",
     "authentication": "Authentisierung",
@@ -801,7 +804,6 @@
     "project_cannot_be_created": "Projekt kann nicht erstellt/updated",
     "to edit the project relation": "zur Bearbeitung der Projektbeziehung",
     "vector": "Vektor",
-    "wrong_spdx_information": "Wenn das falsche SPDX eingegeben wird, werden die Informationen nicht korrekt registriert.",
-    "User preferences": "Nutzerpreferenzen"
+    "wrong_spdx_information": "Wenn das falsche SPDX eingegeben wird, werden die Informationen nicht korrekt registriert."
   }
 }

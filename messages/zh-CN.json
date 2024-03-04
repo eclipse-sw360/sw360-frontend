@@ -331,6 +331,7 @@
     "Found source attachment": "找到源码附件",
     "Freeware": "免费软件",
     "Full Name": "全名",
+    "Fullname not null or empty": "全名不为空！",
     "GNU arch": "GNU 拱门",
     "General": "一般的",
     "General Information": "一般信息",
@@ -711,6 +712,7 @@
     "Unknown": "未知",
     "Update": "更新",
     "Update Component": "更新组件",
+    "Update License": "更新许可证",
     "Update Project": "更新項目",
     "Update Release": "更新发布",
     "Update Setting": "",
@@ -731,6 +733,7 @@
     "UsageRestrictionsFound": "发现使用限制",
     "Used License": "使用的许可证",
     "User": "用户",
+    "User preferences": "用户偏好",
     "Users": "用户",
     "VALUE": "价值",
     "VENDORS": "VENDORS",
@@ -772,8 +775,8 @@
     "You need a security responsible to enable monitoring": "您需要一名负责启用监控的安全人员",
     "You will be notified on changes of an item if you have the selected role in the changed item": "",
     "Your project is created": "您的项目已创建",
-    "Your request completed successfully": "",
     "Your project is updated": "",
+    "Your request completed successfully": "您的请求已成功完成",
     "additional data": "附加数据",
     "as of": "作为",
     "authentication": "验证",
@@ -800,7 +803,6 @@
     "project_cannot_be_created": "无法创建/更新项目",
     "to edit the project relation": "编辑项目关系",
     "vector": "向量",
-    "wrong_spdx_information": "如果输入错误的SPDX，信息将无法正确注册",
-    "User preferences": "用户偏好"
+    "wrong_spdx_information": "如果输入错误的SPDX，信息将无法正确注册"
   }
 }
