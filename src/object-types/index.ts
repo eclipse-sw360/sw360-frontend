@@ -35,6 +35,7 @@ import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
 import LicensePayload from './LicensePayload'
 import LicenseDetail from './LicenseDetail'
+import ModerationRequest from './ModerationRequest'
 import Moderators from './Moderators'
 import ModeratorsType from './ModeratorsType'
 import NavList from './NavList'
@@ -94,6 +95,7 @@ export type {
     Links,
     LicensePayload,
     LicenseDetail,
+    ModerationRequest,
     Moderators,
     ModeratorsType,
     NodeData,
