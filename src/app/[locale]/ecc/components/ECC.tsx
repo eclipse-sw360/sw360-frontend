@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Embedded, ECC } from '@/object-types'
+import type { Embedded, ECC } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
