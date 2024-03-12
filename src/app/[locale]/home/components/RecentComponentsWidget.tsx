@@ -47,20 +47,27 @@ function RecentComponentsWidget() {
     useEffect(() => {
         setLoading(true)
         void fetchData('components/recentComponents').then((components: EmbeddedComponent) => {
-            if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
+            if (
+                !CommonUtils.isNullOrUndefined(components['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
+            ) {
                 setRecentComponent(
                     components['_embedded']['sw360:components'].map((item: Component) => [
                         <li key={item.name}>
                             <Link href={'components/detail/' + item.id}
-                                  style={{ color: 'orange', textDecoration: 'none' }}
-                                >
+                                style={{ color: 'orange', textDecoration: 'none' }}
+                            >
                                 {item.name}
                             </Link>
                         </li>,
-                        ])
-                    )
-                    setLoading(false)
-                }})
+                    ])
+                )
+                setLoading(false)
+            } else {
+                setRecentComponent([])
+                setLoading(false)
+            }
+        })
     }, [fetchData, session])
 
     if (status === 'unauthenticated') {

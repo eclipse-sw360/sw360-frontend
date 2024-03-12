@@ -53,13 +53,19 @@ function MyComponentsWidget() {
 
         fetchData(queryUrl, signal)
             .then((components: EmbeddedComponent) => {
-                if (!CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])) {
+                if (
+                    !CommonUtils.isNullOrUndefined(components['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
+                ) {
                     setData(
                         components['_embedded']['sw360:components'].map((item: Component) => [
                             _(<Link href={'components/detail/' + item.id}>{item.name}</Link>),
                             CommonUtils.truncateText(item.description, 40),
                         ])
                     )
+                    setLoading(false)
+                } else {
+                    setData([])
                     setLoading(false)
                 }
             })

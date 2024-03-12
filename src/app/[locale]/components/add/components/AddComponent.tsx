@@ -124,7 +124,7 @@ export default function AddComponent() {
         if (response.status == HttpStatus.CREATED) {
             const data = (await response.json()) as Component
             alert(true, 'Success', t('Component is created'), 'success')
-            router.push('/components/detail/' + data.id)
+            router.push('/components/edit/' + data.id)
         } else {
             alert(true, 'Duplicate', t('Component is Duplicate'), 'danger')
         }
