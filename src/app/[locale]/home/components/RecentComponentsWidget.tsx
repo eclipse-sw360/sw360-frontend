@@ -35,7 +35,6 @@ function RecentComponentsWidget() {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as EmbeddedComponent
-                console.log(data)
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
