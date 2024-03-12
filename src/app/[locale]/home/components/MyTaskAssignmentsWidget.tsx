@@ -16,7 +16,6 @@ import { signOut, useSession } from 'next-auth/react'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
 
 type EmbeddedTaskAssignment = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -45,7 +44,11 @@ function MyTaskAssignmentsWidget() {
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
-                notFound()
+                return {
+                    _embedded: {
+                        'sw360:moderationRequests': []
+                    }
+                }
             }
         },[session]
     )
