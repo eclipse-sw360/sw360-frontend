@@ -10,36 +10,85 @@
 
 'used-client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 import HomeTableHeader from './HomeTableHeader'
 import { useTranslations } from 'next-intl'
+import { ReleaseDetail, Embedded, HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { signOut, useSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { Spinner } from 'react-bootstrap'
+
+type EmbeddedRelease = Embedded<ReleaseDetail, 'sw360:releases'>
 
 function RecentReleasesWidget() {
-    const [data] = useState([])
+    const [recentRelease, setRecentRelease] = useState([])
     const t = useTranslations('default')
+    const [loading, setLoading] = useState(true)
+    const { data: session, status } = useSession()
+
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedRelease
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
+    )
 
     useEffect(() => {
-        //     const fetchData = async () => {
-        //         const data = await sw360FetchData('/releases/recentReleases', 'releases')
-        //         data &&
-        //             setData(
-        //                 data.map((item: { name: string }) => [
-        //                     <li key={''}>
-        //                         <span style={{ color: 'orange' }}>{item.name}</span>
-        //                     </li>,
-        //                 ])
-        //             )
-        //     }
-        //     fetchData()
-    })
+        setLoading(true)
+        void fetchData('releases/recentReleases').then((releases: EmbeddedRelease) => {
+            if (
+                !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
+            ) {
+                setRecentRelease(
+                    releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
+                        <li key={item.name}>
+                            <Link href={'releases/detail/' + item.id}
+                                style={{ color: 'orange', textDecoration: 'none' }}
+                            >
+                                {item.name}
+                            </Link>
+                        </li>,
+                    ])
+                )
+                setLoading(false)
+            } else {
+                setRecentRelease([])
+                setLoading(false)
+            }
+        })
+    }, [fetchData, session])
 
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('Recent Releases')} />
-            <ul style={{ listStyleType: 'disc', color: 'black' }}>{data}</ul>
+                {loading == false ? (
+                    <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentRelease}</ul>
+                ) : (
+                    <div className='col-12'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+                {recentRelease.length === 0 && (
+                    <>
+                        <div className='subscriptionBox'>{t('No recent releases available')}</div>
+                    </>
+                )}
         </div>
-    )
+    )}
 }
 
 // We need use this to override typescript issue
