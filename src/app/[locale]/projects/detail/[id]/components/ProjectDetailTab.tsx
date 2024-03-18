@@ -24,6 +24,7 @@ import LicenseClearing from './LicenseClearing'
 import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import AttachmentUsages from './AttachmentUsages'
+import ProjectAttachments from './Attachments'
 
 export default function ViewProjects({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
@@ -170,7 +171,9 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                         <EccDetails projectId={projectId} />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='vulnerabilityTrackingStatus'></Tab.Pane>
-                                    <Tab.Pane eventKey='attachments'></Tab.Pane>
+                                    <Tab.Pane eventKey='attachments'>
+                                        <ProjectAttachments projectId={projectId}/>
+                                    </Tab.Pane>
                                     <Tab.Pane eventKey='attachmentUsages'>
                                         <AttachmentUsages projectId={projectId}/>
                                     </Tab.Pane>

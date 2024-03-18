@@ -24,6 +24,7 @@ interface Attachment {
     checkedOn?: string
     checkStatus?: string
     checkedBy?: string
+    size?: string
     usageAttachment?:
         | {
               visible: number
