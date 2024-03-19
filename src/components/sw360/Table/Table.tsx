@@ -29,6 +29,26 @@ interface TableProps extends Partial<Config> {
     language?: Language
 }
 
+const createTableProps = (tableProps: TableProps) => {
+    let newTableProps = { ...defaultOptions, ...tableProps }
+
+    if (newTableProps.server) {
+        newTableProps = {
+            ...newTableProps,
+            pagination: {
+                limit: 10,
+                server: {
+                    url: (prev: string, page: number, limit: number) =>
+                        `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
+                },
+            },
+            data: undefined,
+        }
+    }
+
+    return newTableProps
+}
+
 class Table extends Component<TableProps, unknown> {
     private wrapper: RefObject<HTMLDivElement> = createRef()
     // Grid.js instance
@@ -37,21 +57,7 @@ class Table extends Component<TableProps, unknown> {
 
     constructor(props: TableProps) {
         super(props)
-        this.tableProps = { ...defaultOptions, ...props }
-
-        if (this.tableProps.server) {
-            this.tableProps = {
-                ...this.tableProps,
-                pagination: {
-                    limit: 10,
-                    server: {
-                        url: (prev: string, page: number, limit: number) =>
-                            `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                    },
-                },
-                data: undefined,
-            }
-        }
+        this.tableProps = createTableProps(props)
 
         this.instance = new Grid(this.tableProps)
     }
@@ -70,7 +76,8 @@ class Table extends Component<TableProps, unknown> {
     componentDidUpdate(): void {
         this.instance.config.plugin.remove('pagination')
         this.instance.config.plugin.remove('search')
-        this.instance.updateConfig(this.props).forceRender()
+        this.tableProps = createTableProps(this.props)
+        this.instance.updateConfig(this.tableProps).forceRender()
     }
 
     handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
