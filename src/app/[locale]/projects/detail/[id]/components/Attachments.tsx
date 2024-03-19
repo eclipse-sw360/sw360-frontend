@@ -211,7 +211,7 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
                 const projectAttachments: EmbeddedAttachments = await res.json()
 
                 const tableData: any[] = []
-                for (const attachment of projectAttachments["_embedded"]["sw360:attachments"]) {
+                for (const attachment of projectAttachments["_embedded"]?.["sw360:attachments"] ?? []) {
                     tableData.push([
                         { 
                             id: `projectAttachments.${attachment.sha1}` ?? '', sha1: attachment.sha1 ?? '',
@@ -226,7 +226,7 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
 						attachment.checkedTeam ?? '',
 						attachment.checkedBy ?? '',
 						attachment.usageAttachment ?? 'n/a',
-						{ projectId, attachmentId: attachment['_links']['self']['href'].substring(attachment['_links']['self']['href'].lastIndexOf('/') + 1), attachmentName: attachment.filename }
+						{ projectId, attachmentId: attachment['_links']['self']['href'].split('/').at(-1), attachmentName: attachment.filename }
                     ])
                 }
                 setData(tableData)
