@@ -11,9 +11,10 @@
 
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { Nav, Tab } from 'react-bootstrap'
+import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import ListView from './ListView'
 import TreeView from './TreeView'
+import { useRouter } from 'next/navigation'
 
 export default function LicenseClearing({
     projectId,
@@ -26,6 +27,16 @@ export default function LicenseClearing({
 }) {
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
+    const router = useRouter()
+
+    const createClearingReqest = () => {
+        console.log('Create clearing request....')
+    }
+
+    const generateSourceCodeBundle = () => {
+        router.push(`/projects/generateSourceCode/${projectId}`)
+    }
+
 
     return (
         <>
@@ -42,6 +53,48 @@ export default function LicenseClearing({
                                 <Nav.Link eventKey='list-view'>
                                     <span className='fw-medium'>{t('List View')}</span>
                                 </Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item className='px-2'>
+                                <Dropdown className='col-auto'>
+                                    <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
+                                            <Dropdown.Item>{t('Projects with sub projects')}</Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Dropdown className='col-auto'>
+                                    <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
+                                            <Dropdown.Item>{t('Projects with sub projects')}</Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Dropdown className='col-auto'>
+                                    <Dropdown.Toggle variant='secondary'>{t('Generate Source Code Bundle')}</Dropdown.Toggle>
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item
+                                                onClick = {() => generateSourceCodeBundle()}
+                                            >
+                                                {t('Projects only')}
+                                            </Dropdown.Item>
+                                            <Dropdown.Item>
+                                                {t('Projects with sub projects')}
+                                            </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                            </Nav.Item>
+                            <Nav.Item className='px-2'>
+                                <Button
+                                    variant='secondary'
+                                    className='me-2 col-auto'
+                                    onClick={createClearingReqest}
+                                >
+                                    {t('Create Clearing Request')}
+                                </Button>
                             </Nav.Item>
                         </Nav>
                     </div>
