@@ -16,13 +16,23 @@ import { useState, useEffect } from 'react'
 import { Table, _ } from '@/components/sw360'
 import { HttpStatus, Attachment, Embedded } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, useSession, getSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { LuDownload } from "react-icons/lu"
 import { Spinner } from 'react-bootstrap'
+import DownloadService from '@/services/download.service'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
+
+const handleAttachmentDownload = async ({projectId, attachmentId, attachmentName} :{ projectId: string, attachmentId: string, attachmentName: string }) => {
+    try {
+        const session = await getSession()
+        DownloadService.download(`projects/${projectId}/attachments/${attachmentId}`, session, attachmentName)
+    } catch(e) {
+        console.error(e)
+    }
+}
 
 function ShowAttachmentTextOnExpand({id, sha1, uploadedOn, uploadedComment, checkedOn, checkedComment, colLength}: 
     {id: string, sha1: string, uploadedOn: string, uploadedComment: string, checkedOn: string, checkedComment: string, colLength: number }): JSX.Element {
@@ -170,11 +180,9 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
         {
             id: 'attachments.actions',
             name: t('Actions'),
-            formatter: () =>
+            formatter: ({ projectId, attachmentId, attachmentName }: { projectId: string, attachmentId: string, attachmentName: string }) =>
             _(
-                <>
-                    <LuDownload className='btn-icon' size={18}/>
-                </>
+                <LuDownload className='btn-icon' size={18} onClick={() => handleAttachmentDownload({ projectId, attachmentId, attachmentName })}/>
             ),
             sort: true,
             width: '6%'
@@ -218,7 +226,7 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
 						attachment.checkedTeam ?? '',
 						attachment.checkedBy ?? '',
 						attachment.usageAttachment ?? 'n/a',
-						''
+						{ projectId, attachmentId: attachment['_links']['self']['href'].substring(attachment['_links']['self']['href'].lastIndexOf('/') + 1), attachmentName: attachment.filename }
                     ])
                 }
                 setData(tableData)
