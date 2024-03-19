@@ -134,7 +134,7 @@ function MySubscriptionsWidget() {
                                 <ul style={{ listStyleType: 'disc', color: 'black' }}>
                                     {releaseData.map((item:ReleaseDetail) => (
                                         <li key={item.id}>
-                                            <Link href={'releases/detail/' + item.id}
+                                            <Link href={'components/releases/detail/' + item.id}
                                                 style={{ color: 'orange',
                                                             textDecoration: 'none' }}
                                             >

@@ -53,7 +53,7 @@ function RecentReleasesWidget() {
                 setRecentRelease(
                     releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
                         <li key={item.name}>
-                            <Link href={'releases/detail/' + item.id}
+                            <Link href={'components/releases/detail/' + item.id}
                                 style={{ color: 'orange', textDecoration: 'none' }}
                             >
                                 {item.name}
