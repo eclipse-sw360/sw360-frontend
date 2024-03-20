@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Embedded, Vulnerability } from '@/object-types'
+import { Embedded, Vulnerability, Session } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { useSession } from 'next-auth/react'
@@ -17,12 +17,14 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, QuickFilter, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
 
 type EmbeddedVulnerabilities = Embedded<Vulnerability, 'sw360:vulnerabilityApiDTOes'>
+
+const VulnerabilitesTable = React.memo(Table, () => true)
 
 function Vulnerabilities() {
     const t = useTranslations('default')
@@ -115,24 +117,28 @@ function Vulnerabilities() {
         },
     ]
 
-    const server = {
-        url: CommonUtils.createUrlWithParams(
-            `${SW360_API_URL}/resource/api/vulnerabilities`,
-            Object.fromEntries(params)
-        ),
-        then: (data: EmbeddedVulnerabilities) => {
-            setNumVulnerabilities(data.page.totalElements)
-            return data._embedded['sw360:vulnerabilityApiDTOes'].map((elem: Vulnerability) => [
-                elem.externalId ?? '',
-                elem.title ?? '',
-                { cvss: elem.cvss ?? '', cvssTime: elem.cvssTime ?? '' },
-                elem.publishDate?.substring(0, elem.publishDate.lastIndexOf('T')) ?? '',
-                elem.lastExternalUpdate?.substring(0, elem.lastExternalUpdate.lastIndexOf('T')) ?? '',
-                elem.externalId ?? '',
-            ])
-        },
-        total: (data: EmbeddedVulnerabilities) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+    const initServerPaginationConfig = (session: Session) => {
+        return {
+            url: CommonUtils.createUrlWithParams(
+                `${SW360_API_URL}/resource/api/vulnerabilities`,
+                Object.fromEntries(params)
+            ),
+            then: (data: EmbeddedVulnerabilities) => {
+                setNumVulnerabilities(data.page.totalElements)
+                if (!CommonUtils.isNullEmptyOrUndefinedArray(data._embedded['sw360:vulnerabilityApiDTOes'])) {
+                    return data._embedded['sw360:vulnerabilityApiDTOes'].map((elem: Vulnerability) => [
+                        elem.externalId ?? '',
+                        elem.title ?? '',
+                        { cvss: elem.cvss ?? '', cvssTime: elem.cvssTime ?? '' },
+                        elem.publishDate?.substring(0, elem.publishDate.lastIndexOf('T')) ?? '',
+                        elem.lastExternalUpdate?.substring(0, elem.lastExternalUpdate.lastIndexOf('T')) ?? '',
+                        elem.externalId ?? '',
+                    ])
+                }
+            },
+            total: (data: EmbeddedVulnerabilities) => data.page.totalElements,
+            headers: { Authorization: `Bearer ${session.user.access_token}` },
+        }
     }
 
     return (
@@ -166,7 +172,7 @@ function Vulnerabilities() {
                         </div>
                         <div className='row mt-3'>
                             {status === 'authenticated' ? (
-                                <Table columns={columns} server={server} selector={true} sort={false} />
+                                <VulnerabilitesTable columns={columns} server={initServerPaginationConfig(session)} selector={true} sort={false} />
                             ) : (
                                 <div className='col-12 d-flex justify-content-center align-items-center'>
                                     <Spinner className='spinner' />
