@@ -17,7 +17,7 @@ import { useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 
-import { Component, Embedded } from '@/object-types'
+import { Component, Embedded, Session } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { Table, _ } from 'next-sw360'
@@ -98,26 +98,30 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
         },
     ]
 
-    const server = {
-        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, searchParams),
-        then: (data: Embedded<Component, 'sw360:components'>) => {
-            setNumberOfComponent(data.page.totalElements)
-            return data._embedded['sw360:components'].map((item: Component) => [
-                !CommonUtils.isNullOrUndefined(item.defaultVendor) ? item.defaultVendor.shortName : '',
-                [item.id, item.name],
-                !CommonUtils.isNullOrUndefined(item.mainLicenseIds) ? item.mainLicenseIds : [],
-                item.componentType,
-                item.id,
-            ])
-        },
-        total: (data: Embedded<Component, 'sw360:components'>) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+    const initServerPaginationConfig = (session: Session) => {
+        return {
+            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, searchParams),
+            then: (data: Embedded<Component, 'sw360:components'>) => {
+                setNumberOfComponent(data.page.totalElements)
+                return data._embedded['sw360:components'].map((item: Component) => [
+                    !CommonUtils.isNullOrUndefined(item.defaultVendor) ? item.defaultVendor.shortName : '',
+                    [item.id, item.name],
+                    !CommonUtils.isNullOrUndefined(item.mainLicenseIds) ? item.mainLicenseIds : [],
+                    item.componentType,
+                    item.id,
+                ])
+            },
+            total: (data: Embedded<Component, 'sw360:components'>) => data.page.totalElements,
+            headers: { Authorization: `Bearer ${session.user.access_token}` },
+        }
     }
 
     return (
         <>
             <div className='row'>
-                <Table columns={columns} selector={true} server={server} />
+                {status === 'authenticated' &&
+                    <Table columns={columns} selector={true} server={initServerPaginationConfig(session)} />
+                }
             </div>
             <DeleteComponentDialog
                 componentId={deletingComponent}
