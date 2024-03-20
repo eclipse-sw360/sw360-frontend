@@ -47,7 +47,7 @@ import Preferences from './Preferences'
 import Project from './Project'
 import ProjectPayload from './ProjectPayload'
 import ECC from './ECC'
-import { ProjectData, ProjectVulnerability, ProjectsPayloadElement } from './ProjectVulnerabilityTypes'
+import { ProjectData, ProjectVulnerability, ProjectsPayloadElement, VulnerabilityRatingAndActionPayload } from './ProjectVulnerabilityTypes'
 import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
@@ -128,6 +128,7 @@ export type {
     VendorType,
     VerificationStateInfo,
     Vulnerability,
+    VulnerabilityRatingAndActionPayload
 }
 
 // Special functions for populate data
