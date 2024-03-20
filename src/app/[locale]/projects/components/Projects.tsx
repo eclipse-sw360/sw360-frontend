@@ -10,7 +10,7 @@
 
 'use client'
 
-import { Embedded, HttpStatus, Project as TypeProject } from '@/object-types'
+import { Embedded, HttpStatus, Project as TypeProject, Session } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -214,23 +214,25 @@ function Project() {
         },
     ]
 
-    const server = {
-        url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
-        then: (data: EmbeddedProjects) => {
-            return data._embedded['sw360:projects'].map((elem: TypeProject) => [
-                {
-                    id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                    name: elem.name ?? '',
-                },
-                elem.description ?? '',
-                elem.projectResponsible ?? '',
-                { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
-                elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-            ])
-        },
-        total: (data: EmbeddedProjects) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+    const initServerPaginationConfig = (session: Session) => {
+        return {
+            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
+            then: (data: EmbeddedProjects) => {
+                return data._embedded['sw360:projects'].map((elem: TypeProject) => [
+                    {
+                        id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+                        name: elem.name ?? '',
+                    },
+                    elem.description ?? '',
+                    elem.projectResponsible ?? '',
+                    { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
+                    elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+                    elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+                ])
+            },
+            total: (data: EmbeddedProjects) => data.page.totalElements,
+            headers: { Authorization: `Bearer ${session.user.access_token}` },
+        }
     }
 
     const advancedSearch = [
@@ -369,7 +371,7 @@ function Project() {
                             <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
                         </div>
                         {status === 'authenticated' ? (
-                            <Table columns={columns} server={server} selector={true} sort={false} />
+                            <Table columns={columns} server={initServerPaginationConfig(session)} selector={true} sort={false} />
                         ) : (
                             <div className='col-12 d-flex justify-content-center align-items-center'>
                                 <Spinner className='spinner' />
