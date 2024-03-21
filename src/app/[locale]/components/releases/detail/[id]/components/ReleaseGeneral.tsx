@@ -190,8 +190,8 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                     <td>{t('Main Licenses')}:</td>
                     <td>
                         {release['_embedded'] &&
-                            !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:license']) &&
-                            Object.entries(release._embedded['sw360:license'])
+                            !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:licenses']) &&
+                            Object.entries(release._embedded['sw360:licenses'])
                                 .map(
                                     ([index, item]: [string, Licenses]): React.ReactNode => (
                                         <span key={index}>
