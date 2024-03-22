@@ -11,76 +11,60 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { HttpStatus, Licenses, LicensesType } from '@/object-types'
+import { HttpStatus, LicenseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
-import { notFound, useSearchParams } from 'next/navigation'
-import SelectTableMainLicenses from './SelectTableMainLicenses'
+import { signOut, getSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
+import LicensesTable from './LicensesTable'
 
 interface Props {
     show?: boolean
     setShow?: React.Dispatch<React.SetStateAction<boolean>>
-    selectLicenses?: LicensesType
+    selectLicenses?: (licenses: { [k: string]: string }) => void
+    releaseLicenses: { [k: string]: string }
 }
 
-const MainLicensesDialog = ({ show, setShow, selectLicenses }: Props) => {
+const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Props) => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const params = useSearchParams()
-    const [data, setData] = useState([])
-    const [licenses] = useState([])
-    const [licensesResponse, setLicensesResponse] = useState<Licenses>()
+    const [selectedLicenses, setSelectedLicenses] = useState<{ [k: string]: string }>(releaseLicenses)
     const [licenseDatas, setLicenseDatas] = useState([])
+
+    const searchText = useRef<string>('')
 
     const handleCloseDialog = () => {
         setShow(!show)
     }
 
-    const searchVendor = () => {
-        setLicenseDatas(data)
+    const searchLicenses = async () => {
+        const session = await getSession()
+        const queryUrl = CommonUtils.createUrlWithParams(`licenses`, {})
+        const response = await ApiUtils.GET(queryUrl, session.user.access_token)
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else if (response.status !== HttpStatus.OK) {
+            return notFound()
+        }
+        const licenses = await response.json()
+        if (typeof licenses == 'undefined') {
+            setLicenseDatas([])
+            return
+        }
+        if (
+            !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
+            !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
+        ) {
+            const data = licenses['_embedded']['sw360:licenses'].map((item: LicenseDetail) => [item, item.fullName])
+            setLicenseDatas(data)
+        }
     }
 
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        ;(async () => {
-            try {
-                const queryUrl = CommonUtils.createUrlWithParams(`licenses`, Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-                const licenses = await response.json()
-                if (typeof licenses == 'undefined') {
-                    setData([])
-                    return
-                }
-                if (
-                    !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
-                ) {
-                    const data = licenses['_embedded']['sw360:licenses'].map((item: any) => [item, item.fullName])
-                    setData(data)
-                }
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-        return () => controller.abort()
-    }, [params, session])
-
-    const handleClickSelectModerators = () => {
-        selectLicenses(licensesResponse)
+    const handleClickSelectLicenses = () => {
+        selectLicenses(selectedLicenses)
         setShow(!show)
     }
-
-    const getLicenses: LicensesType = useCallback((licenses: Licenses) => setLicensesResponse(licenses), [])
 
     return (
         <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
@@ -96,13 +80,14 @@ const MainLicensesDialog = ({ show, setShow, selectLicenses }: Props) => {
                                 className='form-control'
                                 placeholder={t('Enter search text')}
                                 aria-describedby='Search Licenses'
+                                onChange={(event) => { searchText.current = event.target.value }}
                             />
                         </div>
                         <div className='col-lg-4'>
                             <button
                                 type='button'
                                 className={`fw-bold btn btn-light button-plain me-2`}
-                                onClick={searchVendor}
+                                onClick={searchLicenses}
                             >
                                 {t('Search')}
                             </button>
@@ -112,10 +97,10 @@ const MainLicensesDialog = ({ show, setShow, selectLicenses }: Props) => {
                         </div>
                     </div>
                     <div className='row mt-3'>
-                        <SelectTableMainLicenses
+                        <LicensesTable
                             licenseDatas={licenseDatas}
-                            setLicenses={getLicenses}
-                            fullnames={licenses}
+                            setLicenses={setSelectedLicenses}
+                            selectedLicenses={selectedLicenses}
                         />
                     </div>
                 </div>
@@ -129,7 +114,7 @@ const MainLicensesDialog = ({ show, setShow, selectLicenses }: Props) => {
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className={`btn btn-primary`} onClick={handleClickSelectModerators}>
+                <Button type='button' className={`btn btn-primary`} onClick={handleClickSelectLicenses}>
                     {t('Select Licenses')}
                 </Button>
             </Modal.Footer>
@@ -137,4 +122,4 @@ const MainLicensesDialog = ({ show, setShow, selectLicenses }: Props) => {
     )
 }
 
-export default MainLicensesDialog
+export default LicensesDialog

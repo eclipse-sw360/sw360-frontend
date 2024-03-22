@@ -7,6 +7,7 @@
 
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
+import Links from './Links'
 import Obligation from './Obligation'
 
 export default interface LicenseDetail {
@@ -26,4 +27,5 @@ export default interface LicenseDetail {
     text?: string
     checked?: boolean
     issetBitfield?: number
+    _links?: Links
 }

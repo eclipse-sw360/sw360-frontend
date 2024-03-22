@@ -14,7 +14,7 @@ import {
     COTSDetails,
     ClearingInformation,
     ECCInformation,
-    Licenses,
+    LicenseDetail,
     ReleaseLink,
     Repository,
     User,
@@ -72,7 +72,8 @@ export default interface ReleaseDetail {
         'sw360:cotsDetail'?: COTSDetails
         'sw360:releaseLinks'?: ReleaseLink[]
         'sw360:attachments'?: Array<Attachment>
-        'sw360:license'?: Licenses[]
+        'sw360:licenses'?: Array<LicenseDetail>
+        'sw360:otherLicenses'?: Array<LicenseDetail>
         'sw360:subscribers'?: User[]
     }
 }

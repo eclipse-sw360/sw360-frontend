@@ -27,8 +27,6 @@ import Embedded from './Embedded'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
-import Licenses from './Licenses'
-import LicensesType from './LicensesType'
 import LinkedAttachments from './LinkedAttachments'
 import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
@@ -87,8 +85,6 @@ export type {
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,
-    Licenses,
-    LicensesType,
     LinkedAttachments,
     LinkedRelease,
     LinkedVulnerability,
