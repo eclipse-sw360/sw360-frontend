@@ -14,12 +14,11 @@ import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { ActionType, Licenses, Moderators, Release, Vendor } from '@/object-types'
+import { ActionType, Moderators, Release, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import ModeratorsDialog from '../sw360/ModeratorsDialog/ModeratorsDialog'
 import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
-import MainLicensesDiaglog from '../sw360/SearchMainLicenses/MainLicensesDialog'
-import OtherLicensesDialog from '../sw360/SearchOtherLicenses/OtherLicensesDialog'
+import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
     actionType?: string
@@ -27,10 +26,10 @@ interface Props {
     setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicensesId?: Licenses
-    setMainLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
-    otherLicensesId?: Licenses
-    setOtherLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
+    mainLicenses?: { [k: string]: string }
+    setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    otherLicenses?: { [k: string]: string }
+    setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     contributor?: Moderators
     setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
     moderator?: Moderators
@@ -43,10 +42,10 @@ const ReleaseSummary = ({
     setReleasePayload,
     vendor,
     setVendor,
-    mainLicensesId,
-    setMainLicensesId,
-    otherLicensesId,
-    setOtherLicensesId,
+    mainLicenses,
+    setMainLicenses,
+    otherLicenses,
+    setOtherLicenses,
     contributor,
     setContributor,
     moderator,
@@ -65,27 +64,19 @@ const ReleaseSummary = ({
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
 
-    const setMainLicenses = (licenseResponse: Licenses) => {
-        const mainLicenses: Licenses = {
-            id: licenseResponse.id,
-            fullName: licenseResponse.fullName,
-        }
-        setMainLicensesId(mainLicenses)
+    const setMainLicensesToPayload = (mainLicenses: { [k: string]: string }) => {
+        setMainLicenses(mainLicenses)
         setReleasePayload({
             ...releasePayload,
-            mainLicenseIds: mainLicenses.id,
+            mainLicenseIds: Object.keys(mainLicenses),
         })
     }
 
-    const setOtherLicenses = (licenseResponse: Licenses) => {
-        const otherLicenses: Licenses = {
-            id: licenseResponse.id,
-            fullName: licenseResponse.fullName,
-        }
-        setOtherLicensesId(otherLicenses)
+    const setOtherLicensesToPayload = (otherLicenses: { [k: string]: string }) => {
+        setOtherLicenses(otherLicenses)
         setReleasePayload({
             ...releasePayload,
-            otherLicenseIds: otherLicenses.id,
+            otherLicenseIds: Object.keys(otherLicenses),
         })
     }
 
@@ -339,13 +330,14 @@ const ReleaseSummary = ({
                                 aria-describedby='MainLicense'
                                 readOnly={true}
                                 name='mainLicenseIds'
-                                value={mainLicensesId.fullName ?? ''}
+                                value={Object.values(mainLicenses).join(', ')}
                                 onClick={handleClickSearchMainLicenses}
                             />
-                            <MainLicensesDiaglog
+                            <LicensesDialog
                                 show={dialogOpenMainLicenses}
                                 setShow={setDialogOpenMainLicenses}
-                                selectLicenses={setMainLicenses}
+                                selectLicenses={setMainLicensesToPayload}
+                                releaseLicenses={mainLicenses}
                             />
                         </div>
                     </div>
@@ -366,12 +358,13 @@ const ReleaseSummary = ({
                                 readOnly={true}
                                 name='otherLicenseIds'
                                 onClick={handleClickSearchOtherLicenses}
-                                value={otherLicensesId.fullName ?? ''}
+                                value={Object.values(otherLicenses).join(', ')}
                             />
-                            <OtherLicensesDialog
+                            <LicensesDialog
                                 show={dialogOpenOtherLicenses}
                                 setShow={setDialogOpenOtherLicenses}
-                                selectLicenses={setOtherLicenses}
+                                selectLicenses={setOtherLicensesToPayload}
+                                releaseLicenses={otherLicenses}
                             />
                         </div>
                         <div className='col-lg-4'>

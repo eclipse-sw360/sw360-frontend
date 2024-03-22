@@ -15,7 +15,7 @@ import { useState } from 'react'
 
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import { DocumentTypes, InputKeyValue, Licenses, Moderators, Release, Vendor } from '@/object-types'
+import { DocumentTypes, InputKeyValue, Moderators, Release, Vendor } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
@@ -24,10 +24,10 @@ interface Props {
     setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicensesId?: Licenses
-    setMainLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
-    otherLicensesId?: Licenses
-    setOtherLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
+    mainLicenses?: { [k: string]: string }
+    setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    otherLicenses?: { [k: string]: string }
+    setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     contributor?: Moderators
     setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
     moderator?: Moderators
@@ -39,10 +39,10 @@ function ReleaseAddSummary({
     setReleasePayload,
     vendor,
     setVendor,
-    mainLicensesId,
-    setMainLicensesId,
-    otherLicensesId,
-    setOtherLicensesId,
+    mainLicenses,
+    setMainLicenses,
+    otherLicenses,
+    setOtherLicenses,
     contributor,
     setContributor,
     moderator,
@@ -92,10 +92,10 @@ function ReleaseAddSummary({
                         setReleasePayload={setReleasePayload}
                         vendor={vendor}
                         setVendor={setVendor}
-                        mainLicensesId={mainLicensesId}
-                        setMainLicensesId={setMainLicensesId}
-                        otherLicensesId={otherLicensesId}
-                        setOtherLicensesId={setOtherLicensesId}
+                        mainLicenses={mainLicenses}
+                        setMainLicenses={setMainLicenses}
+                        otherLicenses={otherLicenses}
+                        setOtherLicenses={setOtherLicenses}
                         moderator={moderator}
                         setModerator={setModerator}
                         contributor={contributor}

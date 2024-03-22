@@ -21,7 +21,6 @@ import {
     DocumentTypes,
     ECCInformation,
     InputKeyValue,
-    Licenses,
     Moderators,
     Release,
     ReleaseDetail,
@@ -38,10 +37,10 @@ interface Props {
     setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicensesId?: Licenses
-    setMainLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
-    otherLicensesId?: Licenses
-    setOtherLicensesId?: React.Dispatch<React.SetStateAction<Licenses>>
+    mainLicenses?: { [k: string]: string }
+    setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    otherLicenses?: { [k: string]: string }
+    setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     contributor?: Moderators
     setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
     moderator?: Moderators
@@ -59,10 +58,10 @@ function ReleaseEditSummary({
     setReleasePayload,
     vendor,
     setVendor,
-    mainLicensesId,
-    setMainLicensesId,
-    otherLicensesId,
-    setOtherLicensesId,
+    mainLicenses,
+    setMainLicenses,
+    otherLicenses,
+    setOtherLicenses,
     contributor,
     setContributor,
     moderator,
@@ -207,10 +206,10 @@ function ReleaseEditSummary({
                         setReleasePayload={setReleasePayload}
                         vendor={vendor}
                         setVendor={setVendor}
-                        mainLicensesId={mainLicensesId}
-                        setMainLicensesId={setMainLicensesId}
-                        otherLicensesId={otherLicensesId}
-                        setOtherLicensesId={setOtherLicensesId}
+                        mainLicenses={mainLicenses}
+                        setMainLicenses={setMainLicenses}
+                        otherLicenses={otherLicenses}
+                        setOtherLicenses={setOtherLicenses}
                         contributor={contributor}
                         setContributor={setContributor}
                         moderator={moderator}

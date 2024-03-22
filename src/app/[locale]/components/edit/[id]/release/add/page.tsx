@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import AddRelease from './releases/AddRelease'
+import AddRelease from './components/AddRelease'
 
 interface Context {
     params: { id: string }

@@ -16,7 +16,7 @@ import { FaCopy, FaInfoCircle } from 'react-icons/fa'
 
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
-import { Licenses, ReleaseDetail, User } from '@/object-types'
+import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import styles from '../detail.module.css'
 
@@ -193,7 +193,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                             !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:licenses']) &&
                             Object.entries(release._embedded['sw360:licenses'])
                                 .map(
-                                    ([index, item]: [string, Licenses]): React.ReactNode => (
+                                    ([index, item]: [string, LicenseDetail]): React.ReactNode => (
                                         <span key={index}>
                                             {item.shortName}
                                             <FaInfoCircle
