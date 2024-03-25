@@ -10,9 +10,9 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
 
@@ -28,7 +28,6 @@ import {
     DocumentTypes,
     ECCInformation,
     HttpStatus,
-    Licenses,
     Moderators,
     Release,
     ReleaseDetail,
@@ -51,8 +50,6 @@ interface Props {
 const EditRelease = ({ releaseId }: Props) => {
     const router = useRouter()
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const params = useSearchParams()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
     const [release, setRelease] = useState<ReleaseDetail>()
@@ -61,13 +58,10 @@ const EditRelease = ({ releaseId }: Props) => {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
     useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        ;(async () => {
+        ; (async () => {
             try {
-                const queryUrl = CommonUtils.createUrlWithParams(`releases/${releaseId}`, Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const session = await getSession()
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
@@ -87,14 +81,32 @@ const EditRelease = ({ releaseId }: Props) => {
                     setEccInformation(eccInformation)
                 }
 
-                if (typeof release['_embedded']['sw360:cotsDetail'] !== 'undefined') {
+                if (release['_embedded']['sw360:cotsDetail']) {
                     const cotsDetails: COTSDetails = release['_embedded']['sw360:cotsDetail']
-                    const cotsResponsible: ComponentOwner = {
-                        email: cotsDetails._embedded['sw360:cotsResponsible'].email,
-                        fullName: cotsDetails._embedded['sw360:cotsResponsible'].fullName,
-                    }
-                    setCotsResponsible(cotsResponsible)
                     setCotsDetails(cotsDetails)
+                    if (cotsDetails['_embedded'] && cotsDetails['_embedded']['sw360:cotsResponsible']) {
+                        const cotsResponsible: ComponentOwner = {
+                            email: cotsDetails._embedded['sw360:cotsResponsible'].email,
+                            fullName: cotsDetails._embedded['sw360:cotsResponsible'].fullName,
+                        }
+                        setCotsResponsible(cotsResponsible)
+                    }
+                }
+
+                if (release['_embedded']['sw360:licenses']) {
+                    const mainLicenses = release['_embedded']['sw360:licenses'].reduce((result, item) => {
+                                                    result[item._links.self.href.split('/').at(-1)] = item.fullName
+                                                    return result
+                                                }, {} as { [k: string]: string })
+                    setMainLicenses(mainLicenses)
+                }
+
+                if (release['_embedded']['sw360:otherLicenses']) {
+                    const otherLicenses = release['_embedded']['sw360:otherLicenses'].reduce((result, item) => {
+                                                    result[item._links.self.href.split('/').at(-1)] = item.fullName
+                                                    return result
+                                                }, {} as { [k: string]: string })
+                    setOtherLicenses(otherLicenses)
                 }
 
                 if (typeof release.clearingInformation !== 'undefined') {
@@ -105,9 +117,7 @@ const EditRelease = ({ releaseId }: Props) => {
                 console.error(e)
             }
         })()
-
-        return () => controller.abort()
-    }, [params, session, releaseId])
+    }, [])
 
     const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
@@ -195,15 +205,9 @@ const EditRelease = ({ releaseId }: Props) => {
         fullName: '',
     })
 
-    const [mainLicensesId, setMainLicensesId] = useState<Licenses>({
-        id: null,
-        fullName: '',
-    })
+    const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
 
-    const [otherLicensesId, setOtherLicensesId] = useState<Licenses>({
-        id: null,
-        fullName: '',
-    })
+    const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
 
     const [contributor, setContributor] = useState<Moderators>({
         emails: null,
@@ -237,6 +241,7 @@ const EditRelease = ({ releaseId }: Props) => {
     }
 
     const submit = async () => {
+        const session = await getSession()
         const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             const release = (await response.json()) as ReleaseDetail
@@ -305,10 +310,10 @@ const EditRelease = ({ releaseId }: Props) => {
                                 setReleasePayload={setReleasePayload}
                                 vendor={vendor}
                                 setVendor={setVendor}
-                                mainLicensesId={mainLicensesId}
-                                setMainLicensesId={setMainLicensesId}
-                                otherLicensesId={otherLicensesId}
-                                setOtherLicensesId={setOtherLicensesId}
+                                mainLicenses={mainLicenses}
+                                setMainLicenses={setMainLicenses}
+                                otherLicenses={otherLicenses}
+                                setOtherLicenses={setOtherLicenses}
                                 contributor={contributor}
                                 setContributor={setContributor}
                                 moderator={moderator}

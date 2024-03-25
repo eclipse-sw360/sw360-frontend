@@ -10,9 +10,9 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-bootstrap'
 
@@ -24,7 +24,6 @@ import {
     Component,
     ComponentOwner,
     HttpStatus,
-    Licenses,
     Moderators,
     Release,
     ReleaseDetail,
@@ -61,8 +60,6 @@ const cotsDetails: COTSDetails = {
 
 function AddRelease({ componentId }: Props) {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const params = useSearchParams()
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
@@ -97,15 +94,9 @@ function AddRelease({ componentId }: Props) {
         fullName: '',
     })
 
-    const [mainLicensesId, setMainLicensesId] = useState<Licenses>({
-        id: null,
-        fullName: '',
-    })
+    const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
 
-    const [otherLicensesId, setOtherLicensesId] = useState<Licenses>({
-        id: null,
-        fullName: '',
-    })
+    const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
 
     const [contributor, setContributor] = useState<Moderators>({
         emails: null,
@@ -139,16 +130,10 @@ function AddRelease({ componentId }: Props) {
     }
 
     useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        ;(async () => {
+        ; (async () => {
             try {
-                const queryUrl = CommonUtils.createUrlWithParams(
-                    `components/${componentId}`,
-                    Object.fromEntries(params)
-                )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const session = await getSession()
+                const response = await ApiUtils.GET(`components/${componentId}`, session.user.access_token)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
@@ -166,10 +151,10 @@ function AddRelease({ componentId }: Props) {
                 console.error(e)
             }
         })()
-        return () => controller.abort()
-    }, [params, session, componentId, releasePayload])
+    }, [])
 
     const submit = async () => {
+        const session = await getSession()
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)
         if (response.status == HttpStatus.CREATED) {
             const release = (await response.json()) as ReleaseDetail
@@ -215,10 +200,10 @@ function AddRelease({ componentId }: Props) {
                                 setReleasePayload={setReleasePayload}
                                 vendor={vendor}
                                 setVendor={setVendor}
-                                mainLicensesId={mainLicensesId}
-                                setMainLicensesId={setMainLicensesId}
-                                otherLicensesId={otherLicensesId}
-                                setOtherLicensesId={setOtherLicensesId}
+                                mainLicenses={mainLicenses}
+                                setMainLicenses={setMainLicenses}
+                                otherLicenses={otherLicenses}
+                                setOtherLicenses={setOtherLicenses}
                                 contributor={contributor}
                                 setContributor={setContributor}
                                 moderator={moderator}
