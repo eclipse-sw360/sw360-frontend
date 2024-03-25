@@ -593,6 +593,7 @@ th {
     padding: 10px;
     text-align: center;
     font-size: small;
+    border-radius: 5px;
 }
 
 .link-sidebar {
