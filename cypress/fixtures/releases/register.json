@@ -1,0 +1,65 @@
+{
+    "TC01_RELEASE_WITH_CPEID": {
+        "version": "version1.0.0.x",
+        "cpeid": "UUID_1002"
+    },
+    "TC03_RELEASE_WITH_CPEID": {
+        "version": "v1.0.0.1",
+        "cpeid": "cpeID123456"
+    },
+    "TC05_ALL_FIELDS": {
+        "default_vendor": {
+            "is_add_vendor": false,
+            "user_no": 1,
+            "full_name": "vendor01",
+            "short_name": "ven1",
+            "url": "https://github.blog/"
+        },
+        "version": "2.0.0",
+        "programming_languages": "Java, C#, NextJS",
+        "operating_systems": "Linux and MAC",
+        "cpeid": "cpe:2.3:a:vender1:cmpName:2.0.0",
+        "software_platforms": "Adobe AIR",
+        "release_date": "08302024",
+        "main_license": {
+            "num_license": 2
+        },
+        "other_license": {
+            "num_license": 3
+        },
+        "src_download_url": "http://10.116.43.147:3000/components/releases/detail/",
+        "binary_download_url": "https://chat.openai.com/",
+        "releasemainlinestate": {
+            "name": "Mainline",
+            "value": "MAINLINE"
+        },
+        "contributors": {
+            "num_user": 2
+        },
+        "moderators": {
+            "num_user": 1
+        },
+        "additional_roles": {
+            "role": {
+                "name": "Contributor",
+                "value": "Contributor"
+            },
+            "mail_address": "test@sw360.org"
+        },
+        "external_id": {
+            "key": "External id",
+            "value": "External value"
+        },
+        "additional_data": {
+            "key": "Additional id",
+            "value": "Additional value"
+        },
+        "release_repository": {
+            "repository_type": {
+                "name": "Subversion (SVN)",
+                "value": "SVN"
+            },
+            "repository_URL": "https://en.wikipedia.org/wiki/GitHub"
+        }
+    }
+}

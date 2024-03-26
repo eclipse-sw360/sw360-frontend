@@ -1,0 +1,10 @@
+{
+    "TC06_DELETE_COMP": {
+        "component": {
+            "name": "TC06_COMP",
+            "categories": "library",
+            "type": "COTS"
+        },
+        "releases": ["v1"]
+    }
+}

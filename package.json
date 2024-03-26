@@ -9,7 +9,8 @@
         "lint": "next lint",
         "prepare": "husky install",
         "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "build-storybook": "storybook build",
+        "test": "cypress open"
     },
     "dependencies": {
         "classnames": "^2.3.2",
@@ -48,6 +49,7 @@
         "classnames": "^2.3.2",
         "commitlint": "^17.8.1",
         "country-list": "^2.3.0",
+        "cypress": "^13.6.6",
         "eslint": "^8.56.0",
         "eslint-config-next": "^14.0.4",
         "eslint-config-prettier": "^9.1.0",

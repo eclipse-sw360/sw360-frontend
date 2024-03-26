@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Document>
+  <SPDXID>SPDXRef-DOCUMENT</SPDXID>
+  <spdxVersion>SPDX-2.1</spdxVersion>
+  <creationInfo>
+    <created>2019-08-31T11:29:46Z</created>
+    <creators>Organization: NTIA Standards and Formats Workgroup</creators>
+    <licenseListVersion>3.6</licenseListVersion>
+  </creationInfo>
+  <name>SBOM toy exaple</name>
+  <dataLicense>CC0-1.0</dataLicense>
+  <documentNamespace>http://www.spdx.org/spdxdocs/8f141b09-1138-4fc5-aecb-fc10d9ac1eed</documentNamespace>
+  <packages>
+    <SPDXID>SPDXRef-asoftware-v1.1</SPDXID>
+    <checksums>
+      <algorithm>SHA1</algorithm>
+      <checksumValue>75068c26abbed3ad3980685bae21d7202d288317</checksumValue>
+    </checksums>
+    <filesAnalyzed>false</filesAnalyzed>
+    <licenseConcluded>NOASSERTION</licenseConcluded>
+    <name>SPDX Component</name>
+    <supplier>Organization: Acme</supplier>
+    <versionInfo>v1</versionInfo>
+  </packages>
+  <relationships>
+    <spdxElementId>SPDXRef-DOCUMENT</spdxElementId>
+    <relationshipType>DESCRIBES</relationshipType>
+    <relatedSpdxElement>SPDXRef-asoftware-v1.1</relatedSpdxElement>
+  </relationships>
+</Document>

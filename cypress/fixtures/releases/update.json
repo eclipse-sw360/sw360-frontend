@@ -1,0 +1,122 @@
+{
+    "TC01_ADD_NEW_VENDOR_AND_ATTACHMENT": {
+        "default_vendor": {
+            "is_add_vendor": true,
+            "user_no": 1,
+            "full_name": "add vendor 01",
+            "short_name": "ven01",
+            "url": "https://github.com/eclipse-sw360/sw360"
+        },
+        "attachment": {
+            "fileNames": [
+                "cypress/fixtures/releases/attachments/attach1.png"
+            ],
+            "shouldUnAttachFile": false,
+            "type": {
+                "name": "Other",
+                "value": "OTHER"
+            }
+        }
+    },
+    "TC03_ADD_VENDOR_AND_ATTACHMENT": {
+        "default_vendor": {
+            "is_add_vendor": false,
+            "user_no": 2
+        },
+        "attachment": {
+            "fileNames": [
+                "cypress/fixtures/releases/attachments/attach2.jpg"
+            ],
+            "shouldUnAttachFile": false,
+            "type": {
+                "name": "Component license information (Combined)",
+                "value": "COMPONENT_LICENSE_INFO_COMBINED"
+            }
+        }
+    },
+    "TC05_ALL_FIELDS": {
+        "clearing_details": {
+            "binaries_original_from_community": true,
+            "binaries_self_made": true,
+            "component_license_information": false,
+            "source_code_delivery": false,
+            "source_code_community": true,
+            "source_code_tool_made": true,
+            "source_code_self_made": false,
+            "screenshot_website": true,
+            "finalized_license_scan_report": false,
+            "license_scan_report_result": true,
+            "legal_evaluation": false,
+            "license_agreement": true,
+            "scanned": "The new scanned",
+            "component_clearing_report": false,
+            "clearing_standard": "Record Keeping",
+            "external_url": "https://chat.openai.com/",
+            "comment": "This is the first comment.",
+            "request_id": "t234581e",
+            "additional_request_info": "This is the request to update Clearing details for release.",
+            "evaluation_start": "skip",
+            "evaluation_end": "skip",
+            "external_supplier_id": "f69a224t",
+            "count_security_vulnerabilities": 5
+        },
+        "ecc_details": {
+            "ECC_status": {
+                "name": "In Progress",
+                "value": "IN_PROGRESS"
+            },
+            "ECC_comment": "The ECC comment!",
+            "ausfuhrliste": "Al01",
+            "eccn": "eccn 02",
+            "material_index_number": 22
+        },
+        "attachment": {
+            "fileNames": [
+                "cypress/fixtures/releases/attachments/attach2.jpg",
+                "cypress/fixtures/releases/attachments/attach1.png"
+            ],
+            "shouldUnAttachFile": false,
+            "type": {
+                "name": "Other",
+                "value": "OTHER"
+            },
+            "uploadComment": "ABCdef 123",
+            "status": {
+                "name": "Accepted",
+                "value": "ACCEPTED"
+            },
+            "approvalComment": "ABCdef 123",
+            "size": "n/a",
+            "usages": "n/a",
+            "group": "DEPARTMENT"
+        }
+    },
+    "TC05_RE-UPDATED": {
+        "clearing_details": {
+            "binaries_original_from_community": false,
+            "binaries_self_made": false,
+            "scanned": "The scanned after updated",
+            "count_security_vulnerabilities": 7
+        },
+        "ecc_details": {
+            "ECC_status": {
+                "name": "Approved",
+                "value": "APPROVED"
+            }
+        }
+    },
+    "TC07_ADD_ATTACH_FOR_RELEASE": {
+        "attachment": {
+            "fileNames": [
+                "cypress/fixtures/releases/attachments/attach2.jpg",
+                "cypress/fixtures/releases/attachments/attach1.png",
+                "cypress/fixtures/releases/attachments/sample.xml"
+            ],
+            "shouldUnAttachFile": true,
+            "type": {
+                "name": "Source file",
+                "value": "SOURCE"
+            }
+        }
+    }
+}
