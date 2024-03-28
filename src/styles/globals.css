@@ -854,3 +854,18 @@ input::-webkit-datetime-edit {
 .global-message .alert span{
     font-size: 15px;
 }
+
+.form-check-input:hover {
+    cursor: pointer;
+}
+
+.modal-title {
+    flex-grow: 1 !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    line-height: 1.5 !important;
+    margin-bottom: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
