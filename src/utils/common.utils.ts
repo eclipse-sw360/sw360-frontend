@@ -267,6 +267,24 @@ const truncateText = (text: string, maxLength = 80) => {
     return truncatedText
 }
 
+/**
+ * Extract user emails and fullNames from array of user following format {'email': 'fullName'}
+ * For example:
+ * {
+ *    'admin@sw360.org': 'Admin user',
+ *    'user@sw360.org': 'User 1'
+ * }
+ * @param users - The array of users.
+ * @returns Object contain emails and full names are extracted from array of users.
+ */
+
+const extractEmailsAndFullNamesFromUsers = (users: Array<User>) => {
+    return users.reduce((result, user) => {
+        result[user.email] = user.fullName
+        return result
+    }, {} as { [k: string]: string })
+}
+
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
@@ -280,6 +298,7 @@ const CommonUtils = {
     convertObjectToMapRoles,
     convertRoles,
     truncateText,
+    extractEmailsAndFullNamesFromUsers,
 }
 
 export default CommonUtils
