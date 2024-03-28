@@ -27,7 +27,6 @@ import {
     DocumentTypes,
     ECCInformation,
     HttpStatus,
-    Moderators,
     Release,
     ReleaseDetail,
     ReleaseTabIds,
@@ -208,16 +207,6 @@ const EditRelease = ({ releaseId }: Props) => {
 
     const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
 
-    const [contributor, setContributor] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
-
-    const [moderator, setModerator] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
-
     const [cotsResponsible, setCotsResponsible] = useState<ComponentOwner>({
         email: '',
         fullName: '',
@@ -282,10 +271,6 @@ const EditRelease = ({ releaseId }: Props) => {
                                 setMainLicenses={setMainLicenses}
                                 otherLicenses={otherLicenses}
                                 setOtherLicenses={setOtherLicenses}
-                                contributor={contributor}
-                                setContributor={setContributor}
-                                moderator={moderator}
-                                setModerator={setModerator}
                                 cotsDetails={cotsDetails}
                                 eccInformation={eccInformation}
                                 clearingInformation={clearingInformation}

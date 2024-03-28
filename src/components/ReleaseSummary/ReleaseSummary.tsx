@@ -14,11 +14,10 @@ import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { ActionType, Moderators, Release, Vendor } from '@/object-types'
+import { ActionType, Release, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
-import ModeratorsDialog from '../sw360/ModeratorsDialog/ModeratorsDialog'
-import ContributorsDialog from '../sw360/SearchContributors/ContributorsDialog'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
+import SelectUsersDialog from '../sw360/SearchUsersDialog/SearchUsersDialog'
 
 interface Props {
     actionType?: string
@@ -30,10 +29,10 @@ interface Props {
     setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     otherLicenses?: { [k: string]: string }
     setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributor?: Moderators
-    setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
-    moderator?: Moderators
-    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
+    contributors?: { [k: string]: string }
+    setContributors?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    moderators?: { [k: string]: string }
+    setModerators?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 const ReleaseSummary = ({
@@ -46,10 +45,10 @@ const ReleaseSummary = ({
     setMainLicenses,
     otherLicenses,
     setOtherLicenses,
-    contributor,
-    setContributor,
-    moderator,
-    setModerator,
+    contributors,
+    setContributors,
+    moderators,
+    setModerators,
 }: Props) => {
     const t = useTranslations('default')
     const [currentDate] = useState(new Date().toLocaleDateString())
@@ -123,27 +122,19 @@ const ReleaseSummary = ({
         })
     }
 
-    const setContributors = (contributorsResponse: Moderators) => {
-        const contributors: Moderators = {
-            emails: contributorsResponse.emails,
-            fullName: contributorsResponse.fullName,
-        }
-        setContributor(contributors)
+    const setContributorsToPayload = (users: { [k: string]: string }) => {
+        setContributors(users)
         setReleasePayload({
             ...releasePayload,
-            contributors: contributors.emails,
+            contributors: Object.keys(users),
         })
     }
 
-    const setModerators = (moderatorsResponse: Moderators) => {
-        const moderators: Moderators = {
-            emails: moderatorsResponse.emails,
-            fullName: moderatorsResponse.fullName,
-        }
-        setModerator(moderators)
+    const setModeratorsToPayload = (users: { [k: string]: string }) => {
+        setModerators(users)
         setReleasePayload({
             ...releasePayload,
-            moderators: moderators.emails,
+            moderators: Object.keys(users),
         })
     }
 
@@ -484,12 +475,14 @@ const ReleaseSummary = ({
                                 readOnly={true}
                                 name='contributors'
                                 onClick={handleClickSearchContributors}
-                                value={contributor.fullName ?? ''}
+                                value={Object.values(contributors).join(', ')}
                             />
-                            <ContributorsDialog
+                            <SelectUsersDialog
                                 show={dialogOpenContributors}
                                 setShow={setDialogOpenContributors}
-                                selectModerators={setContributors}
+                                setSelectedUsers={setContributorsToPayload}
+                                selectedUsers={contributors}
+                                multiple={true}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -507,12 +500,14 @@ const ReleaseSummary = ({
                                 readOnly={true}
                                 name='moderators'
                                 onClick={handleClickSearchModerators}
-                                value={moderator.fullName ?? ''}
+                                value={Object.values(moderators).join(', ')}
                             />
-                            <ModeratorsDialog
+                            <SelectUsersDialog
                                 show={dialogOpenModerators}
                                 setShow={setDialogOpenModerators}
-                                selectModerators={setModerators}
+                                setSelectedUsers={setModeratorsToPayload}
+                                selectedUsers={moderators}
+                                multiple={true}
                             />
                         </div>
                     </div>
