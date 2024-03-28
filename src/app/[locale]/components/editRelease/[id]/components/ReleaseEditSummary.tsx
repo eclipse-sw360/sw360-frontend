@@ -21,7 +21,6 @@ import {
     DocumentTypes,
     ECCInformation,
     InputKeyValue,
-    Moderators,
     Release,
     ReleaseDetail,
     Vendor,
@@ -41,10 +40,6 @@ interface Props {
     setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     otherLicenses?: { [k: string]: string }
     setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributor?: Moderators
-    setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
-    moderator?: Moderators
-    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
     cotsDetails?: COTSDetails
     eccInformation?: ECCInformation
     clearingInformation?: ClearingInformation
@@ -52,7 +47,6 @@ interface Props {
 
 function ReleaseEditSummary({
     release,
-    releaseId,
     actionType,
     releasePayload,
     setReleasePayload,
@@ -62,10 +56,6 @@ function ReleaseEditSummary({
     setMainLicenses,
     otherLicenses,
     setOtherLicenses,
-    contributor,
-    setContributor,
-    moderator,
-    setModerator,
     cotsDetails,
     eccInformation,
     clearingInformation,
@@ -74,6 +64,10 @@ function ReleaseEditSummary({
     const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
+
+    // Store users data in format {'email': 'fullName'}
+    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -112,14 +106,6 @@ function ReleaseEditSummary({
             setAddtionalData(CommonUtils.convertObjectToMap(release.additionalData))
         }
 
-        if (typeof release._embedded['sw360:moderators'] !== 'undefined') {
-            setModerator(CommonUtils.getObjectModerators(release._embedded['sw360:moderators']))
-        }
-
-        if (typeof release._embedded['sw360:contributors'] !== 'undefined') {
-            setContributor(CommonUtils.getObjectContributors(release._embedded['sw360:contributors']))
-        }
-
         let vendorId = ''
         if (typeof release._embedded['sw360:vendors'] !== 'undefined') {
             vendorId = CommonUtils.getIdFromUrl(release._embedded['sw360:vendors'][0]._links.self.href)
@@ -145,6 +131,18 @@ function ReleaseEditSummary({
             componentId = CommonUtils.getIdFromUrl(release._links['sw360:component'].href)
         }
 
+        let moderatorsFromRelease = {}
+        if (typeof release._embedded['sw360:moderators'] !== 'undefined') {
+            moderatorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(release._embedded['sw360:moderators'])
+            setModerators(moderatorsFromRelease)
+        }
+
+        let contributorsFromRelease = {}
+        if (typeof release._embedded['sw360:contributors'] !== 'undefined') {
+            contributorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(release._embedded['sw360:contributors'])
+            setContributors(contributorsFromRelease)
+        }
+
         const releasePayload: Release = {
             name: release.name,
             cpeid: release.cpeId,
@@ -155,12 +153,12 @@ function ReleaseEditSummary({
             additionalData: release.additionalData,
             clearingState: release.clearingState,
             mainlineState: release.mainlineState,
-            contributors: CommonUtils.getEmailsModerators(release._embedded['sw360:contributors']),
+            contributors: Object.keys(contributorsFromRelease),
             createdOn: release.createdOn,
             createBy: createBy,
             modifiedBy: modifiedBy,
             modifiedOn: release.modifiedOn,
-            moderators: CommonUtils.getEmailsModerators(release._embedded['sw360:moderators']),
+            moderators: Object.keys(moderatorsFromRelease),
             roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(release.roles)),
             mainLicenseIds: release.mainLicenseIds,
             otherLicenseIds: release.otherLicenseIds,
@@ -177,17 +175,7 @@ function ReleaseEditSummary({
             clearingInformation: clearingInformation,
         }
         setReleasePayload(releasePayload)
-    }, [
-        releaseId,
-        release,
-        cotsDetails,
-        eccInformation,
-        clearingInformation,
-        setVendor,
-        setReleasePayload,
-        setContributor,
-        setModerator,
-    ])
+    }, [])
 
     return (
         <>
@@ -210,10 +198,10 @@ function ReleaseEditSummary({
                         setMainLicenses={setMainLicenses}
                         otherLicenses={otherLicenses}
                         setOtherLicenses={setOtherLicenses}
-                        contributor={contributor}
-                        setContributor={setContributor}
-                        moderator={moderator}
-                        setModerator={setModerator}
+                        contributors={contributors}
+                        setContributors={setContributors}
+                        moderators={moderators}
+                        setModerators={setModerators}
                     />
                     <div className='row mb-4'>
                         <AddAdditionalRoles

@@ -24,7 +24,6 @@ import {
     Component,
     ComponentOwner,
     HttpStatus,
-    Moderators,
     Release,
     ReleaseDetail,
     ReleaseTabIds,
@@ -97,16 +96,6 @@ function AddRelease({ componentId }: Props) {
     const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
 
     const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
-
-    const [contributor, setContributor] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
-
-    const [moderator, setModerator] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
 
     const [cotsResponsible, setCotsResponsible] = useState<ComponentOwner>({
         email: '',
@@ -204,10 +193,6 @@ function AddRelease({ componentId }: Props) {
                                 setMainLicenses={setMainLicenses}
                                 otherLicenses={otherLicenses}
                                 setOtherLicenses={setOtherLicenses}
-                                contributor={contributor}
-                                setContributor={setContributor}
-                                moderator={moderator}
-                                setModerator={setModerator}
                             />
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
