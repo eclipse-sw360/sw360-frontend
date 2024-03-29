@@ -507,87 +507,36 @@ const ReleaseSummary = ({
                                 />
                             </div>
                         </div>
-                        <div className='col-lg-4'>
-                            <label htmlFor='contributors' className='form-label fw-bold'>
-                                {t('Contributors')}
-                            </label>
-                            <input
-                                type='text'
-                                className='form-control'
-                                data-bs-toggle='modal'
-                                data-bs-target='#search_users_modal'
-                                placeholder={t('Click to edit')}
-                                id='contributors'
-                                aria-describedby='Contributor'
-                                readOnly={true}
-                                name='contributors'
-                                onClick={handleClickSearchContributors}
-                                value={Object.values(contributors).join(', ')}
-                            />
-                            <SelectUsersDialog
-                                show={dialogOpenContributors}
-                                setShow={setDialogOpenContributors}
-                                setSelectedUsers={setContributorsToPayload}
-                                selectedUsers={contributors}
-                                multiple={true}
-                            />
-                        </div>
-                        <div className='col-lg-4'>
-                            <label htmlFor='moderators' className='form-label fw-bold'>
-                                {t('Moderators')}
-                            </label>
-                            <input
-                                type='text'
-                                className='form-control'
-                                data-bs-toggle='modal'
-                                data-bs-target='#search_users_modal'
-                                placeholder={t('Click to edit')}
-                                id='moderators'
-                                aria-describedby='Moderators'
-                                readOnly={true}
-                                name='moderators'
-                                onClick={handleClickSearchModerators}
-                                value={Object.values(moderators).join(', ')}
-                            />
-                            <SelectUsersDialog
-                                show={dialogOpenModerators}
-                                setShow={setDialogOpenModerators}
-                                setSelectedUsers={setModeratorsToPayload}
-                                selectedUsers={moderators}
-                                multiple={true}
-                            />
-                        </div>
-                    </div>
-                    <hr className='my-2' />
-                    <div className='row'>
-                        <div className='col-lg-4'>
-                            <label htmlFor='modified_on' className='form-label fw-bold'>
-                                {t('Modified On')}
-                            </label>
-                            <input
-                                type='date'
-                                className='form-control'
-                                id='modified_on'
-                                aria-describedby='Modified on'
-                                readOnly={true}
-                                name='modifiedOn'
-                                value={releasePayload.modifiedOn ?? ''}
-                            />
-                        </div>
-                        <div className='col-lg-4'>
-                            <label htmlFor='modified_by' className='form-label fw-bold'>
-                                {t('Modified By')}
-                            </label>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder={t('Will be set automatically')}
-                                id='modified_by'
-                                aria-describedby='Modified By'
-                                readOnly={true}
-                                name='modifiedBy'
-                                value={releasePayload.modifiedBy ?? ''}
-                            />
+                        <div className='row pt-2 pb-2 with-divider'>
+                            <div className='col-lg-4'>
+                                <label htmlFor='modified_on' className='form-label fw-bold'>
+                                    {t('Modified On')}
+                                </label>
+                                <input
+                                    type='date'
+                                    className='form-control'
+                                    id='modified_on'
+                                    aria-describedby='Modified on'
+                                    readOnly={true}
+                                    name='modifiedOn'
+                                    value={releasePayload.modifiedOn ?? ''}
+                                />
+                            </div>
+                            <div className='col-lg-4'>
+                                <label htmlFor='modified_by' className='form-label fw-bold'>
+                                    {t('Modified By')}
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder={t('Will be set automatically')}
+                                    id='modified_by'
+                                    aria-describedby='Modified By'
+                                    readOnly={true}
+                                    name='modifiedBy'
+                                    value={releasePayload.modifiedBy ?? ''}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
