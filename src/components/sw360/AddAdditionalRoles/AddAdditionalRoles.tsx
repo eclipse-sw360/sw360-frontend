@@ -72,7 +72,9 @@ function AddAdditionalRoles({
 
     return (
         <>
-            <h6 className='header pb-2 px-2'>{t('Additional Roles')}</h6>
+            <div className='section-header mb-2'>
+                <span className='fw-bold'>{t('Additional Roles')}</span>
+            </div>
             <div className='row'>
                 {inputListData &&
                     inputListData.map((elem, j) => {
