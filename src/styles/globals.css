@@ -841,3 +841,16 @@ input::-webkit-datetime-edit {
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
 }
+
+.section-header {
+    color: #FFF;
+    background-color: #5D8EA9;
+    border-bottom: 1px solid #e7e7ed;
+    border-top-width: 0px;
+    vertical-align: bottom;
+    padding: 0.75rem;
+}
+
+.with-divider {
+    border-bottom: 1px solid #e7e7ed;
+}
