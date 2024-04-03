@@ -14,7 +14,6 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import {
@@ -26,13 +25,13 @@ import {
     DocumentTypes,
     Embedded,
     HttpStatus,
-    ToastData,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
+import MessageService from '@/services/message.service'
 
 interface Props {
     componentId?: string
@@ -88,22 +87,6 @@ const EditComponent = ({ componentId }: Props) => {
         attachmentDTOs: null,
     })
 
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
-
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
@@ -152,10 +135,10 @@ const EditComponent = ({ componentId }: Props) => {
     const submit = async () => {
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            alert(true, 'Success', `Success:Component ${componentPayload.name}  updated successfully!`, 'success')
+            MessageService.success(`Component ${componentPayload.name}  updated successfully!`)
             router.push('/components/detail/' + componentId)
         } else {
-            alert(true, 'Duplicate', t('Edit Component Fail'), 'danger')
+            MessageService.error(t('Edit Component Fail'))
         }
     }
 
@@ -197,16 +180,6 @@ const EditComponent = ({ componentId }: Props) => {
                             <PageButtonHeader title={component.name} buttons={headerButtons}></PageButtonHeader>
                         </div>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <ToastContainer position='top-start'>
-                                <ToastMessage
-                                    show={toastData.show}
-                                    type={toastData.type}
-                                    message={toastData.message}
-                                    contextual={toastData.contextual}
-                                    onClose={() => setToastData({ ...toastData, show: false })}
-                                    setShowToast={setToastData}
-                                />
-                            </ToastContainer>
                             <ComponentEditSummary
                                 attachmentData={attachmentData}
                                 componentId={componentId}
