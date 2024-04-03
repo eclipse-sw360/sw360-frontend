@@ -14,7 +14,6 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
 
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
@@ -27,11 +26,11 @@ import {
     HttpStatus,
     InputKeyValue,
     Moderators,
-    ToastData,
     Vendor,
 } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar, ToastMessage } from 'next-sw360'
+import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
+import MessageService from '@/services/message.service'
 
 export default function AddComponent() {
     const t = useTranslations('default')
@@ -82,22 +81,6 @@ export default function AddComponent() {
         },
     ]
 
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
-
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
         setComponentPayload({
@@ -123,12 +106,13 @@ export default function AddComponent() {
 
         if (response.status == HttpStatus.CREATED) {
             const data = (await response.json()) as Component
-            alert(true, 'Success', t('Component is created'), 'success')
             router.push('/components/edit/' + data.id)
+            MessageService.success(t('Component is created'))
         } else {
-            alert(true, 'Duplicate', t('Component is Duplicate'), 'danger')
+            MessageService.error(t('Component is Duplicate'))
         }
     }
+
     if (status === 'unauthenticated') {
         signOut()
     } else {
@@ -144,16 +128,6 @@ export default function AddComponent() {
                         void submit()
                     }}
                 >
-                    <ToastContainer position='top-start'>
-                        <ToastMessage
-                            show={toastData.show}
-                            type={toastData.type}
-                            message={toastData.message}
-                            contextual={toastData.contextual}
-                            onClose={() => setToastData({ ...toastData, show: false })}
-                            setShowToast={setToastData}
-                        />
-                    </ToastContainer>
                     <div className='container page-content'>
                         <div className='row'>
                             <div className='col-2 sidebar'>
