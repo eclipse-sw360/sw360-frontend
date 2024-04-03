@@ -22,7 +22,7 @@ import { notFound } from 'next/navigation'
 import { ReactNode } from 'react'
 
 import { LOCALES } from '@/constants'
-import { Footer, Navbar } from 'next-sw360'
+import { Footer, Navbar, GlobalMessages } from 'next-sw360'
 import { Providers } from '../provider'
 
 export const metadata: Metadata = {
@@ -59,6 +59,7 @@ async function RootLayout({ children, params: { locale } }: Props) {
                 <Providers>
                     <NextIntlClientProvider locale={locale} messages={messages}>
                         <div id='container' className='d-flex flex-column min-vh-100'>
+                            <GlobalMessages />
                             <Navbar />
                             {children}
                             <Footer />
