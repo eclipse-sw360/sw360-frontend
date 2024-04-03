@@ -14,7 +14,6 @@ import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
 
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
@@ -29,13 +28,13 @@ import {
     ReleaseDetail,
     ReleaseTabIds,
     Repository,
-    ToastData,
     Vendor,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import ReleaseAddSummary from './ReleaseAddSummary'
 import ReleaseAddTabs from './ReleaseAddTab'
+import MessageService from '@/services/message.service'
 
 interface Props {
     componentId?: string
@@ -113,22 +112,6 @@ function AddRelease({ componentId }: Props) {
         fullName: '',
     })
 
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
-
     useEffect(() => {
         ; (async () => {
             try {
@@ -158,13 +141,13 @@ function AddRelease({ componentId }: Props) {
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)
         if (response.status == HttpStatus.CREATED) {
             const release = (await response.json()) as ReleaseDetail
-            alert(true, 'Success', t('Release is created'), 'success')
+            MessageService.success(t('Release is created'))
             const releaseId: string = CommonUtils.getIdFromUrl(release._links?.self?.href)
             router.push('/components/editRelease/' + releaseId)
         } else if (response.status == HttpStatus.CONFLICT) {
-            alert(true, 'Duplicate', t('Release is Duplicate'), 'warning')
+            MessageService.warn(t('Release is Duplicate'))
         } else {
-            alert(true, 'Error', t('Release Create failed'), 'danger')
+            MessageService.error(t('Release Create failed'))
         }
     }
 
@@ -184,16 +167,6 @@ function AddRelease({ componentId }: Props) {
                         <div className='row' style={{ marginBottom: '20px' }}>
                             <PageButtonHeader buttons={headerButtons}></PageButtonHeader>
                         </div>
-                        <ToastContainer position='top-start'>
-                            <ToastMessage
-                                show={toastData.show}
-                                type={toastData.type}
-                                message={toastData.message}
-                                contextual={toastData.contextual}
-                                onClose={() => setToastData({ ...toastData, show: false })}
-                                setShowToast={setToastData}
-                            />
-                        </ToastContainer>
                         <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
                             <ReleaseAddSummary
                                 releasePayload={releasePayload}
