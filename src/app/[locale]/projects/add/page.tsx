@@ -12,14 +12,14 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ToastData, Vendor } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ToastMessage } from 'next-sw360'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Button, Col, ListGroup, Row, Tab, ToastContainer } from 'react-bootstrap'
+import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 function AddProjects() {
     const router = useRouter()
@@ -80,21 +80,6 @@ function AddProjects() {
         licenseInfoHeaderText: '',
         linkedProjects: {},
     })
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
@@ -125,10 +110,10 @@ function AddProjects() {
 
         if (response.status == HttpStatus.CREATED) {
             await response.json()
-            alert(true, 'success', t('Your project is created'), 'success')
+            MessageService.success(t('Your project is created'))
             // router.push('/projects')
         } else {
-            alert(true, 'error', t('There are some errors while creating project'), 'danger')
+            MessageService.error(t('There are some errors while creating project'))
             // router.push('/projects')
         }
     }
@@ -150,16 +135,6 @@ function AddProjects() {
                         event.preventDefault()
                     }}
                 >
-                    <ToastContainer position='top-start'>
-                        <ToastMessage
-                            show={toastData.show}
-                            type={toastData.type}
-                            message={toastData.message}
-                            contextual={toastData.contextual}
-                            onClose={() => setToastData({ ...toastData, show: false })}
-                            setShowToast={setToastData}
-                        />
-                    </ToastContainer>
                     <div>
                         <Tab.Container defaultActiveKey='summary'>
                             <Row>
