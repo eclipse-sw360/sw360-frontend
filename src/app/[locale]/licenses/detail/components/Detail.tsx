@@ -9,18 +9,18 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, LicenseDetail, LicensePayload, ToastData } from '@/object-types'
+import { HttpStatus, LicenseDetail, LicensePayload } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ToastMessage } from 'next-sw360'
 import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useState } from 'react'
-import { Button, ToastContainer } from 'react-bootstrap'
+import { Dispatch, SetStateAction } from 'react'
+import { Button } from 'react-bootstrap'
 import styles from '../detail.module.css'
 import { FiCheckCircle } from 'react-icons/fi'
 import { BiXCircle } from 'react-icons/bi'
 import { BsXCircle } from 'react-icons/bs'
+import MessageService from '@/services/message.service'
 
 interface Props {
     license: LicensePayload
@@ -39,45 +39,19 @@ const Detail = ({ license, setLicense }: Props) => {
         })
     }
 
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
-
     const updateExternalLicenseLink = async () => {
         const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             const data = (await response.json()) as LicenseDetail
-            alert(true, 'Success', t('Update External Link Success!'), 'success')
+            MessageService.success(t('Update External Link Success!'))
             router.push('/licenses/detail?id=' + data.shortName)
         } else {
-            alert(true, 'Fail', t('Update External Link Failed!'), 'danger')
+            MessageService.error(t('Update External Link Failed!'))
         }
     }
 
     return (
         <div className='col'>
-            <ToastContainer position='top-start'>
-                <ToastMessage
-                    show={toastData.show}
-                    type={toastData.type}
-                    message={toastData.message}
-                    contextual={toastData.contextual}
-                    onClose={() => setToastData({ ...toastData, show: false })}
-                    setShowToast={setToastData}
-                />
-            </ToastContainer>
             {!license.checked && (
                 <div
                     className={`alert ${styles['isChecked']}`}

@@ -12,18 +12,18 @@
 
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { PageButtonHeader, SideBar, ToastMessage } from '@/components/sw360'
-import { Changelogs, HttpStatus, LicensePayload, LicenseTabIds, ToastData } from '@/object-types'
+import { PageButtonHeader, SideBar } from '@/components/sw360'
+import { Changelogs, HttpStatus, LicensePayload, LicenseTabIds } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
 import styles from '../detail.module.css'
+import MessageService from '@/services/message.service'
 
 interface Props {
     licenseId?: string
@@ -63,7 +63,7 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
 
     useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedString(updateLicense)) {
-            alert(true, 'Success', t('License updated successfully!'), 'success')
+            MessageService.success(t('License updated successfully!'))
         }
         const controller = new AbortController()
         const signal = controller.signal
@@ -117,22 +117,6 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
         setIsEditWhitelist(false)
     }
 
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
-
     const handleUpdateWhitelist = async () => {
         const whitelistObj = Object.fromEntries(whitelist)
         const response = await ApiUtils.PATCH(
@@ -141,10 +125,10 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
             session.user.access_token
         )
         if (response.status == HttpStatus.OK) {
-            alert(true, 'Success', t('License updated successfully!'), 'success')
+            MessageService.success(t('License updated successfully!'))
             window.location.reload()
         } else {
-            alert(true, 'Failed', t('License updated failed!'), 'danger')
+            MessageService.error(t('License updated failed!'))
         }
     }
 
@@ -177,16 +161,6 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
             license && (
                 <div className={`container ${styles['row-license-detail']}`}>
                     <div className='row'>
-                        <ToastContainer position='top-start'>
-                            <ToastMessage
-                                show={toastData.show}
-                                type={toastData.type}
-                                message={toastData.message}
-                                contextual={toastData.contextual}
-                                onClose={() => setToastData({ ...toastData, show: false })}
-                                setShowToast={setToastData}
-                            />
-                        </ToastContainer>
                         <div className='col-2 sidebar'>
                             <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
                         </div>
