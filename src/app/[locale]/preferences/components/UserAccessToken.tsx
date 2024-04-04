@@ -15,15 +15,14 @@ import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from '../preferences.module.css'
-import { MessageContext } from './MessageContextProvider'
 import TokensTable from './TokensTable'
+import MessageService from '@/services/message.service'
 
 const UserAccessToken = () => {
     const t = useTranslations('default')
-    const { setToastData } = useContext(MessageContext)
     const [validated, setValidated] = useState(false)
     const [tokenData, setTokenData] = useState({
         name: '',
@@ -51,12 +50,7 @@ const UserAccessToken = () => {
                     authorities: ['READ'],
                 })
             } else {
-                setToastData({
-                    show: true,
-                    message: data.message,
-                    type: 'Error',
-                    contextual: 'danger',
-                })
+                MessageService.error(data.message)
             }
         }
     }

@@ -11,13 +11,13 @@
 'use client'
 
 import { AccessToken, Embedded, HttpStatus } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap'
-import { MessageContext } from './MessageContextProvider'
 
 interface Props {
     generatedToken: string
@@ -25,7 +25,6 @@ interface Props {
 
 const TokensTable = ({ generatedToken }: Props) => {
     const t = useTranslations('default')
-    const { setToastData } = useContext(MessageContext)
     const [tableData, setTableData] = useState([])
 
     const fetchData = useCallback(async (url: string) => {
@@ -73,22 +72,12 @@ const TokensTable = ({ generatedToken }: Props) => {
             session.user.access_token
         )
         if (response.status === HttpStatus.NO_CONTENT) {
-            setToastData({
-                show: true,
-                message: t('Revoke token sucessfully'),
-                type: t('Success'),
-                contextual: 'success',
-            })
+            MessageService.success(t('Revoke token sucessfully'))
             fetchData('users/tokens')
         } else if (response.status === HttpStatus.UNAUTHORIZED) {
             signOut()
         } else {
-            setToastData({
-                show: true,
-                message: t('Error while processing'),
-                type: t('Error'),
-                contextual: 'danger',
-            })
+            MessageService.error(t('Error while processing'))
         }
     }
 
