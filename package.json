@@ -17,9 +17,9 @@
         "dotenv": "^16.3.1",
         "flag-icons": "^6.11.2",
         "gridjs": "^6.2.0",
-        "next": "^14.1.3",
+        "next": "^14.1.4",
         "next-auth": "^4.24.7",
-        "next-intl": "^3.9.4",
+        "next-intl": "^3.11.1",
         "react": "^18.2.0",
         "react-bootstrap": "^2.10.1",
         "react-cookie": "^7.0.1",
@@ -49,8 +49,8 @@
         "classnames": "^2.3.2",
         "commitlint": "^17.8.1",
         "country-list": "^2.3.0",
-        "eslint": "^8.56.0",
-        "eslint-config-next": "^14.0.4",
+        "eslint": "^8.57.0",
+        "eslint-config-next": "^14.1.4",
         "eslint-config-prettier": "^9.1.0",
         "eslint-import-resolver-typescript": "^3.6.1",
         "eslint-plugin-import": "^2.29.1",
@@ -69,12 +69,7 @@
         "stylelint-prettier": "^5.0.0",
         "ts-node": "^10.9.2",
         "tsc-files": "^1.1.4",
-        "typescript": "^5.3.3"
-    },
-    "overrides": {
-        "next-intl": {
-            "next": "^14.0.0"
-        }
+        "typescript": "^5.4.4"
     },
     "lint-staged": {
         "**/*.{js,jsx,ts,tsx}": [
