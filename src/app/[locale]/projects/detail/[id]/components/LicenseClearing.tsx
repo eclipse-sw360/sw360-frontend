@@ -33,8 +33,8 @@ export default function LicenseClearing({
         console.log('Create clearing request....')
     }
 
-    const generateLicenseInfo = () => {
-        router.push(`/projects/generateLicenseInfo/${projectId}`)
+    const generateSourceCodeBundle = () => {
+        router.push(`/projects/generateSourceCode/${projectId}`)
     }
 
 
@@ -59,7 +59,7 @@ export default function LicenseClearing({
                                     <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
                                             <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
-                                            <Dropdown.Item>{t('Projects with linked releases')}</Dropdown.Item>
+                                            <Dropdown.Item>{t('Projects with sub projects')}</Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
                             </Nav.Item>
@@ -67,10 +67,7 @@ export default function LicenseClearing({
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                            <Dropdown.Item
-                                                 onClick = {() => generateLicenseInfo()}
-                                            >
-                                                {t('Projects only')}</Dropdown.Item>
+                                            <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
                                             <Dropdown.Item>{t('Projects with sub projects')}</Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
@@ -79,7 +76,9 @@ export default function LicenseClearing({
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Generate Source Code Bundle')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                            <Dropdown.Item>
+                                            <Dropdown.Item
+                                                onClick = {() => generateSourceCodeBundle()}
+                                            >
                                                 {t('Projects only')}
                                             </Dropdown.Item>
                                             <Dropdown.Item>
