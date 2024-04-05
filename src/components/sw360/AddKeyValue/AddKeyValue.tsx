@@ -62,7 +62,9 @@ function AddKeyValue(props: Props) {
 
     return (
         <>
-            <h6 className='header pb-2 px-2'>{props.header}</h6>
+            <div className='section-header mb-2'>
+                <span className='fw-bold'>{props.header}</span>
+            </div>
             <div className='row'>
                 {inputList.map((elem, j) => {
                     return (

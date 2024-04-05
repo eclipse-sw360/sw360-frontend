@@ -37,8 +37,8 @@ const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) => {
     return (
         <>
             <div className='row mb-4'>
-                <div className='header mb-2'>
-                    <p className='fw-bold mt-3'> {t('Release Repository')}</p>
+                <div className='section-header mb-2'>
+                    <span className='fw-bold'>{t('Release Repository')}</span>
                 </div>
                 <div className='row'>
                     <div className='col-lg-4'>

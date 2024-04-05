@@ -15,7 +15,7 @@ import { useState } from 'react'
 
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import { DocumentTypes, InputKeyValue, Moderators, Release, Vendor } from '@/object-types'
+import { DocumentTypes, InputKeyValue, Release, Vendor } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
@@ -28,10 +28,6 @@ interface Props {
     setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     otherLicenses?: { [k: string]: string }
     setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributor?: Moderators
-    setContributor?: React.Dispatch<React.SetStateAction<Moderators>>
-    moderator?: Moderators
-    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
 }
 
 function ReleaseAddSummary({
@@ -43,15 +39,15 @@ function ReleaseAddSummary({
     setMainLicenses,
     otherLicenses,
     setOtherLicenses,
-    contributor,
-    setContributor,
-    moderator,
-    setModerator,
 }: Props) {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
     const [roles, setRoles] = useState<InputKeyValue[]>([])
+
+    // Store users data in format {'email': 'fullName'}
+    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
     const setDataRoles = (roles: InputKeyValue[]) => {
         const roleDatas = CommonUtils.convertRoles(roles)
@@ -96,10 +92,10 @@ function ReleaseAddSummary({
                         setMainLicenses={setMainLicenses}
                         otherLicenses={otherLicenses}
                         setOtherLicenses={setOtherLicenses}
-                        moderator={moderator}
-                        setModerator={setModerator}
-                        contributor={contributor}
-                        setContributor={setContributor}
+                        moderators={moderators}
+                        setModerators={setModerators}
+                        contributors={contributors}
+                        setContributors={setContributors}
                     />
                     <div className='row mb-4'>
                         <AddAdditionalRoles
