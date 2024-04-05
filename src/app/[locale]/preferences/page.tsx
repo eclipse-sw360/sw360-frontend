@@ -9,9 +9,7 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import MessageContextProvider from './components/MessageContextProvider'
 import NotificationSettingForm from './components/NotificationSettingForm'
-import UpdateMessage from './components/UpdateMessage'
 import UserAccessToken from './components/UserAccessToken'
 
 export const metadata: Metadata = {
@@ -21,12 +19,9 @@ export const metadata: Metadata = {
 const PreferencesPage = () => {
     return (
         <div className='container page-content'>
-            <MessageContextProvider>
-                <NotificationSettingForm />
-                <br />
-                <UserAccessToken />
-                <UpdateMessage />
-            </MessageContextProvider>
+            <NotificationSettingForm />
+            <br />
+            <UserAccessToken />
         </div>
     )
 }

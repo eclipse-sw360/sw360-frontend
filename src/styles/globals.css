@@ -796,6 +796,37 @@ input::-webkit-datetime-edit {
     color: #F7941E;
 }
 
+.alert-success {
+    background-color: #edf9f0 !important;
+    border-color: #5aca75 !important;
+    color: #287d3c !important;
+}
+
+.alert-danger {
+    background-color: #feefef !important;
+    border-color: #f48989 !important;
+    color: #da1414 !important;
+}
+
+.global-message {
+    position: sticky;
+    top: 0px;
+    z-index: 999;
+}
+
+.global-message .alert{
+    padding-left: 70px;
+}
+
+.global-message .alert svg{
+    position: relative;
+    top: -2px;
+}
+
+.global-message .alert span{
+    font-size: 15px;
+}
+
 .form-check-input:hover {
     cursor: pointer;
 }

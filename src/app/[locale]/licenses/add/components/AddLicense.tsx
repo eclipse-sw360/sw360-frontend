@@ -14,14 +14,14 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
 
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { HttpStatus, LicensePayload, LicenseTabIds, Obligation, ToastData } from '@/object-types'
+import { HttpStatus, LicensePayload, LicenseTabIds, Obligation } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import AddLicenseSummary from './AddLicenseSummary'
+import MessageService from '@/services/message.service'
 
 export default function AddLicense() {
     const t = useTranslations('default')
@@ -64,7 +64,7 @@ export default function AddLicense() {
     ]
 
     useEffect(() => {
-        alert(true, 'Success', t('New License'), 'success')
+        MessageService.success(t('New License'))
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -100,22 +100,6 @@ export default function AddLicense() {
         return () => controller.abort()
     }, [params, session])
 
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
-
     const validateLicenseShortName = (licensePayload: LicensePayload) => {
         if (CommonUtils.isNullEmptyOrUndefinedString(licensePayload.shortName)) {
             setErrorShortName(true)
@@ -139,20 +123,18 @@ export default function AddLicense() {
             setErrorFullName(true)
         }
         if (validateLicenseShortName(licensePayload) || validateLicenseFullname(licensePayload)) {
-            alert(true, 'Require!', t('Fullname, shortname not null or Empty!'), 'danger')
+            MessageService.error(t('Fullname, shortname not null or Empty!'))
         } else if (!licensePayload.shortName.match(/^[A-Za-z0-9\-.+]*$/)) {
-            alert(true, 'Error!', t('Shortname is invalid!'), 'danger')
+            MessageService.error(t('Shortname is invalid!'))
         } else {
             const response = await ApiUtils.POST('licenses', licensePayload, session.user.access_token)
             if (response.status == HttpStatus.CREATED) {
-                alert(true, 'Success', t('License added successfully!'), 'success')
-                window.setTimeout(() => {
-                    router.push('/licenses')
-                }, 1500)
+                MessageService.success(t('License added successfully!'))
+                router.push('/licenses')
             } else if (response.status == HttpStatus.CONFLICT) {
-                alert(true, 'Error', t('License shortname is already taken!'), 'danger')
+                MessageService.error(t('License shortname is already taken!'))
             } else {
-                alert(true, 'Failed', t('Create License Failed!'), 'danger')
+                MessageService.error(t('Create License Failed!'))
             }
         }
     }
@@ -198,16 +180,6 @@ export default function AddLicense() {
                                 ></PageButtonHeader>
                             )}
                         </div>
-                        <ToastContainer position='top-start'>
-                            <ToastMessage
-                                show={toastData.show}
-                                type={toastData.type}
-                                message={toastData.message}
-                                contextual={toastData.contextual}
-                                onClose={() => setToastData({ ...toastData, show: false })}
-                                setShowToast={setToastData}
-                            />
-                        </ToastContainer>
                         <div className='row' hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}>
                             <AddLicenseSummary
                                 errorShortName={errorShortName}

@@ -65,6 +65,7 @@ import VendorAdvisory from './VendorAdvisory'
 import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
+import { MessageOptions, Message } from './Message'
 
 export type {
     AccessToken,
@@ -124,7 +125,9 @@ export type {
     VendorType,
     VerificationStateInfo,
     Vulnerability,
-    VulnerabilityRatingAndActionPayload
+    VulnerabilityRatingAndActionPayload,
+    Message,
+    MessageOptions,
 }
 
 // Special functions for populate data

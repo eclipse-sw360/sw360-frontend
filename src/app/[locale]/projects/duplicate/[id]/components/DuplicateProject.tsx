@@ -12,15 +12,15 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ProjectPayload, ToastData, Vendor } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { AUTH_TOKEN } from '@/utils/env'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ToastMessage } from 'next-sw360'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Col, ListGroup, Row, Tab, ToastContainer } from 'react-bootstrap'
+import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 interface Props{
     projectId: string
@@ -89,22 +89,6 @@ function DuplicateProject({projectId}:Props) {
         phaseOutSince : '',
         licenseInfoHeaderText : '',
     })
-
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
@@ -213,10 +197,10 @@ function DuplicateProject({projectId}:Props) {
 
         if (response.status == HttpStatus.CREATED) {
             await response.json()
-            alert(true, 'success', t('Your project is created'), 'success')
+            MessageService.success(t('Your project is created'))
             // router.push('/projects')
         } else {
-            alert(true, 'error', t('There are some errors while creating project'), 'danger')
+            MessageService.error(t('There are some errors while creating project'))
             // router.push('/projects')
         }
     }
@@ -238,16 +222,6 @@ function DuplicateProject({projectId}:Props) {
                         event.preventDefault()
                     }}
                 >
-                    <ToastContainer position='top-start'>
-                        <ToastMessage
-                            show={toastData.show}
-                            type={toastData.type}
-                            message={toastData.message}
-                            contextual={toastData.contextual}
-                            onClose={() => setToastData({ ...toastData, show: false })}
-                            setShowToast={setToastData}
-                        />
-                    </ToastContainer>
                     <div>
                         <Tab.Container defaultActiveKey='summary'>
                             <Row>

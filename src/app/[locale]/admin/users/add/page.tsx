@@ -10,13 +10,12 @@
 'use client'
 
 import { useState } from 'react'
-import { CreateUserPayload, HttpStatus, ToastData } from '@/object-types'
+import { CreateUserPayload, HttpStatus } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ApiUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
-import { ToastMessage } from 'next-sw360'
-import { ToastContainer } from 'react-bootstrap'
+import MessageService from '@/services/message.service'
 
 export default function CreateUser() { 
     const t = useTranslations('default')
@@ -29,22 +28,6 @@ export default function CreateUser() {
         password: ''
     })
     const router = useRouter()
-
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -59,14 +42,14 @@ export default function CreateUser() {
             user.fullName = `${user.givenName} ${user.lastName}`
             const response = await ApiUtils.POST('users', user, session.user.access_token)
             if (response.status == HttpStatus.CREATED) {
-                alert(true, 'Success', t('User is created'), 'success')
+                MessageService.success(t('User is created'))
                 router.push('/admin/users')
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else if (response.status === HttpStatus.CONFLICT) {
-                alert(true, 'Duplicate', t('User with the same email already exists'), 'danger')
+                MessageService.error(t('User with the same email already exists'))
             } else {
-                alert(true, 'Error', t('Something went wrong'), 'danger')
+                MessageService.error(t('Something went wrong'))
             }
         } catch (e) {
             console.error(e)
@@ -80,16 +63,6 @@ export default function CreateUser() {
     return (
         <>
             <div className='mx-5 mt-3'>
-                <ToastContainer position='top-start'>
-                    <ToastMessage
-                        show={toastData.show}
-                        type={toastData.type}
-                        message={toastData.message}
-                        contextual={toastData.contextual}
-                        onClose={() => setToastData({ ...toastData, show: false })}
-                        setShowToast={setToastData}
-                    />
-                </ToastContainer>
                 <div className="row mb-4">
                     <button className='btn btn-primary col-auto me-2' onClick={handleCreateUser}>
                         {t('Create User')}

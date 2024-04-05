@@ -9,36 +9,19 @@
 
 'use client'
 
-import { HttpStatus, ToastData } from '@/object-types'
+import { HttpStatus } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ToastMessage } from 'next-sw360'
 import { useRef, useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
+import MessageService from '@/services/message.service'
 
 export default function LicenseAdministration() {
     const t = useTranslations('default')
     const file = useRef<File | undefined>()
     const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)
-
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.currentTarget.files && e.currentTarget.files.length === 0) {
@@ -50,7 +33,7 @@ export default function LicenseAdministration() {
     const uploadLicenses = async () => {
         try {
             if (!file.current) {
-                alert(true, 'Error', t('Please select a file'), 'danger')
+                MessageService.error(t('Please select a file'))
                 return
             }
             const formData = new FormData()
@@ -64,11 +47,11 @@ export default function LicenseAdministration() {
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 signOut()
             } else if (response.status === HttpStatus.OK) {
-                alert(true, 'Success', t('Licenses uploaded successfully'), 'success')
+                MessageService.success(t('Licenses uploaded successfully'))
             } else {
                 const data = await response.json()
                 console.log(data)
-                alert(true, 'Error', t('Something went wrong'), 'danger')
+                MessageService.error(t('Something went wrong'))
             }
         } catch (err) {
             console.error(err)
@@ -121,16 +104,6 @@ export default function LicenseAdministration() {
                 </div>
                 <div className='mt-4'>
                     <h5 className='licadmin-upload'>{t('Upload License Archive')}</h5>
-                    <ToastContainer position='top-start'>
-                        <ToastMessage
-                            show={toastData.show}
-                            type={toastData.type}
-                            message={toastData.message}
-                            contextual={toastData.contextual}
-                            onClose={() => setToastData({ ...toastData, show: false })}
-                            setShowToast={setToastData}
-                        />
-                    </ToastContainer>
                     <input type='file' onChange={handleFileChange} placeholder={t('Drop a File Here')} />
                     <div className='form-check mt-3'>
                         <input

@@ -15,16 +15,15 @@ import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { User } from '@/object-types'
-import { MessageContext } from './MessageContextProvider'
 import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
+import MessageService from '@/services/message.service'
 
 const NotificationSettingForm = () => {
     const t = useTranslations('default')
     const [user, setUser] = useState<User>(undefined)
-    const { setToastData } = useContext(MessageContext)
     const [notificationSetting, setNotificationSetting] = useState({
         wantsMailNotification: undefined,
         notificationPreferences: {},
@@ -34,24 +33,13 @@ const NotificationSettingForm = () => {
         const session = await getSession()
         const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
         if (response.status === HttpStatus.OK) {
-            setToastData({
-                show: true,
-                message: t('Your request completed successfully'),
-                type: t('Success'),
-                contextual: 'success',
-            })
-
+            MessageService.success(t('Your request completed successfully'))
             if (!notificationSetting.wantsMailNotification) {
                 fetchData('users/profile')
             }
             return
         }
-        setToastData({
-            show: true,
-            message: t('Error while processing'),
-            type: t('Error'),
-            contextual: 'danger',
-        })
+        MessageService.error(t('Error while processing'))
     }
 
     const fetchData = useCallback(async (url: string) => {

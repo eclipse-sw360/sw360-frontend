@@ -14,15 +14,15 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { ToastContainer } from 'react-bootstrap'
 
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { HttpStatus, LicensePayload, LicenseTabIds, Obligation, ToastData } from '@/object-types'
+import { HttpStatus, LicensePayload, LicenseTabIds, Obligation } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar, ToastMessage } from 'next-sw360'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
 import EditLicenseSummary from './EditLicenseSummary'
+import MessageService from '@/services/message.service'
 
 interface Props {
     licenseId?: string
@@ -129,35 +129,19 @@ export default function EditLicense({ licenseId }: Props) {
         },
     ]
 
-    const [toastData, setToastData] = useState<ToastData>({
-        show: false,
-        type: '',
-        message: '',
-        contextual: '',
-    })
-
-    const alert = (show_data: boolean, status_type: string, message: string, contextual: string) => {
-        setToastData({
-            show: show_data,
-            type: status_type,
-            message: message,
-            contextual: contextual,
-        })
-    }
-
     const submit = async () => {
         setInputValid(true)
         if (CommonUtils.isNullEmptyOrUndefinedString(licensePayload.fullName)) {
             setErrorFullName(true)
-            alert(true, 'Require!', t('Fullname not null or empty'), 'danger')
+            MessageService.error(t('Fullname not null or empty'))
         } else {
             const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as LicensePayload
-                alert(true, 'Success', t('License updated successfully!'), 'success')
+                MessageService.success(t('License updated successfully!'))
                 router.push(`/licenses/detail?id=${data.shortName}&update=success`)
             } else {
-                alert(true, 'Failed', t('License updated failed!'), 'danger')
+                MessageService.error(t('License updated failed!'))
             }
         }
     }
@@ -194,16 +178,6 @@ export default function EditLicense({ licenseId }: Props) {
                         <div className='col-2 sidebar'>
                             <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
                         </div>
-                        <ToastContainer position='top-start'>
-                            <ToastMessage
-                                show={toastData.show}
-                                type={toastData.type}
-                                message={toastData.message}
-                                contextual={toastData.contextual}
-                                onClose={() => setToastData({ ...toastData, show: false })}
-                                setShowToast={setToastData}
-                            />
-                        </ToastContainer>
                         <DeleteLicenseDialog
                             licensePayload={licensePayload}
                             show={deleteDialogOpen}
