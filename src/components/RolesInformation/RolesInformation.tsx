@@ -90,10 +90,10 @@ const RolesInformation = ({
     return (
         <>
             <div className='row mb-4' style={{ padding: '0px 12px' }}>
-                <div className='header mb-2'>
-                    <p className='fw-bold mt-3'> {t('Roles')}</p>
+                <div className='section-header mb-2'>
+                    <span className='fw-bold'>{t('Roles')}</span>
                 </div>
-                <div className='row'>
+                <div className='row with-divider pt-2 pb-2'>
                     <div className='col-lg-4'>
                         <label htmlFor='component_owner' className='form-label fw-bold'>
                             {t('Component Owner')}
@@ -151,8 +151,7 @@ const RolesInformation = ({
                         />
                     </div>
                 </div>
-                <hr className='my-4' />
-                <div className='row'>
+                <div className='row with-divider pt-2 pb-2'>
                     <div className='col-lg-4'>
                         <SelectCountry selectCountry={updateField} value={componentPayload.ownerCountry ?? ''} />
                     </div>
@@ -184,7 +183,6 @@ const RolesInformation = ({
                         <span onClick={handleClearModerators}>x</span>
                     </div>
                 </div>
-                <hr className='my-4' />
             </div>
         </>
     )

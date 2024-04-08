@@ -877,8 +877,10 @@ input::-webkit-datetime-edit {
     border-top-width: 0px;
     vertical-align: bottom;
     padding: 0.75rem;
+    font-size: 0.875rem;
 }
 
 .with-divider {
     border-bottom: 1px solid #e7e7ed;
+    font-size: 0.875rem;
 }

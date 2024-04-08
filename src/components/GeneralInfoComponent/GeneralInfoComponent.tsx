@@ -15,7 +15,6 @@ import React, { useCallback, useState } from 'react'
 
 import { ComponentPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
-import styles from './SummaryComponent.module.css'
 
 interface Props {
     componentPayload?: ComponentPayload
@@ -76,10 +75,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
         <>
             <div className='col' style={{ padding: '0px 12px' }}>
                 <div className='row mb-4'>
-                    <div className={`${styles['header']} mb-2`}>
-                        <p className='fw-bold mt-3'>{t('General Information')}</p>
+                    <div className='section-header mb-2'>
+                        <span className='fw-bold'>{t('General Information')}</span>
                     </div>
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='name' className='form-label fw-bold'>
                                 {t('Name')}{' '}
@@ -135,8 +134,7 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                     </div>
-                    <hr className='my-4' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='component_type' className='form-label fw-bold'>
                                 {t('Component Type')}{' '}
@@ -208,8 +206,7 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                     </div>
-                    <hr className='my-4' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='blog_url' className='form-label fw-bold'>
                                 {t('Blog URL')}
@@ -256,8 +253,7 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                     </div>
-                    <hr className='my-4' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='description' className='form-label fw-bold'>
                                 {t('Description')}
@@ -301,7 +297,6 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                     </div>
-                    <hr className='my-4' />
                 </div>
             </div>
         </>
