@@ -13,15 +13,14 @@
 import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
-import ComponentOwnerDialog from '@/components/sw360/ComponentOwnerDialog/ComponentOwnerDialog'
-import { ComponentOwner, ComponentPayload } from '@/object-types'
+import { ComponentPayload } from '@/object-types'
 import { SelectUsersDialog, SelectCountry } from 'next-sw360'
 
 interface Props {
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    componentOwner?: ComponentOwner
-    setComponentOwner?: React.Dispatch<React.SetStateAction<ComponentOwner>>
+    componentOwner?: { [k: string]: string }
+    setComponentOwner?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     moderators?: { [k: string]: string }
     setModerators?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
@@ -47,16 +46,21 @@ const RolesInformation = ({
         })
     }
 
-    const setComponentOwnerId = (componentOwnerResponse: ComponentOwner) => {
-        const componentOwner: ComponentOwner = {
-            email: componentOwnerResponse.email,
-            fullName: componentOwnerResponse.fullName,
+    const setComponentOwnerToPayload = (user: { [k: string]: string }) => {
+        const userEmails = Object.keys(user)
+        if (userEmails.length === 0) {
+            setComponentOwner({})
+            setComponentPayload({
+                ...componentPayload,
+                componentOwner: '',
+            })
+        } else {
+            setComponentOwner(user)
+            setComponentPayload({
+                ...componentPayload,
+                componentOwner: userEmails[0],
+            })
         }
-        setComponentOwner(componentOwner)
-        setComponentPayload({
-            ...componentPayload,
-            componentOwner: componentOwnerResponse.email,
-        })
     }
 
     const setModeratorsToPayload = (users: { [k: string]: string }) => {
@@ -68,11 +72,7 @@ const RolesInformation = ({
     }
 
     const handleClearComponentOwner = () => {
-        const componentOwner: ComponentOwner = {
-            email: '',
-            fullName: '',
-        }
-        setComponentOwner(componentOwner)
+        setComponentOwner({})
         setComponentPayload({
             ...componentPayload,
             componentOwner: '',
@@ -109,13 +109,14 @@ const RolesInformation = ({
                             readOnly={true}
                             name='componentOwner'
                             onClick={handleClickSearchComponentOwner}
-                            onChange={updateField}
-                            value={componentOwner.fullName ?? ''}
+                            value={(Object.values(componentOwner).length === 0) ? '' : Object.values(componentOwner)[0]}
                         />
-                        <ComponentOwnerDialog
+                        <SelectUsersDialog
                             show={dialogOpenComponentOwner}
                             setShow={setDialogOpenComponentOwner}
-                            selectComponentOwner={setComponentOwnerId}
+                            setSelectedUsers={setComponentOwnerToPayload}
+                            selectedUsers={componentOwner}
+                            multiple={false}
                         />
                         <span onClick={handleClearComponentOwner}>x</span>
                     </div>

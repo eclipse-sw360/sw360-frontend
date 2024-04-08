@@ -20,7 +20,6 @@ import RolesInformation from '@/components/RolesInformation/RolesInformation'
 import {
     Attachment,
     Component,
-    ComponentOwner,
     ComponentPayload,
     DocumentTypes,
     HttpStatus,
@@ -52,10 +51,7 @@ export default function ComponentEditSummary({
         fullName: '',
     })
 
-    const [componentOwner, setComponentOwner] = useState<ComponentOwner>({
-        email: '',
-        fullName: '',
-    })
+    const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
 
     const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
@@ -92,14 +88,6 @@ export default function ComponentEditSummary({
                 setVendor(vendor)
             }
 
-            if (typeof component._embedded.componentOwner !== 'undefined') {
-                const componentOwner: ComponentOwner = {
-                    email: component._embedded.componentOwner.email,
-                    fullName: component._embedded.componentOwner.fullName,
-                }
-                setComponentOwner(componentOwner)
-            }
-
             let modifiedBy = ''
             if (typeof component._embedded.modifiedBy !== 'undefined') {
                 modifiedBy = component._embedded.modifiedBy.fullName
@@ -113,6 +101,9 @@ export default function ComponentEditSummary({
             let componentOwnerEmail = ''
             if (typeof component._embedded.componentOwner !== 'undefined') {
                 componentOwnerEmail = component._embedded.componentOwner.email
+                setComponentOwner({
+                    [componentOwnerEmail]: component._embedded.componentOwner.fullName
+                })
             }
 
             let moderatorsFromComponent = {}

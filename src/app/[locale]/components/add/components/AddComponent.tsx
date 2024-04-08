@@ -20,13 +20,13 @@ import RolesInformation from '@/components/RolesInformation/RolesInformation'
 import {
     CommonTabIds,
     Component,
-    ComponentOwner,
     ComponentPayload,
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
     Vendor,
 } from '@/object-types'
+
 import { ApiUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
 import MessageService from '@/services/message.service'
@@ -42,10 +42,8 @@ export default function AddComponent() {
         id: '',
         fullName: '',
     })
-    const [componentOwner, setComponentOwner] = useState<ComponentOwner>({
-        email: '',
-        fullName: '',
-    })
+
+    const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
 
     const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
@@ -57,7 +55,7 @@ export default function AddComponent() {
         moderators: null,
         modifiedBy: '',
         modifiedOn: '',
-        componentOwner: '',
+        componentOwner: undefined,
         ownerAccountingUnit: '',
         ownerGroup: '',
         ownerCountry: '',
