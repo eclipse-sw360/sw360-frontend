@@ -17,7 +17,6 @@ import FossologyClearing from './FossologyClearing/FossologyClearing'
 import Gravatar from './Gravatar/Gravatar'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
-import ModeratorsDialog from './ModeratorsDialog/ModeratorsDialog'
 import Navbar from './Navbar/Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import PageSpinner from './PageSpinner/PageSpinner'
@@ -52,7 +51,6 @@ export {
     Gravatar,
     LanguageSwitcher,
     LocaleSwitcher,
-    ModeratorsDialog,
     Navbar,
     PageButtonHeader,
     PageSpinner,
