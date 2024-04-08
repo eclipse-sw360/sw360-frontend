@@ -16,7 +16,6 @@ import { useCallback, useState } from 'react'
 
 import { Release } from '@/object-types'
 import { SelectUsersDialog } from 'next-sw360'
-import styles from './CommercialDetails.module.css'
 
 interface Props {
     releasePayload?: Release
@@ -70,10 +69,10 @@ const CommercialDetailsAdministration = ({
         <>
             <div className='col' style={{ padding: '0px 12px' }}>
                 <div className='row mb-4'>
-                    <div className={`${styles['header']} mb-2`}>
-                        <p className='fw-bold mt-3'>{t('Commercial Details Administration')}</p>
+                    <div className='section-header mb-2'>
+                        <span className='fw-bold'>{t('Commercial Details Administration')}</span>
                     </div>
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <div className='form-check'>
                                 <input
@@ -128,8 +127,7 @@ const CommercialDetailsAdministration = ({
                             />
                         </div>
                     </div>
-                    <hr className='my-2' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='licenseClearingReportURL' className='form-label fw-bold'>
                                 {t('COTS Clearing Report URL')}
@@ -146,7 +144,6 @@ const CommercialDetailsAdministration = ({
                             />
                         </div>
                     </div>
-                    <hr className='my-2' />
                 </div>
             </div>
         </>

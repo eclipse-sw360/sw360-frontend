@@ -51,10 +51,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
                 <div className='col' style={{ padding: '0px 12px', fontSize: '0.875rem' }}>
                     <div className='row mb-4'>
-                        <div className='header mb-2'>
-                            <p className='fw-bold mt-3'>{t('ECC Information')}</p>
+                        <div className='section-header mb-2'>
+                            <span className='fw-bold'>{t('ECC Information')}</span>
                         </div>
-                        <div className='row'>
+                        <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
                                 <label htmlFor='ECC_Status' className='form-label fw-bold'>
                                     {t('ECC Status')}
@@ -95,8 +95,7 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                         </div>
-                        <hr className='my-2' />
-                        <div className='row'>
+                        <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
                                 <label htmlFor='ausfuhrliste' className='form-label fw-bold'>
                                     {t('Ausfuhrliste')}
@@ -143,8 +142,7 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                         </div>
-                        <hr className='my-2' />
-                        <div className='row'>
+                        <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
                                 <label htmlFor='assessor_contact_person' className='form-label fw-bold'>
                                     {t('Assessor Contact Person')}

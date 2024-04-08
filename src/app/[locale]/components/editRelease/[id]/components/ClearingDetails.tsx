@@ -45,10 +45,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
         <>
             <div className='col' style={{ padding: '0px 12px' }}>
                 <div className='row mb-4'>
-                    <div className='header mb-2'>
-                        <p className='fw-bold mt-3'>{t('Clearing Details')}</p>
+                    <div className='section-header mb-2'>
+                        <span className='fw-bold'>{t('Clearing Details')}</span>
                     </div>
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <div className='form-check'>
                                 <input
@@ -95,8 +95,7 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
                             </div>
                         </div>
                     </div>
-                    <hr className='my-2' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <div className='form-check'>
                                 <input
@@ -145,8 +144,7 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
                             </div>
                         </div>
                     </div>
-                    <hr className='my-2' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <div className='form-check'>
                                 <input
@@ -193,8 +191,7 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
                             </div>
                         </div>
                     </div>
-                    <hr className='my-2' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <div className='form-check'>
                                 <input
@@ -241,8 +238,7 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
                             </div>
                         </div>
                     </div>
-                    <hr className='my-2' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='scanned' className='form-label fw-bold'>
                                 {t('Scanned')}
@@ -289,8 +285,7 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
                             />
                         </div>
                     </div>
-                    <hr className='my-2' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='external_url' className='form-label fw-bold'>
                                 {t('External URL')}
@@ -322,7 +317,6 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
                             />
                         </div>
                     </div>
-                    <hr className='my-2' />
                 </div>
             </div>
         </>
