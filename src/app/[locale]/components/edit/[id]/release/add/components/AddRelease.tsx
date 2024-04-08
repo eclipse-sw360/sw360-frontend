@@ -21,7 +21,6 @@ import {
     COTSDetails,
     CommonTabIds,
     Component,
-    ComponentOwner,
     HttpStatus,
     Release,
     ReleaseDetail,
@@ -96,10 +95,7 @@ function AddRelease({ componentId }: Props) {
 
     const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
 
-    const [cotsResponsible, setCotsResponsible] = useState<ComponentOwner>({
-        email: '',
-        fullName: '',
-    })
+    const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
 
     useEffect(() => {
         ; (async () => {
