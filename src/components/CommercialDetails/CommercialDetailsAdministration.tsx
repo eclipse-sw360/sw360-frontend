@@ -14,15 +14,14 @@ import { useTranslations } from 'next-intl'
 
 import { useCallback, useState } from 'react'
 
-import { ComponentOwner, Release } from '@/object-types'
-import { ComponentOwnerDialog } from 'next-sw360'
-import styles from './CommercialDetails.module.css'
+import { Release } from '@/object-types'
+import { SelectUsersDialog } from 'next-sw360'
 
 interface Props {
     releasePayload?: Release
     setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
-    cotsResponsible?: ComponentOwner
-    setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
+    cotsResponsible?: { [k: string]: string }
+    setCotsResponsible?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 const CommercialDetailsAdministration = ({
@@ -32,8 +31,8 @@ const CommercialDetailsAdministration = ({
     setCotsResponsible,
 }: Props) => {
     const t = useTranslations('default')
-    const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
-    const handleClickSearchComponentOwner = useCallback(() => setDialogOpenComponentOwner(true), [])
+    const [dialogCotsResponsibleOpen, setDialogCotsResponsibleOpen] = useState(false)
+    const handleClickSearchComponentOwner = useCallback(() => setDialogCotsResponsibleOpen(true), [])
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReleasePayload({
@@ -55,17 +54,13 @@ const CommercialDetailsAdministration = ({
         })
     }
 
-    const setCotsResponsibleUser = (cotsResponsible: ComponentOwner) => {
-        const cotsResponsibleUser: ComponentOwner = {
-            email: cotsResponsible.email,
-            fullName: cotsResponsible.fullName,
-        }
-        setCotsResponsible(cotsResponsibleUser)
+    const setCotsResponsibleToPayload = (responsibleUser: { [k: string]: string }) => {
+        setCotsResponsible(responsibleUser)
         setReleasePayload({
             ...releasePayload,
             cotsDetails: {
                 ...releasePayload.cotsDetails,
-                cotsResponsible: cotsResponsibleUser.email,
+                cotsResponsible: (Object.keys(responsibleUser).length === 0) ? '' : Object.keys(responsibleUser)[0],
             },
         })
     }
@@ -74,10 +69,10 @@ const CommercialDetailsAdministration = ({
         <>
             <div className='col' style={{ padding: '0px 12px' }}>
                 <div className='row mb-4'>
-                    <div className={`${styles['header']} mb-2`}>
-                        <p className='fw-bold mt-3'>{t('Commercial Details Administration')}</p>
+                    <div className='section-header mb-2'>
+                        <span className='fw-bold'>{t('Commercial Details Administration')}</span>
                     </div>
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <div className='form-check'>
                                 <input
@@ -106,12 +101,14 @@ const CommercialDetailsAdministration = ({
                                 onClick={handleClickSearchComponentOwner}
                                 readOnly={true}
                                 name='COTS_responsible'
-                                value={cotsResponsible.fullName ?? ''}
+                                value={(Object.values(cotsResponsible).length === 0) ? '' : Object.values(cotsResponsible)[0]}
                             />
-                            <ComponentOwnerDialog
-                                show={dialogOpenComponentOwner}
-                                setShow={setDialogOpenComponentOwner}
-                                selectComponentOwner={setCotsResponsibleUser}
+                            <SelectUsersDialog
+                                show={dialogCotsResponsibleOpen}
+                                setShow={setDialogCotsResponsibleOpen}
+                                setSelectedUsers={setCotsResponsibleToPayload}
+                                selectedUsers={cotsResponsible}
+                                multiple={false}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -130,8 +127,7 @@ const CommercialDetailsAdministration = ({
                             />
                         </div>
                     </div>
-                    <hr className='my-2' />
-                    <div className='row'>
+                    <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
                             <label htmlFor='licenseClearingReportURL' className='form-label fw-bold'>
                                 {t('COTS Clearing Report URL')}
@@ -148,7 +144,6 @@ const CommercialDetailsAdministration = ({
                             />
                         </div>
                     </div>
-                    <hr className='my-2' />
                 </div>
             </div>
         </>

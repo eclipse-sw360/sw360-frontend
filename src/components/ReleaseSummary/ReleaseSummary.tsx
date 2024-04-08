@@ -15,9 +15,8 @@ import React, { useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
 import { ActionType, Release, Vendor } from '@/object-types'
-import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import { ShowInfoOnHover, VendorDialog, SelectUsersDialog } from 'next-sw360'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
-import SelectUsersDialog from '../sw360/SearchUsersDialog/SearchUsersDialog'
 
 interface Props {
     actionType?: string

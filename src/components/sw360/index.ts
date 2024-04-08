@@ -11,13 +11,11 @@ import AddAdditionalRoles from './AddAdditionalRoles/AddAdditionalRoles'
 import AddKeyValue from './AddKeyValue/AddKeyValue'
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
-import ComponentOwnerDialog from './ComponentOwnerDialog/ComponentOwnerDialog'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
 import Gravatar from './Gravatar/Gravatar'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
-import ModeratorsDialog from './ModeratorsDialog/ModeratorsDialog'
 import Navbar from './Navbar/Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import PageSpinner from './PageSpinner/PageSpinner'
@@ -27,12 +25,12 @@ import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
-import SelectTableComponentOwner from './SelectTableComponentOwner/SelectTableComponentOwner'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 import GlobalMessages from './GlobalMessages'
+import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
 
 // Table component
 // Strictly derived from gridjs-react with dedicated changes
@@ -45,13 +43,11 @@ export {
     AddKeyValue,
     AdvancedSearch,
     AuthScreen,
-    ComponentOwnerDialog,
     Footer,
     FossologyClearing,
     Gravatar,
     LanguageSwitcher,
     LocaleSwitcher,
-    ModeratorsDialog,
     Navbar,
     PageButtonHeader,
     PageSpinner,
@@ -61,7 +57,6 @@ export {
     SearchUsersModal,
     SearchVendorsModal,
     SelectCountry,
-    SelectTableComponentOwner,
     ShowInfoOnHover,
     SideBar,
     Table,
@@ -70,5 +65,6 @@ export {
     TreeTable,
     VendorDialog,
     GlobalMessages,
+    SelectUsersDialog,
     _,
 }

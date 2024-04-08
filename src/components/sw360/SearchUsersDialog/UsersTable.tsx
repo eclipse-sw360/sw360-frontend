@@ -12,8 +12,9 @@
 
 import React, { useEffect, useRef } from 'react'
 import { Form } from 'react-bootstrap'
-import { _, Table } from 'next-sw360'
+import { _ } from 'next-sw360'
 import { User } from '@/object-types'
+import Table from '../Table/Table'
 
 interface Props {
     tableData: any[]

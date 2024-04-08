@@ -19,8 +19,6 @@ import CVEReference from './CVEReference'
 import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
 import Component from './Component'
-import ComponentOwner from './ComponentOwner'
-import ComponentOwnerType from './ComponentOwnerType'
 import ComponentPayload from './ComponentPayLoad'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
@@ -34,8 +32,6 @@ import Links from './Links'
 import LicensePayload from './LicensePayload'
 import LicenseDetail from './LicenseDetail'
 import ModerationRequest from './ModerationRequest'
-import Moderators from './Moderators'
-import ModeratorsType from './ModeratorsType'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
@@ -78,8 +74,6 @@ export type {
     Changelogs,
     ClearingInformation,
     Component,
-    ComponentOwner,
-    ComponentOwnerType,
     ComponentPayload,
     ECCInformation,
     Embedded,
@@ -93,8 +87,6 @@ export type {
     LicensePayload,
     LicenseDetail,
     ModerationRequest,
-    Moderators,
-    ModeratorsType,
     NodeData,
     OAuthClient,
     Obligation,

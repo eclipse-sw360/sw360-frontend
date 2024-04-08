@@ -20,12 +20,10 @@ import RolesInformation from '@/components/RolesInformation/RolesInformation'
 import {
     Attachment,
     Component,
-    ComponentOwner,
     ComponentPayload,
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
-    Moderators,
     Vendor,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -53,15 +51,9 @@ export default function ComponentEditSummary({
         fullName: '',
     })
 
-    const [componentOwner, setComponentOwner] = useState<ComponentOwner>({
-        email: '',
-        fullName: '',
-    })
+    const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
 
-    const [moderator, setModerator] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -88,24 +80,12 @@ export default function ComponentEditSummary({
                 setAddtionalData(CommonUtils.convertObjectToMap(component.additionalData))
             }
 
-            if (typeof component._embedded['sw360:moderators'] !== 'undefined') {
-                setModerator(CommonUtils.getObjectModerators(component._embedded['sw360:moderators']))
-            }
-
             if (typeof component._embedded.defaultVendor !== 'undefined') {
                 const vendor: Vendor = {
                     id: component.defaultVendorId,
                     fullName: component._embedded.defaultVendor.fullName,
                 }
                 setVendor(vendor)
-            }
-
-            if (typeof component._embedded.componentOwner !== 'undefined') {
-                const componentOwner: ComponentOwner = {
-                    email: component._embedded.componentOwner.email,
-                    fullName: component._embedded.componentOwner.fullName,
-                }
-                setComponentOwner(componentOwner)
             }
 
             let modifiedBy = ''
@@ -121,6 +101,15 @@ export default function ComponentEditSummary({
             let componentOwnerEmail = ''
             if (typeof component._embedded.componentOwner !== 'undefined') {
                 componentOwnerEmail = component._embedded.componentOwner.email
+                setComponentOwner({
+                    [componentOwnerEmail]: component._embedded.componentOwner.fullName
+                })
+            }
+
+            let moderatorsFromComponent = {}
+            if (typeof component._embedded['sw360:moderators'] !== 'undefined') {
+                moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(component._embedded['sw360:moderators'])
+                setModerators(moderatorsFromComponent)
             }
 
             const componentPayloadData: ComponentPayload = {
@@ -128,7 +117,7 @@ export default function ComponentEditSummary({
                 createBy: creatBy,
                 description: component.description,
                 componentType: component.componentType,
-                moderators: CommonUtils.getEmailsModerators(component._embedded['sw360:moderators']),
+                moderators: Object.keys(moderatorsFromComponent),
                 modifiedBy: modifiedBy,
                 modifiedOn: component.modifiedOn,
                 componentOwner: componentOwnerEmail,
@@ -187,8 +176,8 @@ export default function ComponentEditSummary({
                         <RolesInformation
                             componentOwner={componentOwner}
                             setComponentOwner={setComponentOwner}
-                            moderator={moderator}
-                            setModerator={setModerator}
+                            moderators={moderators}
+                            setModerators={setModerators}
                             componentPayload={componentPayload}
                             setComponentPayload={setComponentPayload}
                         />

@@ -10,15 +10,15 @@
 
 'use client'
 
-import { ComponentOwner, Release } from '@/object-types'
+import { Release } from '@/object-types'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 
 interface Props {
     releasePayload?: Release
     setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
-    cotsResponsible?: ComponentOwner
-    setCotsResponsible?: React.Dispatch<React.SetStateAction<ComponentOwner>>
+    cotsResponsible?: { [k: string]: string }
+    setCotsResponsible?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 function AddCommercialDetails({ releasePayload, setReleasePayload, cotsResponsible, setCotsResponsible }: Props) {

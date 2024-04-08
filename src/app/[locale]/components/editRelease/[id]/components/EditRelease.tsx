@@ -23,7 +23,6 @@ import {
     COTSDetails,
     ClearingInformation,
     CommonTabIds,
-    ComponentOwner,
     DocumentTypes,
     ECCInformation,
     HttpStatus,
@@ -83,11 +82,9 @@ const EditRelease = ({ releaseId }: Props) => {
                     const cotsDetails: COTSDetails = release['_embedded']['sw360:cotsDetail']
                     setCotsDetails(cotsDetails)
                     if (cotsDetails['_embedded'] && cotsDetails['_embedded']['sw360:cotsResponsible']) {
-                        const cotsResponsible: ComponentOwner = {
-                            email: cotsDetails._embedded['sw360:cotsResponsible'].email,
-                            fullName: cotsDetails._embedded['sw360:cotsResponsible'].fullName,
-                        }
-                        setCotsResponsible(cotsResponsible)
+                        setCotsResponsible({
+                            [cotsDetails._embedded['sw360:cotsResponsible'].email]: cotsDetails._embedded['sw360:cotsResponsible'].fullName
+                        })
                     }
                 }
 
@@ -207,10 +204,7 @@ const EditRelease = ({ releaseId }: Props) => {
 
     const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
 
-    const [cotsResponsible, setCotsResponsible] = useState<ComponentOwner>({
-        email: '',
-        fullName: '',
-    })
+    const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
 
     const submit = async () => {
         const session = await getSession()

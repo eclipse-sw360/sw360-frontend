@@ -13,17 +13,16 @@
 import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
-import ComponentOwnerDialog from '@/components/sw360/ComponentOwnerDialog/ComponentOwnerDialog'
-import { ComponentOwner, ComponentPayload, Moderators } from '@/object-types'
-import { ModeratorsDialog, SelectCountry } from 'next-sw360'
+import { ComponentPayload } from '@/object-types'
+import { SelectUsersDialog, SelectCountry } from 'next-sw360'
 
 interface Props {
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    componentOwner?: ComponentOwner
-    setComponentOwner?: React.Dispatch<React.SetStateAction<ComponentOwner>>
-    moderator?: Moderators
-    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
+    componentOwner?: { [k: string]: string }
+    setComponentOwner?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    moderators?: { [k: string]: string }
+    setModerators?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 const RolesInformation = ({
@@ -31,8 +30,8 @@ const RolesInformation = ({
     setComponentPayload,
     componentOwner,
     setComponentOwner,
-    moderator,
-    setModerator,
+    moderators,
+    setModerators,
 }: Props) => {
     const t = useTranslations('default')
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
@@ -47,36 +46,33 @@ const RolesInformation = ({
         })
     }
 
-    const setComponentOwnerId = (componentOwnerResponse: ComponentOwner) => {
-        const componentOwner: ComponentOwner = {
-            email: componentOwnerResponse.email,
-            fullName: componentOwnerResponse.fullName,
+    const setComponentOwnerToPayload = (user: { [k: string]: string }) => {
+        const userEmails = Object.keys(user)
+        if (userEmails.length === 0) {
+            setComponentOwner({})
+            setComponentPayload({
+                ...componentPayload,
+                componentOwner: '',
+            })
+        } else {
+            setComponentOwner(user)
+            setComponentPayload({
+                ...componentPayload,
+                componentOwner: userEmails[0],
+            })
         }
-        setComponentOwner(componentOwner)
-        setComponentPayload({
-            ...componentPayload,
-            componentOwner: componentOwnerResponse.email,
-        })
     }
 
-    const setModerators = (moderatorsResponse: Moderators) => {
-        const moderator: Moderators = {
-            emails: moderatorsResponse.emails,
-            fullName: moderatorsResponse.fullName,
-        }
-        setModerator(moderator)
+    const setModeratorsToPayload = (users: { [k: string]: string }) => {
+        setModerators(users)
         setComponentPayload({
             ...componentPayload,
-            moderators: moderatorsResponse.emails,
+            moderators: Object.keys(users),
         })
     }
 
     const handleClearComponentOwner = () => {
-        const componentOwner: ComponentOwner = {
-            email: '',
-            fullName: '',
-        }
-        setComponentOwner(componentOwner)
+        setComponentOwner({})
         setComponentPayload({
             ...componentPayload,
             componentOwner: '',
@@ -84,11 +80,7 @@ const RolesInformation = ({
     }
 
     const handleClearModerators = () => {
-        const moderator: Moderators = {
-            emails: null,
-            fullName: '',
-        }
-        setModerator(moderator)
+        setModerators({})
         setComponentPayload({
             ...componentPayload,
             moderators: [],
@@ -98,10 +90,10 @@ const RolesInformation = ({
     return (
         <>
             <div className='row mb-4' style={{ padding: '0px 12px' }}>
-                <div className='header mb-2'>
-                    <p className='fw-bold mt-3'> {t('Roles')}</p>
+                <div className='section-header mb-2'>
+                    <span className='fw-bold'>{t('Roles')}</span>
                 </div>
-                <div className='row'>
+                <div className='row with-divider pt-2 pb-2'>
                     <div className='col-lg-4'>
                         <label htmlFor='component_owner' className='form-label fw-bold'>
                             {t('Component Owner')}
@@ -117,13 +109,14 @@ const RolesInformation = ({
                             readOnly={true}
                             name='componentOwner'
                             onClick={handleClickSearchComponentOwner}
-                            onChange={updateField}
-                            value={componentOwner.fullName ?? ''}
+                            value={(Object.values(componentOwner).length === 0) ? '' : Object.values(componentOwner)[0]}
                         />
-                        <ComponentOwnerDialog
+                        <SelectUsersDialog
                             show={dialogOpenComponentOwner}
                             setShow={setDialogOpenComponentOwner}
-                            selectComponentOwner={setComponentOwnerId}
+                            setSelectedUsers={setComponentOwnerToPayload}
+                            selectedUsers={componentOwner}
+                            multiple={false}
                         />
                         <span onClick={handleClearComponentOwner}>x</span>
                     </div>
@@ -158,8 +151,7 @@ const RolesInformation = ({
                         />
                     </div>
                 </div>
-                <hr className='my-4' />
-                <div className='row'>
+                <div className='row with-divider pt-2 pb-2'>
                     <div className='col-lg-4'>
                         <SelectCountry selectCountry={updateField} value={componentPayload.ownerCountry ?? ''} />
                     </div>
@@ -178,18 +170,19 @@ const RolesInformation = ({
                             readOnly={true}
                             name='moderators'
                             onChange={updateField}
-                            value={moderator.fullName ?? ''}
+                            value={Object.values(moderators).join(', ')}
                             onClick={handleClickSearchModerators}
                         />
-                        <ModeratorsDialog
+                        <SelectUsersDialog
                             show={dialogOpenModerators}
                             setShow={setDialogOpenModerators}
-                            selectModerators={setModerators}
+                            setSelectedUsers={setModeratorsToPayload}
+                            selectedUsers={moderators}
+                            multiple={true}
                         />
                         <span onClick={handleClearModerators}>x</span>
                     </div>
                 </div>
-                <hr className='my-4' />
             </div>
         </>
     )

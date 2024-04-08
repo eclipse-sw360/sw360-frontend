@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue, Moderators, User } from '@/object-types'
+import { InputKeyValue, User } from '@/object-types'
 
 /**
  * Checks if the given object is null or undefined.
@@ -75,52 +75,6 @@ const isNullEmptyOrUndefinedArray = (arr: Array<unknown>) => {
  */
 const getIdFromUrl = (url: string): string => {
     return url.split('/').at(-1)
-}
-
-/**
- * Returns an object containing the full names and emails of the moderators.
- * @param users - An array of User objects representing the moderators.
- * @returns An object containing the full names and emails of the moderators.
- */
-const getObjectModerators = (users: User[]) => {
-    const fullNames: string[] = []
-    const moderatorsEmail: string[] = []
-    if (users.length == 0) {
-        return
-    }
-    users.forEach((item: User) => {
-        fullNames.push(item.fullName)
-        moderatorsEmail.push(item.email)
-    })
-    const moderatorsName: string = fullNames.join(' , ')
-    const moderatorsResponse: Moderators = {
-        fullName: moderatorsName,
-        emails: moderatorsEmail,
-    }
-    return moderatorsResponse
-}
-
-/**
- * Returns an object containing the full names and emails of the contributors.
- * @param users An array of User objects representing the contributors.
- * @returns An object containing the full names and emails of the contributors.
- */
-const getObjectContributors = (users: User[]) => {
-    const fullNames: string[] = []
-    const contributorsEmail: string[] = []
-    if (users.length == 0) {
-        return
-    }
-    users.forEach((item: User) => {
-        fullNames.push(item.fullName)
-        contributorsEmail.push(item.email)
-    })
-    const contributorsName: string = fullNames.join(' , ')
-    const contributorsResponse: Moderators = {
-        fullName: contributorsName,
-        emails: contributorsEmail,
-    }
-    return contributorsResponse
 }
 
 /**
@@ -291,8 +245,6 @@ const CommonUtils = {
     createUrlWithParams,
     isNullEmptyOrUndefinedArray,
     getIdFromUrl,
-    getObjectModerators,
-    getObjectContributors,
     getEmailsModerators,
     convertObjectToMap,
     convertObjectToMapRoles,

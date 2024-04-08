@@ -20,20 +20,20 @@ import RolesInformation from '@/components/RolesInformation/RolesInformation'
 import {
     CommonTabIds,
     Component,
-    ComponentOwner,
     ComponentPayload,
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
-    Moderators,
     Vendor,
 } from '@/object-types'
+
 import { ApiUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
 import MessageService from '@/services/message.service'
 
 export default function AddComponent() {
     const t = useTranslations('default')
+    const router = useRouter()
     const { data: session, status } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
@@ -42,15 +42,11 @@ export default function AddComponent() {
         id: '',
         fullName: '',
     })
-    const [componentOwner, setComponentOwner] = useState<ComponentOwner>({
-        email: '',
-        fullName: '',
-    })
-    const [moderator, setModerator] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
-    const router = useRouter()
+
+    const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
+
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
         createBy: '',
@@ -59,7 +55,7 @@ export default function AddComponent() {
         moderators: null,
         modifiedBy: '',
         modifiedOn: '',
-        componentOwner: '',
+        componentOwner: undefined,
         ownerAccountingUnit: '',
         ownerGroup: '',
         ownerCountry: '',
@@ -166,8 +162,8 @@ export default function AddComponent() {
                                     <RolesInformation
                                         componentOwner={componentOwner}
                                         setComponentOwner={setComponentOwner}
-                                        moderator={moderator}
-                                        setModerator={setModerator}
+                                        moderators={moderators}
+                                        setModerators={setModerators}
                                         componentPayload={componentPayload}
                                         setComponentPayload={setComponentPayload}
                                     />
