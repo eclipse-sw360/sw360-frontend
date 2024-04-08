@@ -33,6 +33,7 @@ import SideBar from './SideBar/SideBar'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 import GlobalMessages from './GlobalMessages'
+import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
 
 // Table component
 // Strictly derived from gridjs-react with dedicated changes
@@ -70,5 +71,6 @@ export {
     TreeTable,
     VendorDialog,
     GlobalMessages,
+    SelectUsersDialog,
     _,
 }
