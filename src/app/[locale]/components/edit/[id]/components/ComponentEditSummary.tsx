@@ -25,7 +25,6 @@ import {
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
-    Moderators,
     Vendor,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -58,10 +57,7 @@ export default function ComponentEditSummary({
         fullName: '',
     })
 
-    const [moderator, setModerator] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -86,10 +82,6 @@ export default function ComponentEditSummary({
 
             if (typeof component.additionalData !== 'undefined') {
                 setAddtionalData(CommonUtils.convertObjectToMap(component.additionalData))
-            }
-
-            if (typeof component._embedded['sw360:moderators'] !== 'undefined') {
-                setModerator(CommonUtils.getObjectModerators(component._embedded['sw360:moderators']))
             }
 
             if (typeof component._embedded.defaultVendor !== 'undefined') {
@@ -123,12 +115,18 @@ export default function ComponentEditSummary({
                 componentOwnerEmail = component._embedded.componentOwner.email
             }
 
+            let moderatorsFromComponent = {}
+            if (typeof component._embedded['sw360:moderators'] !== 'undefined') {
+                moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(component._embedded['sw360:moderators'])
+                setModerators(moderatorsFromComponent)
+            }
+
             const componentPayloadData: ComponentPayload = {
                 name: component.name,
                 createBy: creatBy,
                 description: component.description,
                 componentType: component.componentType,
-                moderators: CommonUtils.getEmailsModerators(component._embedded['sw360:moderators']),
+                moderators: Object.keys(moderatorsFromComponent),
                 modifiedBy: modifiedBy,
                 modifiedOn: component.modifiedOn,
                 componentOwner: componentOwnerEmail,
@@ -187,8 +185,8 @@ export default function ComponentEditSummary({
                         <RolesInformation
                             componentOwner={componentOwner}
                             setComponentOwner={setComponentOwner}
-                            moderator={moderator}
-                            setModerator={setModerator}
+                            moderators={moderators}
+                            setModerators={setModerators}
                             componentPayload={componentPayload}
                             setComponentPayload={setComponentPayload}
                         />

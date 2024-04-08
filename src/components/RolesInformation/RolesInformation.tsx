@@ -14,16 +14,16 @@ import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
 import ComponentOwnerDialog from '@/components/sw360/ComponentOwnerDialog/ComponentOwnerDialog'
-import { ComponentOwner, ComponentPayload, Moderators } from '@/object-types'
-import { ModeratorsDialog, SelectCountry } from 'next-sw360'
+import { ComponentOwner, ComponentPayload } from '@/object-types'
+import { SelectUsersDialog, SelectCountry } from 'next-sw360'
 
 interface Props {
     componentPayload?: ComponentPayload
     setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
     componentOwner?: ComponentOwner
     setComponentOwner?: React.Dispatch<React.SetStateAction<ComponentOwner>>
-    moderator?: Moderators
-    setModerator?: React.Dispatch<React.SetStateAction<Moderators>>
+    moderators?: { [k: string]: string }
+    setModerators?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 const RolesInformation = ({
@@ -31,8 +31,8 @@ const RolesInformation = ({
     setComponentPayload,
     componentOwner,
     setComponentOwner,
-    moderator,
-    setModerator,
+    moderators,
+    setModerators,
 }: Props) => {
     const t = useTranslations('default')
     const [dialogOpenComponentOwner, setDialogOpenComponentOwner] = useState(false)
@@ -59,15 +59,11 @@ const RolesInformation = ({
         })
     }
 
-    const setModerators = (moderatorsResponse: Moderators) => {
-        const moderator: Moderators = {
-            emails: moderatorsResponse.emails,
-            fullName: moderatorsResponse.fullName,
-        }
-        setModerator(moderator)
+    const setModeratorsToPayload = (users: { [k: string]: string }) => {
+        setModerators(users)
         setComponentPayload({
             ...componentPayload,
-            moderators: moderatorsResponse.emails,
+            moderators: Object.keys(users),
         })
     }
 
@@ -84,11 +80,7 @@ const RolesInformation = ({
     }
 
     const handleClearModerators = () => {
-        const moderator: Moderators = {
-            emails: null,
-            fullName: '',
-        }
-        setModerator(moderator)
+        setModerators({})
         setComponentPayload({
             ...componentPayload,
             moderators: [],
@@ -178,13 +170,15 @@ const RolesInformation = ({
                             readOnly={true}
                             name='moderators'
                             onChange={updateField}
-                            value={moderator.fullName ?? ''}
+                            value={Object.values(moderators).join(', ')}
                             onClick={handleClickSearchModerators}
                         />
-                        <ModeratorsDialog
+                        <SelectUsersDialog
                             show={dialogOpenModerators}
                             setShow={setDialogOpenModerators}
-                            selectModerators={setModerators}
+                            setSelectedUsers={setModeratorsToPayload}
+                            selectedUsers={moderators}
+                            multiple={true}
                         />
                         <span onClick={handleClearModerators}>x</span>
                     </div>
