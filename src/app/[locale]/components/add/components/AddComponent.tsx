@@ -25,7 +25,6 @@ import {
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
-    Moderators,
     Vendor,
 } from '@/object-types'
 import { ApiUtils } from '@/utils'
@@ -34,6 +33,7 @@ import MessageService from '@/services/message.service'
 
 export default function AddComponent() {
     const t = useTranslations('default')
+    const router = useRouter()
     const { data: session, status } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
@@ -46,11 +46,9 @@ export default function AddComponent() {
         email: '',
         fullName: '',
     })
-    const [moderator, setModerator] = useState<Moderators>({
-        emails: null,
-        fullName: '',
-    })
-    const router = useRouter()
+
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
         createBy: '',
@@ -166,8 +164,8 @@ export default function AddComponent() {
                                     <RolesInformation
                                         componentOwner={componentOwner}
                                         setComponentOwner={setComponentOwner}
-                                        moderator={moderator}
-                                        setModerator={setModerator}
+                                        moderators={moderators}
+                                        setModerators={setModerators}
                                         componentPayload={componentPayload}
                                         setComponentPayload={setComponentPayload}
                                     />
