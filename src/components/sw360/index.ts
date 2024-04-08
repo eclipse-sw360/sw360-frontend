@@ -11,7 +11,6 @@ import AddAdditionalRoles from './AddAdditionalRoles/AddAdditionalRoles'
 import AddKeyValue from './AddKeyValue/AddKeyValue'
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
-import ComponentOwnerDialog from './ComponentOwnerDialog/ComponentOwnerDialog'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
 import Gravatar from './Gravatar/Gravatar'
@@ -26,7 +25,6 @@ import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
-import SelectTableComponentOwner from './SelectTableComponentOwner/SelectTableComponentOwner'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
@@ -45,7 +43,6 @@ export {
     AddKeyValue,
     AdvancedSearch,
     AuthScreen,
-    ComponentOwnerDialog,
     Footer,
     FossologyClearing,
     Gravatar,
@@ -60,7 +57,6 @@ export {
     SearchUsersModal,
     SearchVendorsModal,
     SelectCountry,
-    SelectTableComponentOwner,
     ShowInfoOnHover,
     SideBar,
     Table,
