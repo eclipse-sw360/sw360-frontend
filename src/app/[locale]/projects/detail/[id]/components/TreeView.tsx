@@ -17,8 +17,9 @@ import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
+import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -26,7 +27,7 @@ const Capitalize = (text: string) =>
 export default function TreeView({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    const [data, setData] = useState<Array<NodeData>>([])
+    const [data, setData] = useState<Array<NodeData> | null>(null)
 
     const columns = [
         {
@@ -227,7 +228,7 @@ export default function TreeView({ projectId }: { projectId: string }) {
                                 className='text-center'
                                 key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-otherLicenses`}
                             >
-                                {(res[0].otherLicenseIds ?? []).join(', ')}
+                                <ExpandableTextList list={res[0].otherLicenseIds ?? []} />
                             </div>,
                             <div
                                 className='text-center'
@@ -359,7 +360,7 @@ export default function TreeView({ projectId }: { projectId: string }) {
                                 className='text-center'
                                 key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-otherLicenses`}
                             >
-                                {(res[0].otherLicenseIds ?? []).join(', ')}
+                                <ExpandableTextList list={res[0].otherLicenseIds ?? []} />
                             </div>,
                             <div
                                 className='text-center'
@@ -437,7 +438,13 @@ export default function TreeView({ projectId }: { projectId: string }) {
 
     return (
         <>
-            <TreeTable columns={columns} data={data} setData={setData} selector={true} sort={false} />
+            {
+                data ?
+                <TreeTable columns={columns} data={data} setData={setData} selector={true} sort={false} />:
+                <div className='col-12 mt-1 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            }
         </>
     )
 }
