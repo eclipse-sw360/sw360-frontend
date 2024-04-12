@@ -59,7 +59,7 @@ function MyProjectsWidget() {
                         projects['_embedded']['sw360:projects'].map((item: Project) => [
                             _(
                                 <Link href={'projects/detail/' + CommonUtils.getIdFromUrl(item._links.self.href)}>
-                                    {item.name} ({item.version})
+                                    {item.name} {(item.version && item.version != "") && `(${item.version})`}
                                 </Link>
                             ),
                             CommonUtils.truncateText(item.description, 40),
