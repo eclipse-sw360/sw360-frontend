@@ -10,7 +10,7 @@
 
 export default interface ModerationRequest {
     id: string
-    timestamp?: string,
+    timestamp?: number,
     timestampOfDecision?: number
     documentId?: string
     documentType?: string
@@ -18,6 +18,7 @@ export default interface ModerationRequest {
     moderators?: string[]
     documentName: string
     moderationState?: string
+    reviewer?: string
     requestingUserDepartment?: string
     componentType?: string
     moderatorsSize?: number
