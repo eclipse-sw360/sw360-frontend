@@ -1,0 +1,44 @@
+/*
+  Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.card {
+    width: "100%";
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.card-header {
+    background-color: white !important;
+}
+
+.card-header:hover {
+    background-color: bisque !important;
+}
+
+.card-header-expanded {
+    background-color: bisque !important;
+}
+
+.card-body {
+    background-color: white !important;
+}
+
+.header-button {
+    width: "100%";
+    text-decoration: 'none';
+    color: black;
+    padding-left: '10px';
+}
+
+.header-button:hover {
+    color: black;
+    background-color: bisque !important;
+}

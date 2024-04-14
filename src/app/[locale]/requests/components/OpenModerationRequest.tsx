@@ -65,7 +65,7 @@ function OpenModerationRequest() {
                 filteredModerationRequests.map((item: ModerationRequest) => [
                     item.timestamp,
                     item.componentType,
-                    _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
+                    _(<Link href={`/requests/moderationRequest/${item.id}`}>{item.documentName}</Link>),
                     item.requestingUser,
                     item.requestingUserDepartment,
                     item.moderators,
