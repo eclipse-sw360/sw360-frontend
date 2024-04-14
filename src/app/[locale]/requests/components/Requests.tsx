@@ -14,6 +14,7 @@ import { AdvancedSearch} from 'next-sw360'
 import { Col, ListGroup, Row, Tab} from 'react-bootstrap'
 import OpenModerationRequest from './OpenModerationRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
+import OpenClearingRequest from './OpenClearingRequest'
 
 
 function Requests() {
@@ -157,6 +158,9 @@ function Requests() {
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='closedModerationrequests'>
                                         <ClosedModerationRequest/>
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='openClearingRequests'>
+                                        <OpenClearingRequest/>
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Row>
