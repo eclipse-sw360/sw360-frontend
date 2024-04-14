@@ -15,6 +15,7 @@ import { Col, ListGroup, Row, Tab} from 'react-bootstrap'
 import OpenModerationRequest from './OpenModerationRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
 import OpenClearingRequest from './OpenClearingRequest'
+import ClosedClearingRequest from './ClosedClearingRequest'
 
 
 function Requests() {
@@ -161,6 +162,9 @@ function Requests() {
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='openClearingRequests'>
                                         <OpenClearingRequest/>
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='closedClearingRequests'>
+                                        <ClosedClearingRequest/>
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Row>
