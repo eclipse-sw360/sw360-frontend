@@ -20,13 +20,13 @@ import { notFound } from 'next/navigation'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 import { Spinner } from 'react-bootstrap'
 
-type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
+type EmbeddedModeratoinRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 interface ModerationRequestMap {
     [key: string]: string;
 }
 
 
-function OpenModerationRequest() {
+function ClosedModerationRequest() {
 
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
@@ -43,7 +43,7 @@ function OpenModerationRequest() {
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json() as EmbeddedModerationRequest
+                const data = await response.json() as EmbeddedModeratoinRequest
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
@@ -55,10 +55,9 @@ function OpenModerationRequest() {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModerationRequest) => {
-            const filteredModerationRequests = moderationRequests['_embedded']['sw360:moderationRequests']
-                                                                .filter((item: ModerationRequest) => {
-                return item.moderationState === 'PENDING' || item.moderationState === 'INPROGRESS';
+        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModeratoinRequest) => {
+            const filteredModerationRequests = moderationRequests['_embedded']['sw360:moderationRequests'].filter((item: ModerationRequest) => {
+                return item.moderationState === 'APPROVED' || item.moderationState === 'REJECTED';
             });
 
             setTableData(
@@ -78,25 +77,25 @@ function OpenModerationRequest() {
 
     const columns = [
         {
-            id: 'openModerationRequest.date',
+            id: 'closedModerationRequest.date',
             name: t('Date'),
             width: '10%',
             sort: true,
         },
         {
-            id: 'openModerationRequest.type',
+            id: 'closedModerationRequest.type',
             name: t('Type'),
             width: '10%',
             sort: true,
         },
         {
-            id: 'openModerationRequest.documentName',
+            id: 'closedModerationRequest.documentName',
             name: t('Document Name'),
             width: '12%',
             sort: true,
         },
         {
-            id: 'openModerationRequest.requestingUser',
+            id: 'closedModerationRequest.requestingUser',
             name: t('Requesting User'),
             width: '15%',
             formatter: (email: string) =>
@@ -110,13 +109,13 @@ function OpenModerationRequest() {
             sort: true,
         },
         {
-            id: 'openModerationRequest.department',
+            id: 'closedModerationRequest.department',
             name: t('Department'),
             width: '10%',
             sort: true,
         },
         {
-            id: 'openModerationRequest.moderators',
+            id: 'closedModerationRequest.moderators',
             name: t('Moderators'),
             width: '15%',
             formatter: (moderators: string[]) =>
@@ -126,12 +125,12 @@ function OpenModerationRequest() {
             sort: true,
         },
         {
-            id: 'openModerationRequest.state',
+            id: 'closedModerationRequest.state',
             name: t('State'),
             sort: true,
         },
         {
-            id: 'openModerationRequest.actions',
+            id: 'closedModerationRequest.actions',
             name: t('Actions'),
             sort: true,
         }
@@ -158,4 +157,4 @@ function OpenModerationRequest() {
     )}
 }
 
-export default OpenModerationRequest
+export default ClosedModerationRequest

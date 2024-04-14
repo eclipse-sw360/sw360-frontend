@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch} from 'next-sw360'
 import { Col, ListGroup, Row, Tab} from 'react-bootstrap'
 import OpenModerationRequest from './OpenModerationRequest'
+import ClosedModerationRequest from './ClosedModerationRequest'
 
 
 function Requests() {
@@ -153,6 +154,9 @@ function Requests() {
                                 <Tab.Content>
                                     <Tab.Pane eventKey='openModerationrequests'>
                                         <OpenModerationRequest/>
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='closedModerationrequests'>
+                                        <ClosedModerationRequest/>
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Row>
