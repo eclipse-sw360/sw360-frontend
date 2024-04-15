@@ -10,7 +10,7 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
+import { HttpStatus, ModerationRequestPayload } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { notFound } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -19,6 +19,8 @@ import { signOut, useSession } from 'next-auth/react'
 import styles from '../moderationRequestDetail.module.css'
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ModerationRequestDetails } from '@/object-types'
+import ModerationRequestInfo from './ModerationRequestInfo'
+import ModerationDecision from './ModerationDecision'
 
 
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
@@ -26,8 +28,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0);
     const { data: session, status } = useSession()
-    const [moderationRequestData, setModerationRequestData] = useState
-                                            <ModerationRequestDetails | undefined>(undefined)
+    const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails | undefined>()
+    const [moderationRequestPayload, setModerationRequestPayload] =
+                                         useState<ModerationRequestPayload | undefined>({
+        action: '',
+        comment: ''
+    })
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -124,7 +130,20 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         <Collapse in={openCardIndex === 0}>
                                             <div id="example-collapse-text-1">
                                                 <Card.Body className = {`${styles['card-body']}`}>
-                                                    This content is collapsible!
+                                                <div className="row">
+                                                    <div className="col">
+                                                        <ModerationRequestInfo
+                                                            data={moderationRequestData}
+                                                        />
+                                                    </div>
+                                                    <div className="col">
+                                                        <ModerationDecision
+                                                            data={moderationRequestData}
+                                                            moderationRequestPayload = {moderationRequestPayload}
+                                                            setModerationRequestPayload = {setModerationRequestPayload}
+                                                        />
+                                                    </div>
+                                                </div>
                                                 </Card.Body>
                                             </div>
                                         </Collapse>

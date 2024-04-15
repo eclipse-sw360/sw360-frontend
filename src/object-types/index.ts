@@ -33,6 +33,7 @@ import LicensePayload from './LicensePayload'
 import LicenseDetail from './LicenseDetail'
 import ModerationRequest from './ModerationRequest'
 import ModerationRequestDetails from './ModerationRequestDetails'
+import ModerationRequestPayload from './ModerationRequestPayload'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
@@ -89,6 +90,7 @@ export type {
     LicenseDetail,
     ModerationRequest,
     ModerationRequestDetails,
+    ModerationRequestPayload,
     NodeData,
     OAuthClient,
     Obligation,

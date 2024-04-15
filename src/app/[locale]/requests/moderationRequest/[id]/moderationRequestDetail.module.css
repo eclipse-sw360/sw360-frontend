@@ -42,3 +42,8 @@
     color: black;
     background-color: bisque !important;
 }
+
+.summary-table {
+    border: 1px solid lightgray;
+    margin-bottom: 2rem !important;
+}
