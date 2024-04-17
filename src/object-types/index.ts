@@ -63,6 +63,7 @@ import VendorAdvisory from './VendorAdvisory'
 import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
+import { VulnerabilityTrackingStatus, ProjectVulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
 import { MessageOptions, Message } from './Message'
 
 export type {
@@ -124,6 +125,8 @@ export type {
     VulnerabilityRatingAndActionPayload,
     Message,
     MessageOptions,
+    VulnerabilityTrackingStatus,
+    ProjectVulnerabilityTrackingStatus
 }
 
 // Special functions for populate data
