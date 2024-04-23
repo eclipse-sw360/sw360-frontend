@@ -92,7 +92,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             continue
         }
 
-        for (const l of p['linkedReleases']) {
+        for (const l of p['linkedReleases'] ?? []) {
             const id = l.release.substring(l.release.lastIndexOf('/') + 1)
             const res = licenseClearingData['_embedded']['sw360:release'].filter(
                 (e: any) =>
@@ -138,7 +138,7 @@ const extractLinkedReleases = (
 ) => {
     if (!licenseClearingData && !licenseClearingData?.['linkedReleases']) return
     path.push(`${projectName} (${projectVersion})`)
-    for (const l of licenseClearingData['linkedReleases']) {
+    for (const l of licenseClearingData['linkedReleases'] ?? []) {
         const id = l.release.substring(l.release.lastIndexOf('/') + 1)
         const res = licenseClearingData['_embedded']['sw360:release'].filter(
             (e: any) => e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
@@ -409,17 +409,17 @@ export default function ListView({
                 )
 
                 const d = finalData.map((e) => [
-                    { ...e.elem, type: e.elementType },
-                    e.type,
-                    e.projectPath,
-                    e.releasePath,
-                    e.relation,
-                    e.mainLicenses,
+                    { ...e.elem, type: e.elementType ?? '' },
+                    e.type ?? '',
+                    e.projectPath ?? '',
+                    e.releasePath ?? '',
+                    e.relation ?? '',
+                    e.mainLicenses ?? [],
                     { state: e.state, elementType: e.elementType },
-                    e.releaseMainlineState,
-                    e.projectMainlineState,
-                    e.comment,
-                    { id: e.elem.id, type: e.elementType },
+                    e.releaseMainlineState ?? '',
+                    e.projectMainlineState ?? '',
+                    e.comment ?? '',
+                    { id: e.elem.id ?? '', type: e.elementType ?? '' },
                 ])
                 setData(d)
             } catch (e) {
