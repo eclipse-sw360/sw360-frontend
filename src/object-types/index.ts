@@ -65,21 +65,45 @@ import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
 import { VulnerabilityTrackingStatus, ProjectVulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
 import { MessageOptions, Message } from './Message'
+import Annotations from './spdx/Annotations'
+import CheckSum from './spdx/CheckSum'
+import Creator from './spdx/Creator'
+import DocumentCreationInformation from './spdx/DocumentCreationInformation'
+import DocumentState from './spdx/DocumentState'
+import ExternalDocumentReferences from './spdx/ExternalDocumentReferences'
+import ExternalReference from './spdx/ExternalReference'
+import ModerationState from './spdx/ModerationState'
+import OtherLicensingInformationDetected from './spdx/OtherLicensingInformationDetected'
+import PackageInformation from './spdx/PackageInformation'
+import PackageVerificationCode from './spdx/PackageVerificationCode'
+import RelationshipsBetweenSPDXElements from './spdx/RelationshipsBetweenSPDXElements'
+import RequestedAction from './spdx/RequestedAction'
+import SPDX from './spdx/SPDX'
+import SPDXDocument from './spdx/SPDXDocument'
+import SnippetInformation from './spdx/SnippetInformation'
+import SnippetRange from './spdx/SnippetRange'
 
 export type {
     AccessToken,
     AddtionalDataType,
     AdministrationDataType,
+    Annotations,
     Attachment,
     AuthToken,
     COTSDetails,
     CVEReference,
     Changelogs,
+    CheckSum,
     ClearingInformation,
     Component,
     ComponentPayload,
+    Creator,
+    DocumentCreationInformation,
+    DocumentState,
     ECCInformation,
     Embedded,
+    ExternalDocumentReferences,
+    ExternalReference,
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,
@@ -89,12 +113,16 @@ export type {
     Links,
     LicensePayload,
     LicenseDetail,
+    ModerationState,
     ModerationRequest,
     ModerationRequestDetails,
     ModerationRequestPayload,
     NodeData,
     OAuthClient,
     Obligation,
+    OtherLicensingInformationDetected,
+    PackageInformation,
+    PackageVerificationCode,
     Package,
     Project,
     ProjectData,
@@ -102,16 +130,22 @@ export type {
     ECC,
     ProjectVulnerability,
     ProjectsPayloadElement,
+    RelationshipsBetweenSPDXElements,
     Release,
     ReleaseDetail,
     ReleaseLink,
     Repository,
     RequestContent,
+    RequestedAction,
     Resources,
     RestrictedResource,
     RolesType,
+    SPDX,
+    SPDXDocument,
     SearchResult,
     Session,
+    SnippetInformation,
+    SnippetRange,
     SummaryDataType,
     ToastData,
     User,

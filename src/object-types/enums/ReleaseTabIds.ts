@@ -13,6 +13,7 @@ enum ReleaseTabIds {
     CLEARING_DETAILS = 'tab-ClearingDetails',
     ECC_DETAILS = 'tab-EccDetails',
     COMMERCIAL_DETAILS = 'tab-CommercialDetails',
+    SPDX_DOCUMENT = 'tab-SPDXDocument',
 }
 
 export default ReleaseTabIds
