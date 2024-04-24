@@ -753,6 +753,8 @@
     "SINGLE": "SINGLE",
     "SPDX": "SPDX",
     "SPDX Attachments": "SPDX Adjuntos",
+    "SPDX Full": "SPDX completo",
+    "SPDX Lite": "SPDX Lite",
     "SPECIFIC": "Específico",
     "STANDALONE": "Standalone",
     "STATICALLY_LINKED": "Estáticamente vinculada",

@@ -753,6 +753,8 @@
     "SINGLE": "이름 *",
     "SPDX": "사이트맵",
     "SPDX Attachments": "사이트맵 첨부파일",
+    "SPDX Full": "SPDX 전체",
+    "SPDX Lite": "SPDX 라이트",
     "SPECIFIC": "제품정보",
     "STANDALONE": "회사 소개",
     "STATICALLY_LINKED": "정적 링크",

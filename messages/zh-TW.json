@@ -753,6 +753,8 @@
     "SINGLE": "單位",
     "SPDX": "SPDX",
     "SPDX Attachments": "SPDX 附件",
+    "SPDX Full": "SPDX 完整版",
+    "SPDX Lite": "SPDX精簡版",
     "SPECIFIC": "具体",
     "STANDALONE": "獨立",
     "STATICALLY_LINKED": "固定連接",

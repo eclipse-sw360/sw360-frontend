@@ -753,6 +753,8 @@
     "SINGLE": "SINGEN",
     "SPDX": "SPDX",
     "SPDX Attachments": "SPDX Anhänge",
+    "SPDX Full": "SPDX Voll",
+    "SPDX Lite": "SPDX Lite",
     "SPECIFIC": "Spezifische",
     "STANDALONE": "Standalone",
     "STATICALLY_LINKED": "Statisch verbunden",
