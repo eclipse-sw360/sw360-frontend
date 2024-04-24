@@ -44,7 +44,7 @@ import ECCDetails from './ECCDetails'
 import LinkedReleases from './LinkedReleases'
 import ReleaseDetailTabs from './ReleaseDetailTabs'
 import Summary from './Summary'
-import SPDXDocument from './spdx/SPDXDocument'
+import SPDXDocumentTab from './spdx/SPDXDocumentTab'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -261,7 +261,7 @@ const DetailOverview = ({ releaseId }: Props) => {
                             <Summary release={release} releaseId={releaseId} />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.SPDX_DOCUMENT ? true : false}>
-                            <SPDXDocument releaseId={releaseId} />
+                            <SPDXDocumentTab releaseId={releaseId} />
                         </div>
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases releaseId={releaseId} />
