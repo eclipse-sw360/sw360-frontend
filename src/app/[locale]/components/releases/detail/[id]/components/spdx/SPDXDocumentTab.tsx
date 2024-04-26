@@ -57,7 +57,11 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
         OtherLicensingInformationDetected[]
     >([])
 
-    const [indexRelation, setIndexRelation] = useState(0)
+    const [relationshipSelection, setRelationshipSelection] = useState<{ index: number; isSPDXDocument: boolean }>({
+        index: 0,
+        isSPDXDocument: true,
+    })
+
     const [relationshipsBetweenSPDXElementSPDXs, setRelationshipsBetweenSPDXElementSPDXs] = useState<
         RelationshipsBetweenSPDXElements[]
     >([])
@@ -65,7 +69,11 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
         RelationshipsBetweenSPDXElements[]
     >([])
 
-    const [indexAnnotations, setIndexAnnotations] = useState(0)
+    const [annotationsSelection, setAnnotationsSelection] = useState<{ index: number; isSPDXDocument: boolean }>({
+        index: 0,
+        isSPDXDocument: true,
+    })
+
     const [annotationsSPDXs, setAnnotationsSPDXs] = useState<Annotations[]>([])
     const [annotationsPackages, setAnnotationsPackages] = useState<Annotations[]>([])
 
@@ -134,11 +142,9 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
                                 (e1, e2) => e1.index - e2.index
                             )
                         )
-                        setIndexRelation(0)
                     }
                     //Annotations
                     if (!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:spdxDocument'].annotations)) {
-                        setIndexAnnotations(0)
                         setAnnotationsSPDXs(
                             release._embedded['sw360:spdxDocument'].annotations.toSorted(
                                 (e1, e2) => e1.index - e2.index
@@ -176,7 +182,6 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
                             release._embedded['sw360:packageInformation'].relationships
                         )
                     ) {
-                        setIndexRelation(0)
                         setRelationshipsBetweenSPDXElementPackages(
                             release._embedded['sw360:packageInformation'].relationships.toSorted(
                                 (e1, e2) => e1.index - e2.index
@@ -188,7 +193,6 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
                             release._embedded['sw360:packageInformation'].annotations
                         )
                     ) {
-                        setIndexAnnotations(0)
                         setAnnotationsPackages(
                             release._embedded['sw360:packageInformation'].annotations.toSorted(
                                 (e1, e2) => e1.index - e2.index
@@ -205,7 +209,7 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
                 }
             })
             .catch((err) => console.error(err))
-    }, [fetchData, releaseId])
+    }, [])
 
     const changeModeFull = () => {
         setIsModeFull(true)
@@ -268,16 +272,16 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
                         otherLicensingInformationDetecteds={otherLicensingInformationDetecteds}
                     />
                     <RelationshipbetweenSPDXElementsInformation
-                        indexRelation={indexRelation}
-                        setIndexRelation={setIndexRelation}
+                        relationshipSelection={relationshipSelection}
+                        setRelationshipSelection={setRelationshipSelection}
                         relationshipsBetweenSPDXElementSPDXs={relationshipsBetweenSPDXElementSPDXs}
                         setRelationshipsBetweenSPDXElementSPDXs={setRelationshipsBetweenSPDXElementSPDXs}
                         relationshipsBetweenSPDXElementPackages={relationshipsBetweenSPDXElementPackages}
                         setRelationshipsBetweenSPDXElementPackages={setRelationshipsBetweenSPDXElementPackages}
                     />
                     <AnnotationInformation
-                        indexAnnotations={indexAnnotations}
-                        setIndexAnnotations={setIndexAnnotations}
+                        annotationsSelection={annotationsSelection}
+                        setAnnotationsSelection={setAnnotationsSelection}
                         annotationsSPDXs={annotationsSPDXs}
                         setAnnotationsSPDXs={setAnnotationsSPDXs}
                         annotationsPackages={annotationsPackages}

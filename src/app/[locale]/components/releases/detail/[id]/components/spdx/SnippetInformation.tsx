@@ -64,7 +64,11 @@ const SnippetInformationDetail = ({
                             {spdxDocument?.snippets
                                 .toSorted((e1, e2) => e1.index - e2.index)
                                 .map((item) => (
-                                    <option key={item.index} value={item.index}>
+                                    <option
+                                        key={item.index}
+                                        value={item.index}
+                                        selected={item.index === indexSnippetInformation}
+                                    >
                                         {item.index + 1}
                                     </option>
                                 ))}
