@@ -10,20 +10,23 @@
 */
 
 .card {
-    width: "100%";
-    padding-left: 0px;
-    padding-right: 0px;
+    width: "100%" !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
 }
 
-.card-header {
+
+#cardHeader {
     background-color: white !important;
 }
 
-.card-header:hover {
+
+#cardHeader:hover {
     background-color: bisque !important;
 }
 
-.card-header-expanded {
+
+#cardHeader-expanded {
     background-color: bisque !important;
 }
 
@@ -32,18 +35,18 @@
 }
 
 .header-button {
-    width: "100%";
-    text-decoration: 'none';
-    color: black;
-    padding-left: '10px';
+    width: "100%" !important;
+    text-decoration: 'none' !important;
+    color: black !important;
+    padding-left: '10px' !important;
 }
 
 .header-button:hover {
-    color: black;
+    color: black !important;
     background-color: bisque !important;
 }
 
 .summary-table {
-    border: 1px solid lightgray;
+    border: 1px solid lightgray !important;
     margin-bottom: 2rem !important;
 }

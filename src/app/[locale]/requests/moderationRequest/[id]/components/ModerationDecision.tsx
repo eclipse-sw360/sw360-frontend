@@ -66,7 +66,10 @@ export default function ModerationDecision({ data,
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('Comment on Moderation Decision')}:</td>
+                        <td>{t('Comment on Moderation Decision')}
+
+                            : <span style={{ color: 'red' }}>*</span>
+                        </td>
                         <td>
                             <textarea
                                 className='form-control'
@@ -76,6 +79,7 @@ export default function ModerationDecision({ data,
                                 style={{ height: '120px' }}
                                 value={moderationRequestPayload?.comment || ''}
                                 onChange={updateInputField}
+                                required
                             />
                         </td>
                     </tr>

@@ -18,6 +18,14 @@ import styles from '../moderationRequestDetail.module.css'
 export default function ModerationRequestInfo({ data }: { data: ModerationRequestDetails }) {
     const t = useTranslations('default')
 
+    const formatDate = (timestamp: number): string => {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+
     return (
         <>
             <table className={`table label-value-table ${styles['summary-table']}`}>
@@ -37,7 +45,7 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
                     </tr>
                     <tr>
                         <td>{t('Submitted On')}:</td>
-                        <td>{data.timestamp ?? ''}</td>
+                        <td>{formatDate(data.timestamp) ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Comment on Moderation Request')}:</td>

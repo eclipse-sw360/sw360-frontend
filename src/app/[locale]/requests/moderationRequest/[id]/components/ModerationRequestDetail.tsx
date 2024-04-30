@@ -12,7 +12,7 @@
 
 import { HttpStatus, ModerationRequestPayload } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
-import { notFound } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { signOut, useSession } from 'next-auth/react'
@@ -21,6 +21,8 @@ import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ModerationRequestDetails } from '@/object-types'
 import ModerationRequestInfo from './ModerationRequestInfo'
 import ModerationDecision from './ModerationDecision'
+import MessageService from '@/services/message.service'
+import ProposedChanges from './ProposedChanges'
 
 
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
@@ -28,7 +30,35 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0);
     const { data: session, status } = useSession()
-    const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails | undefined>()
+    const router = useRouter()
+    const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails>({
+        id: '',
+        revision: '',
+        timestamp: null,
+        timestampOfDecision: null,
+        documentId: '',
+        documentType: '',
+        requestingUser: '',
+        moderators: [],
+        documentName: '',
+        moderationState: '',
+        reviewer: '',
+        requestDocumentDelete: false,
+        requestingUserDepartment: '',
+        componentType: '',
+        commentRequestingUser: '',
+        commentDecisionModerator: null,
+        componentAdditions: {},
+        releaseAdditions: {},
+        projectAdditions: {},
+        licenseAdditions: {},
+        user: {},
+        componentDeletions: {},
+        releaseDeletions: {},
+        projectDeletions: {},
+        licenseDeletions: {},
+        moderatorsSize: null
+    })
     const [moderationRequestPayload, setModerationRequestPayload] =
                                          useState<ModerationRequestPayload | undefined>({
         action: '',
@@ -56,6 +86,57 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             console.log(moderationRequestData)
         })}, [fetchData, session])
 
+
+    const handleAcceptModerationRequest = async () => {
+        const updatedAcceptPayload = {
+            ...moderationRequestPayload,
+            action: "ACCEPT"
+        }
+        setModerationRequestPayload(updatedAcceptPayload)
+        const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
+                                               updatedAcceptPayload,
+                                               session.user.access_token)
+        if (response.status == HttpStatus.ACCEPTED) {
+            await response.json()
+            MessageService.success(t('You have accepted the moderation request'))
+            router.push('/requests')
+        }
+        else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        }
+        else {
+            MessageService.error(t('There are some errors while updating moderation request'))
+            router.push(`/requests/moderationRequest/${moderationRequestId}`)
+        }
+    };
+
+    const handleRejectModerationRequest = async () => {
+        const updatedRejectPayload = {
+            ...moderationRequestPayload,
+            action: "REJECT"
+        }
+        setModerationRequestPayload(updatedRejectPayload)
+        const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
+                                               updatedRejectPayload,
+                                               session.user.access_token)
+        if (response.status == HttpStatus.ACCEPTED) {
+            await response.json()
+            MessageService.success(t('You have rejected the moderation request'))
+            router.push('/requests')
+        }
+        else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        }
+        else {
+            MessageService.error(t('There are some errors while updating moderation request'))
+            router.push(`/requests/moderationRequest/${moderationRequestId}`)
+        }
+    };
+
+    const handleCancel = () => {
+        router.push('/requests')
+    }
+
     const toggleCollapse = (index: number) => {
         setOpenCardIndex(prevIndex => (prevIndex === index ? -1 : index));
     };
@@ -71,7 +152,9 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     <Row>
                         <Row>
                             <Col lg={12} className='text-truncate buttonheader-title me-3'>
-                                {'Moderation Request test'}
+                                {moderationRequestData &&
+                                `${moderationRequestData.documentName}
+                                (${moderationRequestData.componentType})`}
                             </Col>
                         </Row>
                         <Col className='ps-2 me-3 mt-3'>
@@ -81,28 +164,30 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                             <Button
                                                 variant='success'
                                                 className='me-2 col-auto'
-                                                // onClick={() => handleEditProject(projectId)}
+                                                onClick={handleAcceptModerationRequest}
                                             >
                                                 {t('Accept Request')}
                                             </Button>
-                                            <Button variant='danger' className='me-2 col-auto'
-                                                // onClick={() => setShow(true)}
-                                                >
+                                            <Button
+                                                variant='danger'
+                                                className='me-2 col-auto'
+                                                onClick={handleRejectModerationRequest}
+                                            >
                                                 {t('Decline Request')}
                                             </Button>
                                             <Button variant='secondary' className='me-2 col-auto'
-                                                // onClick={() => setShow(true)}
                                                 >
                                                 {t('Postpone Request')}
                                             </Button>
                                             <Button variant='secondary' className='me-2 col-auto'
-                                                // onClick={() => setShow(true)}
                                                 >
                                                 {t('Remove Me From Moderators')}
                                             </Button>
-                                            <Button variant='dark' className='me-2 col-auto'
-                                                // onClick={() => setShow(true)}
-                                                >
+                                            <Button
+                                                variant='dark'
+                                                className='me-2 col-auto'
+                                                onClick={handleCancel}
+                                            >
                                                 {t('Cancel')}
                                             </Button>
                                         </Row>
@@ -114,9 +199,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                              style={{ cursor: 'pointer', padding: '0'}}
                                         >
                                             <Card.Header
-                                                    className = {`${styles['card-header']}
+                                                    className = {`
                                                                   ${openCardIndex === 0 ?
-                                                                  styles['card-header-expanded'] : ''}`}>
+                                                                  styles['cardHeader-expanded'] : ''}`}
+                                                    id = {`${styles['cardHeader']}`}>
+
                                                 <Button
                                                     variant="button"
                                                     className={`p-0 border-0 ${styles['header-button']}`}
@@ -154,9 +241,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         <div onClick={() => toggleCollapse(1)}
                                              style={{ cursor: 'pointer', padding: '0'}}>
                                             <Card.Header
-                                                    className = {`${styles['card-header']}
+                                                    className = {`
                                                                   ${openCardIndex === 1 ?
-                                                                  styles['card-header-expanded'] : ''}`}>
+                                                                  styles['cardHeader-expanded'] : ''}`}
+                                                                  id = {`${styles['cardHeader']}`}>
                                                 <Button
                                                     variant="button"
                                                     className={`p-0 border-0 ${styles['header-button']}`}
@@ -170,7 +258,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         <Collapse in={openCardIndex === 1}>
                                             <div id="example-collapse-text-2">
                                                 <Card.Body className = {`${styles['card-body']}`}>
-                                                    This content is collapsible!
+                                                    <div className="row">
+                                                        <div className="col">
+                                                            <ProposedChanges data={moderationRequestData}/>
+                                                        </div>
+                                                    </div>
                                                 </Card.Body>
                                             </div>
                                         </Collapse>
@@ -181,9 +273,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         <div onClick={() => toggleCollapse(2)}
                                              style={{ cursor: 'pointer', padding: '0'}}>
                                             <Card.Header
-                                                    className = {`${styles['card-header']}
+                                                    className = {`
                                                                   ${openCardIndex === 2 ?
-                                                                  styles['card-header-expanded'] : ''}`}>
+                                                                  styles['cardHeader-expanded'] : ''}`}
+                                                                  id = {`${styles['cardHeader']}`}>
                                                 <Button
                                                     variant="button"
                                                     className={`p-0 border-0 ${styles['header-button']}`}
@@ -197,7 +290,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         <Collapse in={openCardIndex === 2}>
                                             <div id="example-collapse-text-3">
                                                 <Card.Body className = {`${styles['card-body']}`}>
-                                                    his content is collapsible!
+                                                    This content is collapsible!
                                                 </Card.Body>
                                             </div>
                                         </Collapse>

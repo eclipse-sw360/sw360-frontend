@@ -28,14 +28,16 @@ const ExpandingModeratorCell: React.FC<ModeratorCellProps> = ({ moderators }) =>
             {expanded && (
                 <div>
                     {moderators.map((email, index) => (
-                        <li key={index}>
-                            <Link href={`mailto:${email}`} className='text-link'>
-                                {email}
-                            </Link>
-                        </li>
+                        <span key={index}>
+                        <Link href={`mailto:${email}`} className='text-link'>
+                            {email}
+                        </Link>
+                        {index !== moderators.length - 1 && ', '}
+                        </span>
                     ))}
                 </div>
             )}
+
         </>
     );
 };

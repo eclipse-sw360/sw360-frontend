@@ -137,6 +137,7 @@ import ComponentTabIds from './enums/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
 import LicenseTabIds from './enums/LicenseTabIds'
 import HttpStatus from './enums/HttpStatus'
+import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import ReleaseTabIds from './enums/ReleaseTabIds'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 
@@ -148,6 +149,7 @@ export {
     DocumentTypes,
     LicenseTabIds,
     HttpStatus,
+    RequestDocumentTypes,
     ReleaseTabIds,
     VulnerabilitiesVerificationState,
 }

@@ -39,6 +39,14 @@ function OpenModerationRequest() {
         REJECTED: t('REJECTED'),
     };
 
+    const formatDate = (timestamp: number): string => {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+
     const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -63,7 +71,7 @@ function OpenModerationRequest() {
 
             setTableData(
                 filteredModerationRequests.map((item: ModerationRequest) => [
-                    item.timestamp,
+                    formatDate(item.timestamp),
                     item.componentType,
                     _(<Link href={`/requests/moderationRequest/${item.id}`}>{item.documentName}</Link>),
                     item.requestingUser,
@@ -118,7 +126,7 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.moderators',
             name: t('Moderators'),
-            width: '15%',
+            width: '25%',
             formatter: (moderators: string[]) =>
                 _(
                     <ExpandingModeratorCell moderators={moderators} />
