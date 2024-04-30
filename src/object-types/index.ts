@@ -32,6 +32,8 @@ import Links from './Links'
 import LicensePayload from './LicensePayload'
 import LicenseDetail from './LicenseDetail'
 import ModerationRequest from './ModerationRequest'
+import ModerationRequestDetails from './ModerationRequestDetails'
+import ModerationRequestPayload from './ModerationRequestPayload'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
@@ -87,6 +89,8 @@ export type {
     LicensePayload,
     LicenseDetail,
     ModerationRequest,
+    ModerationRequestDetails,
+    ModerationRequestPayload,
     NodeData,
     OAuthClient,
     Obligation,
@@ -133,6 +137,7 @@ import ComponentTabIds from './enums/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
 import LicenseTabIds from './enums/LicenseTabIds'
 import HttpStatus from './enums/HttpStatus'
+import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import ReleaseTabIds from './enums/ReleaseTabIds'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 
@@ -144,6 +149,7 @@ export {
     DocumentTypes,
     LicenseTabIds,
     HttpStatus,
+    RequestDocumentTypes,
     ReleaseTabIds,
     VulnerabilitiesVerificationState,
 }
