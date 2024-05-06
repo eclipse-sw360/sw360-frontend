@@ -25,6 +25,7 @@ import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import AttachmentUsages from './AttachmentUsages'
 import ProjectAttachments from './Attachments'
+import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
 export default function ViewProjects({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
@@ -170,7 +171,21 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                     <Tab.Pane eventKey='ecc'>
                                         <EccDetails projectId={projectId} />
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey='vulnerabilityTrackingStatus'></Tab.Pane>
+                                    <Tab.Pane eventKey='vulnerabilityTrackingStatus'>
+                                        {
+                                            summaryData && 
+                                            <VulnerabilityTrackingStatusComponent 
+                                                projectData={{
+                                                    id: projectId,
+                                                    name: summaryData.name ?? '',
+                                                    version: summaryData.version ?? '',
+                                                    enableSvm: summaryData.enableSvm ?? false,
+                                                    enableVulnerabilitiesDisplay:
+                                                        summaryData.enableVulnerabilitiesDisplay ?? false,
+                                                }}
+                                            />
+                                        }
+                                    </Tab.Pane>
                                     <Tab.Pane eventKey='attachments'>
                                         <ProjectAttachments projectId={projectId}/>
                                     </Tab.Pane>
