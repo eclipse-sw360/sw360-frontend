@@ -105,11 +105,11 @@ function Project() {
             id: 'projects.name',
             name: t('Project Name'),
             width: '15%',
-            formatter: ({ id, name }: { id: string; name: string }) =>
+            formatter: ({ id, name, version }: { id: string; name: string; version: string; }) =>
                 _(
                     <>
                         <Link href={`/projects/detail/${id}`} className='text-link'>
-                            {name}
+                            {name}{' '}{(version !== "") && `(${version})`}
                         </Link>
                     </>
                 ),
@@ -222,6 +222,7 @@ function Project() {
                     {
                         id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                         name: elem.name ?? '',
+                        version: elem.version ?? ''
                     },
                     elem.description ?? '',
                     elem.projectResponsible ?? '',
