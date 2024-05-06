@@ -19,6 +19,7 @@ import { HttpStatus, Vendor, VendorType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import SelectTableVendor from './SelectTableVendor'
+import AddVendorDialog from './AddVendor'
 
 interface Props {
     show: boolean
@@ -29,6 +30,7 @@ interface Props {
 const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
     const t = useTranslations('default')
     const { data: session } = useSession()
+    const [ showAddVendor, setShowAddVendor ] = useState(false)
     const params = useSearchParams()
     const [data, setData] = useState()
     const [vendor, setVendor] = useState<Vendor>()
@@ -83,52 +85,58 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
     const getVendor: VendorType = useCallback((Vendor: Vendor) => setVendor(Vendor), [])
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton>
-                <Modal.Title>{t('Search Vendor')}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <div className='modal-body'>
-                    <div className='row'>
-                        <div className='col-lg-8'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder={t('Enter search text')}
-                                aria-describedby='Search Vendor'
-                            />
+        <>
+            <AddVendorDialog show={showAddVendor} setShow={setShowAddVendor} />
+            <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('Search Vendor')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className='modal-body'>
+                        <div className='row'>
+                            <div className='col-lg-8'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder={t('Enter search text')}
+                                    aria-describedby='Search Vendor'
+                                />
+                            </div>
+                            <div className='col-lg-4'>
+                                <button type='button' className='btn btn-secondary me-2' onClick={searchVendor}>
+                                    {t('Search')}
+                                </button>
+                                <button type='button' className='btn btn-secondary me-2'>
+                                    {t('Reset')}
+                                </button>
+                            </div>
                         </div>
-                        <div className='col-lg-4'>
-                            <button type='button' className='btn btn-secondary me-2' onClick={searchVendor}>
-                                {t('Search')}
-                            </button>
-                            <button type='button' className='btn btn-secondary me-2'>
-                                {t('Reset')}
-                            </button>
+                        <div className='row mt-3'>
+                            <SelectTableVendor vendors={vendors} setVendor={getVendor} />
                         </div>
                     </div>
-                    <div className='row mt-3'>
-                        <SelectTableVendor vendors={vendors} setVendor={getVendor} />
-                    </div>
-                </div>
-            </Modal.Body>
-            <Modal.Footer className='justify-content-end'>
-                <Button
-                    type='button'
-                    data-bs-dismiss='modal'
-                    className='fw-bold btn btn-light button-plain me-2'
-                    onClick={handleCloseDialog}
-                >
-                    {t('Close')}
-                </Button>
-                <Button type='button' className='fw-bold btn btn-light button-plain me-2'>
-                    {t('Add Vendor')}
-                </Button>
-                <Button type='button' className='btn btn-primary' onClick={handleClickSelectVendor}>
-                    {t('Select Vendor')}
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                </Modal.Body>
+                <Modal.Footer className='justify-content-end'>
+                    <Button
+                        type='button'
+                        data-bs-dismiss='modal'
+                        className='fw-bold btn btn-light button-plain me-2'
+                        onClick={handleCloseDialog}
+                    >
+                        {t('Close')}
+                    </Button>
+                    <Button type='button' className='fw-bold btn btn-light button-plain me-2' onClick={() => {
+                        setShowAddVendor(!showAddVendor)
+                        setShow(!show)
+                    }}>
+                        {t('Add Vendor')}
+                    </Button>
+                    <Button type='button' className='btn btn-primary' onClick={handleClickSelectVendor}>
+                        {t('Select Vendor')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     )
 }
 

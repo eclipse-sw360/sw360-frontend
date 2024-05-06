@@ -15,7 +15,7 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import { HttpStatus, InputKeyValue, Project, Vendor, ProjectPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -24,7 +24,6 @@ import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 function EditProject({ projectId }: { projectId: string }) {
     const router = useRouter()
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -118,6 +117,7 @@ function EditProject({ projectId }: { projectId: string }) {
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as Project
@@ -187,6 +187,7 @@ function EditProject({ projectId }: { projectId: string }) {
     }, [projectId, fetchData, setProjectPayload])
 
     const updateProject = async () => {
+        const session = await getSession()
         const response = await ApiUtils.PATCH(`projects/${projectId}`, projectPayload, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             await response.json()
