@@ -191,7 +191,7 @@ export default function TreeView({ projectId }: { projectId: string }) {
                     continue
                 }
     
-                for (const l of p['linkedReleases']) {
+                for (const l of p['linkedReleases'] ?? []) {
                     const res = licenseClearingData['_embedded']['sw360:release'].filter(
                         (e: any) =>
                             e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
@@ -287,8 +287,8 @@ export default function TreeView({ projectId }: { projectId: string }) {
                         children: [],
                     }
                     nodeProject.children.push(nodeRelease)
-                    treeData.push(nodeProject)
                 }
+                treeData.push(nodeProject)
             }
             return treeData
         }
@@ -321,7 +321,7 @@ export default function TreeView({ projectId }: { projectId: string }) {
                 const linkedProjectsData = await responses[1].json()
 
                 const releases: NodeData[] = []
-                for (const l of licenseClearingData['linkedReleases']) {
+                for (const l of licenseClearingData['linkedReleases'] ?? []) {
                     const res = licenseClearingData['_embedded']['sw360:release'].filter(
                         (e: any) =>
                             e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
@@ -430,7 +430,8 @@ export default function TreeView({ projectId }: { projectId: string }) {
                 ])
             } catch (e) {
                 console.error(e)
-            }
+                setData([])
+            } 
         })()
 
         return () => controller.abort()
