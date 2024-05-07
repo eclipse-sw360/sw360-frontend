@@ -10,5 +10,5 @@
 
 export default interface ModerationRequestPayload {
     action: string
-    comment: string
+    comment?: string
 }
