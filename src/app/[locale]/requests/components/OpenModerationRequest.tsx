@@ -100,7 +100,7 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.documentName',
             name: t('Document Name'),
-            width: '12%',
+            width: 'auto',
             sort: true,
         },
         {

@@ -99,7 +99,7 @@ function ClosedModerationRequest() {
         {
             id: 'closedModerationRequest.documentName',
             name: t('Document Name'),
-            width: '12%',
+            width: 'auto',
             sort: true,
         },
         {

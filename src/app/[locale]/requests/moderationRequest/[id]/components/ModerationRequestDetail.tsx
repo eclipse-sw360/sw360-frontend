@@ -61,8 +61,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     })
     const [moderationRequestPayload, setModerationRequestPayload] =
                                          useState<ModerationRequestPayload | undefined>({
-        action: '',
-        comment: ''
+        action: ''
     })
 
     const fetchData = useCallback(
@@ -133,6 +132,34 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         }
     };
 
+    const handleUnassignModerationRequest = async () => {
+        const updatedUnassignPayload = {
+            ...moderationRequestPayload,
+            action: "UNASSIGN"
+        }
+        setModerationRequestPayload(updatedUnassignPayload)
+        const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
+                                               updatedUnassignPayload,
+                                               session.user.access_token)
+        if (response.status == HttpStatus.ACCEPTED) {
+            await response.json()
+            MessageService.success(t('You have unassigned yourself from the moderation request'))
+            router.push('/requests')
+        }
+        else if (response.status == HttpStatus.BAD_REQUEST) {
+            await response.json()
+            MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
+            router.push('/requests')
+        }
+        else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        }
+        else {
+            MessageService.error(t('There are some errors while updating moderation request'))
+            router.push(`/requests/moderationRequest/${moderationRequestId}`)
+        }
+    };
+
     const handleCancel = () => {
         router.push('/requests')
     }
@@ -179,7 +206,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                                 >
                                                 {t('Postpone Request')}
                                             </Button>
-                                            <Button variant='secondary' className='me-2 col-auto'
+                                            <Button
+                                                variant='secondary'
+                                                className='me-2 col-auto'
+                                                onClick={handleUnassignModerationRequest}
                                                 >
                                                 {t('Remove Me From Moderators')}
                                             </Button>
