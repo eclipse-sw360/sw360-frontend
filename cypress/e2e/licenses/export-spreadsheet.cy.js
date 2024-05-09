@@ -11,27 +11,20 @@
 import { viewSelectors } from './selectors'
 
 const verifyFileExported = () => {
-    const currentDate = new Date().toISOString().split("T")[0]
-    const downloadedFileName = `components-${currentDate}.xlsx`
+    const downloadedFileName = 'Licenses.xlsx'
     cy.verifyDownloadedFile(downloadedFileName)
 }
 
-describe('Export Spreadsheet', () => {
+describe('Export License', () => {
     beforeEach(() => {
         cy.login('admin')
-        cy.visit(`${Cypress.env('sw360_base_url')}/components`)
+        cy.visit(`${Cypress.env('sw360_base_url')}/licenses`)
+        cy.get(viewSelectors.tblLicenseList).should('be.visible')
         cy.removeDownloadsFolder()
     })
 
-    it('TC13: Export components without releases', () => {
-        cy.get(viewSelectors.btnExportSpreadsheet).click()
-        cy.get(viewSelectors.btnExportComponentsOnly).click()
-        verifyFileExported()
-    })
-
-    it('TC14: Export components with releases', () => {
-        cy.get(viewSelectors.btnExportSpreadsheet).click()
-        cy.get(viewSelectors.btnExportComponentsWithReleases).click()
+    it('TC06: Check Export Licenses', () => {
+        cy.downloadFile(viewSelectors.btnExportSpreadsheet)
         verifyFileExported()
     })
 })
