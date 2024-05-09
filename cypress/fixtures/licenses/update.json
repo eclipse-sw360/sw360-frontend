@@ -1,0 +1,32 @@
+{
+    "TC04_EDIT_SOME_FIELDS": {
+        "initial_data": {
+            "license_tab": {
+                "full_name": "PHP License",
+                "short_name": "PHP-3.01",
+                "license_text": "Copyright (C) YEAR by AUTHOR EMAIL Permission to use, copy and modify."
+            },
+            "linked_obligations_tab": {
+                "added_obligations": [0, 1]
+            }
+        },
+        "updated_data": {
+            "license_tab": {
+                "full_name": "PHP License 3.01",
+                "OSI_Approved": {
+                    "name": "(n/a)",
+                    "value": "NA"
+                },
+                "FSF_Free/Libre": {
+                    "name": "Yes",
+                    "value": "YES"
+                },
+                "license_text": " "
+            },
+            "linked_obligations_tab": {
+                "delete_obligation": true,
+                "added_obligations": [2, 3]
+            }
+        }
+    }
+}
