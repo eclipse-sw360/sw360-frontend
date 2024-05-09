@@ -25,6 +25,7 @@ import MessageService from '@/services/message.service'
 import ProposedChanges from './ProposedChanges'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
+import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 
 
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
