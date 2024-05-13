@@ -24,6 +24,8 @@ import ModerationDecision from './ModerationDecision'
 import MessageService from '@/services/message.service'
 import ProposedChanges from './ProposedChanges'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
+import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
+import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 
 
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
@@ -330,8 +332,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         <div id="example-collapse-text-3">
                                             <Card.Body className = {`${styles['card-body']}`}>
                                             {
+                                                moderationRequestData.documentType === 'COMPONENT'
+                                                    && <CurrentComponentDetail componentId={moderationRequestData.documentId} /> ||
                                                 moderationRequestData.documentType === 'PROJECT'
-                                                    && <CurrentProjectDetail projectId={moderationRequestData.documentId} />
+                                                    && <CurrentProjectDetail projectId={moderationRequestData.documentId} /> ||
+                                                moderationRequestData.documentType === 'RELEASE'
+                                                    && <CurrentReleaseDetail releaseId={moderationRequestData.documentId} />
                                             }
                                             </Card.Body>
                                         </div>

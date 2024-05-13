@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2024. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -32,9 +33,10 @@ type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
 
 interface Props {
     componentId: string
+    calledFromModerationRequestDetail?: boolean
 }
 
-const ReleaseOverview = ({ componentId }: Props) => {
+const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props) => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [data, setData] = useState([])
@@ -156,10 +158,51 @@ const ReleaseOverview = ({ componentId }: Props) => {
         },
     ]
 
+    const moderationRequestCurrentComponentReleaseColumns = [
+        {
+            id: 'name',
+            name: t('Name'),
+            sort: true,
+        },
+        {
+            id: 'version',
+            name: t('Version'),
+            formatter: ([id, version]: Array<string>) =>
+                _(
+                    <Link href={'/components/releases/detail/' + id} className='link'>
+                        {version}
+                    </Link>
+                ),
+            sort: true,
+        },
+        {
+            id: 'clearingState',
+            name: t('Clearing State'),
+            sort: true,
+        },
+        {
+            id: 'clearingReport',
+            name: t('Clearing Report'),
+            sort: true,
+        },
+        {
+            id: 'mainlineState',
+            name: t('Release Mainline State'),
+            sort: true,
+        },
+    ]
+
     return (
         <>
             <div className='row'>
-                <Table data={data} search={true} columns={columns} selector={true} />
+                <Table
+                    data={data}
+                    search={true}
+                    columns={calledFromModerationRequestDetail ? 
+                                moderationRequestCurrentComponentReleaseColumns :
+                                columns}
+                    selector={true}
+                />
             </div>
             <DeleteReleaseModal releaseId={deletingRelease} show={deleteModalOpen} setShow={setDeleteModalOpen} />
             {clearingReleaseId && (
