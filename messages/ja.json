@@ -925,6 +925,7 @@
     "You are editing the original document": "元のドキュメントを編集しています。",
     "You are the last moderator for this request you are not allowed to unsubscribe": "あなたはこのリクエストの最後のモデレータです。登録を解除することはできません。",
     "You have accepted the moderation request": "モデレーションリクエストを承認しました",
+    "You have assigned yourself to this moderation request": "あなたはこのモデレーションリクエストに自分自身を割り当てました。",
     "You have rejected the moderation request": "モデレーションリクエストを拒否しました",
     "You have unassigned yourself from the moderation request": "モデレートリクエストから自分自身の割り当てを解除しました",
     "You need a security responsible to enable monitoring": "監視を有効にするにはセキュリティ担当者が必要です",

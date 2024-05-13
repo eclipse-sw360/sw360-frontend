@@ -925,6 +925,7 @@
     "You are editing the original document": "원본 문서를 편집하고 있습니다.",
     "You are the last moderator for this request you are not allowed to unsubscribe": "귀하는 이 요청의 마지막 중재자이므로 구독을 취소할 수 없습니다!",
     "You have accepted the moderation request": "중재 요청을 수락했습니다.",
+    "You have assigned yourself to this moderation request": "귀하는 이 중재 요청에 자신을 할당했습니다.",
     "You have rejected the moderation request": "검토 요청을 거부했습니다.",
     "You have unassigned yourself from the moderation request": "중재 요청에서 자신의 할당을 취소했습니다.",
     "You need a security responsible to enable monitoring": "모니터링 할 책임있는 보안이 필요합니다.",
