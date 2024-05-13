@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -33,14 +34,14 @@ export const authOptions: NextAuthOptions = {
                     const authToken = await AuthService.generateToken(userCredential)
 
                     if (authToken === null) throw new Error('Error while fetching Auth Token')
-
+                    
                     const response = await ApiUtils.GET(`users/${username}`, authToken.access_token)
                     if (response.status !== HttpStatus.OK) {
                         throw new Error('Error while fetching User Group')
                     }
-
+                    
                     const data = await response.json()
-                    return { ...authToken, userGroup: data.userGroup } as any
+                    return { ...authToken, userGroup: data.userGroup, email: username } as any
                 } catch (e) {
                     console.error(e)
                     return null
