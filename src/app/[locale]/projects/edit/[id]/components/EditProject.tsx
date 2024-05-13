@@ -271,9 +271,9 @@ function EditProject({ projectId }: { projectId: string }) {
                                             </Row>
                                         </Col>
                                         <Col lg={4} className='text-truncate buttonheader-title'>
-                                            {t('Update Project')}
+                                            {`${projectPayload.name} (${projectPayload.version})`}
                                         </Col>
-                                    </Row>
+                                    </Row>  
                                     <Row className='mt-5'>
                                         <Tab.Content>
                                             <Tab.Pane eventKey='summary'>
