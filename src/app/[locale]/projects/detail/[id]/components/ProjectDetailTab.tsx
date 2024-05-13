@@ -26,6 +26,7 @@ import Summary from './Summary'
 import AttachmentUsages from './AttachmentUsages'
 import ProjectAttachments from './Attachments'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
+import MessageService from '@/services/message.service'
 
 export default function ViewProjects({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
@@ -67,7 +68,14 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
     }, [projectId, session, status])
 
     const handleEditProject = (projectId: string) => {
-        router.push(`/projects/edit/${projectId}`)
+        if (session.user.email === summaryData['_embedded']['createdBy']['email']){
+            MessageService.success(t('You are editing the original document'))
+            router.push(`/projects/edit/${projectId}`)
+        }
+        else {
+            MessageService.success(t('You will create a moderation request if you update'))
+            router.push(`/projects/edit/${projectId}`)
+        }
     }
 
     return (
