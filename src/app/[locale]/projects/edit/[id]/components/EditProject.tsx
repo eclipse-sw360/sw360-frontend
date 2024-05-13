@@ -191,11 +191,14 @@ function EditProject({ projectId }: { projectId: string }) {
         const response = await ApiUtils.PATCH(`projects/${projectId}`, projectPayload, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             await response.json()
-            MessageService.success(t('Your project is updated'))
-            // router.push('/projects')
+            MessageService.success(t('Project') + 
+                                     ` ${projectPayload.name} (${projectPayload.version}) ` +
+                                     t('updated successfully'))
+            router.push(`/projects/detail/${projectId}`)
         } else {
-            MessageService.error(t('There are some errors while updating project'))
-            // router.push('/projects')
+            MessageService.error(t('There are some errors while updating project') + 
+                                 ` ${projectPayload.name} (${projectPayload.version})!`)
+            router.push(`/projects/detail/${projectId}`)
         }
     }
 
