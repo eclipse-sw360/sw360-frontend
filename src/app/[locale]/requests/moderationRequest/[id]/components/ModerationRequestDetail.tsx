@@ -147,7 +147,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             MessageService.success(t('You have unassigned yourself from the moderation request'))
             router.push('/requests')
         }
-        else if (response.status == HttpStatus.BAD_REQUEST) {
+        else if (response.status == HttpStatus.CONFLICT) {
             await response.json()
             MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
             router.push('/requests')
