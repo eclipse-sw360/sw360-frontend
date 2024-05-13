@@ -20,7 +20,8 @@ import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
-function ChangeLog({ projectId }: { projectId: string }) {
+function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }: 
+                   { projectId: string, isCalledFromModerationRequestCurrentProject?: boolean }) {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [key, setKey] = useState('list-change')
@@ -64,7 +65,7 @@ function ChangeLog({ projectId }: { projectId: string }) {
     return (
         <>
             <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
-                <div className='row'>
+                <div className='row' hidden={isCalledFromModerationRequestCurrentProject}>
                     <div className='col ps-0'>
                         <Nav variant='pills' className='d-inline-flex'>
                             <Nav.Item>

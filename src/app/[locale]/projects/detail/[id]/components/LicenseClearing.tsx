@@ -20,10 +20,12 @@ export default function LicenseClearing({
     projectId,
     projectName,
     projectVersion,
+    isCalledFromModerationRequestCurrentProject,
 }: {
     projectId: string
     projectName: string
     projectVersion: string
+    isCalledFromModerationRequestCurrentProject?: boolean
 }) {
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
@@ -41,7 +43,8 @@ export default function LicenseClearing({
     return (
         <>
             <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
-                <div className='row'>
+                <div className='row'
+                     hidden={isCalledFromModerationRequestCurrentProject}>
                     <div className='col ps-0'>
                         <Nav variant='pills' className='d-inline-flex'>
                             <Nav.Item>
