@@ -13,7 +13,7 @@
 import { HttpStatus, ModerationRequestPayload } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { signOut, useSession } from 'next-auth/react'
 import styles from '../moderationRequestDetail.module.css'
@@ -66,6 +66,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                          useState<ModerationRequestPayload | undefined>({
         action: ''
     })
+    const toastShownRef = useRef(false);
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -82,10 +83,14 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     )
 
     useEffect(() => {
+        if (!toastShownRef.current) {
+            MessageService.success(t('You have assigned yourself to this moderation request'));
+            toastShownRef.current = true;
+        }
+
         void fetchData(`moderationrequest/${moderationRequestId}`).then(
                       (moderationRequestDetails: ModerationRequestDetails) => {
             setModerationRequestData(moderationRequestDetails)
-            console.log(moderationRequestData)
         })}, [fetchData, session])
 
 

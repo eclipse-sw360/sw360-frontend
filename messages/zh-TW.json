@@ -925,6 +925,7 @@
     "You are editing the original document": "您正在編輯原始文檔。",
     "You are the last moderator for this request you are not allowed to unsubscribe": "您是此請求的最後一位版主，您不能取消訂閱！",
     "You have accepted the moderation request": "您已接受審核請求",
+    "You have assigned yourself to this moderation request": "您已將自己指派給此審核請求。",
     "You have rejected the moderation request": "您已拒絕審核請求",
     "You have unassigned yourself from the moderation request": "您已取消為自己指派審核請求",
     "You need a security responsible to enable monitoring": "你需要一個負責監控的保安",
