@@ -90,7 +90,7 @@ function Requests() {
             paramName: 'name',
         },
         {
-            fieldName: t('RequestingUserEmail'),
+            fieldName: t('Requesting User Email'),
             value: '',
             paramName: 'requestingUser',
         },
@@ -115,7 +115,7 @@ function Requests() {
             value: [
                 {
                     key: 'approved',
-                    text: t('Approved'),
+                    text: t('APPROVED'),
                 },
                 {
                     key: 'pending',
@@ -123,7 +123,7 @@ function Requests() {
                 },
                 {
                     key: 'rejected',
-                    text: t('Rejected'),
+                    text: t('REJECTED'),
                 },
                 {
                     key: 'inProgress',
