@@ -13,22 +13,53 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { SelectCountry } from 'next-sw360'
+import { SelectUsersDialog, SelectCountry } from 'next-sw360'
 import DepartmentModal from './DepartmentModal'
-import UsersModal from './UsersModal'
 import {ProjectPayload} from '@/object-types'
 
 interface Props{
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    moderators: { [k: string]: string }
+    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    contributors: { [k: string]: string }
+    setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    securityResponsibles: { [k: string]: string }
+    setSecurityResponsibles: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    projectOwner: { [k: string]: string }
+    setProjectOwner: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    projectManager: { [k: string]: string }
+    setProjectManager: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    leadArchitect: { [k: string]: string }
+    setLeadArchitect: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
-
-export default function Roles({projectPayload, setProjectPayload}:Props) {
+export default function Roles({
+        projectPayload, 
+        setProjectPayload, 
+        moderators,
+        setModerators,
+        contributors, 
+        setContributors,
+        projectOwner,
+        setProjectOwner,
+        projectManager,
+        setProjectManager,
+        leadArchitect,
+        setLeadArchitect,
+        securityResponsibles,
+        setSecurityResponsibles
+    } : Props
+) {
     const t = useTranslations('default')
 
     const [showDepartmentModal, setShowDepartmentModal] = useState<boolean>(false)
-    const [showUsersModal, setShowUsersModal] = useState<boolean>(false)
+    const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
+    const [dialogOpenProjectOwner, setDialogOpenProjectOwner] = useState(false)
+    const [dialogOpenContributors, setDialogOpenContributors] = useState(false)
+    const [dialogOpenSecurityResponsibles, setDialogOpenSecurityResponsibles] = useState(false)
+    const [dialogOpenProjectManager, setDialogOpenProjectManager] = useState(false)
+    const [dialogOpenLeadArchitect, setDialogOpenLeadArchitect] = useState(false)
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -37,10 +68,132 @@ export default function Roles({projectPayload, setProjectPayload}:Props) {
         })
     }
 
+    const setModeratorsToPayload = (users: { [k: string]: string }) => {
+        setModerators(users)
+        setProjectPayload({
+            ...projectPayload,
+            moderators: Object.keys(users),
+        })
+    }
+
+    const handleClearModerators = () => {
+        setModerators({})
+        setProjectPayload({
+            ...projectPayload,
+            moderators: [],
+        })
+    }
+
+    const setContributorsToPayload = (users: { [k: string]: string }) => {
+        setContributors(users)
+        setProjectPayload({
+            ...projectPayload,
+            contributors: Object.keys(users),
+        })
+    }
+
+    const handleClearContributors = () => {
+        setModerators({})
+        setProjectPayload({
+            ...projectPayload,
+            contributors: [],
+        })
+    }
+
+    const setSecurityResponsiblesToPayload = (users: { [k: string]: string }) => {
+        setSecurityResponsibles(users)
+        setProjectPayload({
+            ...projectPayload,
+            securityResponsibles: Object.keys(users),
+        })
+    }
+
+    const handleClearSecurityResponsibles = () => {
+        setModerators({})
+        setProjectPayload({
+            ...projectPayload,
+            securityResponsibles: [],
+        })
+    }
+
+    const setProjectOwnerToPayload = (user: { [k: string]: string }) => {
+        const userEmails = Object.keys(user)
+        if (userEmails.length === 0) {
+            setProjectOwner({})
+            setProjectPayload({
+                ...projectPayload,
+                projectOwner: '',
+            })
+        } else {
+            setProjectOwner(user)
+            setProjectPayload({
+                ...projectPayload,
+                projectOwner: userEmails[0],
+            })
+        }
+    }
+
+    const handleClearProjectOwner = () => {
+        setProjectOwner({})
+        setProjectPayload({
+            ...projectPayload,
+            projectOwner: '',
+        })
+    }
+
+    const setProjectManagerToPayload = (user: { [k: string]: string }) => {
+        const userEmails = Object.keys(user)
+        if (userEmails.length === 0) {
+            setProjectManager({})
+            setProjectPayload({
+                ...projectPayload,
+                projectManager: '',
+            })
+        } else {
+            setProjectManager(user)
+            setProjectPayload({
+                ...projectPayload,
+                projectManager: userEmails[0],
+            })
+        }
+    }
+
+    const handleClearProjectManager = () => {
+        setProjectManager({})
+        setProjectPayload({
+            ...projectPayload,
+            projectManager: '',
+        })
+    }
+
+    const setLeadArchitectToPayload = (user: { [k: string]: string }) => {
+        const userEmails = Object.keys(user)
+        if (userEmails.length === 0) {
+            setLeadArchitect({})
+            setProjectPayload({
+                ...projectPayload,
+                leadArchitect: '',
+            })
+        } else {
+            setLeadArchitect(user)
+            setProjectPayload({
+                ...projectPayload,
+                leadArchitect: userEmails[0],
+            })
+        }
+    }
+
+    const handleClearLeadArchitect = () => {
+        setLeadArchitect({})
+        setProjectPayload({
+            ...projectPayload,
+            leadArchitect: '',
+        })
+    }
+
     return (
         <>
             <DepartmentModal show={showDepartmentModal} setShow={setShowDepartmentModal} />
-            <UsersModal show={showUsersModal} setShow={setShowUsersModal} />
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Roles')}</h6>
                 <div className='row'>
@@ -70,12 +223,25 @@ export default function Roles({projectPayload, setProjectPayload}:Props) {
                         <input
                             type='text'
                             className='form-control'
+                            placeholder={t('Click to edit')}
                             id='addProjects.projectManager'
                             aria-label={t('Project Manager')}
-                            placeholder={t('Click to edit')}
                             readOnly={true}
-                            onClick={() => setShowUsersModal(true)}
+                            name='projectManager'
+                            onClick={() => setDialogOpenProjectManager(true)}
+                            value={(Object.values(projectManager).length === 0) ? '' : Object.values(projectManager)[0]}
                         />
+                        <SelectUsersDialog
+                            show={dialogOpenProjectManager}
+                            setShow={setDialogOpenProjectManager}
+                            setSelectedUsers={setProjectManagerToPayload}
+                            selectedUsers={projectManager}
+                            multiple={false}
+                        />
+                        <div className='form-text' onClick={handleClearProjectManager}>
+                            {' '}
+                            <GiCancel />
+                        </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.projectOwner' className='form-label fw-medium'>
@@ -84,12 +250,25 @@ export default function Roles({projectPayload, setProjectPayload}:Props) {
                         <input
                             type='text'
                             className='form-control'
+                            placeholder={t('Click to edit')}
                             id='addProjects.projectOwner'
                             aria-label={t('Project Owner')}
-                            placeholder={t('Click to edit')}
                             readOnly={true}
-                            onClick={() => setShowUsersModal(true)}
+                            name='projectOwner'
+                            onClick={() => setDialogOpenProjectOwner(true)}
+                            value={(Object.values(projectOwner).length === 0) ? '' : Object.values(projectOwner)[0]}
                         />
+                        <SelectUsersDialog
+                            show={dialogOpenProjectOwner}
+                            setShow={setDialogOpenProjectOwner}
+                            setSelectedUsers={setProjectOwnerToPayload}
+                            selectedUsers={projectOwner}
+                            multiple={false}
+                        />
+                        <div className='form-text' onClick={handleClearProjectOwner}>
+                            {' '}
+                            <GiCancel />
+                        </div>
                     </div>
                 </div>
                 <hr className='my-2' />
@@ -137,12 +316,25 @@ export default function Roles({projectPayload, setProjectPayload}:Props) {
                         <input
                             type='text'
                             className='form-control'
+                            placeholder={t('Click to edit')}
                             id='addProjects.leadArchitect'
                             aria-label={t('Lead Architect')}
-                            placeholder={t('Click to edit')}
                             readOnly={true}
-                            onClick={() => setShowUsersModal(true)}
+                            name='leadArchitect'
+                            onClick={() => setDialogOpenLeadArchitect(true)}
+                            value={(Object.values(leadArchitect).length === 0) ? '' : Object.values(leadArchitect)[0]}
                         />
+                        <SelectUsersDialog
+                            show={dialogOpenLeadArchitect}
+                            setShow={setDialogOpenLeadArchitect}
+                            setSelectedUsers={setLeadArchitectToPayload}
+                            selectedUsers={leadArchitect}
+                            multiple={false}
+                        />
+                        <div className='form-text' onClick={handleClearLeadArchitect}>
+                            {' '}
+                            <GiCancel />
+                        </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.moderators' className='form-label fw-medium'>
@@ -155,8 +347,21 @@ export default function Roles({projectPayload, setProjectPayload}:Props) {
                             aria-label={t('Moderators')}
                             placeholder={t('Click to edit')}
                             readOnly={true}
-                            onClick={() => setShowUsersModal(true)}
+                            name='moderators'
+                            value={Object.values(moderators).join(', ')}
+                            onClick={() => setDialogOpenModerators(true)}
                         />
+                        <SelectUsersDialog
+                            show={dialogOpenModerators}
+                            setShow={setDialogOpenModerators}
+                            setSelectedUsers={setModeratorsToPayload}
+                            selectedUsers={moderators}
+                            multiple={true}
+                        />
+                        <div className='form-text' onClick={handleClearModerators}>
+                            {' '}
+                            <GiCancel />
+                        </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
                         <label htmlFor='addProjects.contributors' className='form-label fw-medium'>
@@ -169,8 +374,21 @@ export default function Roles({projectPayload, setProjectPayload}:Props) {
                             aria-label={t('Contributors')}
                             placeholder={t('Click to edit')}
                             readOnly={true}
-                            onClick={() => setShowUsersModal(true)}
+                            name='contributors'
+                            value={Object.values(contributors).join(', ')}
+                            onClick={() => setDialogOpenContributors(true)}
                         />
+                        <SelectUsersDialog
+                            show={dialogOpenContributors}
+                            setShow={setDialogOpenContributors}
+                            setSelectedUsers={setContributorsToPayload}
+                            selectedUsers={contributors}
+                            multiple={true}
+                        />
+                        <div className='form-text' onClick={handleClearContributors}>
+                            {' '}
+                            <GiCancel />
+                        </div>
                     </div>
                 </div>
                 <hr className='my-2' />
@@ -186,8 +404,21 @@ export default function Roles({projectPayload, setProjectPayload}:Props) {
                             aria-label={t('Security Responsibles')}
                             placeholder={t('Click to edit')}
                             readOnly={true}
-                            onClick={() => setShowUsersModal(true)}
+                            name='securityResponsibles'
+                            value={Object.values(securityResponsibles).join(', ')}
+                            onClick={() => setDialogOpenSecurityResponsibles(true)}
                         />
+                        <SelectUsersDialog
+                            show={dialogOpenSecurityResponsibles}
+                            setShow={setDialogOpenSecurityResponsibles}
+                            setSelectedUsers={setSecurityResponsiblesToPayload}
+                            selectedUsers={securityResponsibles}
+                            multiple={true}
+                        />
+                        <div className='form-text' onClick={handleClearSecurityResponsibles}>
+                            {' '}
+                            <GiCancel />
+                        </div>
                     </div>
                 </div>
             </div>

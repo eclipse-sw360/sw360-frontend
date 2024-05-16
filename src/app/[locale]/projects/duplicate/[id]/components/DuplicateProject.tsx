@@ -15,8 +15,7 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import { HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { AUTH_TOKEN } from '@/utils/env'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -30,7 +29,6 @@ function DuplicateProject({projectId}:Props) {
 
     const router = useRouter()
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -38,21 +36,18 @@ function DuplicateProject({projectId}:Props) {
 
     const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
 
-    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([
-        {
-            key: '',
-            value: '',
-        },
-    ])
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
 
-    const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([
-        {
-            key: '',
-            value: '',
-        },
-    ])
+    const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([])
 
     const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
+
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
+    const [securityResponsibles, setSecurityResponsibles] = useState<{ [k: string]: string }>({})
+    const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
+    const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
+    const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -124,7 +119,8 @@ function DuplicateProject({projectId}:Props) {
 
     const fetchData = useCallback(
         async (url: string) => {
-            const response = await ApiUtils.GET(url, AUTH_TOKEN)
+            const session = await getSession()
+            const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as Project
                 return data
@@ -152,6 +148,42 @@ function DuplicateProject({projectId}:Props) {
 
             if (typeof project.roles !== 'undefined') {
                 setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
+            }
+
+            if (typeof project["_embedded"]["leadArchitect"] !== 'undefined') {
+                setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]: project["_embedded"]["leadArchitect"].fullName })
+            }
+
+            if (typeof project["_embedded"]["projectOwner"] !== 'undefined') {
+                setProjectOwner({ [project["_embedded"]["projectOwner"].email]: project["_embedded"]["projectOwner"].fullName })
+            }
+
+            if (typeof project["_embedded"]["projectManager"] !== 'undefined') {
+                setProjectManager({ [project["_embedded"]["projectManager"].email]: project["_embedded"]["projectManager"].fullName })
+            }
+
+            if (typeof project["_embedded"]["sw360:moderators"] !== 'undefined') {
+                const moderatorMap = new Map<string, string>()
+                project["_embedded"]["sw360:moderators"].map((moderator) => {
+                    moderatorMap.set(moderator.email, moderator.fullName)
+                })
+                setModerators(Object.fromEntries(moderatorMap))
+            }
+
+            if (typeof project["_embedded"]["sw360:contributors"] !== 'undefined') {
+                const contributorMap = new Map<string, string>()
+                project["_embedded"]["sw360:contributors"].map((contributor) => {
+                    contributorMap.set(contributor.email, contributor.fullName)
+                })
+                setContributors(Object.fromEntries(contributorMap))
+            }
+
+            if (typeof project["_embedded"]["sw360:securityResponsibles"] !== 'undefined') {
+                const securityResponsiblesMap = new Map<string, string>()
+                project["_embedded"]["sw360:securityResponsibles"].map((securityResponsible) => {
+                    securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName)
+                })
+                setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
             }
 
             const projectPayloadData: ProjectPayload = {
@@ -193,15 +225,15 @@ function DuplicateProject({projectId}:Props) {
     }, [projectId, fetchData, setProjectPayload])
 
     const createProject = async () => {
+        const session = await getSession()
         const response = await ApiUtils.POST(`projects/duplicate/${projectId}`, projectPayload, session.user.access_token)
 
         if (response.status == HttpStatus.CREATED) {
             await response.json()
             MessageService.success(t('Your project is created'))
-            // router.push('/projects')
+            router.push(`/projects/detail/${projectId}`)
         } else {
             MessageService.error(t('There are some errors while creating project'))
-            // router.push('/projects')
         }
     }
 
@@ -209,104 +241,112 @@ function DuplicateProject({projectId}:Props) {
         router.push('/projects')
     }
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <div className='container page-content'>
-                <form
-                    action=''
-                    id='form_submit'
-                    method='post'
-                    onSubmit={(event) => {
-                        event.preventDefault()
-                    }}
-                >
-                    <div>
-                        <Tab.Container defaultActiveKey='summary'>
-                            <Row>
-                                <Col sm='auto' className='me-3'>
-                                    <ListGroup>
-                                        <ListGroup.Item action eventKey='summary'>
-                                            <div className='my-2'>{t('Summary')}</div>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item action eventKey='administration'>
-                                            <div className='my-2'>{t('Administration')}</div>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item action eventKey='linkedProjects'>
-                                            <div className='my-2'>{t('Linked Releases and Projects')}</div>
-                                        </ListGroup.Item>
-                                    </ListGroup>
-                                </Col>
-                                <Col className='me-3'>
-                                    <Row className='d-flex justify-content-between'>
-                                        <Col lg={3}>
-                                            <Row>
-                                                <Button
-                                                    variant='primary'
-                                                    type='submit'
-                                                    className='me-2 col-auto'
-                                                    onClick={createProject}
-                                                >
-                                                    {t('Create Project')}
-                                                </Button>
-                                                <Button
-                                                    variant='secondary'
-                                                    className='col-auto'
-                                                    onClick={handleCancelClick}
-                                                >
-                                                    {t('Cancel')}
-                                                </Button>
-                                            </Row>
-                                        </Col>
-                                        <Col lg={4} className='text-truncate buttonheader-title'>
-                                            {projectPayload && `${projectPayload.name} (${projectPayload.version})`}
-                                        </Col>
-                                    </Row>
-                                    <Row className='mt-5'>
-                                        <Tab.Content>
-                                            <Tab.Pane eventKey='summary'>
-                                                <Summary
-                                                    vendor={vendor}
-                                                    setVendor={setVendor}
-                                                    externalUrls={externalUrls}
-                                                    setExternalUrls={setExternalUrls}
-                                                    setExternalUrlsData={setDataExternalUrls}
-                                                    externalIds={externalIds}
-                                                    setExternalIds={setExternalIds}
-                                                    setExternalIdsData={setDataExternalIds}
-                                                    additionalData={additionalData}
-                                                    setAdditionalData={setAdditionalData}
-                                                    setAdditionalDataObject={setDataAdditionalData}
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
-                                                    additionalRoles={additionalRoles}
-                                                    setAdditionalRoles={setAdditionalRoles}
-                                                    setDataAdditionalRoles={setDataAdditionalRoles}
-                                                />
-                                            </Tab.Pane>
-                                            <Tab.Pane eventKey='administration'>
-                                                <Administration
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
-                                                />
-                                            </Tab.Pane>
-                                            <Tab.Pane eventKey='linkedProjects'>
-                                                <LinkedReleasesAndProjects
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
-                                                />
-                                            </Tab.Pane>
-                                        </Tab.Content>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        </Tab.Container>
-                    </div>
-                </form>
-            </div>
-        )
-    }
+    return (
+        <div className='container page-content'>
+            <form
+                action=''
+                id='form_submit'
+                method='post'
+                onSubmit={(event) => {
+                    event.preventDefault()
+                }}
+            >
+                <div>
+                    <Tab.Container defaultActiveKey='summary'>
+                        <Row>
+                            <Col sm='auto' className='me-3'>
+                                <ListGroup>
+                                    <ListGroup.Item action eventKey='summary'>
+                                        <div className='my-2'>{t('Summary')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='administration'>
+                                        <div className='my-2'>{t('Administration')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='linkedProjects'>
+                                        <div className='my-2'>{t('Linked Releases and Projects')}</div>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Col>
+                            <Col className='me-3'>
+                                <Row className='d-flex justify-content-between'>
+                                    <Col lg={3}>
+                                        <Row>
+                                            <Button
+                                                variant='primary'
+                                                type='submit'
+                                                className='me-2 col-auto'
+                                                onClick={createProject}
+                                            >
+                                                {t('Create Project')}
+                                            </Button>
+                                            <Button
+                                                variant='secondary'
+                                                className='col-auto'
+                                                onClick={handleCancelClick}
+                                            >
+                                                {t('Cancel')}
+                                            </Button>
+                                        </Row>
+                                    </Col>
+                                    <Col lg={4} className='text-truncate buttonheader-title'>
+                                        {projectPayload && `${projectPayload.name} (${projectPayload.version})`}
+                                    </Col>
+                                </Row>
+                                <Row className='mt-5'>
+                                    <Tab.Content>
+                                        <Tab.Pane eventKey='summary'>
+                                            <Summary
+                                                vendor={vendor}
+                                                setVendor={setVendor}
+                                                externalUrls={externalUrls}
+                                                setExternalUrls={setExternalUrls}
+                                                setExternalUrlsData={setDataExternalUrls}
+                                                externalIds={externalIds}
+                                                setExternalIds={setExternalIds}
+                                                setExternalIdsData={setDataExternalIds}
+                                                additionalData={additionalData}
+                                                setAdditionalData={setAdditionalData}
+                                                setAdditionalDataObject={setDataAdditionalData}
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                                additionalRoles={additionalRoles}
+                                                setAdditionalRoles={setAdditionalRoles}
+                                                setDataAdditionalRoles={setDataAdditionalRoles}
+                                                moderators={moderators}
+                                                setModerators={setModerators}
+                                                contributors={contributors}
+                                                setContributors={setContributors}
+                                                securityResponsibles={securityResponsibles}
+                                                setSecurityResponsibles={setSecurityResponsibles}
+                                                projectOwner={projectOwner}
+                                                setProjectOwner={setProjectOwner}
+                                                projectManager={projectManager}
+                                                setProjectManager={setProjectManager}
+                                                leadArchitect={leadArchitect}
+                                                setLeadArchitect={setLeadArchitect}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='administration'>
+                                            <Administration
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='linkedProjects'>
+                                            <LinkedReleasesAndProjects
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
+                                        </Tab.Pane>
+                                    </Tab.Content>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Tab.Container>
+                </div>
+            </form>
+        </div>
+    )
 }
 
 export default DuplicateProject

@@ -12,11 +12,11 @@ import { Links } from '@/object-types'
 
 export interface User {
     email: string
-    department: string
+    department?: string
     deactivated: boolean
     fullName: string
-    givenName: string
-    lastName: string
+    givenName?: string
+    lastName?: string
     wantsMailNotification?: boolean
     notificationPreferences?: { [key: string]: boolean }
     secondaryDepartmentsAndRoles?: { [key: string]: Array<string> }
