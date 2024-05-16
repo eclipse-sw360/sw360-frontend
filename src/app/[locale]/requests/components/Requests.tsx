@@ -16,11 +16,21 @@ import OpenModerationRequest from './OpenModerationRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
 import OpenClearingRequest from './OpenClearingRequest'
 import ClosedClearingRequest from './ClosedClearingRequest'
+import { useCallback, useEffect, useState } from 'react'
+import { ApiUtils } from '@/utils/index'
+import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
 
+
+type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 
 function Requests() {
 
     const t = useTranslations('default')
+    const { data: session, status } = useSession()
+    const [openModerationRequestCount, setOpenModerationRequestCount] = useState(0)
+    const [closedModerationRequestCount, setClosedModerationRequestCount] = useState(0)
     const advancedSearch = [
         {
             fieldName: t('Date'),
@@ -124,56 +134,98 @@ function Requests() {
         }
     ]
 
-    return (
-        <>
-            <div className='ms-5 mt-3'>
-                <Tab.Container defaultActiveKey='openModerationrequests' mountOnEnter={true} unmountOnExit={true}>
-                    <Row>
-                        <Col sm='auto' className='me-3'>
-                            <ListGroup>
-                                <ListGroup.Item action eventKey='openModerationrequests'>
-                                    <div className='my-2'>{t('Open Moderation Requests')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item action eventKey='closedModerationrequests'>
-                                    <div className='my-2'>{t('Closed Moderation Requests')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item action eventKey='openClearingRequests'>
-                                    <div className='my-2'>{t('Open Clearing Requests')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item action eventKey='closedClearingRequests'>
-                                    <div className='my-2'>{t('Closed Clearing Requests')}</div>
-                                </ListGroup.Item>
-                            </ListGroup>
-                            <div className='mt-4 mb-4'>
-                                <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
-                            </div>
-                        </Col>
-                        <Col md={9}>
-                            <Row className='text-truncate buttonheader-title '>
-                                {t('MODERATIONS')}
-                            </Row>
-                            <Row className='mt-3' style={{ marginRight: '0px' }}>
-                                <Tab.Content>
-                                    <Tab.Pane eventKey='openModerationrequests'>
-                                        <OpenModerationRequest/>
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='closedModerationrequests'>
-                                        <ClosedModerationRequest/>
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='openClearingRequests'>
-                                        <OpenClearingRequest/>
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='closedClearingRequests'>
-                                        <ClosedClearingRequest/>
-                                    </Tab.Pane>
-                                </Tab.Content>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Tab.Container>
-            </div>
-        </>
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedModerationRequest
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
     )
+
+    useEffect(() => {
+        void fetchData('moderationrequest')
+                .then((moderationRequests: EmbeddedModerationRequest) => {
+                    let openMRCount = 0
+                    let closedMRCount = 0
+                    moderationRequests['_embedded']['sw360:moderationRequests']
+                    .filter((item: ModerationRequest) => {
+                        if (  item.moderationState === 'PENDING' ||
+                              item.moderationState === 'INPROGRESS'){
+                                openMRCount++;
+                        }
+                        else if ( item.moderationState === 'APPROVED' ||
+                                  item.moderationState === 'REJECTED'){
+                                    closedMRCount++;
+                        }
+                    })
+                setOpenModerationRequestCount(openMRCount)
+                setClosedModerationRequestCount(closedMRCount)
+            })
+        }, [fetchData, session])
+
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
+        return (
+            <>
+                <div className='ms-5 mt-3'>
+                    <Tab.Container defaultActiveKey='openModerationrequests'
+                                mountOnEnter={true}
+                                unmountOnExit={true}>
+                        <Row>
+                            <Col sm='auto' className='me-3'>
+                                <ListGroup>
+                                    <ListGroup.Item action eventKey='openModerationrequests'>
+                                        <div className='my-2'>{t('Open Moderation Requests')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='closedModerationrequests'>
+                                        <div className='my-2'>{t('Closed Moderation Requests')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='openClearingRequests'>
+                                        <div className='my-2'>{t('Open Clearing Requests')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='closedClearingRequests'>
+                                        <div className='my-2'>{t('Closed Clearing Requests')}</div>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                                <div className='mt-4 mb-4'>
+                                    <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+                                </div>
+                            </Col>
+                            <Col md={9}>
+                                <Row className='text-truncate buttonheader-title '>
+                                    {t('MODERATIONS') +
+                                    `(${openModerationRequestCount}/${closedModerationRequestCount})`}
+                                </Row>
+                                <Row className='mt-3' style={{ marginRight: '0px' }}>
+                                    <Tab.Content>
+                                        <Tab.Pane eventKey='openModerationrequests'>
+                                            <OpenModerationRequest/>
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='closedModerationrequests'>
+                                            <ClosedModerationRequest/>
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='openClearingRequests'>
+                                            <OpenClearingRequest/>
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='closedClearingRequests'>
+                                            <ClosedClearingRequest/>
+                                        </Tab.Pane>
+                                    </Tab.Content>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Tab.Container>
+                </div>
+            </>
+        )
+    }
 }
 
 export default Requests
