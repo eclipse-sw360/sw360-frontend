@@ -701,6 +701,7 @@
     "Request ID": "リクエスト ID",
     "Request Information": "リクエスト情報",
     "Requesting User": "要求元のユーザー",
+    "Requesting User Email": "ユーザーの電子メールをリクエストする",
     "RequestingUserEmail": "リクエスト元ユーザー（メール）",
     "Requests": "リクエスト",
     "Requirement document": "要件文書",

@@ -701,6 +701,7 @@
     "Request ID": "请求ID",
     "Request Information": "索取信息",
     "Requesting User": "请求用户",
+    "Requesting User Email": "请求用户电子邮件",
     "RequestingUserEmail": "",
     "Requests": "要求",
     "Requirement document": "需求文件",
