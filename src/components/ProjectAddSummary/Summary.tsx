@@ -33,6 +33,18 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     setAdditionalRoles?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setDataAdditionalRoles?: RolesType
+    moderators: { [k: string]: string }
+    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    contributors: { [k: string]: string }
+    setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    securityResponsibles: { [k: string]: string }
+    setSecurityResponsibles: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    projectOwner: { [k: string]: string }
+    setProjectOwner: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    projectManager: { [k: string]: string }
+    setProjectManager: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    leadArchitect: { [k: string]: string }
+    setLeadArchitect: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 export default function Summary({
@@ -52,6 +64,18 @@ export default function Summary({
     setProjectPayload,
     setAdditionalRoles,
     setDataAdditionalRoles,
+    moderators,
+    setModerators,
+    contributors, 
+    setContributors,
+    projectOwner,
+    setProjectOwner,
+    projectManager,
+    setProjectManager,
+    leadArchitect,
+    setLeadArchitect,
+    securityResponsibles,
+    setSecurityResponsibles
 }: Props) {
     const t = useTranslations('default')
 
@@ -73,8 +97,21 @@ export default function Summary({
                         setObject={setExternalUrlsData}
                     />
                 </div>
-                <Roles projectPayload={projectPayload}
-                       setProjectPayload={setProjectPayload}
+                <Roles 
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                    moderators={moderators}
+                    setModerators={setModerators}
+                    contributors={contributors}
+                    setContributors={setContributors}
+                    securityResponsibles={securityResponsibles}
+                    setSecurityResponsibles={setSecurityResponsibles}
+                    projectOwner={projectOwner}
+                    setProjectOwner={setProjectOwner}
+                    projectManager={projectManager}
+                    setProjectManager={setProjectManager}
+                    leadArchitect={leadArchitect}
+                    setLeadArchitect={setLeadArchitect}
                 />
                 <div className='row mb-4'>
                     <AddAdditionalRoles

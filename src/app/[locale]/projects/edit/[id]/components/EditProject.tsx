@@ -31,21 +31,18 @@ function EditProject({ projectId }: { projectId: string }) {
 
     const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
 
-    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([
-        {
-            key: '',
-            value: '',
-        },
-    ])
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
 
-    const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([
-        {
-            key: '',
-            value: '',
-        },
-    ])
+    const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([])
 
     const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
+
+    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
+    const [securityResponsibles, setSecurityResponsibles] = useState<{ [k: string]: string }>({})
+    const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
+    const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
+    const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -148,6 +145,42 @@ function EditProject({ projectId }: { projectId: string }) {
                 setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
             }
 
+            if (typeof project["_embedded"]["leadArchitect"] !== 'undefined') {
+                setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]: project["_embedded"]["leadArchitect"].fullName })
+            }
+
+            if (typeof project["_embedded"]["projectOwner"] !== 'undefined') {
+                setProjectOwner({ [project["_embedded"]["projectOwner"].email]: project["_embedded"]["projectOwner"].fullName })
+            }
+
+            if (typeof project["_embedded"]["projectManager"] !== 'undefined') {
+                setProjectManager({ [project["_embedded"]["projectManager"].email]: project["_embedded"]["projectManager"].fullName })
+            }
+
+            if (typeof project["_embedded"]["sw360:moderators"] !== 'undefined') {
+                const moderatorMap = new Map<string, string>()
+                project["_embedded"]["sw360:moderators"].map((moderator) => {
+                    moderatorMap.set(moderator.email, moderator.fullName)
+                })
+                setModerators(Object.fromEntries(moderatorMap))
+            }
+
+            if (typeof project["_embedded"]["sw360:contributors"] !== 'undefined') {
+                const contributorMap = new Map<string, string>()
+                project["_embedded"]["sw360:contributors"].map((contributor) => {
+                    contributorMap.set(contributor.email, contributor.fullName)
+                })
+                setContributors(Object.fromEntries(contributorMap))
+            }
+
+            if (typeof project["_embedded"]["sw360:securityResponsibles"] !== 'undefined') {
+                const securityResponsiblesMap = new Map<string, string>()
+                project["_embedded"]["sw360:securityResponsibles"].map((securityResponsible) => {
+                    securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName)
+                })
+                setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
+            }
+            
             const projectPayloadData: ProjectPayload = {
                 name: project.name,
                 version: project.version,
@@ -206,123 +239,131 @@ function EditProject({ projectId }: { projectId: string }) {
         router.push('/projects')
     }
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <div className='container page-content'>
-                <form
-                    action=''
-                    id='form_submit'
-                    method='post'
-                    onSubmit={(event) => {
-                        event.preventDefault()
-                    }}
-                >
-                    <div>
-                        <Tab.Container defaultActiveKey='summary'>
-                            <Row>
-                                <Col sm='auto' className='me-3'>
-                                    <ListGroup>
-                                        <ListGroup.Item action eventKey='summary'>
-                                            <div className='my-2'>{t('Summary')}</div>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item action eventKey='administration'>
-                                            <div className='my-2'>{t('Administration')}</div>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item action eventKey='linkedProjectsAndReleases'>
-                                            <div className='my-2'>{t('Linked Releases and Projects')}</div>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item action eventKey='linkedPackages'>
-                                            <div className='my-2'>{t('Linked Packages')}</div>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item action eventKey='attachments'>
-                                            <div className='my-2'>{t('Attachments')}</div>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item action eventKey='obligations'>
-                                            <div className='my-2'>{t('Obligations')}</div>
-                                        </ListGroup.Item>
-                                    </ListGroup>
-                                </Col>
-                                <Col className='me-3'>
-                                    <Row className='d-flex justify-content-between'>
-                                        <Col lg={3}>
-                                            <Row>
-                                                <Button
-                                                    variant='primary'
-                                                    type='submit'
-                                                    className='me-2 col-auto'
-                                                    onClick={updateProject}
-                                                >
-                                                    {t('Update Project')}
-                                                </Button>
-                                                <Button
-                                                    variant='danger'
-                                                    type='submit'
-                                                    className='me-2 col-auto'
-                                                    onClick={handleCancelClick}
-                                                >
-                                                    {t('Delete Project')}
-                                                </Button>
-                                                <Button
-                                                    variant='secondary'
-                                                    className='col-auto'
-                                                    onClick={handleCancelClick}
-                                                >
-                                                    {t('Cancel')}
-                                                </Button>
-                                            </Row>
-                                        </Col>
-                                        <Col lg={4} className='text-truncate buttonheader-title'>
-                                            {`${projectPayload.name} (${projectPayload.version})`}
-                                        </Col>
-                                    </Row>  
-                                    <Row className='mt-5'>
-                                        <Tab.Content>
-                                            <Tab.Pane eventKey='summary'>
-                                                <Summary
-                                                    vendor={vendor}
-                                                    setVendor={setVendor}
-                                                    externalUrls={externalUrls}
-                                                    setExternalUrls={setExternalUrls}
-                                                    setExternalUrlsData={setDataExternalUrls}
-                                                    externalIds={externalIds}
-                                                    setExternalIds={setExternalIds}
-                                                    setExternalIdsData={setDataExternalIds}
-                                                    additionalData={additionalData}
-                                                    setAdditionalData={setAdditionalData}
-                                                    setAdditionalDataObject={setDataAdditionalData}
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
-                                                    additionalRoles={additionalRoles}
-                                                    setAdditionalRoles={setAdditionalRoles}
-                                                    setDataAdditionalRoles={setDataAdditionalRoles}
-                                                />
-                                            </Tab.Pane>
-                                            <Tab.Pane eventKey='administration'>
-                                                <Administration
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
-                                                />
-                                            </Tab.Pane>
-                                            <Tab.Pane eventKey='linkedProjectsAndReleases'>
-                                                <LinkedReleasesAndProjects
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
-                                                />
-                                            </Tab.Pane>
-                                            <Tab.Pane eventKey='attachments'></Tab.Pane>
-                                            <Tab.Pane eventKey='obligations'></Tab.Pane>
-                                        </Tab.Content>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        </Tab.Container>
-                    </div>
-                </form>
-            </div>
-        )
-    }
+    return (
+        <div className='container page-content'>
+            <form
+                action=''
+                id='form_submit'
+                method='post'
+                onSubmit={(event) => {
+                    event.preventDefault()
+                }}
+            >
+                <div>
+                    <Tab.Container defaultActiveKey='summary'>
+                        <Row>
+                            <Col sm='auto' className='me-3'>
+                                <ListGroup>
+                                    <ListGroup.Item action eventKey='summary'>
+                                        <div className='my-2'>{t('Summary')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='administration'>
+                                        <div className='my-2'>{t('Administration')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='linkedProjectsAndReleases'>
+                                        <div className='my-2'>{t('Linked Releases and Projects')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='linkedPackages'>
+                                        <div className='my-2'>{t('Linked Packages')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='attachments'>
+                                        <div className='my-2'>{t('Attachments')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='obligations'>
+                                        <div className='my-2'>{t('Obligations')}</div>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Col>
+                            <Col className='me-3'>
+                                <Row className='d-flex justify-content-between'>
+                                    <Col lg={3}>
+                                        <Row>
+                                            <Button
+                                                variant='primary'
+                                                type='submit'
+                                                className='me-2 col-auto'
+                                                onClick={updateProject}
+                                            >
+                                                {t('Update Project')}
+                                            </Button>
+                                            <Button
+                                                variant='danger'
+                                                type='submit'
+                                                className='me-2 col-auto'
+                                                onClick={handleCancelClick}
+                                            >
+                                                {t('Delete Project')}
+                                            </Button>
+                                            <Button
+                                                variant='secondary'
+                                                className='col-auto'
+                                                onClick={handleCancelClick}
+                                            >
+                                                {t('Cancel')}
+                                            </Button>
+                                        </Row>
+                                    </Col>
+                                    <Col lg={4} className='text-truncate buttonheader-title'>
+                                        {t('Update Project')}
+                                    </Col>
+                                </Row>
+                                <Row className='mt-5'>
+                                    <Tab.Content>
+                                        <Tab.Pane eventKey='summary'>
+                                            <Summary
+                                                vendor={vendor}
+                                                setVendor={setVendor}
+                                                externalUrls={externalUrls}
+                                                setExternalUrls={setExternalUrls}
+                                                setExternalUrlsData={setDataExternalUrls}
+                                                externalIds={externalIds}
+                                                setExternalIds={setExternalIds}
+                                                setExternalIdsData={setDataExternalIds}
+                                                additionalData={additionalData}
+                                                setAdditionalData={setAdditionalData}
+                                                setAdditionalDataObject={setDataAdditionalData}
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                                additionalRoles={additionalRoles}
+                                                setAdditionalRoles={setAdditionalRoles}
+                                                setDataAdditionalRoles={setDataAdditionalRoles}
+                                                moderators={moderators}
+                                                setModerators={setModerators}
+                                                contributors={contributors}
+                                                setContributors={setContributors}
+                                                securityResponsibles={securityResponsibles}
+                                                setSecurityResponsibles={setSecurityResponsibles}
+                                                projectOwner={projectOwner}
+                                                setProjectOwner={setProjectOwner}
+                                                projectManager={projectManager}
+                                                setProjectManager={setProjectManager}
+                                                leadArchitect={leadArchitect}
+                                                setLeadArchitect={setLeadArchitect}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='administration'>
+                                            <Administration
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='linkedProjectsAndReleases'>
+                                            <LinkedReleasesAndProjects
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='attachments'></Tab.Pane>
+                                        <Tab.Pane eventKey='obligations'></Tab.Pane>
+                                    </Tab.Content>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Tab.Container>
+                </div>
+            </form>
+        </div>
+    )
 }
 
 export default EditProject

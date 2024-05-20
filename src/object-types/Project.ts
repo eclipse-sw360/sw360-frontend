@@ -60,11 +60,16 @@ interface Project {
     _links?: Links
     _embedded?: {
         leadArchitect?: User
+        projectManager?: User
+        projectOwner?: User
         createdBy?: User
         'sw360:releases'?: Array<Release>
         'sw360:attachments'?: Array<Attachment>
         'sw360:projects'?: Array<Project>
         'sw360:packages'?: Array<Package>
+        'sw360:moderators'?: Array<User>
+        'sw360:contributors'?: Array<User>
+        'sw360:securityResponsibles'?: Array<User>
     }
 }
 
