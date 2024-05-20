@@ -10,15 +10,52 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
+import { ApiUtils } from '@/utils/index'
+import { Embedded, HttpStatus } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
+import { ClearingRequest } from '@/object-types'
+import { Spinner } from 'react-bootstrap'
+
+type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
 
 function OpenClearingRequest() {
 
     const t = useTranslations('default')
+    const [loading, setLoading] = useState(true)
+    const { data: session, status } = useSession()
     const [tableData] = useState<Array<any>>([])
+
+
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedClearingRequest
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
+    )
+
+    useEffect(() => {
+        setLoading(true)
+        void fetchData('moderationrequest').then((clearingRequests: EmbeddedClearingRequest) => {
+            const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
+                                                                .filter((item: ClearingRequest) => {
+                return item.clearingState === 'PENDING' || item.clearingState === 'INPROGRESS';
+            });
+            console.log(filteredClearingRequests)
+            setLoading(false)
+        })}, [fetchData, session])
+
 
     const columns = [
         {
@@ -96,17 +133,25 @@ function OpenClearingRequest() {
         }
     ]
 
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
     return (
         <>
             <div className='row mb-4'>
                 <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <div style={{ paddingLeft: '0px' }}>
-                        <Table columns={columns} data={tableData} sort={false} selector={true} />
-                    </div>
+                    {loading == false ? (
+                        <div style={{ paddingLeft: '0px' }}>
+                            <Table columns={columns} data={tableData} sort={false} selector={true} />
+                        </div>
+                        ) : (
+                                <Spinner className='spinner' />
+                        )
+                    }
                 </div>
             </div>
         </>
-    )
+    )}
 }
 
 export default OpenClearingRequest
