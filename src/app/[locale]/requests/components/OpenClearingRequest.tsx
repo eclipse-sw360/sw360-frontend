@@ -36,7 +36,7 @@ function OpenClearingRequest() {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
         ACCEPTED: t('ACCEPTED'),
-        PENDING: t('Pending'),
+        PENDING_INPUT: t('Pending Input'),
         REJECTED: t('REJECTED'),
         IN_QUEUE: t('In Queue'),
         CLOSED: t('Closed'),
