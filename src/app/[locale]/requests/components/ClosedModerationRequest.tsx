@@ -87,26 +87,22 @@ function ClosedModerationRequest() {
         {
             id: 'closedModerationRequest.date',
             name: t('Date'),
-            width: '10%',
             sort: true,
         },
         {
             id: 'closedModerationRequest.type',
             name: t('Type'),
-            width: '10%',
             sort: true,
         },
         {
             id: 'closedModerationRequest.documentName',
             name: t('Document Name'),
-            width: 'auto',
             sort: true,
         },
         {
             id: 'closedModerationRequest.requestingUser',
             name: t('Requesting User'),
-            width: '15%',
-            formatter: (email: string) =>
+                        formatter: (email: string) =>
                 _(
                     <>
                         <Link href={`mailto:${email}`} className='text-link'>
@@ -119,14 +115,12 @@ function ClosedModerationRequest() {
         {
             id: 'closedModerationRequest.department',
             name: t('Department'),
-            width: '10%',
             sort: true,
         },
         {
             id: 'closedModerationRequest.moderators',
             name: t('Moderators'),
-            width: '25%',
-            formatter: (moderators: string[]) =>
+                        formatter: (moderators: string[]) =>
                 _(
                     <ExpandingModeratorCell moderators={moderators} />
                 ),

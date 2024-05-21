@@ -91,25 +91,21 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.date',
             name: t('Date'),
-            width: '10%',
             sort: true,
         },
         {
             id: 'openModerationRequest.type',
             name: t('Type'),
-            width: '10%',
             sort: true,
         },
         {
             id: 'openModerationRequest.documentName',
             name: t('Document Name'),
-            width: 'auto',
             sort: true,
         },
         {
             id: 'openModerationRequest.requestingUser',
             name: t('Requesting User'),
-            width: '15%',
             formatter: (email: string) =>
                 _(
                     <>
@@ -123,13 +119,11 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.department',
             name: t('Department'),
-            width: '10%',
             sort: true,
         },
         {
             id: 'openModerationRequest.moderators',
             name: t('Moderators'),
-            width: '25%',
             formatter: (moderators: string[]) =>
                 _(
                     <ExpandingModeratorCell moderators={moderators} />

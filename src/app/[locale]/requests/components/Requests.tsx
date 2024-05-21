@@ -174,7 +174,7 @@ function Requests() {
     } else {
         return (
             <>
-                <div className='ms-5 mt-3'>
+                <div className='container page-content'>
                     <Tab.Container defaultActiveKey='openModerationrequests'
                                 mountOnEnter={true}
                                 unmountOnExit={true}>
@@ -198,7 +198,7 @@ function Requests() {
                                     <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                                 </div>
                             </Col>
-                            <Col md={9}>
+                            <Col>
                                 <Row className='text-truncate buttonheader-title '>
                                     {t('MODERATIONS') +
                                     `(${openModerationRequestCount}/${closedModerationRequestCount})`}
