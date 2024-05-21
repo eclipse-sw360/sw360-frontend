@@ -50,12 +50,14 @@ function OpenClearingRequest() {
         ON_HOLD: t('On Hold'),
         SANITY_CHECK: t('Sanity Check')
     };
+
     const clearingRequestPriority : ClearingRequestPriorityMap = {
         LOW: t('Low'),
         MEDIUM: t('Medium'),
         HIGH: t('High'),
         CRITICAL: t('Critical')
     };
+    
     const clearingRequestType : ClearingRequestTypeMap = {
         DEEP: t('Deep'),
         HIGH: t('High')
@@ -90,7 +92,7 @@ function OpenClearingRequest() {
                       projectName: item.projectName ?? '' },
                     '',
                     clearingRequestStatus[item.clearingState] ?? '',
-                    clearingRequestPriority[item.priority] ?? '',
+                    { priority: item.priority ?? '' },
                     item.requestingUser ?? '',
                     '',
                     '',
@@ -142,6 +144,41 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.priority',
             name: t('Priority'),
             sort: true,
+            formatter: ({ priority }: { priority: string }) =>
+                _(
+                    <>
+                        {priority && priority === 'LOW' && (
+                            <>
+                                <div className='text-success'>
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                        {priority && priority === 'MEDIUM' && (
+                            <>
+                                <div className='text-primary'>
+
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                        {priority && priority === 'HIGH' && (
+                            <>
+                                <div className='text-warning'>
+
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                        {priority && priority === 'CRITICAL' && (
+                            <>
+                                <div className='text-danger'>
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                    </>
+                ),
         },
         {
             id: 'openClearingRequest.requestingUser',
