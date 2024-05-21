@@ -40,6 +40,9 @@ function OpenModerationRequest() {
     };
 
     const formatDate = (timestamp: number): string => {
+        if(!timestamp){
+            return null
+        }
         const date = new Date(timestamp);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -72,7 +75,7 @@ function OpenModerationRequest() {
             setTableData(
                 filteredModerationRequests.map((item: ModerationRequest) => [
                     formatDate(item.timestamp),
-                    item.componentType,
+                    item.documentType,
                     _(<Link href={`/requests/moderationRequest/${item.id}`}>{item.documentName}</Link>),
                     item.requestingUser,
                     item.requestingUserDepartment,
