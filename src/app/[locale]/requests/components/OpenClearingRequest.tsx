@@ -85,17 +85,17 @@ function OpenClearingRequest() {
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => [
                     item.id,
-                    item.projectBU,
-                    item.projectId,
+                    item.projectBU ?? '',
+                    [item.projectId ?? '', item.projectName ?? ''],
                     '',
-                    clearingRequestStatus[item.clearingState],
-                    clearingRequestPriority[item.priority],
-                    item.requestingUser,
+                    clearingRequestStatus[item.clearingState] ?? '',
+                    clearingRequestPriority[item.priority] ?? '',
+                    item.requestingUser ?? '',
                     '',
                     '',
-                    item.requestedClearingDate,
+                    item.requestedClearingDate ?? '',
                     '',
-                    clearingRequestType[item.clearingType],
+                    clearingRequestType[item.clearingType] ?? '',
                     ''
                 ])
             )
@@ -118,39 +118,14 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.project',
             name: t('Project'),
             sort: true,
-        },
-        {
-            id: 'openClearingRequest.openReleases',
-            name: t('Open Releases'),
-            sort: true,
-        },
-        {
-            id: 'openClearingRequest.status',
-            name: t('Status'),
-            sort: true,
-        },
-        {
-            id: 'openClearingRequest.priority',
-            name: t('Priority'),
-            sort: true,
-        },
-        {
-            id: 'openClearingRequest.reqestingUser',
-            name: t('Requesting User'),
-            formatter: (email: string) =>
-            _(
-                <>
-                    <Link href={`mailto:${email}`} className='text-link'>
-                        {email}
-                    </Link>
-                </>
-            ),
-            sort: true,
-        },
-        {
-            id: 'openClearingRequest.clearingProcess ',
-            name: t('Clearing Process'),
-            sort: true,
+            formatter: ({ projectId, projectName }: { projectId: string; projectName: string }) =>
+                _(
+                    <>
+                        <Link href={`/projects/detail/${projectId}`} className='text-link'>
+                            {projectName}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'openClearingRequest.createdOn',
