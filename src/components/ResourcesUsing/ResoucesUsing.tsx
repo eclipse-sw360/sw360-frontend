@@ -44,7 +44,7 @@ const ResoucesUsing = ({ documentId, documentType, documentName }: Props) => {
                         <ProjectsUsing
                             projectUsings={resourcesUsing._embedded['sw360:projects']}
                             documentName={documentName}
-                            restrictedResource={resourcesUsing._embedded['sw360:restrictedResources'][0]}
+                            restrictedResource={resourcesUsing._embedded['sw360:restrictedResources']?.[0]}
                         />
                     )}
                 {resourcesUsing._embedded['sw360:components'] &&

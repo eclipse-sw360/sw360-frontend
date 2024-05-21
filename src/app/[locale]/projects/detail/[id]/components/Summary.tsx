@@ -14,8 +14,8 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
-
-import { SummaryDataType } from '@/object-types'
+import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
+import { SummaryDataType, DocumentTypes } from '@/object-types'
 import styles from '../detail.module.css'
 
 const Capitalize = (text: string) => {
@@ -303,6 +303,11 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                 </tbody>
             </table>
+            <ResoucesUsing
+                documentId={summaryData.id ?? ''}
+                documentType={DocumentTypes.PROJECT}
+                documentName={summaryData.name ?? ''}
+            />
         </>
     )
 }

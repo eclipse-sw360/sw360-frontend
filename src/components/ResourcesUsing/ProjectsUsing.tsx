@@ -18,7 +18,7 @@ import { Alert } from 'react-bootstrap'
 interface Props {
     projectUsings: Array<Project>
     documentName: string
-    restrictedResource: RestrictedResource
+    restrictedResource: RestrictedResource | null
 }
 
 const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Props) => {
@@ -59,9 +59,9 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
     return (
         <>
             <Alert variant='primary'>
-                {`${documentName} is used by a total of ${restrictedResource.projects + projectUsings.length} (${
+                {`${documentName} is used by a total of ${restrictedResource?.projects ?? 0 + projectUsings.length} (${
                     projectUsings.length
-                } visible / ${restrictedResource.projects} restricted) projects.`}
+                } visible / ${restrictedResource?.projects ?? 0} restricted) projects.`}
             </Alert>
             <Table data={tableData} columns={columns} />
         </>
