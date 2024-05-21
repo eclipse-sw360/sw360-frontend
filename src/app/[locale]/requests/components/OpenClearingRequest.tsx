@@ -21,6 +21,9 @@ import { ClearingRequest } from '@/object-types'
 import { Spinner } from 'react-bootstrap'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
+interface ClearingRequestStatusMap {
+    [key: string]: string;
+}
 
 
 function OpenClearingRequest() {
@@ -28,7 +31,19 @@ function OpenClearingRequest() {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
-    const [tableData] = useState<Array<any>>([])
+    const [tableData, setTableData] = useState<Array<any>>([])
+    const clearingRequestStatus : ClearingRequestStatusMap = {
+        NEW: t('New'),
+        IN_PROGRESS: t('In Progress'),
+        ACCEPTED: t('ACCEPTED'),
+        PENDING: t('Pending'),
+        REJECTED: t('REJECTED'),
+        IN_QUEUE: t('In Queue'),
+        CLOSED: t('Closed'),
+        AWAITING_RESPONSE: t('Awaiting Response'),
+        ON_HOLD: t('On Hold'),
+        SANITY_CHECK: t('Sanity Check')
+    };
 
 
     const fetchData = useCallback(
@@ -50,9 +65,25 @@ function OpenClearingRequest() {
         void fetchData('moderationrequest').then((clearingRequests: EmbeddedClearingRequest) => {
             const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
                                                                 .filter((item: ClearingRequest) => {
-                return item.clearingState === 'PENDING' || item.clearingState === 'INPROGRESS';
+                return item.clearingState != 'ACCEPTED' && item.clearingState != 'CLOSED';
             });
-            console.log(filteredClearingRequests)
+            setTableData(
+                filteredClearingRequests.map((item: ClearingRequest) => [
+                    item.id,
+                    item.projectBU,
+                    item.projectId,
+                    '',
+                    clearingRequestStatus[item.clearingState],
+                    item.priority,
+                    item.requestingUser,
+                    '',
+                    '',
+                    item.requestedClearingDate,
+                    '',
+                    '',
+                    ''
+                ])
+            )
             setLoading(false)
         })}, [fetchData, session])
 
