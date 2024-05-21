@@ -45,7 +45,6 @@ function OpenClearingRequest() {
         SANITY_CHECK: t('Sanity Check')
     };
 
-
     const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -62,7 +61,7 @@ function OpenClearingRequest() {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest').then((clearingRequests: EmbeddedClearingRequest) => {
+        void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest) => {
             const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
                                                                 .filter((item: ClearingRequest) => {
                 return item.clearingState != 'ACCEPTED' && item.clearingState != 'CLOSED';
