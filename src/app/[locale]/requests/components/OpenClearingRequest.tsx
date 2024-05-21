@@ -24,7 +24,9 @@ type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests
 interface ClearingRequestStatusMap {
     [key: string]: string;
 }
-
+interface ClearingRequestPriorityMap {
+    [key: string]: string;
+}
 
 function OpenClearingRequest() {
 
@@ -43,6 +45,12 @@ function OpenClearingRequest() {
         AWAITING_RESPONSE: t('Awaiting Response'),
         ON_HOLD: t('On Hold'),
         SANITY_CHECK: t('Sanity Check')
+    };
+    const clearingRequestPriority : ClearingRequestPriorityMap = {
+        LOW: t('Low'),
+        MEDIUM: t('Medium'),
+        HIGH: t('High'),
+        CRITICAL: t('Critical')
     };
 
     const fetchData = useCallback(
@@ -73,7 +81,7 @@ function OpenClearingRequest() {
                     item.projectId,
                     '',
                     clearingRequestStatus[item.clearingState],
-                    item.priority,
+                    clearingRequestPriority[item.priority],
                     item.requestingUser,
                     '',
                     '',
