@@ -20,6 +20,9 @@ import {
     User,
     Vendor,
 } from '@/object-types'
+import DocumentCreationInformation from './spdx/DocumentCreationInformation'
+import PackageInformation from './spdx/PackageInformation'
+import SPDXDocument from './spdx/SPDXDocument'
 
 export default interface ReleaseDetail {
     id?: string
@@ -48,6 +51,7 @@ export default interface ReleaseDetail {
     modifiedOn?: string
     cpeId?: string
     eccInformation?: ECCInformation
+    spdxId?: string
     _links?: {
         'sw360:component': {
             href: string
@@ -75,5 +79,8 @@ export default interface ReleaseDetail {
         'sw360:licenses'?: Array<LicenseDetail>
         'sw360:otherLicenses'?: Array<LicenseDetail>
         'sw360:subscribers'?: User[]
+        'sw360:documentCreationInformation'?: DocumentCreationInformation
+        'sw360:packageInformation'?: PackageInformation
+        'sw360:spdxDocument'?: SPDXDocument
     }
 }

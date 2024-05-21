@@ -884,3 +884,167 @@ input::-webkit-datetime-edit {
     border-bottom: 1px solid #e7e7ed;
     font-size: 0.875rem;
 }
+
+.spdx-col-1 {
+    flex: 1;
+}
+
+.spdx-col-2 {
+    flex: 2;
+}
+
+.spdx-col-3 {
+    flex: 3;
+    max-width: 60%;
+}
+
+.spdx-flex-row {
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+}
+
+.spdx-flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.spdx-key {
+    font-weight: bold;
+}
+
+.spdx-label-index {
+    text-decoration: underline;
+}
+
+.spdx-table td:first-child {
+    width: 100% !important;
+}
+
+.spdx-thead {
+    cursor: pointer;
+}
+
+.spdx-uppercase {
+    text-transform: uppercase;
+}
+
+.btn:focus {
+    box-shadow: 0 0 0 0.125rem #fff, 0 0 0 0.25rem #fbca8f;
+    outline: 0;
+}
+
+.radio-label {
+    vertical-align: text-bottom !important;
+}
+.sub-label {
+    margin-right: 0.5rem;
+    margin-top: 0.5rem;
+    font-weight: 400;
+    font-size: 1rem;
+}
+.sub-title {
+    width: 10rem;
+    margin-top: 0.7rem;
+    margin-right: 1rem;
+}
+.sub-input {
+    width: auto;
+}
+.spdx-checkbox {
+    margin-top: 0.75rem;
+    width: 1rem;
+    height: 1rem;
+}
+.spdx-select {
+    width: auto;
+    flex: auto;
+    margin-right: 2rem;
+}
+.spdx-radio {
+    margin-top: 0.75rem;
+    margin-right: 0.5rem;
+    width: 1rem;
+    height: 1rem;
+}
+.spdx-date {
+    width: 12rem;
+    text-align: center;
+}
+.spdx-time {
+    width: 12rem;
+    text-align: center;
+    margin-left: 0.6rem;
+}
+.label-select {
+    flex: 1;
+    text-decoration: underline;
+}
+.spdx-delete-icon-main {
+    margin-top: 0.3rem;
+    margin-right: 1rem;
+    width: 1rem;
+    height: auto;
+
+    cursor: pointer;
+}
+.spdx-delete-icon-sub {
+    margin-top: 0.3rem;
+    margin-right: 4rem;
+    width: 1rem;
+    height: auto;
+
+    cursor: pointer;
+}
+.spdx-add-button-main {
+    margin-left: 11rem;
+    margin-bottom: 2rem;
+    width: 10rem;
+}
+.spdx-add-button-sub {
+    width: 10rem;
+}
+thead {
+    cursor: pointer;
+}
+.spdx-table .form-group {
+    margin-right: 1rem;
+}
+.spdx-table textarea {
+    margin-left: 0 !important;
+}
+.spdx-table .form-control {
+    margin-left: 0 !important;
+}
+#spdxLiteMode {
+    margin-left: -1px !important;
+}
+input[type='date'] {
+    margin-right: 1rem;
+}
+
+.lableSPDX {
+    color: #272833;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.spdx-delete-icon-main {
+    margin-top: 0.3rem;
+    margin-right: 1rem;
+    width: 0.85rem;
+    height: auto;
+    cursor: pointer;
+}
+
+.spdx-delete-icon-main-index {
+    margin-top: 0.3rem;
+    margin-right: 1rem;
+    width: 1rem;
+    height: auto;
+    cursor: pointer;
+}

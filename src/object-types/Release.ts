@@ -41,6 +41,7 @@ interface Release {
     cotsDetails?: COTSDetails
     attachmentDTOs?: Array<Attachment>
     eccInformation?: ECCInformation
+    spdxId?: string
     _links?: Links
 }
 
