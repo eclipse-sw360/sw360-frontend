@@ -102,7 +102,7 @@ function ClosedModerationRequest() {
         {
             id: 'closedModerationRequest.requestingUser',
             name: t('Requesting User'),
-                        formatter: (email: string) =>
+            formatter: (email: string) =>
                 _(
                     <>
                         <Link href={`mailto:${email}`} className='text-link'>
@@ -120,7 +120,7 @@ function ClosedModerationRequest() {
         {
             id: 'closedModerationRequest.moderators',
             name: t('Moderators'),
-                        formatter: (moderators: string[]) =>
+            formatter: (moderators: string[]) =>
                 _(
                     <ExpandingModeratorCell moderators={moderators} />
                 ),

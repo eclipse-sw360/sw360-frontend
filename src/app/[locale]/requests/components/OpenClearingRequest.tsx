@@ -86,7 +86,8 @@ function OpenClearingRequest() {
                 filteredClearingRequests.map((item: ClearingRequest) => [
                     item.id,
                     item.projectBU ?? '',
-                    [item.projectId ?? '', item.projectName ?? ''],
+                    { projectId: item.projectId ?? '',
+                      projectName: item.projectName ?? '' },
                     '',
                     clearingRequestStatus[item.clearingState] ?? '',
                     clearingRequestPriority[item.priority] ?? '',
@@ -128,6 +129,31 @@ function OpenClearingRequest() {
                 ),
         },
         {
+            id: 'openClearingRequest.openReleases',
+            name: t('Open Releases'),
+            sort: true,
+        },
+        {
+            id: 'openClearingRequest.status',
+            name: t('Status'),
+            sort: true,
+        },
+        {
+            id: 'openClearingRequest.priority',
+            name: t('Priority'),
+            sort: true,
+        },
+        {
+            id: 'openClearingRequest.requestingUser',
+            name: t('Requesting User'),
+            sort: true,
+        },
+        {
+            id: 'openClearingRequest.clearingProgress',
+            name: t('Clearing Progress'),
+            sort: true,
+        },
+        {
             id: 'openClearingRequest.createdOn',
             name: t('Created On'),
             sort: true,
@@ -143,12 +169,12 @@ function OpenClearingRequest() {
             sort: true,
         },
         {
-            id: 'openClearingRequest.clearingType ',
+            id: 'openClearingRequest.clearingType',
             name: t('Clearing Type'),
             sort: true,
         },
         {
-            id: 'openClearingRequest.actions ',
+            id: 'openClearingRequest.actions',
             name: t('Actions'),
             sort: true,
         }
