@@ -27,6 +27,10 @@ interface ClearingRequestStatusMap {
 interface ClearingRequestPriorityMap {
     [key: string]: string;
 }
+interface ClearingRequestTypeMap {
+    [key: string]: string;
+}
+
 
 function OpenClearingRequest() {
 
@@ -51,6 +55,10 @@ function OpenClearingRequest() {
         MEDIUM: t('Medium'),
         HIGH: t('High'),
         CRITICAL: t('Critical')
+    };
+    const clearingRequestType : ClearingRequestTypeMap = {
+        DEEP: t('Deep'),
+        HIGH: t('High')
     };
 
     const fetchData = useCallback(
@@ -87,7 +95,7 @@ function OpenClearingRequest() {
                     '',
                     item.requestedClearingDate,
                     '',
-                    '',
+                    clearingRequestType[item.clearingType],
                     ''
                 ])
             )
