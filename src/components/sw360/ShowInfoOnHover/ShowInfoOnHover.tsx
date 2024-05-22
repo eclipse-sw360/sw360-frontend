@@ -8,14 +8,14 @@
 // License-Filename: LICENSE
 
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiInfoCircle } from 'react-icons/bi'
+import { FaInfoCircle } from 'react-icons/fa'
 
 const ShowInfoOnHover = ({ text }: { text: string }) => {
     return (
         <>
             <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
                 <span className='d-inline-block'>
-                    <BiInfoCircle />
+                    <FaInfoCircle />
                 </span>
             </OverlayTrigger>
         </>

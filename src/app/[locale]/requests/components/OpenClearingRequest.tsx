@@ -86,7 +86,7 @@ function OpenClearingRequest() {
             });
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => [
-                    item.id,
+                    {requestId: item.id},
                     item.projectBU ?? '',
                     { projectId: item.projectId ?? '',
                       projectName: item.projectName ?? '' },
@@ -111,6 +111,14 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.requestId',
             name: t('Request ID'),
             sort: true,
+            formatter: ({ requestId }: { requestId: string; }) =>
+                _(
+                    <>
+                        <Link href={`/requests/clearingRequest/${requestId}`} className='text-link'>
+                            {requestId}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'openClearingRequest.baBlGroup',
