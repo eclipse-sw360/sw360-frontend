@@ -19,6 +19,7 @@ import { signOut, useSession } from 'next-auth/react'
 import styles from './../../../moderationRequest/[id]/moderationRequestDetail.module.css'
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
+import ClearingRequestInfo from './ClearingRequestInfo'
 
 
 function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
@@ -73,6 +74,8 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         })}, [fetchData, session])
 
     const handleEditClearingRequest = () => {
+        
+        // Temp code
         console.log('Edit Clearing Request')
         router.push('/requests')
     }
@@ -139,7 +142,13 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                     <Collapse in={openCardIndex === 0}>
                                         <div id="example-collapse-text-1">
                                             <Card.Body className = {`${styles['card-body']}`}>
-                                                
+                                                <div className="row">
+                                                    <div className="col">
+                                                        <ClearingRequestInfo
+                                                            data={clearingRequestData}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </Card.Body>
                                         </div>
                                     </Collapse>

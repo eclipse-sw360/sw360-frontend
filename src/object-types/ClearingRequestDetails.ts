@@ -16,6 +16,7 @@ export default interface ClearingRequestDetails{
     projectId?: string,
     projectName?: string,
     requestingUser?: string,
+    requestingUserName?: string,
     projectBU?: string,
     requestingUserComment?: string,
     clearingTeam?: string,
