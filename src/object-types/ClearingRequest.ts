@@ -14,8 +14,10 @@ export default interface ClearingRequest {
     projectId?: string
     clearingState?: string
     requestingUser?: string
+    requestingUserName?: string,
     projectBU?: string
     clearingTeam?: string
+    clearingTeamName?: string
     agreedClearingDate?: string
     priority?: string
     projectName?: string

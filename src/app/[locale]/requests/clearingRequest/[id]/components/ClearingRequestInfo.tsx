@@ -13,11 +13,17 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails } from '@/object-types'
 import styles from './../../../moderationRequest/[id]/moderationRequestDetail.module.css'
+import { signOut, useSession } from 'next-auth/react'
 
 
 export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails }) {
     const t = useTranslations('default')
+    const { status } = useSession()
 
+
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
     return (
         <>
             <table className={`table label-value-table ${styles['summary-table']}`}>
@@ -53,10 +59,10 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     </tr>
                     <tr>
                         <td>{t('Requester Comment')}:</td>
-                        <td>{data.requestingUserComment}</td>
+                        <td>{data.requestingUserComment ?? ''}</td>
                     </tr>
                 </tbody>
             </table>
         </>
-    )
+    )}
 }

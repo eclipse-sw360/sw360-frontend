@@ -20,12 +20,13 @@ import styles from './../../../moderationRequest/[id]/moderationRequestDetail.mo
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
 import ClearingRequestInfo from './ClearingRequestInfo'
+import ClearingDecision from './ClearingDecision'
 
 
 function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
 
     const t = useTranslations('default')
-    const [openCardIndex, setOpenCardIndex] = useState<number>(0);
+    const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const { data: session, status } = useSession()
     const router = useRouter()
     const toastShownRef = useRef(false);
@@ -44,10 +45,6 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         reOpenOn: null,
         comments: [{}]
     })
-    // const [clearingRequestPayload, setClearingRequestPayload] =
-    //                                      useState<ClearingRequestPayload | undefined>({
-    //     action: ''
-    // })
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -145,6 +142,11 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 <div className="row">
                                                     <div className="col">
                                                         <ClearingRequestInfo
+                                                            data={clearingRequestData}
+                                                        />
+                                                    </div>
+                                                    <div className="col">
+                                                        <ClearingDecision
                                                             data={clearingRequestData}
                                                         />
                                                     </div>

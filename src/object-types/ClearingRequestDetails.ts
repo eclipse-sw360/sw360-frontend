@@ -20,9 +20,11 @@ export default interface ClearingRequestDetails{
     projectBU?: string,
     requestingUserComment?: string,
     clearingTeam?: string,
+    clearingTeamName?: string,
     agreedClearingDate?: string,
     priority?: string,
     clearingType?: string,
+    clearingState?: string,
     reOpenOn?: number,
     comments?: [{
         text?: string,
