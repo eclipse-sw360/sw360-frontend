@@ -10,21 +10,115 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
+import { ApiUtils } from '@/utils/index'
+import { Embedded, HttpStatus } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
+import { ClearingRequest } from '@/object-types'
+import { Spinner } from 'react-bootstrap'
+
+type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
+interface ClearingRequestStatusMap {
+    [key: string]: string;
+}
+interface ClearingRequestPriorityMap {
+    [key: string]: string;
+}
+interface ClearingRequestTypeMap {
+    [key: string]: string;
+}
 
 
 function OpenClearingRequest() {
 
     const t = useTranslations('default')
-    const [tableData] = useState<Array<any>>([])
+    const [loading, setLoading] = useState(true)
+    const { data: session, status } = useSession()
+    const [tableData, setTableData] = useState<Array<any>>([])
+    const clearingRequestStatus : ClearingRequestStatusMap = {
+        NEW: t('New'),
+        IN_PROGRESS: t('In Progress'),
+        ACCEPTED: t('ACCEPTED'),
+        PENDING_INPUT: t('Pending Input'),
+        REJECTED: t('REJECTED'),
+        IN_QUEUE: t('In Queue'),
+        CLOSED: t('Closed'),
+        AWAITING_RESPONSE: t('Awaiting Response'),
+        ON_HOLD: t('On Hold'),
+        SANITY_CHECK: t('Sanity Check')
+    };
+
+    const clearingRequestPriority : ClearingRequestPriorityMap = {
+        LOW: t('Low'),
+        MEDIUM: t('Medium'),
+        HIGH: t('High'),
+        CRITICAL: t('Critical')
+    };
+    
+    const clearingRequestType : ClearingRequestTypeMap = {
+        DEEP: t('Deep'),
+        HIGH: t('High')
+    };
+
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedClearingRequest
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
+    )
+
+    useEffect(() => {
+        setLoading(true)
+        void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest) => {
+            const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
+                                                                .filter((item: ClearingRequest) => {
+                return item.clearingState != 'ACCEPTED' && item.clearingState != 'CLOSED';
+            });
+            setTableData(
+                filteredClearingRequests.map((item: ClearingRequest) => [
+                    {requestId: item.id},
+                    item.projectBU ?? '',
+                    { projectId: item.projectId ?? '',
+                      projectName: item.projectName ?? '' },
+                    '',
+                    clearingRequestStatus[item.clearingState] ?? '',
+                    { priority: item.priority ?? '' },
+                    item.requestingUser ?? '',
+                    '',
+                    '',
+                    item.requestedClearingDate ?? '',
+                    '',
+                    clearingRequestType[item.clearingType] ?? '',
+                    ''
+                ])
+            )
+            setLoading(false)
+        })}, [fetchData, session])
+
 
     const columns = [
         {
             id: 'openClearingRequest.requestId',
             name: t('Request ID'),
             sort: true,
+            formatter: ({ requestId }: { requestId: string; }) =>
+                _(
+                    <>
+                        <Link href={`/requests/clearingRequest/${requestId}`} className='text-link'>
+                            {requestId}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'openClearingRequest.baBlGroup',
@@ -35,6 +129,14 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.project',
             name: t('Project'),
             sort: true,
+            formatter: ({ projectId, projectName }: { projectId: string; projectName: string }) =>
+                _(
+                    <>
+                        <Link href={`/projects/detail/${projectId}`} className='text-link'>
+                            {projectName}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'openClearingRequest.openReleases',
@@ -50,23 +152,50 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.priority',
             name: t('Priority'),
             sort: true,
+            formatter: ({ priority }: { priority: string }) =>
+                _(
+                    <>
+                        {priority && priority === 'LOW' && (
+                            <>
+                                <div className='text-success'>
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                        {priority && priority === 'MEDIUM' && (
+                            <>
+                                <div className='text-primary'>
+
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                        {priority && priority === 'HIGH' && (
+                            <>
+                                <div className='text-warning'>
+
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                        {priority && priority === 'CRITICAL' && (
+                            <>
+                                <div className='text-danger'>
+                                    <b>{clearingRequestPriority[priority]}</b>
+                                </div>
+                            </>
+                        )}
+                    </>
+                ),
         },
         {
-            id: 'openClearingRequest.reqestingUser',
+            id: 'openClearingRequest.requestingUser',
             name: t('Requesting User'),
-            formatter: (email: string) =>
-            _(
-                <>
-                    <Link href={`mailto:${email}`} className='text-link'>
-                        {email}
-                    </Link>
-                </>
-            ),
             sort: true,
         },
         {
-            id: 'openClearingRequest.clearingProcess ',
-            name: t('Clearing Process'),
+            id: 'openClearingRequest.clearingProgress',
+            name: t('Clearing Progress'),
             sort: true,
         },
         {
@@ -85,28 +214,36 @@ function OpenClearingRequest() {
             sort: true,
         },
         {
-            id: 'openClearingRequest.clearingType ',
+            id: 'openClearingRequest.clearingType',
             name: t('Clearing Type'),
             sort: true,
         },
         {
-            id: 'openClearingRequest.actions ',
+            id: 'openClearingRequest.actions',
             name: t('Actions'),
             sort: true,
         }
     ]
 
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
     return (
         <>
             <div className='row mb-4'>
                 <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <div style={{ paddingLeft: '0px' }}>
-                        <Table columns={columns} data={tableData} sort={false} selector={true} />
-                    </div>
+                    {loading == false ? (
+                        <div style={{ paddingLeft: '0px' }}>
+                            <Table columns={columns} data={tableData} sort={false} selector={true} />
+                        </div>
+                        ) : (
+                                <Spinner className='spinner' />
+                        )
+                    }
                 </div>
             </div>
         </>
-    )
+    )}
 }
 
 export default OpenClearingRequest

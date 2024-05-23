@@ -18,6 +18,8 @@ import COTSDetails from './COTSDetails'
 import CVEReference from './CVEReference'
 import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
+import ClearingRequest from './ClearingRequest'
+import ClearingRequestDetails from './ClearingRequestDetails'
 import Component from './Component'
 import ComponentPayload from './ComponentPayLoad'
 import ECCInformation from './ECCInformation'
@@ -95,6 +97,8 @@ export type {
     Changelogs,
     CheckSum,
     ClearingInformation,
+    ClearingRequest,
+    ClearingRequestDetails,
     Component,
     ComponentPayload,
     Creator,
