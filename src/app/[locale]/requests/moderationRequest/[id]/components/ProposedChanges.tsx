@@ -13,7 +13,6 @@
 import { useTranslations } from 'next-intl'
 import { Component,
          HttpStatus,
-         LicenseDetail,
          ModerationRequestDetails,
          Project,
          ReleaseDetail } from '@/object-types'
@@ -42,10 +41,7 @@ export default function ProposedChanges({ moderationRequestData }:
     const [requestAdditionType, setRequestAdditionType] = useState<string>('')
     const [requestDeletionType, setRequestDeletionType] = useState<string>('')
     const [proposedBasicChangesData, setProposedBasicChangesData] = useState([])
-    const [documentData, setDocumentData] = useState<Component|
-                                                     Project|
-                                                     LicenseDetail|
-                                                     ReleaseDetail>({})
+    // const [documentData, setDocumentData] = useState<interimDataType>({})
     const [proposedAttachmentChangesData] = useState([])
     const columns = [
         {
@@ -84,7 +80,7 @@ export default function ProposedChanges({ moderationRequestData }:
         },[session]
     )
 
-    const dataExtractor = (data: Component | Project | LicenseDetail | ReleaseDetail) => {
+    const dataExtractor = (data: interimDataType) => {
 
         const documentAdditions = moderationRequestData[requestAdditionType as keyof 
                                                             ModerationRequestDetails] as interimDataType
@@ -95,11 +91,10 @@ export default function ProposedChanges({ moderationRequestData }:
         for (const key in documentAdditions) {
             if (key in documentAdditions && key in documentDeletions) {
                 if (documentAdditions[key] !== documentDeletions[key]) {
-                    differingKeys.push([key, '', documentDeletions[key], documentAdditions[key]]);
+                    differingKeys.push([key, data[key], documentDeletions[key], documentAdditions[key]])
                 }
             }
         }
-        console.log('AKJSHNDFKNASDKF....', differingKeys)
 
         // This part of code needs refactor once rest api is refactored
         setProposedBasicChangesData(differingKeys)
@@ -112,10 +107,15 @@ export default function ProposedChanges({ moderationRequestData }:
             console.log(requestAdditionType, requestDeletionType)
             void fetchData(`components/${moderationRequestData.documentId}`).then(
                             (componentDetail: Component) => {
-                                setDocumentData(componentDetail)
-                dataExtractor(documentData)
+                                // The double type assertion is introduced to make the code more
+                                // generic and to access the keys (i.e. data[keys]) in the dataExtractor
+                                // function in line (differingKeys.push([key, data[key], documentDeletions[key],
+                                // documentAdditions[key]])) of response type be component, or project,
+                                // or even release in one go. Although for safety purpose we are already
+                                // doign the type checking in previous line (i.e. in api response)
+                                const interimData = componentDetail as unknown as interimDataType
+                                dataExtractor(interimData)
             })
-            console.log(documentData)
         }
         else if (moderationRequestData.documentType == RequestDocumentTypes.LICENSE){
             setRequestAdditionType(RequestDocumentTypes.LICENSE_ADDITION)
@@ -126,7 +126,14 @@ export default function ProposedChanges({ moderationRequestData }:
             setRequestDeletionType(RequestDocumentTypes.PROJECT_DELETION)
             void fetchData(`projects/${moderationRequestData.documentId}`).then(
                             (projectDetail: Project) => {
-                                setDocumentData(projectDetail)
+                                // The double type assertion is introduced to make the code more
+                                // generic and to access the keys (i.e. data[keys]) in the dataExtractor
+                                // function in line (differingKeys.push([key, data[key], documentDeletions[key],
+                                // documentAdditions[key]])) of response type be component, or project,
+                                // or even release in one go. Although for safety purpose we are already
+                                // doign the type checking in previous line (i.e. in api response)
+                                const interimData = projectDetail as unknown as interimDataType
+                                dataExtractor(interimData)
             })
         }
         else if (moderationRequestData.documentType == RequestDocumentTypes.RELEASE){
@@ -134,7 +141,14 @@ export default function ProposedChanges({ moderationRequestData }:
             setRequestDeletionType(RequestDocumentTypes.RELEASE_DELETION)
             void fetchData(`releases/${moderationRequestData.documentId}`).then(
                             (releaseDetail: ReleaseDetail) => {
-                                setDocumentData(releaseDetail)
+                                // The double type assertion is introduced to make the code more
+                                // generic and to access the keys (i.e. data[keys]) in the dataExtractor
+                                // function in line (differingKeys.push([key, data[key], documentDeletions[key],
+                                // documentAdditions[key]])) of response type be component, or project,
+                                // or even release in one go. Although for safety purpose we are already
+                                // doign the type checking in previous line (i.e. in api response)
+                                const interimData = releaseDetail as unknown as interimDataType
+                                dataExtractor(interimData)
             })
         }
     }, [moderationRequestData])
