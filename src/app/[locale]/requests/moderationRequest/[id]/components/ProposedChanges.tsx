@@ -105,6 +105,10 @@ export default function ProposedChanges({ data }: { data: ModerationRequestDetai
         else if (data.documentType == RequestDocumentTypes.RELEASE){
             setRequestAdditionType(RequestDocumentTypes.RELEASE_ADDITION)
             setRequestDelitionType(RequestDocumentTypes.RELEASE_DELETION)
+            void fetchData(`releases/${data.documentId}`).then(
+                            (releaseDetail: ReleaseDetail) => {
+                                setDocumentData(releaseDetail)
+            })
         }
 
         
