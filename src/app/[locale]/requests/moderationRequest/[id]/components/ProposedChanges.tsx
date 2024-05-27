@@ -28,14 +28,19 @@ import { notFound } from 'next/navigation'
 import { AUTH_TOKEN } from '@/utils/env'
 
 
-export default function ProposedChanges({ data }: { data: ModerationRequestDetails }) {
+interface interimDataType {
+    [k: string]: string,
+}
+
+export default function ProposedChanges({ moderationRequestData }:
+                                        { moderationRequestData: ModerationRequestDetails }) {
 
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const dafaultTitle = t('BASIC FIELD CHANGES')
     const attachmentTitle = t('ATTACHMENTS')
-    const [requestAdditionType, setRequestAdditionType] = useState('')
-    const [requestDelitionType, setRequestDelitionType] = useState('')
+    const [requestAdditionType, setRequestAdditionType] = useState<string>('')
+    const [requestDeletionType, setRequestDeletionType] = useState<string>('')
     const [proposedBasicChangesData, setProposedBasicChangesData] = useState([])
     const [documentData, setDocumentData] = useState<Component|
                                                      Project|
@@ -79,46 +84,60 @@ export default function ProposedChanges({ data }: { data: ModerationRequestDetai
         },[session]
     )
 
+    const dataExtractor = (data: Component | Project | LicenseDetail | ReleaseDetail) => {
+
+        const documentAdditions = moderationRequestData[requestAdditionType as keyof 
+                                                            ModerationRequestDetails] as interimDataType
+        const documentDeletions = moderationRequestData[requestDeletionType as keyof
+                                                            ModerationRequestDetails] as interimDataType
+        console.log(data)
+        const differingKeys: Array<any> = [];
+        for (const key in documentAdditions) {
+            if (key in documentAdditions && key in documentDeletions) {
+                if (documentAdditions[key] !== documentDeletions[key]) {
+                    differingKeys.push([key, '', documentDeletions[key], documentAdditions[key]]);
+                }
+            }
+        }
+        console.log('AKJSHNDFKNASDKF....', differingKeys)
+
+        // This part of code needs refactor once rest api is refactored
+        setProposedBasicChangesData(differingKeys)
+    }
+
     useEffect(() => {
-        if (data.documentType == RequestDocumentTypes.COMPONENT){
+        if (moderationRequestData.documentType == RequestDocumentTypes.COMPONENT){
             setRequestAdditionType(RequestDocumentTypes.COMPONENT_ADDITION)
-            setRequestDelitionType(RequestDocumentTypes.COMPONENT_DELETION)
-            console.log(requestAdditionType, requestDelitionType)
-            void fetchData(`components/${data.documentId}`).then(
+            setRequestDeletionType(RequestDocumentTypes.COMPONENT_DELETION)
+            console.log(requestAdditionType, requestDeletionType)
+            void fetchData(`components/${moderationRequestData.documentId}`).then(
                             (componentDetail: Component) => {
                                 setDocumentData(componentDetail)
+                dataExtractor(documentData)
             })
             console.log(documentData)
         }
-        else if (data.documentType == RequestDocumentTypes.LICENSE){
+        else if (moderationRequestData.documentType == RequestDocumentTypes.LICENSE){
             setRequestAdditionType(RequestDocumentTypes.LICENSE_ADDITION)
-            setRequestDelitionType(RequestDocumentTypes.LICENSE_DELETION)
+            setRequestDeletionType(RequestDocumentTypes.LICENSE_DELETION)
         }
-        else if (data.documentType == RequestDocumentTypes.PROJECT){
+        else if (moderationRequestData.documentType == RequestDocumentTypes.PROJECT){
             setRequestAdditionType(RequestDocumentTypes.PROJECT_ADDITION)
-            setRequestDelitionType(RequestDocumentTypes.PROJECT_DELETION)
-            void fetchData(`projects/${data.documentId}`).then(
+            setRequestDeletionType(RequestDocumentTypes.PROJECT_DELETION)
+            void fetchData(`projects/${moderationRequestData.documentId}`).then(
                             (projectDetail: Project) => {
                                 setDocumentData(projectDetail)
             })
         }
-        else if (data.documentType == RequestDocumentTypes.RELEASE){
+        else if (moderationRequestData.documentType == RequestDocumentTypes.RELEASE){
             setRequestAdditionType(RequestDocumentTypes.RELEASE_ADDITION)
-            setRequestDelitionType(RequestDocumentTypes.RELEASE_DELETION)
-            void fetchData(`releases/${data.documentId}`).then(
+            setRequestDeletionType(RequestDocumentTypes.RELEASE_DELETION)
+            void fetchData(`releases/${moderationRequestData.documentId}`).then(
                             (releaseDetail: ReleaseDetail) => {
                                 setDocumentData(releaseDetail)
             })
         }
-
-        
-        // This part of code needs refactor once rest api is refactored
-        setProposedBasicChangesData(
-            [['visibility',
-            'old_data',
-            'new_Data',
-            'newest data']])
-        }, [data])
+    }, [moderationRequestData])
 
 
     if (status === 'unauthenticated') {

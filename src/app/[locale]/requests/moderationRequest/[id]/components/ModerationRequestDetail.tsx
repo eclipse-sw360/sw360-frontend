@@ -302,7 +302,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                             <Card.Body className = {`${styles['card-body']}`}>
                                                 <div className="row">
                                                     <div className="col">
-                                                        <ProposedChanges data={moderationRequestData}/>
+                                                        <ProposedChanges moderationRequestData={moderationRequestData}/>
                                                     </div>
                                                 </div>
                                             </Card.Body>
