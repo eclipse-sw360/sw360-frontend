@@ -82,7 +82,7 @@ function OpenClearingRequest() {
         void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest) => {
             const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
                                                                 .filter((item: ClearingRequest) => {
-                return item.clearingState != 'ACCEPTED' && item.clearingState != 'CLOSED';
+                return item.clearingState != 'REJECTED' && item.clearingState != 'CLOSED';
             });
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => [
