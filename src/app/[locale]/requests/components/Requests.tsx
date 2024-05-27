@@ -159,12 +159,12 @@ function Requests() {
                     let closedMRCount = 0
                     moderationRequests['_embedded']['sw360:moderationRequests']
                     .filter((item: ModerationRequest) => {
-                        if (  item.moderationState === 'PENDING' ||
-                              item.moderationState === 'INPROGRESS'){
+                        if (item.moderationState === 'PENDING' ||
+                            item.moderationState === 'INPROGRESS') {
                                 openMRCount++;
                         }
-                        else if ( item.moderationState === 'APPROVED' ||
-                                  item.moderationState === 'REJECTED'){
+                        else if (item.moderationState === 'APPROVED' ||
+                                 item.moderationState === 'REJECTED') {
                                     closedMRCount++;
                         }
                     })
@@ -177,18 +177,18 @@ function Requests() {
                 let closedCRCount = 0
                 clearingRequests['_embedded']['sw360:clearingRequests']
                 .filter((item: ClearingRequest) => {
-                    if (  item.clearingState === 'NEW' ||
-                          item.clearingState === 'ACCEPTED' ||
-                          item.clearingState === 'IN_QUEUE' ||
-                          item.clearingState === 'IN_PROGRESS' ||
-                          item.clearingState === 'AWAITING_RESPONSE' ||
-                          item.clearingState === 'ON_HOLD' ||
-                          item.clearingState === 'SANITY_CHECK' ||
-                          item.clearingState === 'PENDING_INPUT'){
+                    if (item.clearingState === 'NEW' ||
+                        item.clearingState === 'ACCEPTED' ||
+                        item.clearingState === 'IN_QUEUE' ||
+                        item.clearingState === 'IN_PROGRESS' ||
+                        item.clearingState === 'AWAITING_RESPONSE' ||
+                        item.clearingState === 'ON_HOLD' ||
+                        item.clearingState === 'SANITY_CHECK' ||
+                        item.clearingState === 'PENDING_INPUT') {
                             openCRCount++;
                     }
-                    else if ( item.clearingState === 'CLOSED' ||
-                              item.clearingState === 'REJECTED'){
+                    else if (item.clearingState === 'CLOSED' ||
+                             item.clearingState === 'REJECTED') {
                                 closedCRCount++;
                     }
                 })
