@@ -75,8 +75,7 @@ export default function ProposedChanges({ data }: { data: ModerationRequestDetai
             [['visibility',
             'old_data',
             'new_Data',
-            'newest data']]
-        )
+            'newest data']])
         }, [data])
 
 
@@ -93,19 +92,27 @@ export default function ProposedChanges({ data }: { data: ModerationRequestDetai
                 <div>
                     <TableHeader title={dafaultTitle} />
                     <div className = {`${styles}`}>
-                        <Table columns={columns} data={proposedBasicChangesData} pagination={{ limit: 5 }} selector={false}/>
+                        <Table columns={columns}
+                               data={proposedBasicChangesData}
+                               pagination={{ limit: 5 }}
+                               selector={false}/>
                     </div>
                 </div>
             )}
         {proposedAttachmentChangesData.length === 0 ? (
                 <div>
                     <TableHeader title={attachmentTitle} />
-                    <div className='subscriptionBox'>{t('No changes in attachments')}</div>
+                    <div className='subscriptionBox'>
+                        {t('No changes in attachments')}
+                    </div>
                 </div>
             ) : (
                 <div>
                     <TableHeader title={attachmentTitle} />
-                        <Table columns={columns} data={proposedAttachmentChangesData} pagination={{ limit: 5 }} selector={false}/>
+                        <Table columns={columns}
+                               data={proposedAttachmentChangesData}
+                               pagination={{ limit: 5 }}
+                               selector={false}/>
                 </div>
             )}
         </>
