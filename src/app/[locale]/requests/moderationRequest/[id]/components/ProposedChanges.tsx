@@ -84,7 +84,6 @@ export default function ProposedChanges({ data }: { data: ModerationRequestDetai
             setRequestAdditionType(RequestDocumentTypes.COMPONENT_ADDITION)
             setRequestDelitionType(RequestDocumentTypes.COMPONENT_DELETION)
             console.log(requestAdditionType, requestDelitionType)
-            console.log(data.documentId)
             void fetchData(`components/${data.documentId}`).then(
                             (componentDetail: Component) => {
                                 setDocumentData(componentDetail)
@@ -98,6 +97,10 @@ export default function ProposedChanges({ data }: { data: ModerationRequestDetai
         else if (data.documentType == RequestDocumentTypes.PROJECT){
             setRequestAdditionType(RequestDocumentTypes.PROJECT_ADDITION)
             setRequestDelitionType(RequestDocumentTypes.PROJECT_DELETION)
+            void fetchData(`projects/${data.documentId}`).then(
+                            (projectDetail: Project) => {
+                                setDocumentData(projectDetail)
+            })
         }
         else if (data.documentType == RequestDocumentTypes.RELEASE){
             setRequestAdditionType(RequestDocumentTypes.RELEASE_ADDITION)
