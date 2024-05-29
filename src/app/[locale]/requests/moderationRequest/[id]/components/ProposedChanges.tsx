@@ -91,21 +91,21 @@ export default function ProposedChanges({ moderationRequestData }:
         // Condition when the existing data is modified
         for ( const key in documentDeletions) {
             if (key in documentAdditions) {
-                if (documentDeletions[key] != documentAdditions[key])
-                    {
-                        if (typeof documentAdditions[key] === "object" && 
-                            typeof documentDeletions[key] === "object" &&
-                            Object.keys(documentAdditions[key]).length !== 0 &&
-                            Object.keys(documentDeletions[key]).length === 0) {
-                                for (const k in (documentAdditions as interimDataType)[key]) {
-                                    changedData.push([ `${key}[${k}]:`,
-                                        ((interimData as interimDataType)[key] != null && 
-                                        (interimData as interimDataType)[key][k]) ?
-                                        (interimData as interimDataType)[key][k] : '',
-                                        'n.a. (modified list)',
-                                        documentAdditions[key][k]])
-                                    
-                                }}
+                if (documentDeletions[key] != documentAdditions[key]) {
+                    if (typeof documentAdditions[key] === "object" && 
+                        typeof documentDeletions[key] === "object" &&
+                        Object.keys(documentAdditions[key]).length !== 0 &&
+                        Object.keys(documentDeletions[key]).length === 0) {
+                            for (const k in documentAdditions[key]) {
+                                changedData.push([ `${key}[${k}]:`,
+                                    ((interimData as interimDataType)[key] != null && 
+                                    (interimData as interimDataType)[key][k]) ?
+                                    (interimData as interimDataType)[key][k] : '',
+                                    t('n a modified list'),
+                                    documentAdditions[key][k]])
+                                
+                            }
+                    }
                 }
             }
         }

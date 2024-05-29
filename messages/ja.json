@@ -984,6 +984,7 @@
     "integrity": "誠実さ",
     "key": "鍵",
     "learn_more_components": "コンポーネントの種類について詳しくは、こちらをご覧くだ い。",
+    "n a modified list": "いや。 (変更されたリスト)",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> of the vulnerabilities were matched by <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "There has to be exactly one source attachment, but there are {count} at this release. Please come back once you corrected that.",
     "other documents might use the licenses": "注意:その他の文書はライセンスを使用する場合があります。",

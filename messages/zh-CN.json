@@ -984,6 +984,7 @@
     "integrity": "正直",
     "key": "钥匙",
     "learn_more_components": "了解有关组件类型的更多信息。",
+    "n a modified list": "不适用（修改后的列表）",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> 个漏洞与 <strong>{matchedBy}</strong> 匹配",
     "number_of_attachments_not_match_condition": "必须只有一个源附件，但此版本中有 {count} 个。\n更正后请回来。",
     "other documents might use the licenses": "注:其他文件可能使用许可证。",

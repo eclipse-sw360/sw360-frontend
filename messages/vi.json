@@ -984,6 +984,7 @@
     "integrity": "chính trực",
     "key": "chìa khóa",
     "learn_more_components": "Tìm hiểu thêm về các loại thành phần.",
+    "n a modified list": "không (danh sách đã sửa đổi)",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> số các lỗ hổng đã được so khớp bởi <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "Phải có chính xác một tệp đính kèm nguồn nhưng có {count} ở bản phát hành này. \nVui lòng quay lại sau khi bạn sửa lỗi đó.",
     "other documents might use the licenses": "Lưu ý: các tài liệu khác có thể sử dụng giấy phép.",

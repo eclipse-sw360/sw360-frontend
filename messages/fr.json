@@ -984,6 +984,7 @@
     "integrity": "intégrité",
     "key": "clé",
     "learn_more_components": "En savoir plus sur les types de composants.",
+    "n a modified list": "n / A. (liste modifiée)",
     "number of the vulnerabilities were matched by": "<strong>{compte}</strong> des vulnérabilités ont été jumelées par <strong>{comparé par}</strong>",
     "number_of_attachments_not_match_condition": "Il doit y avoir exactement une pièce jointe source, mais il y a {count} à cette publication. Revenez une fois que vous l'avez corrigé.",
     "other documents might use the licenses": "Remarque : d'autres documents pourraient utiliser les licences.",

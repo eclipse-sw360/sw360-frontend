@@ -984,6 +984,7 @@
     "integrity": "이름 *",
     "key": "주요 특징",
     "learn_more_components": "구성요소 유형에 대해 자세히 알아보세요.",
+    "n a modified list": "해당 없음 (수정된 목록)",
     "number of the vulnerabilities were matched by": "<strong>이름 *</strong> 취약점의 일치 <strong>이름 *</strong>",
     "number_of_attachments_not_match_condition": "정확히 하나의 소스 첨부 파일이 있지만,이 릴리스에서 {count}이 있습니다. 한 번에 다시 오십시오.",
     "other documents might use the licenses": "참고 : 다른 문서는 라이센스를 사용할 수 있습니다.",

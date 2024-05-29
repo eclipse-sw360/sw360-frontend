@@ -984,6 +984,7 @@
     "integrity": "integrity",
     "key": "key",
     "learn_more_components": "Learn more about component types.",
+    "n a modified list": "n.a. (modified list)",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> of the vulnerabilities were matched by <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "There has to be exactly one source attachment, but there are {count} at this release. Please come back once you corrected that.",
     "other documents might use the licenses": "Note: other documents might use the licenses.",

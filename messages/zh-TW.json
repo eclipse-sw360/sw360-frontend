@@ -984,6 +984,7 @@
     "integrity": "完整性",
     "key": "按鍵",
     "learn_more_components": "了解更多元件類型 。",
+    "n a modified list": "不適用（修改後的清單）",
     "number of the vulnerabilities were matched by": "<strong>{計數}</strong> 与脆弱性相匹配 <strong>{匹配By}</strong>",
     "number_of_attachments_not_match_condition": "必須有一個來源附件, 但此放行時有 {count} 。 校正了再回來吧",
     "other documents might use the licenses": "注:其他文件可能使用许可证。",
