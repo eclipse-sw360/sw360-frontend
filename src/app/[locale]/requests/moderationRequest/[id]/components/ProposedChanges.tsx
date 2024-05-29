@@ -103,9 +103,25 @@ export default function ProposedChanges({ moderationRequestData }:
                                     (interimData as interimDataType)[key][k] : '',
                                     t('n a modified list'),
                                     documentAdditions[key][k]])
-                                
                             }
                     }
+                else if (typeof documentAdditions[key] === "object" && 
+                         typeof documentDeletions[key] === "object" &&
+                         Object.keys(documentDeletions[key]).length !== 0 &&
+                         Object.keys(documentAdditions[key]).length === 0) {
+
+                            for (const k in documentDeletions[key]) {
+                                 const filteredData = (interimData as interimDataType)[key]
+                                                    .filter((item: interimDataType) => {
+                                    return !(item[k] === (interimData as interimDataType)[key][k])
+                                })
+                                changedData.push([ `${key}[${k}]:`,
+                                    ((interimData as interimDataType)[key] != null && 
+                                    (interimData as interimDataType)[key][k]) ?
+                                    (interimData as interimDataType)[key][k] : '',
+                                    t('n a modified list'),
+                                    filteredData[k]])
+                        }}
                 }
             }
         }
