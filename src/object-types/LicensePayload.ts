@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Obligation from "./Obligation"
+import { Obligation } from "./Obligation"
 
 export default interface LicensePayload {
     shortName?: string

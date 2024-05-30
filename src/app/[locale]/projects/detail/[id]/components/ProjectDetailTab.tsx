@@ -24,6 +24,7 @@ import LicenseClearing from './LicenseClearing'
 import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import AttachmentUsages from './AttachmentUsages'
+import Obligations from './Obligations/Obligations'
 import ProjectAttachments from './Attachments'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 import MessageService from '@/services/message.service'
@@ -175,7 +176,9 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                             />
                                         )}
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey='obligations'></Tab.Pane>
+                                    <Tab.Pane eventKey='obligations'>
+                                        <Obligations projectId={projectId}/>
+                                    </Tab.Pane>
                                     <Tab.Pane eventKey='ecc'>
                                         <EccDetails projectId={projectId} />
                                     </Tab.Pane>

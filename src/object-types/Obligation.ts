@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface Obligation {
+export interface Obligation {
     id?: string
     type?: string
     text?: string
@@ -25,5 +25,35 @@ export default interface Obligation {
         self: {
             href: string
         }
+    }
+}
+
+export interface LicenseObligationRelease {
+    name: string
+    version: string
+    type: string
+    id: string
+}
+
+interface ProjectObligation {
+    [k: string]: {
+        text?: string
+        licenseIds?: string[]
+        id?: string
+        obligationLevel?: string
+        status?: string
+        comment?: string
+        type?: string
+        releases?: LicenseObligationRelease[]
+    }
+}
+
+export interface ProjectObligationsList {
+    licenseObligations: ProjectObligation
+    page?: {
+        size?: number
+        totalElements?: number
+        totalPages?: number
+        number?: number
     }
 }
