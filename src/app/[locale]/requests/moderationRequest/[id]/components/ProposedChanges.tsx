@@ -20,7 +20,7 @@ import styles from '../moderationRequestDetail.module.css'
 import { useCallback, useEffect, useState } from 'react'
 import { RequestDocumentTypes } from '@/object-types'
 import TableHeader from './TableHeader'
-import { Table } from 'next-sw360'
+import { Table, _ } from 'next-sw360'
 import { ApiUtils } from '@/utils/index'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
@@ -53,6 +53,12 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.currentValue',
             name: t('Current Value'),
             sort: true,
+            formatter: (currentValue: string[]) =>
+                _( currentValue.map((item: string) =>
+                    <>
+                        {<li>{`${item}`}</li>}
+                    </>
+                ))
         },
         {
             id: 'proposedChanges.formerValue',
@@ -63,6 +69,12 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.suggestedValue',
             name: t('Suggested Value'),
             sort: true,
+            formatter: (suggestedValue: string[]) =>
+                _( suggestedValue.map((item: string) =>
+                    <>
+                        {<li>{`${item}`}</li>}
+                    </>
+                ))
         }
     ]
 
