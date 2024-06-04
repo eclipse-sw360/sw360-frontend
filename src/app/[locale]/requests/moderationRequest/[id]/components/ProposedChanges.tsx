@@ -160,9 +160,10 @@ export default function ProposedChanges({ moderationRequestData }:
             if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
                 isObject = false
                 changedData.push([key,
-                                 ((interimData as interimDataType)[key] != null && 
-                                 (interimData as interimDataType)[key]) ?
-                                 [(interimData as interimDataType)[key], isObject] : ['', isObject],
+                                 Object.hasOwn(interimData as interimDataType, key) &&
+                                    (interimData as interimDataType)[key] !== '' ?
+                                    [(interimData as interimDataType)[key], isObject] :
+                                    ['', isObject],
                                  '',
                                  [documentAdditions[key], isObject]])
             }
