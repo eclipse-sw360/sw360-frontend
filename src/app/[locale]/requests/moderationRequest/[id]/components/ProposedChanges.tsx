@@ -41,7 +41,7 @@ export default function ProposedChanges({ moderationRequestData }:
     const [requestAdditionType, setRequestAdditionType] = useState<string>('')
     const [requestDeletionType, setRequestDeletionType] = useState<string>('')
     const [proposedBasicChangesData, setProposedBasicChangesData] = useState([])
-    // const [documentData, setDocumentData] = useState<interimDataType>({})
+    const [documentDelete, setDocumentDelete] = useState<boolean>(false)
     const [proposedAttachmentChangesData] = useState([])
     const columns = [
         {
@@ -110,64 +110,69 @@ export default function ProposedChanges({ moderationRequestData }:
                                                             ModerationRequestDetails] as interimDataType
         const changedData: Array<any> = [];
         let isObject:boolean = false
-
-        // Condition when the existing data is modified
-        for ( const key in documentDeletions) {
-            if (key in documentAdditions) {
-                if (documentDeletions[key] != documentAdditions[key]) {
-                    if (typeof documentAdditions[key] === "object" && 
-                        typeof documentDeletions[key] === "object" &&
-                        Object.keys(documentAdditions[key]).length !== 0 &&
-                        Object.keys(documentDeletions[key]).length === 0) {
-                            isObject = true
-                            for (const k in documentAdditions[key]) {
-                                changedData.push([ `${key}[${k}]:`,
-                                    ((interimData as interimDataType)[key] != null && 
-                                    (interimData as interimDataType)[key][k]) ?
-                                    [(interimData as interimDataType)[key][k], isObject] : ['', isObject],
-                                    t('n a modified list'),
-                                    [documentAdditions[key][k], isObject]])
-                            }
+        
+        // Check if there is a document delete request raised
+        if (moderationRequestData['requestDocumentDelete'] == true) {
+            setDocumentDelete(true)
+        }
+        else {
+            // Condition when the existing data is modified
+            for ( const key in documentDeletions) {
+                if (key in documentAdditions) {
+                    if (documentDeletions[key] != documentAdditions[key]) {
+                        if (typeof documentAdditions[key] === "object" && 
+                            typeof documentDeletions[key] === "object" &&
+                            Object.keys(documentAdditions[key]).length !== 0 &&
+                            Object.keys(documentDeletions[key]).length === 0) {
+                                isObject = true
+                                for (const k in documentAdditions[key]) {
+                                    changedData.push([ `${key}[${k}]:`,
+                                        ((interimData as interimDataType)[key] != null && 
+                                        (interimData as interimDataType)[key][k]) ?
+                                        [(interimData as interimDataType)[key][k], isObject] : ['', isObject],
+                                        t('n a modified list'),
+                                        [documentAdditions[key][k], isObject]])
+                                }
+                        }
+                    else if (typeof documentAdditions[key] === "object" && 
+                            typeof documentDeletions[key] === "object" &&
+                            Object.keys(documentDeletions[key]).length !== 0 &&
+                            Object.keys(documentAdditions[key]).length === 0) {
+                                isObject = true
+                                for (const k in documentDeletions[key]) {
+                                    const filteredData = (interimData as interimDataType)[key]
+                                                        .filter((item: interimDataType) => {
+                                        return !(item[k] === (interimData as interimDataType)[key][k])
+                                    })
+                                    changedData.push([ `${key}[${k}]:`,
+                                        ((interimData as interimDataType)[key] != null && 
+                                        (interimData as interimDataType)[key][k]) ?
+                                        [(interimData as interimDataType)[key][k], isObject] : ['', isObject],
+                                        t('n a modified list'),
+                                        [filteredData[k]], isObject])
+                            }}
+                    else 
+                        changedData.push([key,
+                                        [(interimData as interimDataType)[key], isObject],
+                                        documentDeletions[key],
+                                        [documentAdditions[key], isObject]])
                     }
-                else if (typeof documentAdditions[key] === "object" && 
-                         typeof documentDeletions[key] === "object" &&
-                         Object.keys(documentDeletions[key]).length !== 0 &&
-                         Object.keys(documentAdditions[key]).length === 0) {
-                            isObject = true
-                            for (const k in documentDeletions[key]) {
-                                 const filteredData = (interimData as interimDataType)[key]
-                                                    .filter((item: interimDataType) => {
-                                    return !(item[k] === (interimData as interimDataType)[key][k])
-                                })
-                                changedData.push([ `${key}[${k}]:`,
-                                    ((interimData as interimDataType)[key] != null && 
-                                    (interimData as interimDataType)[key][k]) ?
-                                    [(interimData as interimDataType)[key][k], isObject] : ['', isObject],
-                                    t('n a modified list'),
-                                    [filteredData[k]], isObject])
-                        }}
-                else 
-                    changedData.push([key,
-                                     [(interimData as interimDataType)[key], isObject],
-                                     documentDeletions[key],
-                                     [documentAdditions[key], isObject]])
                 }
             }
-        }
 
-        // Condition when the new data are added  
-        for (const key in documentAdditions) {
-            if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
-                isObject = false
-                changedData.push([key,
-                                 Object.hasOwn(interimData as interimDataType, key) &&
-                                    (interimData as interimDataType)[key] !== '' ?
-                                    [(interimData as interimDataType)[key], isObject] :
-                                    ['', isObject],
-                                 '',
-                                 [documentAdditions[key], isObject]])
-            }
-        }
+            // Condition when the new data are added  
+            for (const key in documentAdditions) {
+                if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
+                    isObject = false
+                    changedData.push([key,
+                                    Object.hasOwn(interimData as interimDataType, key) &&
+                                        (interimData as interimDataType)[key] !== '' ?
+                                        [(interimData as interimDataType)[key], isObject] :
+                                        ['', isObject],
+                                    '',
+                                    [documentAdditions[key], isObject]])
+                }
+            }}
 
         setProposedBasicChangesData(changedData)
     }
@@ -210,39 +215,49 @@ export default function ProposedChanges({ moderationRequestData }:
     } else {
     return (
         <>
-        {proposedBasicChangesData.length === 0 ? (
+            { documentDelete === true ? (
                 <>
-                    <TableHeader title={dafaultTitle} />
-                    <div className='subscriptionBox'>
-                        {t('No changes in basic details')}
+                    <div className='subscriptionBoxDanger'>
+                        {t('The document is requested to be deleted')}
                     </div>
+                </>   
+            ) : (
+                <>
+                    { proposedBasicChangesData.length === 0 ? (
+                        <>
+                            <TableHeader title={dafaultTitle} />
+                            <div className='subscriptionBox'>
+                                {t('No changes in basic details')}
+                            </div>
+                        </>
+                    ) : (
+                        <div>
+                            <TableHeader title={dafaultTitle} />
+                            <div className = {`${styles}`}>
+                                <Table columns={columns}
+                                    data={proposedBasicChangesData}
+                                    pagination={{ limit: 5 }}
+                                    selector={false}/>
+                            </div>
+                        </div>
+                    )}
+                    { proposedAttachmentChangesData.length === 0 ? (
+                        <div>
+                            <TableHeader title={attachmentTitle} />
+                            <div className='subscriptionBox'>
+                                {t('No changes in attachments')}
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <TableHeader title={attachmentTitle} />
+                                <Table columns={columns}
+                                    data={proposedAttachmentChangesData}
+                                    pagination={{ limit: 5 }}
+                                    selector={false}/>
+                        </div>
+                    )}
                 </>
-            ) : (
-                <div>
-                    <TableHeader title={dafaultTitle} />
-                    <div className = {`${styles}`}>
-                        <Table columns={columns}
-                               data={proposedBasicChangesData}
-                               pagination={{ limit: 5 }}
-                               selector={false}/>
-                    </div>
-                </div>
-            )}
-        {proposedAttachmentChangesData.length === 0 ? (
-                <div>
-                    <TableHeader title={attachmentTitle} />
-                    <div className='subscriptionBox'>
-                        {t('No changes in attachments')}
-                    </div>
-                </div>
-            ) : (
-                <div>
-                    <TableHeader title={attachmentTitle} />
-                        <Table columns={columns}
-                               data={proposedAttachmentChangesData}
-                               pagination={{ limit: 5 }}
-                               selector={false}/>
-                </div>
             )}
         </>
     )}

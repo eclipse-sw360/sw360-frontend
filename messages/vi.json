@@ -855,6 +855,7 @@
     "Test and Diagnostics": "Kiểm tra và chẩn đoán",
     "Text": "Chữ",
     "The component cannot be deleted, since it contains releases Please delete the releases first": "Không thể xóa thành phần <strong>{name}</strong> vì nó chứa các bản phát hành <strong>{releaseCount}</strong>. \nVui lòng xóa các bản phát hành trước.",
+    "The document is requested to be deleted": "Tài liệu được yêu cầu xóa.",
     "The new Component and new Release will be created, do you want to import?": "Thành phần mới và Bản phát hành mới sẽ được tạo, bạn có muốn nhập không?",
     "The project cannot be deleted, since it is used by another project!": "",
     "The projects have been successfully linked to project": "Các dự án đã được liên kết thành công với dự án",

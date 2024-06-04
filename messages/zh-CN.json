@@ -855,6 +855,7 @@
     "Test and Diagnostics": "测试和诊断",
     "Text": "文本",
     "The component cannot be deleted, since it contains releases Please delete the releases first": "无法删除组件 <strong>{name}</strong>，因为它包含 <strong>{releaseCount}</strong> 版本。\n请先删除版本。",
+    "The document is requested to be deleted": "要求删除该文件。",
     "The new Component and new Release will be created, do you want to import?": "将创建新的组件和新的版本，是否要导入？",
     "The project cannot be deleted, since it is used by another project!": "",
     "The projects have been successfully linked to project": "项目已成功链接至项目",

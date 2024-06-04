@@ -855,6 +855,7 @@
     "Test and Diagnostics": "Test and Diagnostics",
     "Text": "Text",
     "The component cannot be deleted, since it contains releases Please delete the releases first": "The component <strong>{name}</strong> cannot be deleted, since it contains <strong>{releaseCount}</strong> releases. Please delete the releases first.",
+    "The document is requested to be deleted": "The document is requested to be deleted.",
     "The new Component and new Release will be created, do you want to import?": "The new Component and new Release will be created, do you want to import?",
     "The project cannot be deleted, since it is used by another project!": "The project cannot be deleted, since it is used by another project!",
     "The projects have been successfully linked to project": "The projects have been successfully linked to project",

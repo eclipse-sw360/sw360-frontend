@@ -855,6 +855,7 @@
     "Test and Diagnostics": "Pruebas y diagnósticos",
     "Text": "Texto",
     "The component cannot be deleted, since it contains releases Please delete the releases first": "El componente <strong>{Nombre}</strong> no se puede eliminar, ya que contiene <strong>{releaseCount}</strong> liberaciones. Por favor, elimine las liberaciones primero.",
+    "The document is requested to be deleted": "Se solicita la eliminación del documento.",
     "The new Component and new Release will be created, do you want to import?": "Se creará el nuevo componente y nueva versión, ¿quieres importar?",
     "The project cannot be deleted, since it is used by another project!": "",
     "The projects have been successfully linked to project": "Los proyectos se han relacionado con éxito con el proyecto",

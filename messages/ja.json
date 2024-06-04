@@ -855,6 +855,7 @@
     "Test and Diagnostics": "テストと診断",
     "Text": "Text",
     "The component cannot be deleted, since it contains releases Please delete the releases first": "コンポーネント <strong>{name}</strong> は <strong>{releaseCount}</strong> を持つため消去できない．最初にリリースを消去してください",
+    "The document is requested to be deleted": "文書の削除が要求されています。",
     "The new Component and new Release will be created, do you want to import?": "The new Component and new Release will be created, do you want to import?",
     "The project cannot be deleted, since it is used by another project!": "",
     "The projects have been successfully linked to project": "The projects have been successfully linked to project",
