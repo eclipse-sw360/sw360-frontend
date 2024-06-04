@@ -155,7 +155,19 @@ export default function ProposedChanges({ moderationRequestData }:
             }
         }
 
-        // This part of code needs refactor once rest api is refactored
+        // Condition when the new data are added  
+        for (const key in documentAdditions) {
+            if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
+                isObject = false
+                changedData.push([key,
+                                 ((interimData as interimDataType)[key] != null && 
+                                 (interimData as interimDataType)[key]) ?
+                                 [(interimData as interimDataType)[key], isObject] : ['', isObject],
+                                 '',
+                                 [documentAdditions[key], isObject]])
+            }
+        }
+
         setProposedBasicChangesData(changedData)
     }
 
