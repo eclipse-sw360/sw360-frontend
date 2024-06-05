@@ -23,6 +23,7 @@ import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
 import DeleteProjectDialog from './DeleteProjectDialog'
+import ImportSBOMModal from './ImportSBOMModal'
 
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
@@ -34,9 +35,13 @@ interface LicenseClearingData {
     'Approved Count': number
 }
 
+interface ImportSBOMMetadata {
+    importType: 'SPDX' | 'CycloneDx'
+    show: boolean
+}
+
 function LicenseClearing({ projectId }: { projectId: string }) {
     const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
-
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
@@ -90,6 +95,7 @@ function Project() {
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({ show: false, importType: 'SPDX' })
 
     const handleDeleteProject = (projectId: string) => {
         setDeleteProjectId(projectId)
@@ -338,6 +344,7 @@ function Project() {
 
     return (
         <>
+            <ImportSBOMModal importSBOMMetadata={importSBOMMetadata} setImportSBOMMetadata={setImportSBOMMetadata} />
             <DeleteProjectDialog projectId={deleteProjectId} show={deleteDialogOpen} setShow={setDeleteDialogOpen} />
             <div className='mx-3 mt-3'>
                 <div className='row'>
@@ -355,8 +362,8 @@ function Project() {
                                         <Dropdown>
                                             <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
                                             <Dropdown.Menu>
-                                                <Dropdown.Item>{t('SPDX')}</Dropdown.Item>
-                                                <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => setImportSBOMMetadata({ importType: 'SPDX', show: true })}>{t('SPDX')}</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => setImportSBOMMetadata({ importType: 'CycloneDx', show: true })}>{t('CycloneDX')}</Dropdown.Item>
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
