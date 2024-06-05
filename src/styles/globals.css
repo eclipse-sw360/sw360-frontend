@@ -1048,3 +1048,13 @@ input[type='date'] {
     height: auto;
     cursor: pointer;
 }
+
+.subscriptionBoxDanger {
+    border: 1px solid #f48989;
+    background-color: #feefef;
+    color: #da1414;
+    padding: 10px;
+    text-align: center;
+    font-size: small;
+    border-radius: 5px;
+}
