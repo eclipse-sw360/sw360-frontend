@@ -218,7 +218,9 @@ export default function ProposedChanges({ moderationRequestData }:
             { documentDelete === true ? (
                 <>
                     <div className='subscriptionBoxDanger'>
-                        {t('The document is requested to be deleted')}
+                        {t('The') + ` ${(moderationRequestData.documentType).toLowerCase()} ` +
+                        ` ${moderationRequestData.documentName} ` +
+                        t('is requested to be deleted')}
                     </div>
                 </>   
             ) : (
