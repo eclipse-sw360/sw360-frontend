@@ -30,14 +30,19 @@ import {
     ReleaseDetail,
     ReleaseTabIds,
     Vendor,
+    Creator,
+    DocumentCreationInformation,
+    SPDX
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { SPDX_ENABLE } from '@/utils/env'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
+import EditSPDXDocument from './EditSPDXDocument'
 import MessageService from '@/services/message.service'
 
 interface Props {
@@ -48,11 +53,31 @@ const EditRelease = ({ releaseId }: Props) => {
     const router = useRouter()
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS)
+    const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+
+    const [SPDXPayload, setSPDXPayload] = useState<SPDX>({
+        spdxDocument: null,
+        documentCreationInformation: null,
+        packageInformation: null,
+    })
+
+    const handleCreators = (fullName: string, data: string) => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(data)) {
+            return []
+        }
+        const creators: Array<Creator> = []
+        const creator: Creator = {
+            type: 'Person',
+            value: fullName + ' (' + data + ')',
+            index: 0,
+        }
+        creators.push(creator)
+        return creators
+    }
 
     useEffect(() => {
         ; (async () => {
@@ -65,17 +90,75 @@ const EditRelease = ({ releaseId }: Props) => {
                     return notFound()
                 }
                 const release: ReleaseDetail = await response.json()
+                let createdDate = release._embedded['sw360:documentCreationInformation']?.created
+                if (CommonUtils.isNullEmptyOrUndefinedString(createdDate)) {
+                    createdDate = new Date().toISOString()
+                }
+                let creators: Creator[] = release._embedded['sw360:documentCreationInformation']?.creator
+                if (CommonUtils.isNullEmptyOrUndefinedArray(creators)) {
+                    if (
+                        !CommonUtils.isNullOrUndefined(release._embedded) &&
+                        !CommonUtils.isNullOrUndefined(release._embedded['sw360:modifiedBy'])
+                    ) {
+                        creators = handleCreators(
+                            release._embedded['sw360:createdBy'].fullName,
+                            release._embedded['sw360:documentCreationInformation']?.createdBy
+                        )
+                    } else {
+                        setAddNewRelease(true)
+                        creators = []
+                    }
+                }
+                const documentCreationInfomation: DocumentCreationInformation =
+                    release._embedded['sw360:documentCreationInformation']
+                        ?
+                            {
+                                id: release._embedded['sw360:documentCreationInformation'].id,
+                                spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
+                                spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
+                                dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
+                                SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
+                                name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
+                                documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
+                                externalDocumentRefs: release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
+                                licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
+                                creator: creators, // 6.8
+                                created: createdDate, // 6.9
+                                creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
+                                documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
+                                // Information for ModerationRequests
+                                documentState: release._embedded['sw360:documentCreationInformation'].documentState,
+                                permissions: release._embedded['sw360:documentCreationInformation'].permissions,
+                                createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
+                                moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
+                            }
+                        : undefined
+
+                const SPDXPayload: SPDX = {
+                    spdxDocument: release._embedded['sw360:spdxDocument'],
+                    documentCreationInformation: documentCreationInfomation,
+                    packageInformation: release._embedded['sw360:packageInformation'],
+                }
+                setSPDXPayload(SPDXPayload)
                 setRelease(release)
                 setDeletingRelease(releaseId)
                 setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
 
-                if (release.componentType === 'COTS') {
+                if (release.componentType === 'COTS' && SPDX_ENABLE !== 'true') {
                     setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
                 }
 
                 if (typeof release.eccInformation !== 'undefined') {
                     const eccInformation: ECCInformation = release.eccInformation
                     setEccInformation(eccInformation)
+                }
+
+                if (release.componentType === 'COTS' && SPDX_ENABLE === 'true') {
+                    setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS_AND_SPDX)
+                }
+
+                if (release.componentType !== 'COTS' && SPDX_ENABLE === 'true') {
+                    setTabList(ReleaseEditTabs.WITH_SPDX)
                 }
 
                 if (release['_embedded']['sw360:cotsDetail']) {
@@ -142,6 +225,7 @@ const EditRelease = ({ releaseId }: Props) => {
         releaseIdToRelationship: null,
         cotsDetails: null,
         attachmentDTOs: null,
+        spdxId: '',
     })
 
     const [eccInformation, setEccInformation] = useState<ECCInformation>({
@@ -206,16 +290,92 @@ const EditRelease = ({ releaseId }: Props) => {
 
     const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
 
+    const [errorLicenseIdentifier, setErrorLicenseIdentifier] = useState(false)
+    const [errorExtractedText, setErrorExtractedText] = useState(false)
+    const [errorCreator, setErrorCreator] = useState(false)
+    const [addNewRelease, setAddNewRelease] = useState(false)
+    const [inputValid, setInputValid] = useState(false)
+
+    const validateCreator = (SPDXPayload: SPDX): boolean => {
+        if (
+            CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.documentCreationInformation.creator) &&
+            !addNewRelease
+        ) {
+            setErrorCreator(true)
+            return true
+        }
+        return false
+    }
+
+    const validateLicenseIdentifier = (SPDXPayload: SPDX): boolean => {
+        if (CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.spdxDocument.otherLicensingInformationDetecteds)) {
+            return false
+        }
+        let validate: boolean = false
+
+        SPDXPayload.spdxDocument.otherLicensingInformationDetecteds?.map((item) => {
+            if (CommonUtils.isNullEmptyOrUndefinedString(item.licenseId) || item.licenseId === 'LicenseRef-') {
+                setErrorLicenseIdentifier(true)
+                validate = true
+            }
+        })
+        return validate
+    }
+
+    const validateExtractedText = (SPDXPayload: SPDX): boolean => {
+        if (CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.spdxDocument.otherLicensingInformationDetecteds)) {
+            return false
+        }
+        let validate: boolean = false
+        SPDXPayload.spdxDocument.otherLicensingInformationDetecteds?.map((item) => {
+            if (CommonUtils.isNullEmptyOrUndefinedString(item.extractedText)) {
+                setErrorExtractedText(true)
+                validate = true
+            }
+        })
+        return validate
+    }
+
     const submit = async () => {
         const session = await getSession()
-        const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const release = (await response.json()) as ReleaseDetail
-            MessageService.success(`Release ${release.name} (${release.version})  updated successfully!`)
-            const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
-            router.push('/components/releases/detail/' + releaseId)
-        } else {
-            MessageService.error( t('Release Create failed'))
+        if (SPDX_ENABLE === 'true') {
+            setInputValid(true)
+            if (validateLicenseIdentifier(SPDXPayload) && validateExtractedText(SPDXPayload)) {
+                setErrorLicenseIdentifier(true)
+                setErrorExtractedText(true)
+            }
+            if (
+                validateLicenseIdentifier(SPDXPayload) ||
+                validateExtractedText(SPDXPayload) ||
+                validateCreator(SPDXPayload)
+            ) {
+                return
+            } else {
+                const responseUpdateSPDX = await ApiUtils.PATCH(
+                    `releases/${releaseId}/spdx`,
+                    SPDXPayload,
+                    session.user.access_token
+                )
+                if (responseUpdateSPDX.status == HttpStatus.OK) {
+                    MessageService.success(`SPDX updated successfully!`)
+                }
+            }
+        }
+
+        if (
+            !validateLicenseIdentifier(SPDXPayload) &&
+            !validateExtractedText(SPDXPayload) &&
+            !validateCreator(SPDXPayload)
+        ) {
+            const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const release = (await response.json()) as ReleaseDetail
+                MessageService.success(`Release ${release.name} (${release.version})  updated successfully!`)
+                const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
+                router.push('/components/releases/detail/' + releaseId)
+            } else {
+                MessageService.success(`Release Create failed`)
+            }
         }
     }
 
@@ -284,6 +444,22 @@ const EditRelease = ({ releaseId }: Props) => {
                                 setReleasePayload={setReleasePayload}
                             />
                         </div>
+                        {SPDX_ENABLE === 'true' && (
+                            <div className='row' hidden={selectedTab !== ReleaseTabIds.SPDX_DOCUMENT ? true : false}>
+                                <EditSPDXDocument
+                                    releaseId={releaseId}
+                                    SPDXPayload={SPDXPayload}
+                                    setSPDXPayload={setSPDXPayload}
+                                    errorLicenseIdentifier={errorLicenseIdentifier}
+                                    setErrorLicenseIdentifier={setErrorLicenseIdentifier}
+                                    errorExtractedText={errorExtractedText}
+                                    setErrorExtractedText={setErrorExtractedText}
+                                    errorCreator={errorCreator}
+                                    setErrorCreator={setErrorCreator}
+                                    inputValid={inputValid}
+                                />
+                            </div>
+                        )}
                         <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
                             <EditECCDetails releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
                         </div>
