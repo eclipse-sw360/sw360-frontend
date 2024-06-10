@@ -81,6 +81,7 @@ interface Project {
         'sw360:moderators'?: Array<User>
         'sw360:contributors'?: Array<User>
         'sw360:securityResponsibles'?: Array<User>
+        'sw360:linkedProjects'?: Array<Project>
     }
 }
 
