@@ -113,7 +113,7 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
         ;(async () => {
             try {
                 const res_licenseClearing = await ApiUtils.GET(
-                    `projects/${projectId}/attachmentUsage`,
+                    `projects/${projectId}/attachmentUsage?transitive=true`,
                     session.user.access_token,
                     signal
                 )
@@ -145,7 +145,7 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                     if(proj.length === 0) {
                         continue
                     }
-                    const releases = new Set<string>();
+                    const releases = new Set<string>()
                     proj[0].linkedReleases?.map((r: any) => {
                         releases.add(
                             r.release.substring(
@@ -272,6 +272,22 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                                     children: []
                                 }
                                 for(const att of r.attachments) {
+                                    let sourceCodeBundleChecked = false, manuallySetChecked = false, licenseInfoChecked = false
+                                    const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"]?.[0]?.filter((elem: any) => elem.attachmentContentId === att.attachmentContentId)
+                                    console.log(usages)
+                                    for(const u of usages) {
+                                        if (u.usageData) {
+                                            if(u.usageData.sourcePackage) {
+                                                sourceCodeBundleChecked = true
+                                            }
+                                            if (u.usageData.manuallySet) {
+                                                manuallySetChecked = true
+                                            }
+                                            if (u.usageData.licenseInfo) {
+                                                licenseInfoChecked = true
+                                            }
+                                        }
+                                    }
                                     const attachment: NodeData = {
                                         rowData: [
                                             <div key={`${att.filename ?? ''}_name_attachment`}>
@@ -284,14 +300,15 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                                                 {att.createdBy ?? ''}
                                             </div>,
                                             <div key={`${att.filename ?? ''}_type_attachment`}>
-                                                {Capitalize(att.attachmentType)}
+                                                {att.attachmentType}
                                             </div>,
                                             <input
                                                 key={`${att.filename ?? ''}_used_in_license_info_attachment`}
                                                 id='attachmentUsages.checkbox'
                                                 type='checkbox'
                                                 className='form-check-input'
-                                                disabled
+                                                checked={licenseInfoChecked}
+                                                readOnly
                                             />,
                                             <div key={`${att.filename ?? ''}_used_in_license_info_conclusions_attachment`}>
                                                 {''}
@@ -301,14 +318,16 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                                                 id='attachmentUsages.sourceCodeBundle.checkbox'
                                                 type='checkbox'
                                                 className='form-check-input'
-                                                disabled
+                                                checked={sourceCodeBundleChecked}
+                                                readOnly
                                             />,
                                             <input
                                             key={`${att.filename ?? ''}_other_attachment`}
                                                 id='attachmentUsages.other.checkbox'
                                                 type='checkbox'
                                                 className='form-check-input'
-                                                disabled
+                                                checked={manuallySetChecked}
+                                                readOnly
                                             />
                                         ], 
                                         children: []
@@ -405,6 +424,21 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                         children: []
                     }
                     for(const att of r.attachments) {
+                        let sourceCodeBundleChecked = false, manuallySetChecked = false, licenseInfoChecked = false
+                        const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"]?.[0]?.filter((elem: any) => elem.attachmentContentId === att.attachmentContentId)
+                        for(const u of usages) {
+                            if (u.usageData) {
+                                if(u.usageData.sourcePackage) {
+                                    sourceCodeBundleChecked = true
+                                }
+                                if (u.usageData.manuallySet) {
+                                    manuallySetChecked = true
+                                }
+                                if (u.usageData.licenseInfo) {
+                                    licenseInfoChecked = true
+                                }
+                            }
+                        }
                         const attachment: NodeData = {
                             rowData: [
                                 <div key={`${att.filename ?? ''}_name_attachment`}>
@@ -417,14 +451,15 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                                     {att.createdBy ?? ''}
                                 </div>,
                                 <div key={`${att.filename ?? ''}_type_attachment`}>
-                                    {Capitalize(att.attachmentType)}
+                                    {att.attachmentType}
                                 </div>,
                                 <input
                                     key={`${att.filename ?? ''}_used_in_license_info_attachment`}
                                     id='attachmentUsages.checkbox'
                                     type='checkbox'
                                     className='form-check-input'
-                                    disabled
+                                    checked={licenseInfoChecked}
+                                    readOnly
                                 />,
                                 <div key={`${att.filename ?? ''}_used_in_license_info_conclusions_attachment`}>
                                     {''}
@@ -434,14 +469,16 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                                     id='attachmentUsages.sourceCodeBundle.checkbox'
                                     type='checkbox'
                                     className='form-check-input'
-                                    disabled
+                                    checked={sourceCodeBundleChecked}
+                                    readOnly
                                 />,
                                 <input
                                     key={`${att.filename ?? ''}_other_attachment`}
                                     id='attachmentUsages.other.checkbox'
                                     type='checkbox'
                                     className='form-check-input'
-                                    disabled
+                                    checked={manuallySetChecked}
+                                    readOnly
                                 />
                             ], 
                             children: []
