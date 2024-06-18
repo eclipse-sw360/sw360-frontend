@@ -174,7 +174,6 @@ export default function ProposedChanges({ moderationRequestData }:
                 }
             }}
             setProposedBasicChangesData(changedData)
-            console.log('proposed basic changes data....',changedData)
     }
 
     useEffect(() => {
