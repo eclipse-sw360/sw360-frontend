@@ -54,7 +54,7 @@ export default function ProposedChanges({ moderationRequestData }:
             name: t('Current Value'),
             sort: true,
             formatter: ([currentValue, isObject]:  [currentValue: string[], isObject: boolean]) =>
-                _( isObject === true ? (currentValue.map((item: string) =>
+                _( isObject === true && currentValue.length !== 0 ? (currentValue.map((item: string) =>
                         <>
                             {<li>{`${item}`}</li>}
                         </>
@@ -75,7 +75,7 @@ export default function ProposedChanges({ moderationRequestData }:
             name: t('Suggested Value'),
             sort: true,
             formatter: ([suggestedValue, isObject]:  [suggestedValue: string[], isObject: boolean]) =>
-                _( isObject === true ? (suggestedValue.map((item: string) =>
+                _( isObject === true && suggestedValue.length !== 0 ? (suggestedValue.map((item: string) =>
                     <>
                         {<li>{`${item}`}</li>}
                     </>
@@ -127,9 +127,9 @@ export default function ProposedChanges({ moderationRequestData }:
                                 isObject = true
                                 for (const k in documentAdditions[key]) {
                                     changedData.push([ `${key}[${k}]:`,
-                                        ((interimData as interimDataType)[key] != null && 
+                                        (Object.keys((interimData as interimDataType)[key]).length !== 0 &&
                                         (interimData as interimDataType)[key][k]) ?
-                                        [(interimData as interimDataType)[key][k], isObject] : ['', isObject],
+                                        [(interimData as interimDataType)[key][k], isObject] : [[], isObject],
                                         t('n a modified list'),
                                         [documentAdditions[key][k], isObject]])
                                 }
@@ -145,9 +145,9 @@ export default function ProposedChanges({ moderationRequestData }:
                                         return !(item[k] === (interimData as interimDataType)[key][k])
                                     })
                                     changedData.push([ `${key}[${k}]:`,
-                                        ((interimData as interimDataType)[key] != null && 
+                                        (Object.keys((interimData as interimDataType)[key]).length !== 0 && 
                                         (interimData as interimDataType)[key][k]) ?
-                                        [(interimData as interimDataType)[key][k], isObject] : ['', isObject],
+                                        [(interimData as interimDataType)[key][k], isObject] : [[], isObject],
                                         t('n a modified list'),
                                         [filteredData[k]], isObject])
                             }}
@@ -173,8 +173,7 @@ export default function ProposedChanges({ moderationRequestData }:
                                     [documentAdditions[key], isObject]])
                 }
             }}
-
-        setProposedBasicChangesData(changedData)
+            setProposedBasicChangesData(changedData)
     }
 
     useEffect(() => {
