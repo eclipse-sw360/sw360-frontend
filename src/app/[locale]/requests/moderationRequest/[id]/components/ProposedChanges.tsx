@@ -56,7 +56,7 @@ export default function ProposedChanges({ moderationRequestData }:
             formatter: ([currentValue, isObject]:  [currentValue: string[], isObject: boolean]) =>
                 _( isObject === true && currentValue.length !== 0 ? (currentValue.map((item: string) =>
                         <>
-                            {<li>{`${item}`}</li>}
+                            {<li>{item}</li>}
                         </>
                     )): (
                         <>
@@ -77,7 +77,7 @@ export default function ProposedChanges({ moderationRequestData }:
             formatter: ([suggestedValue, isObject]:  [suggestedValue: string[], isObject: boolean]) =>
                 _( isObject === true && suggestedValue.length !== 0 ? (suggestedValue.map((item: string) =>
                     <>
-                        {<li>{`${item}`}</li>}
+                        {<li>{item}</li>}
                     </>
                 )): (
                     <>
@@ -126,12 +126,21 @@ export default function ProposedChanges({ moderationRequestData }:
                             Object.keys(documentDeletions[key]).length === 0) {
                                 isObject = true
                                 for (const k in documentAdditions[key]) {
-                                    changedData.push([ `${key}[${k}]:`,
-                                        (Object.keys((interimData as interimDataType)[key]).length !== 0 &&
-                                        (interimData as interimDataType)[key][k]) ?
-                                        [(interimData as interimDataType)[key][k], isObject] : [[], isObject],
-                                        t('n a modified list'),
-                                        [documentAdditions[key][k], isObject]])
+                                    const updatedValue: any[] = []
+                                    const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
+                                                        (interimData as interimDataType)[key] !== '' ?
+                                                        Object.values((interimData as interimDataType)[key]) : []
+                                    updatedValue.push(valueFromDB)
+                                    updatedValue.push(
+                                        <b key={`${key}`} style={{color: 'green'}}>
+                                            {documentAdditions[key][k]}
+                                        </b>
+                                    )
+                                    changedData.push([`${key}[${k}]:`,
+                                                    [valueFromDB, isObject],
+                                                    t('n a modified list'),
+                                                    [updatedValue, isObject]])
+
                                 }
                         }
                     else if (typeof documentAdditions[key] === "object" && 
@@ -150,13 +159,14 @@ export default function ProposedChanges({ moderationRequestData }:
                                         [(interimData as interimDataType)[key][k], isObject] : [[], isObject],
                                         t('n a modified list'),
                                         [filteredData[k]], isObject])
-                            }}
+                            }
+                        }
                     else 
                         changedData.push([key,
-                                        [(interimData as interimDataType)[key], isObject],
-                                        documentDeletions[key],
-                                        [documentAdditions[key], isObject]])
-                    }
+                            [(interimData as interimDataType)[key], isObject],
+                            documentDeletions[key],
+                            [documentAdditions[key], isObject]])
+                }
                 }
             }
 
@@ -165,12 +175,12 @@ export default function ProposedChanges({ moderationRequestData }:
                 if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
                     isObject = false
                     changedData.push([key,
-                                    Object.hasOwn(interimData as interimDataType, key) &&
-                                        (interimData as interimDataType)[key] !== '' ?
-                                        [(interimData as interimDataType)[key], isObject] :
-                                        ['', isObject],
-                                    '',
-                                    [documentAdditions[key], isObject]])
+                        Object.hasOwn(interimData as interimDataType, key) &&
+                            (interimData as interimDataType)[key] !== '' ?
+                            [(interimData as interimDataType)[key], isObject] :
+                            ['', isObject],
+                        '',
+                        [documentAdditions[key], isObject]])
                 }
             }}
             setProposedBasicChangesData(changedData)
