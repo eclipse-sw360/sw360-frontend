@@ -53,12 +53,17 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.currentValue',
             name: t('Current Value'),
             sort: true,
-            formatter: ([currentValue, isObject]:  [currentValue: string[], isObject: boolean]) =>
-                _( isObject === true && currentValue.length !== 0 ? (currentValue.map((item: string) =>
-                        <>
-                            {<li>{item}</li>}
-                        </>
-                    )): (
+            formatter: ([currentValue, isObject]: [string[], boolean]) =>
+                _(
+                    isObject === true && currentValue.length !== 0 ? (
+                        <ul>
+                            {currentValue.map((item: string) => (
+                                <li key={item}>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
                         <>
                             {currentValue}
                         </>
@@ -74,17 +79,22 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.suggestedValue',
             name: t('Suggested Value'),
             sort: true,
-            formatter: ([suggestedValue, isObject]:  [suggestedValue: string[], isObject: boolean]) =>
-                _( isObject === true && suggestedValue.length !== 0 ? (suggestedValue.map((item: string) =>
-                    <>
-                        {<li>{item}</li>}
-                    </>
-                )): (
-                    <>
-                        {suggestedValue}
-                    </>
+            formatter: ([suggestedValue, isObject]: [string[], boolean]) =>
+                _(
+                    isObject === true && suggestedValue.length !== 0 ? (
+                        <ul>
+                            {suggestedValue.map((item: string) => (
+                                <li key={item}>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <>
+                            {suggestedValue}
+                        </>
+                    )
                 )
-            )
         }
     ]
 
@@ -129,10 +139,10 @@ export default function ProposedChanges({ moderationRequestData }:
                                     const updatedValue: any[] = []
                                     const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
                                                         (interimData as interimDataType)[key] !== '' ?
-                                                        Object.values((interimData as interimDataType)[key]) : []
-                                    updatedValue.push(valueFromDB)
+                                                        Object.values((interimData as interimDataType)[key]).flat() : []
+                                    updatedValue.push(...valueFromDB)
                                     updatedValue.push(
-                                        <b key={`${key}`} style={{color: 'green'}}>
+                                        <b key={`${key}[${k}]`} style={{color: 'green'}}>
                                             {documentAdditions[key][k]}
                                         </b>
                                     )
@@ -149,16 +159,28 @@ export default function ProposedChanges({ moderationRequestData }:
                             Object.keys(documentAdditions[key]).length === 0) {
                                 isObject = true
                                 for (const k in documentDeletions[key]) {
-                                    const filteredData = (interimData as interimDataType)[key]
-                                                        .filter((item: interimDataType) => {
-                                        return !(item[k] === (interimData as interimDataType)[key][k])
-                                    })
-                                    changedData.push([ `${key}[${k}]:`,
-                                        (Object.keys((interimData as interimDataType)[key]).length !== 0 && 
-                                        (interimData as interimDataType)[key][k]) ?
-                                        [(interimData as interimDataType)[key][k], isObject] : [[], isObject],
-                                        t('n a modified list'),
-                                        [filteredData[k]], isObject])
+                                    let filteredDataFromDB : string[] = []
+                                    let valueFromDB :string[] = []
+                                    const updatedValue: any[] = []
+                                    if(Object.hasOwn(interimData as interimDataType, key) &&
+                                       Object.hasOwn((interimData as interimDataType)[key], k)) {
+                                        const dataFromDB = (interimData as interimDataType)[key][k]
+                                        filteredDataFromDB = dataFromDB.filter((item: string) => 
+                                                                !documentDeletions[key][k].includes(item))
+                                    }
+                                    valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
+                                                        (interimData as interimDataType)[key] !== '' ?
+                                                        Object.values((interimData as interimDataType)[key]) : []
+                                    updatedValue.push(filteredDataFromDB)
+                                    updatedValue.push(
+                                        <b key={`${key}[${k}]`} style={{color: 'red'}}>
+                                            {documentDeletions[key][k]}
+                                        </b>
+                                    )
+                                    changedData.push([`${key}[${k}]:`,
+                                                    [valueFromDB, isObject],
+                                                    t('n a modified list'),
+                                                    [updatedValue, isObject]])
                             }
                         }
                     else 
