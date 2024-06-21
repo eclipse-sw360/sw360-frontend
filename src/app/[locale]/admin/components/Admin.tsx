@@ -80,7 +80,7 @@ const AdminMainPage = () => {
                             <RiArrowUpDownFill /> {t('Import Export')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/databaseSanitation'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <BsSearch /> {t('Database Sanitation')}
                         </button>
