@@ -159,19 +159,18 @@ export default function ProposedChanges({ moderationRequestData }:
                             Object.keys(documentAdditions[key]).length === 0) {
                                 isObject = true
                                 for (const k in documentDeletions[key]) {
-                                    let filteredDataFromDB : string[] = []
-                                    let valueFromDB :string[] = []
                                     const updatedValue: any[] = []
+                                    let filteredDataFromDB: string[] = []
                                     if(Object.hasOwn(interimData as interimDataType, key) &&
                                        Object.hasOwn((interimData as interimDataType)[key], k)) {
-                                        const dataFromDB = (interimData as interimDataType)[key][k]
-                                        filteredDataFromDB = dataFromDB.filter((item: string) => 
-                                                                !documentDeletions[key][k].includes(item))
+                                        filteredDataFromDB = (interimData as interimDataType)[key][k]
+                                                                    .filter((item: string) => 
+                                                                        !documentDeletions[key][k].includes(item))
                                     }
-                                    valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
+                                    const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
                                                         (interimData as interimDataType)[key] !== '' ?
-                                                        Object.values((interimData as interimDataType)[key]) : []
-                                    updatedValue.push(filteredDataFromDB)
+                                                        Object.values((interimData as interimDataType)[key]).flat() : []
+                                    updatedValue.push(...filteredDataFromDB)
                                     updatedValue.push(
                                         <b key={`${key}[${k}]`} style={{color: 'red'}}>
                                             {documentDeletions[key][k]}
