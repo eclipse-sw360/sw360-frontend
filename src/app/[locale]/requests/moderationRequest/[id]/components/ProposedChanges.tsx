@@ -144,8 +144,9 @@ export default function ProposedChanges({ moderationRequestData }:
                                 for (const k in documentAdditions[key]) {
                                     const updatedValue: any[] = []
                                     const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
-                                                        (interimData as interimDataType)[key] !== '' ?
-                                                        Object.values((interimData as interimDataType)[key]).flat() : []
+                                                        (interimData as interimDataType)[key] !== '' && 
+                                                        Object.hasOwn((interimData as interimDataType)[key], k) ?
+                                                        Object.values((interimData as interimDataType)[key][k]).flat() : []
                                     updatedValue.push(...valueFromDB)
                                     updatedValue.push(
                                         <b key={`${key}[${k}]`} style={{color: 'green'}}>
