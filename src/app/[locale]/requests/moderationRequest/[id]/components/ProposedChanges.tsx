@@ -74,6 +74,12 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.formerValue',
             name: t('Former Value'),
             sort: true,
+            formatter: ((formerValue: any) =>
+                _(
+                    <>
+                        {formerValue}
+                    </>
+                ))
         },
         {
             id: 'proposedChanges.suggestedValue',
@@ -182,14 +188,25 @@ export default function ProposedChanges({ moderationRequestData }:
                                                     [updatedValue, isObject]])
                             }
                         }
-                    else 
+                    else {
+                        const updatedValue: any[] = []
+                        updatedValue.push(
+                            <b key={`${key}`} style={{color: 'green'}}>
+                                {documentAdditions[key]}
+                            </b>
+                        )
+                        const updatedFormerValue = (
+                            <b key={`${key}`} style={{color: 'red'}}>
+                                {documentDeletions[key]}
+                            </b>
+                        )
                         changedData.push([key,
                             [(interimData as interimDataType)[key], isObject],
-                            documentDeletions[key],
-                            [documentAdditions[key], isObject]])
+                            updatedFormerValue,
+                            [updatedValue, isObject]])
+                    }
                 }
-                }
-            }
+            }}
 
             // Condition when the new data are added  
             for (const key in documentAdditions) {
