@@ -53,12 +53,17 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.currentValue',
             name: t('Current Value'),
             sort: true,
-            formatter: ([currentValue, isObject]:  [currentValue: string[], isObject: boolean]) =>
-                _( isObject === true && currentValue.length !== 0 ? (currentValue.map((item: string) =>
-                        <>
-                            {<li>{`${item}`}</li>}
-                        </>
-                    )): (
+            formatter: ([currentValue, isObject]: [string[], boolean]) =>
+                _(
+                    isObject === true && currentValue.length !== 0 ? (
+                        <ul>
+                            {currentValue.map((item: string) => (
+                                <li key={item}>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
                         <>
                             {currentValue}
                         </>
@@ -69,22 +74,33 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.formerValue',
             name: t('Former Value'),
             sort: true,
+            formatter: ((formerValue: any) =>
+                _(
+                    <>
+                        {formerValue}
+                    </>
+                ))
         },
         {
             id: 'proposedChanges.suggestedValue',
             name: t('Suggested Value'),
             sort: true,
-            formatter: ([suggestedValue, isObject]:  [suggestedValue: string[], isObject: boolean]) =>
-                _( isObject === true && suggestedValue.length !== 0 ? (suggestedValue.map((item: string) =>
-                    <>
-                        {<li>{`${item}`}</li>}
-                    </>
-                )): (
-                    <>
-                        {suggestedValue}
-                    </>
+            formatter: ([suggestedValue, isObject]: [string[], boolean]) =>
+                _(
+                    isObject === true && suggestedValue.length !== 0 ? (
+                        <ul>
+                            {suggestedValue.map((item: string) => (
+                                <li key={item}>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <>
+                            {suggestedValue}
+                        </>
+                    )
                 )
-            )
         }
     ]
 
@@ -126,12 +142,22 @@ export default function ProposedChanges({ moderationRequestData }:
                             Object.keys(documentDeletions[key]).length === 0) {
                                 isObject = true
                                 for (const k in documentAdditions[key]) {
-                                    changedData.push([ `${key}[${k}]:`,
-                                        (Object.keys((interimData as interimDataType)[key]).length !== 0 &&
-                                        (interimData as interimDataType)[key][k]) ?
-                                        [(interimData as interimDataType)[key][k], isObject] : [[], isObject],
-                                        t('n a modified list'),
-                                        [documentAdditions[key][k], isObject]])
+                                    const updatedValue: any[] = []
+                                    const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
+                                                        (interimData as interimDataType)[key] !== '' && 
+                                                        Object.hasOwn((interimData as interimDataType)[key], k) ?
+                                                        Object.values((interimData as interimDataType)[key][k]).flat() : []
+                                    updatedValue.push(...valueFromDB)
+                                    updatedValue.push(
+                                        <b key={`${key}[${k}]`} style={{color: 'green'}}>
+                                            {documentAdditions[key][k]}
+                                        </b>
+                                    )
+                                    changedData.push([`${key}[${k}]:`,
+                                                    [valueFromDB, isObject],
+                                                    t('n a modified list'),
+                                                    [updatedValue, isObject]])
+
                                 }
                         }
                     else if (typeof documentAdditions[key] === "object" && 
@@ -140,37 +166,67 @@ export default function ProposedChanges({ moderationRequestData }:
                             Object.keys(documentAdditions[key]).length === 0) {
                                 isObject = true
                                 for (const k in documentDeletions[key]) {
-                                    const filteredData = (interimData as interimDataType)[key]
-                                                        .filter((item: interimDataType) => {
-                                        return !(item[k] === (interimData as interimDataType)[key][k])
-                                    })
-                                    changedData.push([ `${key}[${k}]:`,
-                                        (Object.keys((interimData as interimDataType)[key]).length !== 0 && 
-                                        (interimData as interimDataType)[key][k]) ?
-                                        [(interimData as interimDataType)[key][k], isObject] : [[], isObject],
-                                        t('n a modified list'),
-                                        [filteredData[k]], isObject])
-                            }}
-                    else 
+                                    const updatedValue: any[] = []
+                                    let filteredDataFromDB: string[] = []
+                                    if(Object.hasOwn(interimData as interimDataType, key) &&
+                                       Object.hasOwn((interimData as interimDataType)[key], k)) {
+                                        filteredDataFromDB = (interimData as interimDataType)[key][k]
+                                                                    .filter((item: string) => 
+                                                                        !documentDeletions[key][k].includes(item))
+                                    }
+                                    const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
+                                                        (interimData as interimDataType)[key] !== '' && 
+                                                        Object.hasOwn((interimData as interimDataType)[key], k)?
+                                                        Object.values((interimData as interimDataType)[key][k]).flat() : []
+                                    updatedValue.push(...filteredDataFromDB)
+                                    updatedValue.push(
+                                        <b key={`${key}[${k}]`} style={{color: 'red'}}>
+                                            {documentDeletions[key][k]}
+                                        </b>
+                                    )
+                                    changedData.push([`${key}[${k}]:`,
+                                                    [valueFromDB, isObject],
+                                                    t('n a modified list'),
+                                                    [updatedValue, isObject]])
+                            }
+                        }
+                    else {
+                        const updatedValue: any[] = []
+                        updatedValue.push(
+                            <b key={`${key}`} style={{color: 'green'}}>
+                                {documentAdditions[key]}
+                            </b>
+                        )
+                        const updatedFormerValue = (
+                            <b key={`${key}`} style={{color: 'red'}}>
+                                {documentDeletions[key]}
+                            </b>
+                        )
                         changedData.push([key,
-                                        [(interimData as interimDataType)[key], isObject],
-                                        documentDeletions[key],
-                                        [documentAdditions[key], isObject]])
+                            [(interimData as interimDataType)[key], isObject],
+                            updatedFormerValue,
+                            [updatedValue, isObject]])
                     }
                 }
-            }
+            }}
 
             // Condition when the new data are added  
             for (const key in documentAdditions) {
                 if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
                     isObject = false
+                    const updatedValue: any[] = []
+                        updatedValue.push(
+                            <b key={`${key}`} style={{color: 'green'}}>
+                                {documentAdditions[key]}
+                            </b>
+                        )
                     changedData.push([key,
-                                    Object.hasOwn(interimData as interimDataType, key) &&
-                                        (interimData as interimDataType)[key] !== '' ?
-                                        [(interimData as interimDataType)[key], isObject] :
-                                        ['', isObject],
-                                    '',
-                                    [documentAdditions[key], isObject]])
+                        Object.hasOwn(interimData as interimDataType, key) &&
+                            (interimData as interimDataType)[key] !== '' ?
+                            [(interimData as interimDataType)[key], isObject] :
+                            ['', isObject],
+                        '',
+                        [updatedValue, isObject]])
                 }
             }}
             setProposedBasicChangesData(changedData)
