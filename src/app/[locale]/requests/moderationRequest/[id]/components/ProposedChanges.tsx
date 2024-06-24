@@ -212,13 +212,19 @@ export default function ProposedChanges({ moderationRequestData }:
             for (const key in documentAdditions) {
                 if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
                     isObject = false
+                    const updatedValue: any[] = []
+                        updatedValue.push(
+                            <b key={`${key}`} style={{color: 'green'}}>
+                                {documentAdditions[key]}
+                            </b>
+                        )
                     changedData.push([key,
                         Object.hasOwn(interimData as interimDataType, key) &&
                             (interimData as interimDataType)[key] !== '' ?
                             [(interimData as interimDataType)[key], isObject] :
                             ['', isObject],
                         '',
-                        [documentAdditions[key], isObject]])
+                        [updatedValue, isObject]])
                 }
             }}
             setProposedBasicChangesData(changedData)
