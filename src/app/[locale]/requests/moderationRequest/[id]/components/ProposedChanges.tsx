@@ -175,8 +175,9 @@ export default function ProposedChanges({ moderationRequestData }:
                                                                         !documentDeletions[key][k].includes(item))
                                     }
                                     const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
-                                                        (interimData as interimDataType)[key] !== '' ?
-                                                        Object.values((interimData as interimDataType)[key]).flat() : []
+                                                        (interimData as interimDataType)[key] !== '' && 
+                                                        Object.hasOwn((interimData as interimDataType)[key], k)?
+                                                        Object.values((interimData as interimDataType)[key][k]).flat() : []
                                     updatedValue.push(...filteredDataFromDB)
                                     updatedValue.push(
                                         <b key={`${key}[${k}]`} style={{color: 'red'}}>
