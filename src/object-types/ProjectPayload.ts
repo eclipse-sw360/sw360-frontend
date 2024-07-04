@@ -3,6 +3,7 @@
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
 // which is available at https://www.eclipse.org/legal/epl-2.0/
+
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
@@ -49,6 +50,19 @@ interface ProjectPayload {
     projectOwner?: string
     securityResponsibles?: string[]
     considerReleasesFromExternalList?: boolean
+    linkedProjects?: {
+        [key: string]: {
+            projectRelationship: string
+            enableSvm: boolean
+        }
+    }
+    linkedReleases?: {
+        [key: string]: {
+            releaseRelation?: string
+            mainlineState?: string
+            comment?: string
+        }
+    }
 }
 
 export default ProjectPayload

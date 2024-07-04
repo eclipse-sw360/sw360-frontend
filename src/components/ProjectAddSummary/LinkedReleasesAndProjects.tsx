@@ -9,21 +9,27 @@
 
 'use client'
 
-import { Project } from '@/object-types'
+import { ProjectPayload } from '@/object-types'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
 
 interface Props {
-    projectPayload: Project
-    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
+    projectPayload: ProjectPayload
+    existingReleaseData?: Map<string, any>
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LinkedReleasesAndProjects({ projectPayload, setProjectPayload }: Props) {
+export default function LinkedReleasesAndProjects({ projectPayload,
+                                                    setProjectPayload,
+                                                    existingReleaseData }: Props) {
     return (
         <>
             <div className='ms-1'>
-                <LinkedProjects projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
-                <LinkedReleases />
+                <LinkedProjects projectPayload = {projectPayload}
+                                setProjectPayload = {setProjectPayload} />
+                <LinkedReleases projectPayload = {projectPayload}
+                                setProjectPayload = {setProjectPayload}
+                                existingReleaseData = {existingReleaseData}/>
             </div>
         </>
     )
