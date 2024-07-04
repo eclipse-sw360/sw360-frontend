@@ -35,7 +35,7 @@ export interface LicenseObligationRelease {
     id: string
 }
 
-interface ProjectObligation {
+export interface ProjectObligation {
     [k: string]: {
         text?: string
         licenseIds?: string[]

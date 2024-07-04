@@ -45,7 +45,7 @@ import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import { LicenseObligationRelease, Obligation, ProjectObligationsList } from './Obligation'
+import { Obligation, ProjectObligationsList, LicenseObligationRelease, ProjectObligation } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
@@ -189,6 +189,7 @@ export type {
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
     LicenseType,
+    ProjectObligation
 }
 
 // Special functions for populate data

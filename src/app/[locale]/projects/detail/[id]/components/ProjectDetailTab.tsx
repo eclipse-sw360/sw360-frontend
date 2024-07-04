@@ -9,7 +9,7 @@
 
 'use client'
 
-import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
+import { AdministrationDataType, HttpStatus, SummaryDataType, ActionType } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -24,7 +24,7 @@ import LicenseClearing from './LicenseClearing'
 import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import AttachmentUsages from './AttachmentUsages'
-import Obligations from './Obligations/Obligations'
+import Obligations from '../../../components/Obligations/Obligations'
 import ProjectAttachments from './Attachments'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 import MessageService from '@/services/message.service'
@@ -179,7 +179,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='obligations'>
-                                        <Obligations projectId={projectId}/>
+                                        <Obligations projectId={projectId} actionType={ActionType.DETAIL}/>
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='ecc'>
                                         <EccDetails projectId={projectId} />

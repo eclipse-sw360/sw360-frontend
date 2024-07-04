@@ -9,17 +9,24 @@
 
 'use client'
 
+import { Dispatch, SetStateAction } from 'react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { Nav, Tab, Dropdown } from 'react-bootstrap'
+import { Button, Nav, Tab, Dropdown } from 'react-bootstrap'
 import ObligationView from './ObligationsView/ObligationsView'
+import { ActionType, ProjectObligation } from '@/object-types'
+import CompareObligation from './CompareObligation'
 
-export default function Obligations({ projectId }: { projectId: string }) {
+export default function Obligations({ projectId, actionType, payload, setPayload }: 
+    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>> }) {
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
+    const [show, setShow] = useState(false)
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
 
     return (
         <>
+        <CompareObligation show={show} setShow={setShow} setSelectedProjectId={setSelectedProjectId} />
             <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
                 <div className='row'>
                     <div className='col ps-0'>
@@ -36,17 +43,26 @@ export default function Obligations({ projectId }: { projectId: string }) {
                             </Nav.Item>
                         </Nav>
                     </div>
-                    <Dropdown className='col-auto'>
-                        <Dropdown.Toggle variant='primary'>{t('Create Project Clearing Report')}</Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item eventKey={key}>{t('Project only')}</Dropdown.Item>
-                            <Dropdown.Item eventKey={key}>{t('Project with sub project')}</Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
+                    {
+                        (actionType === ActionType.DETAIL) &&
+                        <Dropdown className='col-auto'>
+                            <Dropdown.Toggle variant='primary'>{t('Create Project Clearing Report')}</Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item eventKey={key}>{t('Project only')}</Dropdown.Item>
+                                <Dropdown.Item eventKey={key}>{t('Project with sub project')}</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    }
+                    {
+                        (actionType === ActionType.EDIT) &&
+                        <Button variant='secondary' className='col-auto' onClick={() => setShow(true)}>
+                            {t('Compare Obligation')}
+                        </Button>
+                    }
                 </div>
                 <Tab.Content className='mt-4'>
                     <Tab.Pane eventKey='obligations-view'>
-                        <ObligationView projectId={projectId}/>
+                        <ObligationView projectId={projectId} actionType={actionType} payload={payload} setPayload={setPayload} selectedProjectId={selectedProjectId} />
                     </Tab.Pane>
                     <Tab.Pane eventKey='release-view'>
                         
