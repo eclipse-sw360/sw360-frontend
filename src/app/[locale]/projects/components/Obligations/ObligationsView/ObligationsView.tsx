@@ -9,16 +9,19 @@
 
 'use client'
 
+import { Dispatch, SetStateAction } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import LicenseObligation from './LicenseObligation'
+import { ActionType, ProjectObligation } from '@/object-types'
 
-export default function ObligationView({ projectId }: { projectId: string }) {
+export default function ObligationView({ projectId, actionType, payload, setPayload, selectedProjectId }:
+    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null }) {
     const t = useTranslations('default')
     return (
         <Tabs defaultActiveKey='license-obligation' className='mb-3' mountOnEnter={true} unmountOnExit={true}>
             <Tab eventKey='license-obligation' title={t('License Obligation')}>
-                <LicenseObligation projectId={projectId}/>
+                <LicenseObligation projectId={projectId} actionType={actionType} payload={payload} setPayload={setPayload} selectedProjectId={selectedProjectId} />
             </Tab>
             <Tab eventKey='component-obligation' title={t('Component Obligation')}>
             </Tab>

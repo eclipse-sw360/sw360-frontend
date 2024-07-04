@@ -12,7 +12,7 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, Vendor, ProjectPayload } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, Vendor, ProjectPayload, ActionType, ProjectObligation } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
@@ -21,6 +21,7 @@ import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import Obligations from '../../../components/Obligations/Obligations'
 
 interface LinkedReleaseProps {
     release?: string
@@ -51,7 +52,9 @@ function EditProject({ projectId }: { projectId: string }) {
     const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
-    const [existingReleaseData, setExistingReleaseData] = useState<Map<string, any>>()
+    const [existingReleaseData, setExistingReleaseData] = useState<Map<string, any>>()    
+    const [obligations, setObligations] = useState<ProjectObligation>({})
+
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
         version: '',
@@ -276,10 +279,21 @@ function EditProject({ projectId }: { projectId: string }) {
 
     const updateProject = async () => {
         const session = await getSession()
-        const updateUrl = ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP ? `projects/network/${projectId}` : `projects/${projectId}`
-        const response = await ApiUtils.PATCH(updateUrl, projectPayload, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            await response.json()
+        const requests = [
+            ApiUtils.PATCH(ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP ? `projects/network/${projectId}` : `projects/${projectId}`, projectPayload, session.user.access_token),
+        ]
+        if(Object.keys(obligations).length !== 0) {
+            requests.push(ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, obligations, session.user.access_token))
+        }
+        const responses = await Promise.all(requests)
+        let allOk = true
+        for(const r of responses) {
+            if(!(r.status === HttpStatus.OK || r.status === HttpStatus.CREATED)) {
+                allOk = false
+                break
+            }
+        }
+        if (allOk) {
             MessageService.success(t('Project') + 
                                      ` ${projectPayload.name} (${projectPayload.version}) ` +
                                      t('updated successfully'))
@@ -287,7 +301,6 @@ function EditProject({ projectId }: { projectId: string }) {
         } else {
             MessageService.error(t('There are some errors while updating project') + 
                                  ` ${projectPayload.name} (${projectPayload.version})!`)
-            router.push(`/projects/detail/${projectId}`)
         }
     }
 
@@ -306,7 +319,7 @@ function EditProject({ projectId }: { projectId: string }) {
                 }}
             >
                 <div>
-                    <Tab.Container defaultActiveKey='summary'>
+                    <Tab.Container defaultActiveKey='summary' mountOnEnter={true} unmountOnExit={true}>
                         <Row>
                             <Col sm='auto' className='me-3'>
                                 <ListGroup>
@@ -332,7 +345,7 @@ function EditProject({ projectId }: { projectId: string }) {
                             </Col>
                             <Col className='me-3'>
                                 <Row className='d-flex justify-content-between'>
-                                    <Col lg={3}>
+                                    <Col lg={4}>
                                         <Row>
                                             <Button
                                                 variant='primary'
@@ -414,7 +427,9 @@ function EditProject({ projectId }: { projectId: string }) {
                                             }
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='attachments'></Tab.Pane>
-                                        <Tab.Pane eventKey='obligations'></Tab.Pane>
+                                        <Tab.Pane eventKey='obligations'>
+                                            <Obligations projectId={projectId} actionType={ActionType.EDIT} payload={obligations} setPayload={setObligations}/>
+                                        </Tab.Pane>
                                     </Tab.Content>
                                 </Row>
                             </Col>
