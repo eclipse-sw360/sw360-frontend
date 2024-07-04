@@ -21,6 +21,13 @@ import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
+interface LinkedReleaseProps {
+    release?: string
+    relation?: string
+    mainlineState?: string
+    comment?: string
+}
+
 function EditProject({ projectId }: { projectId: string }) {
     const router = useRouter()
     const t = useTranslations('default')
@@ -43,6 +50,7 @@ function EditProject({ projectId }: { projectId: string }) {
     const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
+    const [existingReleaseData, setExistingReleaseData] = useState<Map<string, any>>()
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -78,6 +86,13 @@ function EditProject({ projectId }: { projectId: string }) {
         deliveryStart : '',
         phaseOutSince : '',
         licenseInfoHeaderText : '',
+        linkedReleases: {},
+        securityResponsibles: [],
+        moderators: [],
+        contributors: [],
+        projectOwner: '',
+        leadArchitect: '',
+        projectManager: ''
     })
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
@@ -110,6 +125,32 @@ function EditProject({ projectId }: { projectId: string }) {
             ...projectPayload,
             roles: obj,
         })
+    }
+
+    const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
+        const map = new Map<string, any>();
+        const linkedReleasesObject: { [key: string]: any } = {}
+        await Promise.all(linkedReleases.map(async (obj) => {
+            const releaseId = obj['release'].split('/').pop();
+            const releaseData = await fetchData(`releases/${releaseId}`);
+            map.set(releaseId, {
+                'name': releaseData.name,
+                'version': releaseData.version,
+                'releaseRelation': obj['relation'],
+                'mainlineState': obj['mainlineState'],
+                'comment': obj['comment'],
+            })
+            setExistingReleaseData(map)
+            linkedReleasesObject[releaseId] = {
+                'releaseRelation': obj['relation'],
+                'mainlineState': obj['mainlineState'],
+                'comment': obj['comment'],
+            };
+        }))
+        setProjectPayload((prevProjectPayload) => ({
+            ...prevProjectPayload,
+            linkedReleases: linkedReleasesObject,
+        }));
     }
 
     const fetchData = useCallback(
@@ -145,16 +186,23 @@ function EditProject({ projectId }: { projectId: string }) {
                 setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
             }
 
+            if (typeof project.linkedReleases !== 'undefined') {
+                setObjectToMap(project.linkedReleases)
+            }
+
             if (typeof project["_embedded"]["leadArchitect"] !== 'undefined') {
-                setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]: project["_embedded"]["leadArchitect"].fullName })
+                setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]: 
+                                    project["_embedded"]["leadArchitect"].fullName })
             }
 
             if (typeof project["_embedded"]["projectOwner"] !== 'undefined') {
-                setProjectOwner({ [project["_embedded"]["projectOwner"].email]: project["_embedded"]["projectOwner"].fullName })
+                setProjectOwner({ [project["_embedded"]["projectOwner"].email]:
+                                   project["_embedded"]["projectOwner"].fullName })
             }
 
             if (typeof project["_embedded"]["projectManager"] !== 'undefined') {
-                setProjectManager({ [project["_embedded"]["projectManager"].email]: project["_embedded"]["projectManager"].fullName })
+                setProjectManager({ [project["_embedded"]["projectManager"].email]:
+                                     project["_embedded"]["projectManager"].fullName })
             }
 
             if (typeof project["_embedded"]["sw360:moderators"] !== 'undefined') {
@@ -183,37 +231,44 @@ function EditProject({ projectId }: { projectId: string }) {
             
             const projectPayloadData: ProjectPayload = {
                 name: project.name,
-                version: project.version,
-                visibility: project.visibility,
-                createdBy: project._embedded.createdBy.fullName,
-                projectType: project.projectType,
-                tag: project.tag,
-                description: project.description,
-                domain: project.domain,
-                modifiedOn: project.modifiedOn,
-                modifiedBy: project.modifiedBy,
-                externalIds: project.externalIds,
-                externalUrls:project.externalUrls,
-                additionalData: project.additionalData,
-                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)),
-                ownerAccountingUnit: project.ownerAccountingUnit,
-                ownerGroup: project.ownerGroup,
-                ownerCountry: project.ownerCountry,
-                clearingState: project.clearingState,
-                businessUnit: project.businessUnit,
-                preevaluationDeadline: project.preevaluationDeadline,
-                clearingSummary: project.clearingSummary,
-                specialRisksOSS: project.specialRisksOSS,
-                generalRisks3rdParty: project.generalRisks3rdParty,
-                specialRisks3rdParty: project.specialRisks3rdParty,
-                deliveryChannels: project.deliveryChannels,
-                remarksAdditionalRequirements: project.remarksAdditionalRequirements,
-                state: project.state,
-                systemTestStart: project.systemTestStart,
-                systemTestEnd: project.systemTestEnd,
-                deliveryStart: project.deliveryStart,
-                phaseOutSince: project.phaseOutSince,
-                licenseInfoHeaderText: project.licenseInfoHeaderText
+                version: project?.version ?? '',
+                visibility: project.visibility ?? 'EVERYONE',
+                createdBy: project._embedded.createdBy.fullName ?? '',
+                projectType: project.projectType ?? 'PRODUCT',
+                tag: project.tag ?? '',
+                description: project.description ?? '',
+                domain: project.domain ?? '',
+                modifiedOn: project.modifiedOn ?? '',
+                modifiedBy: project.modifiedBy ?? '',
+                externalIds: project.externalIds ?? {},
+                externalUrls:project.externalUrls ?? {},
+                additionalData: project.additionalData ?? {},
+                roles: CommonUtils.convertRoles(
+                            CommonUtils.convertObjectToMapRoles(project.roles)) ?? {},
+                ownerAccountingUnit: project.ownerAccountingUnit ?? '',
+                ownerGroup: project.ownerGroup ?? '',
+                ownerCountry: project.ownerCountry ?? '',
+                clearingState: project.clearingState ?? 'OPEN',
+                businessUnit: project.businessUnit ?? 'CT',
+                preevaluationDeadline: project.preevaluationDeadline ?? '',
+                clearingSummary: project.clearingSummary ?? '',
+                specialRisksOSS: project.specialRisksOSS ?? '',
+                generalRisks3rdParty: project.generalRisks3rdParty ?? '',
+                specialRisks3rdParty: project.specialRisks3rdParty ?? '',
+                deliveryChannels: project.deliveryChannels ?? '',
+                remarksAdditionalRequirements: project.remarksAdditionalRequirements ?? '',
+                state: project.state ?? 'ACTIVE',
+                systemTestStart: project.systemTestStart ?? '',
+                systemTestEnd: project.systemTestEnd ?? '',
+                deliveryStart: project.deliveryStart ?? '',
+                phaseOutSince: project.phaseOutSince ?? '',
+                licenseInfoHeaderText: project.licenseInfoHeaderText ?? '',
+                securityResponsibles: project.securityResponsibles ?? [],
+                contributors: (project._embedded?.['sw360:contributors'] ?? []).map(user => user.email),
+                moderators: (project._embedded?.['sw360:moderators'] ?? []).map(user => user.email),
+                projectOwner: project._embedded?.projectOwner?.email ?? '',
+                leadArchitect: project._embedded?.leadArchitect?.email ?? '',
+                linkedReleases: projectPayload?.linkedReleases ?? {},
             }
             setProjectPayload(projectPayloadData)
         })
@@ -351,6 +406,7 @@ function EditProject({ projectId }: { projectId: string }) {
                                             <LinkedReleasesAndProjects
                                                 projectPayload={projectPayload}
                                                 setProjectPayload={setProjectPayload}
+                                                existingReleaseData={existingReleaseData}
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='attachments'></Tab.Pane>

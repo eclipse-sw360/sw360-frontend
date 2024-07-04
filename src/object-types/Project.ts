@@ -51,12 +51,23 @@ interface Project {
     tag?: string
     version?: string
     visibility?: string
+    projectOwner?: string
+    projectManager?: string
+    createdBy?: string
     linkedProjects?: {
         [key: string]: {
             projectRelationship: string
             enableSvm: boolean
         }
     }
+    linkedReleases?: {
+        createdBy?: string
+        release?: string
+        mainlineState?: string
+        comment?: string
+        createdOn?: string
+        relation?: string
+    }[]
     _links?: Links
     _embedded?: {
         leadArchitect?: User

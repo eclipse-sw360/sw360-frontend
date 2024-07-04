@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus, Project } from '@/object-types'
+import { HttpStatus, ProjectPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -26,8 +26,8 @@ interface AlertData {
 
 interface Props {
     setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, any>>>
-    projectPayload: Project
-    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
     setShow: (show: boolean) => void
 }
