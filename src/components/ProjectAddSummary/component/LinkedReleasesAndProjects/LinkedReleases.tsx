@@ -71,6 +71,26 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
             console.error(e)
         }
     }
+    
+    const handleComments = ( releaseId:string,
+                             updatedComment:string,
+                             linkedReleaseData: Map<string, any>) => {
+        try {
+            if (linkedReleaseData.has(releaseId)) {
+                linkedReleaseData.forEach((value, key) => {
+                    if (key === releaseId) {
+                        value.comment = updatedComment
+                        setLinkedReleaseData(linkedReleaseData)
+                        projectPayload.linkedReleases[releaseId].comment = updatedComment
+                        const data: any = extractDataFromMap(linkedReleaseData)
+                        setTableData(data)
+                    }
+                })
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
     const extractDataFromMap = (linkedReleaseData: Map<string, any>) => {
         const extractedData: any = []
@@ -86,10 +106,6 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
         })
         return extractedData
     }
-
-    const handleComments = ( releaseId:string, updatedComments:string) => {
-            projectPayload.linkedReleases[releaseId].comment = updatedComments
-        }
 
     useEffect(() => {
 
@@ -191,10 +207,10 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                         id='linkedReleaseData.comment'
                         aria-describedby='linkedReleaseData.comment'
                         name='comment'
-                        value={linkedReleaseData.get(key) ?.comment || comments}
-                        onChange={(event) => {
+                        defaultValue={linkedReleaseData.get(key) ?.comment || comments}
+                        onBlur={(event) => {
                             const updatedComment = event.target.value
-                            handleComments(key, updatedComment)
+                            handleComments(key, updatedComment, linkedReleaseData)
                         }}
                     />
                 </div>
