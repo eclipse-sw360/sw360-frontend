@@ -51,7 +51,6 @@ function EditProject({ projectId }: { projectId: string }) {
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, any>>()
-
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
         version: '',
