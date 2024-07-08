@@ -87,7 +87,7 @@ export default function ECC() {
             ])
         },
         total: (data: EmbeddedECC) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+        headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 
     return (

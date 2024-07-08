@@ -76,7 +76,7 @@ function SelectAttachment({
             method: 'POST',
             body: formData,
             headers: {
-                Authorization: `Bearer ${session.user.access_token}`,
+                Authorization: `${session.user.access_token}`,
             },
         })
             .then((res) => res.json())

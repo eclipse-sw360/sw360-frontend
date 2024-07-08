@@ -194,7 +194,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }) 
                 return tableRows
             },
             total: (data: ProjectObligationsList) => data.page.totalElements,
-            headers: { Authorization: `Bearer ${session.user.access_token}` },
+            headers: { Authorization: `${session.user.access_token}` },
         }
     }
 

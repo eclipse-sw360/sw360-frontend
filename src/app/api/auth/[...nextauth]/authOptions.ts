@@ -31,6 +31,34 @@ export const authOptions: NextAuthOptions = {
                         username: username,
                         password: password,
                     }
+
+                    const authToken = await AuthService.generateBasicToken(userCredential)
+
+                    if (authToken === null) throw new Error('Error while fetching Auth Token')
+
+                    const response = await ApiUtils.GET(`users/${username}`, authToken)
+                    if (response.status !== HttpStatus.OK) {
+                        throw new Error('Error while fetching User Group')
+                    }
+                    const data = await response.json()
+                    return { access_token: authToken, userGroup: data.userGroup, email: username} as any
+                } catch (e) {
+                    console.error(e)
+                    return null
+                }
+            },
+        }),
+        CredentialsProvider({
+            name: CREDENTIAL_PROVIDER,
+            credentials: {},
+            async authorize(credentials) {
+                try {
+                    const { username, password } = credentials as any
+                    const userCredential: UserCredentialInfo = {
+                        username: username,
+                        password: password,
+                    }
+
                     const authToken = await AuthService.generateToken(userCredential)
 
                     if (authToken === null) throw new Error('Error while fetching Auth Token')
@@ -61,7 +89,6 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             // Send properties to the client, like an access_token from a provider.
             session.user = token
-
             return session
         },
     },

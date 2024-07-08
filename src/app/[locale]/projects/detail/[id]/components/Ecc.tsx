@@ -104,7 +104,7 @@ export default function EccDetails({ projectId }: { projectId: string }) {
             ])
         },
         total: (data: EmbeddedProjectReleaseEcc) => data.page.totalElements,
-        headers: { Authorization: `Bearer ${status === 'authenticated' ? session.user.access_token : ''}` },
+        headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 
     return (
