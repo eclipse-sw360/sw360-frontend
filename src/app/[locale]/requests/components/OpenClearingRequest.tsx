@@ -15,7 +15,7 @@ import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
 import { ApiUtils } from '@/utils/index'
 import { Embedded, HttpStatus } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
 import { Spinner } from 'react-bootstrap'
@@ -29,6 +29,58 @@ interface ClearingRequestPriorityMap {
 }
 interface ClearingRequestTypeMap {
     [key: string]: string;
+}
+
+interface LicenseClearingData {
+    'Release Count': number
+}
+
+function LicenseClearing({ projectId }: { projectId: string }) {
+    const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (!session) {
+                    return signOut()
+                }
+
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/licenseClearingCount`,
+                    session.user.access_token,
+                    signal
+                )
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+
+                const data = await response.json()
+
+                setLcData(data)
+            } catch (e) {
+                console.error(e)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [projectId])
+
+    return (
+        <>
+            {lcData ? (
+                <div className='text-center'>{`${lcData['Release Count']}`}</div>
+            ) : (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </>
+    )
 }
 
 
@@ -90,7 +142,7 @@ function OpenClearingRequest() {
                     item.projectBU ?? '',
                     { projectId: item.projectId ?? '',
                       projectName: item.projectName ?? '' },
-                    '',
+                    item.projectId,
                     clearingRequestStatus[item.clearingState] ?? '',
                     { priority: item.priority ?? '' },
                     item.requestingUser ?? '',
@@ -142,6 +194,7 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.openReleases',
             name: t('Open Releases'),
             sort: true,
+            formatter: (id: string) => _(<LicenseClearing projectId={id} />),
         },
         {
             id: 'openClearingRequest.status',
