@@ -238,7 +238,7 @@ function Project() {
                 ])
             },
             total: (data: EmbeddedProjects) => data.page.totalElements,
-            headers: { Authorization: `Bearer ${session.user.access_token}` },
+            headers: { Authorization: `${session.user.access_token}` },
         }
     }
 

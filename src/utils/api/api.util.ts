@@ -38,7 +38,7 @@ async function send({
     }
 
     if (token) {
-        request_content.headers['Authorization'] = `Bearer ${token}`
+        request_content.headers['Authorization'] = `${token}`
     }
 
     if (signal) {
