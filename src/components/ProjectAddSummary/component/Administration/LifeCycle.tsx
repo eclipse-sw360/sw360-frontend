@@ -11,18 +11,20 @@
 
 import { useTranslations } from 'next-intl'
 
-import { Project } from '@/object-types'
+import { ProjectPayload } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
-    projectPayload: Project
-    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
 export default function Lifecycle({ projectPayload, setProjectPayload }: Props) {
     const t = useTranslations('default')
     const PROJECT_STATE_INFO = `Active: \n Phaseout: \n Unknown:`
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                                       HTMLInputElement |
+                                                       HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
             [event.target.name]: event.target.value,
