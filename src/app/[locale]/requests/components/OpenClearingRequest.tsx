@@ -21,21 +21,31 @@ import { ClearingRequest } from '@/object-types'
 import { Spinner } from 'react-bootstrap'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
+
 interface ClearingRequestStatusMap {
     [key: string]: string;
 }
+
 interface ClearingRequestPriorityMap {
     [key: string]: string;
 }
+
 interface ClearingRequestTypeMap {
     [key: string]: string;
 }
 
 interface LicenseClearingData {
     'Release Count': number
+    'Approved Count': number
 }
 
-function LicenseClearing({ projectId }: { projectId: string }) {
+interface LicenseClearing {
+    projectId: string,
+    clearingProgress?: boolean,
+    openReleases?: boolean
+}
+
+function LicenseClearing(licenseClearing: LicenseClearing) {
     const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
     useEffect(() => {
         const controller = new AbortController()
@@ -49,7 +59,7 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                 }
 
                 const response = await ApiUtils.GET(
-                    `projects/${projectId}/licenseClearingCount`,
+                    `projects/${licenseClearing.projectId}/licenseClearingCount`,
                     session.user.access_token,
                     signal
                 )
@@ -68,21 +78,35 @@ function LicenseClearing({ projectId }: { projectId: string }) {
         })()
 
         return () => controller.abort()
-    }, [projectId])
+    }, [licenseClearing.projectId])
 
     return (
         <>
-            {lcData ? (
-                <div className='text-center'>{`${lcData['Release Count']}`}</div>
-            ) : (
+            { lcData ? (
+                <>
+                    {
+                        licenseClearing.openReleases && (
+                            <div className='text-center'>
+                                {`${lcData['Release Count']}`}
+                            </div>
+                        )
+                    }
+                    {
+                        licenseClearing.clearingProgress && (
+                            <div className='text-center'>
+                                {`${lcData['Approved Count']}/${lcData['Release Count']}`}
+                            </div>
+                        )
+                    }
+                </>
+            ):(
                 <div className='col-12 text-center'>
                     <Spinner className='spinner' />
                 </div>
             )}
-        </>
+        </>        
     )
 }
-
 
 function OpenClearingRequest() {
 
@@ -138,15 +162,27 @@ function OpenClearingRequest() {
             });
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => [
-                    {requestId: item.id},
+                    {
+                        requestId: item.id
+                    },
                     item.projectBU ?? '',
-                    { projectId: item.projectId ?? '',
-                      projectName: item.projectName ?? '' },
-                    item.projectId,
+                    {
+                        projectId: item.projectId ?? '',
+                        projectName: item.projectName ?? ''
+                    },
+                    { 
+                        projectId: item.projectId ?? '',
+                        openReleases: true
+                    },
                     clearingRequestStatus[item.clearingState] ?? '',
-                    { priority: item.priority ?? '' },
+                    { 
+                        priority: item.priority ?? ''
+                    },
                     item.requestingUser ?? '',
-                    '',
+                    {
+                        projectId: item.projectId ?? '',
+                        clearingProgress: true
+                    },
                     '',
                     item.requestedClearingDate ?? '',
                     '',
@@ -156,7 +192,6 @@ function OpenClearingRequest() {
             )
             setLoading(false)
         })}, [fetchData, session])
-
 
     const columns = [
         {
@@ -194,7 +229,13 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.openReleases',
             name: t('Open Releases'),
             sort: true,
-            formatter: (id: string) => _(<LicenseClearing projectId={id} />),
+            formatter: ({projectId, openReleases}:
+                        {projectId: string, openReleases: boolean}) => 
+                _(
+                    <LicenseClearing projectId={projectId}
+                                     openReleases={openReleases}
+                    />
+                ),
         },
         {
             id: 'openClearingRequest.status',
@@ -250,6 +291,13 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.clearingProgress',
             name: t('Clearing Progress'),
             sort: true,
+            formatter: ({projectId, clearingProgress}:
+                        {projectId: string, clearingProgress: boolean}) => 
+                _(
+                    <LicenseClearing projectId={projectId}
+                                     clearingProgress={clearingProgress}
+                    />
+                ),
         },
         {
             id: 'openClearingRequest.createdOn',
