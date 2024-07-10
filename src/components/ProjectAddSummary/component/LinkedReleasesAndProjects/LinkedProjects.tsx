@@ -11,13 +11,13 @@
 
 import { Table, _ } from '@/components/sw360'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
-import { Project } from '@/object-types'
+import { ProjectPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 interface Props {
-    projectPayload: Project
-    setProjectPayload: React.Dispatch<React.SetStateAction<Project>>
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
 export default function LinkedProjects({ projectPayload, setProjectPayload }: Props) {

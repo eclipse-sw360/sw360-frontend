@@ -71,7 +71,9 @@ function AddProjects() {
         licenseInfoHeaderText: '',
         projectOwner: '',
         projectManager: '',
-        securityResponsibles: []
+        securityResponsibles: [],
+        linkedProjects: {},
+        linkedReleases:{},
     })
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
