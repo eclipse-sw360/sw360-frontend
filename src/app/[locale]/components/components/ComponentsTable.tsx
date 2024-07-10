@@ -112,7 +112,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
                 ])
             },
             total: (data: Embedded<Component, 'sw360:components'>) => data.page.totalElements,
-            headers: { Authorization: `Bearer ${session.user.access_token}` },
+            headers: { Authorization: `${session.user.access_token}` },
         }
     }
 

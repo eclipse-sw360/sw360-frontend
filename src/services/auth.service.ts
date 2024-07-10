@@ -78,8 +78,15 @@ const generateToken = async (userData: UserCredentialInfo) => {
     return sw360token
 }
 
+const generateBasicToken = async (userData: UserCredentialInfo) => {
+    const credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64')
+    const sw360token = `Basic ${credentials}`
+    return sw360token
+}
+
 const AuthService = {
     generateToken,
+    generateBasicToken,
 }
 
 export default AuthService

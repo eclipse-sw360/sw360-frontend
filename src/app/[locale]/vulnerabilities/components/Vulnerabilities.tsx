@@ -137,7 +137,7 @@ function Vulnerabilities() {
                 }
             },
             total: (data: EmbeddedVulnerabilities) => data.page.totalElements,
-            headers: { Authorization: `Bearer ${session.user.access_token}` },
+            headers: { Authorization: `${session.user.access_token}` },
         }
     }
 
