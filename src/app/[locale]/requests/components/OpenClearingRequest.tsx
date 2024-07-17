@@ -40,9 +40,16 @@ interface LicenseClearingData {
 }
 
 interface LicenseClearing {
-    projectId: string,
+    isProjectDeleted?: boolean,
+    projectId?: string,
     clearingProgress?: boolean,
     openReleases?: boolean
+}
+
+interface ProjectData {
+    isProjectDeleted?: boolean,
+    projectId?: string,
+    projectName?: string
 }
 
 function LicenseClearing(licenseClearing: LicenseClearing) {
@@ -58,20 +65,20 @@ function LicenseClearing(licenseClearing: LicenseClearing) {
                     return signOut()
                 }
 
-                const response = await ApiUtils.GET(
-                    `projects/${licenseClearing.projectId}/licenseClearingCount`,
-                    session.user.access_token,
-                    signal
-                )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
+                    const response = await ApiUtils.GET(
+                        `projects/${licenseClearing.projectId}/licenseClearingCount`,
+                        session.user.access_token,
+                        signal
+                    )
+                    if (response.status === HttpStatus.UNAUTHORIZED) {
+                        return signOut()
                 } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
+                        return notFound()
+                    }
 
-                const data = await response.json()
+                    const data = await response.json()
 
-                setLcData(data)
+                    setLcData(data)
             } catch (e) {
                 console.error(e)
             }
@@ -85,18 +92,18 @@ function LicenseClearing(licenseClearing: LicenseClearing) {
             { lcData ? (
                 <>
                     {
-                        licenseClearing.openReleases && (
+                        licenseClearing.openReleases && lcData['Release Count']? (
                             <div className='text-center'>
                                 {`${lcData['Release Count']}`}
                             </div>
-                        )
+                        ) : null
                     }
                     {
-                        licenseClearing.clearingProgress && (
+                        licenseClearing.clearingProgress ? (
                             <div className='text-center'>
                                 {`${lcData['Approved Count']}/${lcData['Release Count']}`}
                             </div>
-                        )
+                        ) : null
                     }
                 </>
             ):(
@@ -161,34 +168,49 @@ function OpenClearingRequest() {
                 return item.clearingState != 'REJECTED' && item.clearingState != 'CLOSED';
             });
             setTableData(
-                filteredClearingRequests.map((item: ClearingRequest) => [
-                    {
-                        requestId: item.id
-                    },
-                    item.projectBU ?? '',
-                    {
-                        projectId: item.projectId ?? '',
-                        projectName: item.projectName ?? ''
-                    },
-                    { 
-                        projectId: item.projectId ?? '',
-                        openReleases: true
-                    },
-                    clearingRequestStatus[item.clearingState] ?? '',
-                    { 
-                        priority: item.priority ?? ''
-                    },
-                    item.requestingUser ?? '',
-                    {
-                        projectId: item.projectId ?? '',
-                        clearingProgress: true
-                    },
-                    '',
-                    item.requestedClearingDate ?? '',
-                    '',
-                    clearingRequestType[item.clearingType] ?? '',
-                    ''
-                ])
+                filteredClearingRequests.map((item: ClearingRequest) => {
+                    let isProjectDeleted : boolean = false
+                    if (!Object.hasOwn(item, 'projectId')){
+                        isProjectDeleted = true
+                    }
+                    return [
+                                {
+                                    requestId: item.id
+                                },
+                                item.projectBU ?? t('Not Available'),
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : {
+                                    isProjectDeleted: false,
+                                    projectId: item.projectId ?? '',
+                                    projectName: item.projectName ?? ''
+                                },
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : { 
+                                        isProjectDeleted: false,
+                                        projectId: item.projectId ?? '',
+                                        openReleases: true
+                                    },
+                                clearingRequestStatus[item.clearingState] ?? '',
+                                { 
+                                    priority: item.priority ?? ''
+                                },
+                                item.requestingUser ?? '',
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : { 
+                                        isProjectDeleted: false,
+                                        projectId: item.projectId ?? '',
+                                        clearingProgress: true
+                                    },
+                                '',
+                                item.requestedClearingDate ?? '',
+                                '',
+                                clearingRequestType[item.clearingType] ?? '',
+                                ''
+                            ]
+                })
             )
             setLoading(false)
         })}, [fetchData, session])
@@ -216,11 +238,13 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.project',
             name: t('Project'),
             sort: true,
-            formatter: ({ projectId, projectName }: { projectId: string; projectName: string }) =>
+            formatter: (projectData: ProjectData) =>
                 _(
+                    projectData.isProjectDeleted ? t('Project Deleted') :
                     <>
-                        <Link href={`/projects/detail/${projectId}`} className='text-link'>
-                            {projectName}
+                        <Link href={`/projects/detail/${projectData.projectId}`}
+                              className='text-link'>
+                            {projectData.projectName}
                         </Link>
                     </>
                 ),
@@ -229,11 +253,11 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.openReleases',
             name: t('Open Releases'),
             sort: true,
-            formatter: ({projectId, openReleases}:
-                        {projectId: string, openReleases: boolean}) => 
-                _(
-                    <LicenseClearing projectId={projectId}
-                                     openReleases={openReleases}
+            formatter: (licenseClearing: LicenseClearing) => 
+                _(  
+                    licenseClearing.isProjectDeleted ? t('Not Available') :
+                    <LicenseClearing projectId={licenseClearing.projectId}
+                                     openReleases={licenseClearing.openReleases}
                     />
                 ),
         },
@@ -291,11 +315,11 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.clearingProgress',
             name: t('Clearing Progress'),
             sort: true,
-            formatter: ({projectId, clearingProgress}:
-                        {projectId: string, clearingProgress: boolean}) => 
-                _(
-                    <LicenseClearing projectId={projectId}
-                                     clearingProgress={clearingProgress}
+            formatter: (licenseClearing: LicenseClearing) => 
+                _(  
+                    licenseClearing.isProjectDeleted ? t('Not Available') :
+                    <LicenseClearing projectId={licenseClearing.projectId}
+                                     clearingProgress={licenseClearing.clearingProgress}
                     />
                 ),
         },
