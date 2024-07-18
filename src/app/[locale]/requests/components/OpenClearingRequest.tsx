@@ -15,22 +15,105 @@ import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
 import { ApiUtils } from '@/utils/index'
 import { Embedded, HttpStatus } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
 import { Spinner } from 'react-bootstrap'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
+
 interface ClearingRequestStatusMap {
     [key: string]: string;
 }
+
 interface ClearingRequestPriorityMap {
     [key: string]: string;
 }
+
 interface ClearingRequestTypeMap {
     [key: string]: string;
 }
 
+interface LicenseClearingData {
+    'Release Count': number
+    'Approved Count': number
+}
+
+interface LicenseClearing {
+    isProjectDeleted?: boolean,
+    projectId?: string,
+    clearingProgress?: boolean,
+    openReleases?: boolean
+}
+
+interface ProjectData {
+    isProjectDeleted?: boolean,
+    projectId?: string,
+    projectName?: string
+}
+
+function LicenseClearing(licenseClearing: LicenseClearing) {
+    const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (!session) {
+                    return signOut()
+                }
+
+                    const response = await ApiUtils.GET(
+                        `projects/${licenseClearing.projectId}/licenseClearingCount`,
+                        session.user.access_token,
+                        signal
+                    )
+                    if (response.status === HttpStatus.UNAUTHORIZED) {
+                        return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                        return notFound()
+                    }
+
+                    const data = await response.json()
+
+                    setLcData(data)
+            } catch (e) {
+                console.error(e)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [licenseClearing.projectId])
+
+    return (
+        <>
+            { lcData ? (
+                <>
+                    {
+                        licenseClearing.openReleases && lcData['Release Count']? (
+                            <div className='text-center'>
+                                {`${lcData['Release Count']}`}
+                            </div>
+                        ) : null
+                    }
+                    {
+                        licenseClearing.clearingProgress ? (
+                            <div className='text-center'>
+                                {`${lcData['Approved Count']}/${lcData['Release Count']}`}
+                            </div>
+                        ) : null
+                    }
+                </>
+            ):(
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </>        
+    )
+}
 
 function OpenClearingRequest() {
 
@@ -85,26 +168,52 @@ function OpenClearingRequest() {
                 return item.clearingState != 'REJECTED' && item.clearingState != 'CLOSED';
             });
             setTableData(
-                filteredClearingRequests.map((item: ClearingRequest) => [
-                    {requestId: item.id},
-                    item.projectBU ?? '',
-                    { projectId: item.projectId ?? '',
-                      projectName: item.projectName ?? '' },
-                    '',
-                    clearingRequestStatus[item.clearingState] ?? '',
-                    { priority: item.priority ?? '' },
-                    item.requestingUser ?? '',
-                    '',
-                    '',
-                    item.requestedClearingDate ?? '',
-                    '',
-                    clearingRequestType[item.clearingType] ?? '',
-                    ''
-                ])
+                filteredClearingRequests.map((item: ClearingRequest) => {
+                    let isProjectDeleted : boolean = false
+                    if (!Object.hasOwn(item, 'projectId')){
+                        isProjectDeleted = true
+                    }
+                    return [
+                                {
+                                    requestId: item.id
+                                },
+                                item.projectBU ?? t('Not Available'),
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : {
+                                    isProjectDeleted: false,
+                                    projectId: item.projectId ?? '',
+                                    projectName: item.projectName ?? ''
+                                },
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : { 
+                                        isProjectDeleted: false,
+                                        projectId: item.projectId ?? '',
+                                        openReleases: true
+                                    },
+                                clearingRequestStatus[item.clearingState] ?? '',
+                                { 
+                                    priority: item.priority ?? ''
+                                },
+                                item.requestingUser ?? '',
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : { 
+                                        isProjectDeleted: false,
+                                        projectId: item.projectId ?? '',
+                                        clearingProgress: true
+                                    },
+                                '',
+                                item.requestedClearingDate ?? '',
+                                '',
+                                clearingRequestType[item.clearingType] ?? '',
+                                ''
+                            ]
+                })
             )
             setLoading(false)
         })}, [fetchData, session])
-
 
     const columns = [
         {
@@ -129,11 +238,13 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.project',
             name: t('Project'),
             sort: true,
-            formatter: ({ projectId, projectName }: { projectId: string; projectName: string }) =>
+            formatter: (projectData: ProjectData) =>
                 _(
+                    projectData.isProjectDeleted ? t('Project Deleted') :
                     <>
-                        <Link href={`/projects/detail/${projectId}`} className='text-link'>
-                            {projectName}
+                        <Link href={`/projects/detail/${projectData.projectId}`}
+                              className='text-link'>
+                            {projectData.projectName}
                         </Link>
                     </>
                 ),
@@ -142,6 +253,13 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.openReleases',
             name: t('Open Releases'),
             sort: true,
+            formatter: (licenseClearing: LicenseClearing) => 
+                _(  
+                    licenseClearing.isProjectDeleted ? t('Not Available') :
+                    <LicenseClearing projectId={licenseClearing.projectId}
+                                     openReleases={licenseClearing.openReleases}
+                    />
+                ),
         },
         {
             id: 'openClearingRequest.status',
@@ -197,6 +315,13 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.clearingProgress',
             name: t('Clearing Progress'),
             sort: true,
+            formatter: (licenseClearing: LicenseClearing) => 
+                _(  
+                    licenseClearing.isProjectDeleted ? t('Not Available') :
+                    <LicenseClearing projectId={licenseClearing.projectId}
+                                     clearingProgress={licenseClearing.clearingProgress}
+                    />
+                ),
         },
         {
             id: 'openClearingRequest.createdOn',
