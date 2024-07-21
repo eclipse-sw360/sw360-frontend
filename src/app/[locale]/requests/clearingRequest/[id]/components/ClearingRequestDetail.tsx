@@ -30,6 +30,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const { data: session, status } = useSession()
     const router = useRouter()
     const toastShownRef = useRef(false);
+    const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
         id: '',
         requestedClearingDate: '',
@@ -67,6 +68,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
 
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
                       (clearingRequestDetails: ClearingRequestDetails) => {
+            if (!Object.hasOwn(clearingRequestDetails, 'projectId')){
+                setIsProjectDeleted(true)
+            }
             setClearingRequestData(clearingRequestDetails)
         })}, [fetchData, session])
 
@@ -102,6 +106,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             variant='btn btn-primary'
                                             className='me-2 col-auto'
                                             onClick={handleEditClearingRequest}
+                                            hidden={isProjectDeleted}
                                         >
                                             {t('Edit Request')}
                                         </Button>
