@@ -133,10 +133,15 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             <div>
                                                 <ShowInfoOnHover text={''} />
                                                 {' '}
-                                                {t('Clearing Request Information For Project') + ` `}
-                                                <a href={`/projects/detail/${clearingRequestData.projectId}`}>
-                                                    {clearingRequestData.projectId}
-                                                </a>
+                                                {isProjectDeleted ? (
+                                                    t('Clearing Request Information For DELETED Project')
+                                                ) : ( <>
+                                                        {t('Clearing Request Information For Project') + ` `}
+                                                        <a href={`/projects/detail/${clearingRequestData.projectId}`}>
+                                                            {clearingRequestData.projectId}
+                                                        </a>
+                                                    </>
+                                                )}
                                             </div>
                                             </Button>
                                         </Card.Header>
