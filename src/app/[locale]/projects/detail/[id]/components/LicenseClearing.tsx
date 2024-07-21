@@ -15,6 +15,11 @@ import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import ListView from './ListView'
 import TreeView from './TreeView'
 import { useRouter } from 'next/navigation'
+import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
+import dynamic from 'next/dynamic'
+
+const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
+const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
 
 export default function LicenseClearing({
     projectId,
@@ -104,10 +109,22 @@ export default function LicenseClearing({
                 </div>
                 <Tab.Content className='mt-3'>
                     <Tab.Pane eventKey='tree-view'>
-                        <TreeView projectId={projectId} />
+                        {
+                            ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true'
+                            ?
+                                <DependencyNetworkTreeView projectId={projectId} />
+                            :
+                                <TreeView projectId={projectId} />
+                        }
                     </Tab.Pane>
                     <Tab.Pane eventKey='list-view'>
-                        <ListView projectId={projectId} projectName={projectName} projectVersion={projectVersion} />
+                        {
+                            ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true'
+                            ?
+                                <DependencyNetworkListView projectId={projectId} />
+                            :
+                                <ListView projectId={projectId} projectName={projectName} projectVersion={projectVersion} />
+                        }
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>

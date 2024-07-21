@@ -44,3 +44,82 @@
 .icon-btn:hover {
     cursor: pointer;
 }
+
+.state-box {
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+    color: #FFF;
+    height: 25px;
+    padding: 0 4px;
+    font-weight: bold;
+    line-height: 25px;
+    text-align: center;
+}
+
+.dropdown-btn button{
+    background: none !important;
+    border: 0px !important;
+    padding: 0px !important;
+}
+
+.dropdown-btn button:focus{
+    background: none !important;
+    border: 0px !important;
+}
+
+.dropdown-btn button:hover{
+    background: none !important;
+    border: 0px !important;
+}
+
+.dropdown-btn button::after {
+    display: none !important;
+}
+
+.dropdown-btn svg {
+    color: white !important;
+}
+
+.selection {
+    padding-left: 2.5rem;
+}
+
+.dropdown-btn > div {
+    font-size: 0.875rem !important;
+    width: 240px !important;
+}
+
+.table-search-box {
+    width: 15%;
+}
+
+.table-search-box label{
+    width: 60px;
+}
+
+.table-search-box input{
+    line-height: 1.2rem !important;
+}
+
+.expanded-all-message {
+    padding: 0.5rem !important;
+    margin-bottom: 0px !important;
+}
+
+.expanded-all-message [type='button'] {
+    padding: 17px !important;
+}
+
+.list-view-search-box {
+    width: 25%;
+    right: 0px;
+}
+
+.list-view-search-box label{
+    width: 60px;
+}
+
+.list-view-search-box input{
+    width: 83%;
+    line-height: 1.2rem !important;
+}

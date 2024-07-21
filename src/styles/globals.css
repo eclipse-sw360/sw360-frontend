@@ -1058,3 +1058,107 @@ input[type='date'] {
     font-size: small;
     border-radius: 5px;
 }
+
+.state-box {
+    color: #FFF;
+    height: 25px;
+    padding: 0 4px;
+    font-weight: bold;
+    line-height: 25px;
+    text-align: center;
+    display: inline-block;
+}
+
+.clearingStateOpen {
+    background-color: rgba(220, 53, 69, 0.7);
+}
+
+.clearingStateReportAvailable {
+    background-color: #2e5aac;
+}
+
+.clearingStateInProgress {
+    background-color: rgba(255, 193, 7, 0.7);
+}
+
+.clearingStateApproved {
+    background-color: rgba(40, 167, 69, 0.7);
+}
+
+.clearingStateUnknown {
+    background-color: #dee2e6;
+}
+
+.clearingStateSentToClearingTool {
+    background-color: #F7941E;
+}
+
+.tab-content {
+    padding-left: 0px !important;
+}
+
+.capsule-left {
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+}
+
+.capsule-right {
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.projectStateActive {
+    background-color: rgba(40, 167, 69, 0.7);
+}
+
+.projectStateInactive {
+    background-color: #dee2e6;
+}
+
+.indenter {
+    display: inline-block;
+    margin: 0;
+    padding-right: 5px;
+    text-align: right;
+    box-sizing: content-box !important;
+    width: 19px;
+}
+
+svg.cursor {
+    cursor: pointer
+}
+
+.btn-light:hover {
+    background-color: #e2e4ea !important;
+    border-color: transparent !important;
+    color: #272833 !important;
+}
+
+.modal-warning .modal-header {
+    background-color: #fff4ec;
+    border-color: #ff8f39;
+    color: #b95000;
+}
+
+.modal-info .modal-header {
+    background-color: #eef2fa;
+    border-color: #89a7e0;
+    color: #2e5aac;
+}
+
+a.text-primary:hover, a.text-primary:focus {
+    color: #c26c07 !important;
+}
+
+a.text-primary {
+    color: var(--sw360-primary-color) !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.tooltip-inner {
+    max-width: 600px !important;
+    font-size: 13px !important;
+}

@@ -12,3 +12,4 @@
 export const SW360_API_URL: string | undefined  = process.env.NEXT_PUBLIC_SW360_API_URL;
 export const AUTH_TOKEN : string | undefined  = process.env.NEXT_PUBLIC_AUTH_TOKEN;
 export const SPDX_ENABLE: string | undefined = process.env.NEXT_PUBLIC_SPDX_ENABLE;
+export const ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP : string | undefined  = process.env.NEXT_PUBLIC_ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP;

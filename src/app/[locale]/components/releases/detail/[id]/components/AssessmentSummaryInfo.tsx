@@ -106,7 +106,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
                 )}
                 {cliAttachmentNumber == 0 && (
                     <tr>
-                        <td colSpan={2}>{t('CLI attachment not found in the release!')}</td>
+                        <td colSpan={2}>{t('CLI attachment not found in the release')}!</td>
                     </tr>
                 )}
                 {cliAttachmentNumber > 1 && (

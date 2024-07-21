@@ -11,7 +11,10 @@
 interface NodeData {
     rowData: Array<any>
     isExpanded?: boolean
-    children: Array<NodeData>
+    children?: Array<NodeData>
+    isExpandable?: boolean
+    isNodeFetched?: boolean
+    additionalData?: any // You can add any thing to this field, this will help you customize fetching function when expanding
 }
 
 export default NodeData
