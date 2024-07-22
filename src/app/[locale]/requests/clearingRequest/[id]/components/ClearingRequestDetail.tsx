@@ -21,6 +21,7 @@ import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
 import ClearingRequestInfo from './ClearingRequestInfo'
 import ClearingDecision from './ClearingDecision'
+import ClearingComments from './ClearingComments'
 
 
 function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
@@ -189,6 +190,13 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                     <Collapse in={openCardIndex === 1}>
                                         <div id="example-collapse-text-2">
                                             <Card.Body className = {`${styles['card-body']}`}>
+                                                <div>
+                                                    <div className="col">
+                                                        <ClearingComments
+                                                            data={clearingRequestData}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </Card.Body>
                                         </div>
                                     </Collapse>

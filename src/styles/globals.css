@@ -1162,3 +1162,15 @@ a.text-primary {
     max-width: 600px !important;
     font-size: 13px !important;
 }
+
+.btn-accept {
+    background-color: #287d3c !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+}
+
+.btn-accept:hover {
+    background-color: #226a33 !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+}
