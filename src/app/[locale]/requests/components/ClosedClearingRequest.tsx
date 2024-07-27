@@ -10,15 +10,45 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
+import { ApiUtils } from '@/utils/index'
+import { Embedded, HttpStatus } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
+import { ClearingRequest } from '@/object-types'
+import { Spinner } from 'react-bootstrap'
 
+type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
+
+interface ClearingRequestDataMap {
+    [key: string]: string;
+}
 
 function ClosedClearingRequest() {
 
     const t = useTranslations('default')
-    const [tableData] = useState<Array<any>>([])
+    const { data: session, status } = useSession()
+    const [loading, setLoading] = useState(true)
+    const [tableData, setTableData] = useState<Array<any>>([])
+    const [tableDatum] = useState<Array<any>>([])
+    const clearingRequestStatus : ClearingRequestDataMap = {
+        NEW: t('New'),
+        IN_PROGRESS: t('In Progress'),
+        ACCEPTED: t('ACCEPTED'),
+        PENDING_INPUT: t('Pending Input'),
+        REJECTED: t('REJECTED'),
+        IN_QUEUE: t('In Queue'),
+        CLOSED: t('Closed'),
+        AWAITING_RESPONSE: t('Awaiting Response'),
+        ON_HOLD: t('On Hold'),
+        SANITY_CHECK: t('Sanity Check')
+    };
+    const clearingRequestType : ClearingRequestDataMap = {
+        DEEP: t('Deep'),
+        HIGH: t('High')
+    };
 
     const columns = [
         {
@@ -80,23 +110,106 @@ function ClosedClearingRequest() {
             sort: true,
         },
         {
+            id: 'openClearingRequest.clearingType',
+            name: t('Clearing Type'),
+            sort: true,
+        },
+        {
             id: 'closedClearingRequest.actions ',
             name: t('Actions'),
             sort: true,
         }
     ]
 
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedClearingRequest
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
+    )
+
+    useEffect(() => {
+        setLoading(true)
+        void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest) => {
+            const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
+                                                                .filter((item: ClearingRequest) => {
+                return item.clearingState === 'REJECTED' || item.clearingState === 'CLOSED';
+            });
+            setTableData(
+                filteredClearingRequests.map((item: ClearingRequest) => {
+                    let isProjectDeleted : boolean = false
+                    if (!Object.hasOwn(item, 'projectId')){
+                        isProjectDeleted = true
+                    }
+                    return [
+                                {
+                                    requestId: item.id
+                                },
+                                item.projectBU ?? t('Not Available'),
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : {
+                                    isProjectDeleted: false,
+                                    projectId: item.projectId ?? '',
+                                    projectName: item.projectName ?? ''
+                                },
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : { 
+                                        isProjectDeleted: false,
+                                        projectId: item.projectId ?? '',
+                                        openReleases: true
+                                    },
+                                clearingRequestStatus[item.clearingState] ?? '',
+                                { 
+                                    priority: item.priority ?? ''
+                                },
+                                item.requestingUser ?? '',
+                                isProjectDeleted ? {
+                                    isProjectDeleted: true
+                                    } : { 
+                                        isProjectDeleted: false,
+                                        projectId: item.projectId ?? '',
+                                        clearingProgress: true
+                                    },
+                                '',
+                                item.requestedClearingDate ?? '',
+                                '',
+                                clearingRequestType[item.clearingType] ?? '',
+                                ''
+                            ]
+                })
+            )
+            console.log('table data', tableData)
+            setLoading(false)
+        })}, [fetchData, session])
+
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
     return (
         <>
             <div className='row mb-4'>
                 <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <div style={{ paddingLeft: '0px' }}>
-                        <Table columns={columns} data={tableData} sort={false} selector={true} />
-                    </div>
+                    {loading == false ? (
+                        <div style={{ paddingLeft: '0px' }}>
+                            <Table columns={columns} data={tableDatum} sort={false} selector={true} />
+                        </div>
+                        ) : (
+                                <Spinner className='spinner' />
+                        )
+                    }
                 </div>
             </div>
         </>
-    )
+    )}
 }
 
 export default ClosedClearingRequest
