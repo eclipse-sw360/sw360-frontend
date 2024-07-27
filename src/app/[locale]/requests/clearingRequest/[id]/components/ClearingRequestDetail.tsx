@@ -46,7 +46,13 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         clearingType: '',
         reOpenOn: null,
         createdOn: '',
-        comments: [{}]
+        comments: [{}],
+        _embedded: {
+            "sw360:project": {
+                name: '',
+                version: ''
+            }
+        }
     })
 
     const fetchData = useCallback(
@@ -139,12 +145,14 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                     t('Clearing Request Information For DELETED Project')
                                                 ) : ( <>
                                                         {t('Clearing Request Information For Project') + ` `}
-                                                        <a href={`/projects/detail/${clearingRequestData.projectId}`}>
-                                                            {clearingRequestData.projectId}
+                                                        <a href={`/projects/detail/${clearingRequestData.projectId}`}
+                                                           className='text-link'>
+                                                                {clearingRequestData._embedded['sw360:project'].name + 
+                                                                `(${clearingRequestData._embedded['sw360:project'].version})`}
                                                         </a>
                                                     </>
                                                 )}
-                                            </div>
+                                            </div>  
                                             </Button>
                                         </Card.Header>
                                     </div>
