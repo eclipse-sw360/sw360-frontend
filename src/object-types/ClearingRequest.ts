@@ -19,12 +19,14 @@ export default interface ClearingRequest {
     clearingTeam?: string
     clearingTeamName?: string
     agreedClearingDate?: string
+    preferredClearingDate?: string
     priority?: string
     projectName?: string
     openReleases?: string
     clearingProgress?: string
     createdOn?: string
     clearingType?: string
+    requestClosedOn?: string
     _links?: {
         self: {
             href: string

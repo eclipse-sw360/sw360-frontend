@@ -192,28 +192,13 @@ function ClosedClearingRequest() {
                                     projectId: item.projectId ?? '',
                                     projectName: item.projectName ?? ''
                                 },
-                                isProjectDeleted ? {
-                                    isProjectDeleted: true
-                                    } : { 
-                                        isProjectDeleted: false,
-                                        projectId: item.projectId ?? '',
-                                        openReleases: true
-                                    },
                                 clearingRequestStatus[item.clearingState] ?? '',
-                                { 
-                                    priority: item.priority ?? ''
-                                },
                                 item.requestingUser ?? '',
-                                isProjectDeleted ? {
-                                    isProjectDeleted: true
-                                    } : { 
-                                        isProjectDeleted: false,
-                                        projectId: item.projectId ?? '',
-                                        clearingProgress: true
-                                    },
-                                '',
-                                item.requestedClearingDate ?? '',
-                                '',
+                                item.clearingTeam ?? '',
+                                item.createdOn ?? '',
+                                item.preferredClearingDate ?? '',
+                                item.agreedClearingDate ?? '',
+                                item.requestClosedOn ?? '',
                                 clearingRequestType[item.clearingType] ?? '',
                                 ''
                             ]
