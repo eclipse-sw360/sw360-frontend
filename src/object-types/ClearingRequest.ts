@@ -19,7 +19,6 @@ export default interface ClearingRequest {
     clearingTeam?: string
     clearingTeamName?: string
     agreedClearingDate?: string
-    preferredClearingDate?: string
     priority?: string
     projectName?: string
     openReleases?: string

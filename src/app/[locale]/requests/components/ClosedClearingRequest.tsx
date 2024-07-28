@@ -38,7 +38,6 @@ function ClosedClearingRequest() {
     const { data: session, status } = useSession()
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<Array<any>>([])
-    const [tableDatum] = useState<Array<any>>([])
     const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
@@ -196,7 +195,7 @@ function ClosedClearingRequest() {
                                 item.requestingUser ?? '',
                                 item.clearingTeam ?? '',
                                 item.createdOn ?? '',
-                                item.preferredClearingDate ?? '',
+                                item.requestedClearingDate ?? '',
                                 item.agreedClearingDate ?? '',
                                 item.requestClosedOn ?? '',
                                 clearingRequestType[item.clearingType] ?? '',
@@ -204,7 +203,6 @@ function ClosedClearingRequest() {
                             ]
                 })
             )
-            console.log('table data', tableData)
             setLoading(false)
         })}, [fetchData, session])
 
@@ -217,7 +215,7 @@ function ClosedClearingRequest() {
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     {loading == false ? (
                         <div style={{ paddingLeft: '0px' }}>
-                            <Table columns={columns} data={tableDatum} sort={false} selector={true} />
+                            <Table columns={columns} data={tableData} sort={false} selector={true} />
                         </div>
                         ) : (
                                 <Spinner className='spinner' />
