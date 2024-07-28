@@ -204,9 +204,9 @@ function OpenClearingRequest() {
                                         projectId: item.projectId ?? '',
                                         clearingProgress: true
                                     },
-                                '',
+                                item.createdOn ?? '',
                                 item.requestedClearingDate ?? '',
-                                '',
+                                item.agreedClearingDate ?? '',
                                 clearingRequestType[item.clearingType] ?? '',
                                 ''
                             ]

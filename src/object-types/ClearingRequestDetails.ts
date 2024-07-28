@@ -26,6 +26,7 @@ export default interface ClearingRequestDetails{
     clearingType?: string,
     clearingState?: string,
     reOpenOn?: number,
+    createdOn?: string,
     comments?: [{
         text?: string,
         commentedBy?: string

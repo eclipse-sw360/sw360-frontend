@@ -15,7 +15,7 @@ import { ClearingRequestDetails } from '@/object-types'
 import styles from './../../../moderationRequest/[id]/moderationRequestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 
-interface ClearingRequestStatusMap {
+interface ClearingRequestDataMap {
     [key: string]: string;
 }
 
@@ -23,16 +23,11 @@ interface Props {
     data: ClearingRequestDetails
 }
 
-interface ClearingRequestPriorityMap {
-    [key: string]: string;
-}
-
-
 export default function ClearingDecision({ data }: Props ) {
 
     const t = useTranslations('default')
     const { status } = useSession()
-    const clearingRequestStatus : ClearingRequestStatusMap = {
+    const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
         ACCEPTED: t('ACCEPTED'),
@@ -45,7 +40,7 @@ export default function ClearingDecision({ data }: Props ) {
         SANITY_CHECK: t('Sanity Check')
     };
 
-    const clearingRequestPriority : ClearingRequestPriorityMap = {
+    const clearingRequestPriority : ClearingRequestDataMap = {
         LOW: t('Low'),
         MEDIUM: t('Medium'),
         HIGH: t('High'),
