@@ -26,6 +26,12 @@ interface ClearingRequestDataMap {
     [key: string]: string;
 }
 
+interface ProjectData {
+    isProjectDeleted?: boolean,
+    projectId?: string,
+    projectName?: string
+}
+
 function ClosedClearingRequest() {
 
     const t = useTranslations('default')
@@ -55,6 +61,14 @@ function ClosedClearingRequest() {
             id: 'closedClearingRequest.requestId',
             name: t('Request ID'),
             sort: true,
+            formatter: ({ requestId }: { requestId: string; }) =>
+                _(
+                    <>
+                        <Link href={`/requests/clearingRequest/${requestId}`} className='text-link'>
+                            {requestId}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'closedClearingRequest.baBlGroup',
@@ -65,6 +79,16 @@ function ClosedClearingRequest() {
             id: 'closedClearingRequest.project',
             name: t('Project'),
             sort: true,
+            formatter: (projectData: ProjectData) =>
+                _(
+                    projectData.isProjectDeleted ? t('Project Deleted') :
+                    <>
+                        <Link href={`/projects/detail/${projectData.projectId}`}
+                              className='text-link'>
+                            {projectData.projectName}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'closedClearingRequest.status',
@@ -88,6 +112,14 @@ function ClosedClearingRequest() {
             id: 'closedClearingRequest.clearingTeam ',
             name: t('Clearing Team'),
             sort: true,
+            formatter: (email: string) =>
+                _(
+                    <>
+                        <Link href={`mailto:${email}`} className='text-link'>
+                            {email}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'closedClearingRequest.createdOn',
