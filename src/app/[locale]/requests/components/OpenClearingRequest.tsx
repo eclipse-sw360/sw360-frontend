@@ -22,15 +22,7 @@ import { Spinner } from 'react-bootstrap'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
-interface ClearingRequestStatusMap {
-    [key: string]: string;
-}
-
-interface ClearingRequestPriorityMap {
-    [key: string]: string;
-}
-
-interface ClearingRequestTypeMap {
+interface ClearingRequestDataMap {
     [key: string]: string;
 }
 
@@ -121,7 +113,7 @@ function OpenClearingRequest() {
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
     const [tableData, setTableData] = useState<Array<any>>([])
-    const clearingRequestStatus : ClearingRequestStatusMap = {
+    const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
         ACCEPTED: t('ACCEPTED'),
@@ -134,14 +126,14 @@ function OpenClearingRequest() {
         SANITY_CHECK: t('Sanity Check')
     };
 
-    const clearingRequestPriority : ClearingRequestPriorityMap = {
+    const clearingRequestPriority : ClearingRequestDataMap = {
         LOW: t('Low'),
         MEDIUM: t('Medium'),
         HIGH: t('High'),
         CRITICAL: t('Critical')
     };
     
-    const clearingRequestType : ClearingRequestTypeMap = {
+    const clearingRequestType : ClearingRequestDataMap = {
         DEEP: t('Deep'),
         HIGH: t('High')
     };
@@ -223,7 +215,7 @@ function OpenClearingRequest() {
             formatter: ({ requestId }: { requestId: string; }) =>
                 _(
                     <>
-                        <Link href={`/requests/clearingRequest/${requestId}`} className='text-link'>
+                        <Link href={`/requests/clearingRequest/detail/${requestId}`} className='text-link'>
                             {requestId}
                         </Link>
                     </>

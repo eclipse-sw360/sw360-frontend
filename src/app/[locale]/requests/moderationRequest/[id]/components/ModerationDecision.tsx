@@ -12,7 +12,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
-import styles from '../moderationRequestDetail.module.css'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
 
 interface ModerationRequestMap {
     [key: string]: string;

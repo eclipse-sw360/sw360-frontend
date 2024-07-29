@@ -16,11 +16,12 @@ import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { signOut, useSession } from 'next-auth/react'
-import styles from './../../../moderationRequest/[id]/moderationRequestDetail.module.css'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
 import ClearingRequestInfo from './ClearingRequestInfo'
 import ClearingDecision from './ClearingDecision'
+import ClearingComments from './ClearingComments'
 
 
 function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
@@ -45,7 +46,13 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         clearingType: '',
         reOpenOn: null,
         createdOn: '',
-        comments: [{}]
+        comments: [{}],
+        _embedded: {
+            "sw360:project": {
+                name: '',
+                version: ''
+            }
+        }
     })
 
     const fetchData = useCallback(
@@ -138,12 +145,14 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                     t('Clearing Request Information For DELETED Project')
                                                 ) : ( <>
                                                         {t('Clearing Request Information For Project') + ` `}
-                                                        <a href={`/projects/detail/${clearingRequestData.projectId}`}>
-                                                            {clearingRequestData.projectId}
+                                                        <a href={`/projects/detail/${clearingRequestData.projectId}`}
+                                                           className='text-link'>
+                                                                {clearingRequestData._embedded['sw360:project'].name + 
+                                                                `(${clearingRequestData._embedded['sw360:project'].version})`}
                                                         </a>
                                                     </>
                                                 )}
-                                            </div>
+                                            </div>  
                                             </Button>
                                         </Card.Header>
                                     </div>
@@ -182,13 +191,21 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 aria-controls="example-collapse-text-2"
                                                 aria-expanded={openCardIndex === 1}
                                             >
-                                            {t('Clearing Request Comments')}
+                                            {t('Clearing Request Comments') + ' ' +
+                                             `(${clearingRequestData.comments.length})`}
                                             </Button>
                                         </Card.Header>
                                     </div>
                                     <Collapse in={openCardIndex === 1}>
                                         <div id="example-collapse-text-2">
                                             <Card.Body className = {`${styles['card-body']}`}>
+                                                <div>
+                                                    <div className="col">
+                                                        <ClearingComments
+                                                            data={clearingRequestData}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </Card.Body>
                                         </div>
                                     </Collapse>
