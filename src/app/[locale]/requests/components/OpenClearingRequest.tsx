@@ -19,6 +19,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
 import { Spinner } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
@@ -200,7 +201,9 @@ function OpenClearingRequest() {
                                 item.requestedClearingDate ?? '',
                                 item.agreedClearingDate ?? '',
                                 clearingRequestType[item.clearingType] ?? '',
-                                ''
+                                {
+                                    requestId: item.id
+                                },
                             ]
                 })
             )
@@ -215,7 +218,8 @@ function OpenClearingRequest() {
             formatter: ({ requestId }: { requestId: string; }) =>
                 _(
                     <>
-                        <Link href={`/requests/clearingRequest/detail/${requestId}`} className='text-link'>
+                        <Link href={`/requests/clearingRequest/detail/${requestId}`}
+                              className='text-link'>
                             {requestId}
                         </Link>
                     </>
@@ -339,6 +343,15 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.actions',
             name: t('Actions'),
             sort: true,
+            formatter: ({ requestId }: { requestId: string }) => 
+                _(
+                    <>
+                        <Link href={`/requests/clearingRequest/${requestId}`}
+                              className='overlay-trigger'>
+                            <FaPencilAlt className='btn-icon' />
+                        </Link>
+                    </>
+                )
         }
     ]
 
@@ -351,7 +364,10 @@ function OpenClearingRequest() {
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     {loading == false ? (
                         <div style={{ paddingLeft: '0px' }}>
-                            <Table columns={columns} data={tableData} sort={false} selector={true} />
+                            <Table columns={columns}
+                                   data={tableData}
+                                   sort={false}
+                                   selector={true} />
                         </div>
                         ) : (
                                 <Spinner className='spinner' />
