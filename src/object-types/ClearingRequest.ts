@@ -25,6 +25,7 @@ export default interface ClearingRequest {
     clearingProgress?: string
     createdOn?: string
     clearingType?: string
+    requestClosedOn?: string
     _links?: {
         self: {
             href: string
