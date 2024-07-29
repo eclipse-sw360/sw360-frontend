@@ -18,7 +18,7 @@ import { Embedded, HttpStatus } from '@/object-types'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
-import { Spinner } from 'react-bootstrap'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
@@ -346,10 +346,15 @@ function OpenClearingRequest() {
             formatter: ({ requestId }: { requestId: string }) => 
                 _(
                     <>
-                        <Link href={`/requests/clearingRequest/${requestId}`}
-                              className='overlay-trigger'>
-                            <FaPencilAlt className='btn-icon' />
-                        </Link>
+                        <OverlayTrigger overlay={
+                            <Tooltip>
+                                {t('Edit')}
+                            </Tooltip>}>
+                            <Link href={`/requests/clearingRequest/${requestId}`}
+                                  className='overlay-trigger'>
+                                <FaPencilAlt className='btn-icon' />
+                            </Link>
+                        </OverlayTrigger>
                     </>
                 )
         }
