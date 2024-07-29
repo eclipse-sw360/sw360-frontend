@@ -23,10 +23,33 @@ interface Package {
     homepageUrl?: string
     vcs?: string
     createdOn?: string
+    modifiedOn?: string
     createdBy?: string
     packageManager?: string
     clearingState?: string
     _links?: Links
+    _embedded?: {
+        createdBy?: {
+            email: string
+            wantsMailNotification: boolean
+            deactivated: boolean
+            fullName: string
+            _links?: Links
+        }
+        modifiedBy?: {
+            email: string
+            wantsMailNotification: boolean
+            deactivated: boolean
+            fullName: string
+            _links?: Links
+        }
+        "sw360:release"?: {
+            id: string
+            name: string
+            version: string
+            _links: Links
+        }
+    }
 }
 
 export default Package
