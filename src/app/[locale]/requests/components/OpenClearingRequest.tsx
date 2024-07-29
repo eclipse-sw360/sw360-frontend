@@ -215,7 +215,7 @@ function OpenClearingRequest() {
             formatter: ({ requestId }: { requestId: string; }) =>
                 _(
                     <>
-                        <Link href={`/requests/clearingRequest/${requestId}`} className='text-link'>
+                        <Link href={`/requests/clearingRequest/detail/${requestId}`} className='text-link'>
                             {requestId}
                         </Link>
                     </>

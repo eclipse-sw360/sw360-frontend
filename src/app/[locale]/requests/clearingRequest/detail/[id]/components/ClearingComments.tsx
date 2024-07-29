@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails } from '@/object-types'
-import styles from './../../../moderationRequest/[id]/moderationRequestDetail.module.css'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 
 

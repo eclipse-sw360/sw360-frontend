@@ -16,7 +16,7 @@ import { Component,
          ModerationRequestDetails,
          Project,
          ReleaseDetail } from '@/object-types'
-import styles from '../moderationRequestDetail.module.css'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { useCallback, useEffect, useState } from 'react'
 import { RequestDocumentTypes } from '@/object-types'
 import TableHeader from './TableHeader'
