@@ -191,7 +191,8 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 aria-controls="example-collapse-text-2"
                                                 aria-expanded={openCardIndex === 1}
                                             >
-                                            {t('Clearing Request Comments')}
+                                            {t('Clearing Request Comments') + ' ' +
+                                             `(${clearingRequestData.comments.length})`}
                                             </Button>
                                         </Card.Header>
                                     </div>
