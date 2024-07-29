@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import Links from './Links'
+
 interface Package {
     id?: string
     rev?: string
@@ -23,6 +25,8 @@ interface Package {
     createdOn?: string
     createdBy?: string
     packageManager?: string
+    clearingState?: string
+    _links?: Links
 }
 
 export default Package

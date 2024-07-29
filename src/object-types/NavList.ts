@@ -17,6 +17,7 @@ function NavList() {
         { href: '/home', name: t('Home'), id: 'home' },
         { href: '/projects', name: t('Projects'), id: 'projects' },
         { href: '/components', name: t('Components'), id: 'components' },
+        { href: '/packages', name: t('Packages'), id: 'packages' },
         { href: '/licenses', name: t('Licenses'), id: 'licenses' },
         { href: '/ecc', name: t('ECC'), id: 'ecc' },
         { href: '/vulnerabilities', name: t('Vulnerabilities'), id: 'vulnerabilities' },
