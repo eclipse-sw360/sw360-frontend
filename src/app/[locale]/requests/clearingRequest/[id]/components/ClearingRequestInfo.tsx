@@ -43,7 +43,7 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{data.requestedClearingDate ?? ''}</td>
+                        <td>{data.createdOn ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
