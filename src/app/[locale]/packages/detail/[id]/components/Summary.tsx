@@ -15,7 +15,6 @@ import { useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
 import { Package } from '@/object-types'
-import styles from '../detail.module.css'
 
 const Capitalize = (text: string) => {
     return text
@@ -45,7 +44,7 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
 
     return (
         <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className="table summary-table">
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {
@@ -184,9 +183,9 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                                 summaryData._embedded?.modifiedBy &&
                                 <Link
                                     className={`text-link`}
-                                    href={`mailto:${summaryData._embedded.modifiedBy.email ?? ''}`}
+                                    href={`mailto:${summaryData._embedded.modifiedBy.email}`}
                                 >
-                                    {summaryData._embedded.modifiedBy.fullName ?? ''}
+                                    {summaryData._embedded.modifiedBy.fullName}
                                 </Link>
                             }
                         </td>

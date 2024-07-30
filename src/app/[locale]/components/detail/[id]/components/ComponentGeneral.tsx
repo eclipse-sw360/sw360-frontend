@@ -17,7 +17,7 @@ import { FaCopy } from 'react-icons/fa'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { Component } from '@/object-types'
-import styles from '../detail.module.css'
+import Link from 'next/link'
 
 interface Props {
     component: Component
@@ -28,7 +28,7 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {
@@ -41,7 +41,7 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
             </thead>
             <tbody hidden={toggle}>
                 <tr>
-                    <td className={styles.tag}>Id:</td>
+                    <td>Id:</td>
                     <td id='documentId'>
                         {componentId}
                         <button
@@ -66,11 +66,15 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                 <tr>
                     <td>{t('Created by')}:</td>
                     <td>
-                        {component['_embedded'] && (
-                            <a className={styles.link} href={`mailto:${component['_embedded']['createdBy']['email']}`}>
-                                {component['_embedded']['createdBy']['fullName']}
-                            </a>
-                        )}
+                        {
+                            component._embedded?.createdBy &&
+                            <Link
+                                className='text-link'
+                                href={`mailto:${component._embedded?.createdBy.email}`}
+                            >
+                                {component._embedded?.createdBy.fullName}
+                            </Link>
+                        }   
                     </td>
                 </tr>
                 <tr>
@@ -84,9 +88,15 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                 <tr>
                     <td>{t('Modified By')}:</td>
                     <td>
-                        {component['modifiedBy'] && (
-                            <a className={styles.link} href={`mailto:${component['modifiedBy']}`}></a>
-                        )}
+                        {
+                            component._embedded?.modifiedBy &&
+                            <Link
+                                className='text-link'
+                                href={`mailto:${component._embedded.modifiedBy.email}`}
+                            >
+                                {component._embedded.modifiedBy.fullName}
+                            </Link>
+                        } 
                     </td>
                 </tr>
                 <tr>
@@ -106,25 +116,57 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                 <tr>
                     <td>{t('Homepage')}:</td>
                     <td>
-                        <a href={component.homepage}>{component.homepage}</a>
+                        {
+                            component.homepage &&
+                            <Link
+                                className='text-link'
+                                href={component.homepage}
+                            >
+                                {component.homepage}
+                            </Link>
+                        }   
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Blog')}:</td>
                     <td>
-                        <a href={component.blog}>{component.blog}</a>
+                        {
+                            component.blog &&
+                            <Link
+                                className='text-link'
+                                href={component.blog}
+                            >
+                                {component.blog}
+                            </Link>
+                        }  
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Wiki')}:</td>
                     <td>
-                        <a href={component.wiki}>{component.wiki}</a>
+                        {
+                            component.wiki &&
+                            <Link
+                                className='text-link'
+                                href={component.wiki}
+                            >
+                                {component.wiki}
+                            </Link>
+                        }  
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Mailing list')}:</td>
                     <td>
-                        <a href={`mailto:${component.mailinglist}`}>{component.mailinglist}</a>
+                        {
+                            component.mailinglist &&
+                            <Link
+                                className='text-link'
+                                href={component.mailinglist}
+                            >
+                                {component.mailinglist}
+                            </Link>
+                        }  
                     </td>
                 </tr>
                 <tr>

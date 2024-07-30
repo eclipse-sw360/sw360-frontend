@@ -12,7 +12,6 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { ClearingInformation } from '@/object-types'
-import styles from '../detail.module.css'
 
 interface Props {
     clearingInformation: ClearingInformation
@@ -23,7 +22,7 @@ const RequestInformation = ({ clearingInformation }: Props) => {
     const t = useTranslations('default')
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

@@ -11,7 +11,6 @@
 'use client'
 import { SPDXDocument, SnippetInformation, SnippetRange } from '@/object-types'
 import { useState } from 'react'
-import styles from '../../detail.module.css'
 
 interface Props {
     spdxDocument?: SPDXDocument
@@ -39,7 +38,7 @@ const SnippetInformationDetail = ({
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

@@ -9,53 +9,6 @@
   License-Filename: LICENSE
 */
 
-.summary-table {
-    border: 1px solid lightgray;
-    margin-bottom: 2rem !important;
-}
-
-.mapDisplayRootItem {
-    max-width: 70%;
-}
-
-.summary-table tbody td:first-child {
-    width: 30%;
-}
-
-.summary-table tbody a {
-    color: #f7941e !important;
-    text-decoration-line: none;
-}
-
-.summary-table tbody td {
-    word-wrap: break-word;
-}
-
-.btn-group:not(:last-child) {
-    margin-right: 0.5rem;
-}
-
-.icon-btn {
-    color: gray;
-    font-size: 14px;
-    margin-right: 5px;
-}
-
-.icon-btn:hover {
-    cursor: pointer;
-}
-
-.state-box {
-    border-bottom-right-radius: 5px;
-    border-top-right-radius: 5px;
-    color: #FFF;
-    height: 25px;
-    padding: 0 4px;
-    font-weight: bold;
-    line-height: 25px;
-    text-align: center;
-}
-
 .dropdown-btn button{
     background: none !important;
     border: 0px !important;

@@ -12,7 +12,6 @@
 import { AdministrationDataType } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import styles from '../detail.module.css'
 
 const Capitalize = (text: string) => {
     return text
@@ -28,7 +27,7 @@ export default function Administration({ data }: { data: AdministrationDataType 
 
     return (
         <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {
@@ -136,7 +135,7 @@ export default function Administration({ data }: { data: AdministrationDataType 
                     </tr>
                 </tbody>
             </table>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {
@@ -170,7 +169,7 @@ export default function Administration({ data }: { data: AdministrationDataType 
                     </tr>
                 </tbody>
             </table>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {

@@ -17,23 +17,23 @@ const AdditionalData = ({ additionalData }: any) => {
         if (additionalData[key].match(regexEmail)) {
           return (
             <li key={key}>
-              <span className="mapDisplayChildItemLeft" style={{ fontWeight: 'bold' }}>{key}: </span>
-              <span className="mapDisplayChildItemRight"> <a style={{ textDecoration: 'none', color: '#F7941E' }} href={`mailto:${additionalData[key]}`}>{additionalData[key]}</a></span>
+              <span className="fw-bold">{key}: </span>
+              <span> <a style={{ textDecoration: 'none', color: '#F7941E' }} href={`mailto:${additionalData[key]}`}>{additionalData[key]}</a></span>
             </li>
           )
         }
         else if (additionalData[key].match(regexUrl)) {
           return (
             <li key={key}>
-              <span className="mapDisplayChildItemLeft" style={{ fontWeight: 'bold' }}>{key}: </span>
-              <span className="mapDisplayChildItemRight"> <a style={{ textDecoration: 'none', color: '#F7941E' }} href={additionalData[key]}>{additionalData[key]}</a></span>
+              <span className="fw-bold">{key}: </span>
+              <span> <a style={{ textDecoration: 'none', color: '#F7941E' }} href={additionalData[key]}>{additionalData[key]}</a></span>
             </li>
           )
         } else {
           return (
             <li key={key}>
-              <span className="mapDisplayChildItemLeft" style={{ fontWeight: 'bold' }}>{key}: </span>
-              <span className="mapDisplayChildItemRight">{additionalData[key]}</span>
+              <span className="fw-bold">{key}: </span>
+              <span>{additionalData[key]}</span>
             </li>
           )
         }

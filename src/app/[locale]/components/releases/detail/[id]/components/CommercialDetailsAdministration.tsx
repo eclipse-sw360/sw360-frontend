@@ -15,14 +15,13 @@ import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
 
 import { COTSDetails } from '@/object-types'
-import styles from '../detail.module.css'
 
 const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails }) => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

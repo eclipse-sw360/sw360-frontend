@@ -11,7 +11,6 @@
 'use client'
 import { DocumentCreationInformation, ExternalDocumentReferences } from '@/object-types'
 import { useState } from 'react'
-import styles from '../../detail.module.css'
 
 interface Props {
     documentCreationInformation?: DocumentCreationInformation
@@ -34,7 +33,7 @@ const DocumentCreationInformationDetail = ({
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

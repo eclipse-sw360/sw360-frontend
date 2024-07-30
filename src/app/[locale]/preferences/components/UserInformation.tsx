@@ -30,7 +30,7 @@ const UserInformation = ({ user }: Props) => {
     const email_by_token = user_data ? user_data.user_name : 'admin@sw360.org'
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead>
                 <tr>
                     <th colSpan={2}>{t('SW360 User')}</th>
@@ -66,8 +66,8 @@ const UserInformation = ({ user }: Props) => {
                             {user?.secondaryDepartmentsAndRoles &&
                                 Object.keys(user?.secondaryDepartmentsAndRoles).map((department) => (
                                     <li key={department}>
-                                        <span className='mapDisplayChildItemLeft bold-text'>{department}</span>
-                                        <span className='mapDisplayChildItemRight'>
+                                        <span className='bold-text'>{department}</span>
+                                        <span>
                                             {' -> '}
                                             {user?.secondaryDepartmentsAndRoles[department]}
                                         </span>

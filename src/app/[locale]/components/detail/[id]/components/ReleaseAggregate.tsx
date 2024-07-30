@@ -14,14 +14,13 @@ import { useState } from 'react'
 
 import { Component, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 
 const ReleaseAgrregate = ({ component }: { component: Component }) => {
     const [toggle, setToggle] = useState(false)
     const t = useTranslations('default')
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

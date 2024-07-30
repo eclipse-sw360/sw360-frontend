@@ -13,7 +13,6 @@ import { InputKeyValue, SPDX, SnippetInformation, SnippetRange } from '@/object-
 import CommonUtils from '@/utils/common.utils'
 import { useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
-import styles from '../detail.module.css'
 import SnippetFileSPDXIdentifier from './SnippetInformation/SnippetFileSPDXIdentifier'
 import SnippetRanges from './SnippetInformation/SnippetRanges'
 
@@ -517,7 +516,7 @@ const EditSnippetInformation = ({
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

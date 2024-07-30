@@ -10,7 +10,6 @@
 
 'use client'
 import { OtherLicensingInformationDetected, SPDXDocument } from '@/object-types'
-import styles from '../../detail.module.css'
 
 interface Props {
     spdxDocument?: SPDXDocument
@@ -37,7 +36,7 @@ const OtherLicensingInformationDetectedDetail = ({
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {
