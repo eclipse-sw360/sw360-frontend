@@ -60,6 +60,15 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
         })
     }
 
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                     HTMLInputElement |
+                                     HTMLTextAreaElement>) => {
+            setClearingRequestPayload({
+                ...clearingRequestPayload,
+                [event.target.name]: event.target.value,
+        })
+    }
+
     if (status === 'unauthenticated') {
         signOut()
     } else {
@@ -108,7 +117,19 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     </tr>
                     <tr>
                         <td>{t('Clearing Type')}:</td>
-                        <td>{data.clearingType ?? ''}</td>
+                        <td>
+                            <select
+                                className='form-select'
+                                id='editClearingRequest.clearingType'
+                                name='clearingType'
+                                value={clearingRequestPayload.clearingType}
+                                onChange={updateInputField}
+                                required
+                            >
+                                <option value='DEEP'>{t('Deep Level CLX')}</option>
+                                <option value='HIGH'>{t('High Level ISR')}</option>
+                            </select>
+                        </td> 
                     </tr>
                     <tr>
                         <td>{t('Requester Comment')}:</td>
