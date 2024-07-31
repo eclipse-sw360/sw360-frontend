@@ -21,36 +21,12 @@ interface Props {
     setClearingRequestPayload: React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
 }
 
-interface ClearingRequestDataMap {
-    [key: string]: string;
-}
-
 export default function EditClearingDecision({ clearingRequestData,
                                                clearingRequestPayload,
                                                setClearingRequestPayload }: Props) {
 
     const t = useTranslations('default')
     const { status } = useSession()
-    const clearingRequestStatus : ClearingRequestDataMap = {
-        NEW: t('New'),
-        IN_PROGRESS: t('In Progress'),
-        ACCEPTED: t('ACCEPTED'),
-        PENDING_INPUT: t('Pending Input'),
-        REJECTED: t('REJECTED'),
-        IN_QUEUE: t('In Queue'),
-        CLOSED: t('Closed'),
-        AWAITING_RESPONSE: t('Awaiting Response'),
-        ON_HOLD: t('On Hold'),
-        SANITY_CHECK: t('Sanity Check')
-    };
-
-    const clearingRequestPriority : ClearingRequestDataMap = {
-        LOW: t('Low'),
-        MEDIUM: t('Medium'),
-        HIGH: t('High'),
-        CRITICAL: t('Critical')
-    };
-
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement |
                                      HTMLTextAreaElement>) => {
@@ -79,7 +55,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 className='form-select'
                                 id='editClearingDecision.clearingState'
                                 name='clearingState'
-                                value={clearingRequestStatus[clearingRequestPayload.clearingState]}
+                                value={clearingRequestPayload.clearingState}
                                 onChange={updateInputField}
                                 required
                             >
@@ -91,7 +67,8 @@ export default function EditClearingDecision({ clearingRequestData,
                                 <option value='CLOSED'>{t('Closed')}</option>
                                 <option value='AWAITING_RESPONSE'>{t('Awaiting Response')}</option>
                                 <option value='ON_HOLD'>{t('On Hold')}</option>
-                                <option value='SANITY_CHECK '>{t('Sanity Check')}</option>
+                                <option value='SANITY_CHECK'>{t('Sanity Check')}</option>
+                                <option value='PENDING_INPUT'>{t('Pending Input')}</option>
                             </select>
                         </td>
                     </tr>
@@ -102,7 +79,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 className='form-select'
                                 id='editClearingDecision.priority'
                                 name='priority'
-                                value={clearingRequestPriority[clearingRequestPayload.priority]}
+                                value={clearingRequestPayload.priority}
                                 onChange={updateInputField}
                                 required
                             >
