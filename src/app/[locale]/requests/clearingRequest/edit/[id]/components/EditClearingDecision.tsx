@@ -9,16 +9,21 @@
 
 'use client'
 
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails, ClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
+import { useState } from 'react'
+import { SelectUsersDialog } from 'next-sw360'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails,
     clearingRequestPayload: ClearingRequestPayload
     setClearingRequestPayload: React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
+}
+
+interface ClearingRequestDataMap {
+    [key: string]: string;
 }
 
 export default function EditClearingDecision({ clearingRequestData,
@@ -27,6 +32,18 @@ export default function EditClearingDecision({ clearingRequestData,
 
     const t = useTranslations('default')
     const { status } = useSession()
+    const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
+    const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
+
+    const updateClearingTeamData = (user: ClearingRequestDataMap) => {
+        const userEmails = Object.keys(user)
+        setClearingTeamData(user)
+        setClearingRequestPayload({
+            ...clearingRequestPayload,
+            clearingTeam: userEmails[0],
+        })
+    }
+
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement |
                                      HTMLTextAreaElement>) => {
@@ -93,11 +110,23 @@ export default function EditClearingDecision({ clearingRequestData,
                     <tr>
                         <td>{t('Clearing Team')}:</td>
                         <td>
-                            {clearingRequestData.clearingTeam
-                                ? <Link href={`mailto:${clearingRequestData.clearingTeam}`}>
-                                    {clearingRequestData.clearingTeamName}
-                                  </Link>
-                                : ''}
+                            <input
+                                type='text'
+                                className='form-control'
+                                id='editClearingRequest.clearingTeam'
+                                readOnly={true}
+                                name='clearingTeam'
+                                onClick={() => setDialogOpenClearingTeam(true)}
+                                value={ clearingRequestPayload.clearingTeam}
+
+                            />
+                            <SelectUsersDialog
+                                show={dialogOpenClearingTeam}
+                                setShow={setDialogOpenClearingTeam}
+                                setSelectedUsers={updateClearingTeamData}
+                                selectedUsers={clearingTeamData}
+                                multiple={false}
+                            />
                         </td>
                     </tr>
                     <tr>
