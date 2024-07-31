@@ -10,7 +10,7 @@
 
 'use client'
 
-import { ClearingRequestDetails, HttpStatus } from '@/object-types'
+import { ClearingRequestDetails, ClearingRequestPayload, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -53,6 +53,16 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
             }
         }
     })
+    const [clearingRequestPayload, setClearingRequestPayload] = useState<ClearingRequestPayload>({
+        requestingUser: '',
+        requestingUserName: '',
+        clearingTeam: '',
+        clearingTeamName: '',
+        priority: '',
+        clearingType: '',
+        clearingState: '',
+        agreedClearingDate: '',
+    })
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -76,7 +86,19 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
                       (clearingRequestDetails: ClearingRequestDetails) => {
             setClearingRequestData(clearingRequestDetails)
-        })}, [fetchData, session])
+        })
+        const updatedClearingRequestData : ClearingRequestPayload = {
+            requestingUser: clearingRequestData.requestingUser ?? '',
+            requestingUserName: clearingRequestData.requestingUserName ?? '',
+            clearingTeam: clearingRequestData.clearingTeam ?? '',
+            clearingTeamName: clearingRequestData.clearingTeamName ?? '',
+            priority: clearingRequestData.priority ?? '',
+            clearingType: clearingRequestData.clearingType ?? '',
+            clearingState: clearingRequestData.clearingState ?? '',
+            agreedClearingDate: clearingRequestData.agreedClearingDate ?? '',
+        }
+        setClearingRequestPayload(updatedClearingRequestData)
+    }, [fetchData, session, setClearingRequestPayload])
 
     const handleUpdateClearingRequest = () => {
         
@@ -166,7 +188,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 <div className="row">
                                                     <div className="col">
                                                         <EditClearingRequestInfo
-                                                            data={clearingRequestData}
+                                                            clearingRequestData={clearingRequestData}
+                                                            clearingRequestPayload={clearingRequestPayload}
+                                                            setClearingRequestPayload={setClearingRequestPayload}
                                                         />
                                                     </div>
                                                     <div className="col">

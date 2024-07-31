@@ -10,48 +10,31 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails } from '@/object-types'
+import { ClearingRequestDetails, ClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { SelectUsersDialog } from 'next-sw360'
-import { ClearingRequestPayload } from '@/object-types'
 
-interface DataProp {
+interface Props {
+    clearingRequestData: ClearingRequestDetails,
+    clearingRequestPayload: ClearingRequestPayload
+    setClearingRequestPayload : React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
+}
+
+interface DataTypeProp {
     [key: string]: string;
 }
 
-export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails }) {
+export default function ClearingRequestInfo({ clearingRequestData,
+                                              clearingRequestPayload,
+                                              setClearingRequestPayload }: Props) {
     const t = useTranslations('default')
     const { status } = useSession()
     const [dialogOpenRequestingUser, setDialogOpenRequestingUser] = useState(false)
     const [requestingUserData, setRequestingUserData] = useState<{ [k: string]: string }>({})
-    const [clearingRequestPayload, setClearingRequestPayload] = useState<ClearingRequestPayload>({
-        requestingUser: '',
-        requestingUserName: '',
-        clearingTeam: '',
-        clearingTeamName: '',
-        priority: '',
-        clearingType: '',
-        clearingState: '',
-        agreedClearingDate: '',
-    })
-
-    useEffect(() => {
-        const updatedClearingRequestData : ClearingRequestPayload = {
-            requestingUser: data.requestingUser ?? '',
-            requestingUserName: data.requestingUserName ?? '',
-            clearingTeam: data.clearingTeam ?? '',
-            clearingTeamName: data.clearingTeamName ?? '',
-            priority: data.priority ?? '',
-            clearingType: data.clearingType ?? '',
-            clearingState: data.clearingState ?? '',
-            agreedClearingDate: data.agreedClearingDate ?? '',
-        }
-        setClearingRequestPayload(updatedClearingRequestData)
-    },[data, setClearingRequestPayload])
     
-    const setRequestingUserEmail = (user: DataProp) => {
+    const setRequestingUserEmail = (user: DataTypeProp) => {
         const userEmails = Object.keys(user)
         setRequestingUserData(user)
         setClearingRequestPayload({
@@ -105,15 +88,15 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{data.createdOn ?? ''}</td>
+                        <td>{clearingRequestData.createdOn ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
-                        <td>{data.requestedClearingDate ?? ''}</td>
+                        <td>{clearingRequestData.requestedClearingDate ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Business Area Line')}:</td>
-                        <td>{data.projectBU ?? ''}</td>
+                        <td>{clearingRequestData.projectBU ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Type')}:</td>
@@ -133,7 +116,7 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     </tr>
                     <tr>
                         <td>{t('Requester Comment')}:</td>
-                        <td>{data.requestingUserComment ?? ''}</td>
+                        <td>{clearingRequestData.requestingUserComment ?? ''}</td>
                     </tr>
                 </tbody>
             </table>
