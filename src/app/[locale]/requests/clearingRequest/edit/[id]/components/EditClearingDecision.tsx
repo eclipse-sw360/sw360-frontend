@@ -98,7 +98,19 @@ export default function EditClearingDecision({ clearingRequestData,
                     <tr>
                         <td>{t('Priority')}:</td>
                         <td>
-                            {clearingRequestPriority[clearingRequestData.priority]}
+                            <select
+                                className='form-select'
+                                id='editClearingDecision.priority'
+                                name='priority'
+                                value={clearingRequestPriority[clearingRequestPayload.priority]}
+                                onChange={updateInputField}
+                                required
+                            >
+                                <option value='LOW'>{t('Low')}</option>
+                                <option value='MEDIUM'>{t('Medium')}</option>
+                                <option value='HIGH'>{t('High')}</option>
+                                <option value='CRITICAL'>{t('Critical')}</option>
+                            </select>
                         </td>
                     </tr>
                     <tr>
