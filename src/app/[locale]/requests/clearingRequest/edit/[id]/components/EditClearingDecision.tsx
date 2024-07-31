@@ -17,15 +17,17 @@ import { signOut, useSession } from 'next-auth/react'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails,
-    clearingRequestPayload?: ClearingRequestPayload
-    setClearingRequestPayload?: React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
+    clearingRequestPayload: ClearingRequestPayload
+    setClearingRequestPayload: React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
 }
 
 interface ClearingRequestDataMap {
     [key: string]: string;
 }
 
-export default function EditClearingDecision({ clearingRequestData }: Props) {
+export default function EditClearingDecision({ clearingRequestData,
+                                               clearingRequestPayload,
+                                               setClearingRequestPayload }: Props) {
 
     const t = useTranslations('default')
     const { status } = useSession()
@@ -49,6 +51,14 @@ export default function EditClearingDecision({ clearingRequestData }: Props) {
         CRITICAL: t('Critical')
     };
 
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                     HTMLInputElement |
+                                     HTMLTextAreaElement>) => {
+        setClearingRequestPayload({
+            ...clearingRequestPayload,
+            [event.target.name]: event.target.value,
+        })
+    }
 
     if (status === 'unauthenticated') {
         signOut()
@@ -64,7 +74,26 @@ export default function EditClearingDecision({ clearingRequestData }: Props) {
                 <tbody>
                     <tr>
                         <td>{t('Request Status')}:</td>
-                        <td>{clearingRequestStatus[clearingRequestData.clearingState]}</td>
+                        <td>
+                            <select
+                                className='form-select'
+                                id='editClearingDecision.clearingState'
+                                name='clearingState'
+                                value={clearingRequestStatus[clearingRequestPayload.clearingState]}
+                                onChange={updateInputField}
+                                required
+                            >
+                                <option value='NEW'>{t('New')}</option>
+                                <option value='ACCEPTED'>{t('ACCEPTED')}</option>
+                                <option value='REJECTED'>{t('REJECTED')}</option>
+                                <option value='IN_QUEUE'>{t('In Queue')}</option>
+                                <option value='IN_PROGRESS'>{t('In Progress')}</option>
+                                <option value='CLOSED'>{t('Closed')}</option>
+                                <option value='AWAITING_RESPONSE'>{t('Awaiting Response')}</option>
+                                <option value='ON_HOLD'>{t('On Hold')}</option>
+                                <option value='SANITY_CHECK '>{t('Sanity Check')}</option>
+                            </select>
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Priority')}:</td>
