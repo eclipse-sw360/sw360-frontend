@@ -132,13 +132,22 @@ export default function EditClearingDecision({ clearingRequestData,
                     <tr>
                         <td>{t('Agreed Clearing Date')}:</td>
                         <td>
-                            {clearingRequestData.agreedClearingDate ?? ''}
+                            <input
+                                type='date'
+                                className='form-control'
+                                aria-label='Agreed Clearing Date YYYY-MM-DD'
+                                id='agreedClearingDate'
+                                aria-describedby='agreedClearingDate'
+                                name='agreedClearingDate'
+                                value={clearingRequestPayload?.agreedClearingDate ?? ''}
+                                onChange={updateInputField}
+                            />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Last Updated on')}:</td>
                         <td>
-                            {''}
+                            {clearingRequestData?.lastUpdatedOn ?? ''}
                         </td>
                     </tr>
                 </tbody>
