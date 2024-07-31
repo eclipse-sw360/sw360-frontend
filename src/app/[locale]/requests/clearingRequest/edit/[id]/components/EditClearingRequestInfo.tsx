@@ -26,7 +26,7 @@ interface DataTypeProp {
     [key: string]: string;
 }
 
-export default function ClearingRequestInfo({ clearingRequestData,
+export default function EditClearingRequestInfo({ clearingRequestData,
                                               clearingRequestPayload,
                                               setClearingRequestPayload }: Props) {
     const t = useTranslations('default')

@@ -11,19 +11,21 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails } from '@/object-types'
+import { ClearingRequestDetails, ClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
+
+interface Props {
+    clearingRequestData: ClearingRequestDetails,
+    clearingRequestPayload?: ClearingRequestPayload
+    setClearingRequestPayload?: React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
+}
 
 interface ClearingRequestDataMap {
     [key: string]: string;
 }
 
-interface Props {
-    data: ClearingRequestDetails
-}
-
-export default function ClearingDecision({ data }: Props ) {
+export default function EditClearingDecision({ clearingRequestData }: Props) {
 
     const t = useTranslations('default')
     const { status } = useSession()
@@ -62,26 +64,28 @@ export default function ClearingDecision({ data }: Props ) {
                 <tbody>
                     <tr>
                         <td>{t('Request Status')}:</td>
-                        <td>{clearingRequestStatus[data.clearingState]}</td>
+                        <td>{clearingRequestStatus[clearingRequestData.clearingState]}</td>
                     </tr>
                     <tr>
                         <td>{t('Priority')}:</td>
                         <td>
-                            {clearingRequestPriority[data.priority]}
+                            {clearingRequestPriority[clearingRequestData.priority]}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Team')}:</td>
                         <td>
-                            {data.clearingTeam
-                                ? <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
+                            {clearingRequestData.clearingTeam
+                                ? <Link href={`mailto:${clearingRequestData.clearingTeam}`}>
+                                    {clearingRequestData.clearingTeamName}
+                                  </Link>
                                 : ''}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Agreed Clearing Date')}:</td>
                         <td>
-                            {data.agreedClearingDate ?? ''}
+                            {clearingRequestData.agreedClearingDate ?? ''}
                         </td>
                     </tr>
                     <tr>

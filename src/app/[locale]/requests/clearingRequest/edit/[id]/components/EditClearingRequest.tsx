@@ -195,7 +195,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                     </div>
                                                     <div className="col">
                                                         <EditClearingDecision
-                                                            data={clearingRequestData}
+                                                            clearingRequestData={clearingRequestData}
+                                                            clearingRequestPayload={clearingRequestPayload}
+                                                            setClearingRequestPayload={setClearingRequestPayload}
                                                         />
                                                     </div>
                                                 </div>
