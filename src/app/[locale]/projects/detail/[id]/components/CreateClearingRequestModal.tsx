@@ -13,7 +13,7 @@ import { signOut, useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { SelectUsersDialog } from "next-sw360"
 import { Dispatch, SetStateAction, useState } from "react"
-import { Alert, Button, Form, Modal} from "react-bootstrap"
+import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
 import { BsCheck2Square } from "react-icons/bs"
 import { CreateClearingRequestPayload } from "@/object-types"
 
@@ -93,14 +93,14 @@ export default function CreateClearingRequestModal({ show,
         }
     }
 
-    // const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-    //                                  HTMLInputElement |
-    //                                  HTMLTextAreaElement>) => {
-    //     setCreateClearingRequestPayload({
-    //         ...createClearingRequestPayload,
-    //         [event.target.name]: event.target.value,
-    //     })
-    // }
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                     HTMLInputElement |
+                                     HTMLTextAreaElement>) => {
+        setCreateClearingRequestPayload({
+            ...createClearingRequestPayload,
+            [event.target.name]: event.target.value,
+        })
+    }
 
     if (status === 'unauthenticated') {
         signOut()
@@ -163,6 +163,27 @@ export default function CreateClearingRequestModal({ show,
                                         multiple={false}
                                     />
                             </Form.Group>
+                            <Row className='mb-3'>                                
+                                <Col md={6}>
+                                    <Form.Group className='mb-3'>
+                                        <Form.Label style={{ fontWeight: 'bold' }}>
+                                            {t('Clearing Type')} :
+                                        </Form.Label>
+                                        <Form.Select
+                                            id='createClearingRequest.clearingType'
+                                            name='clearingType'
+                                            value={createClearingRequestPayload.clearingType}
+                                            onChange={updateInputField}
+                                            required
+                                        >
+                                            <option value='' hidden></option>
+                                            <option value='DEEP'>{t('Deep Level CLX')}</option>
+                                            <option value='HIGH'>{t('High Level ISR')}</option>
+                                        </Form.Select>
+                                    </Form.Group>
+
+                                </Col>
+                            </Row>  
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
