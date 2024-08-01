@@ -183,6 +183,21 @@ export default function CreateClearingRequestModal({ show,
                                     </Form.Group>
 
                                 </Col>
+                                <Col md={6}>
+                                    <Form.Group className='mb-3'>
+                                        <Form.Label style={{ fontWeight: 'bold' }}>
+                                            {t('Preferred Clearing Date')} :
+                                        </Form.Label>
+                                        <Form.Control
+                                            type='date'
+                                            id='createClearingRequest.requestedClearingDate'
+                                            name='requestedClearingDate'
+                                            value={createClearingRequestPayload?.requestedClearingDate ?? ''}
+                                            onChange={updateInputField}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
                             </Row>  
                         </Form>
                     </Modal.Body>
