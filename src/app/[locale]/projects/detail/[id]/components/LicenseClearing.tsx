@@ -17,6 +17,7 @@ import TreeView from './TreeView'
 import { useRouter } from 'next/navigation'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import dynamic from 'next/dynamic'
+import CreateClearingRequestModal from './CreateClearingRequestModal'
 
 const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
 const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
@@ -35,10 +36,7 @@ export default function LicenseClearing({
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
     const router = useRouter()
-
-    const createClearingReqest = () => {
-        console.log('Create clearing request....')
-    }
+    const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
 
     const generateSourceCodeBundle = () => {
         router.push(`/projects/generateSourceCode/${projectId}`)
@@ -47,6 +45,10 @@ export default function LicenseClearing({
 
     return (
         <>
+            <CreateClearingRequestModal show = {showCreateClearingRequestModal}
+                                        setShow = {setShowCreateClearingRequestModal}
+                                        projectId = {projectId}
+                                        projectName = {projectName}/>
             <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
                 <div className='row'
                      hidden={isCalledFromModerationRequestCurrentProject}>
@@ -99,7 +101,7 @@ export default function LicenseClearing({
                                 <Button
                                     variant='secondary'
                                     className='me-2 col-auto'
-                                    onClick={createClearingReqest}
+                                    onClick={() => setShowCreateClearingRequestModal(true)}
                                 >
                                     {t('Create Clearing Request')}
                                 </Button>
