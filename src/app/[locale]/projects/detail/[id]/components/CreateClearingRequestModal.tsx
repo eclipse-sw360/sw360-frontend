@@ -11,9 +11,9 @@
 
 import { signOut, useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
-// import { SelectUsersDialog } from "next-sw360"
+import { SelectUsersDialog } from "next-sw360"
 import { Dispatch, SetStateAction, useState } from "react"
-import { Alert, Button, Form, Modal } from "react-bootstrap"
+import { Alert, Button, Form, Modal} from "react-bootstrap"
 import { BsCheck2Square } from "react-icons/bs"
 import { CreateClearingRequestPayload } from "@/object-types"
 
@@ -24,9 +24,9 @@ interface Props {
     projectName?: string
 }
 
-// interface ClearingRequestDataMap {
-//     [key: string]: string;
-// }
+interface ClearingRequestDataMap {
+    [key: string]: string;
+}
 
 export default function CreateClearingRequestModal({ show,
                                                      setShow,
@@ -39,8 +39,8 @@ export default function CreateClearingRequestModal({ show,
     const [variant] = useState('success')
     const [reloadPage] = useState(false)
     const [showMessage, setShowMessage] = useState(false)
-    // const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
-    // const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
+    const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
+    const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [createClearingRequestPayload, setCreateClearingRequestPayload] = 
                                         useState<CreateClearingRequestPayload>({
             requestedClearingDate: '',
@@ -50,16 +50,14 @@ export default function CreateClearingRequestModal({ show,
             requestingUserComment: ''
     })
 
-    console.log(createClearingRequestPayload)
-
-    // const updateClearingTeamData = (user: ClearingRequestDataMap) => {
-    //     const userEmails = Object.keys(user)
-    //     setClearingTeamData(user)
-    //     setCreateClearingRequestPayload({
-    //         ...createClearingRequestPayload,
-    //         clearingTeam: userEmails[0],
-    //     })
-    // }
+    const updateClearingTeamData = (user: ClearingRequestDataMap) => {
+        const userEmails = Object.keys(user)
+        setClearingTeamData(user)
+        setCreateClearingRequestPayload({
+            ...createClearingRequestPayload,
+            clearingTeam: userEmails[0],
+        })
+    }
 
     // const handleError = useCallback(() => {
     //     displayMessage('danger', t('Error when processing'))
@@ -141,7 +139,30 @@ export default function CreateClearingRequestModal({ show,
                                 </Form.Label>
                                 <br />
                             </Form.Group>
-                            <hr />  
+                            <hr />
+                            <Form.Group className='mb-3'>
+                                <Form.Label style={{ fontWeight: 'bold' }}>
+                                    {t('Please enter the clearing team email id')}
+                                </Form.Label>
+                                <Form.Control
+                                    type='text'
+                                    id='createClearingRequest.clearingTeam'
+                                    readOnly={true}
+                                    name='clearingTeam'
+                                    placeholder={createClearingRequestPayload.clearingTeam ? '' 
+                                                 : 'Click to edit'}
+                                    onClick={() => setDialogOpenClearingTeam(true)}
+                                    value={ createClearingRequestPayload.clearingTeam}
+                                    required
+                                />
+                                    <SelectUsersDialog
+                                        show={dialogOpenClearingTeam}
+                                        setShow={setDialogOpenClearingTeam}
+                                        setSelectedUsers={updateClearingTeamData}
+                                        selectedUsers={clearingTeamData}
+                                        multiple={false}
+                                    />
+                            </Form.Group>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
