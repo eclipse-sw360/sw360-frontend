@@ -12,10 +12,13 @@
 import { signOut, useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { SelectUsersDialog, ShowInfoOnHover } from "next-sw360"
-import { Dispatch, SetStateAction, useState } from "react"
+import { Dispatch, SetStateAction, useCallback, useState } from "react"
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
 import { BsCheck2Square } from "react-icons/bs"
-import { CreateClearingRequestPayload } from "@/object-types"
+import { ClearingRequestDetails,
+         CreateClearingRequestPayload,
+         HttpStatus } from "@/object-types"
+import { ApiUtils } from "@/utils/index"
 
 interface Props {
     show?: boolean
@@ -33,20 +36,20 @@ export default function CreateClearingRequestModal({ show,
                                                      projectId,
                                                      projectName }: Props) {
     const t = useTranslations('default')
-    const { status } = useSession()
-    const [message] = useState('')
-    const [variant] = useState('success')
-    const [reloadPage] = useState(false)
+    const [message, setMessage] = useState('')
+    const { data: session, status } = useSession()
+    const [variant, setVariant] = useState('success')
+    const [reloadPage, setReloadPage] = useState(false)
     const [showMessage, setShowMessage] = useState(false)
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [createClearingRequestPayload, setCreateClearingRequestPayload] = 
                                         useState<CreateClearingRequestPayload>({
-            requestedClearingDate: '',
-            clearingTeam: '',
-            clearingType: '',
-            priority: '',
-            requestingUserComment: ''
+        requestedClearingDate: '',
+        clearingTeam: '',
+        clearingType: '',
+        priority: 'LOW',
+        requestingUserComment: ''
     })
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
@@ -58,23 +61,56 @@ export default function CreateClearingRequestModal({ show,
         })
     }
 
-    // const handleError = useCallback(() => {
-    //     displayMessage('danger', t('Error when processing'))
-    //     setReloadPage(true)
-    // }, [t])
+    const handleError = useCallback(() => {
+        displayMessage('danger', t('Error when processing'))
+        setReloadPage(true)
+    }, [t])
 
-    // const displayMessage = (variant: string, message: string) => {
-    //     setVariant(variant)
-    //     setMessage(message)
-    //     setShowMessage(true)
-    // }
+    const displayMessage = (variant: string, message: any) => {
+        setVariant(variant)
+        setMessage(message)
+        setShowMessage(true)
+    }
 
-    const createClearingRequest = () => {
-        console.log(projectId)
+    const createClearingRequest = async () => {
+        console.log('payload', createClearingRequestPayload)
+        const response = await ApiUtils.POST(`projects/${projectId}/clearingRequest`,
+                                              createClearingRequestPayload,
+                                              session.user.access_token)
+        const responseData: ClearingRequestDetails = await response.json()
+        try {
+            if (response.status == HttpStatus.CREATED) {
+                displayMessage('success',  
+                    (
+                        <>
+                            {t.rich('Clearing Request created successfully', {
+                                id: responseData.id,
+                                strong: (chunks) => <b>{chunks}</b>
+                            })}
+                            <br />
+                            {t.rich('Clearing team will confirm on the agreed clearing date', {
+                                strong: (chunks) => <b>{chunks}</b>
+                            })}
+                        </>
+                    )
+                )
+                setReloadPage(true)
+            } else if (response.status == HttpStatus.CONFLICT) {
+                displayMessage('danger', t('Clearing request already present for project'))
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            } else {
+                displayMessage('danger', t('Error when processing'))
+            }
+        } catch (err) {
+            handleError()
+        }
     }
 
     const handleSubmit = () => {
-        createClearingRequest()
+        createClearingRequest().catch((err) => {
+            console.log(err)
+        })
     }
 
     const handleCloseDialog = () => {
@@ -126,7 +162,9 @@ export default function CreateClearingRequestModal({ show,
                 >
                     <Modal.Header closeButton style={{ color: '#2E5AAC' }}>
                         <Modal.Title id='create-clearing-request-modal'>
-                            <BsCheck2Square style={{ marginBottom: '5px', color: '#2E5AAC', fontSize: '23px'}} />
+                            <BsCheck2Square style={{ marginBottom: '5px',
+                                                     color: '#2E5AAC',
+                                                     fontSize: '23px'}} />
                                 {' '}
                                 { t('create clearing request')}
                         </Modal.Title>
