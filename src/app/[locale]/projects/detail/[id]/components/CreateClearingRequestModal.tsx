@@ -150,6 +150,10 @@ export default function CreateClearingRequestModal({ show,
                             <Form.Group className='mb-3'>
                                 <Form.Label style={{ fontWeight: 'bold' }}>
                                     {t('Please enter the clearing team email id')} :
+                                    <span className='text-red'
+                                          style={{ color: '#F7941E' }}>
+                                        *
+                                    </span>
                                 </Form.Label>
                                 <Form.Control
                                     type='text'
@@ -175,6 +179,10 @@ export default function CreateClearingRequestModal({ show,
                                     <Form.Group className='mb-2'>
                                         <Form.Label style={{ fontWeight: 'bold' }}>
                                             {t('Clearing Type')} :
+                                            <span className='text-red'
+                                                  style={{ color: '#F7941E' }}>
+                                                *
+                                            </span>
                                         </Form.Label>
                                         <Form.Select
                                             id='createClearingRequest.clearingType'
@@ -198,6 +206,10 @@ export default function CreateClearingRequestModal({ show,
                                     <Form.Group className='mb-2'>
                                         <Form.Label style={{ fontWeight: 'bold' }}>
                                             {t('Preferred Clearing Date')} :
+                                            <span className='text-red'
+                                                  style={{ color: '#F7941E' }}>
+                                                *
+                                            </span>
                                         </Form.Label>
                                         <Form.Control
                                             type='date'
