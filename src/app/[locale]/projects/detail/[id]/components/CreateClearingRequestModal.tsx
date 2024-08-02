@@ -40,6 +40,7 @@ export default function CreateClearingRequestModal({ show,
     const { data: session, status } = useSession()
     const [variant, setVariant] = useState('success')
     const [reloadPage, setReloadPage] = useState(false)
+    const [isDisabled, setIsDisabled] = useState(false)
     const [showMessage, setShowMessage] = useState(false)
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
@@ -94,9 +95,11 @@ export default function CreateClearingRequestModal({ show,
                         </>
                     )
                 )
+                setIsDisabled(true)
                 setReloadPage(true)
             } else if (response.status == HttpStatus.CONFLICT) {
                 displayMessage('danger', t('Clearing request already present for project'))
+                setIsDisabled(true)
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 await signOut()
             } else {
@@ -115,6 +118,7 @@ export default function CreateClearingRequestModal({ show,
 
     const handleCloseDialog = () => {
         setShow(!show)
+        setIsDisabled(false)
         setShowMessage(false)
         setCreateClearingRequestPayload({
             requestedClearingDate: '',
@@ -202,6 +206,7 @@ export default function CreateClearingRequestModal({ show,
                                                  : 'Click to edit'}
                                     onClick={() => setDialogOpenClearingTeam(true)}
                                     value={ createClearingRequestPayload.clearingTeam}
+                                    disabled={isDisabled}
                                     required
                                 />
                                     <SelectUsersDialog
@@ -227,6 +232,7 @@ export default function CreateClearingRequestModal({ show,
                                             name='clearingType'
                                             value={createClearingRequestPayload.clearingType}
                                             onChange={updateInputField}
+                                            disabled={isDisabled}
                                             required
                                         >
                                             <option value='' hidden></option>
@@ -255,6 +261,7 @@ export default function CreateClearingRequestModal({ show,
                                             name='requestedClearingDate'
                                             value={createClearingRequestPayload?.requestedClearingDate ?? ''}
                                             onChange={updateInputField}
+                                            disabled={isDisabled}
                                             required
                                         />
                                         <div className='form-text'
@@ -275,6 +282,7 @@ export default function CreateClearingRequestModal({ show,
                                     style={{marginTop: '1px'}}
                                     onChange={() => setClearingPriority('CRITICAL')}
                                     value={ createClearingRequestPayload.priority}
+                                    disabled={isDisabled}
                                 />
                                 <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px'}}>
                                     {t('Critical')}
@@ -297,6 +305,7 @@ export default function CreateClearingRequestModal({ show,
                                     value={createClearingRequestPayload.requestingUserComment}
                                     onChange={updateInputField}
                                     style={{height: 'auto', textAlign: 'left'}}
+                                    disabled={isDisabled}
                                 />
                             </Form.Group>
                         </Form>
