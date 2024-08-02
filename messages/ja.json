@@ -229,6 +229,7 @@
     "Creator Group": "Creator Group",
     "Critical": "致命的",
     "CriticalFilesFound": "Critical Files Found",
+    "Criticality selection info": "利用可能な希望日よりも早い日に決済する必要がある場合は、重要なチェックボックスをオンにして、希望する決済日を再選択してください。",
     "Current Component": "現在のコンポーネント",
     "Current License": "現在のライセンス",
     "Current Project": "現行の企画",

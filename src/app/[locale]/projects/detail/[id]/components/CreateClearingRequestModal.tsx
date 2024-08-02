@@ -215,7 +215,7 @@ export default function CreateClearingRequestModal({ show,
                                     </Form.Group>
                                 </Col>
                             </Row>
-                            <Form.Group className='mb-3' style={{ display: 'flex',
+                            <Form.Group className='mb-1' style={{ display: 'flex',
                                                                   alignItems: 'left' }}>
                                 <Form.Check
                                     type='checkbox'
@@ -226,10 +226,13 @@ export default function CreateClearingRequestModal({ show,
                                     onChange={() => setClearingPriority('CRITICAL')}
                                     value={ createClearingRequestPayload.priority}
                                 />
-                              <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px'}}>
+                                <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px'}}>
                                     {t('Critical')}
                                 </Form.Label>
                             </Form.Group>
+                            <div className='subscriptionBox' style={{ textAlign: 'left' }}>
+                                {t('Criticality selection info')}
+                            </div>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>

@@ -229,6 +229,7 @@
     "Creator Group": "Creator Group",
     "Critical": "Critical",
     "CriticalFilesFound": "Critical Files Found",
+    "Criticality selection info": "In case you need the clearing at an earlier date than the preferred date that is available, please check the critical checkbox and reselect the preferred clearing date.",
     "Current Component": "Current Component",
     "Current License": "Current License",
     "Current Project": "Current Project",
