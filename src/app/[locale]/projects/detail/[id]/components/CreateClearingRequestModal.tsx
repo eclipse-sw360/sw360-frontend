@@ -11,7 +11,7 @@
 
 import { signOut, useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { SelectUsersDialog } from "next-sw360"
+import { SelectUsersDialog, ShowInfoOnHover } from "next-sw360"
 import { Dispatch, SetStateAction, useState } from "react"
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
 import { BsCheck2Square } from "react-icons/bs"
@@ -34,7 +34,6 @@ export default function CreateClearingRequestModal({ show,
                                                      projectName }: Props) {
     const t = useTranslations('default')
     const { status } = useSession()
-    const [comment] = useState('')
     const [message] = useState('')
     const [variant] = useState('success')
     const [reloadPage] = useState(false)
@@ -142,7 +141,7 @@ export default function CreateClearingRequestModal({ show,
                             <hr />
                             <Form.Group className='mb-3'>
                                 <Form.Label style={{ fontWeight: 'bold' }}>
-                                    {t('Please enter the clearing team email id')}
+                                    {t('Please enter the clearing team email id')} :
                                 </Form.Label>
                                 <Form.Control
                                     type='text'
@@ -165,7 +164,7 @@ export default function CreateClearingRequestModal({ show,
                             </Form.Group>
                             <Row className='mb-3'>                                
                                 <Col md={6}>
-                                    <Form.Group className='mb-3'>
+                                    <Form.Group className='mb-2'>
                                         <Form.Label style={{ fontWeight: 'bold' }}>
                                             {t('Clearing Type')} :
                                         </Form.Label>
@@ -180,11 +179,15 @@ export default function CreateClearingRequestModal({ show,
                                             <option value='DEEP'>{t('Deep Level CLX')}</option>
                                             <option value='HIGH'>{t('High Level ISR')}</option>
                                         </Form.Select>
+                                        <div className='form-text'
+                                             id='createClearingRequest.clearingType.HelpBlock'>
+                                            <ShowInfoOnHover text={t('Clearing Type Info')}/>
+                                                {' '}{t('Learn more about clearing request type')}.
+                                        </div>
                                     </Form.Group>
-
                                 </Col>
                                 <Col md={6}>
-                                    <Form.Group className='mb-3'>
+                                    <Form.Group className='mb-2'>
                                         <Form.Label style={{ fontWeight: 'bold' }}>
                                             {t('Preferred Clearing Date')} :
                                         </Form.Label>
@@ -196,9 +199,14 @@ export default function CreateClearingRequestModal({ show,
                                             onChange={updateInputField}
                                             required
                                         />
+                                        <div className='form-text'
+                                             id='createClearingRequest.requestedClearingDate.HelpBlock'>
+                                            <ShowInfoOnHover text={t('Requested Clearing Date Info')}/>
+                                                {' '}{t('Learn more about preferred clearing date')}.
+                                        </div>
                                     </Form.Group>
                                 </Col>
-                            </Row>  
+                            </Row>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
@@ -209,7 +217,9 @@ export default function CreateClearingRequestModal({ show,
                         <Button
                             className='login-btn'
                             variant='primary'
-                            disabled={!comment}
+                            disabled={!createClearingRequestPayload.clearingTeam ||
+                                      !createClearingRequestPayload.clearingType ||
+                                      !createClearingRequestPayload.requestedClearingDate}
                             onClick={() => handleSubmit()}
                             hidden={reloadPage}
                         >
