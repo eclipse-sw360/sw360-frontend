@@ -1011,6 +1011,7 @@
     "Verification": "Vérification",
     "Version": "Version",
     "View Clearing Request": "Afficher la demande de compensation",
+    "View clearing request detail": "Demande de compensation <strong>{id}</strong> détails pour le projet",
     "View file list": "Afficher la liste des fichiers",
     "Visibility": "Visibilité",
     "Visual SourceSafe": "Source visuelle sûre",

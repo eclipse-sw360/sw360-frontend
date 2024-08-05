@@ -1011,6 +1011,7 @@
     "Verification": "회사연혁",
     "Version": "이름 *",
     "View Clearing Request": "청산요청 보기",
+    "View clearing request detail": "프로젝트에 대한 요청 <strong>{id}</strong> 세부정보 지우기",
     "View file list": "파일 목록 보기",
     "Visibility": "제품정보",
     "Visual SourceSafe": "비주얼 소스Safe",

@@ -1011,6 +1011,7 @@
     "Verification": "xác minh",
     "Version": "Phiên bản",
     "View Clearing Request": "Xem yêu cầu xóa",
+    "View clearing request detail": "Đang xóa chi tiết yêu cầu <strong>{id}</strong> cho dự án",
     "View file list": "Xem danh sách tệp",
     "Visibility": "Hiển thị",
     "Visual SourceSafe": "Nguồn trực quanAn toàn",

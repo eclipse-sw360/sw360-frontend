@@ -1011,6 +1011,7 @@
     "Verification": "核查",
     "Version": "版本",
     "View Clearing Request": "查看清算請求",
+    "View clearing request detail": "清除項目的請求 <strong>{id}</strong> 詳細信息",
     "View file list": "查看文件列表",
     "Visibility": "可见度",
     "Visual SourceSafe": "視覺來源安全",

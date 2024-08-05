@@ -1011,6 +1011,7 @@
     "Verification": "验证",
     "Version": "バージョン",
     "View Clearing Request": "決済リクエストの表示",
+    "View clearing request detail": "プロジェクトのリクエスト <strong>{id}</strong> の詳細をクリアします",
     "View file list": "ファイルリストを表示する",
     "Visibility": "可視性",
     "Visual SourceSafe": "ビジュアルソースセーフ",
