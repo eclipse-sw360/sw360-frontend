@@ -173,6 +173,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                                 projectId={projectId}
                                                 projectName={summaryData.name ?? ''}
                                                 projectVersion={summaryData.version ?? ''}
+                                                clearingState={administrationData.clearingState ?? ''}
                                             />
                                         )}
                                     </Tab.Pane>

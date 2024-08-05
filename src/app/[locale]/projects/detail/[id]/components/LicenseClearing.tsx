@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import dynamic from 'next/dynamic'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
+import { ClearingRequestStates } from '@/object-types'
 
 const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
 const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
@@ -26,11 +27,13 @@ export default function LicenseClearing({
     projectId,
     projectName,
     projectVersion,
+    clearingState,
     isCalledFromModerationRequestCurrentProject,
 }: {
     projectId: string
     projectName: string
     projectVersion: string
+    clearingState?: string
     isCalledFromModerationRequestCurrentProject?: boolean
 }) {
     const t = useTranslations('default')
@@ -102,8 +105,15 @@ export default function LicenseClearing({
                                     variant='secondary'
                                     className='me-2 col-auto'
                                     onClick={() => setShowCreateClearingRequestModal(true)}
+                                    disabled={clearingState === ClearingRequestStates.CLOSED}
                                 >
-                                    {t('Create Clearing Request')}
+                                    {
+                                        <>
+                                            {clearingState === ClearingRequestStates.OPEN
+                                            ? t('View Clearing Request')
+                                            : t('Create Clearing Request')}
+                                        </>
+                                    }
                                 </Button>
                             </Nav.Item>
                         </Nav>
