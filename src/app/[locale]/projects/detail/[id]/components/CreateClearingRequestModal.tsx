@@ -12,7 +12,7 @@
 import { signOut, useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { SelectUsersDialog, ShowInfoOnHover } from "next-sw360"
-import { Dispatch, SetStateAction, useCallback, useState } from "react"
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react"
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
 import { BsCheck2Square } from "react-icons/bs"
 import { ClearingRequestDetails,
@@ -37,10 +37,12 @@ export default function CreateClearingRequestModal({ show,
                                                      projectName }: Props) {
     const t = useTranslations('default')
     const [message, setMessage] = useState('')
+    const [minDate, setMinDate] = useState('')
     const { data: session, status } = useSession()
     const [variant, setVariant] = useState('success')
     const [reloadPage, setReloadPage] = useState(false)
     const [isDisabled, setIsDisabled] = useState(false)
+    const [isCritical, setIsCritical] = useState(false)
     const [showMessage, setShowMessage] = useState(false)
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
@@ -52,7 +54,18 @@ export default function CreateClearingRequestModal({ show,
         priority: 'LOW',
         requestingUserComment: ''
     })
-
+  
+    useEffect(() => {
+        const calculateMinDate = () => {
+          const currentDate = new Date();
+          if (!isCritical) {
+            currentDate.setDate(currentDate.getDate() + 21)
+          }
+          return currentDate.toISOString().split('T')[0]
+        }
+        setMinDate(calculateMinDate());
+      }, [isCritical])
+    
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)
         setClearingTeamData(user)
@@ -118,6 +131,8 @@ export default function CreateClearingRequestModal({ show,
 
     const handleCloseDialog = () => {
         setShow(!show)
+        setMinDate('')
+        setIsCritical(false)
         setIsDisabled(false)
         setShowMessage(false)
         setCreateClearingRequestPayload({
@@ -141,11 +156,22 @@ export default function CreateClearingRequestModal({ show,
         })
     }
     
-    const setClearingPriority = (priorityStatus: string) => {
-        setCreateClearingRequestPayload({
+    const setClearingPriority = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setIsCritical(event.target.checked)
+        if (event.target.checked) {
+            setCreateClearingRequestPayload({
                 ...createClearingRequestPayload,
-                priority: priorityStatus
+                priority: 'CRITICAL',
+                requestedClearingDate: ''
             })
+        }
+        else {
+            setCreateClearingRequestPayload({
+                ...createClearingRequestPayload,
+                priority: 'LOW',
+                requestedClearingDate: ''
+            })
+        }
     }
 
 
@@ -262,6 +288,7 @@ export default function CreateClearingRequestModal({ show,
                                             value={createClearingRequestPayload?.requestedClearingDate ?? ''}
                                             onChange={updateInputField}
                                             disabled={isDisabled}
+                                            min={minDate}
                                             required
                                         />
                                         <div className='form-text'
@@ -277,11 +304,10 @@ export default function CreateClearingRequestModal({ show,
                                 <Form.Check
                                     type='checkbox'
                                     id='createClearingRequest.priority'
-                                    readOnly={true}
                                     name='priority'
+                                    checked={isCritical}
                                     style={{marginTop: '1px'}}
-                                    onChange={() => setClearingPriority('CRITICAL')}
-                                    value={ createClearingRequestPayload.priority}
+                                    onChange={setClearingPriority}
                                     disabled={isDisabled}
                                 />
                                 <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px'}}>
