@@ -20,6 +20,7 @@ import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
 import ClearingRequest from './ClearingRequest'
 import ClearingRequestDetails from './ClearingRequestDetails'
+import CreateClearingRequestPayload from './CreateClearingRequestPayload'
 import Component from './Component'
 import ComponentPayload from './ComponentPayLoad'
 import ECCInformation from './ECCInformation'
@@ -100,6 +101,7 @@ export type {
     ClearingInformation,
     ClearingRequest,
     ClearingRequestDetails,
+    CreateClearingRequestPayload,
     Component,
     ComponentPayload,
     Creator,
