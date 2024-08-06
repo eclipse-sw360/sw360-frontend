@@ -83,10 +83,24 @@ export default function ViewClearingRequestModal({ show,
     )
 
     useEffect(() => {
-        void fetchData(`clearingrequest/${clearingRequestId}`).then(
+        if (status !== 'authenticated') return
+
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                    void fetchData(`clearingrequest/${clearingRequestId}`).then(
                       (clearingRequestDetails: ClearingRequestDetails) => {
                         setClearingRequestData(clearingRequestDetails)
-        })}, [fetchData, session])
+                    })
+                } 
+            catch (e) {
+                console.error(e)
+            }
+            })()
+        return () => controller.abort(signal)
+    }, [fetchData, session])
 
     const handleCloseDialog = () => {
         setShow(!show)
