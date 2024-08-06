@@ -50,3 +50,11 @@
     border: 1px solid lightgray !important;
     margin-bottom: 2rem !important;
 }
+
+.summary-table-view-cr {
+    border: 1px solid lightgray !important;
+    margin-bottom: 2rem !important;
+    background-color: #5d8ea9 !important;
+    color: white !important;
+    max-width: 120px  !important;
+}
