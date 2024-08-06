@@ -21,22 +21,9 @@ import { useRouter, useSearchParams, redirect } from 'next/navigation'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import DeletePackageModal from './DeletePackageModal'
+import { packageManagers } from "./PackageManagers"
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
-
-const PackageManagers = [
-    'Alpine', 'ALPM', 'APK',
-    'Bitbucket', 'Cargo', 'Cocoapods',
-    'Composer', 'Conan', 'Conda',
-    'Cpan', 'Cran', 'Deb',
-    'Docker', 'Drupal', 'Gem',
-    'Generic', 'Github', 'Gitlab',
-    'Golang', 'Gradle', 'Hackage',
-    'Hex', 'huggingface', 'MLflow',
-    'Npm', 'NuGet', 'Oci',
-    'Pub', 'PyPi', 'Rpm',
-    'swid', 'Swift', 'Yarn', 'Yocto'
-]
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -52,7 +39,7 @@ export default function Packages() {
     const router = useRouter()
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({ show: false, packageId: '', packageName: '', packageVersion: '' })
 
-    const handleAddPackages = () => {
+    const handleCreatePackage = () => {
         router.push('/packages/add')
     }
 
@@ -163,7 +150,7 @@ export default function Packages() {
         },
         {
             fieldName: t('Package Manager'),
-            value: PackageManagers.map((p) => ({key: p, text: p})),
+            value: packageManagers.map((p) => ({key: p, text: p})),
             paramName: 'type',
         },
         {
@@ -188,7 +175,7 @@ export default function Packages() {
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between ms-1'>
-                            <button className='btn btn-primary col-auto' onClick={handleAddPackages}>
+                            <button className='btn btn-primary col-auto' onClick={handleCreatePackage}>
                                 {t('Add Package')}
                             </button>
                             <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
