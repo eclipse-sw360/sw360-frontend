@@ -421,6 +421,7 @@
     "External ids": "Identifications externes",
     "External link for more information": "",
     "FSF Free/Libre?": "",
+    "Failed to fetch clearing request from database": "Échec de la récupération de la demande de compensation à partir de la base de données !",
     "Failed to load source file with error": "Échec du chargement du fichier source avec erreur",
     "Field Name": "Nom du champ",
     "File name": "Nom du fichier",

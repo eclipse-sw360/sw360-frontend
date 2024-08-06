@@ -421,6 +421,7 @@
     "External ids": "Vacunas externas",
     "External link for more information": "",
     "FSF Free/Libre?": "",
+    "Failed to fetch clearing request from database": "¡No se pudo recuperar la solicitud de compensación de la base de datos!",
     "Failed to load source file with error": "No se pudo cargar el archivo fuente con error",
     "Field Name": "Nombre del campo",
     "File name": "Nombre del archivo",

@@ -421,6 +421,7 @@
     "External ids": "外部 ID",
     "External link for more information": "",
     "FSF Free/Libre?": "",
+    "Failed to fetch clearing request from database": "无法从数据库获取清算请求！",
     "Failed to load source file with error": "无法加载源文件并出现错误",
     "Field Name": "字段名称",
     "File name": "文件名",

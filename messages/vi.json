@@ -421,6 +421,7 @@
     "External ids": "Id bên ngoài",
     "External link for more information": "",
     "FSF Free/Libre?": "",
+    "Failed to fetch clearing request from database": "Không tìm nạp được yêu cầu xóa từ cơ sở dữ liệu!",
     "Failed to load source file with error": "Không thể tải tập tin nguồn có lỗi",
     "Field Name": "Tên trường",
     "File name": "Tên tập tin",

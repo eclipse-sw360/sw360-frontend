@@ -421,6 +421,7 @@
     "External ids": "외부 ids",
     "External link for more information": "",
     "FSF Free/Libre?": "",
+    "Failed to fetch clearing request from database": "데이터베이스에서 삭제 요청을 가져오지 못했습니다!",
     "Failed to load source file with error": "오류로 인해 소스 파일을 로드하지 못했습니다.",
     "Field Name": "필드 이름",
     "File name": "파일 이름",

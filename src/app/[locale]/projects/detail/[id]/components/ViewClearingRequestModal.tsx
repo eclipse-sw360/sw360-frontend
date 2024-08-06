@@ -12,7 +12,7 @@
 import { signOut, useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react"
-import { Button, Form, Modal } from "react-bootstrap"
+import { Alert, Button, Form, Modal } from "react-bootstrap"
 import { BsCheck2Square } from "react-icons/bs"
 import { ClearingRequestDetails, HttpStatus } from "@/object-types"
 import { ApiUtils } from "@/utils/index"
@@ -32,7 +32,10 @@ export default function ViewClearingRequestModal({ show,
                                                    projectName,
                                                    clearingRequestId }: Props) {
     const t = useTranslations('default')
+    const [message, setMessage] = useState('')
     const { data: session, status } = useSession()
+    const [variant, setVariant] = useState('success')
+    const [showMessage, setShowMessage] = useState(false)
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
         id: '',
         requestedClearingDate: '',
@@ -56,12 +59,21 @@ export default function ViewClearingRequestModal({ show,
         }
     })
 
+    const displayMessage = (variant: string, message: string) => {
+        setVariant(variant)
+        setMessage(message)
+        setShowMessage(true)
+    }
+
     const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as ClearingRequestDetails
                 return data
+            } else if (response.status == HttpStatus.FORBIDDEN) {
+                displayMessage('warning',  t('Failed to fetch clearing request from database'))
+                return signOut()
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
@@ -106,6 +118,12 @@ export default function ViewClearingRequestModal({ show,
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
+                        <Alert variant={variant}
+                            onClose={() => setShowMessage(false)}
+                            show={showMessage}
+                            dismissible>
+                            {message}
+                        </Alert>
                         <Form>
                             <Form.Group>
                                 <Form.Label className='mb-4'>
