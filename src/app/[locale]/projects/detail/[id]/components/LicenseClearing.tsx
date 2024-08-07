@@ -18,6 +18,8 @@ import { useRouter } from 'next/navigation'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import dynamic from 'next/dynamic'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
+import { ClearingRequestStates } from '@/object-types'
+import ViewClearingRequestModal from './ViewClearingRequestModal'
 
 const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
 const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
@@ -26,17 +28,22 @@ export default function LicenseClearing({
     projectId,
     projectName,
     projectVersion,
+    clearingState,
+    clearingRequestId,
     isCalledFromModerationRequestCurrentProject,
 }: {
     projectId: string
     projectName: string
     projectVersion: string
+    clearingState?: string
+    clearingRequestId?: string
     isCalledFromModerationRequestCurrentProject?: boolean
 }) {
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
     const router = useRouter()
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
+    const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
 
     const generateSourceCodeBundle = () => {
         router.push(`/projects/generateSourceCode/${projectId}`)
@@ -49,6 +56,10 @@ export default function LicenseClearing({
                                         setShow = {setShowCreateClearingRequestModal}
                                         projectId = {projectId}
                                         projectName = {projectName}/>
+            <ViewClearingRequestModal   show = {showViewClearingRequestModal}
+                                        setShow = {setShowViewClearingRequestModal}
+                                        projectName = {projectName}
+                                        clearingRequestId = {clearingRequestId}/>
             <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
                 <div className='row'
                      hidden={isCalledFromModerationRequestCurrentProject}>
@@ -101,9 +112,18 @@ export default function LicenseClearing({
                                 <Button
                                     variant='secondary'
                                     className='me-2 col-auto'
-                                    onClick={() => setShowCreateClearingRequestModal(true)}
+                                    onClick={ clearingState === ClearingRequestStates.OPEN ?
+                                                () => setShowViewClearingRequestModal(true) :
+                                                () => setShowCreateClearingRequestModal(true)}
+                                    disabled={clearingState === ClearingRequestStates.CLOSED}
                                 >
-                                    {t('Create Clearing Request')}
+                                    {
+                                        <>
+                                            {clearingState === ClearingRequestStates.OPEN
+                                            ? t('View Clearing Request')
+                                            : t('Create Clearing Request')}
+                                        </>
+                                    }
                                 </Button>
                             </Nav.Item>
                         </Nav>

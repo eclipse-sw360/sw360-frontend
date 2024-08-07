@@ -179,6 +179,7 @@ export { NavList, Preferences }
 // Enums
 import ActionType from './enums/ActionType'
 import AttachmentType from './enums/AttachmentTypes'
+import ClearingRequestStates from './enums/ClearingRequestStates'
 import CommonTabIds from './enums/CommonTabsIds'
 import ComponentTabIds from './enums/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
@@ -191,6 +192,7 @@ import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificatio
 export {
     ActionType,
     AttachmentType,
+    ClearingRequestStates,
     CommonTabIds,
     ComponentTabIds,
     DocumentTypes,
