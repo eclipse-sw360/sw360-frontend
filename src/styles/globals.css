@@ -1174,3 +1174,16 @@ a.text-primary {
     border-color: transparent !important;
     color: #ffffff !important;
 }
+
+.btn-transparent {
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+.btn-transparent:hover {
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #000000 !important;
+}
+
