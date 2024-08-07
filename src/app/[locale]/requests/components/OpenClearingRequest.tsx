@@ -18,7 +18,7 @@ import { Embedded, HttpStatus } from '@/object-types'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
@@ -113,6 +113,7 @@ function OpenClearingRequest() {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
+    const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const [tableData, setTableData] = useState<Array<any>>([])
     const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
@@ -162,9 +163,8 @@ function OpenClearingRequest() {
             });
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => {
-                    let isProjectDeleted : boolean = false
                     if (!Object.hasOwn(item, 'projectId')){
-                        isProjectDeleted = true
+                        setIsProjectDeleted(true)
                     }
                     return [
                                 {
@@ -350,10 +350,13 @@ function OpenClearingRequest() {
                             <Tooltip>
                                 {t('Edit')}
                             </Tooltip>}>
-                            <Link href={`/requests/clearingRequest/${requestId}`}
-                                  className='overlay-trigger'>
-                                <FaPencilAlt className='btn-icon' />
-                            </Link>
+                            <Button className='btn-transparent'
+                                    hidden={isProjectDeleted}>
+                                <Link href={`/requests/clearingRequest/edit/${requestId}`}
+                                    className='overlay-trigger'>
+                                    <FaPencilAlt className='btn-icon'/>
+                                </Link>
+                            </Button>
                         </OverlayTrigger>
                     </>
                 )
