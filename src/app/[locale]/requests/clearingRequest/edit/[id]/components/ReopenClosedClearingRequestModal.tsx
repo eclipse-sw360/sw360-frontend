@@ -83,6 +83,13 @@ export default function ReopenClosedClearingRequestModal({ show,
             [event.target.name]: event.target.value,
         })
     }
+
+    const setClearingPriority = (priorityStatus: string) => {
+        setCreateClearingRequestPayload({
+                ...createClearingRequestPayload,
+                priority: priorityStatus
+            })
+    }
     
 
     if (status === 'unauthenticated') {
@@ -179,6 +186,22 @@ export default function ReopenClosedClearingRequestModal({ show,
                                     </Form.Group>
                                 </Col>
                             </Row>
+                            <Form.Group className='mb-1' style={{ display: 'flex',
+                                                                  alignItems: 'left' }}>
+                                <Form.Check
+                                    type='checkbox'
+                                    id='createClearingRequest.priority'
+                                    readOnly={true}
+                                    name='priority'
+                                    style={{marginTop: '1px'}}
+                                    onChange={() => setClearingPriority('CRITICAL')}
+                                    value={ createClearingRequestPayload.priority}
+                                    disabled={isDisabled}
+                                />
+                                <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px'}}>
+                                    {t('Critical')}
+                                </Form.Label>
+                            </Form.Group>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
