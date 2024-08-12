@@ -18,7 +18,7 @@ import { Embedded, HttpStatus } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
@@ -39,6 +39,7 @@ function ClosedClearingRequest() {
     const { data: session, status } = useSession()
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<Array<any>>([])
+    const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
@@ -158,10 +159,13 @@ function ClosedClearingRequest() {
                             <Tooltip>
                                 {t('Edit')}
                             </Tooltip>}>
-                            <Link href={`/requests/clearingRequest/${requestId}`}
-                                  className='overlay-trigger'>
-                                <FaPencilAlt className='btn-icon' />
-                            </Link>
+                            <Button className='btn-transparent'
+                                    hidden={isProjectDeleted}>
+                                <Link href={`/requests/clearingRequest/edit/${requestId}`}
+                                    className='overlay-trigger'>
+                                    <FaPencilAlt className='btn-icon'/>
+                                </Link>
+                            </Button>
                         </OverlayTrigger>
                     </>
                 )
@@ -191,9 +195,8 @@ function ClosedClearingRequest() {
             });
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => {
-                    let isProjectDeleted : boolean = false
                     if (!Object.hasOwn(item, 'projectId')){
-                        isProjectDeleted = true
+                        setIsProjectDeleted(true)
                     }
                     return [
                                 {
