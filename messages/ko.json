@@ -693,6 +693,7 @@
     "Please enter a token name": "토큰 이름을 입력하세요.",
     "Please enter a valid expiration date": "",
     "Please enter an expiration date": "만료일을 입력하세요.",
+    "Please enter details to re-open clearing request": "청산 요청을 다시 열려면 원하는 청산 날짜와 청산 요청 유형을 입력하세요.",
     "Please enter the clearing team email id": "청산팀 이메일 ID를 입력하세요.",
     "Please select a file": "파일을 선택하십시오!",
     "Postpone Request": "요청 연기",

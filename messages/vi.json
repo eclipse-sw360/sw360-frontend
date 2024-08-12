@@ -693,6 +693,7 @@
     "Please enter a token name": "Vui lòng nhập tên mã thông báo",
     "Please enter a valid expiration date": "",
     "Please enter an expiration date": "Vui lòng nhập ngày hết hạn",
+    "Please enter details to re-open clearing request": "Vui lòng nhập ngày thanh toán bù trừ ưu tiên và loại yêu cầu thanh toán bù trừ để mở lại yêu cầu thanh toán bù trừ",
     "Please enter the clearing team email id": "Vui lòng nhập id email của nhóm thanh toán bù trừ",
     "Please select a file": "Vui lòng chọn một tập tin!",
     "Postpone Request": "Trì hoãn yêu cầu",

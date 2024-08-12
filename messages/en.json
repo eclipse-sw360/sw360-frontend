@@ -693,6 +693,7 @@
     "Please enter a token name": "Please enter a token name",
     "Please enter a valid expiration date": "Please enter a valid expiration date",
     "Please enter an expiration date": "Please enter an expiration date",
+    "Please enter details to re-open clearing request": "Please enter preferred clearing date and clearing request type to re-open clearing request",
     "Please enter the clearing team email id": "Please enter the clearing team email id",
     "Please select a file": "Please select a file!",
     "Postpone Request": "Postpone Request",

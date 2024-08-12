@@ -693,6 +693,7 @@
     "Please enter a token name": "Insira um nome de token",
     "Please enter a valid expiration date": "",
     "Please enter an expiration date": "Insira uma data de validade",
+    "Please enter details to re-open clearing request": "Insira a data de compensação preferida e o tipo de solicitação de compensação para reabrir a solicitação de compensação",
     "Please enter the clearing team email id": "Insira o ID de e-mail da equipe de compensação",
     "Please select a file": "Selecione um arquivo!",
     "Postpone Request": "Adiar solicitação",

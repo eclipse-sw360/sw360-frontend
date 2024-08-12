@@ -693,6 +693,7 @@
     "Please enter a token name": "トークン名を入力してください",
     "Please enter a valid expiration date": "",
     "Please enter an expiration date": "有効期限を入力してください",
+    "Please enter details to re-open clearing request": "決済リクエストを再開するには、ご希望の決済日と決済リクエストのタイプを入力してください。",
     "Please enter the clearing team email id": "清算チームのメール ID を入力してください",
     "Please select a file": "ファイルを選択してください!",
     "Postpone Request": "リクエストの延期",

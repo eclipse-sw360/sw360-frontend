@@ -693,6 +693,7 @@
     "Please enter a token name": "Bitte geben Sie einen Token-Namen ein",
     "Please enter a valid expiration date": "",
     "Please enter an expiration date": "Bitte geben Sie ein Ablaufdatum ein",
+    "Please enter details to re-open clearing request": "Bitte geben Sie das gewünschte Clearing-Datum und den Clearing-Anforderungstyp ein, um die Clearing-Anfrage erneut zu öffnen",
     "Please enter the clearing team email id": "Bitte geben Sie die E-Mail-ID des Clearing-Teams ein",
     "Please select a file": "Bitte wählen Sie eine Datei aus!",
     "Postpone Request": "Anfrage verschieben",

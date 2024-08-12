@@ -693,6 +693,7 @@
     "Please enter a token name": "请输入代币名称",
     "Please enter a valid expiration date": "",
     "Please enter an expiration date": "请输入到期日期",
+    "Please enter details to re-open clearing request": "请输入首选清算日期和清算请求类型以重新打开清算请求",
     "Please enter the clearing team email id": "请输入清算团队电子邮件地址",
     "Please select a file": "请选择一个文件!",
     "Postpone Request": "推迟请求",
