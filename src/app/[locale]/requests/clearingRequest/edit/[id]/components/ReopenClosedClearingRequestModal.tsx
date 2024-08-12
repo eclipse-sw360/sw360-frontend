@@ -150,6 +150,34 @@ export default function ReopenClosedClearingRequestModal({ show,
                                         </div>
                                     </Form.Group>
                                 </Col>
+                                <Col md={6}>
+                                    <Form.Group className='mb-2'>
+                                        <Form.Label style={{ fontWeight: 'bold' }}>
+                                            {t('Clearing Type')} :
+                                            <span className='text-red'
+                                                  style={{ color: '#F7941E' }}>
+                                                *
+                                            </span>
+                                        </Form.Label>
+                                        <Form.Select
+                                            id='createClearingRequest.clearingType'
+                                            name='clearingType'
+                                            value={createClearingRequestPayload.clearingType}
+                                            onChange={updateInputField}
+                                            disabled={isDisabled}
+                                            required
+                                        >
+                                            <option value='' hidden></option>
+                                            <option value='DEEP'>{t('Deep Level CLX')}</option>
+                                            <option value='HIGH'>{t('High Level ISR')}</option>
+                                        </Form.Select>
+                                        <div className='form-text'
+                                             id='createClearingRequest.clearingType.HelpBlock'>
+                                            <ShowInfoOnHover text={t('Clearing Type Info')}/>
+                                                {' '}{t('Learn more about clearing request type')}.
+                                        </div>
+                                    </Form.Group>
+                                </Col>
                             </Row>
                         </Form>
                     </Modal.Body>
