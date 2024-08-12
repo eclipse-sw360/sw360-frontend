@@ -32,6 +32,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const router = useRouter()
     const toastShownRef = useRef(false);
     const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
+    const [isReopenClosedCR, setIsReopenClosedCR] = useState<boolean>(false)
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
         id: '',
         requestedClearingDate: '',
@@ -79,6 +80,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             if (!Object.hasOwn(clearingRequestDetails, 'projectId')){
                 setIsProjectDeleted(true)
             }
+            if (clearingRequestDetails.clearingState === 'CLOSED' ||
+                clearingRequestDetails.clearingState === 'REJECTED'){
+                setIsReopenClosedCR(true)
+            }
             setClearingRequestData(clearingRequestDetails)
         })}, [fetchData, session])
 
@@ -86,6 +91,13 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         
         // Temp code
         console.log('Edit Clearing Request')
+        router.push('/requests')
+    }
+
+    const handleReopenClearingRequest = () => {
+        
+        // Temp code
+        console.log('Reopen Clearing Request')
         router.push('/requests')
     }
 
@@ -113,10 +125,16 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                         <Button
                                             variant='btn btn-primary'
                                             className='me-2 col-auto'
-                                            onClick={handleEditClearingRequest}
+                                            onClick={isReopenClosedCR 
+                                                        ? handleReopenClearingRequest
+                                                        : handleEditClearingRequest}
                                             hidden={isProjectDeleted}
                                         >
-                                            {t('Edit Request')}
+                                            {
+                                                isReopenClosedCR
+                                                ? t('Reopen Request')
+                                                : t('Edit Request')
+                                            }
                                         </Button>
                                     </Row>
                                 </Col>
