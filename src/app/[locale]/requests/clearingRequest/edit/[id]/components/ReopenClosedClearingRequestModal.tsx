@@ -202,6 +202,26 @@ export default function ReopenClosedClearingRequestModal({ show,
                                     {t('Critical')}
                                 </Form.Label>
                             </Form.Group>
+                            <div className='subscriptionBox'
+                                 style={{ textAlign: 'left',
+                                          marginBottom: '20px' }}>
+                                {t('Criticality selection info')}
+                            </div>
+                            <Form.Group className='mb-2'>
+                                <Form.Label style={{ fontWeight: 'bold' }}>
+                                    {t('Comments')} :
+                                </Form.Label>
+                                <Form.Control
+                                    id='createClearingRequest.requestingUserComment'
+                                    type='text'
+                                    placeholder='Enter Comments'
+                                    name='requestingUserComment'
+                                    value={createClearingRequestPayload.requestingUserComment}
+                                    onChange={updateInputField}
+                                    style={{height: 'auto', textAlign: 'left'}}
+                                    disabled={isDisabled}
+                                />
+                            </Form.Group>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
