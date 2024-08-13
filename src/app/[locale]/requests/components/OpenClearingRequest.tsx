@@ -18,7 +18,8 @@ import { Embedded, HttpStatus } from '@/object-types'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
-import { Spinner } from 'react-bootstrap'
+import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
@@ -112,6 +113,7 @@ function OpenClearingRequest() {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
+    const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const [tableData, setTableData] = useState<Array<any>>([])
     const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
@@ -161,9 +163,8 @@ function OpenClearingRequest() {
             });
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => {
-                    let isProjectDeleted : boolean = false
                     if (!Object.hasOwn(item, 'projectId')){
-                        isProjectDeleted = true
+                        setIsProjectDeleted(true)
                     }
                     return [
                                 {
@@ -200,7 +201,9 @@ function OpenClearingRequest() {
                                 item.requestedClearingDate ?? '',
                                 item.agreedClearingDate ?? '',
                                 clearingRequestType[item.clearingType] ?? '',
-                                ''
+                                {
+                                    requestId: item.id
+                                },
                             ]
                 })
             )
@@ -215,7 +218,8 @@ function OpenClearingRequest() {
             formatter: ({ requestId }: { requestId: string; }) =>
                 _(
                     <>
-                        <Link href={`/requests/clearingRequest/detail/${requestId}`} className='text-link'>
+                        <Link href={`/requests/clearingRequest/detail/${requestId}`}
+                              className='text-link'>
                             {requestId}
                         </Link>
                     </>
@@ -339,6 +343,23 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.actions',
             name: t('Actions'),
             sort: true,
+            formatter: ({ requestId }: { requestId: string }) => 
+                _(
+                    <>
+                        <OverlayTrigger overlay={
+                            <Tooltip>
+                                {t('Edit')}
+                            </Tooltip>}>
+                            <Button className='btn-transparent'
+                                    hidden={isProjectDeleted}>
+                                <Link href={`/requests/clearingRequest/edit/${requestId}`}
+                                    className='overlay-trigger'>
+                                    <FaPencilAlt className='btn-icon'/>
+                                </Link>
+                            </Button>
+                        </OverlayTrigger>
+                    </>
+                )
         }
     ]
 
@@ -351,7 +372,10 @@ function OpenClearingRequest() {
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     {loading == false ? (
                         <div style={{ paddingLeft: '0px' }}>
-                            <Table columns={columns} data={tableData} sort={false} selector={true} />
+                            <Table columns={columns}
+                                   data={tableData}
+                                   sort={false}
+                                   selector={true} />
                         </div>
                         ) : (
                                 <Spinner className='spinner' />
