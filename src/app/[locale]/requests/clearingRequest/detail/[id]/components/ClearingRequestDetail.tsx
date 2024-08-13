@@ -22,6 +22,7 @@ import { ShowInfoOnHover } from 'next-sw360'
 import ClearingRequestInfo from './ClearingRequestInfo'
 import ClearingDecision from './ClearingDecision'
 import ClearingComments from './ClearingComments'
+import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
 
 
 function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
@@ -32,6 +33,8 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const router = useRouter()
     const toastShownRef = useRef(false);
     const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
+    const [isReopenClosedCR, setIsReopenClosedCR] = useState<boolean>(false)
+    const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState(false)
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
         id: '',
         requestedClearingDate: '',
@@ -79,6 +82,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             if (!Object.hasOwn(clearingRequestDetails, 'projectId')){
                 setIsProjectDeleted(true)
             }
+            if (clearingRequestDetails.clearingState === 'CLOSED' ||
+                clearingRequestDetails.clearingState === 'REJECTED'){
+                setIsReopenClosedCR(true)
+            }
             setClearingRequestData(clearingRequestDetails)
         })}, [fetchData, session])
 
@@ -97,7 +104,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         signOut()
     } else {
     return (
-        <div className='ms-5 mt-2'>
+        <>
+            <ReopenClosedClearingRequestModal show = {showReopenClearingRequestModal}
+                                              setShow = {setShowReopenClearingRequestModal}/>
+            <div className='ms-5 mt-2'>
                 <Tab.Container>
                     <Row>
                         <Row>
@@ -113,10 +123,16 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                         <Button
                                             variant='btn btn-primary'
                                             className='me-2 col-auto'
-                                            onClick={handleEditClearingRequest}
+                                            onClick={() => { isReopenClosedCR 
+                                                        ? setShowReopenClearingRequestModal(true)
+                                                        : handleEditClearingRequest}}
                                             hidden={isProjectDeleted}
                                         >
-                                            {t('Edit Request')}
+                                            {
+                                                isReopenClosedCR
+                                                ? t('Reopen Request')
+                                                : t('Edit Request')
+                                            }
                                         </Button>
                                     </Row>
                                 </Col>
@@ -215,6 +231,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                     </Row>
                 </Tab.Container>
             </div>
+        </>
     )}
 }
 

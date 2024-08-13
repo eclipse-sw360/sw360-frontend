@@ -18,7 +18,8 @@ import { Embedded, HttpStatus } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
-import { Spinner } from 'react-bootstrap'
+import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
@@ -38,6 +39,7 @@ function ClosedClearingRequest() {
     const { data: session, status } = useSession()
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<Array<any>>([])
+    const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
@@ -63,7 +65,8 @@ function ClosedClearingRequest() {
             formatter: ({ requestId }: { requestId: string; }) =>
                 _(
                     <>
-                        <Link href={`/requests/clearingRequest/detail/${requestId}`} className='text-link'>
+                        <Link href={`/requests/clearingRequest/detail/${requestId}`}
+                              className='text-link'>
                             {requestId}
                         </Link>
                     </>
@@ -149,6 +152,23 @@ function ClosedClearingRequest() {
             id: 'closedClearingRequest.actions ',
             name: t('Actions'),
             sort: true,
+            formatter: ({ requestId }: { requestId: string }) => 
+                _(
+                    <>
+                        <OverlayTrigger overlay={
+                            <Tooltip>
+                                {t('Edit')}
+                            </Tooltip>}>
+                            <Button className='btn-transparent'
+                                    hidden={isProjectDeleted}>
+                                <Link href={`/requests/clearingRequest/edit/${requestId}`}
+                                    className='overlay-trigger'>
+                                    <FaPencilAlt className='btn-icon'/>
+                                </Link>
+                            </Button>
+                        </OverlayTrigger>
+                    </>
+                )
         }
     ]
 
@@ -175,9 +195,8 @@ function ClosedClearingRequest() {
             });
             setTableData(
                 filteredClearingRequests.map((item: ClearingRequest) => {
-                    let isProjectDeleted : boolean = false
                     if (!Object.hasOwn(item, 'projectId')){
-                        isProjectDeleted = true
+                        setIsProjectDeleted(true)
                     }
                     return [
                                 {
@@ -199,7 +218,9 @@ function ClosedClearingRequest() {
                                 item.agreedClearingDate ?? '',
                                 item.requestClosedOn ?? '',
                                 clearingRequestType[item.clearingType] ?? '',
-                                ''
+                                {
+                                    requestId: item.id
+                                },
                             ]
                 })
             )
@@ -215,7 +236,10 @@ function ClosedClearingRequest() {
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     {loading == false ? (
                         <div style={{ paddingLeft: '0px' }}>
-                            <Table columns={columns} data={tableData} sort={false} selector={true} />
+                            <Table columns={columns}
+                                   data={tableData}
+                                   sort={false}
+                                   selector={true} />
                         </div>
                         ) : (
                                 <Spinner className='spinner' />
