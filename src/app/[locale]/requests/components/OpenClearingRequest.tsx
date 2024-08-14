@@ -23,10 +23,6 @@ import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
-interface ClearingRequestDataMap {
-    [key: string]: string;
-}
-
 interface LicenseClearingData {
     'Release Count': number
     'Approved Count': number
@@ -115,30 +111,6 @@ function OpenClearingRequest() {
     const { data: session, status } = useSession()
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const [tableData, setTableData] = useState<Array<any>>([])
-    const clearingRequestStatus : ClearingRequestDataMap = {
-        NEW: t('New'),
-        IN_PROGRESS: t('In Progress'),
-        ACCEPTED: t('ACCEPTED'),
-        PENDING_INPUT: t('Pending Input'),
-        REJECTED: t('REJECTED'),
-        IN_QUEUE: t('In Queue'),
-        CLOSED: t('Closed'),
-        AWAITING_RESPONSE: t('Awaiting Response'),
-        ON_HOLD: t('On Hold'),
-        SANITY_CHECK: t('Sanity Check')
-    };
-
-    const clearingRequestPriority : ClearingRequestDataMap = {
-        LOW: t('Low'),
-        MEDIUM: t('Medium'),
-        HIGH: t('High'),
-        CRITICAL: t('Critical')
-    };
-    
-    const clearingRequestType : ClearingRequestDataMap = {
-        DEEP: t('Deep'),
-        HIGH: t('High')
-    };
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -185,10 +157,8 @@ function OpenClearingRequest() {
                                         projectId: item.projectId ?? '',
                                         openReleases: true
                                     },
-                                clearingRequestStatus[item.clearingState] ?? '',
-                                { 
-                                    priority: item.priority ?? ''
-                                },
+                                item.clearingState ?? '', 
+                                item.priority ?? '',
                                 item.requestingUser ?? '',
                                 isProjectDeleted ? {
                                     isProjectDeleted: true
@@ -200,10 +170,8 @@ function OpenClearingRequest() {
                                 item.createdOn ?? '',
                                 item.requestedClearingDate ?? '',
                                 item.agreedClearingDate ?? '',
-                                clearingRequestType[item.clearingType] ?? '',
-                                {
-                                    requestId: item.id
-                                },
+                                item.clearingType ?? '',
+                                ''
                             ]
                 })
             )
@@ -261,41 +229,164 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.status',
             name: t('Status'),
             sort: true,
+            formatter: (status: string) => 
+                _(  
+                    <>
+                        {status === 'NEW' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR New')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'IN_PROGRESS' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR In Progress')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'ACCEPTED' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Accepted')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'SANITY_CHECK' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Sanity Check')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'IN_QUEUE' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR In Queue')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'AWAITING_RESPONSE' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Awaiting Response')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'ON_HOLD' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR On Hold')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'PENDING_INPUT' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Pending Input')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                    </>
+                ),
         },
         {
             id: 'openClearingRequest.priority',
             name: t('Priority'),
             sort: true,
-            formatter: ({ priority }: { priority: string }) =>
+            formatter: (priority: string) =>
                 _(
                     <>
                         {priority && priority === 'LOW' && (
                             <>
                                 <div className='text-success'>
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority Low')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
                         {priority && priority === 'MEDIUM' && (
                             <>
                                 <div className='text-primary'>
-
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority Medium')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
                         {priority && priority === 'HIGH' && (
                             <>
                                 <div className='text-warning'>
-
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority High')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
                         {priority && priority === 'CRITICAL' && (
                             <>
                                 <div className='text-danger'>
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority Critical')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
@@ -338,6 +429,33 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.clearingType',
             name: t('Clearing Type'),
             sort: true,
+            formatter: (clearingType: string) => 
+                _(  
+                    <>
+                        {clearingType === 'DEEP' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Type Deep')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${clearingType}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                        {clearingType === 'HIGH' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Type High')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${clearingType}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                    </>
+                )
         },
         {
             id: 'openClearingRequest.actions',
