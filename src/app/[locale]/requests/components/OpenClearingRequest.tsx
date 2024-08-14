@@ -115,18 +115,6 @@ function OpenClearingRequest() {
     const { data: session, status } = useSession()
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const [tableData, setTableData] = useState<Array<any>>([])
-    const clearingRequestStatus : ClearingRequestDataMap = {
-        NEW: t('New'),
-        IN_PROGRESS: t('In Progress'),
-        ACCEPTED: t('ACCEPTED'),
-        PENDING_INPUT: t('Pending Input'),
-        REJECTED: t('REJECTED'),
-        IN_QUEUE: t('In Queue'),
-        CLOSED: t('Closed'),
-        AWAITING_RESPONSE: t('Awaiting Response'),
-        ON_HOLD: t('On Hold'),
-        SANITY_CHECK: t('Sanity Check')
-    };
 
     const clearingRequestPriority : ClearingRequestDataMap = {
         LOW: t('Low'),
@@ -185,7 +173,7 @@ function OpenClearingRequest() {
                                         projectId: item.projectId ?? '',
                                         openReleases: true
                                     },
-                                clearingRequestStatus[item.clearingState] ?? '',
+                                item.clearingState ?? '',
                                 { 
                                     priority: item.priority ?? ''
                                 },
@@ -261,6 +249,99 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.status',
             name: t('Status'),
             sort: true,
+            formatter: (status: string) => 
+                _(  
+                    <>
+                        {status === 'NEW' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR New')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'IN_PROGRESS' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR In Progress')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'ACCEPTED' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Accepted')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'SANITY_CHECK' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Sanity Check')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'IN_QUEUE' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR In Queue')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'AWAITING_RESPONSE' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Awaiting Response')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'ON_HOLD' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR On Hold')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'PENDING_INPUT' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Pending Input')}
+                                </Tooltip>
+                            }>
+                            <span className='d-inline-block'>
+                                {t(`${status}`)}
+                            </span>
+                            </OverlayTrigger>
+                        )}
+                    </>
+                ),
         },
         {
             id: 'openClearingRequest.priority',
