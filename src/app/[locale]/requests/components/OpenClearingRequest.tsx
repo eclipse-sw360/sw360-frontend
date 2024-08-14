@@ -115,14 +115,6 @@ function OpenClearingRequest() {
     const { data: session, status } = useSession()
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const [tableData, setTableData] = useState<Array<any>>([])
-
-    const clearingRequestPriority : ClearingRequestDataMap = {
-        LOW: t('Low'),
-        MEDIUM: t('Medium'),
-        HIGH: t('High'),
-        CRITICAL: t('Critical')
-    };
-    
     const clearingRequestType : ClearingRequestDataMap = {
         DEEP: t('Deep'),
         HIGH: t('High')
@@ -173,10 +165,8 @@ function OpenClearingRequest() {
                                         projectId: item.projectId ?? '',
                                         openReleases: true
                                     },
-                                item.clearingState ?? '',
-                                { 
-                                    priority: item.priority ?? ''
-                                },
+                                item.clearingState ?? '', 
+                                item.priority ?? '',
                                 item.requestingUser ?? '',
                                 isProjectDeleted ? {
                                     isProjectDeleted: true
@@ -347,36 +337,66 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.priority',
             name: t('Priority'),
             sort: true,
-            formatter: ({ priority }: { priority: string }) =>
+            formatter: (priority: string) =>
                 _(
                     <>
                         {priority && priority === 'LOW' && (
                             <>
                                 <div className='text-success'>
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority Low')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
                         {priority && priority === 'MEDIUM' && (
                             <>
                                 <div className='text-primary'>
-
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority Medium')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
                         {priority && priority === 'HIGH' && (
                             <>
                                 <div className='text-warning'>
-
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority High')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
                         {priority && priority === 'CRITICAL' && (
                             <>
                                 <div className='text-danger'>
-                                    <b>{clearingRequestPriority[priority]}</b>
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('CR Priority Critical')}
+                                        </Tooltip>
+                                    }>
+                                        <span className='d-inline-block'>
+                                            <b>{t(`${priority}`)}</b>
+                                        </span>
+                                    </OverlayTrigger>
                                 </div>
                             </>
                         )}
