@@ -23,10 +23,6 @@ import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
-interface ClearingRequestDataMap {
-    [key: string]: string;
-}
-
 interface LicenseClearingData {
     'Release Count': number
     'Approved Count': number
@@ -115,10 +111,6 @@ function OpenClearingRequest() {
     const { data: session, status } = useSession()
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const [tableData, setTableData] = useState<Array<any>>([])
-    const clearingRequestType : ClearingRequestDataMap = {
-        DEEP: t('Deep'),
-        HIGH: t('High')
-    };
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -178,10 +170,8 @@ function OpenClearingRequest() {
                                 item.createdOn ?? '',
                                 item.requestedClearingDate ?? '',
                                 item.agreedClearingDate ?? '',
-                                clearingRequestType[item.clearingType] ?? '',
-                                {
-                                    requestId: item.id
-                                },
+                                item.clearingType ?? '',
+                                ''
                             ]
                 })
             )
@@ -439,6 +429,33 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.clearingType',
             name: t('Clearing Type'),
             sort: true,
+            formatter: (clearingType: string) => 
+                _(  
+                    <>
+                        {clearingType === 'DEEP' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Type Deep')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${clearingType}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                        {clearingType === 'HIGH' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Type High')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${clearingType}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                    </>
+                )
         },
         {
             id: 'openClearingRequest.actions',
