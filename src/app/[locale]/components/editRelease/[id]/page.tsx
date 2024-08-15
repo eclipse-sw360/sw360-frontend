@@ -10,6 +10,10 @@
 
 import { ReactNode } from 'react'
 import EditRelease from './components/EditRelease'
+import { getServerSession } from 'next-auth/next'
+import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { ConfigKeys, Configuration } from '@/object-types'
 
 interface Context {
     params: Promise<{ id: string }>
@@ -18,8 +22,15 @@ interface Context {
 const ReleaseEditPage = async (props: Context): Promise<ReactNode> => {
     const params = await props.params;
     const releaseId = params.id
+    const session = await getServerSession(authOptions)
+    if (CommonUtils.isNullOrUndefined(session)) {
+        return <></>
+    }
+    const response = await ApiUtils.GET('configurations', session.user.access_token)
+    const config = await response.json() as Configuration
+    const isSPDXFeatureEnabled = config[ConfigKeys.SPDX_DOCUMENT_ENABLED] == 'true'
 
-    return <EditRelease releaseId={releaseId} />
+    return <EditRelease releaseId={releaseId} isSPDXFeatureEnabled={isSPDXFeatureEnabled}/>
 }
 
 export default ReleaseEditPage

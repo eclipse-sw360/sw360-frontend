@@ -9,7 +9,11 @@
 // License-Filename: LICENSE
 
 import { ReactNode } from 'react'
+import { getServerSession } from 'next-auth'
+import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
 import DetailOverview from './components/DetailOverview'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ConfigKeys, Configuration } from '@/object-types'
 
 interface Context {
     params: Promise<{ id: string }>
@@ -18,8 +22,15 @@ interface Context {
 const Detail = async (props: Context): Promise<ReactNode> => {
     const params = await props.params;
     const releaseId = params.id
+    const session = await getServerSession(authOptions)
+    if (CommonUtils.isNullOrUndefined(session)) {
+        return <></>
+    }
+    const response = await ApiUtils.GET('configurations', session.user.access_token)
+    const configs = await response.json() as Configuration
+    const isSPDXFeatureEnabled = configs[ConfigKeys.SPDX_DOCUMENT_ENABLED] == 'true'
 
-    return <DetailOverview releaseId={releaseId} />
+    return <DetailOverview releaseId={releaseId} isSPDXFeatureEnabled={isSPDXFeatureEnabled}/>
 }
 
 export default Detail
