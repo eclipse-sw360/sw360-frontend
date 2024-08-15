@@ -102,6 +102,7 @@ import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
 import ErrorDetails from './error'
+import Configuration from './Configuration'
 
 export type {
     AccessToken,
@@ -203,6 +204,7 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
+    Configuration,
 }
 
 // Special functions for populate data
@@ -223,6 +225,7 @@ import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
+import ConfigKeys from './enums/ConfigKeys'
 
 export {
     ActionType,
@@ -239,4 +242,5 @@ export {
     RequestDocumentTypes,
     UserGroupType,
     VulnerabilitiesVerificationState,
+    ConfigKeys,
 }
