@@ -38,7 +38,6 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { SPDX_ENABLE } from '@/utils/env'
 import styles from '../detail.module.css'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
@@ -55,9 +54,10 @@ type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
 
 interface Props {
     releaseId: string
+    isSPDXFeatureEnabled: boolean
 }
 
-const DetailOverview = ({ releaseId }: Props) : ReactNode => {
+const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode  => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
@@ -123,15 +123,15 @@ const DetailOverview = ({ releaseId }: Props) : ReactNode => {
                     setEmbeddedAttachments(release._embedded['sw360:attachments'])
                 }
 
-                if (release.componentType === 'COTS' && SPDX_ENABLE !== 'true') {
+                if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
                     setTabList(ReleaseDetailTabs.WITH_COMMERCIAL_DETAILS)
                 }
 
-                if (release.componentType === 'COTS' && SPDX_ENABLE === 'true') {
+                if (release.componentType === 'COTS' && isSPDXFeatureEnabled === true) {
                     setTabList(ReleaseDetailTabs.WITH_COMMERCIAL_DETAILS_AND_SPDX)
                 }
 
-                if (release.componentType !== 'COTS' && SPDX_ENABLE === 'true') {
+                if (release.componentType !== 'COTS' && isSPDXFeatureEnabled === true) {
                     setTabList(ReleaseDetailTabs.WITH_SPDX)
                 }
                 return release

@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState, useCallback } from 'react'
 import { getSession, signOut } from 'next-auth/react'
 import { ApiUtils } from '@/utils'
-import { Configuration, HttpStatus } from '@/object-types'
+import { Configuration, HttpStatus, ConfigKeys } from '@/object-types'
 import OnOffSwitch from './OnOffSwitch'
 import { PageButtonHeader, PageSpinner } from 'next-sw360'
 import MessageService from '@/services/message.service'
@@ -88,8 +88,8 @@ const FeatureConfigurations = () => {
                             <td>
                                 <OnOffSwitch size={25}
                                     setCurrentConfig={setCurrentConfig}
-                                    checked={currentConfig['spdx.document.enabled'] == 'true'}
-                                    propKey='spdx.document.enabled'
+                                    checked={currentConfig[ConfigKeys.SPDX_DOCUMENT_ENABLED] == 'true'}
+                                    propKey={ConfigKeys.SPDX_DOCUMENT_ENABLED}
                                 />
                             </td>
                             <td>
