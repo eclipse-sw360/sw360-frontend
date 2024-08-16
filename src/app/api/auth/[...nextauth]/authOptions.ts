@@ -11,15 +11,51 @@
 
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import crypto from 'crypto';
 
 import { CREDENTIAL_PROVIDER } from '@/constants'
 import { HttpStatus, UserCredentialInfo } from '@/object-types'
 import AuthService from '@/services/auth.service'
 import { ApiUtils } from '@/utils'
+import { SW360User } from '../../../../../nextauth'
+import { SW360_API_URL, SW360_REST_CLIENT_ID, SW360_REST_CLIENT_SECRET } from '@/utils/env';
 
+let codeVerifier: crypto.BinaryLike;
 export const authOptions: NextAuthOptions = {
     // Configure one or more authentication providers
     providers: [
+        {
+            id: "sw360-backend",
+            name: "sw360 backend",
+            type: "oauth",
+            version: "2.0",
+            wellKnown: SW360_API_URL+"/authorization/.well-known/oauth-authorization-server",
+            checks: ["pkce", "state"],
+            idToken: true,
+            // Partial GH Copilot generated- start
+            authorization: { params: { scope: "openid READ WRITE ADMIN" , code_challenge_method: "S256", code_challenge: (() => {
+                codeVerifier = codeVerifierGenerator();
+                const codeChallenge = codeChallengeGenerator(codeVerifier);
+                return codeChallenge;
+              })(), } },
+            // Partial GH Copilot generated- end
+            clientId: SW360_REST_CLIENT_ID,
+            clientSecret: SW360_REST_CLIENT_SECRET,
+            profile: async (profiles, tokens) => {
+                return {
+                    exp: tokens.exp,
+                    expires_in: tokens.expires_in,
+                    iat: tokens.iat,
+                    refresh_token: tokens.refresh_token,
+                    scope: tokens.scope,
+                    token_type: tokens.token_type,
+                    userGroup: profiles.userGroup,
+                    email: profiles.email,
+                    access_token: 'Bearer ' +tokens.access_token,
+                    id: profiles.sub,
+                } as SW360User;
+            },
+        },
         CredentialsProvider({
             name: CREDENTIAL_PROVIDER,
             credentials: {},
@@ -97,3 +133,28 @@ export const authOptions: NextAuthOptions = {
         signIn: '/',
     },
 }
+
+
+  // GH Copilot generated- start
+  function codeVerifierGenerator() {
+    const randomBytes = crypto.randomBytes(32);
+    const verifier = base64urlEncode(randomBytes);
+    return verifier;
+  }
+
+  function base64urlEncode(buffer: Buffer) {
+    return buffer.toString('base64')
+      .replace('+', '-')
+      .replace('/', '_')
+      .replace(/=+$/, '');
+  }
+
+
+  function codeChallengeGenerator(verifier: crypto.BinaryLike) {
+    const hash = crypto.createHash('sha256').update(verifier).digest();
+    const challenge = base64urlEncode(hash);
+    return challenge;
+  }
+  // GH Copilot generated- end
+
+

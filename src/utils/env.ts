@@ -12,4 +12,7 @@
 export const SW360_API_URL: string | undefined  = process.env.NEXT_PUBLIC_SW360_API_URL;
 export const AUTH_TOKEN : string | undefined  = process.env.NEXT_PUBLIC_AUTH_TOKEN;
 export const SPDX_ENABLE: string | undefined = process.env.NEXT_PUBLIC_SPDX_ENABLE;
+export const SW360_REST_CLIENT_ID: string | undefined  = process.env.NEXT_PUBLIC_SW360_REST_CLIENT_ID;
+export const SW360_REST_CLIENT_SECRET: string | undefined  = process.env.NEXT_PUBLIC_SW360_REST_CLIENT_SECRET;
+export const ENABLE_SW360_OAUTH_PROVIDER: string | undefined  = process.env.NEXT_PUBLIC_ENABLE_SW360_OAUTH_PROVIDER;
 export const ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP : string | undefined  = process.env.NEXT_PUBLIC_ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP;
