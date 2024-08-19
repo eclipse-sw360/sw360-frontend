@@ -23,10 +23,6 @@ import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
-interface ClearingRequestDataMap {
-    [key: string]: string;
-}
-
 interface ProjectData {
     isProjectDeleted?: boolean,
     projectId?: string,
@@ -40,22 +36,6 @@ function ClosedClearingRequest() {
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<Array<any>>([])
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
-    const clearingRequestStatus : ClearingRequestDataMap = {
-        NEW: t('New'),
-        IN_PROGRESS: t('In Progress'),
-        ACCEPTED: t('ACCEPTED'),
-        PENDING_INPUT: t('Pending Input'),
-        REJECTED: t('REJECTED'),
-        IN_QUEUE: t('In Queue'),
-        CLOSED: t('Closed'),
-        AWAITING_RESPONSE: t('Awaiting Response'),
-        ON_HOLD: t('On Hold'),
-        SANITY_CHECK: t('Sanity Check')
-    };
-    const clearingRequestType : ClearingRequestDataMap = {
-        DEEP: t('Deep'),
-        HIGH: t('High')
-    };
 
     const columns = [
         {
@@ -96,6 +76,33 @@ function ClosedClearingRequest() {
             id: 'closedClearingRequest.status',
             name: t('Status'),
             sort: true,
+            formatter: (status: string) => 
+                _(  
+                    <>
+                        {status === 'CLOSED' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Closed')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${status}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                        {status === 'REJECTED' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Rejected')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${status}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                    </>
+                )
         },
         {
             id: 'closedClearingRequest.reqestingUser',
@@ -147,6 +154,33 @@ function ClosedClearingRequest() {
             id: 'openClearingRequest.clearingType',
             name: t('Clearing Type'),
             sort: true,
+            formatter: (clearingType: string) => 
+                _(  
+                    <>
+                        {clearingType === 'DEEP' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Type Deep')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${clearingType}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                        {clearingType === 'HIGH' && (
+                            <OverlayTrigger overlay={
+                                <Tooltip>
+                                    {t('CR Type High')}
+                                </Tooltip>
+                            }>
+                                <span className='d-inline-block'>
+                                    {t(`${clearingType}`)}
+                                </span>
+                            </OverlayTrigger>
+                        )}
+                    </>
+                )
         },
         {
             id: 'closedClearingRequest.actions ',
@@ -210,14 +244,14 @@ function ClosedClearingRequest() {
                                     projectId: item.projectId ?? '',
                                     projectName: item.projectName ?? ''
                                 },
-                                clearingRequestStatus[item.clearingState] ?? '',
+                                item.clearingState ?? '',
                                 item.requestingUser ?? '',
                                 item.clearingTeam ?? '',
                                 item.createdOn ?? '',
                                 item.requestedClearingDate ?? '',
                                 item.agreedClearingDate ?? '',
                                 item.requestClosedOn ?? '',
-                                clearingRequestType[item.clearingType] ?? '',
+                                item.clearingType ?? '',
                                 {
                                     requestId: item.id
                                 },
