@@ -9,8 +9,11 @@
 
 import EditProject from './components/EditProject'
 
-import type { JSX } from "react";
-
+import type { JSX } from 'react';
+import { getServerSession } from 'next-auth/next'
+import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { ConfigKeys, Configuration } from '@/object-types'
 interface Context {
     params: Promise<{ id: string }>
 }
@@ -18,8 +21,14 @@ interface Context {
 const ProjectEditPage = async (props: Context): Promise<JSX.Element> => {
     const params = await props.params;
     const projectId = params.id
-
-    return <EditProject projectId={projectId} />
+    const session = await getServerSession(authOptions)
+    if (CommonUtils.isNullOrUndefined(session)) {
+        return <></>
+    }
+    const response = await ApiUtils.GET('configurations', session.user.access_token)
+    const config = await response.json() as Configuration
+    const isDependencyNetworkFeatureEnabled = config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true'
+    return <EditProject projectId={projectId} isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}/>
 }
 
 export default ProjectEditPage

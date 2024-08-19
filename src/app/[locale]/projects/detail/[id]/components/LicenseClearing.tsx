@@ -10,20 +10,18 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState, type JSX } from 'react';
+import { useEffect, useState, type JSX  } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import ListView from './ListView'
 import TreeView from './TreeView'
 import { useRouter } from 'next/navigation'
-import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import dynamic from 'next/dynamic'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
-import { ClearingRequestStates, HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import MessageService from '@/services/message.service'
+import { ClearingRequestStates, ConfigKeys, HttpStatus } from '@/object-types'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
 import { getSession, signOut } from 'next-auth/react'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
-import MessageService from '@/services/message.service'
 
 const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
 const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
@@ -48,6 +46,30 @@ export default function LicenseClearing({
     const router = useRouter()
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
+    const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
+
+    useEffect(() => {
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) {
+                    MessageService.error(t('Session has expired'))
+                    return signOut()
+                }
+                const response = await ApiUtils.GET('configurations', session.user.access_token)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    setDependencyNetworkFeatureEnabled(false)
+                    return
+                }
+                const config = await response.json()
+                setDependencyNetworkFeatureEnabled(config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true')
+            } catch {
+                setDependencyNetworkFeatureEnabled(false)
+            }
+        })()
+    }, [])
 
     const generateSourceCodeBundle = (withSubProjects: boolean) => {
         router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
@@ -201,7 +223,7 @@ export default function LicenseClearing({
                 <Tab.Content className='mt-3'>
                     <Tab.Pane eventKey='tree-view'>
                         {
-                            ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true'
+                            isDependencyNetworkFeatureEnabled
                             ?
                                 <DependencyNetworkTreeView projectId={projectId} />
                             :
@@ -210,7 +232,7 @@ export default function LicenseClearing({
                     </Tab.Pane>
                     <Tab.Pane eventKey='list-view'>
                         {
-                            ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true'
+                            isDependencyNetworkFeatureEnabled
                             ?
                                 <DependencyNetworkListView projectId={projectId} />
                             :

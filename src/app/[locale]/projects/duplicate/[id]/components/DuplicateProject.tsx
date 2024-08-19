@@ -15,7 +15,6 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import { HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
@@ -24,6 +23,7 @@ import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 interface Props{
     projectId: string
+    isDependencyNetworkFeatureEnabled: boolean
 }
 
 interface LinkedReleaseProps {
@@ -42,7 +42,7 @@ interface LinkedReleaseData {
     version: string
 }
 
-function DuplicateProject({projectId}:Props): JSX.Element {
+function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props): JSX.Element {
 
     const router = useRouter()
     const t = useTranslations('default')
@@ -298,7 +298,7 @@ function DuplicateProject({projectId}:Props): JSX.Element {
         const session = await getSession()
         if(CommonUtils.isNullOrUndefined(session))
             return signOut()
-        const createProjectUrl = (ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network/duplicate/${projectId}` : `projects/duplicate/${projectId}`
+        const createProjectUrl = (isDependencyNetworkFeatureEnabled === true) ? `projects/network/duplicate/${projectId}` : `projects/duplicate/${projectId}`
         const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
 
         if (response.status == HttpStatus.CREATED) {
@@ -413,6 +413,7 @@ function DuplicateProject({projectId}:Props): JSX.Element {
                                                     projectPayload={projectPayload}
                                                     setProjectPayload={setProjectPayload}
                                                     existingReleaseData={existingReleaseData}
+                                                    isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}
                                                 />
                                             }
                                         </Tab.Pane>
