@@ -10,7 +10,8 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails, ClearingRequestPayload } from '@/object-types'
+import { ClearingRequestDetails,
+         UpdateClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
@@ -18,8 +19,8 @@ import { SelectUsersDialog } from 'next-sw360'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails,
-    clearingRequestPayload: ClearingRequestPayload
-    setClearingRequestPayload: React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
+    updateClearingRequestPayload: UpdateClearingRequestPayload
+    setUpdateClearingRequestPayload: React.Dispatch<React.SetStateAction<UpdateClearingRequestPayload>>
 }
 
 interface ClearingRequestDataMap {
@@ -27,8 +28,8 @@ interface ClearingRequestDataMap {
 }
 
 export default function EditClearingDecision({ clearingRequestData,
-                                               clearingRequestPayload,
-                                               setClearingRequestPayload }: Props) {
+                                               updateClearingRequestPayload,
+                                               setUpdateClearingRequestPayload }: Props) {
 
     const t = useTranslations('default')
     const { status } = useSession()
@@ -45,8 +46,8 @@ export default function EditClearingDecision({ clearingRequestData,
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)
         setClearingTeamData(user)
-        setClearingRequestPayload({
-            ...clearingRequestPayload,
+        setUpdateClearingRequestPayload({
+            ...updateClearingRequestPayload,
             clearingTeam: userEmails[0],
         })
     }
@@ -54,11 +55,12 @@ export default function EditClearingDecision({ clearingRequestData,
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement |
                                      HTMLTextAreaElement>) => {
-        setClearingRequestPayload({
-            ...clearingRequestPayload,
+        setUpdateClearingRequestPayload({
+            ...updateClearingRequestPayload,
             [event.target.name]: event.target.value,
         })
     }
+
 
     if (status === 'unauthenticated') {
         signOut()
@@ -79,7 +81,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 className='form-select'
                                 id='editClearingDecision.clearingState'
                                 name='clearingState'
-                                value={clearingRequestPayload.clearingState}
+                                value={updateClearingRequestPayload.clearingState}
                                 onChange={updateInputField}
                                 required
                             >
@@ -103,7 +105,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 className='form-select'
                                 id='editClearingDecision.priority'
                                 name='priority'
-                                value={clearingRequestPayload.priority}
+                                value={updateClearingRequestPayload.priority}
                                 onChange={updateInputField}
                                 required
                             >
@@ -124,7 +126,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 readOnly={true}
                                 name='clearingTeam'
                                 onClick={() => setDialogOpenClearingTeam(true)}
-                                value={ clearingRequestPayload.clearingTeam}
+                                value={updateClearingRequestPayload.clearingTeam}
 
                             />
                             <SelectUsersDialog
@@ -146,7 +148,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 id='agreedClearingDate'
                                 aria-describedby='agreedClearingDate'
                                 name='agreedClearingDate'
-                                value={clearingRequestPayload?.agreedClearingDate ?? ''}
+                                value={updateClearingRequestPayload.agreedClearingDate}
                                 onChange={updateInputField}
                                 min={minDate}
                             />

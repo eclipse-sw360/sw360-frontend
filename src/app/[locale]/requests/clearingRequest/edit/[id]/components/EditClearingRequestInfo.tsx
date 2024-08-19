@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails, ClearingRequestPayload } from '@/object-types'
+import { ClearingRequestDetails, UpdateClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
@@ -18,8 +18,8 @@ import { SelectUsersDialog } from 'next-sw360'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails,
-    clearingRequestPayload: ClearingRequestPayload
-    setClearingRequestPayload : React.Dispatch<React.SetStateAction<ClearingRequestPayload>>
+    updateClearingRequestPayload: UpdateClearingRequestPayload
+    setUpdateClearingRequestPayload : React.Dispatch<React.SetStateAction<UpdateClearingRequestPayload>>
 }
 
 interface DataTypeProp {
@@ -27,8 +27,8 @@ interface DataTypeProp {
 }
 
 export default function EditClearingRequestInfo({ clearingRequestData,
-                                              clearingRequestPayload,
-                                              setClearingRequestPayload }: Props) {
+                                                  updateClearingRequestPayload,
+                                                  setUpdateClearingRequestPayload }: Props) {
     const t = useTranslations('default')
     const { status } = useSession()
     const [dialogOpenRequestingUser, setDialogOpenRequestingUser] = useState(false)
@@ -37,8 +37,8 @@ export default function EditClearingRequestInfo({ clearingRequestData,
     const setRequestingUserEmail = (user: DataTypeProp) => {
         const userEmails = Object.keys(user)
         setRequestingUserData(user)
-        setClearingRequestPayload({
-            ...clearingRequestPayload,
+        setUpdateClearingRequestPayload({
+            ...updateClearingRequestPayload,
             requestingUser: userEmails[0],
         })
     }
@@ -46,11 +46,12 @@ export default function EditClearingRequestInfo({ clearingRequestData,
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement |
                                      HTMLTextAreaElement>) => {
-            setClearingRequestPayload({
-                ...clearingRequestPayload,
-                [event.target.name]: event.target.value,
+        setUpdateClearingRequestPayload({
+            ...updateClearingRequestPayload,
+            [event.target.name]: event.target.value,
         })
     }
+
 
     if (status === 'unauthenticated') {
         signOut()
@@ -74,7 +75,7 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                                 readOnly={true}
                                 name='requestingUser'
                                 onClick={() => setDialogOpenRequestingUser(true)}
-                                value={ clearingRequestPayload.requestingUser}
+                                value={updateClearingRequestPayload.requestingUser}
 
                             />
                             <SelectUsersDialog
@@ -105,7 +106,7 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                                 className='form-select'
                                 id='editClearingRequest.clearingType'
                                 name='clearingType'
-                                value={clearingRequestPayload.clearingType}
+                                value={updateClearingRequestPayload.clearingType}
                                 onChange={updateInputField}
                                 required
                             >

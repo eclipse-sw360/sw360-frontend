@@ -161,6 +161,7 @@
     "Clearing Request Information For DELETED Project": "Xóa thông tin yêu cầu cho dự án đã bị xóa",
     "Clearing Request Information For Project": "Xóa thông tin yêu cầu cho dự án:",
     "Clearing Request created successfully": "Yêu cầu xóa <strong>{id</strong> đã được tạo thành công !",
+    "Clearing Request updated successfully": "Yêu cầu xóa <strong>{id</strong> đã được cập nhật thành công!",
     "Clearing Standard": "Tiêu chuẩn thanh toán bù trừ",
     "Clearing State": "Trạng thái thanh toán bù trừ",
     "Clearing Team": "Đội dọn dẹp",

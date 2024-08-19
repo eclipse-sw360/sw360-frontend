@@ -161,6 +161,7 @@
     "Clearing Request Information For DELETED Project": "清除已刪除項目的請求訊息",
     "Clearing Request Information For Project": "清除項目請求資訊：",
     "Clearing Request created successfully": "清算請求<strong>{id}</strong>創建成功！",
+    "Clearing Request updated successfully": "清算請求<strong>{id}</strong>成功更新！",
     "Clearing Standard": "清除標準",
     "Clearing State": "清除狀態",
     "Clearing Team": "清理小組",

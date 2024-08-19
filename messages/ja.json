@@ -161,6 +161,7 @@
     "Clearing Request Information For DELETED Project": "DELETEDプロジェクトのリクエスト情報をクリアします",
     "Clearing Request Information For Project": "プロジェクトのリクエスト情報のクリア:",
     "Clearing Request created successfully": "クリアリクエスト <strong>{id}</strong> が正常に作成されました 。",
+    "Clearing Request updated successfully": "クリアリクエスト <strong>{id}</strong> が正常に更新されました。",
     "Clearing Standard": "クリアリング基準",
     "Clearing State": "クリアリングステータス",
     "Clearing Team": "Clearing Team",

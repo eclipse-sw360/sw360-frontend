@@ -161,6 +161,7 @@
     "Clearing Request Information For DELETED Project": "삭제된 프로젝트에 대한 요청 정보 지우기",
     "Clearing Request Information For Project": "프로젝트에 대한 요청 정보 지우기:",
     "Clearing Request created successfully": "<strong>{id}</strong> 삭제 요청이 성공적으로 생성되었습니다 !",
+    "Clearing Request updated successfully": "삭제 요청 <strong>{id}</strong>이(가) 성공적으로 업데이트되었습니다!",
     "Clearing Standard": "Clearing 기준",
     "Clearing State": "정리 국가",
     "Clearing Team": "명확한 팀",

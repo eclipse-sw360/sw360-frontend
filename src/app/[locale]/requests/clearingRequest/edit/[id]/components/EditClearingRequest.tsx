@@ -10,7 +10,6 @@
 
 'use client'
 
-import { ClearingRequestDetails, ClearingRequestPayload, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -22,6 +21,10 @@ import { ShowInfoOnHover } from 'next-sw360'
 import EditClearingRequestInfo from './EditClearingRequestInfo'
 import EditClearingDecision from './EditClearingDecision'
 import ClearingComments from './../../../detail/[id]/components/ClearingComments'
+import MessageService from '@/services/message.service'
+import { ClearingRequestDetails,
+         UpdateClearingRequestPayload,
+         HttpStatus } from '@/object-types'
 
 
 function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string }) {
@@ -31,37 +34,38 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     const { data: session, status } = useSession()
     const router = useRouter()
     const toastShownRef = useRef(false)
-    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
-        id: '',
-        requestedClearingDate: '',
-        projectId: '',
-        projectName: '',
-        requestingUser: '',
-        projectBU: '',
-        requestingUserComment: '',
-        clearingTeam: '',
-        agreedClearingDate: '',
-        priority: '',
-        clearingType: '',
-        reOpenOn: null,
-        createdOn: '',
-        comments: [{}],
-        _embedded: {
-            "sw360:project": {
-                name: '',
-                version: ''
+    const [clearingRequestData,
+           setClearingRequestData] = useState<ClearingRequestDetails>({
+            id: '',
+            requestedClearingDate: '',
+            projectId: '',
+            projectName: '',
+            requestingUser: '',
+            projectBU: '',
+            requestingUserComment: '',
+            clearingTeam: '',
+            agreedClearingDate: '',
+            priority: '',
+            clearingType: '',
+            reOpenOn: null,
+            createdOn: '',
+            comments: [{}],
+            _embedded: {
+                "sw360:project": {
+                    name: '',
+                    version: ''
+                }
             }
-        }
-    })
-    const [clearingRequestPayload, setClearingRequestPayload] = useState<ClearingRequestPayload>({
-        requestingUser: '',
-        requestingUserName: '',
-        clearingTeam: '',
-        clearingTeamName: '',
-        priority: '',
-        clearingType: '',
-        clearingState: '',
-        agreedClearingDate: '',
+        })
+    const [updateClearingRequestPayload, 
+           setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
+            requestedClearingDate: '',
+            clearingType: '',
+            clearingState: '',
+            priority: '',
+            clearingTeam: '',
+            agreedClearingDate: '',
+            requestingUser: ''
     })
 
     const fetchData = useCallback(
@@ -87,24 +91,37 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                       (clearingRequestDetails: ClearingRequestDetails) => {
             setClearingRequestData(clearingRequestDetails)
         })
-        const updatedClearingRequestData : ClearingRequestPayload = {
-            requestingUser: clearingRequestData.requestingUser ?? '',
-            requestingUserName: clearingRequestData.requestingUserName ?? '',
-            clearingTeam: clearingRequestData.clearingTeam ?? '',
-            clearingTeamName: clearingRequestData.clearingTeamName ?? '',
-            priority: clearingRequestData.priority ?? '',
+        const updatedClearingRequestData : UpdateClearingRequestPayload = {
+            requestedClearingDate: clearingRequestData.requestedClearingDate ?? '',
             clearingType: clearingRequestData.clearingType ?? '',
             clearingState: clearingRequestData.clearingState ?? '',
+            priority: clearingRequestData.priority ?? '',
+            clearingTeam: clearingRequestData.clearingTeam ?? '',
             agreedClearingDate: clearingRequestData.agreedClearingDate ?? '',
+            requestingUser: clearingRequestData.requestingUser ?? ''
         }
-        setClearingRequestPayload(updatedClearingRequestData)
-    }, [fetchData, session, setClearingRequestPayload])
+        setUpdateClearingRequestPayload(updatedClearingRequestData)
+    }, [fetchData, session, setUpdateClearingRequestPayload])
 
-    const handleUpdateClearingRequest = () => {
-        
-        // Temp code
-        console.log('Edit Clearing Request')
-        router.push('/requests')
+    const handleUpdateClearingRequest = async () => {
+        try {
+            const response = await ApiUtils.PATCH(
+                `clearingrequest/${clearingRequestData.id}`,
+                updateClearingRequestPayload,
+                session.user.access_token
+            )
+            if (response.status == HttpStatus.OK) {
+                MessageService.success(t('Clearing Request') +
+                                         `${clearingRequestData.id} `+
+                                         t('updated successfully'))
+                router.push(`/clearingRequest/detail/${clearingRequestData.id}`)
+            }
+            else if (response.status == HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            }
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     const handleCancelUpdateClearingRequest = (requestId: string) => {
@@ -188,16 +205,22 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 <div className="row">
                                                     <div className="col">
                                                         <EditClearingRequestInfo
-                                                            clearingRequestData={clearingRequestData}
-                                                            clearingRequestPayload={clearingRequestPayload}
-                                                            setClearingRequestPayload={setClearingRequestPayload}
+                                                            clearingRequestData=
+                                                                {clearingRequestData}
+                                                            updateClearingRequestPayload=
+                                                                {updateClearingRequestPayload}
+                                                            setUpdateClearingRequestPayload=
+                                                                {setUpdateClearingRequestPayload}
                                                         />
                                                     </div>
                                                     <div className="col">
                                                         <EditClearingDecision
-                                                            clearingRequestData={clearingRequestData}
-                                                            clearingRequestPayload={clearingRequestPayload}
-                                                            setClearingRequestPayload={setClearingRequestPayload}
+                                                            clearingRequestData=
+                                                                {clearingRequestData}
+                                                            updateClearingRequestPayload=
+                                                                {updateClearingRequestPayload}
+                                                            setUpdateClearingRequestPayload=
+                                                                {setUpdateClearingRequestPayload}
                                                         />
                                                     </div>
                                                 </div>

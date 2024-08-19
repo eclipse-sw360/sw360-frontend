@@ -161,6 +161,7 @@
     "Clearing Request Information For DELETED Project": "Informations sur la demande de compensation pour le projet SUPPRIMÉ",
     "Clearing Request Information For Project": "Informations sur la demande de compensation pour le projet :",
     "Clearing Request created successfully": "Demande de compensation <strong>{id}</strong> créée avec succès !",
+    "Clearing Request updated successfully": "Demande de compensation <strong>{id}</strong> mise à jour avec succès !",
     "Clearing Standard": "Norme de compensation",
     "Clearing State": "État compensateur",
     "Clearing Team": "Équipe de compensation",

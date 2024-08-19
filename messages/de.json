@@ -161,6 +161,7 @@
     "Clearing Request Information For DELETED Project": "Löschanforderungsinformationen für GELÖSCHTES Projekt",
     "Clearing Request Information For Project": "Clearing-Anfrageinformationen für das Projekt:",
     "Clearing Request created successfully": "Clearing-Anfrage <strong>{id}</strong> erfolgreich erstellt !",
+    "Clearing Request updated successfully": "Clearing-Anfrage <strong>{id}</strong> erfolgreich aktualisiert!",
     "Clearing Standard": "Clearing Standard",
     "Clearing State": "Clearingstaat",
     "Clearing Team": "Clearing Team",

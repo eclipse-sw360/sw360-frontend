@@ -161,6 +161,7 @@
     "Clearing Request Information For DELETED Project": "清除已删除项目的请求信息",
     "Clearing Request Information For Project": "清除项目请求信息：",
     "Clearing Request created successfully": "清算请求<strong>{id}</strong>创建成功 ！",
+    "Clearing Request updated successfully": "清算请求<strong>{id}</strong>已成功更新！",
     "Clearing Standard": "清算标准",
     "Clearing State": "清算状态",
     "Clearing Team": "清算团队",
