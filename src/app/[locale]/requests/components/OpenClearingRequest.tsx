@@ -171,7 +171,10 @@ function OpenClearingRequest() {
                                 item.requestedClearingDate ?? '',
                                 item.agreedClearingDate ?? '',
                                 item.clearingType ?? '',
-                                ''
+                                {
+                                    requestId: item.id,
+                                    requestingUser: item.requestingUser
+                                },
                             ]
                 })
             )
@@ -461,7 +464,8 @@ function OpenClearingRequest() {
             id: 'openClearingRequest.actions',
             name: t('Actions'),
             sort: true,
-            formatter: ({ requestId }: { requestId: string }) => 
+            formatter: ({ requestId, requestingUser }:
+                        { requestId: string, requestingUser: string }) => 
                 _(
                     <>
                         <OverlayTrigger overlay={
@@ -469,7 +473,8 @@ function OpenClearingRequest() {
                                 {t('Edit')}
                             </Tooltip>}>
                             <Button className='btn-transparent'
-                                    hidden={isProjectDeleted}>
+                                    hidden={isProjectDeleted  || (session.user.userGroup  === 'USER' &&
+                                                                  session.user.email !== requestingUser)}>
                                 <Link href={`/requests/clearingRequest/edit/${requestId}`}
                                     className='overlay-trigger'>
                                     <FaPencilAlt className='btn-icon'/>
