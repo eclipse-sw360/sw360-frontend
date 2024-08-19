@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails, ClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SelectUsersDialog } from 'next-sw360'
 
 interface Props {
@@ -32,8 +32,15 @@ export default function EditClearingDecision({ clearingRequestData,
 
     const t = useTranslations('default')
     const { status } = useSession()
+    const [minDate, setMinDate] = useState('')
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
+
+
+    useEffect(() => {
+        const currentDate = new Date();
+        setMinDate(currentDate.toISOString().split('T')[0]);
+    }, [])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)
@@ -141,6 +148,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 name='agreedClearingDate'
                                 value={clearingRequestPayload?.agreedClearingDate ?? ''}
                                 onChange={updateInputField}
+                                min={minDate}
                             />
                         </td>
                     </tr>
