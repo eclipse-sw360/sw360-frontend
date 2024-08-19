@@ -49,7 +49,7 @@ const FeatureConfigurations = () => {
         if (!session) signOut()
         const response = await ApiUtils.PATCH('configurations', currentConfig, session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            MessageService.success('Update configuration successfully')
+            MessageService.success(t('Update configurations successfully'))
         } else if (response.status == HttpStatus.UNAUTHORIZED) {
             await signOut()
         } else {

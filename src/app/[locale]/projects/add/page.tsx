@@ -13,14 +13,13 @@ import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, ProjectPayload, Vendor, Project } from '@/object-types'
+import { HttpStatus, InputKeyValue, ProjectPayload, Vendor, Project, ConfigKeys } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 function AddProjects(): JSX.Element {
@@ -76,6 +75,31 @@ function AddProjects(): JSX.Element {
         packageIds: [],
     })
 
+    const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
+
+    useEffect(() => {
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) {
+                    MessageService.error(t('Session has expired'))
+                    return signOut()
+                }
+                const response = await ApiUtils.GET('configurations', session.user.access_token)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    setDependencyNetworkFeatureEnabled(false)
+                    return
+                }
+                const config = await response.json()
+                setDependencyNetworkFeatureEnabled(config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true')
+            } catch {
+                setDependencyNetworkFeatureEnabled(false)
+            }
+        })()
+    }, [])
+
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
         setProjectPayload({
@@ -105,7 +129,7 @@ function AddProjects(): JSX.Element {
             const session = await getSession()
             if(CommonUtils.isNullOrUndefined(session))
                 return signOut()
-            const createUrl = (ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network` : 'projects'
+            const createUrl = (isDependencyNetworkFeatureEnabled === true) ? `projects/network` : 'projects'
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
 
             if (response.status == HttpStatus.CREATED) {
@@ -219,6 +243,7 @@ function AddProjects(): JSX.Element {
                                             <LinkedReleasesAndProjects
                                                 projectPayload={projectPayload}
                                                 setProjectPayload={setProjectPayload}
+                                                isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedPackages'>
