@@ -47,7 +47,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         agreedClearingDate: '',
         priority: '',
         clearingType: '',
-        reOpenOn: null,
+        reOpenedOn: null,
         createdOn: '',
         comments: [{}],
         _embedded: {

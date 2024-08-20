@@ -156,10 +156,28 @@ export default function EditClearingDecision({ clearingRequestData,
                             />
                         </td>
                     </tr>
-                    <tr hidden={session?.user.userGroup === "USER"}>
+                    <tr hidden={session?.user.userGroup === "USER" || 
+                               (session?.user.userGroup === ("ADMIN" || "CLEARING_ADMIN" ||
+                                                             "ECC_ADMIN" || "SECURITY_ADMIN" ||
+                                                             "SW360_ADMIN" || "CLEARING_EXPERT") && 
+                                !Object.hasOwn(clearingRequestData, 'lastUpdatedOn'))
+                                }
+                    >
                         <td>{t('Last Updated on')}:</td>
                         <td>
                             {clearingRequestData?.lastUpdatedOn ?? ''}
+                        </td>
+                    </tr>
+                    <tr hidden={session?.user.userGroup === "USER" || 
+                               (session?.user.userGroup === ("ADMIN" || "CLEARING_ADMIN" ||
+                                                             "ECC_ADMIN" || "SECURITY_ADMIN" ||
+                                                             "SW360_ADMIN" || "CLEARING_EXPERT") && 
+                                !Object.hasOwn(clearingRequestData, 'reOpenedOn'))
+                                }
+                    >
+                        <td>{t('Reopened on')}:</td>
+                        <td>
+                            {clearingRequestData?.reOpenedOn ?? ''}
                         </td>
                     </tr>
                 </tbody>
