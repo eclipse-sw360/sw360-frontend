@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
 import MessageService from '@/services/message.service'
 import Summary from './Summary'
+import ChangeLog from './Changelog'
 
 export default function PackageDetailTab({ packageId }: { packageId: string }) {
     const t = useTranslations('default')
@@ -106,6 +107,7 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) {
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='changeLog'>
+                                        <ChangeLog packageId={packageId} />
                                     </Tab.Pane>
                                 </Tab.Content>
                             </div>
