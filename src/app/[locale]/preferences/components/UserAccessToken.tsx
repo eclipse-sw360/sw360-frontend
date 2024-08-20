@@ -83,7 +83,7 @@ const UserAccessToken = () => {
                 <div className='col'>
                     <h4 className={styles.decorator}>{t('REST API Tokens')}</h4>
                     <Form noValidate validated={validated} id='generateTokenForm' onSubmit={generateToken}>
-                        <table className={`table ${styles['summary-table']}`} id='restInfoTable'>
+                        <table className='table summary-table' id='restInfoTable'>
                             <thead>
                                 <tr>
                                     <th colSpan={2}>{t('REST API Token')}</th>

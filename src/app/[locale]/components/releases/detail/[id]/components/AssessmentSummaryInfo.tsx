@@ -17,7 +17,6 @@ import { Button } from 'react-bootstrap'
 
 import { Attachment, AttachmentType, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import styles from '../detail.module.css'
 
 interface Props {
     releaseId: string
@@ -68,7 +67,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
         })
     }
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 onClick={() => {
                     setToggle(!toggle)

@@ -1163,6 +1163,28 @@ a.text-primary {
     font-size: 13px !important;
 }
 
+.summary-table {
+    border: 1px solid lightgray;
+    margin-bottom: 2rem !important;
+}
+
+.summary-table tbody td:first-child {
+    width: 30%;
+}
+
+.summary-table tbody a {
+    color: #f7941e !important;
+    text-decoration-line: none;
+}
+
+.summary-table tbody td {
+    word-wrap: break-word;
+}
+
+.mapDisplayRootItem {
+    max-width: 70%;
+}
+
 .btn-accept {
     background-color: #287d3c !important;
     border-color: transparent !important;

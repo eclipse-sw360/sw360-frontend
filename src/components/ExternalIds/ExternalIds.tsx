@@ -14,8 +14,8 @@ const ExternalIds = ({ externalIds }: any) => {
       Object.keys(externalIds).map((key) => {
         return (
           <li key={key}>
-            <span className="mapDisplayChildItemLeft" style={{ fontWeight: 'bold' }}>{key}: </span>
-            <span className="mapDisplayChildItemRight"> {externalIds[key]}</span>
+            <span className="fw-bold">{key}: </span>
+            <span> {externalIds[key]}</span>
           </li>
         )
       }

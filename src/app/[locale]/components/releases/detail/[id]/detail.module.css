@@ -10,32 +10,6 @@
   License-Filename: LICENSE
 */
 
-.summary-table {
-  border: 1px solid lightgray;
-  margin-bottom: 2rem;
-}
-
-.mapDisplayRootItem {
-  max-width: 70%;
-}
-
-.summary-table tbody td:first-child {
-  width: 30%;
-}
-
-.summary-table tbody a{
-  color: #F7941E !important;
-  text-decoration-line: none;
-}
-
-.summary-table tbody td {
-  word-wrap: break-word;
-}
-
-.btn-group:not(:last-child) {
-  margin-right: 0.5rem;
-}
-
 .info:hover {
   cursor: pointer;
 }

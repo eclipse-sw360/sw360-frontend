@@ -13,7 +13,6 @@ import { Creator, DocumentCreationInformation, ExternalDocumentReferences, Input
 import CommonUtils from '@/utils/common.utils'
 import React, { useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
-import styles from '../detail.module.css'
 import Created from './DocumentCreationInfo/Created'
 import Creators from './DocumentCreationInfo/Creators'
 
@@ -355,7 +354,7 @@ const EditDocumentCreationInformation = ({
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

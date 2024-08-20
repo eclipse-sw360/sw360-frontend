@@ -14,7 +14,6 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { ReleaseDetail } from '@/object-types'
-import styles from '../detail.module.css'
 
 interface Props {
     release: ReleaseDetail
@@ -25,7 +24,7 @@ const ReleaseVendor = ({ release }: Props) => {
     const [toggle, setToggle] = useState(false)
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table label-value-table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

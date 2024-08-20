@@ -13,14 +13,13 @@ import { useState } from 'react'
 
 import { Component, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 
 const SummaryRole = ({ component }: { component: Component }) => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {
@@ -77,10 +76,10 @@ const SummaryRole = ({ component }: { component: Component }) => {
                         {component.roles &&
                             Object.keys(component.roles).map((key) => (
                                 <li key={key}>
-                                    <span className='mapDisplayChildItemLeft' style={{ fontWeight: 'bold' }}>
+                                    <span className='fw-bold'>
                                         {key}:{' '}
                                     </span>
-                                    <span className='mapDisplayChildItemRight'>
+                                    <span>
                                         {component.roles[key]
                                             .map(
                                                 (email: string): React.ReactNode => (

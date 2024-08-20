@@ -16,7 +16,6 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
 import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
 import { SummaryDataType, DocumentTypes } from '@/object-types'
-import styles from '../detail.module.css'
 
 const Capitalize = (text: string) => {
     return text
@@ -49,7 +48,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
     return (
         <>
             <p className='mt-3 mb-4 px-0 mx-0'>{summaryData.description}</p>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {
@@ -156,7 +155,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                 </tbody>
             </table>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {
@@ -277,7 +276,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                 </tbody>
             </table>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {

@@ -26,7 +26,6 @@ import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyCle
 import { Embedded, HttpStatus, LinkedRelease, ReleaseLink } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
-import styles from '../detail.module.css'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
 type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
@@ -149,10 +148,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                             onClick={() => handleFossologyClearing(id)}
                         />
                         <Link href={`/components/editRelease/${id}`}>
-                            <FaPencilAlt className={styles['icon-btn']} />
+                            <FaPencilAlt className='btn-icon' />
                         </Link>
-                        <HiOutlineLink className={styles['icon-btn']} onClick={() => handleLinkToProject(id)} />
-                        <FaTrashAlt className={styles['icon-btn']} onClick={() => handleClickDelete(id)} />
+                        <HiOutlineLink className='btn-icon' onClick={() => handleLinkToProject(id)} />
+                        <FaTrashAlt className='btn-icon' onClick={() => handleClickDelete(id)} />
                     </span>
                 ),
         },

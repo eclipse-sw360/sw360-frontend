@@ -18,7 +18,6 @@ import { useState } from 'react'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import { Attachment, ReleaseDetail } from '@/object-types'
 import { FossologyClearing } from 'next-sw360'
-import styles from '../detail.module.css'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 import ClearingInformationStatus from './ClearingInformationStatus'
 import RequestInformation from './RequestInformation'
@@ -40,7 +39,7 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) => 
         <div className='col'>
             <SPDXAttachments releaseId={releaseId} />
             <AssessmentSummaryInfo releaseId={releaseId} embeddedAttachments={embeddedAttachments} />
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {

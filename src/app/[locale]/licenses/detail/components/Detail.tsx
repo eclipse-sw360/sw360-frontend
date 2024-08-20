@@ -59,7 +59,7 @@ const Detail = ({ license, setLicense }: Props) => {
                     {t('This license is')} <b>UNCHECKED</b>
                 </div>
             )}
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead>
                     <tr>
                         <th colSpan={2}>{t('License Details')}</th>

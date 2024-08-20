@@ -48,7 +48,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {
@@ -93,9 +93,15 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                 <tr>
                     <td>{t('Created by')}:</td>
                     <td>
-                        <a className={styles.link} href={`mailto:${release['_embedded']['sw360:createdBy'].email}`}>
-                            {release['_embedded']['sw360:createdBy'].fullName}
-                        </a>
+                        {
+                            release._embedded?.['sw360:createdBy'] &&
+                            <Link
+                                className='text-link'
+                                href={`mailto:${release._embedded['sw360:createdBy'].email}`}
+                            >
+                                {release._embedded['sw360:createdBy'].fullName}
+                            </Link>
+                        } 
                     </td>
                 </tr>
                 <tr>
@@ -105,11 +111,15 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                 <tr>
                     <td>{t('Modified By')}:</td>
                     <td>
-                        {release._embedded && release._embedded['sw360:modifiedBy'] && (
-                            <a className={styles.link} href={`mailto:${release._embedded['sw360:modifiedBy'].email}`}>
+                        {
+                            release._embedded?.['sw360:modifiedBy'] &&
+                            <Link
+                                className='text-link'
+                                href={`mailto:${release._embedded['sw360:modifiedBy'].email}`}
+                            >
                                 {release._embedded['sw360:modifiedBy'].fullName}
-                            </a>
-                        )}
+                            </Link>
+                        } 
                     </td>
                 </tr>
                 <tr>
@@ -143,7 +153,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                             {release.roles &&
                                 Object.keys(release.roles).map((key) => (
                                     <li key={key}>
-                                        <span className='mapDisplayChildItemLeft' style={{ fontWeight: 'bold' }}>
+                                        <span className='fw-bold'>
                                             {key}:{' '}
                                         </span>
                                         <span className='mapDisplayChildItemRight'>

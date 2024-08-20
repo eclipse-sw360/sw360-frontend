@@ -12,7 +12,6 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
 
 interface ModerationRequestMap {
     [key: string]: string;
@@ -46,7 +45,7 @@ export default function ModerationDecision({ data,
 
     return (
         <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead>
                     <tr>
                         <th colSpan={2}>{t('Moderation Decision')}</th>

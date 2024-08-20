@@ -21,7 +21,7 @@ const Text = ({ license }: Props) => {
     const t = useTranslations('default')
     return (
         <div className='col'>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead>
                     <tr>
                         <th colSpan={2}>{t('License Text')}</th>

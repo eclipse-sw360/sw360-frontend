@@ -12,7 +12,6 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails } from '@/object-types'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 
 interface ClearingRequestDataMap {
@@ -53,7 +52,7 @@ export default function ClearingDecision({ data }: Props ) {
     } else {
     return (
         <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead>
                     <tr>
                         <th colSpan={2}>{t('Clearing Decision')}</th>

@@ -20,7 +20,6 @@ import {
 import CommonUtils from '@/utils/common.utils'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
-import styles from '../detail.module.css'
 import BuiltDate from './PackageInformation/BuiltDate'
 import CheckSums from './PackageInformation/CheckSums'
 import PackageOriginator from './PackageInformation/PackageOriginator'
@@ -900,7 +899,7 @@ const EditPackageInformation = ({
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

@@ -12,9 +12,7 @@
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState } from 'react'
-
 import { Vulnerability } from '@/object-types'
-import styles from '../detail.module.css'
 
 export default function Summary({ summaryData }: { summaryData: Vulnerability }) {
     const t = useTranslations('default')
@@ -22,7 +20,7 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
 
     return (
         <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {

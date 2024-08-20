@@ -10,24 +10,6 @@
   License-Filename: LICENSE
 */
 
-.summary-table {
-    border: 1px solid lightgray;
-    margin-bottom: 2rem !important;
-}
-
-.summary-table tbody td:first-child {
-    width: 30%;
-}
-
-.summary-table tbody a {
-    color: #f7941e !important;
-    text-decoration-line: none;
-}
-
-.summary-table tbody td {
-    word-wrap: break-word;
-}
-
 #preferences-tittle {
     font-size: 0.875rem;
     padding: 0.75rem;

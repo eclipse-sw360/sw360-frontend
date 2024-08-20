@@ -12,7 +12,6 @@
 import { RelationshipsBetweenSPDXElements } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { useState } from 'react'
-import styles from '../../detail.module.css'
 
 interface Props {
     relationshipSelection?: { index: number; isSPDXDocument: boolean }
@@ -70,7 +69,7 @@ const RelationshipbetweenSPDXElementsInformation = ({
     }
 
     return (
-        <table className={`table label-value-table ${styles['summary-table']}`}>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {
