@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails, UpdateClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SelectUsersDialog } from 'next-sw360'
 
 interface Props {
@@ -30,9 +30,15 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                                                   updateClearingRequestPayload,
                                                   setUpdateClearingRequestPayload }: Props) {
     const t = useTranslations('default')
-    const { status } = useSession()
+    const { data:session, status } = useSession()
+    const [minDate, setMinDate] = useState('')
     const [dialogOpenRequestingUser, setDialogOpenRequestingUser] = useState(false)
     const [requestingUserData, setRequestingUserData] = useState<{ [k: string]: string }>({})
+
+    useEffect(() => {
+        const currentDate = new Date();
+        setMinDate(currentDate.toISOString().split('T')[0]);
+    }, [])
     
     const setRequestingUserEmail = (user: DataTypeProp) => {
         const userEmails = Object.keys(user)
@@ -76,6 +82,7 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                                 name='requestingUser'
                                 onClick={() => setDialogOpenRequestingUser(true)}
                                 value={updateClearingRequestPayload.requestingUser}
+                                disabled={session?.user.userGroup === "USER"}
 
                             />
                             <SelectUsersDialog
@@ -93,7 +100,19 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
-                        <td>{clearingRequestData.requestedClearingDate ?? ''}</td>
+                        <td>
+                            <input
+                                type='date'
+                                className='form-control'
+                                aria-label='Preferred Clearing Date YYYY-MM-DD'
+                                id='requestedClearingDate'
+                                aria-describedby='requestedClearingDate'
+                                name='requestedClearingDate'
+                                value={updateClearingRequestPayload.requestedClearingDate}
+                                onChange={updateInputField}
+                                min={minDate}
+                            />
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Business Area Line')}:</td>
@@ -108,6 +127,7 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                                 name='clearingType'
                                 value={updateClearingRequestPayload.clearingType}
                                 onChange={updateInputField}
+                                disabled={session?.user.userGroup === "USER"}
                                 required
                             >
                                 <option value='DEEP'>{t('Deep Level CLX')}</option>

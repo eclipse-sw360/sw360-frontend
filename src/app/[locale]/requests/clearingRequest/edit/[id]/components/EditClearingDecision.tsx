@@ -32,7 +32,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                                setUpdateClearingRequestPayload }: Props) {
 
     const t = useTranslations('default')
-    const { status } = useSession()
+    const { data:session, status } = useSession()
     const [minDate, setMinDate] = useState('')
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
@@ -107,6 +107,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 name='priority'
                                 value={updateClearingRequestPayload.priority}
                                 onChange={updateInputField}
+                                disabled={session?.user.userGroup === "USER"}
                                 required
                             >
                                 <option value='LOW'>{t('Low')}</option>
@@ -149,12 +150,13 @@ export default function EditClearingDecision({ clearingRequestData,
                                 aria-describedby='agreedClearingDate'
                                 name='agreedClearingDate'
                                 value={updateClearingRequestPayload.agreedClearingDate}
+                                disabled={session?.user.userGroup === "USER"}
                                 onChange={updateInputField}
                                 min={minDate}
                             />
                         </td>
                     </tr>
-                    <tr>
+                    <tr hidden={session?.user.userGroup === "USER"}>
                         <td>{t('Last Updated on')}:</td>
                         <td>
                             {clearingRequestData?.lastUpdatedOn ?? ''}
