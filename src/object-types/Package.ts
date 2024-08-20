@@ -13,7 +13,7 @@ interface Package {
     id?: string
     rev?: string
     type?: string
-    name: string
+    name?: string
     version?: string
     purl?: string
     packageType?: string
@@ -25,6 +25,7 @@ interface Package {
     createdOn?: string
     modifiedOn?: string
     createdBy?: string
+    modifiedBy?: string
     packageManager?: string
     clearingState?: string
     _links?: Links
