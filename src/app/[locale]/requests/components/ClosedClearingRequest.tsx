@@ -195,7 +195,7 @@ function ClosedClearingRequest() {
                             </Tooltip>}>
                             <Button className='btn-transparent'
                                     hidden={isProjectDeleted}>
-                                <Link href={`/requests/clearingRequest/edit/${requestId}`}
+                                <Link href={`/requests/clearingRequest/detail/${requestId}`}
                                     className='overlay-trigger'>
                                     <FaPencilAlt className='btn-icon'/>
                                 </Link>
