@@ -15,7 +15,7 @@ import { ClearingRequestDetails,
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
-import { SelectUsersDialog } from 'next-sw360'
+import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails,
@@ -96,6 +96,11 @@ export default function EditClearingDecision({ clearingRequestData,
                                 <option value='SANITY_CHECK'>{t('Sanity Check')}</option>
                                 <option value='PENDING_INPUT'>{t('Pending Input')}</option>
                             </select>
+                            <div className='form-text'
+                                 id='editClearingDecision.requestStatus.HelpBlock'>
+                                 <ShowInfoOnHover text={t('Clearing request status info')}/>
+                                                {' '}{t('Learn more about clearing request status')}.
+                            </div>
                         </td>
                     </tr>
                     <tr>
@@ -115,6 +120,11 @@ export default function EditClearingDecision({ clearingRequestData,
                                 <option value='HIGH'>{t('High')}</option>
                                 <option value='CRITICAL'>{t('Critical')}</option>
                             </select>
+                            <div className='form-text'
+                                 id='editClearingDecision.priority.HelpBlock'>
+                                 <ShowInfoOnHover text={t('Clearing request priority info')}/>
+                                                {' '}{t('Learn more about clearing request priority')}.
+                            </div>
                         </td>
                     </tr>
                     <tr>

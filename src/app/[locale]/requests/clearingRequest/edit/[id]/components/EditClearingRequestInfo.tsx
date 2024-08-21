@@ -14,7 +14,7 @@ import { ClearingRequestDetails, UpdateClearingRequestPayload } from '@/object-t
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
-import { SelectUsersDialog } from 'next-sw360'
+import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails,
@@ -133,6 +133,11 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                                 <option value='DEEP'>{t('Deep Level CLX')}</option>
                                 <option value='HIGH'>{t('High Level ISR')}</option>
                             </select>
+                            <div className='form-text'
+                                 id='editClearingRequest.clearingType.HelpBlock'>
+                                 <ShowInfoOnHover text={t('Clearing request type info')}/>
+                                                {' '}{t('Learn more about clearing request type')}.
+                            </div>
                         </td> 
                     </tr>
                     <tr>
