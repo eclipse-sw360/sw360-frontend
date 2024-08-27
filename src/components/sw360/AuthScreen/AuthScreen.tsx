@@ -19,6 +19,7 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { CREDENTIALS } from '@/constants'
 import { HttpStatus } from '@/object-types'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
+import { ENABLE_SW360_OAUTH_PROVIDER } from '@/utils/env';
 
 function AuthScreen() {
     const router = useRouter()
@@ -31,7 +32,13 @@ function AuthScreen() {
     const { status } = useSession()
 
     const handleClose = () => setDialogShow(false)
-    const handleShow = () => setDialogShow(true)
+    const handleShow = () => {
+        if (ENABLE_SW360_OAUTH_PROVIDER) {
+            signIn('sw360-backend');
+        } else {
+            setDialogShow(true)
+        }
+    }
 
     const handleLogin = async () => {
         await signIn(CREDENTIALS, {

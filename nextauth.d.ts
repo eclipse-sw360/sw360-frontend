@@ -21,6 +21,7 @@ enum UserGroupType {
 }
 
 interface SW360User extends DefaultUser {
+    id: string
     access_token: string
     exp: number
     expires_in: number
