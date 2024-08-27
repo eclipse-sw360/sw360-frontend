@@ -48,7 +48,7 @@ export default function ViewClearingRequestModal({ show,
         agreedClearingDate: '',
         priority: '',
         clearingType: '',
-        reOpenOn: null,
+        reOpenedOn: null,
         createdOn: '',
         comments: [{}],
         _embedded: {

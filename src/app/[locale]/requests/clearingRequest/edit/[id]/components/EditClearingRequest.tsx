@@ -10,7 +10,6 @@
 
 'use client'
 
-import { ClearingRequestDetails, HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -19,44 +18,54 @@ import { signOut, useSession } from 'next-auth/react'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
-import ClearingRequestInfo from './ClearingRequestInfo'
-import ClearingDecision from './ClearingDecision'
-import ClearingComments from './ClearingComments'
-import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
+import EditClearingRequestInfo from './EditClearingRequestInfo'
+import EditClearingDecision from './EditClearingDecision'
+import ClearingComments from './../../../detail/[id]/components/ClearingComments'
+import MessageService from '@/services/message.service'
+import { ClearingRequestDetails,
+         UpdateClearingRequestPayload,
+         HttpStatus } from '@/object-types'
 
 
-function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
+function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string }) {
 
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const { data: session, status } = useSession()
     const router = useRouter()
-    const toastShownRef = useRef(false);
-    const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
-    const [isReopenClosedCR, setIsReopenClosedCR] = useState<boolean>(false)
-    const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState(false)
-    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
-        id: '',
-        requestedClearingDate: '',
-        projectId: '',
-        projectName: '',
-        requestingUser: '',
-        projectBU: '',
-        requestingUserComment: '',
-        clearingTeam: '',
-        agreedClearingDate: '',
-        priority: '',
-        clearingType: '',
-        reOpenedOn: null,
-        createdOn: '',
-        comments: [{}],
-        _embedded: {
-            "sw360:project": {
-                name: '',
-                version: ''
-            },
-            requestClosedOn: ''
-        }
+    const toastShownRef = useRef(false)
+    const [clearingRequestData,
+           setClearingRequestData] = useState<ClearingRequestDetails>({
+            id: '',
+            requestedClearingDate: '',
+            projectId: '',
+            projectName: '',
+            requestingUser: '',
+            projectBU: '',
+            requestingUserComment: '',
+            clearingTeam: '',
+            agreedClearingDate: '',
+            priority: '',
+            clearingType: '',
+            reOpenedOn: null,
+            createdOn: '',
+            comments: [{}],
+            _embedded: {
+                "sw360:project": {
+                    name: '',
+                    version: ''
+                }
+            }
+        })
+    const [updateClearingRequestPayload, 
+           setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
+            requestedClearingDate: '',
+            clearingType: '',
+            clearingState: '',
+            priority: '',
+            clearingTeam: '',
+            agreedClearingDate: '',
+            requestingUser: ''
     })
 
     const fetchData = useCallback(
@@ -80,18 +89,43 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
 
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
                       (clearingRequestDetails: ClearingRequestDetails) => {
-            if (!Object.hasOwn(clearingRequestDetails, 'projectId')){
-                setIsProjectDeleted(true)
-            }
-            if (clearingRequestDetails.clearingState === 'CLOSED' ||
-                clearingRequestDetails.clearingState === 'REJECTED'){
-                setIsReopenClosedCR(true)
-            }
             setClearingRequestData(clearingRequestDetails)
-        })}, [fetchData, session])
+        })
+        const updatedClearingRequestData : UpdateClearingRequestPayload = {
+            requestedClearingDate: clearingRequestData.requestedClearingDate ?? '',
+            clearingType: clearingRequestData.clearingType ?? '',
+            clearingState: clearingRequestData.clearingState ?? '',
+            priority: clearingRequestData.priority ?? '',
+            clearingTeam: clearingRequestData.clearingTeam ?? '',
+            agreedClearingDate: clearingRequestData.agreedClearingDate ?? '',
+            requestingUser: clearingRequestData.requestingUser ?? ''
+        }
+        setUpdateClearingRequestPayload(updatedClearingRequestData)
+    }, [fetchData, session, setUpdateClearingRequestPayload])
 
-    const handleEditClearingRequest = (requestId: string) => {
-        router.push(`/requests/clearingRequest/edit/${requestId}`)
+    const handleUpdateClearingRequest = async () => {
+        try {
+            const response = await ApiUtils.PATCH(
+                `clearingrequest/${clearingRequestData.id}`,
+                updateClearingRequestPayload,
+                session.user.access_token
+            )
+            if (response.status == HttpStatus.OK) {
+                MessageService.success(t('Clearing Request') +
+                                         `${clearingRequestData.id} `+
+                                         t('updated successfully'))
+                router.push(`/clearingRequest/detail/${clearingRequestData.id}`)
+            }
+            else if (response.status == HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const handleCancelUpdateClearingRequest = (requestId: string) => {
+        router.push(`/requests/clearingRequest/detail/${requestId}`)
     }
 
     const toggleCollapse = (index: number) => {
@@ -102,10 +136,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         signOut()
     } else {
     return (
-        <>
-            <ReopenClosedClearingRequestModal show = {showReopenClearingRequestModal}
-                                              setShow = {setShowReopenClearingRequestModal}/>
-            <div className='ms-5 mt-2'>
+        <div className='ms-5 mt-2'>
                 <Tab.Container>
                     <Row>
                         <Row>
@@ -121,16 +152,17 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                         <Button
                                             variant='btn btn-primary'
                                             className='me-2 col-auto'
-                                            onClick={() => { isReopenClosedCR 
-                                                        ? setShowReopenClearingRequestModal(true)
-                                                        : handleEditClearingRequest(clearingRequestData.id)}}
-                                            hidden={isProjectDeleted}
+                                            onClick={handleUpdateClearingRequest}
                                         >
-                                            {
-                                                isReopenClosedCR
-                                                ? t('Reopen Request')
-                                                : t('Edit Request')
-                                            }
+                                            {t('Update Request')}
+                                        </Button>
+                                        <Button
+                                            variant='btn btn-secondary'
+                                            className='me-2 col-auto'
+                                            onClick={ () => 
+                                                handleCancelUpdateClearingRequest(clearingRequestData.id)}
+                                        >
+                                            {t('Cancel')}
                                         </Button>
                                     </Row>
                                 </Col>
@@ -155,9 +187,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             <div>
                                                 <ShowInfoOnHover text={''} />
                                                 {' '}
-                                                {isProjectDeleted ? (
-                                                    t('Clearing Request Information For DELETED Project')
-                                                ) : ( <>
+                                                    <>
                                                         {t('Clearing Request Information For Project') + ` `}
                                                         <a href={`/projects/detail/${clearingRequestData.projectId}`}
                                                            className='text-link'>
@@ -165,7 +195,6 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                                 `(${clearingRequestData._embedded['sw360:project'].version})`}
                                                         </a>
                                                     </>
-                                                )}
                                             </div>  
                                             </Button>
                                         </Card.Header>
@@ -175,13 +204,23 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             <Card.Body className = {`${styles['card-body']}`}>
                                                 <div className="row">
                                                     <div className="col">
-                                                        <ClearingRequestInfo
-                                                            data={clearingRequestData}
+                                                        <EditClearingRequestInfo
+                                                            clearingRequestData=
+                                                                {clearingRequestData}
+                                                            updateClearingRequestPayload=
+                                                                {updateClearingRequestPayload}
+                                                            setUpdateClearingRequestPayload=
+                                                                {setUpdateClearingRequestPayload}
                                                         />
                                                     </div>
                                                     <div className="col">
-                                                        <ClearingDecision
-                                                            data={clearingRequestData}
+                                                        <EditClearingDecision
+                                                            clearingRequestData=
+                                                                {clearingRequestData}
+                                                            updateClearingRequestPayload=
+                                                                {updateClearingRequestPayload}
+                                                            setUpdateClearingRequestPayload=
+                                                                {setUpdateClearingRequestPayload}
                                                         />
                                                     </div>
                                                 </div>
@@ -229,8 +268,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                     </Row>
                 </Tab.Container>
             </div>
-        </>
     )}
 }
 
-export default ClearingRequestDetail
+export default EditClearingRequest
