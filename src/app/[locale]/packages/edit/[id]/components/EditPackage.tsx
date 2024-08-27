@@ -1,4 +1,4 @@
-// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2024. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,37 +9,50 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Package, HttpStatus } from "@/object-types"
-import CreateOrEditPackage from '../../components/CreateOrEditPackage'
-import { Tab, ListGroup } from 'react-bootstrap'
+import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
+import { Tab, ListGroup, Spinner } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { getSession, signOut } from 'next-auth/react'
 import { ApiUtils } from '@/utils'
 import MessageService from '@/services/message.service'
 import { useRouter } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
-export default function CreatePackage() {
+export default function EditPackage({ packageId }: { packageId: string }) {
 
     const t = useTranslations('default')
     const router = useRouter()
-    const d = new Date()
-    const [ packagePayload, setPackagePayload ] = useState<Package>({
-        createdOn: `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`
-    })
-    const [creatingPackage, setCreatingPackage] = useState(false)
+    const [packagePayload, setPackagePayload] = useState<Package>(null)
+    const [updatingPackage, setUpdatingPackage] = useState(false)
 
-    const handleCreatePackage = async () => {
+    useEffect(() => {
+        ;(async () => {
+            try {
+                const session = await getSession()
+                const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token)
+                if(response.status === HttpStatus.OK) {
+                    setPackagePayload(await response.json())
+                } else {
+                    notFound()
+                }
+            } catch(e) {
+                console.error(e)
+            }
+        })()
+    }, [])
+
+    const handleEditPackage = async () => {
         try {
-            setCreatingPackage(true)
+            setUpdatingPackage(true)
             const session = await getSession()
-            const response = await ApiUtils.POST('packages', { 
+            const response = await ApiUtils.PATCH(`packages/${packageId}`, { 
                 ...packagePayload, 
-                createdBy: session.user.email,
                 packageManager: packagePayload.purl.substring(4, packagePayload.purl.indexOf('/')).toUpperCase()
             }, session.user.access_token)
-            if (response.status == HttpStatus.CREATED) {
-                MessageService.success(t('Package created successfully'))
+            if (response.status == HttpStatus.OK) {
+                MessageService.success(t('Package updated successfully'))
                 router.push('/packages')
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 signOut()
@@ -50,7 +63,7 @@ export default function CreatePackage() {
         } catch (e) {
             console.error(e)
         } finally {
-            setCreatingPackage(false)
+            setUpdatingPackage(false)
         }
     }
 
@@ -68,8 +81,14 @@ export default function CreatePackage() {
                     <div className="col ms-2 me-4 mt-2">
                         <Tab.Content>
                             <Tab.Pane eventKey='summary'>
-                                <CreateOrEditPackage packagePayload={packagePayload} setPackagePayload={setPackagePayload} 
-                                    handleSubmit={handleCreatePackage} isPending={creatingPackage} isEditPage={false} />
+                                {
+                                    packagePayload ? 
+                                    <CreateOrEditPackage packagePayload={packagePayload} setPackagePayload={setPackagePayload} 
+                                        handleSubmit={handleEditPackage} isPending={updatingPackage} isEditPage={true} />:
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                }
                             </Tab.Pane>
                         </Tab.Content>
                     </div>
