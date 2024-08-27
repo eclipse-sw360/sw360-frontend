@@ -216,7 +216,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 <div>
                                                     <div className="col">
                                                         <ClearingComments
-                                                            data={clearingRequestData}
+                                                            clearingRequestDetails={clearingRequestData}
                                                         />
                                                     </div>
                                                 </div>

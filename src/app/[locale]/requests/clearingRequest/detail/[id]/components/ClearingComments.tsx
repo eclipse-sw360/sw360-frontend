@@ -10,17 +10,59 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails } from '@/object-types'
+import { ClearingRequestDetails, HttpStatus } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+import { ApiUtils } from '@/utils/index'
+import { notFound } from 'next/navigation'
+import MessageService from '@/services/message.service'
 
 
-export default function ClearingComments({ data }: { data: ClearingRequestDetails }) {
+interface comment {
+    text?: string
+    commentedBy?: string
+}
+
+export default function ClearingComments({ clearingRequestDetails }:
+                                         { clearingRequestDetails: ClearingRequestDetails }) {
     const t = useTranslations('default')
-    const { status } = useSession()
+    const { data:session, status } = useSession()
+    const [comments, setComments] = useState<Array<comment>>([])
+    const [inputComment, setInputComment] = useState('')
+    const [commentPayload, setCommentPayload] = useState({
+        text: ''
+    })
 
-    const handleAddComment = () => {
-        console.log('Test')
+    useEffect(() => {
+        setComments(clearingRequestDetails.comments);
+      }, [clearingRequestDetails.comments])
+
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                     HTMLInputElement |
+                                     HTMLTextAreaElement>) => {
+        setInputComment(event.target.value)
+        setCommentPayload({
+            ...commentPayload,
+            [event.target.name]: event.target.value,
+        })
+    }
+
+    const handleAddComment = async () => {
+        const response = await ApiUtils.POST(`clearingrequest/${clearingRequestDetails.id}/comments`,
+                                              commentPayload,
+                                              session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const response_data = await response.json()
+            setInputComment('')
+            setComments(response_data)
+            MessageService.success(t('Your comments updated successfully'))
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            MessageService.error(t('There are some problem to update your comments'))
+            notFound()
+        }
     }
 
     if (status === 'unauthenticated') {
@@ -55,7 +97,7 @@ export default function ClearingComments({ data }: { data: ClearingRequestDetail
                                 </div>
                             </td>
                         </tr>
-                        {data.comments.map((item) => (
+                        {comments.map((item) => (
                             <tr key={item.text}>
                                 <td>{item.text}</td>
                                 <td>{item.commentedBy}</td>
