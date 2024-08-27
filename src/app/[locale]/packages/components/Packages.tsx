@@ -167,7 +167,7 @@ export default function Packages() {
 
     return (
         <>
-            <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData}/>
+            <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData} isEditPage={false}/>
             <div className='mx-3 mt-3'>
                 <div className='row'>
                     <div className='col-lg-2'>

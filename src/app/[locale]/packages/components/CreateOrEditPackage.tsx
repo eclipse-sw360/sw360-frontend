@@ -9,38 +9,75 @@
 
 'use client'
 
+import { useState } from 'react'
 import { Package } from "@/object-types"
 import { useTranslations } from "next-intl"
 import { Dispatch, SetStateAction } from "react"
 import { ShowInfoOnHover } from 'next-sw360'
 import { packageManagers } from "./PackageManagers"
 import { IoIosClose } from "react-icons/io"
+import { useRouter } from 'next/navigation'
+import DeletePackageModal from './DeletePackageModal'
 
-export default function CreateOrEditPackage({ packagePayload, setPackagePayload, handleSubmit, creatingPackage }: 
-    { packagePayload: Package, setPackagePayload: Dispatch<SetStateAction<Package>>, handleSubmit: () => void, creatingPackage: boolean }) {
+interface DeletePackageModalMetData {
+    show: boolean
+    packageId: string
+    packageName: string
+    packageVersion: string
+}
+
+export default function CreateOrEditPackage({ packagePayload, setPackagePayload, handleSubmit, isPending, isEditPage }: 
+    { packagePayload: Package, setPackagePayload: Dispatch<SetStateAction<Package>>, handleSubmit: () => void, isPending: boolean, isEditPage: boolean }) {
     const t = useTranslations('default')
+    const router = useRouter()
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     }
 
+    const [deletePackageModalMetaData, setDeletePackageModalMetaData] = 
+        useState<DeletePackageModalMetData>({ show: false, packageId: '', packageName: '', packageVersion: '' })
+
     return (
         <>
+            <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData} isEditPage={isEditPage} />
             <form
                 id='add_or_edit_package_form_submit'
                 method='post'
+                className="mb-3"
                 onSubmit={(e) => {
                     e.preventDefault()
                     handleSubmit()
                 }}
             >
-                <button
-                    type='submit'
-                    className='mb-3 col-auto btn btn-primary'
-                    disabled={creatingPackage}
-                >
-                    {t('Create Package')}
-                </button>
+                <div className='row'>
+                    <button
+                        type='submit'
+                        className='mb-3 me-1 col-auto btn btn-primary'
+                        disabled={isPending}
+                    >
+                        {isEditPage?t('Update Package'):t('Create Package')}
+                    </button>
+                    {
+                        isEditPage &&
+                        <button
+                            type='button'
+                            className='mb-3 me-1 col-auto btn btn-danger'
+                            onClick={() => setDeletePackageModalMetaData(
+                                { show: true, packageId: packagePayload._links.self.href.split('/').at(-1), packageName: packagePayload.name, packageVersion: packagePayload.version })
+                            }
+                        >
+                            {t('Delete Package')}
+                        </button>
+                    }
+                    <button
+                        type='button'
+                        className='mb-3 me-1 col-auto btn btn-secondary'
+                        onClick={() => router.push('/packages')}
+                    >
+                        {t('Cancel')}
+                    </button>
+                </div>
 
                 <div className='row header mb-2 pb-2 px-2 ms-1'>
                     <h6>{t('Summary')}</h6>
@@ -221,6 +258,7 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                                 type='text'
                                 className='form-control'
                                 id='createOrEditPackage.createdBy'
+                                placeholder={t('Will be set automatically')}
                                 value={packagePayload.createdBy ?? ''}
                                 readOnly
                             />
