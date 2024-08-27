@@ -84,6 +84,12 @@ export default function ClearingDecision({ data }: Props ) {
                         </td>
                     </tr>
                     <tr>
+                        <td>{t('Request Closed on')}:</td>
+                        <td>
+                            {data._embedded.requestClosedOn}
+                        </td>
+                    </tr>
+                    <tr>
                         <td>{t('Last Updated on')}:</td>
                         <td>
                             {''}

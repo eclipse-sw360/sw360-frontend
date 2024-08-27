@@ -54,7 +54,8 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             "sw360:project": {
                 name: '',
                 version: ''
-            }
+            },
+            requestClosedOn: ''
         }
     })
 

@@ -40,5 +40,6 @@ export default interface ClearingRequestDetails{
         'clearingTeam'?: User
         'requestingUser'?: User
         'sw360:project'?: Project
+        requestClosedOn?: string
     }
 }
