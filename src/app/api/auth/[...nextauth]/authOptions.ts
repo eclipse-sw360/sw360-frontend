@@ -11,6 +11,7 @@
 
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import KeycloakProvider from "next-auth/providers/keycloak";
 import crypto from 'crypto';
 
 import { CREDENTIAL_PROVIDER } from '@/constants'
@@ -112,6 +113,13 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
+        KeycloakProvider({
+            clientId: `${process.env.SW360_KEYCLOAK_CLIENT_ID}`,
+            clientSecret: `${process.env.SW360_KEYCLOAK_CLIENT_SECRET}`,
+            issuer: `${process.env.AUTH_ISSUER}`,
+            checks: 'state',
+            authorization: { params: { scope: "openid READ WRITE" } },
+        }),
     ],
 
     session: {
@@ -119,12 +127,19 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, account, profile }) {
+                //Initial Login
+                console.log("accunt", account)
+                console.log("profile", profile)
+                // token.id = account.id
+
             return { ...token, ...user }
         },
-        async session({ session, token }) {
+        async session({ session, token , user}) {
+            console.log("user", user)
             // Send properties to the client, like an access_token from a provider.
             session.user = token
+            // session.user.access_token = token.access_token;
             return session
         },
     },
