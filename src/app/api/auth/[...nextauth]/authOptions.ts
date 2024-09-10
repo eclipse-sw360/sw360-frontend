@@ -12,6 +12,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import KeycloakProvider from "next-auth/providers/keycloak";
+import { jwtDecode } from 'jwt-decode'
 import crypto from 'crypto';
 
 import { CREDENTIAL_PROVIDER } from '@/constants'
@@ -20,6 +21,7 @@ import AuthService from '@/services/auth.service'
 import { ApiUtils } from '@/utils'
 import { SW360User } from '../../../../../nextauth'
 import { SW360_API_URL, SW360_REST_CLIENT_ID, SW360_REST_CLIENT_SECRET } from '@/utils/env';
+import UserGroupType from '../../../../object-types/enums/UserGroupType';
 
 let codeVerifier: crypto.BinaryLike;
 export const authOptions: NextAuthOptions = {
@@ -127,19 +129,29 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user, account, profile }) {
-                //Initial Login
-                console.log("accunt", account)
-                console.log("profile", profile)
-                // token.id = account.id
-
-            return { ...token, ...user }
+        async jwt({ token, account }) {
+            const nowTimeStamp = Math.floor(Date.now() / 1000)
+            if (account) {
+                token.decoded = jwtDecode(account.access_token)
+                token.access_token = "Bearer "+account.id_token
+                token.expires_in = account.expires_at
+                token.refresh_token = account.refresh_token
+                const tokenDetails = JSON.parse(JSON.stringify(token.decoded))
+                token.userGroup = getUserGroup(tokenDetails)
+                return token
+            } else if (nowTimeStamp < token.expires_in) {
+                return token
+            } else {
+                console.log('Token is expired!!')
+            }
         },
-        async session({ session, token , user}) {
-            console.log("user", user)
+        async session({ session, token }) {
             // Send properties to the client, like an access_token from a provider.
-            session.user = token
-            // session.user.access_token = token.access_token;
+            session.user.access_token = token.access_token
+            const decodedToken = jwtDecode(token.access_token)
+            const tokenDetails = JSON.parse(JSON.stringify(decodedToken))
+            const user_Group = getUserGroup(tokenDetails)
+            session.user.userGroup = user_Group
             return session
         },
     },
@@ -149,6 +161,28 @@ export const authOptions: NextAuthOptions = {
     },
 }
 
+
+function getUserGroup(tokenDetails: any) {
+    return tokenDetails.userGroup ?
+        (tokenDetails.userGroup as string[]).map((elem) => {
+            if (elem === '/ADMIN') {
+                return UserGroupType.ADMIN;
+            } else if (elem === '/CLEARING_ADMIN') {
+                return UserGroupType.CLEARING_ADMIN;
+            } else if (elem === '/ECC_ADMIN') {
+                return UserGroupType.ECC_ADMIN;
+            } else if (elem === '/SECURITY_ADMIN') {
+                return UserGroupType.SECURITY_ADMIN;
+            } else if (elem === '/SW360_ADMIN') {
+                return UserGroupType.SW360_ADMIN;
+            } else if (elem === '/CLEARING_EXPERT') {
+                return UserGroupType.CLEARING_EXPERT;
+            } else {
+                return UserGroupType.USER;
+            }
+        }) :
+        [UserGroupType.USER];
+}
 
   // GH Copilot generated- start
   function codeVerifierGenerator() {
