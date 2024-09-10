@@ -64,7 +64,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     })
     const [moderationRequestPayload, setModerationRequestPayload] =
                                          useState<ModerationRequestPayload | undefined>({
-        action: ''
+        action: '',
+        comment: ''
     })
     const toastShownRef = useRef(false);
 
@@ -93,6 +94,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             setModerationRequestData(moderationRequestDetails)
         })}, [fetchData, session])
 
+    const handleCommentValidation = () => {
+        if (!moderationRequestPayload.comment.trim()) {
+            return false
+        }
+        return true
+    };
 
     const handleAcceptModerationRequest = async () => {
         const updatedAcceptPayload = {
@@ -142,28 +149,34 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     const handlePostponeModerationRequest = async () => {
 
-        const updatedPostponePayload = {
-            ...moderationRequestPayload,
-            action: "POSTPONE"
-        }
-        setModerationRequestPayload(updatedPostponePayload)
-        const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                            updatedPostponePayload,
-                                            session.user.access_token)
-        if (response.status == HttpStatus.ACCEPTED) {
-            await response.json()
-            MessageService.success(t('You have postponed the moderation request'))
-            router.push('/requests')
-        }
-        else if (response.status == HttpStatus.UNAUTHORIZED) {
-            return signOut()
+        const hasComment = handleCommentValidation()
+        if (hasComment){
+            const updatedPostponePayload = {
+                ...moderationRequestPayload,
+                action: "POSTPONE"
+            }
+            setModerationRequestPayload(updatedPostponePayload)
+            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
+                                                updatedPostponePayload,
+                                                session.user.access_token)
+            if (response.status == HttpStatus.ACCEPTED) {
+                await response.json()
+                MessageService.success(t('You have postponed the moderation request'))
+                router.push('/requests')
+            }
+            else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            }
+            else {
+                MessageService.error(t('There are some errors while updating moderation request'))
+                router.push(`/requests/moderationRequest/${moderationRequestId}`)
+            }
         }
         else {
-            MessageService.error(t('There are some errors while updating moderation request'))
-            router.push(`/requests/moderationRequest/${moderationRequestId}`)
+            MessageService.error(t('Mandatory fields are empty please provide required data'))
         }
     };
-    
+
     const handleUnassignModerationRequest = async () => {
         const updatedUnassignPayload = {
             ...moderationRequestPayload,
