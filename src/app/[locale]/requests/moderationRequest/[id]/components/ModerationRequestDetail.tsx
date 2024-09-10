@@ -140,6 +140,30 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         }
     };
 
+    const handlePostponeModerationRequest = async () => {
+
+        const updatedPostponePayload = {
+            ...moderationRequestPayload,
+            action: "POSTPONE"
+        }
+        setModerationRequestPayload(updatedPostponePayload)
+        const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
+                                            updatedPostponePayload,
+                                            session.user.access_token)
+        if (response.status == HttpStatus.ACCEPTED) {
+            await response.json()
+            MessageService.success(t('You have postponed the moderation request'))
+            router.push('/requests')
+        }
+        else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        }
+        else {
+            MessageService.error(t('There are some errors while updating moderation request'))
+            router.push(`/requests/moderationRequest/${moderationRequestId}`)
+        }
+    };
+    
     const handleUnassignModerationRequest = async () => {
         const updatedUnassignPayload = {
             ...moderationRequestPayload,
@@ -214,7 +238,9 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         >
                                             {t('Decline Request')}
                                         </Button>
-                                        <Button variant='secondary' className='me-2 col-auto'
+                                        <Button variant='secondary'
+                                                className='me-2 col-auto'
+                                                onClick={handlePostponeModerationRequest}
                                             >
                                             {t('Postpone Request')}
                                         </Button>
