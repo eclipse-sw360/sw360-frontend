@@ -14,6 +14,5 @@ export const AUTH_TOKEN : string | undefined  = process.env.NEXT_PUBLIC_AUTH_TOK
 export const SPDX_ENABLE: string | undefined = process.env.NEXT_PUBLIC_SPDX_ENABLE;
 export const SW360_REST_CLIENT_ID: string | undefined  = process.env.NEXT_PUBLIC_SW360_REST_CLIENT_ID;
 export const SW360_REST_CLIENT_SECRET: string | undefined  = process.env.NEXT_PUBLIC_SW360_REST_CLIENT_SECRET;
-export const ENABLE_SW360_OAUTH_PROVIDER: string | undefined  = process.env.NEXT_PUBLIC_ENABLE_SW360_OAUTH_PROVIDER;
-export const ENABLE_SW360_KEYCLOAK_PROVIDER: string | undefined  = process.env.NEXT_PUBLIC_ENABLE_SW360_KEYCLOAK_PROVIDER;
+export const AUTH_PROVIDER: string | undefined = process.env.NEXT_PUBLIC_SW360_AUTH_PROVIDER;
 export const ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP : string | undefined  = process.env.NEXT_PUBLIC_ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP;

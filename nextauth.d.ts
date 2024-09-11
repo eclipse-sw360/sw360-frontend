@@ -31,7 +31,7 @@ interface SW360User extends DefaultUser {
     scope: string
     token_type: string
     email: string
-    userGroup: UserGroupType[]
+    userGroup: UserGroupType
     id_token: string
     decoded: string
 }

@@ -9,201 +9,31 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import KeycloakProvider from "next-auth/providers/keycloak";
-import { jwtDecode } from 'jwt-decode'
-import crypto from 'crypto';
+import { AUTH_PROVIDER } from '@/utils/env';
+import keycloakAuth from './keycloakAuthOption';
+import { NextAuthOptions } from 'next-auth';
+import basicAuthOption from './basicAuthOption';
+import sw360OauthOption from './sw360OauthOption';
+import sw360OauthPwdGrantTypeOption from './sw360OauthPwdGrantTypeOption';
 
-import { CREDENTIAL_PROVIDER } from '@/constants'
-import { HttpStatus, UserCredentialInfo } from '@/object-types'
-import AuthService from '@/services/auth.service'
-import { ApiUtils } from '@/utils'
-import { SW360User } from '../../../../../nextauth'
-import { SW360_API_URL, SW360_REST_CLIENT_ID, SW360_REST_CLIENT_SECRET } from '@/utils/env';
-import UserGroupType from '../../../../object-types/enums/UserGroupType';
+let authOptions: NextAuthOptions
 
-let codeVerifier: crypto.BinaryLike;
-export const authOptions: NextAuthOptions = {
-    // Configure one or more authentication providers
-    providers: [
-        {
-            id: "sw360-backend",
-            name: "sw360 backend",
-            type: "oauth",
-            version: "2.0",
-            wellKnown: SW360_API_URL+"/authorization/.well-known/oauth-authorization-server",
-            checks: ["pkce", "state"],
-            idToken: true,
-            // Partial GH Copilot generated- start
-            authorization: { params: { scope: "openid READ WRITE ADMIN" , code_challenge_method: "S256", code_challenge: (() => {
-                codeVerifier = codeVerifierGenerator();
-                const codeChallenge = codeChallengeGenerator(codeVerifier);
-                return codeChallenge;
-              })(), } },
-            // Partial GH Copilot generated- end
-            clientId: SW360_REST_CLIENT_ID,
-            clientSecret: SW360_REST_CLIENT_SECRET,
-            profile: async (profiles, tokens) => {
-                return {
-                    exp: tokens.exp,
-                    expires_in: tokens.expires_in,
-                    iat: tokens.iat,
-                    refresh_token: tokens.refresh_token,
-                    scope: tokens.scope,
-                    token_type: tokens.token_type,
-                    userGroup: profiles.userGroup,
-                    email: profiles.email,
-                    access_token: 'Bearer ' +tokens.access_token,
-                    id: profiles.sub,
-                } as SW360User;
-            },
-        },
-        CredentialsProvider({
-            name: CREDENTIAL_PROVIDER,
-            credentials: {},
-            async authorize(credentials) {
-                // Add logic here to look up the user from the credentials supplied
-                try {
-                    const { username, password } = credentials as any
-                    const userCredential: UserCredentialInfo = {
-                        username: username,
-                        password: password,
-                    }
-
-                    const authToken = await AuthService.generateBasicToken(userCredential)
-
-                    if (authToken === null) throw new Error('Error while fetching Auth Token')
-
-                    const response = await ApiUtils.GET(`users/${username}`, authToken)
-                    if (response.status !== HttpStatus.OK) {
-                        throw new Error('Error while fetching User Group')
-                    }
-                    const data = await response.json()
-                    return { access_token: authToken, userGroup: data.userGroup, email: username} as any
-                } catch (e) {
-                    console.error(e)
-                    return null
-                }
-            },
-        }),
-        CredentialsProvider({
-            name: CREDENTIAL_PROVIDER,
-            credentials: {},
-            async authorize(credentials) {
-                try {
-                    const { username, password } = credentials as any
-                    const userCredential: UserCredentialInfo = {
-                        username: username,
-                        password: password,
-                    }
-
-                    const authToken = await AuthService.generateToken(userCredential)
-
-                    if (authToken === null) throw new Error('Error while fetching Auth Token')
-                    
-                    const response = await ApiUtils.GET(`users/${username}`, authToken.access_token)
-                    if (response.status !== HttpStatus.OK) {
-                        throw new Error('Error while fetching User Group')
-                    }
-                    
-                    const data = await response.json()
-                    return { ...authToken, userGroup: data.userGroup, email: username } as any
-                } catch (e) {
-                    console.error(e)
-                    return null
-                }
-            },
-        }),
-        KeycloakProvider({
-            clientId: `${process.env.SW360_KEYCLOAK_CLIENT_ID}`,
-            clientSecret: `${process.env.SW360_KEYCLOAK_CLIENT_SECRET}`,
-            issuer: `${process.env.AUTH_ISSUER}`,
-            checks: 'state',
-            authorization: { params: { scope: "openid READ WRITE" } },
-        }),
-    ],
-
-    session: {
-        strategy: 'jwt',
-    },
-
-    callbacks: {
-        async jwt({ token, account }) {
-            const nowTimeStamp = Math.floor(Date.now() / 1000)
-            if (account) {
-                token.decoded = jwtDecode(account.access_token)
-                token.access_token = "Bearer "+account.id_token
-                token.expires_in = account.expires_at
-                token.refresh_token = account.refresh_token
-                const tokenDetails = JSON.parse(JSON.stringify(token.decoded))
-                token.userGroup = getUserGroup(tokenDetails)
-                return token
-            } else if (nowTimeStamp < token.expires_in) {
-                return token
-            } else {
-                console.log('Token is expired!!')
-            }
-        },
-        async session({ session, token }) {
-            // Send properties to the client, like an access_token from a provider.
-            session.user.access_token = token.access_token
-            const decodedToken = jwtDecode(token.access_token)
-            const tokenDetails = JSON.parse(JSON.stringify(decodedToken))
-            const user_Group = getUserGroup(tokenDetails)
-            session.user.userGroup = user_Group
-            return session
-        },
-    },
-
-    pages: {
-        signIn: '/',
-    },
+switch (AUTH_PROVIDER) {
+    case 'sw360basic':
+        authOptions = basicAuthOption
+        break;
+    case 'sw360oauth':
+        authOptions = sw360OauthOption
+        break;
+    case 'keycloak':
+        authOptions = keycloakAuth
+        break;
+    case 'oauth-password-grant':
+        authOptions = sw360OauthPwdGrantTypeOption
+        break;
+    default:
+        break;
 }
 
-
-function getUserGroup(tokenDetails: any) {
-    return tokenDetails.userGroup ?
-        (tokenDetails.userGroup as string[]).map((elem) => {
-            if (elem === '/ADMIN') {
-                return UserGroupType.ADMIN;
-            } else if (elem === '/CLEARING_ADMIN') {
-                return UserGroupType.CLEARING_ADMIN;
-            } else if (elem === '/ECC_ADMIN') {
-                return UserGroupType.ECC_ADMIN;
-            } else if (elem === '/SECURITY_ADMIN') {
-                return UserGroupType.SECURITY_ADMIN;
-            } else if (elem === '/SW360_ADMIN') {
-                return UserGroupType.SW360_ADMIN;
-            } else if (elem === '/CLEARING_EXPERT') {
-                return UserGroupType.CLEARING_EXPERT;
-            } else {
-                return UserGroupType.USER;
-            }
-        }) :
-        [UserGroupType.USER];
-}
-
-  // GH Copilot generated- start
-  function codeVerifierGenerator() {
-    const randomBytes = crypto.randomBytes(32);
-    const verifier = base64urlEncode(randomBytes);
-    return verifier;
-  }
-
-  function base64urlEncode(buffer: Buffer) {
-    return buffer.toString('base64')
-      .replace('+', '-')
-      .replace('/', '_')
-      .replace(/=+$/, '');
-  }
-
-
-  function codeChallengeGenerator(verifier: crypto.BinaryLike) {
-    const hash = crypto.createHash('sha256').update(verifier).digest();
-    const challenge = base64urlEncode(hash);
-    return challenge;
-  }
-  // GH Copilot generated- end
-
+export default authOptions
 

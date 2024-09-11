@@ -19,7 +19,7 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { HttpStatus } from '@/object-types'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
-import { ENABLE_SW360_KEYCLOAK_PROVIDER, ENABLE_SW360_OAUTH_PROVIDER } from '@/utils/env';
+import { AUTH_PROVIDER } from '@/utils/env';
 
 function AuthScreen() {
     const router = useRouter()
@@ -33,12 +33,11 @@ function AuthScreen() {
 
     const handleClose = () => setDialogShow(false)
     const handleShow = () => {
-        if (ENABLE_SW360_OAUTH_PROVIDER) {
-            if(ENABLE_SW360_KEYCLOAK_PROVIDER){
-                signIn(KEYCLOAK_PROVIDER);
-            } else {
-                signIn(SW360OAUTH_PROVIDER);
-            }
+        const authProvider = AUTH_PROVIDER;
+        if (authProvider === 'keycloak') {
+            signIn(KEYCLOAK_PROVIDER)
+        } else if (authProvider === 'sw360oauth') {
+            signIn(SW360OAUTH_PROVIDER)
         } else {
             setDialogShow(true)
         }
