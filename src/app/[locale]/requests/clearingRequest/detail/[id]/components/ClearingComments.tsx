@@ -10,14 +10,13 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Embedded, HttpStatus } from '@/object-types'
+import { Embedded, HttpStatus, ClearingRequestComments } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { notFound } from 'next/navigation'
 import MessageService from '@/services/message.service'
-import ClearingRequestComments from '@/object-types/ClearingRequestComments'
 import { Spinner } from 'react-bootstrap'
 import parse from 'html-react-parser'
 import Link from 'next/link'
@@ -69,9 +68,16 @@ export default function ClearingComments({ clearingRequestId }:
         setLoading(true)
         void fetchData(`clearingrequest/${clearingRequestId}/comments`).then(
                     (clearingRequestCommentList: EmbeddedClearingRequestComments) => {
-            setComments(clearingRequestCommentList['_embedded']['sw360:comments'])
-            setLoading(false)
-    })}, [fetchData, session])
+            if (
+                !CommonUtils.isNullOrUndefined(clearingRequestCommentList['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(clearingRequestCommentList['_embedded']['sw360:comments'])
+            ){
+                setComments(clearingRequestCommentList['_embedded']['sw360:comments'])
+                setLoading(false)
+            }
+        })
+        .catch((err) => console.error(err))
+    }, [fetchData, session])
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement |
@@ -116,14 +122,14 @@ export default function ClearingComments({ clearingRequestId }:
                         <tr>
                             <td colSpan={2}>
                                 <input className='form-control'
-                                    type="text"
-                                    name="text"
-                                    placeholder={t('Enter Comment')}
-                                    style={{ height: '50px',
-                                            width: '100%',
-                                            marginBottom: '20px' }}
-                                    value={inputComment}
-                                    onChange={updateInputField}/>
+                                       type="text"
+                                       name="text"
+                                       placeholder={t('Enter Comment')}
+                                       style={{ height: '50px',
+                                                width: '100%',
+                                                marginBottom: '20px' }}
+                                       value={inputComment}
+                                       onChange={updateInputField}/>
                                 <button type='button'
                                         className='btn btn-accept mb-2'
                                         onClick={handleAddComment}>
@@ -132,13 +138,14 @@ export default function ClearingComments({ clearingRequestId }:
                             </td>
                         </tr>
                         {comments.map((item) => (
-                            <tr key={item.text}>
+                            <tr key={item.commentedOn}>
                                 <td style={{padding: '5px !important', width: '3%'}}>
                                     <div>
                                         {item._embedded['commentingUser']['fullName'].split(' ')
                                                 .map(word => (word as string)[0])
                                                 .join('')
-                                                .toUpperCase() ?? ''}
+                                                .toUpperCase() ?? ''
+                                        }
                                     </div>
                                 </td>
                                 <td>
@@ -151,7 +158,8 @@ export default function ClearingComments({ clearingRequestId }:
                                     </div>
                                     <div>
                                         {
-                                            parse(item.text.replace(/\n/g, '<br />&emsp;&emsp;'))
+                                            parse(item.text.replace(/<li>/g, '<li style="margin-left:10px;">')
+                                                           .replace(/\n/g, '<br />&emsp;&emsp;'))
                                         }
                                     </div>
                                     <div>
