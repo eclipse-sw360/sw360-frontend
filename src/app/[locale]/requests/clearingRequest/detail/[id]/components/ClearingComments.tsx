@@ -20,6 +20,7 @@ import MessageService from '@/services/message.service'
 import ClearingRequestComments from '@/object-types/ClearingRequestComments'
 import { Spinner } from 'react-bootstrap'
 import parse from 'html-react-parser'
+import Link from 'next/link'
 
 
 type EmbeddedClearingRequestComments = Embedded<ClearingRequestComments, 'sw360:comments'>
@@ -138,7 +139,20 @@ export default function ClearingComments({ clearingRequestId }:
                                             parse(item.text.replace(/\n/g, '<br />&emsp;&emsp;'))
                                         }
                                     </div>
-                                    {item.commentedBy}
+                                    <div>
+                                        {<>
+                                            -- by &thinsp; {
+                                                    <Link
+                                                        className='text-link'
+                                                        href={`mailto:${item.commentedBy}`} >
+                                                            <b>
+                                                                {item._embedded['commentingUser']['fullName']}
+                                                            </b>
+                                                    </Link>
+                                                }
+                                            </>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                         ))}
