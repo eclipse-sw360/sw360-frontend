@@ -36,6 +36,21 @@ export default function ClearingComments({ clearingRequestId }:
         text: ''
     })
 
+    const formatDate = (timestamp: number): string | null => {
+        if (!timestamp) {
+            return null
+        }
+        const date = new Date(timestamp)
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        const hours = String(date.getHours()).padStart(2, '0')
+        const minutes = String(date.getMinutes()).padStart(2, '0')
+        const seconds = String(date.getSeconds()).padStart(2, '0')
+    
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    }
+
     const fetchData = useCallback(
         async (url: string) => {
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -142,6 +157,7 @@ export default function ClearingComments({ clearingRequestId }:
                                     <div>
                                         {<>
                                             -- by &thinsp; {
+                                                <i>
                                                     <Link
                                                         className='text-link'
                                                         href={`mailto:${item.commentedBy}`} >
@@ -149,7 +165,13 @@ export default function ClearingComments({ clearingRequestId }:
                                                                 {item._embedded['commentingUser']['fullName']}
                                                             </b>
                                                     </Link>
-                                                }
+                                                </i> 
+                                                } &thinsp; on &thinsp; 
+                                                    <i>
+                                                        { 
+                                                            formatDate(item.commentedOn)
+                                                        }
+                                                    </i>
                                             </>
                                         }
                                     </div>
