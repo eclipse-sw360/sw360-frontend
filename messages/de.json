@@ -1009,6 +1009,7 @@
     "There are some problem to update your comments": "Es gibt ein Problem beim Aktualisieren Ihrer Kommentare!",
     "This currently only supports SPDX RDF/XML files with a uniq described top level node": "Dies unterstützt derzeit nur SPDX RDF/XML-Dateien mit einem uniq beschriebenen Top Level Knoten",
     "This function is meant to be followed by a new license import": "Diese Funktion soll durch einen neuen Lizenzimport verfolgt werden.",
+    "This is auto-generated comment": "*** Dies ist ein automatisch generierter Kommentar ***",
     "This license is": "",
     "This project contains": "Dieses Projekt <strong>{name}</strong> enthält",
     "This release contains": "Diese Veröffentlichung <strong>{name}</strong> enthält: ",

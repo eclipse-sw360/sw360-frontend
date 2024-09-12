@@ -1009,6 +1009,7 @@
     "There are some problem to update your comments": "Có một số vấn đề khi cập nhật nhận xét của bạn!",
     "This currently only supports SPDX RDF/XML files with a uniq described top level node": "Điều này hiện chỉ hỗ trợ các tệp SPDX RDF/XML với nút cấp cao nhất được mô tả uniq",
     "This function is meant to be followed by a new license import": "Chức năng này được thực hiện sau khi nhập giấy phép mới.",
+    "This is auto-generated comment": "*** Đây là bình luận được tạo tự động ***",
     "This license is": "",
     "This project contains": "Dự án này <strong>{name</strong> chứa",
     "This release contains": "Bản phát hành này <strong>{name}</strong> chứa:",

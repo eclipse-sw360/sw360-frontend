@@ -1009,6 +1009,7 @@
     "There are some problem to update your comments": "コメントを更新するには問題があります。",
     "This currently only supports SPDX RDF/XML files with a uniq described top level node": "This currently only supports SPDX RDF/XML files with a uniq described top level node",
     "This function is meant to be followed by a new license import": "この関数は、新しいライセンスのインポートに従うことを目的としています。",
+    "This is auto-generated comment": "*** これは自動生成されたコメントです ***",
     "This license is": "",
     "This project contains": "このプロジェクト <strong>{name}</strong> には次の内容が含まれています",
     "This release contains": "このリリース <strong>{name}</strong> には次の内容が含まれています:",
