@@ -68,43 +68,41 @@ export default function ClearingComments({ clearingRequestDetails }:
     if (status === 'unauthenticated') {
         signOut()
     } else {
-        return (
-            <div>
-                <table className={`table label-value-table ${styles['summary-table']}`}>
-                    <thead>
-                        <tr>
-                            <th colSpan={2}>{t('Comments')}</th>
+    return (
+        <>
+            <table className={`table label-value-table ${styles['summary-table']}`}>
+                <thead>
+                    <tr>
+                        <th colSpan={2}>{t('Comments')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colSpan={2}>
+                            <input className='form-control'
+                                type="text"
+                                name="text"
+                                placeholder={t('Enter Comment')}
+                                style={{ height: '50px',
+                                         width: '100%',
+                                         marginBottom: '20px' }}
+                                value={inputComment}
+                                onChange={updateInputField}/>
+                            <button type='button'
+                                    className='btn btn-accept mb-2'
+                                    onClick={handleAddComment}>
+                                {t('Add Comment')}
+                            </button>
+                        </td>
+                    </tr>
+                    {comments.map((item) => (
+                        <tr key={item.text}>
+                            <td>{item.text}</td>
+                            <td>{item.commentedBy}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colSpan={2}>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <input
-                                        className='form-control'
-                                        type="text"
-                                        placeholder={t('Enter Comment')}
-                                        style={{ height: '50px', marginBottom: '10px' }}
-                                    />
-                                    <button
-                                        type='button'
-                                        className='btn btn-accept'
-                                        style={{ width: 'fit-content' }}
-                                        onClick={handleAddComment}
-                                    >
-                                        {t('Add Comment')}
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {comments.map((item) => (
-                            <tr key={item.text}>
-                                <td>{item.text}</td>
-                                <td>{item.commentedBy}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        )}
+                    ))}
+                </tbody>
+            </table>
+        </>
+    )}
 }
