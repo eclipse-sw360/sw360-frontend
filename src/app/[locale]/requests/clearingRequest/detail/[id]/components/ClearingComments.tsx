@@ -10,33 +10,51 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails, HttpStatus } from '@/object-types'
+import { Embedded, HttpStatus } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ApiUtils } from '@/utils/index'
 import { notFound } from 'next/navigation'
 import MessageService from '@/services/message.service'
+import ClearingRequestComments from '@/object-types/ClearingRequestComments'
+import { Spinner } from 'react-bootstrap'
 
 
-interface comment {
-    text?: string
-    commentedBy?: string
-}
+type EmbeddedClearingRequestComments = Embedded<ClearingRequestComments, 'sw360:comments'>
 
-export default function ClearingComments({ clearingRequestDetails }:
-                                         { clearingRequestDetails: ClearingRequestDetails }) {
+export default function ClearingComments({ clearingRequestId }:
+                                         { clearingRequestId: string }) {
     const t = useTranslations('default')
+    const [loading, setLoading] = useState(true)
     const { data:session, status } = useSession()
-    const [comments, setComments] = useState<Array<comment>>([])
+    const [comments, setComments] = useState<Array<ClearingRequestComments>>([])
     const [inputComment, setInputComment] = useState('')
     const [commentPayload, setCommentPayload] = useState({
         text: ''
     })
 
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedClearingRequestComments
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
+    )
+
     useEffect(() => {
-        setComments(clearingRequestDetails.comments);
-      }, [clearingRequestDetails.comments])
+        setLoading(true)
+        void fetchData(`clearingrequest/${clearingRequestId}/comments`).then(
+                      (clearingRequestCommentList: EmbeddedClearingRequestComments) => {
+            setComments(clearingRequestCommentList['_embedded']['sw360:comments'])
+            setLoading(false)
+        })}, [fetchData, session])
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement |
@@ -49,13 +67,13 @@ export default function ClearingComments({ clearingRequestDetails }:
     }
 
     const handleAddComment = async () => {
-        const response = await ApiUtils.POST(`clearingrequest/${clearingRequestDetails.id}/comments`,
+        const response = await ApiUtils.POST(`clearingrequest/${clearingRequestId}/comments`,
                                               commentPayload,
                                               session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            const response_data = await response.json()
+            const response_data = await response.json() as EmbeddedClearingRequestComments
             setInputComment('')
-            setComments(response_data)
+            setComments(response_data._embedded['sw360:comments'])
             MessageService.success(t('Your comments updated successfully'))
         } else if (response.status == HttpStatus.UNAUTHORIZED) {
             return signOut()
@@ -70,39 +88,45 @@ export default function ClearingComments({ clearingRequestDetails }:
     } else {
     return (
         <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
-                <thead>
-                    <tr>
-                        <th colSpan={2}>{t('Comments')}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colSpan={2}>
-                            <input className='form-control'
-                                type="text"
-                                name="text"
-                                placeholder={t('Enter Comment')}
-                                style={{ height: '50px',
-                                         width: '100%',
-                                         marginBottom: '20px' }}
-                                value={inputComment}
-                                onChange={updateInputField}/>
-                            <button type='button'
-                                    className='btn btn-accept mb-2'
-                                    onClick={handleAddComment}>
-                                {t('Add Comment')}
-                            </button>
-                        </td>
-                    </tr>
-                    {comments.map((item) => (
-                        <tr key={item.text}>
-                            <td>{item.text}</td>
-                            <td>{item.commentedBy}</td>
+            {loading == false ? (
+                <table className={`table label-value-table ${styles['summary-table']}`}>
+                    <thead>
+                        <tr>
+                            <th colSpan={2}>{t('Comments')}</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colSpan={2}>
+                                <input className='form-control'
+                                    type="text"
+                                    name="text"
+                                    placeholder={t('Enter Comment')}
+                                    style={{ height: '50px',
+                                            width: '100%',
+                                            marginBottom: '20px' }}
+                                    value={inputComment}
+                                    onChange={updateInputField}/>
+                                <button type='button'
+                                        className='btn btn-accept mb-2'
+                                        onClick={handleAddComment}>
+                                    {t('Add Comment')}
+                                </button>
+                            </td>
+                        </tr>
+                        {comments.map((item) => (
+                            <tr key={item.text}>
+                                <td>{item.text}</td>
+                                <td>{item.commentedBy}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ) : (
+                <div className='col-12 d-flex justify-content-center align-items-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
         </>
     )}
 }

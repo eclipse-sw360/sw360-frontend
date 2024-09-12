@@ -19,6 +19,7 @@ import CVEReference from './CVEReference'
 import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
 import ClearingRequest from './ClearingRequest'
+import ClearingRequestComments from './ClearingRequestComments'
 import ClearingRequestDetails from './ClearingRequestDetails'
 import CreateClearingRequestPayload from './CreateClearingRequestPayload'
 import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
@@ -101,6 +102,7 @@ export type {
     CheckSum,
     ClearingInformation,
     ClearingRequest,
+    ClearingRequestComments,
     ClearingRequestDetails,
     CreateClearingRequestPayload,
     UpdateClearingRequestPayload,
