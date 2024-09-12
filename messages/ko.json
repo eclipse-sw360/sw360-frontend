@@ -1009,7 +1009,7 @@
     "There are some problem to update your comments": "귀하의 의견을 업데이트하는 데 문제가 있습니다!",
     "This currently only supports SPDX RDF/XML files with a uniq described top level node": "현재 SPDX RDF/XML 파일을 uniq 기술 최고 수준의 노드로 지원합니다.",
     "This function is meant to be followed by a new license import": "이 기능은 새로운 라이센스 수입에 의해 따를 수 없습니다.",
-    "This is auto-generated comment": "*** 자동으로 생성된 댓글입니다 ***",
+    "This is auto-generated comment": "자동으로 생성된 댓글입니다.",
     "This license is": "",
     "This project contains": "이 프로젝트 <strong>{name}</strong>에는 다음이 포함됩니다.",
     "This release contains": "이 릴리스 <strong>이름 *</strong> 포함 : ",

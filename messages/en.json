@@ -1009,7 +1009,7 @@
     "There are some problem to update your comments": "There are some problem to update your comments !",
     "This currently only supports SPDX RDF/XML files with a uniq described top level node": "This currently only supports SPDX RDF/XML files with a uniq described top level node",
     "This function is meant to be followed by a new license import": "This function is meant to be followed by a new license import.",
-    "This is auto-generated comment": "*** This is auto-generated comment ***",
+    "This is auto-generated comment": "This is auto-generated comment",
     "This license is": "This license is",
     "This project contains": "This project <strong>{name}</strong> contains",
     "This release contains": "This release <strong>{name}</strong> contains: ",

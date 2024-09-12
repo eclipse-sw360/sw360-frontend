@@ -1009,7 +1009,7 @@
     "There are some problem to update your comments": "更新评论有问题！",
     "This currently only supports SPDX RDF/XML files with a uniq described top level node": "当前仅支持具有 uniq 描述的顶级节点的 SPDX RDF/XML 文件",
     "This function is meant to be followed by a new license import": "此功能将随后导入新的许可证 。",
-    "This is auto-generated comment": "*** 这是自动生成的评论 ***",
+    "This is auto-generated comment": "这是自动生成的评论",
     "This license is": "",
     "This project contains": "此项目<strong>{name}</strong>包含",
     "This release contains": "此版本<strong>{name}</strong>包含：",
