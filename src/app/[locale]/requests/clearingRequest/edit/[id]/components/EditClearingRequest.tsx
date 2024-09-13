@@ -255,7 +255,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 <div>
                                                     <div className="col">
                                                         <ClearingComments
-                                                            data={clearingRequestData}
+                                                            clearingRequestId={clearingRequestData.id}
                                                         />
                                                     </div>
                                                 </div>

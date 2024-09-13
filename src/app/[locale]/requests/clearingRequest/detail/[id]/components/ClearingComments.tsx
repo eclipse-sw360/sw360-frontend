@@ -10,24 +10,101 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails } from '@/object-types'
+import { Embedded, HttpStatus, ClearingRequestComments } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
+import { useCallback, useEffect, useState } from 'react'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { notFound } from 'next/navigation'
+import MessageService from '@/services/message.service'
+import { Spinner } from 'react-bootstrap'
+import parse from 'html-react-parser'
+import Link from 'next/link'
 
 
-export default function ClearingComments({ data }: { data: ClearingRequestDetails }) {
+type EmbeddedClearingRequestComments = Embedded<ClearingRequestComments, 'sw360:comments'>
+
+export default function ClearingComments({ clearingRequestId }:
+                                         { clearingRequestId: string }) {
     const t = useTranslations('default')
-    const { status } = useSession()
+    const [loading, setLoading] = useState(true)
+    const { data:session, status } = useSession()
+    const [comments, setComments] = useState<Array<ClearingRequestComments>>([])
+    const [inputComment, setInputComment] = useState('')
+    const [commentPayload, setCommentPayload] = useState({
+        text: ''
+    })
 
-    const handleAddComment = () => {
-        console.log('Test')
+    const formatDate = (timestamp: number): string | null => {
+        if (!timestamp) {
+            return null
+        }
+        const date = new Date(timestamp)
+        const dateISOString = date.toISOString()
+        return `${dateISOString.slice(0,10)}  ${dateISOString.slice(11,19)}`
+    }
+
+    const fetchData = useCallback(
+        async (url: string) => {
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as EmbeddedClearingRequestComments
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                notFound()
+            }
+        },[session]
+    )
+
+    useEffect(() => {
+        setLoading(true)
+        void fetchData(`clearingrequest/${clearingRequestId}/comments`).then(
+                    (clearingRequestCommentList: EmbeddedClearingRequestComments) => {
+            if (
+                !CommonUtils.isNullOrUndefined(clearingRequestCommentList['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(clearingRequestCommentList['_embedded']['sw360:comments'])
+            ){
+                setComments(clearingRequestCommentList['_embedded']['sw360:comments'])
+                setLoading(false)
+            }
+        })
+        .catch((err) => console.error(err))
+    }, [fetchData, session])
+
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                     HTMLInputElement |
+                                     HTMLTextAreaElement>) => {
+        setInputComment(event.target.value)
+        setCommentPayload({
+            ...commentPayload,
+            [event.target.name]: event.target.value,
+        })
+    }
+
+    const handleAddComment = async () => {
+        const response = await ApiUtils.POST(`clearingrequest/${clearingRequestId}/comments`,
+                                              commentPayload,
+                                              session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const response_data = await response.json() as EmbeddedClearingRequestComments
+            setInputComment('')
+            setComments(response_data._embedded['sw360:comments'])
+            MessageService.success(t('Your comments updated successfully'))
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            MessageService.error(t('There are some problem to update your comments'))
+        }
     }
 
     if (status === 'unauthenticated') {
         signOut()
     } else {
-        return (
-            <div>
+    return (
+        <>
+            {loading == false ? (
                 <table className={`table label-value-table ${styles['summary-table']}`}>
                     <thead>
                         <tr>
@@ -37,32 +114,78 @@ export default function ClearingComments({ data }: { data: ClearingRequestDetail
                     <tbody>
                         <tr>
                             <td colSpan={2}>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <input
-                                        className='form-control'
-                                        type="text"
-                                        placeholder={t('Enter Comment')}
-                                        style={{ height: '50px', marginBottom: '10px' }}
-                                    />
-                                    <button
-                                        type='button'
-                                        className='btn btn-accept'
-                                        style={{ width: 'fit-content' }}
-                                        onClick={handleAddComment}
-                                    >
-                                        {t('Add Comment')}
-                                    </button>
-                                </div>
+                                <input className='form-control'
+                                       type="text"
+                                       name="text"
+                                       placeholder={t('Enter Comment')}
+                                       style={{ height: '50px',
+                                                width: '100%',
+                                                marginBottom: '20px' }}
+                                       value={inputComment}
+                                       onChange={updateInputField}/>
+                                <button type='button'
+                                        className='btn btn-accept mb-2'
+                                        onClick={handleAddComment}>
+                                    {t('Add Comment')}
+                                </button>
                             </td>
                         </tr>
-                        {data.comments.map((item) => (
-                            <tr key={item.text}>
-                                <td>{item.text}</td>
-                                <td>{item.commentedBy}</td>
+                        {comments.map((item) => (
+                            <tr key={item.commentedOn}>
+                                <td style={{padding: '5px !important', width: '3%'}}>
+                                    <div>
+                                        {item._embedded['commentingUser']['fullName'].split(' ')
+                                                .map(word => (word as string)[0])
+                                                .join('')
+                                                .toUpperCase() ?? ''
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        { item.autoGenerated && 
+                                            <>
+                                                *** <b>{t('This is auto-generated comment')}</b> ***
+                                            </>
+                                        }
+                                    </div>
+                                    <div>
+                                        {
+                                            parse(item.text.replace(/<li>/g, '<li style="margin-left:10px;">')
+                                                           .replace(/\n/g, '<br />&emsp;&emsp;'))
+                                        }
+                                    </div>
+                                    <div>
+                                        {<>
+                                            -- by &thinsp; {
+                                                <i>
+                                                    <Link
+                                                        className='text-link'
+                                                        href={`mailto:${item.commentedBy}`} >
+                                                            <b>
+                                                                {item._embedded['commentingUser']['fullName']}
+                                                            </b>
+                                                    </Link>
+                                                </i> 
+                                                } &thinsp; on &thinsp; 
+                                                    <i>
+                                                        { 
+                                                            formatDate(item.commentedOn)
+                                                        }
+                                                    </i>
+                                            </>
+                                        }
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
-            </div>
-        )}
+            ) : (
+                <div className='col-12 d-flex justify-content-center align-items-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </>
+    )}
 }

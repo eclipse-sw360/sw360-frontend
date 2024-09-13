@@ -21,8 +21,8 @@ import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
 import ClearingRequestInfo from './ClearingRequestInfo'
 import ClearingDecision from './ClearingDecision'
-import ClearingComments from './ClearingComments'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
+import dynamic from 'next/dynamic'
 
 
 function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
@@ -57,6 +57,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             },
             requestClosedOn: ''
         }
+    })
+
+    const ClearingComments = dynamic(() => import('./ClearingComments'), {
+        ssr: false
     })
 
     const fetchData = useCallback(
@@ -215,9 +219,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             <Card.Body className = {`${styles['card-body']}`}>
                                                 <div>
                                                     <div className="col">
-                                                        <ClearingComments
-                                                            data={clearingRequestData}
-                                                        />
+                                                        {openCardIndex === 1 && (
+                                                            <ClearingComments
+                                                                clearingRequestId={clearingRequestData.id} />
+                                                        )}
                                                     </div>
                                                 </div>
                                             </Card.Body>
