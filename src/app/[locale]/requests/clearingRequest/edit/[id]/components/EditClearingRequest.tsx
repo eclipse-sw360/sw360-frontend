@@ -254,9 +254,10 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                             <Card.Body className = {`${styles['card-body']}`}>
                                                 <div>
                                                     <div className="col">
-                                                        <ClearingComments
-                                                            clearingRequestId={clearingRequestData.id}
-                                                        />
+                                                        {openCardIndex === 1 && (
+                                                            <ClearingComments
+                                                                clearingRequestId={clearingRequestData.id} />
+                                                        )}
                                                     </div>
                                                 </div>
                                             </Card.Body>
