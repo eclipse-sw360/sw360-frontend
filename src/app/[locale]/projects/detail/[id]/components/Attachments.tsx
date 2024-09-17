@@ -193,7 +193,7 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
         if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
-        
+
         ;(async () => {
             try {
                 const res = await ApiUtils.GET(
@@ -213,8 +213,8 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
                 const tableData: any[] = []
                 for (const attachment of projectAttachments["_embedded"]?.["sw360:attachments"] ?? []) {
                     tableData.push([
-                        { 
-                            id: `projectAttachments.${attachment.sha1}` ?? '', sha1: attachment.sha1 ?? '',
+                        {
+                            id: `projectAttachments.${attachment.sha1}`, sha1: attachment.sha1 ?? '',
                             uploadedOn: attachment.createdOn ?? '', uploadedComment: attachment.createdComment ?? '',
                             checkedOn: attachment.checkedOn ?? '', checkedComment: attachment.checkedComment ?? ''
                         },

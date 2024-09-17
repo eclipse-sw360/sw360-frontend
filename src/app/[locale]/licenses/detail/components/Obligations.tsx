@@ -124,7 +124,12 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             id: 'check',
             name: _(<i className={styles.collapse}></i>),
             formatter: (item: Obligation) =>
-                _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
+                _(
+                    <i
+                        className={styles.collapse}
+                        onClick={buildAttachmentDetail(item)}
+                    ></i>,
+                ),
             sort: false,
             width: '10%',
         },
@@ -172,11 +177,11 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                         style={{ textAlign: 'center' }}
                         name='obligationId'
                         type='checkbox'
-                        defaultChecked={!CommonUtils.isNullEmptyOrUndefinedArray(item.whitelist) ?? true}
+                        defaultChecked={!CommonUtils.isNullEmptyOrUndefinedArray(item.whitelist)}
                         onClick={() => {
                             handlerRadioButton(item)
                         }}
-                    ></Form.Check>
+                    ></Form.Check>,
                 ),
         },
         {
@@ -230,7 +235,12 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                 />
             ) : (
                 <div>
-                    <TableLicense data={data} columns={columns} style={style} pagination={false} />
+                    <TableLicense
+                        data={data}
+                        columns={columns}
+                        style={style}
+                        pagination={false}
+                    />
                 </div>
             )}
         </div>
