@@ -19,9 +19,6 @@ import sw360OauthPwdGrantTypeOption from './sw360OauthPwdGrantTypeOption';
 let authOptions: NextAuthOptions
 
 switch (AUTH_PROVIDER) {
-    case 'sw360basic':
-        authOptions = basicAuthOption
-        break;
     case 'sw360oauth':
         authOptions = sw360OauthOption
         break;
@@ -31,7 +28,9 @@ switch (AUTH_PROVIDER) {
     case 'oauth-password-grant':
         authOptions = sw360OauthPwdGrantTypeOption
         break;
+    case 'sw360basic':
     default:
+        authOptions = basicAuthOption
         break;
 }
 
