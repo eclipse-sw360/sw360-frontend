@@ -19,6 +19,7 @@ import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { notFound } from 'next/navigation'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 import { Spinner } from 'react-bootstrap'
+import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 
 type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 interface ModerationRequestMap {
@@ -34,6 +35,8 @@ function OpenModerationRequest() {
     const [mrIdArray, setMrIdArray] = useState([])
     const [tableData, setTableData] = useState<Array<any>>([])
     const [disableBulkDecline, setDisableBulkDecline] = useState(true)
+    const [bulkDeclineMRModal, setBulkDeclineMRModal] = useState(false)
+    const [mrDocumentNames, setMrDocumentNames] = useState([])
     const moderationRequestStatus : ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
@@ -69,24 +72,29 @@ function OpenModerationRequest() {
     useEffect(() => {
         setLoading(true)
         void fetchData('moderationrequest').then((moderationRequests: EmbeddedModerationRequest) => {
+            const mrNameArray: string[] = []
             const filteredModerationRequests = moderationRequests['_embedded']['sw360:moderationRequests']
                                                                 .filter((item: ModerationRequest) => {
                 return item.moderationState === 'PENDING' || item.moderationState === 'INPROGRESS';
             });
 
             setTableData(
-                filteredModerationRequests.map((item: ModerationRequest) => [
-                    item.id,
-                    formatDate(item.timestamp),
-                    item.documentType,
-                    _(<Link href={`/requests/moderationRequest/${item.id}`}>{item.documentName}</Link>),
-                    item.requestingUser,
-                    item.requestingUserDepartment,
-                    item.moderators,
-                    moderationRequestStatus[item.moderationState],
-                    '',
-                ])
-            )
+                filteredModerationRequests.map((item: ModerationRequest) => {
+                    mrNameArray.push(item.documentName)
+                    return [
+                        item.id,
+                        formatDate(item.timestamp),
+                        item.documentType,
+                        _(<Link href={`/requests/moderationRequest/${item.id}`}>{item.documentName}</Link>),
+                        item.requestingUser,
+                        item.requestingUserDepartment,
+                        item.moderators,
+                        moderationRequestStatus[item.moderationState],
+                        '',
+                    ]
+                }
+            ))
+            setMrDocumentNames(mrNameArray)
             setLoading(false)
         })}, [fetchData, session])
 
@@ -100,7 +108,7 @@ function OpenModerationRequest() {
         }
         setMrIdArray(updatedMrIdArray)
         setDisableBulkDecline(updatedMrIdArray.length === 0)
-    };
+    }
 
     const columns = [
         {
@@ -181,10 +189,17 @@ function OpenModerationRequest() {
     } else {
     return (
         <>
+            <BulkDeclineModerationRequestModal
+                show={bulkDeclineMRModal}
+                setShow={setBulkDeclineMRModal}
+                mrDocumentNames={mrDocumentNames}
+            />
             <div className='row mb-4'>
                 <div className='col-12'>
                     <button className='btn btn-danger'
-                            disabled={disableBulkDecline}>
+                            disabled={disableBulkDecline}
+                            onClick={() => setBulkDeclineMRModal(true)}
+                            >
                         {t('Bulk Decline Request')}
                     </button>
                 </div>
