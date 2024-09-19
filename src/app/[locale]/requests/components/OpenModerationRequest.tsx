@@ -74,6 +74,7 @@ function OpenModerationRequest() {
 
             setTableData(
                 filteredModerationRequests.map((item: ModerationRequest) => [
+                    item.id,
                     formatDate(item.timestamp),
                     item.documentType,
                     _(<Link href={`/requests/moderationRequest/${item.id}`}>{item.documentName}</Link>),
@@ -87,7 +88,31 @@ function OpenModerationRequest() {
             setLoading(false)
         })}, [fetchData, session])
 
+    // const handleCheckboxes = (moderationRequestId: string) => {
+    //     const m = new Map()
+    //     m.set(moderationRequestId)
+    // }
+
     const columns = [
+        {
+            id: 'openModerationRequest.selectMRCheckbox',
+            name: '',
+            width: '8%',
+            formatter: (moderationRequestId: string) =>
+                _(
+                    <div className='form-check'>
+                        <input
+                            className='form-check-input'
+                            type='checkbox'
+                            name='moderationRequestId'
+                            value={moderationRequestId}
+                            id={moderationRequestId}
+                            // checked={linkProjects.has(moderationRequestId)}
+                            // onChange={() => handleCheckboxes(moderationRequestId)}
+                        />
+                    </div>
+                ),
+        },
         {
             id: 'openModerationRequest.date',
             name: t('Date'),
@@ -148,6 +173,11 @@ function OpenModerationRequest() {
     return (
         <>
             <div className='row mb-4'>
+                <div className='col-12'>
+                    <button className='btn btn-danger'>
+                        {t('Bulk Decline Request')}
+                    </button>
+                </div>
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     {loading == false ? (
                         <div style={{ paddingLeft: '0px' }}>
