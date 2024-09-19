@@ -31,7 +31,9 @@ function OpenModerationRequest() {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
+    const [mrIdArray, setMrIdArray] = useState([])
     const [tableData, setTableData] = useState<Array<any>>([])
+    const [disableBulkDecline, setDisableBulkDecline] = useState(true)
     const moderationRequestStatus : ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
@@ -88,10 +90,17 @@ function OpenModerationRequest() {
             setLoading(false)
         })}, [fetchData, session])
 
-    // const handleCheckboxes = (moderationRequestId: string) => {
-    //     const m = new Map()
-    //     m.set(moderationRequestId)
-    // }
+    const handleCheckboxes = (moderationRequestId: string) => {
+        const updatedMrIdArray = [...mrIdArray]
+        if (updatedMrIdArray.includes(moderationRequestId)) {
+            const index = updatedMrIdArray.indexOf(moderationRequestId)
+            updatedMrIdArray.splice(index, 1)
+        } else {
+            updatedMrIdArray.push(moderationRequestId)
+        }
+        setMrIdArray(updatedMrIdArray)
+        setDisableBulkDecline(updatedMrIdArray.length === 0)
+    };
 
     const columns = [
         {
@@ -107,8 +116,8 @@ function OpenModerationRequest() {
                             name='moderationRequestId'
                             value={moderationRequestId}
                             id={moderationRequestId}
-                            // checked={linkProjects.has(moderationRequestId)}
-                            // onChange={() => handleCheckboxes(moderationRequestId)}
+                            checked={mrIdArray.includes(moderationRequestId)}
+                            onChange={() => handleCheckboxes(moderationRequestId)}
                         />
                     </div>
                 ),
@@ -174,7 +183,8 @@ function OpenModerationRequest() {
         <>
             <div className='row mb-4'>
                 <div className='col-12'>
-                    <button className='btn btn-danger'>
+                    <button className='btn btn-danger'
+                            disabled={disableBulkDecline}>
                         {t('Bulk Decline Request')}
                     </button>
                 </div>
