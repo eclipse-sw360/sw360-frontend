@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { Alert, Form, Modal } from 'react-bootstrap'
+import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
 interface Message {
@@ -37,6 +37,9 @@ export default function BulkDeclineModerationRequestModal({
     const [deleting] = useState<boolean>(undefined)
     const [message, setMessage] = useState<undefined | Message>(undefined)
 
+    const handleBulkDeclineModerationRequests = async () => {
+        await console.log('Test Delete-----')
+    }
 
     return (
         <>
@@ -69,6 +72,7 @@ export default function BulkDeclineModerationRequestModal({
                     )}
                     <p className='my-3'>{t('Decline All MRs')}</p> 
                     <Form>
+                    <Form.Group className='mb-3'>
                         <Form.Label className='mb-1'>
                             {t.rich('Your selected Moderation requests are')}
                             <ul>
@@ -82,18 +86,20 @@ export default function BulkDeclineModerationRequestModal({
                                 ))}
                             </ul>
                         </Form.Label>
-                        <Form.Group className='mb-3'>
-                            <Form.Label style={{ fontWeight: 'bold' }}>{t('Please provide your comments')}</Form.Label>
-                            <Form.Control
-                                as='textarea'
-                                aria-label='With textarea'
-                                placeholder='Comment your message...'
-                                // onChange={handleUserComment}
+                        <br />
+                        <Form.Label style={{ fontWeight: 'bold' }}>
+                            {t('Please provide your comments')}
+                        </Form.Label>
+                        <Form.Control
+                            as='textarea'
+                            aria-label='With textarea'
+                            placeholder='Comment your message...'
+                            // onChange={handleUserComment}
                             />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
-                {/* <Modal.Footer>
+                <Modal.Footer>
                     <button
                         className='btn btn-dark'
                         onClick={() => {
@@ -107,14 +113,16 @@ export default function BulkDeclineModerationRequestModal({
                     <button
                         className='btn btn-danger'
                         onClick={async () => {
-                            await handleDelete()
+                            await handleBulkDeclineModerationRequests()
                         }}
                         disabled={deleting}
                     >
-                        {t('Delete All License Information')}{' '}
-                        {deleting && <Spinner size='sm' className='ms-1 spinner' />}
+                        {t('Bulk Decline Moderation Requests')}{' '}
+                        {deleting && 
+                            <Spinner size='sm' className='ms-1 spinner' />
+                        }
                     </button>
-                </Modal.Footer> */}
+                </Modal.Footer>
             </Modal>
         </>
     )
