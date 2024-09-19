@@ -694,6 +694,7 @@
     "Not Checked": "未検査",
     "NotOwnComponent": "あなたはコンポーネントを所有していません。",
     "Note": "",
+    "Note for comments": "注: このコメントは、一括拒否用に選択されたすべてのモデレーション リクエストに入力されます。",
     "Number of Security Vulnerabilities": "セキュリティ脆弱性の数",
     "OAuth Client": "OAuth Client",
     "ON_HOLD": "保留中",

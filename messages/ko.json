@@ -694,6 +694,7 @@
     "Not Checked": "확인되지 않은",
     "NotOwnComponent": "당신은 어떤 성분을 소유하지 않습니다.",
     "Note": "",
+    "Note for comments": "참고: 이 댓글은 일괄 거부를 위해 선택한 모든 조정 요청에 채워집니다.",
     "Number of Security Vulnerabilities": "보안 취약점 수",
     "OAuth Client": "OAuth 클라이언트",
     "ON_HOLD": "보류 중",
