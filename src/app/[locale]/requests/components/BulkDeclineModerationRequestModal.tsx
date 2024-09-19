@@ -19,14 +19,18 @@ interface Message {
     message: string
 }
 
+interface propType {
+    [key: string]: string
+}
+
 export default function BulkDeclineModerationRequestModal({
     show,
     setShow,
-    mrDocumentNames
+    mrIdNameMap
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
-    mrDocumentNames: Array<string>
+    mrIdNameMap: propType
 }) {
     const t = useTranslations('default')
     const [deleting] = useState<boolean>(undefined)
@@ -67,8 +71,10 @@ export default function BulkDeclineModerationRequestModal({
                         <Form.Label className='mb-1'>
                             {t.rich('Your selected Moderation requests are')}
                             <ul>
-                                {Object.entries(mrDocumentNames).map(([key, name]) => (
-                                    <li key={key}>{`${name}`}</li>
+                                {Object.entries(mrIdNameMap).map(([key, value]) => (
+                                    <li key={key}>
+                                            {`${value}`}
+                                    </li>
                                 ))}
                             </ul>
                         </Form.Label>
