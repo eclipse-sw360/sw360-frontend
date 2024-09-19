@@ -694,6 +694,7 @@
     "Not Checked": "Chưa được kiểm tra",
     "NotOwnComponent": "Bạn không sở hữu bất kỳ thành phần nào.",
     "Note": "",
+    "Note for comments": "Lưu ý: Nhận xét này sẽ được áp dụng cho tất cả các Yêu cầu kiểm duyệt được chọn để từ chối hàng loạt",
     "Number of Security Vulnerabilities": "Số lượng lỗ hổng bảo mật",
     "OAuth Client": "OAuth Client",
     "ON_HOLD": "Đang chờ",

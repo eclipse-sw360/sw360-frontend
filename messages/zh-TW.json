@@ -694,6 +694,7 @@
     "Not Checked": "未勾選",
     "NotOwnComponent": "您沒有任何元件 。",
     "Note": "",
+    "Note for comments": "注意：此評論將填入選擇批量拒絕的所有審核請求中",
     "Number of Security Vulnerabilities": "安全脆弱性",
     "OAuth Client": "OAuth 用戶端",
     "ON_HOLD": "等候接聽",

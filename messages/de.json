@@ -694,6 +694,7 @@
     "Not Checked": "Nicht geprüft",
     "NotOwnComponent": "Sie besitzen keine Komponenten.",
     "Note": "",
+    "Note for comments": "Hinweis: Dieser Kommentar wird in alle Moderationsanfragen eingetragen, die für eine Massenablehnung ausgewählt wurden",
     "Number of Security Vulnerabilities": "Anzahl Sicherheitslücken",
     "OAuth Client": "OAuth Client",
     "ON_HOLD": "In der Warteschleife",

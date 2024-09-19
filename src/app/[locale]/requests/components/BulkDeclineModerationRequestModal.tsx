@@ -90,6 +90,10 @@ export default function BulkDeclineModerationRequestModal({
                         <Form.Label style={{ fontWeight: 'bold' }}>
                             {t('Please provide your comments')}
                         </Form.Label>
+                        <p className='subscriptionBox'
+                            style={{textAlign: 'left'}}>
+                            {t('Note for comments')}
+                        </p>
                         <Form.Control
                             as='textarea'
                             aria-label='With textarea'

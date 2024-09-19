@@ -694,6 +694,7 @@
     "Not Checked": "Non vérifié",
     "NotOwnComponent": "Vous ne possédez aucun composant.",
     "Note": "",
+    "Note for comments": "Remarque : Ce commentaire sera renseigné pour toutes les demandes de modération sélectionnées pour un refus groupé.",
     "Number of Security Vulnerabilities": "Nombre de vulnérabilités en matière de sécurité",
     "OAuth Client": "Client OAuth",
     "ON_HOLD": "En attente",

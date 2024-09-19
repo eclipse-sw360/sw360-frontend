@@ -694,6 +694,7 @@
     "Not Checked": "Not Checked",
     "NotOwnComponent": "You do not own any components.",
     "Note": "Note",
+    "Note for comments": "Note : This comment will be populated to all the Moderation Requests selected for bulk decline",
     "Number of Security Vulnerabilities": "Number of Security Vulnerabilities",
     "OAuth Client": "OAuth Client",
     "ON_HOLD": "On Hold",
