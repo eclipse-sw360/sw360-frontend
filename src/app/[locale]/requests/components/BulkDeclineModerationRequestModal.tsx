@@ -10,6 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Alert, Form, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
@@ -73,7 +74,10 @@ export default function BulkDeclineModerationRequestModal({
                             <ul>
                                 {Object.entries(mrIdNameMap).map(([key, value]) => (
                                     <li key={key}>
+                                        <Link className='link'
+                                              href={`/requests/moderationRequest/${key}`}>
                                             {`${value}`}
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>
