@@ -9,6 +9,7 @@
 
 'use client'
 
+import { ModerationRequestPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -36,6 +37,20 @@ export default function BulkDeclineModerationRequestModal({
     const t = useTranslations('default')
     const [deleting] = useState<boolean>(undefined)
     const [message, setMessage] = useState<undefined | Message>(undefined)
+    const [moderationRequestPayload, setModerationRequestPayload] =
+                useState<ModerationRequestPayload | undefined>({
+        action: '',
+        comment: ''
+    })
+
+    const handleUserComment = (event: React.ChangeEvent<HTMLSelectElement |
+                                                        HTMLInputElement |
+                                                        HTMLTextAreaElement>) => {
+        setModerationRequestPayload({
+            ...moderationRequestPayload,
+            [event.target.name]: event.target.value,
+        })
+    }
 
     const handleBulkDeclineModerationRequests = async () => {
         await console.log('Test Delete-----')
@@ -96,9 +111,10 @@ export default function BulkDeclineModerationRequestModal({
                         </p>
                         <Form.Control
                             as='textarea'
+                            name='comment'
                             aria-label='With textarea'
                             placeholder='Comment your message...'
-                            // onChange={handleUserComment}
+                            onChange={handleUserComment}
                             />
                         </Form.Group>
                     </Form>
