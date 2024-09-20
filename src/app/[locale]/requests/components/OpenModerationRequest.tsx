@@ -81,10 +81,6 @@ function OpenModerationRequest() {
             });
             setTableData(
                 filteredModerationRequests.map((item: ModerationRequest) => [
-                    {
-                        moderationRequestId: item.id,
-                        documentName: item.documentName
-                    },
                     formatDate(item.timestamp),
                     item.documentType,
                     _(<Link href={`/requests/moderationRequest/${item.id}`}>
@@ -94,7 +90,10 @@ function OpenModerationRequest() {
                     item.requestingUserDepartment,
                     item.moderators,
                     moderationRequestStatus[item.moderationState],
-                    '',
+                    {
+                        moderationRequestId: item.id,
+                        documentName: item.documentName
+                    },
                 ]
             ))
             setLoading(false)
@@ -119,26 +118,6 @@ function OpenModerationRequest() {
     }
 
     const columns = [
-        {
-            id: 'openModerationRequest.selectMRCheckbox',
-            name: '',
-            width: '8%',
-            formatter: ({moderationRequestId, documentName}: {moderationRequestId: string;
-                        documentName: string}) =>
-                _(
-                    <div className='form-check'>
-                        <input
-                            className='form-check-input'
-                            type='checkbox'
-                            name='moderationRequestId'
-                            value={moderationRequestId}
-                            id={moderationRequestId}
-                            checked={mrIdArray.includes(moderationRequestId)}
-                            onChange={() => handleCheckboxes(moderationRequestId, documentName)}
-                        />
-                    </div>
-                ),
-        },
         {
             id: 'openModerationRequest.date',
             name: t('Date'),
@@ -189,7 +168,22 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.actions',
             name: t('Actions'),
-            sort: true,
+            width: '5%',
+            formatter: ({moderationRequestId, documentName}: {moderationRequestId: string;
+                                                              documentName: string}) =>
+            _(
+                <div className='form-check'>
+                    <input
+                        className='form-check-input'
+                        type='checkbox'
+                        name='moderationRequestId'
+                        value={moderationRequestId}
+                        id={moderationRequestId}
+                        checked={mrIdArray.includes(moderationRequestId)}
+                        onChange={() => handleCheckboxes(moderationRequestId, documentName)}
+                    />
+                </div>
+            ),
         }
     ]
 
