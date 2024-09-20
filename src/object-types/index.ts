@@ -88,6 +88,7 @@ import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
 import SearchDuplicatesResponse from './SearchDuplicateResponse'
+import { AttachmentUsages, AttachmentUsage } from './AttachmentUsages'
 
 export type {
     AccessToken,
@@ -174,7 +175,9 @@ export type {
     MessageOptions,
     VulnerabilityTrackingStatus,
     ProjectVulnerabilityTrackingStatus,
-    SearchDuplicatesResponse
+    SearchDuplicatesResponse,
+    AttachmentUsages,
+    AttachmentUsage
 }
 
 // Special functions for populate data

@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus, NodeData } from '@/object-types'
+import { HttpStatus, NodeData, AttachmentUsages, Project, Release } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -22,7 +22,7 @@ import { Spinner } from 'react-bootstrap'
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function AttachmentUsages({ projectId }: { projectId: string }) {
+export default function AttachmentUsagesComponent({ projectId }: { projectId: string }) {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [data, setData] = useState<Array<NodeData | null>>(null)
@@ -88,20 +88,83 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
         }
     ]
 
-    const fetchProjectAndReleaseDetails = (linkedProjects: any, projectId: string, proj: any[]) => {
+    const fetchProjectAndReleaseDetails = (linkedProjects: Project[], projectId: string, proj: Project[]) => {
         if(!linkedProjects || proj.length !== 0) {
             return
         }
         for(const p of linkedProjects) {
-            if(p['_links']['self']['href'].substring(
-                    p['_links']['self']['href'].lastIndexOf('/') + 1
-                ) === projectId
+            if(p['_links']['self']['href'].split('/').at(-1) === projectId
             ) {
                 proj[0] = p
                 return
             } else {
                 fetchProjectAndReleaseDetails(p?.["_embedded"]?.["sw360:linkedProjects"], projectId, proj)
             }
+        }
+    }
+
+    const formatReleaseAttachmentDataToTableData = (r: Release, release: NodeData, attachmentUsages: AttachmentUsages) => {
+        for(const att of r.attachments) {
+            let sourceCodeBundleChecked = false, manuallySetChecked = false, licenseInfoChecked = false
+            const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"]?.[0]?.filter((elem: any) => elem.attachmentContentId === att.attachmentContentId)
+            for(const u of usages) {
+                if (u.usageData) {
+                    if(u.usageData.sourcePackage) {
+                        sourceCodeBundleChecked = true
+                    }
+                    if (u.usageData.manuallySet) {
+                        manuallySetChecked = true
+                    }
+                    if (u.usageData.licenseInfo) {
+                        licenseInfoChecked = true
+                    }
+                }
+            }
+            const attachment: NodeData = {
+                rowData: [
+                    <div key={`${att.filename ?? ''}_name_attachment`}>
+                        {att.filename ?? ''}
+                    </div>,
+                    <div key={`${att.filename ?? ''}_relation_attachment`}>
+                        {''}
+                    </div>,
+                    <div key={`${att.filename ?? ''}_uploadedBy_attachment`}>
+                        {att.createdBy ?? ''}
+                    </div>,
+                    <div key={`${att.filename ?? ''}_type_attachment`}>
+                        {att.attachmentType}
+                    </div>,
+                    <input
+                        key={`${att.filename ?? ''}_used_in_license_info_attachment`}
+                        id='attachmentUsages.checkbox'
+                        type='checkbox'
+                        className='form-check-input'
+                        checked={licenseInfoChecked}
+                        readOnly
+                    />,
+                    <div key={`${att.filename ?? ''}_used_in_license_info_conclusions_attachment`}>
+                        {''}
+                    </div>,
+                    <input
+                        key={`${att.filename ?? ''}_used_in_source_code_bundle_attachment`}
+                        id='attachmentUsages.sourceCodeBundle.checkbox'
+                        type='checkbox'
+                        className='form-check-input'
+                        checked={sourceCodeBundleChecked}
+                        readOnly
+                    />,
+                    <input
+                    key={`${att.filename ?? ''}_other_attachment`}
+                        id='attachmentUsages.other.checkbox'
+                        type='checkbox'
+                        className='form-check-input'
+                        checked={manuallySetChecked}
+                        readOnly
+                    />
+                ], 
+                children: []
+            }
+            release.children.push(attachment)
         }
     }
 
@@ -113,7 +176,7 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
         ;(async () => {
             try {
                 const res_licenseClearing = await ApiUtils.GET(
-                    `projects/${projectId}/attachmentUsage`,
+                    `projects/${projectId}/attachmentUsage?transitive=true`,
                     session.user.access_token,
                     signal
                 )
@@ -145,184 +208,88 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                     if(proj.length === 0) {
                         continue
                     }
-                    const releases = new Set<string>();
+                    const releases = new Set<string>()
                     proj[0].linkedReleases?.map((r: any) => {
-                        releases.add(
-                            r.release.substring(
-                                r.release.lastIndexOf('/') + 1
-                            )
-                        )
+                        releases.add(r.release.split('/').at(-1))
                     })
+                    const projId = proj[0]["_links"]["self"]["href"].split('/').at(-1)
                     const node: NodeData = {
                         rowData: [
-                            <Link key={`${proj[0]["_links"]["self"]["href"].substring(
-                                    proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                )}_name_project`} 
-                                href={`/projects/detail/${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}`}>
+                            <Link key={`${projId}_name_project`} 
+                                href={`/projects/detail/${projId}`}>
                                 {`${proj[0].name ?? ''} ${proj[0].version ?? ''}`}
                             </Link>,
-                            <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}_relationship_project`}>
+                            <div key={`${projId}_relationship_project`}>
                                 {Capitalize(attachmentUsages['linkedProjects'][p].projectRelationship ?? '')}
                             </div>,
-                            <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}_uploadedBy_project`}>
+                            <div key={`${projId}_uploadedBy_project`}>
                                 {''}
                             </div>,
-                            <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}_type_project`}>
+                            <div key={`${projId}_type_project`}>
                                 {''}
                             </div>,
-                            <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}_used_in_license_info_project`}>
+                            <div key={`${projId}_used_in_license_info_project`}>
                                 {''}
                             </div>,
-                            <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}_used_in_license_info_conclusions_project`}>
+                            <div key={`${projId}_used_in_license_info_conclusions_project`}>
                                 {''}
                             </div>,
-                            <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}_used_in_source_code_bundle_project`}>
+                            <div key={`${projId}_used_in_source_code_bundle_project`}>
                                 {''}
                             </div>,
-                            <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                            )}_other_project`}>
+                            <div key={`${projId}_other_project`}>
                                 {''}
                             </div>
                         ], 
                         children: []
                     }
                     for(const r of attachmentUsages['_embedded']['sw360:release']) {
-                        if(releases.has(r['_links']['self']['href'].substring(
-                                r['_links']['self']['href'].lastIndexOf('/') + 1
-                            ))) {
+                        if(releases.has(r['_links']['self']['href'].split('/').at(-1))) {
                                 const release: NodeData = {
                                     rowData: [
                                         <Link 
-                                            key={`${proj[0]["_links"]["self"]["href"].substring(
-                                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                            )}_name_release`} 
+                                            key={`${projId}_name_release`} 
                                             href={`/components/releases/detail/${
-                                                r['_links']['self']['href'].substring(
-                                                    r['_links']['self']['href'].lastIndexOf('/') + 1
-                                                )
+                                                r['_links']['self']['href'].split('/').at(-1)
                                             }`}
                                         >
                                             {`${r.name ?? ''} ${r.version ?? ''}`}
                                         </Link>,
-                                        <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                                proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                            )}_relation_release`} 
-                                        >
+                                        <div key={`${projId}_relation_release`}>
                                             {
                                                 Capitalize(attachmentUsages['releaseIdToUsage']?.[
-                                                    r['_links']['self']['href'].substring(
-                                                        r['_links']['self']['href'].lastIndexOf('/') + 1
-                                                    )
+                                                    r['_links']['self']['href'].split('/').at(-1)
                                                 ]?.releaseRelation ?? '')
                                             }
                                         </div>,
-                                        <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                            proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                        )}_uploadedBy_release`} 
-                                        >
+                                        <div key={`${projId}_uploadedBy_release`}>
                                             {''}
                                         </div>,
-                                        
-                                        <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                            proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                        )}_type_release`} 
-                                        >
+                                        <div key={`${projId}_type_release`}>
                                             {''}
                                         </div>,
-                                        <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                            proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                        )}_used_in_license_info_release`} 
-                                        >
+                                        <div key={`${projId}_used_in_license_info_release`}>
                                             {''}
                                         </div>,
-                                        <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                            proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                        )}_used_in_license_info_conclusions_release`} 
-                                        >
+                                        <div key={`${projId}_used_in_license_info_conclusions_release`}>
                                             {''}
                                         </div>,
-                                        <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                            proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                        )}_used_in_source_code_bundle_release`} 
-                                        >
+                                        <div key={`${projId}_used_in_source_code_bundle_release`}>
                                             {''}
                                         </div>,
-                                        <div key={`${proj[0]["_links"]["self"]["href"].substring(
-                                            proj[0]["_links"]["self"]["href"].lastIndexOf('/') + 1
-                                        )}_other_release`} 
-                                        >
+                                        <div key={`${projId}_other_release`}>
                                             {''}
                                         </div>,
                                     ],
                                     children: []
                                 }
-                                for(const att of r.attachments) {
-                                    const attachment: NodeData = {
-                                        rowData: [
-                                            <div key={`${att.filename ?? ''}_name_attachment`}>
-                                                {att.filename ?? ''}
-                                            </div>,
-                                            <div key={`${att.filename ?? ''}_relation_attachment`}>
-                                                {''}
-                                            </div>,
-                                            <div key={`${att.filename ?? ''}_uploadedBy_attachment`}>
-                                                {att.createdBy ?? ''}
-                                            </div>,
-                                            <div key={`${att.filename ?? ''}_type_attachment`}>
-                                                {Capitalize(att.attachmentType)}
-                                            </div>,
-                                            <input
-                                                key={`${att.filename ?? ''}_used_in_license_info_attachment`}
-                                                id='attachmentUsages.checkbox'
-                                                type='checkbox'
-                                                className='form-check-input'
-                                                disabled
-                                            />,
-                                            <div key={`${att.filename ?? ''}_used_in_license_info_conclusions_attachment`}>
-                                                {''}
-                                            </div>,
-                                            <input
-                                                key={`${att.filename ?? ''}_used_in_source_code_bundle_attachment`}
-                                                id='attachmentUsages.sourceCodeBundle.checkbox'
-                                                type='checkbox'
-                                                className='form-check-input'
-                                                disabled
-                                            />,
-                                            <input
-                                            key={`${att.filename ?? ''}_other_attachment`}
-                                                id='attachmentUsages.other.checkbox'
-                                                type='checkbox'
-                                                className='form-check-input'
-                                                disabled
-                                            />
-                                        ], 
-                                        children: []
-                                    }
-                                    release.children.push(attachment)
-                                }
+                                formatReleaseAttachmentDataToTableData(r, release, attachmentUsages)
                                 node.children.push(release)
                         }
                     }
                     attachmentUsages['_embedded']['sw360:release'] = 
                     attachmentUsages['_embedded']['sw360:release'].filter((r: any) => 
-                        !releases.has(r['_links']['self']['href'].substring(
-                            r['_links']['self']['href'].lastIndexOf('/') + 1
-                        ))
+                        !releases.has(r['_links']['self']['href'].split('/').at(-1))
                     )
                     tableData.push(node)
                 }
@@ -331,123 +298,45 @@ export default function AttachmentUsages({ projectId }: { projectId: string }) {
                     const release: NodeData = {
                         rowData: [
                             <Link 
-                                key={`${
-                                    r['_links']['self']['href'].substring(
-                                        r['_links']['self']['href'].lastIndexOf('/') + 1
-                                    )
-                                }_name_release`} 
+                                key={`${r['_links']['self']['href'].split('/').at(-1)}_name_release`} 
                                 href={`/components/releases/detail/${
-                                    r['_links']['self']['href'].substring(
-                                        r['_links']['self']['href'].lastIndexOf('/') + 1
-                                    )
+                                    r['_links']['self']['href'].split('/').at(-1)
                                 }`}
                             >
                                 {`${r.name ?? ''} ${r.version ?? ''}`}
                             </Link>,
-                            <div key={`${
-                                    r['_links']['self']['href'].substring(
-                                        r['_links']['self']['href'].lastIndexOf('/') + 1
-                                    )
-                                }_relation_release`} 
-                            >
+                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_relation_release`}>
                                 {
                                     Capitalize(attachmentUsages['releaseIdToUsage']?.[
-                                        r['_links']['self']['href'].substring(
-                                            r['_links']['self']['href'].lastIndexOf('/') + 1
-                                        )
+                                        r['_links']['self']['href'].split('/').at(-1)
                                     ]?.releaseRelation ?? '')
                                 }
                             </div>,
-                            <div key={`${
-                                    r['_links']['self']['href'].substring(
-                                        r['_links']['self']['href'].lastIndexOf('/') + 1
-                                    )
-                                }_uploadedBy_release`} 
-                            >
+                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_uploadedBy_release`}>
+                                {''}
+                            </div>,
+                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_type_release`}>
+                                {''}
+                            </div>,
+                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_used_in_license_info_release`}>
                                 {''}
                             </div>,
                             <div key={`${
-                                r['_links']['self']['href'].substring(
-                                    r['_links']['self']['href'].lastIndexOf('/') + 1
-                                )
-                            }_type_release`}>
+                                r['_links']['self']['href'].split('/').at(-1)}_used_in_license_info_conclusions_release`}>
                                 {''}
                             </div>,
                             <div key={`${
-                                r['_links']['self']['href'].substring(
-                                    r['_links']['self']['href'].lastIndexOf('/') + 1
-                                )
-                            }_used_in_license_info_release`} >
+                                r['_links']['self']['href'].split('/').at(-1)}_used_in_license_info_source_code_bundle`}>
                                 {''}
                             </div>,
                             <div key={`${
-                                r['_links']['self']['href'].substring(
-                                    r['_links']['self']['href'].lastIndexOf('/') + 1
-                                )
-                            }_used_in_license_info_conclusions_release`}>
-                                {''}
-                            </div>,
-                            <div key={`${
-                                r['_links']['self']['href'].substring(
-                                    r['_links']['self']['href'].lastIndexOf('/') + 1
-                                )
-                            }_used_in_license_info_source_code_bundle`}>
-                                {''}
-                            </div>,
-                            <div key={`${
-                                r['_links']['self']['href'].substring(
-                                    r['_links']['self']['href'].lastIndexOf('/') + 1
-                                )
-                            }_other_release`} >
+                                r['_links']['self']['href'].split('/').at(-1)}_other_release`}>
                                 {''}
                             </div>
                         ],
                         children: []
                     }
-                    for(const att of r.attachments) {
-                        const attachment: NodeData = {
-                            rowData: [
-                                <div key={`${att.filename ?? ''}_name_attachment`}>
-                                    {att.filename ?? ''}
-                                </div>,
-                                <div key={`${att.filename ?? ''}_relation_attachment`}>
-                                    {''}
-                                </div>,
-                                <div key={`${att.filename ?? ''}_uploadedBy_attachment`}>
-                                    {att.createdBy ?? ''}
-                                </div>,
-                                <div key={`${att.filename ?? ''}_type_attachment`}>
-                                    {Capitalize(att.attachmentType)}
-                                </div>,
-                                <input
-                                    key={`${att.filename ?? ''}_used_in_license_info_attachment`}
-                                    id='attachmentUsages.checkbox'
-                                    type='checkbox'
-                                    className='form-check-input'
-                                    disabled
-                                />,
-                                <div key={`${att.filename ?? ''}_used_in_license_info_conclusions_attachment`}>
-                                    {''}
-                                </div>,
-                                <input
-                                    key={`${att.filename ?? ''}_used_in_source_code_bundle_attachment`}
-                                    id='attachmentUsages.sourceCodeBundle.checkbox'
-                                    type='checkbox'
-                                    className='form-check-input'
-                                    disabled
-                                />,
-                                <input
-                                    key={`${att.filename ?? ''}_other_attachment`}
-                                    id='attachmentUsages.other.checkbox'
-                                    type='checkbox'
-                                    className='form-check-input'
-                                    disabled
-                                />
-                            ], 
-                            children: []
-                        }
-                        release.children.push(attachment)
-                    }
+                    formatReleaseAttachmentDataToTableData(r, release, attachmentUsages)
                     tableData.push(release)
                 }
                 setData(tableData)

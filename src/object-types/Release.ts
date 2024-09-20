@@ -40,6 +40,7 @@ interface Release {
     clearingInformation?: ClearingInformation
     cotsDetails?: COTSDetails
     attachmentDTOs?: Array<Attachment>
+    attachments?: Array<Attachment>
     eccInformation?: ECCInformation
     spdxId?: string
     _links?: Links
