@@ -203,7 +203,7 @@ function OpenModerationRequest() {
                             disabled={disableBulkDecline}
                             onClick={() => setBulkDeclineMRModal(true)}
                             >
-                        {t('Bulk Decline Request')}
+                        {t('Bulk Actions')}
                     </button>
                 </div>
                 <div className='col-12 d-flex justify-content-center align-items-center'>
