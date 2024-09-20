@@ -65,14 +65,14 @@ export default function BulkDeclineModerationRequestModal({
         setHasComment(hasCommentStatus)
     }
 
-    const handleRejectModerationRequest = async (singleMrId: string) => {
-
+    const handleRejectModerationRequest = async (singleMrId: string,
+                                                 updatedRejectPayload:ModerationRequestPayload
+                                                ) => {
         const hasComment = handleCommentValidation(moderationRequestPayload.comment)
         if (hasComment){
-            setModerationRequestPayload(moderationRequestPayload)
-            const response = await ApiUtils.PATCH(`moderationrequest/${Object.keys(singleMrId)}`,
-                                                moderationRequestPayload,
-                                                session.user.access_token)
+            const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`,
+                                                   updatedRejectPayload,
+                                                   session.user.access_token)
             if (response.status == HttpStatus.ACCEPTED) {
                 await response.json()
                 MessageService.success(t('You have rejected the moderation request'))
@@ -96,7 +96,7 @@ export default function BulkDeclineModerationRequestModal({
         }
         setModerationRequestPayload(updatedRejectPayload)
         for (const [key] of Object.entries(mrIdNameMap)){
-            await handleRejectModerationRequest(key)
+            await handleRejectModerationRequest(key, updatedRejectPayload)
         }
     }
 
