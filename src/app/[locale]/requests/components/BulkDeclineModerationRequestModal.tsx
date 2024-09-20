@@ -196,6 +196,18 @@ export default function BulkDeclineModerationRequestModal({
                                 <Spinner size='sm' className='ms-1 spinner' />
                             }
                         </button>
+                        <button
+                            className='btn btn-success'
+                            onClick={async () => {
+                                // await handleBulkAcceptModerationRequests()
+                            }}
+                            disabled={deleting || !hasComment}
+                        >
+                            {t('Bulk Accept Moderation Requests')}{' '}
+                            {deleting && 
+                                <Spinner size='sm' className='ms-1 spinner' />
+                            }
+                        </button>
                     </Modal.Footer>
                 </Modal>
             </>
