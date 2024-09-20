@@ -12,24 +12,30 @@
 import { ProjectPayload } from '@/object-types'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
+import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
+import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork'
 
 interface Props {
+    projectId?: string
     projectPayload: ProjectPayload
     existingReleaseData?: Map<string, any>
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LinkedReleasesAndProjects({ projectPayload,
-                                                    setProjectPayload,
-                                                    existingReleaseData }: Props) {
+export default function LinkedReleasesAndProjects({ projectId, projectPayload, setProjectPayload, existingReleaseData }: Props) {
     return (
         <>
             <div className='ms-1'>
-                <LinkedProjects projectPayload = {projectPayload}
-                                setProjectPayload = {setProjectPayload} />
-                <LinkedReleases projectPayload = {projectPayload}
+                <LinkedProjects projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
+                {
+                    ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true'
+                    ?
+                    <EditDependencyNetwork projectId={projectId} projectPayload={projectPayload} setProjectPayload={setProjectPayload}/>
+                    :
+                    <LinkedReleases projectPayload = {projectPayload}
                                 setProjectPayload = {setProjectPayload}
                                 existingReleaseData = {existingReleaseData}/>
+                }
             </div>
         </>
     )

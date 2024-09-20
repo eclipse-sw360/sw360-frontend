@@ -25,6 +25,7 @@ interface ReleaseLink {
     hasSubreleases?: boolean
     licenseIds?: Array<string>
     accessible?: boolean
+    componentId?: string
     _embedded?: {
         'sw360:releaseLinks': Array<ReleaseLink>
     }

@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReleaseNode } from '@/object-types'
+
 interface ProjectPayload {
     id?: string
     name: string
@@ -62,7 +64,8 @@ interface ProjectPayload {
             mainlineState?: string
             comment?: string
         }
-    }
+    },
+    dependencyNetwork?: Array<ReleaseNode>
 }
 
 export default ProjectPayload
