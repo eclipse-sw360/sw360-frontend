@@ -36,24 +36,33 @@ export default function BulkDeclineModerationRequestModal({
 }) {
     const t = useTranslations('default')
     const [deleting] = useState<boolean>(undefined)
+    const [hasComment, setHasComment] = useState<boolean>(false)
     const [message, setMessage] = useState<undefined | Message>(undefined)
     const [moderationRequestPayload, setModerationRequestPayload] =
-                useState<ModerationRequestPayload | undefined>({
+                    useState<ModerationRequestPayload>({
         action: '',
         comment: ''
     })
 
-    const handleUserComment = (event: React.ChangeEvent<HTMLSelectElement |
-                                                        HTMLInputElement |
-                                                        HTMLTextAreaElement>) => {
+    const handleCommentValidation = (comment: string) => {
+        if (!comment.trim()) {
+            return false
+        }
+        return true
+    }
+
+    const handleUserComment = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const updatedComment = event.target.value;
         setModerationRequestPayload({
             ...moderationRequestPayload,
-            [event.target.name]: event.target.value,
+            [event.target.name]: updatedComment,
         })
+        const hasCommentStatus: boolean = handleCommentValidation(updatedComment);
+        setHasComment(hasCommentStatus)
     }
 
     const handleBulkDeclineModerationRequests = async () => {
-        await console.log('Test Delete-----')
+        await console.log('Test Delete-----', moderationRequestPayload)
     }
 
     return (
@@ -66,6 +75,7 @@ export default function BulkDeclineModerationRequestModal({
                     if (!deleting) {
                         setShow(false)
                         setMessage(undefined)
+                        setHasComment(false)
                     }
                 }}
                 aria-labelledby={t('Decline All Selected Moderation Requests')}
@@ -103,7 +113,10 @@ export default function BulkDeclineModerationRequestModal({
                         </Form.Label>
                         <br />
                         <Form.Label style={{ fontWeight: 'bold' }}>
-                            {t('Please provide your comments')}
+                            {t('Please provide your comments')}{' '}
+                            <span className='text-red' style={{ color: '#F7941E' }}>
+                                *
+                            </span>
                         </Form.Label>
                         <p className='subscriptionBox'
                             style={{textAlign: 'left'}}>
@@ -115,6 +128,7 @@ export default function BulkDeclineModerationRequestModal({
                             aria-label='With textarea'
                             placeholder='Comment your message...'
                             onChange={handleUserComment}
+                            required
                             />
                         </Form.Group>
                     </Form>
@@ -125,6 +139,7 @@ export default function BulkDeclineModerationRequestModal({
                         onClick={() => {
                             setShow(false)
                             setMessage(undefined)
+                            setHasComment(false)
                         }}
                         disabled={deleting}
                     >
@@ -135,7 +150,7 @@ export default function BulkDeclineModerationRequestModal({
                         onClick={async () => {
                             await handleBulkDeclineModerationRequests()
                         }}
-                        disabled={deleting}
+                        disabled={deleting || !hasComment}
                     >
                         {t('Bulk Decline Moderation Requests')}{' '}
                         {deleting && 
