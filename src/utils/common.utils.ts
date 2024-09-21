@@ -17,7 +17,7 @@ import { InputKeyValue, User } from '@/object-types'
  * @param obj - The object to check.
  * @returns True if the object is null or undefined, false otherwise.
  */
-const isNullOrUndefined = (obj: unknown) => {
+const isNullOrUndefined = (obj: unknown): boolean => {
     if (obj === null || obj === undefined) {
         return true
     }
@@ -29,8 +29,8 @@ const isNullOrUndefined = (obj: unknown) => {
  * @param str - The string to check.
  * @returns True if the string is null, empty or undefined, false otherwise.
  */
-const isNullEmptyOrUndefinedString = (str: string) => {
-    if (str === null || str === undefined || str.length === 0) {
+const isNullEmptyOrUndefinedString = (str: string): boolean => {
+    if (str.length === 0) {
         return true
     }
     return false
@@ -47,9 +47,9 @@ interface UrlWithParams {
  * @param params - An object containing the query parameters.
  * @returns The URL with the query parameters.
  */
-const createUrlWithParams = (url: string, params: UrlWithParams) => {
+const createUrlWithParams = (url: string, params: UrlWithParams): string => {
     const queryString = Object.keys(params)
-        .filter((key) => params[key] !== undefined)
+        .filter((key) => params[key])
         .map((key) => {
             return [key, params[key]].map(encodeURIComponent).join('=')
         })
@@ -62,8 +62,8 @@ const createUrlWithParams = (url: string, params: UrlWithParams) => {
  * @param arr - The array to check.
  * @returns True if the array is null, empty or undefined, false otherwise.
  */
-const isNullEmptyOrUndefinedArray = (arr: Array<unknown>) => {
-    if (arr === null || arr === undefined || arr.length === 0) {
+const isNullEmptyOrUndefinedArray = (arr: Array<unknown>): boolean => {
+    if (arr.length === 0) {
         return true
     }
     return false
@@ -75,7 +75,7 @@ const isNullEmptyOrUndefinedArray = (arr: Array<unknown>) => {
  * @returns The ID extracted from the URL string.
  */
 const getIdFromUrl = (url: string): string => {
-    return url.split('/').at(-1)
+    return url.split('/').at(-1) ?? ''
 }
 
 /**
@@ -83,10 +83,10 @@ const getIdFromUrl = (url: string): string => {
  * @param users - An array of User objects.
  * @returns An array of email addresses.
  */
-const getEmailsModerators = (users: User[]) => {
+const getEmailsModerators = (users: User[]): string[] => {
     const moderatorsEmail: string[] = []
     if (typeof users === 'undefined') {
-        return
+        return []
     }
     users.forEach((item: User) => {
         moderatorsEmail.push(item.email)
@@ -100,7 +100,7 @@ const getEmailsModerators = (users: User[]) => {
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
  */
-const convertObjectToMap = (data: { [k: string]: string }) => {
+const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
     const map = new Map(Object.entries(data))
     const inputs: InputKeyValue[] = []
     map.forEach((value, key) => {
@@ -118,17 +118,14 @@ const convertObjectToMap = (data: { [k: string]: string }) => {
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
  */
-const convertObjectToMapRoles = (data: { [k: string]: Array<string> }) => {
-    if (data === undefined) {
-        return []
-    }
+const convertObjectToMapRoles = (data: { [k: string]: Array<string> }): InputKeyValue[] => {
     const inputRoles: InputKeyValue[] = []
     const mapRoles = new Map(Object.entries(data))
     mapRoles.forEach((value, key) => {
         for (let index = 0; index < value.length; index++) {
             const input: InputKeyValue = {
                 key: key,
-                value: value.at(index),
+                value: value.at(index) ?? '',
             }
             inputRoles.push(input)
         }
@@ -141,10 +138,7 @@ const convertObjectToMapRoles = (data: { [k: string]: Array<string> }) => {
  * @param datas - The array of key-value pairs to convert.
  * @returns An object with keys for each role type and an array of values for each role.
  */
-const convertRoles = (datas: InputKeyValue[]) => {
-    if (datas === null) {
-        return null
-    }
+const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
     const contributors: string[] = []
     const commiters: string[] = []
     const expecters: string[] = []
@@ -156,7 +150,6 @@ const convertRoles = (datas: InputKeyValue[]) => {
     const testManager: string[] = []
     const technicalWriter: string[] = []
     const keyUser: string[] = []
-
 
     datas.forEach((data) => {
         if (data.key === 'Contributor') {
@@ -205,7 +198,7 @@ const convertRoles = (datas: InputKeyValue[]) => {
  * @param maxLength - The maximum length of the truncated text.
  * @returns The truncated text.
  */
-const truncateText = (text: string, maxLength = 80) => {
+const truncateText = (text: string, maxLength = 80): string => {
     if (text.length <= maxLength) {
         return text
     }
@@ -233,7 +226,7 @@ const truncateText = (text: string, maxLength = 80) => {
  * @returns Object contain emails and full names are extracted from array of users.
  */
 
-const fillDate = (value: string) => {
+const fillDate = (value: string): string => {
     const timeStamp = Date.parse(value)
 
     const date = new Date(timeStamp)
@@ -251,7 +244,7 @@ const fillDate = (value: string) => {
     )
 }
 
-const fillTime = (value: string) => {
+const fillTime = (value: string): string => {
     const timeStamp = Date.parse(value)
 
     const date = new Date(timeStamp)
@@ -265,7 +258,7 @@ const fillTime = (value: string) => {
     )
 }
 
-const readDateTime = (datePicker: string, timePicker: string) => {
+const readDateTime = (datePicker: string, timePicker: string): string => {
     if (datePicker == '' || timePicker == '') {
         return ''
     }
@@ -273,14 +266,17 @@ const readDateTime = (datePicker: string, timePicker: string) => {
     return localDate.toISOString().slice(0, -5) + 'Z'
 }
 
-const extractEmailsAndFullNamesFromUsers = (users: Array<User>) => {
-    return users.reduce((result, user) => {
-        result[user.email] = user.fullName
-        return result
-    }, {} as { [k: string]: string })
+const extractEmailsAndFullNamesFromUsers = (users: Array<User>): { [k: string]: string } => {
+    return users.reduce(
+        (result, user) => {
+            result[user.email] = user.fullName ?? ''
+            return result
+        },
+        {} as { [k: string]: string },
+    )
 }
 
-const nullToEmptyString = (item: string | null | undefined) => item ? item : ''
+const nullToEmptyString = (item: string | null | undefined): string => (item != null ? item : '')
 
 const CommonUtils = {
     isNullOrUndefined,
