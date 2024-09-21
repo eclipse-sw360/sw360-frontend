@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Subject } from 'rxjs'
-import { filter } from 'rxjs/operators'
 import { Message, MessageOptions } from '@/object-types'
+import { Observable, Subject } from 'rxjs'
+import { filter } from 'rxjs/operators'
 
 const MessageType = {
     Success: 'success',
@@ -19,45 +19,45 @@ const MessageType = {
     Warning: 'warning',
 }
 
-const messageSubject = new Subject<Message>();
-const defaultId = 'default-message';
+const messageSubject = new Subject<Message>()
+const defaultId = 'default-message'
 
 // enable subscribing to messages observable
-function enableSubscribing(id = defaultId) {
-    return messageSubject.asObservable().pipe(filter((x: Message)=> x && x.id === id))
+function enableSubscribing(id = defaultId): Observable<Message> {
+    return messageSubject.asObservable().pipe(filter((x: Message) => x.id === id))
 }
 
 // convenience methods
-function success(message: string, options?: MessageOptions | undefined) {
+function success(message: string, options?: MessageOptions | undefined): void {
     showMessage(MessageType.Success, message, 'Success', options)
 }
 
-function error(message: string, options?: MessageOptions | undefined) {
+function error(message: string, options?: MessageOptions | undefined): void {
     showMessage(MessageType.Error, message, 'Error', options)
 }
 
-function info(message: string, options?: MessageOptions | undefined) {
+function info(message: string, options?: MessageOptions | undefined): void {
     showMessage(MessageType.Info, message, 'Info', options)
 }
 
-function warn(message: string, options?: MessageOptions) {
+function warn(message: string, options?: MessageOptions): void {
     showMessage(MessageType.Warning, message, 'Warning', options)
 }
 
-function showMessage(type: string, text: string, lead: string, options: MessageOptions) {
+function showMessage(type: string, text: string, lead: string, options?: MessageOptions): void {
     const message: Message = {
-        id: (options && options.id) ? options.id : defaultId,
+        id: options && options.id != null ? options.id : defaultId,
         type: type,
         lead: lead,
         text: text,
-        autoClose: (options && options.autoClose) ? options.autoClose : true,
-        keepAfterRouteChange: (options && options.keepAfterRouteChange) ? options.keepAfterRouteChange : true
+        autoClose: options && (options.autoClose ?? false) ? options.autoClose : true,
+        keepAfterRouteChange: options?.keepAfterRouteChange ?? true,
     }
 
     messageSubject.next(message)
 }
 
-function clear(id = defaultId) {
+function clear(id = defaultId): void {
     messageSubject.next({ id })
 }
 
@@ -68,7 +68,7 @@ const MessageService = {
     info,
     warn,
     showMessage,
-    clear
+    clear,
 }
 
 export default MessageService
