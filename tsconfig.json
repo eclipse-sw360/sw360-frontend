@@ -7,53 +7,53 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 {
-    "compilerOptions": {
-        "target": "es6",
-        "lib": ["dom", "dom.iterable", "esnext"],
-        "allowJs": true,
-        "skipLibCheck": true,
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
-        "esModuleInterop": true,
-        "module": "esnext",
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "jsx": "preserve",
-        "incremental": true,
-        "strictNullChecks": false,
-        "typeRoots": ["node_modules/@types", "./types"],
-        "sourceMap": true,
-        "allowSyntheticDefaultImports": true,
-        "paths": {
-            "next-sw360": ["./src/components/sw360"],
-            "@/app/*": ["./src/app/*"],
-            "@/assets/*": ["./src/assets/*"],
-            "@/components/*": ["./src/components/*"],
-            "@/constants": ["./src/object-types/Constants"],
-            "@/hooks": ["./src/hooks"],
-            "@/messages": ["./messages"],
-            "@/object-types": ["./src/object-types"],
-            "@/services/*": ["./src/services/*"],
-            "@/styles/*": ["./src/styles/*"],
-            "@/utils/*": ["./src/utils/*"],
-            "@/utils": ["./src/utils"]
-        },
-        "plugins": [
-            {
-                "name": "next"
-            }
-        ]
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "strictNullChecks": true,
+    "typeRoots": ["node_modules/@types", "./types"],
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "next-sw360": ["./src/components/sw360"],
+      "@/app/*": ["./src/app/*"],
+      "@/assets/*": ["./src/assets/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/constants": ["./src/object-types/Constants"],
+      "@/hooks": ["./src/hooks"],
+      "@/messages": ["./messages"],
+      "@/object-types": ["./src/object-types"],
+      "@/services/*": ["./src/services/*"],
+      "@/styles/*": ["./src/styles/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/utils": ["./src/utils"]
     },
-    "include": [
-        "next-env.d.ts",
-        "next.config.js",
-        "nextauth.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        ".next/types/**/*.ts",
-        "*.tsx"
-    ],
-    "exclude": ["dist", "node_modules", "src/**/*.test.tsx"]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "next.config.js",
+    "nextauth.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "*.tsx"
+  ],
+  "exclude": ["dist", "node_modules", "src/**/*.test.tsx"]
 }

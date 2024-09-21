@@ -1,36 +1,43 @@
 {
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended",
-        //"plugin:@typescript-eslint/recommended-requiring-type-checking",
-        "next",
-        "prettier"
+  "settings": {
+    "next": {
+      "rootDir": "src"
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "tsconfig.json"
+      }
+    }
+  },
+  "plugins": ["@typescript-eslint", "react", "import"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "next",
+    "prettier"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": ["warn", { "fixToUnknown": false }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }
     ],
-    "settings": {
-        "next": {
-            "rootDir": "src"
-        },
-        "import/resolver": {
-            "typescript": {
-                "alwaysTryTypes": true,
-                "project": "tsconfig.json"
-            }
-        }
-
-    },
-    "plugins": ["@typescript-eslint", "react", "import"],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "project": true,
-        "tsconfigRootDir": "__dirname",
-        "ecmaFeatures": {
-            "jsx": true
-        }
-    },
-    "rules": {
-        "@typescript-eslint/no-explicit-any": ["warn", { "fixToUnknown": true }],
-        "@typescript-eslint/no-unused-vars": ["error"],
-        "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": "allow-with-description" }]
-    },
-    "root": true
+    "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": "allow-with-description" }],
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/explicit-module-boundary-types": "warn",
+    "@typescript-eslint/no-inferrable-types": "error",
+    "@typescript-eslint/no-unnecessary-condition": "error",
+    "@typescript-eslint/strict-boolean-expressions": "error",
+    "@typescript-eslint/no-unsafe-call": "warn"
+  },
+  "root": true
 }
