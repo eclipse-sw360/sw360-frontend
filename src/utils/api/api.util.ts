@@ -41,30 +41,30 @@ async function send({
         request_content.headers['Authorization'] = `${token}`
     }
 
-    if (signal) {
+    if (signal !== undefined) {
         request_content.signal = signal
     }
 
     return fetch(`${base}/${path}`, request_content).then((r) => r)
 }
 
-function GET(path: string, token: string, signal?: unknown) {
+function GET(path: string, token: string, signal?: unknown): Promise<Response> {
     return send({ method: 'GET', path, token, data: null, signal })
 }
 
-function DELETE(path: string, token: string) {
+function DELETE(path: string, token: string): Promise<Response> {
     return send({ method: 'DELETE', path, token, data: null })
 }
 
-function POST(path: string, data: object, token: string) {
+function POST(path: string, data: object, token: string): Promise<Response> {
     return send({ method: 'POST', path, data, token })
 }
 
-function PUT(path: string, data: object, token: string) {
+function PUT(path: string, data: object, token: string): Promise<Response> {
     return send({ method: 'PUT', path, data, token })
 }
 
-function PATCH(path: string, data: object, token: string) {
+function PATCH(path: string, data: object, token: string): Promise<Response> {
     return send({ method: 'PATCH', path, data, token })
 }
 
