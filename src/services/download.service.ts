@@ -11,7 +11,11 @@
 import { ApiUtils } from '@/utils'
 import { Session } from '@/object-types'
 
-const download = (url: string, session: Session, fileName: string) => {
+const download = (url: string, session: Session, fileName: string): void => {
+    if (!session.user) {
+        console.error('User is undefined');
+        return;
+    }
     ApiUtils.GET(url, session.user.access_token)
         .then((response) => response.blob())
         .then((blob: Blob) => {
