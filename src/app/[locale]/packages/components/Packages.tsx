@@ -168,17 +168,19 @@ export default function Packages() {
     return (
         <>
             <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData} isEditPage={false}/>
-            <div className='mx-3 mt-3'>
+            <div className='container page-content'>
                 <div className='row'>
-                    <div className='col-lg-2'>
+                    <div className='col-2'>
                         <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                     </div>
-                    <div className='col-lg-10'>
-                        <div className='row d-flex justify-content-between ms-1'>
-                            <button className='btn btn-primary col-auto' onClick={handleCreatePackage}>
-                                {t('Add Package')}
-                            </button>
-                            <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
+                    <div className='col-10'>
+                        <div className='row'>
+                            <div className='col d-flex justify-content-between'>
+                                <button className='btn btn-primary col-auto' onClick={handleCreatePackage}>
+                                    {t('Add Package')}
+                                </button>
+                                <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
+                            </div>
                         </div>
                         {
                             status === 'authenticated' ? 

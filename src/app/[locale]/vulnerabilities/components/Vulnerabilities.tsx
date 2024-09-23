@@ -149,13 +149,10 @@ function Vulnerabilities() {
             />
             <div className='container page-content'>
                 <div className='row'>
-                    <div className='col-lg-2'>
-                        <div className='row mb-3'>
-                            <QuickFilter id='vunerabilities.quickSearch' />
-                        </div>
-                        <div className='row'>
-                            <AdvancedSearch title='Advanced Filter' fields={advancedSearch} />
-                        </div>
+                    <div className='col-lg-2 sidebar'>
+                        <QuickFilter id='vunerabilities.quickSearch' />
+                        <br/>
+                        <AdvancedSearch title='Advanced Filter' fields={advancedSearch} />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between ms-1'>

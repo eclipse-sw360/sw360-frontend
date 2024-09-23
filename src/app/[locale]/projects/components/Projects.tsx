@@ -346,13 +346,13 @@ function Project() {
         <>
             <ImportSBOMModal importSBOMMetadata={importSBOMMetadata} setImportSBOMMetadata={setImportSBOMMetadata} />
             <DeleteProjectDialog projectId={deleteProjectId} show={deleteDialogOpen} setShow={setDeleteDialogOpen} />
-            <div className='mx-3 mt-3'>
+            <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
                         <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                     </div>
                     <div className='col-lg-10'>
-                        <div className='row d-flex justify-content-between ms-1'>
+                        <div className='row d-flex justify-content-between'>
                             <div className='col-lg-5'>
                                 <div className='row'>
                                     <div className='btn-group col-auto' role='group'>

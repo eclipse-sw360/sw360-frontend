@@ -659,7 +659,7 @@ body {
 
 .licadmin-upload {
     color: #5d8ea9;
-    border: 1px solid #5d8ea9;
+    border-bottom: 1px solid #5d8ea9;
     font-size: 1rem;
     font-weight: bold;
     text-transform: uppercase;
