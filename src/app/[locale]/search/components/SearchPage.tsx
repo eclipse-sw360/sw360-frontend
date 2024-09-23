@@ -93,7 +93,7 @@ export default function Search() {
                                 {t('SEARCH RESULTS', { datalength: data ? data.length : 0 })}
                             </div>
                         </div>
-                        <div className='row mt-5'>
+                        <div className='row'>
                             {!data ? (
                                 <div className='col-12' style={{ textAlign: 'center' }}>
                                     <Spinner className='spinner' />

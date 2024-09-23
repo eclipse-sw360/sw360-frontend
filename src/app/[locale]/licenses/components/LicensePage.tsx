@@ -93,12 +93,12 @@ function LicensePage() {
         signOut()
     } else {
         return (
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+            <div className='container page-content'>
                 <div className='row'>
                     <div className='col-2 sidebar'>
                         <QuickFilter id='licensefilter' title={t('Quick Filter')} searchFunction={doSearch} />
                     </div>
-                    <div className='col col-sm-9'>
+                    <div className='col col-10'>
                         <div className='col'>
                             <div className='row'>
                                 <PageButtonHeader

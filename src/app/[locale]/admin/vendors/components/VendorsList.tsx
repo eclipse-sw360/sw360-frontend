@@ -99,7 +99,7 @@ export default function VendorsList() {
                         <QuickFilter id='vendorSearch' />
                     </div>
                     <div className='col-lg-10'>
-                        <div className='row d-flex justify-content-between ms-1'>
+                        <div className='row d-flex justify-content-between'>
                             <div className='col-lg-5'>
                                 <button className='btn btn-primary col-auto me-2' onClick={handleAddVendor}>
                                     {t('Add Vendor')}

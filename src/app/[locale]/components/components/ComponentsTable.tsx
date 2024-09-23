@@ -118,7 +118,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
 
     return (
         <>
-            <div className='row'>
+            <div className='col'>
                 {status === 'authenticated' &&
                     <Table columns={columns} selector={true} server={initServerPaginationConfig(session)} />
                 }
