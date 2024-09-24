@@ -1069,6 +1069,7 @@
     "UPLOAD SBOM HEADER": "Cargue el documento SBOM <strong>{fileFormats}</strong>.",
     "URL": "URL",
     "Unknown": "Desconocido",
+    "Unsubscribe": "Darse de baja",
     "Update": "Actualización",
     "Update Component": "Componente de actualización",
     "Update External Link Failed!": "",
