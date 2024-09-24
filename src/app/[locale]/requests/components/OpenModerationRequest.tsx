@@ -80,21 +80,24 @@ function OpenModerationRequest() {
                        item.moderationState === 'INPROGRESS';
             });
             setTableData(
-                filteredModerationRequests.map((item: ModerationRequest) => [
-                    formatDate(item.timestamp),
-                    item.documentType,
-                    _(<Link href={`/requests/moderationRequest/${item.id}`}>
-                        {item.documentName}
-                        </Link>),
-                    item.requestingUser,
-                    item.requestingUserDepartment,
-                    item.moderators,
-                    moderationRequestStatus[item.moderationState],
-                    {
-                        moderationRequestId: item.id,
-                        documentName: item.documentName
-                    },
-                ]
+                filteredModerationRequests.map((item: ModerationRequest) => {
+                    return [
+                        formatDate(item.timestamp),
+                        item.documentType,
+                        {
+                            id: item.id,
+                            documentName: item.documentName,
+                        },
+                        item.requestingUser,
+                        item.requestingUserDepartment,
+                        item.moderators,
+                        moderationRequestStatus[item.moderationState],
+                        {
+                            moderationRequestId: item.id,
+                            documentName: item.documentName
+                        },
+                    ]
+                }
             ))
             setLoading(false)
         })}, [fetchData, session])
@@ -110,7 +113,6 @@ function OpenModerationRequest() {
         } else {
             mrMap[moderationRequestId] = documentName
             updatedMrIdArray.push(moderationRequestId)
-            setMrIdNameMap(mrMap)
         }
         setMrIdArray(updatedMrIdArray)
         setMrIdNameMap(mrMap)
@@ -121,21 +123,33 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.date',
             name: t('Date'),
+            width: 'auto',
             sort: true,
         },
         {
             id: 'openModerationRequest.type',
             name: t('Type'),
+            width: 'auto',
             sort: true,
         },
         {
             id: 'openModerationRequest.documentName',
             name: t('Document Name'),
+            width: 'auto',
             sort: true,
+            formatter: ({id, documentName}: {id: string, documentName: string}) =>
+                _(
+                    <>
+                        <Link href={`/requests/moderationRequest/${id}`}>
+                            {documentName}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'openModerationRequest.requestingUser',
             name: t('Requesting User'),
+            width: 'auto',
             formatter: (email: string) =>
                 _(
                     <>
@@ -149,11 +163,13 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.department',
             name: t('Department'),
+            width: 'auto',
             sort: true,
         },
         {
             id: 'openModerationRequest.moderators',
             name: t('Moderators'),
+            width: 'auto',
             formatter: (moderators: string[]) =>
                 _(
                     <ExpandingModeratorCell moderators={moderators} />
@@ -168,9 +184,9 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.actions',
             name: t('Actions'),
-            width: '5%',
-            formatter: ({moderationRequestId, documentName}: {moderationRequestId: string;
-                                                              documentName: string}) =>
+            width: 'auto',
+            formatter: ({moderationRequestId, documentName}:
+                            {moderationRequestId: string, documentName: string}) =>
             _(
                 <div className='form-check'>
                     <input

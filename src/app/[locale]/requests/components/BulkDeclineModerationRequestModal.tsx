@@ -13,11 +13,12 @@ import { HttpStatus, ModerationRequestPayload } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
 import { signOut, useSession } from 'next-auth/react'
+import { _, Table } from 'next-sw360'
 
 interface Message {
     type: 'success' | 'danger'
@@ -38,8 +39,10 @@ export default function BulkDeclineModerationRequestModal({
     mrIdNameMap: propType
 }) {
     const t = useTranslations('default')
+    const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
     const [deleting] = useState<boolean>(undefined)
+    const [tableData, setTableData] = useState<Array<any>>([])
     const [hasComment, setHasComment] = useState<boolean>(false)
     const [message, setMessage] = useState<undefined | Message>(undefined)
     const [moderationRequestPayload, setModerationRequestPayload] =
@@ -47,6 +50,46 @@ export default function BulkDeclineModerationRequestModal({
         action: '',
         comment: ''
     })
+
+    const columns = [
+        {
+            id: 'bulkModerationRequestAction.documentName',
+            name: t('Document Name'),
+            sort: true,
+            width: "50%",
+            formatter: ({mrId, documentName}:{mrId: string; documentName: string}) =>
+                _(
+                    <>
+                        <Link className='link'
+                            href={`/requests/moderationRequest/${mrId}`}>
+                            {documentName}
+                        </Link>
+                    </>
+                ),
+        },
+        {
+            id: 'bulkModerationRequestAction.status',
+            name: t('Status'),
+            sort: true,
+            width: "50%"
+        },
+    ]
+
+    useEffect(() => {
+        setLoading(true)
+        setTableData(
+            Object.entries(mrIdNameMap).map(([key, value]) => {
+                return [
+                        {
+                            moderationRequestId: key,
+                            documentName: value
+                        },
+                        ''
+                    ]
+            })
+        )
+        setLoading(false)
+    },[mrIdNameMap])
 
     const handleCommentValidation = (comment: string) => {
         if (!comment.trim()) {
@@ -139,16 +182,20 @@ export default function BulkDeclineModerationRequestModal({
                         <Form.Group className='mb-3'>
                             <Form.Label className='mb-1'>
                                 {t.rich('Your selected Moderation requests are')}
-                                <ul>
-                                    {Object.entries(mrIdNameMap).map(([key, value]) => (
-                                        <li key={key}>
-                                            <Link className='link'
-                                                href={`/requests/moderationRequest/${key}`}>
-                                                {`${value}`}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className='col-12 d-flex justify-content-center align-items-center'>
+                                    {loading == false ? (
+                                        <div style={{ paddingLeft: '0px' }}>
+                                            <Table columns={columns}
+                                                data={tableData}
+                                                sort={false}
+                                                selector={true}
+                                            />
+                                        </div>
+                                        ) : (
+                                                <Spinner className='spinner' />
+                                        )
+                                    }
+                                </div>
                             </Form.Label>
                             <br />
                             <Form.Label style={{ fontWeight: 'bold' }}>
