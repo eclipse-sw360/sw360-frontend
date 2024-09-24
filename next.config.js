@@ -16,6 +16,9 @@ const nextConfig = {
     experimental: {
         missingSuspenseWithCSRBailout: false,
     },
+    typescript: {
+        ignoreBuildErrors: false,
+    },
 }
 
 module.exports = withNextIntl(nextConfig)
