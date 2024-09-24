@@ -1069,6 +1069,7 @@
     "UPLOAD SBOM HEADER": "请上传<strong>{fileFormats}</strong> SBOM 文档。",
     "URL": "网址",
     "Unknown": "未知",
+    "Unsubscribe": "退订",
     "Update": "更新",
     "Update Component": "更新组件",
     "Update External Link Failed!": "",

@@ -1069,6 +1069,7 @@
     "UPLOAD SBOM HEADER": "<strong>{fileFormats}</strong> SBOM ドキュメントをアップロードしてください。",
     "URL": "URL",
     "Unknown": "未知",
+    "Unsubscribe": "購読を解除する",
     "Update": "アップデート",
     "Update Component": "コンポーネントの更新",
     "Update External Link Failed!": "",
