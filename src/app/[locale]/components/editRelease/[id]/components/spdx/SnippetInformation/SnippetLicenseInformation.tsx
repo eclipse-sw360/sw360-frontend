@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    licenseInfoInSnippets?: string[]
-    setAllLicensesInformationToSnippet?: any
-    licenseInfoInSnippetsExist?: boolean
-    setLicenseInfoInSnippetsExist?: React.Dispatch<React.SetStateAction<boolean>>
-    licenseInfoInSnippetsNone?: boolean
-    setLicenseInfoInSnippetsNone?: React.Dispatch<React.SetStateAction<boolean>>
-    licenseInfoInSnippetsNoasserttion?: boolean
-    setLicenseInfoInSnippetsNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
+    licenseInfoInSnippets: string[]
+    setAllLicensesInformationToSnippet: React.Dispatch<React.SetStateAction<string | string[]>>
+    licenseInfoInSnippetsExist: boolean
+    setLicenseInfoInSnippetsExist: React.Dispatch<React.SetStateAction<boolean>>
+    licenseInfoInSnippetsNone: boolean
+    setLicenseInfoInSnippetsNone: React.Dispatch<React.SetStateAction<boolean>>
+    licenseInfoInSnippetsNoasserttion: boolean
+    setLicenseInfoInSnippetsNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 function SnippetLicenseInformation({
@@ -28,7 +30,7 @@ function SnippetLicenseInformation({
     setLicenseInfoInSnippetsNone,
     licenseInfoInSnippetsNoasserttion,
     setLicenseInfoInSnippetsNoasserttion,
-}: Props) {
+}: Props) : ReactNode {
     const selectLicenseInfoSnippetExist = () => {
         setLicenseInfoInSnippetsExist(true)
         setLicenseInfoInSnippetsNone(false)
@@ -75,7 +77,7 @@ function SnippetLicenseInformation({
                             name='licenseInfoInSnippets'
                             placeholder='Enter license information in snippet'
                             onChange={updateField}
-                            value={licenseInfoInSnippets?.toString().replaceAll(',', '\n') ?? ''}
+                            value={licenseInfoInSnippets.toString().replaceAll(',', '\n')}
                             disabled={licenseInfoInSnippetsNone || licenseInfoInSnippetsNoasserttion}
                         ></textarea>
                     </div>

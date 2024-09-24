@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    copyrightText?: string
-    setCopyrightTextToPackage?: (data: string) => void
-    copyrightTextExist?: boolean
-    setCopyrightTextExist?: React.Dispatch<React.SetStateAction<boolean>>
-    copyrightTextNone?: boolean
-    setCopyrightTextNone?: React.Dispatch<React.SetStateAction<boolean>>
-    copyrightTextNoasserttion?: boolean
-    setCopyrightTextNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
+    copyrightText: string
+    setCopyrightTextToPackage: (data: string) => void
+    copyrightTextExist: boolean
+    setCopyrightTextExist: React.Dispatch<React.SetStateAction<boolean>>
+    copyrightTextNone: boolean
+    setCopyrightTextNone: React.Dispatch<React.SetStateAction<boolean>>
+    copyrightTextNoasserttion: boolean
+    setCopyrightTextNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 function PackageCopyrightText({
@@ -28,7 +30,7 @@ function PackageCopyrightText({
     setCopyrightTextNone,
     copyrightTextNoasserttion,
     setCopyrightTextNoasserttion,
-}: Props) {
+}: Props) : ReactNode {
     const selectCopyrightTextExist = () => {
         setCopyrightTextExist(true)
         setCopyrightTextNone(false)
@@ -75,7 +77,7 @@ function PackageCopyrightText({
                             name='copyrightText'
                             placeholder='Enter copyright text'
                             onChange={updateField}
-                            value={copyrightText ?? ''}
+                            value={copyrightText}
                             disabled={copyrightTextNone || copyrightTextNoasserttion}
                         ></textarea>
                     </div>

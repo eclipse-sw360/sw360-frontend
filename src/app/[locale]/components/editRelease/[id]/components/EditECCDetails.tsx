@@ -18,8 +18,8 @@ import { BiInfoCircle } from 'react-icons/bi'
 import { Release } from '@/object-types'
 
 interface Props {
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
 const ShowInfoOnHover = ({ text }: { text: string }) => {

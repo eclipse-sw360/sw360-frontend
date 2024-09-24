@@ -9,12 +9,12 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
 import { COTSDetails } from '@/object-types'
 
-const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails }) => {
+const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefined }) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -33,7 +33,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails }) => {
             <tbody hidden={toggle}>
                 <tr>
                     <td>{t('Used License')}:</td>
-                    <td>{costDetails && costDetails.usedLicense && <span>{costDetails.usedLicense}</span>}</td>
+                    <td>{costDetails && costDetails.usedLicense !== undefined && <span>{costDetails.usedLicense}</span>}</td>
                 </tr>
                 <tr>
                     <td>{t('Contains Open Source Software')}:</td>
@@ -66,7 +66,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails }) => {
                 <tr>
                     <td>{t('OSS Information URL')}:</td>
                     <td>
-                        {costDetails && costDetails.ossInformationURL && <span>{costDetails.ossInformationURL}</span>}
+                        {costDetails && costDetails.ossInformationURL !== undefined && <span>{costDetails.ossInformationURL}</span>}
                     </td>
                 </tr>
                 <tr>

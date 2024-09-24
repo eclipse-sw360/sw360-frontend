@@ -15,19 +15,19 @@ export default interface ComponentPayload {
     componentType?: string
     modifiedBy?: string
     modifiedOn?: string
-    moderators?: Array<string>
-    componentOwner?: string
+    moderators?: Array<string> | null
+    componentOwner?: string | null
     ownerAccountingUnit?: string
     ownerGroup?: string
     ownerCountry?: string
-    roles?: { [k: string]: Array<string> }
-    externalIds?: { [k: string]: string }
-    additionalData?: { [k: string]: string }
+    roles?: { [k: string]: Array<string> } | null
+    externalIds?: { [k: string]: string } | null
+    additionalData?: { [k: string]: string } | null
     defaultVendorId?: string
-    categories?: Array<string>
+    categories?: Array<string> | null
     homepage?: string
     mailinglist?: string
     wiki?: string
     blog?: string
-    attachmentDTOs?: Array<Attachment>
+    attachmentDTOs?: Array<Attachment> | null
 }

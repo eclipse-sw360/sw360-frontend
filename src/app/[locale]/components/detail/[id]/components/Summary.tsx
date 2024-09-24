@@ -8,18 +8,19 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
+import ResourcesUsing from '@/components/ResourcesUsing/ResoucesUsing'
 import { Component, DocumentTypes } from '@/object-types'
 import ComponentGeneral from './ComponentGeneral'
 import ReleaseAgrregateData from './ReleaseAggregate'
 import SummaryRole from './SummaryRole'
+import { ReactNode } from 'react'
 
 interface Props {
     component: Component
     componentId: string
 }
 
-const Summary = ({ component, componentId }: Props) => {
+const Summary = ({ component, componentId }: Props) : ReactNode => {
     return (
         <div className='col'>
             <div>
@@ -35,7 +36,7 @@ const Summary = ({ component, componentId }: Props) => {
                 <SummaryRole component={component} />
             </div>
             <div>
-                <ResoucesUsing
+                <ResourcesUsing
                     documentId={componentId}
                     documentType={DocumentTypes.COMPONENT}
                     documentName={component.name}

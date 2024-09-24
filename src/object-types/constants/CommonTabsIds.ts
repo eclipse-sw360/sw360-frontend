@@ -8,12 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum ReleaseTabIds {
-    LINKED_RELEASES = 'tab-Releases',
-    CLEARING_DETAILS = 'tab-ClearingDetails',
-    ECC_DETAILS = 'tab-EccDetails',
-    COMMERCIAL_DETAILS = 'tab-CommercialDetails',
-    SPDX_DOCUMENT = 'tab-SPDXDocument',
+const CommonTabIds = {
+    SUMMARY: 'tab-Summary',
+    ATTACHMENTS: 'tab-Attachments',
+    RELEASES: 'tab-releases',
+    VULNERABILITIES: 'tab-Vulnerabilities',
+    CHANGE_LOG: 'tab-ChangeLogs',
 }
 
-export default ReleaseTabIds
+export default CommonTabIds

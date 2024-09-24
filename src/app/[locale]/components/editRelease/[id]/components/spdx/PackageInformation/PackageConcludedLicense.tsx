@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    concludedLicense?: string
-    setConcludedLicenseToPackage?: (data: string) => void
-    concludedLicenseExist?: boolean
-    setConcludedLicenseExist?: React.Dispatch<React.SetStateAction<boolean>>
-    concludedLicenseNone?: boolean
-    setConcludedLicenseNone?: React.Dispatch<React.SetStateAction<boolean>>
-    concludedLicenseNoasserttion?: boolean
-    setConcludedLicenseNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
+    concludedLicense: string
+    setConcludedLicenseToPackage: (data: string) => void
+    concludedLicenseExist: boolean
+    setConcludedLicenseExist: React.Dispatch<React.SetStateAction<boolean>>
+    concludedLicenseNone: boolean
+    setConcludedLicenseNone: React.Dispatch<React.SetStateAction<boolean>>
+    concludedLicenseNoasserttion: boolean
+    setConcludedLicenseNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 function PackageConcludedLicense({
@@ -28,7 +30,7 @@ function PackageConcludedLicense({
     concludedLicenseNoasserttion,
     setConcludedLicenseNoasserttion,
     concludedLicense,
-}: Props) {
+}: Props) : ReactNode {
     const selectConcludedLicenseExist = () => {
         setConcludedLicenseExist(true)
         setConcludedLicenseNone(false)
@@ -75,7 +77,7 @@ function PackageConcludedLicense({
                             name='licenseConcluded'
                             placeholder='Enter concluded license'
                             onChange={updateField}
-                            value={concludedLicense ?? ''}
+                            value={concludedLicense}
                             disabled={concludedLicenseNone || concludedLicenseNoasserttion}
                         />
                     </div>

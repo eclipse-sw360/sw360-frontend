@@ -17,12 +17,12 @@ import { ComponentPayload } from '@/object-types'
 import { SelectUsersDialog, SelectCountry } from 'next-sw360'
 
 interface Props {
-    componentPayload?: ComponentPayload
-    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    componentOwner?: { [k: string]: string }
-    setComponentOwner?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    moderators?: { [k: string]: string }
-    setModerators?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    componentPayload: ComponentPayload
+    setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    componentOwner: { [k: string]: string }
+    setComponentOwner: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    moderators: { [k: string]: string }
+    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 const RolesInformation = ({

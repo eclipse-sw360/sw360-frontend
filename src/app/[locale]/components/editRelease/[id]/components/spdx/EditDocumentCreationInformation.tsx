@@ -11,24 +11,24 @@
 'use client'
 import { Creator, DocumentCreationInformation, ExternalDocumentReferences, InputKeyValue, SPDX } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import React, { useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import Created from './DocumentCreationInfo/Created'
 import Creators from './DocumentCreationInfo/Creators'
 
 interface Props {
     fullnameModifiedBy?: string
-    documentCreationInformation?: DocumentCreationInformation
-    setDocumentCreationInformation?: React.Dispatch<React.SetStateAction<DocumentCreationInformation>>
-    isModeFull?: boolean
+    documentCreationInformation: DocumentCreationInformation
+    setDocumentCreationInformation: React.Dispatch<React.SetStateAction<DocumentCreationInformation>>
+    isModeFull: boolean
     externalDocumentRefs?: ExternalDocumentReferences[]
-    setExternalDocumentRefs?: React.Dispatch<React.SetStateAction<ExternalDocumentReferences[]>>
-    indexExternalDocumentRef?: number
-    setIndexExternalDocumentRef?: React.Dispatch<React.SetStateAction<number>>
-    SPDXPayload?: SPDX
-    setSPDXPayload?: React.Dispatch<React.SetStateAction<SPDX>>
-    errorCreator?: boolean
-    setErrorCreator?: React.Dispatch<React.SetStateAction<boolean>>
+    setExternalDocumentRefs: React.Dispatch<React.SetStateAction<ExternalDocumentReferences[]>>
+    indexExternalDocumentRef: number
+    setIndexExternalDocumentRef: React.Dispatch<React.SetStateAction<number>>
+    SPDXPayload: SPDX
+    setSPDXPayload: React.Dispatch<React.SetStateAction<SPDX>>
+    errorCreator: boolean
+    setErrorCreator: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const EditDocumentCreationInformation = ({
@@ -44,7 +44,7 @@ const EditDocumentCreationInformation = ({
     setSPDXPayload,
     errorCreator,
     setErrorCreator,
-}: Props) => {
+}: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     const [creator, setCreator] = useState<InputKeyValue[]>([])
@@ -66,17 +66,17 @@ const EditDocumentCreationInformation = ({
     }
 
     const addDocumentReferences = () => {
-        const arrayExternals: ExternalDocumentReferences[] = [...externalDocumentRefs]
-        setIncreIndex(externalDocumentRefs.length)
-        setNumberIndex(externalDocumentRefs.length)
+        const arrayExternals: ExternalDocumentReferences[] = externalDocumentRefs ? [...externalDocumentRefs] : []
+        setIncreIndex(externalDocumentRefs ? externalDocumentRefs.length : 0)
+        setNumberIndex(externalDocumentRefs ? externalDocumentRefs.length : 0)
         setIsAdd(true)
         const externalDocumentReference: ExternalDocumentReferences = {
             externalDocumentId: '',
             checksum: { algorithm: '', checksumValue: '', index: 0 },
             spdxDocument: '',
-            index: externalDocumentRefs.length,
+            index: externalDocumentRefs ? externalDocumentRefs.length : 0,
         }
-        setIndexExternalDocumentRef(externalDocumentRefs.length)
+        setIndexExternalDocumentRef(externalDocumentRefs ? externalDocumentRefs.length : 0)
         arrayExternals.push(externalDocumentReference)
         setExternalDocumentRefs(arrayExternals)
         setSPDXPayload({
@@ -84,12 +84,12 @@ const EditDocumentCreationInformation = ({
             documentCreationInformation: {
                 ...SPDXPayload.documentCreationInformation,
                 externalDocumentRefs: arrayExternals,
-            },
+            } as DocumentCreationInformation,
         })
     }
 
     useEffect(() => {
-        if (!CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation?.creator)) {
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation.creator)) {
             if (!isAnonymous) {
                 setCreator(
                     convertCreator(documentCreationInformation.creator.toSorted((e1, e2) => e1.index - e2.index))
@@ -98,8 +98,8 @@ const EditDocumentCreationInformation = ({
         }
 
         if (
-            CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation?.creator) &&
-            typeof documentCreationInformation?.createdBy !== 'undefined' &&
+            CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation.creator) &&
+            typeof documentCreationInformation.createdBy !== 'undefined' &&
             CommonUtils.isNullEmptyOrUndefinedArray(creator) &&
             !isDelete
         ) {
@@ -112,12 +112,12 @@ const EditDocumentCreationInformation = ({
             setCreator(creators)
         }
 
-        if (!CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation?.created)) {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.created)) {
             setDataCreated(handleCreated(documentCreationInformation.created))
         } else {
             setDataCreated(handleCreated(new Date().toISOString()))
         }
-    }, [documentCreationInformation?.created])
+    }, [documentCreationInformation.created])
 
     const convertCreator = (creators: Creator[]) => {
         const inputs: InputKeyValue[] = []
@@ -131,9 +131,9 @@ const EditDocumentCreationInformation = ({
         return inputs
     }
 
-    const convertInputToCreator = (datas: InputKeyValue[]) => {
-        if (datas === null) {
-            return null
+    const convertInputToCreator = (datas: InputKeyValue[] | undefined | null) => {
+        if (CommonUtils.isNullOrUndefined(datas)) {
+            return []
         }
         const creators: Creator[] = []
         datas.forEach((data: InputKeyValue, index: number) => {
@@ -152,13 +152,13 @@ const EditDocumentCreationInformation = ({
         setDocumentCreationInformation({
             ...documentCreationInformation,
             [e.target.name]: e.target.value,
-        })
+        } as DocumentCreationInformation)
         setSPDXPayload({
             ...SPDXPayload,
             documentCreationInformation: {
                 ...SPDXPayload.documentCreationInformation,
                 [e.target.name]: e.target.value,
-            },
+            } as DocumentCreationInformation,
         })
     }
 
@@ -166,13 +166,13 @@ const EditDocumentCreationInformation = ({
         setDocumentCreationInformation({
             ...documentCreationInformation,
             [e.target.name]: e.target.value,
-        })
+        } as DocumentCreationInformation)
         setSPDXPayload({
             ...SPDXPayload,
             documentCreationInformation: {
                 ...SPDXPayload.documentCreationInformation,
                 [e.target.name]: 'SPDX-' + e.target.value,
-            },
+            } as DocumentCreationInformation,
         })
     }
 
@@ -180,13 +180,13 @@ const EditDocumentCreationInformation = ({
         setDocumentCreationInformation({
             ...documentCreationInformation,
             [e.target.name]: e.target.value,
-        })
+        } as DocumentCreationInformation)
         setSPDXPayload({
             ...SPDXPayload,
             documentCreationInformation: {
                 ...SPDXPayload.documentCreationInformation,
                 [e.target.name]: 'SPDXRef-' + e.target.value,
-            },
+            } as DocumentCreationInformation,
         })
     }
 
@@ -198,13 +198,13 @@ const EditDocumentCreationInformation = ({
             setDocumentCreationInformation({
                 ...documentCreationInformation,
                 creator: convertInputToCreator(creators),
-            })
+            } as DocumentCreationInformation)
             setSPDXPayload({
                 ...SPDXPayload,
                 documentCreationInformation: {
                     ...SPDXPayload.documentCreationInformation,
                     creator: convertInputToCreator(creators),
-                },
+                } as DocumentCreationInformation,
             })
         } else {
             setSPDXPayload({
@@ -212,13 +212,12 @@ const EditDocumentCreationInformation = ({
                 documentCreationInformation: {
                     ...SPDXPayload.documentCreationInformation,
                     creator: convertInputToCreator(creator),
-                },
+                } as DocumentCreationInformation,
             })
         }
     }
 
     const setDataCreators = (inputs: InputKeyValue[]) => {
-        console.log(inputs)
         setErrorCreator(false)
         if (isAnonymous) {
             inputs = inputs.filter((input) => input.key != 'Organization').filter((input) => input.key != 'Person')
@@ -226,14 +225,14 @@ const EditDocumentCreationInformation = ({
         setDocumentCreationInformation({
             ...documentCreationInformation,
             creator: convertInputToCreator(inputs),
-        })
+        } as DocumentCreationInformation)
 
         setSPDXPayload({
             ...SPDXPayload,
             documentCreationInformation: {
                 ...SPDXPayload.documentCreationInformation,
                 creator: convertInputToCreator(inputs),
-            },
+            } as DocumentCreationInformation,
         })
     }
 
@@ -246,13 +245,13 @@ const EditDocumentCreationInformation = ({
         return input
     }
 
-    const convertInputToCreated = (data: InputKeyValue) => {
+    const convertInputToCreated = (data: InputKeyValue | null | undefined) => {
+        if (!data) return ''
         if (data.key == '' || data.value == '') {
-            console.log('11111111')
             return ''
         }
         const localDate = new Date(data.key + ' ' + data.value)
-        if (isNaN(+localDate)) return
+        if (isNaN(+localDate)) return ''
         return localDate.toISOString().slice(0, -5) + 'Z'
     }
 
@@ -263,7 +262,7 @@ const EditDocumentCreationInformation = ({
                 documentCreationInformation: {
                     ...SPDXPayload.documentCreationInformation,
                     created: new Date().toISOString(),
-                },
+                } as DocumentCreationInformation,
             })
         } else {
             setSPDXPayload({
@@ -271,7 +270,7 @@ const EditDocumentCreationInformation = ({
                 documentCreationInformation: {
                     ...SPDXPayload.documentCreationInformation,
                     created: convertInputToCreated(inputs),
-                },
+                } as DocumentCreationInformation,
             })
         }
     }
@@ -279,6 +278,7 @@ const EditDocumentCreationInformation = ({
     const [isDeleteSucces, setIsDeleteSucces] = useState(false)
 
     const deleteExternalReference = () => {
+        if (!externalDocumentRefs) return
         if (externalDocumentRefs.length == 1) {
             setExternalDocumentRefs([])
         } else {
@@ -299,7 +299,7 @@ const EditDocumentCreationInformation = ({
                 documentCreationInformation: {
                     ...SPDXPayload.documentCreationInformation,
                     externalDocumentRefs: externalDocuments,
-                },
+                } as DocumentCreationInformation,
             })
             if (!CommonUtils.isNullEmptyOrUndefinedArray(externalDocumentRefs)) {
                 setNumberIndex(externalDocuments[0].index)
@@ -308,7 +308,7 @@ const EditDocumentCreationInformation = ({
     }
 
     const updateCheckSum = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        const externals: ExternalDocumentReferences[] = externalDocumentRefs.map((externalDocument, index) => {
+        const externals: ExternalDocumentReferences[] = externalDocumentRefs ? externalDocumentRefs.map((externalDocument, index) => {
             if (index === indexExternalDocumentRef) {
                 return {
                     ...externalDocument,
@@ -319,21 +319,21 @@ const EditDocumentCreationInformation = ({
                 }
             }
             return externalDocument
-        })
+        }) : []
         setExternalDocumentRefs(externals)
         setSPDXPayload({
             ...SPDXPayload,
             documentCreationInformation: {
                 ...SPDXPayload.documentCreationInformation,
                 externalDocumentRefs: externals,
-            },
+            } as DocumentCreationInformation,
         })
     }
 
     const updateExternalReferens = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
     ) => {
-        const externals: ExternalDocumentReferences[] = externalDocumentRefs.map((externalDocument, index) => {
+        const externals: ExternalDocumentReferences[] = externalDocumentRefs ? externalDocumentRefs.map((externalDocument, index) => {
             if (index === indexExternalDocumentRef) {
                 return {
                     ...externalDocument,
@@ -341,7 +341,7 @@ const EditDocumentCreationInformation = ({
                 }
             }
             return externalDocument
-        })
+        }) : []
 
         setExternalDocumentRefs(externals)
         setSPDXPayload({
@@ -349,7 +349,7 @@ const EditDocumentCreationInformation = ({
             documentCreationInformation: {
                 ...SPDXPayload.documentCreationInformation,
                 externalDocumentRefs: externals,
-            },
+            } as DocumentCreationInformation,
         })
     }
 
@@ -366,398 +366,398 @@ const EditDocumentCreationInformation = ({
                 </tr>
             </thead>
             <tbody hidden={toggle}>
-                {documentCreationInformation && (
-                    <>
-                        <tr>
-                            <td>
-                                <div className='form-group' style={{ flex: 1 }}>
-                                    <label className='lableSPDX' htmlFor='spdxVersion'>
-                                        6.1 SPDX version
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
-                                        <label className='sub-label'>SPDX-</label>
-                                        <input
-                                            id='spdxVersion'
-                                            name='spdxVersion'
-                                            className='form-control needs-validation'
-                                            type='text'
-                                            placeholder='Enter SPDX version'
-                                            onChange={updateFieldSPDXVersion}
-                                            value={
-                                                documentCreationInformation.spdxVersion?.startsWith('SPDX-')
+                <>
+                    <tr>
+                        <td>
+                            <div className='form-group' style={{ flex: 1 }}>
+                                <label className='lableSPDX' htmlFor='spdxVersion'>
+                                    6.1 SPDX version
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <label className='sub-label'>SPDX-</label>
+                                    <input
+                                        id='spdxVersion'
+                                        name='spdxVersion'
+                                        className='form-control needs-validation'
+                                        type='text'
+                                        placeholder='Enter SPDX version'
+                                        onChange={updateFieldSPDXVersion}
+                                        value={
+                                            !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.spdxVersion)
+                                            ?
+                                                documentCreationInformation.spdxVersion.startsWith('SPDX-')
                                                     ? documentCreationInformation.spdxVersion.substring(5)
                                                     : documentCreationInformation.spdxVersion
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div className='form-group' style={{ flex: 1 }}>
-                                    <label className='lableSPDX' htmlFor='dataLicense'>
-                                        6.2 Data license
-                                    </label>
-                                    <input
-                                        id='dataLicense'
-                                        name='dataLicense'
-                                        className='form-control needs-validation'
-                                        type='text'
-                                        placeholder='Enter data license'
-                                        onChange={updateField}
-                                        value={documentCreationInformation.dataLicense ?? ''}
+                                            : ''
+                                        }
                                     />
                                 </div>
-                            </td>
-                            <td>
-                                <div className='form-group' style={{ flex: 1 }}>
-                                    <label className='lableSPDX' htmlFor='spdxIdentifier'>
-                                        6.3 SPDX identifier
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
-                                        <label className='sub-label'>SPDXRef-</label>
-                                        <input
-                                            id='spdxIdentifier'
-                                            name='SPDXID'
-                                            className='form-control needs-validation'
-                                            type='text'
-                                            placeholder='Enter SPDX identifier'
-                                            onChange={updateFieldSPDXIdentifier}
-                                            value={
-                                                documentCreationInformation.SPDXID?.startsWith('SPDXRef-')
+                            </div>
+                        </td>
+                        <td>
+                            <div className='form-group' style={{ flex: 1 }}>
+                                <label className='lableSPDX' htmlFor='dataLicense'>
+                                    6.2 Data license
+                                </label>
+                                <input
+                                    id='dataLicense'
+                                    name='dataLicense'
+                                    className='form-control needs-validation'
+                                    type='text'
+                                    placeholder='Enter data license'
+                                    onChange={updateField}
+                                    value={documentCreationInformation.dataLicense ?? ''}
+                                />
+                            </div>
+                        </td>
+                        <td>
+                            <div className='form-group' style={{ flex: 1 }}>
+                                <label className='lableSPDX' htmlFor='spdxIdentifier'>
+                                    6.3 SPDX identifier
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <label className='sub-label'>SPDXRef-</label>
+                                    <input
+                                        id='spdxIdentifier'
+                                        name='SPDXID'
+                                        className='form-control needs-validation'
+                                        type='text'
+                                        placeholder='Enter SPDX identifier'
+                                        onChange={updateFieldSPDXIdentifier}
+                                        value={
+                                            !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.SPDXID)
+                                            ?
+                                                documentCreationInformation.SPDXID.startsWith('SPDXRef-')
                                                     ? documentCreationInformation.SPDXID.substring(8)
                                                     : documentCreationInformation.SPDXID
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='documentName'>
-                                        6.4 Document name
-                                    </label>
-                                    <input
-                                        id='documentName'
-                                        name='name'
-                                        type='text'
-                                        className='form-control needs-validation'
-                                        placeholder='Enter document name'
-                                        onChange={updateField}
-                                        value={documentCreationInformation.name ?? ''}
+                                            : ''
+                                        }
                                     />
                                 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='documentNamespace'>
-                                        6.5 SPDX document namespace
-                                    </label>
-                                    <input
-                                        id='documentNamespace'
-                                        name='documentNamespace'
-                                        className='form-control needs-validation'
-                                        type='text'
-                                        placeholder='Enter SPDX document namespace'
-                                        onChange={updateField}
-                                        value={documentCreationInformation.documentNamespace ?? ''}
-                                    />
-                                </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
-                            <>
-                                <tr>
-                                    <td className='spdx-full' colSpan={3}>
-                                        <div className='form-group section section-external-doc-ref'>
-                                            <label className='lableSPDX' htmlFor='externalDocumentRefs'>
-                                                6.6 External document references
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='documentName'>
+                                    6.4 Document name
+                                </label>
+                                <input
+                                    id='documentName'
+                                    name='name'
+                                    type='text'
+                                    className='form-control needs-validation'
+                                    placeholder='Enter document name'
+                                    onChange={updateField}
+                                    value={documentCreationInformation.name ?? ''}
+                                />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='documentNamespace'>
+                                    6.5 SPDX document namespace
+                                </label>
+                                <input
+                                    id='documentNamespace'
+                                    name='documentNamespace'
+                                    className='form-control needs-validation'
+                                    type='text'
+                                    placeholder='Enter SPDX document namespace'
+                                    onChange={updateField}
+                                    value={documentCreationInformation.documentNamespace ?? ''}
+                                />
+                            </div>
+                        </td>
+                    </tr>
+                    {isModeFull && (
+                        <>
+                            <tr>
+                                <td className='spdx-full' colSpan={3}>
+                                    <div className='form-group section section-external-doc-ref'>
+                                        <label className='lableSPDX' htmlFor='externalDocumentRefs'>
+                                            6.6 External document references
+                                        </label>
+                                        <br></br>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                paddingLeft: '1rem',
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'row',
+                                                    marginBottom: '0.75rem',
+                                                }}
+                                            >
+                                                <label
+                                                    className='lableSPDX sub-title'
+                                                    htmlFor='externalDocumentRefs'
+                                                    style={{ textDecoration: 'underline' }}
+                                                >
+                                                    Select Reference
+                                                </label>
+                                                <select
+                                                    id='externalDocumentRefs'
+                                                    className='form-control spdx-select form-select'
+                                                    onChange={displayIndex}
+                                                    disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                        externalDocumentRefs
+                                                    )}
+                                                    value={
+                                                        isAdd
+                                                            ? isDeleteSucces
+                                                                ? indexExternalDocumentRef
+                                                                : increIndex
+                                                            : numberIndex
+                                                    }
+                                                >
+                                                    {externalDocumentRefs && externalDocumentRefs.map((item) => (
+                                                        <option key={item.index} value={item.index}>
+                                                            {item.index + 1}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <FaTrashAlt
+                                                    className='spdx-delete-icon-main-index'
+                                                    onClick={deleteExternalReference}
+                                                />
+                                            </div>
+                                            <button
+                                                className='spdx-add-button-main'
+                                                name='add-externalDocRef'
+                                                onClick={addDocumentReferences}
+                                            >
+                                                Add new Reference
+                                            </button>
+                                        </div>
+
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                marginBottom: '0.75rem',
+                                            }}
+                                        >
+                                            <label className='sub-title lableSPDX' htmlFor='externalDocumentId'>
+                                                External document ID
                                             </label>
-                                            <br></br>
+                                            <input
+                                                id='externalDocumentId'
+                                                style={{ width: 'auto', flex: 'auto' }}
+                                                type='text'
+                                                name='externalDocumentId'
+                                                className='form-control'
+                                                placeholder='Enter external document ID'
+                                                onChange={updateExternalReferens}
+                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                    externalDocumentRefs
+                                                )}
+                                                value={
+                                                    externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.externalDocumentId ?? '') : ''
+                                                }
+                                            />
+                                        </div>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                marginBottom: '0.75rem',
+                                            }}
+                                        >
+                                            <label className='sub-title lableSPDX' htmlFor='externalDocument'>
+                                                External document
+                                            </label>
+                                            <input
+                                                id='externalDocument'
+                                                style={{ width: 'auto', flex: 'auto' }}
+                                                type='text'
+                                                name='spdxDocument'
+                                                className='form-control'
+                                                placeholder='Enter external document'
+                                                onChange={updateExternalReferens}
+                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                    externalDocumentRefs
+                                                )}
+                                                value={
+                                                    externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.spdxDocument ?? '') : ''
+                                                }
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex' }}>
+                                            <label className='sub-title lableSPDX'>Checksum</label>
                                             <div
                                                 style={{
                                                     display: 'flex',
                                                     flexDirection: 'column',
-                                                    paddingLeft: '1rem',
+                                                    flex: 7,
                                                 }}
                                             >
-                                                <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        flexDirection: 'row',
-                                                        marginBottom: '0.75rem',
-                                                    }}
-                                                >
-                                                    <label
-                                                        className='lableSPDX sub-title'
-                                                        htmlFor='externalDocumentRefs'
-                                                        style={{ textDecoration: 'underline' }}
-                                                    >
-                                                        Select Reference
-                                                    </label>
-                                                    <select
-                                                        id='externalDocumentRefs'
-                                                        className='form-control spdx-select form-select'
-                                                        onChange={displayIndex}
+                                                <div style={{ display: 'flex', marginBottom: '0.75rem' }}>
+                                                    <input
+                                                        style={{ flex: 2, marginRight: '1rem' }}
+                                                        type='text'
+                                                        className='form-control'
+                                                        id='checksumAlgorithm'
+                                                        name='algorithm'
+                                                        placeholder='Enter algorithm'
+                                                        onChange={updateCheckSum}
                                                         disabled={CommonUtils.isNullEmptyOrUndefinedArray(
                                                             externalDocumentRefs
                                                         )}
                                                         value={
-                                                            isAdd
-                                                                ? isDeleteSucces
-                                                                    ? indexExternalDocumentRef
-                                                                    : increIndex
-                                                                : numberIndex
+                                                            externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.checksum?.algorithm ?? '') : ''
                                                         }
-                                                    >
-                                                        {externalDocumentRefs.map((item) => (
-                                                            <option key={item.index} value={item.index}>
-                                                                {item.index + 1}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                    <FaTrashAlt
-                                                        className='spdx-delete-icon-main-index'
-                                                        onClick={deleteExternalReference}
+                                                    />
+                                                    <input
+                                                        style={{ flex: 6 }}
+                                                        type='text'
+                                                        className='form-control'
+                                                        id='checksumValue'
+                                                        placeholder='Enter value'
+                                                        name='checksumValue'
+                                                        onChange={updateCheckSum}
+                                                        disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                            externalDocumentRefs
+                                                        )}
+                                                        value={
+                                                            externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.checksum?.checksumValue ?? '') : ''
+                                                        }
                                                     />
                                                 </div>
-                                                <button
-                                                    className='spdx-add-button-main'
-                                                    name='add-externalDocRef'
-                                                    onClick={addDocumentReferences}
-                                                >
-                                                    Add new Reference
-                                                </button>
-                                            </div>
-
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row',
-                                                    marginBottom: '0.75rem',
-                                                }}
-                                            >
-                                                <label className='sub-title lableSPDX' htmlFor='externalDocumentId'>
-                                                    External document ID
-                                                </label>
-                                                <input
-                                                    id='externalDocumentId'
-                                                    style={{ width: 'auto', flex: 'auto' }}
-                                                    type='text'
-                                                    name='externalDocumentId'
-                                                    className='form-control'
-                                                    placeholder='Enter external document ID'
-                                                    onChange={updateExternalReferens}
-                                                    disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                        externalDocumentRefs
-                                                    )}
-                                                    value={
-                                                        externalDocumentRefs[indexExternalDocumentRef]
-                                                            ?.externalDocumentId ?? ''
-                                                    }
-                                                />
-                                            </div>
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row',
-                                                    marginBottom: '0.75rem',
-                                                }}
-                                            >
-                                                <label className='sub-title lableSPDX' htmlFor='externalDocument'>
-                                                    External document
-                                                </label>
-                                                <input
-                                                    id='externalDocument'
-                                                    style={{ width: 'auto', flex: 'auto' }}
-                                                    type='text'
-                                                    name='spdxDocument'
-                                                    className='form-control'
-                                                    placeholder='Enter external document'
-                                                    onChange={updateExternalReferens}
-                                                    disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                        externalDocumentRefs
-                                                    )}
-                                                    value={
-                                                        externalDocumentRefs[indexExternalDocumentRef]?.spdxDocument ??
-                                                        ''
-                                                    }
-                                                />
-                                            </div>
-                                            <div style={{ display: 'flex' }}>
-                                                <label className='sub-title lableSPDX'>Checksum</label>
-                                                <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        flex: 7,
-                                                    }}
-                                                >
-                                                    <div style={{ display: 'flex', marginBottom: '0.75rem' }}>
-                                                        <input
-                                                            style={{ flex: 2, marginRight: '1rem' }}
-                                                            type='text'
-                                                            className='form-control'
-                                                            id='checksumAlgorithm'
-                                                            name='algorithm'
-                                                            placeholder='Enter algorithm'
-                                                            onChange={updateCheckSum}
-                                                            disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                externalDocumentRefs
-                                                            )}
-                                                            value={
-                                                                externalDocumentRefs[indexExternalDocumentRef]?.checksum
-                                                                    ?.algorithm ?? ''
-                                                            }
-                                                        />
-                                                        <input
-                                                            style={{ flex: 6 }}
-                                                            type='text'
-                                                            className='form-control'
-                                                            id='checksumValue'
-                                                            placeholder='Enter value'
-                                                            name='checksumValue'
-                                                            onChange={updateCheckSum}
-                                                            disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                externalDocumentRefs
-                                                            )}
-                                                            value={
-                                                                externalDocumentRefs[indexExternalDocumentRef]?.checksum
-                                                                    ?.checksumValue ?? ''
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='licenseListVersion'>
-                                                6.7 License list version
-                                            </label>
-                                            <input
-                                                id='licenseListVersion'
-                                                name='licenseListVersion'
-                                                className='form-control'
-                                                type='text'
-                                                placeholder='Enter license list version'
-                                                onChange={updateField}
-                                                value={documentCreationInformation.licenseListVersion ?? ''}
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='creator'>
-                                        6.8 Creators
-                                    </label>
-                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
-                                            <label className='sub-title lableSPDX' htmlFor='creator-anonymous'>
-                                                Anonymous
-                                            </label>
-                                            <input
-                                                id='creator-anonymous'
-                                                className='spdx-checkbox'
-                                                type='checkbox'
-                                                onChange={handleClickAnonymous}
-                                            />
-                                        </div>
-                                        <div style={{ display: 'flex' }}>
-                                            <label className='sub-title lableSPDX'>List</label>
-                                            <Creators
-                                                inputList={creator}
-                                                setInputList={setCreator}
-                                                isAnonymous={isAnonymous}
-                                                setDataCreators={setDataCreators}
-                                                setIsDelete={setIsDelete}
-                                            />
-                                        </div>
-                                        <input
-                                            id='spdxCreator'
-                                            className='form-control'
-                                            style={{ display: 'none' }}
-                                            type='text'
-                                        />
-
-                                        {errorCreator && (
-                                            <div>
-                                                <div
-                                                    style={{
-                                                        color: '#da1414',
-                                                        fontSize: '0.875rem',
-                                                        marginTop: '0.25rem',
-                                                        width: '100%',
-                                                    }}
-                                                >
-                                                    <span>This field must be not empty!</span>
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan={3}>
+                                    <div className='form-group'>
+                                        <label className='lableSPDX' htmlFor='licenseListVersion'>
+                                            6.7 License list version
+                                        </label>
+                                        <input
+                                            id='licenseListVersion'
+                                            name='licenseListVersion'
+                                            className='form-control'
+                                            type='text'
+                                            placeholder='Enter license list version'
+                                            onChange={updateField}
+                                            value={documentCreationInformation.licenseListVersion ?? ''}
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                        </>
+                    )}
+
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='creator'>
+                                    6.8 Creators
+                                </label>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                                        <label className='sub-title lableSPDX' htmlFor='creator-anonymous'>
+                                            Anonymous
+                                        </label>
+                                        <input
+                                            id='creator-anonymous'
+                                            className='spdx-checkbox'
+                                            type='checkbox'
+                                            onChange={handleClickAnonymous}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex' }}>
+                                        <label className='sub-title lableSPDX'>List</label>
+                                        <Creators
+                                            inputList={creator}
+                                            setInputList={setCreator}
+                                            isAnonymous={isAnonymous}
+                                            setDataCreators={setDataCreators}
+                                            setIsDelete={setIsDelete}
+                                        />
+                                    </div>
+                                    <input
+                                        id='spdxCreator'
+                                        className='form-control'
+                                        style={{ display: 'none' }}
+                                        type='text'
+                                    />
+
+                                    {errorCreator && (
+                                        <div>
+                                            <div
+                                                style={{
+                                                    color: '#da1414',
+                                                    fontSize: '0.875rem',
+                                                    marginTop: '0.25rem',
+                                                    width: '100%',
+                                                }}
+                                            >
+                                                <span>This field must be not empty!</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <Created
-                                setCreated={setCreated}
-                                dataCreated={dataCreated}
-                                setDataCreated={setDataCreated}
-                            />
-                        </tr>
-                        {isModeFull && (
-                            <>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='creatorComment'>
-                                                6.10 Creator comment
-                                            </label>
-                                            <textarea
-                                                className='form-control'
-                                                id='creatorComment'
-                                                name='creatorComment'
-                                                rows={5}
-                                                placeholder='Enter creator comment'
-                                                onChange={updateField}
-                                                value={documentCreationInformation.creatorComment ?? ''}
-                                            ></textarea>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='documentComment'>
-                                                6.11 Document comment
-                                            </label>
-                                            <textarea
-                                                className='form-control'
-                                                name='documentComment'
-                                                id='documentComment'
-                                                rows={5}
-                                                onChange={updateField}
-                                                placeholder='Enter document comment'
-                                                value={documentCreationInformation.documentComment ?? ''}
-                                            ></textarea>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                    </>
-                )}
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <Created
+                            setCreated={setCreated}
+                            dataCreated={dataCreated}
+                            setDataCreated={setDataCreated}
+                        />
+                    </tr>
+                    {isModeFull && (
+                        <>
+                            <tr>
+                                <td colSpan={3}>
+                                    <div className='form-group'>
+                                        <label className='lableSPDX' htmlFor='creatorComment'>
+                                            6.10 Creator comment
+                                        </label>
+                                        <textarea
+                                            className='form-control'
+                                            id='creatorComment'
+                                            name='creatorComment'
+                                            rows={5}
+                                            placeholder='Enter creator comment'
+                                            onChange={updateField}
+                                            value={documentCreationInformation.creatorComment ?? ''}
+                                        ></textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan={3}>
+                                    <div className='form-group'>
+                                        <label className='lableSPDX' htmlFor='documentComment'>
+                                            6.11 Document comment
+                                        </label>
+                                        <textarea
+                                            className='form-control'
+                                            name='documentComment'
+                                            id='documentComment'
+                                            rows={5}
+                                            onChange={updateField}
+                                            placeholder='Enter document comment'
+                                            value={documentCreationInformation.documentComment ?? ''}
+                                        ></textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                        </>
+                    )}
+                </>
             </tbody>
         </table>
     )

@@ -17,30 +17,30 @@ interface Release {
     version?: string
     componentId?: string
     releaseDate?: string
-    externalIds?: { [k: string]: string }
-    additionalData?: { [k: string]: string }
+    externalIds?: { [k: string]: string } | null
+    additionalData?: { [k: string]: string } | null
     clearingState?: string
     createdOn?: string
     createBy?: string
     modifiedBy?: string
     modifiedOn?: string
     mainlineState?: string
-    contributors?: Array<string>
-    moderators?: Array<string>
-    roles?: { [k: string]: Array<string> }
-    mainLicenseIds?: Array<string>
-    otherLicenseIds?: Array<string>
+    contributors?: Array<string> | null
+    moderators?: Array<string> | null
+    roles?: { [k: string]: Array<string> } | null
+    mainLicenseIds?: Array<string> | null
+    otherLicenseIds?: Array<string> | null
     vendorId?: string
-    languages?: Array<string>
-    operatingSystems?: Array<string>
-    softwarePlatforms?: Array<string>
+    languages?: Array<string> | null
+    operatingSystems?: Array<string> | null
+    softwarePlatforms?: Array<string> | null
     sourceCodeDownloadurl?: string
     binaryDownloadurl?: string
-    repository?: Repository
-    releaseIdToRelationship?: { [k: string]: string }
+    repository?: Repository | null
+    releaseIdToRelationship?: { [k: string]: string } | null
     clearingInformation?: ClearingInformation
-    cotsDetails?: COTSDetails
-    attachmentDTOs?: Array<Attachment>
+    cotsDetails?: COTSDetails | null
+    attachmentDTOs?: Array<Attachment> | null
     attachments?: Array<Attachment>
     eccInformation?: ECCInformation
     spdxId?: string

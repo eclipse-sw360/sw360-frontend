@@ -12,13 +12,14 @@ import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
 import { DocumentTypes, ReleaseDetail } from '@/object-types'
 import ReleaseGeneral from './ReleaseGeneral'
 import ReleaseVendor from './ReleaseVendor'
+import { ReactNode } from 'react'
 
 interface Props {
     release: ReleaseDetail
     releaseId: string
 }
 
-const Summary = ({ release, releaseId }: Props) => {
+const Summary = ({ release, releaseId }: Props) : ReactNode => {
     return (
         <div className='col'>
             <div>

@@ -10,7 +10,7 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import { ReleaseDetail } from '@/object-types'
 
@@ -18,7 +18,7 @@ interface Props {
     release: ReleaseDetail
 }
 
-const ECCDetails = ({ release }: Props) => {
+const ECCDetails = ({ release }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     return (
@@ -39,38 +39,37 @@ const ECCDetails = ({ release }: Props) => {
                         <td>{t('ECC Status')}:</td>
                         <td>
                             {
-                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                                t(release.eccInformation.eccStatus)
+                                t(release.eccInformation?.eccStatus as never)
                             }
                         </td>
                     </tr>
                     <tr>
                         <td>{t('AL')}:</td>
-                        <td>{release.eccInformation.al}</td>
+                        <td>{release.eccInformation?.al}</td>
                     </tr>
                     <tr>
                         <td>ECCN:</td>
-                        <td>{release.eccInformation.eccn}</td>
+                        <td>{release.eccInformation?.eccn}</td>
                     </tr>
                     <tr>
                         <td>{t('Material Index Number')}:</td>
-                        <td>{release.eccInformation.materialIndexNumber}</td>
+                        <td>{release.eccInformation?.materialIndexNumber}</td>
                     </tr>
                     <tr>
                         <td>{t('ECC Comment')}:</td>
-                        <td>{release.eccInformation.eccComment}</td>
+                        <td>{release.eccInformation?.eccComment}</td>
                     </tr>
                     <tr>
                         <td>{t('Assessor Contact Person')}:</td>
-                        <td>{release.eccInformation.assessorContactPerson}</td>
+                        <td>{release.eccInformation?.assessorContactPerson}</td>
                     </tr>
                     <tr>
                         <td>{t('Assessor Department')}:</td>
-                        <td>{release.eccInformation.assessorDepartment}</td>
+                        <td>{release.eccInformation?.assessorDepartment}</td>
                     </tr>
                     <tr>
                         <td>{t('Assessment Date')}:</td>
-                        <td>{release.eccInformation.assessmentDate}</td>
+                        <td>{release.eccInformation?.assessmentDate}</td>
                     </tr>
                 </tbody>
             </table>

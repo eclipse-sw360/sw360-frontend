@@ -10,13 +10,13 @@
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
 
 import { COTSDetails } from '@/object-types'
 
-const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails }) => {
+const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails | undefined }) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -60,15 +60,17 @@ const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDet
                 <tr>
                     <td>{t('COTS Clearing Deadline')}:</td>
                     <td>
-                        {costDetails && costDetails.clearingDeadline && <span>{costDetails.clearingDeadline}</span>}
+                        {(costDetails !== undefined && costDetails.clearingDeadline !== undefined)
+                            ? <span>{costDetails.clearingDeadline}</span>
+                            : ''}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('COTS Clearing Report URL')}:</td>
                     <td>
-                        {costDetails && costDetails.licenseClearingReportURL && (
-                            <span>{costDetails.licenseClearingReportURL}</span>
-                        )}
+                        {(costDetails !== undefined && costDetails.licenseClearingReportURL !== undefined)
+                            ? <span>{costDetails.licenseClearingReportURL}</span>
+                            : ''}
                     </td>
                 </tr>
             </tbody>

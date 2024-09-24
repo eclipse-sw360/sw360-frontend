@@ -13,7 +13,7 @@
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import fossologyIcon from '@/assets/images/fossology.svg'
 import { Attachment, ReleaseDetail } from '@/object-types'
@@ -23,6 +23,7 @@ import ClearingInformationStatus from './ClearingInformationStatus'
 import RequestInformation from './RequestInformation'
 import SPDXAttachments from './SPDXAttachments'
 import SupplementalInformation from './SupplementalInformation'
+import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
 interface Props {
     release: ReleaseDetail
@@ -30,7 +31,7 @@ interface Props {
     embeddedAttachments: Array<Attachment>
 }
 
-const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) => {
+const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [show, setShow] = useState(false)
@@ -55,11 +56,10 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) => 
                         <td>{t('Clearing State')}:</td>
                         <td>
                             {
-                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                                t(release.clearingState)
+                                t(release.clearingState as never)
                             }
                             <Image
-                                src={fossologyIcon}
+                                src={fossologyIcon as StaticImport}
                                 width={15}
                                 height={15}
                                 style={{ marginLeft: '5px' }}
@@ -226,7 +226,7 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) => 
                         <td>{t('External URL')}:</td>
                         <td>
                             {release.clearingInformation && (
-                                <Link href={release.clearingInformation.externalUrl}>
+                                <Link href={release.clearingInformation.externalUrl as string}>
                                     {release.clearingInformation.externalUrl}
                                 </Link>
                             )}

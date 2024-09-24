@@ -10,10 +10,10 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
@@ -30,9 +30,9 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
-    componentId?: string
-    componentPayload?: ComponentPayload
-    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    componentId: string
+    componentPayload: ComponentPayload
+    setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
     attachmentData?: Array<Attachment>
 }
 
@@ -41,9 +41,8 @@ export default function ComponentEditSummary({
     componentPayload,
     setComponentPayload,
     attachmentData,
-}: Props) {
+}: Props) : ReactNode {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
     const [vendor, setVendor] = useState<Vendor>({
@@ -57,30 +56,36 @@ export default function ComponentEditSummary({
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status === HttpStatus.OK) {
                 const data = (await response.json()) as Component
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
-                notFound()
+                return notFound()
             }
         },
-        [session.user.access_token]
+        []
     )
 
     useEffect(() => {
-        void fetchData(`components/${componentId}`).then((component: Component) => {
-            if (typeof component.externalIds !== 'undefined') {
+        void fetchData(`components/${componentId}`).then((component: Component | undefined) => {
+            if (!component) return
+
+            if (component.externalIds) {
                 setExternalIds(CommonUtils.convertObjectToMap(component.externalIds))
             }
 
-            if (typeof component.additionalData !== 'undefined') {
+            if (component.additionalData) {
                 setAddtionalData(CommonUtils.convertObjectToMap(component.additionalData))
             }
 
-            if (typeof component._embedded.defaultVendor !== 'undefined') {
+            if (component._embedded && component._embedded.defaultVendor) {
                 const vendor: Vendor = {
                     id: component.defaultVendorId,
                     fullName: component._embedded.defaultVendor.fullName,
@@ -89,32 +94,32 @@ export default function ComponentEditSummary({
             }
 
             let modifiedBy = ''
-            if (typeof component._embedded.modifiedBy !== 'undefined') {
-                modifiedBy = component._embedded.modifiedBy.fullName
+            if (component._embedded && component._embedded.modifiedBy) {
+                modifiedBy = component._embedded.modifiedBy.fullName ?? ''
             }
 
-            let creatBy = ''
-            if (typeof component._embedded.createdBy !== 'undefined') {
-                creatBy = component._embedded.createdBy.fullName
+            let createdBy = ''
+            if (component._embedded && component._embedded.createdBy) {
+                createdBy = component._embedded.createdBy.fullName ?? ''
             }
 
             let componentOwnerEmail = ''
-            if (typeof component._embedded.componentOwner !== 'undefined') {
+            if (component._embedded && component._embedded.componentOwner) {
                 componentOwnerEmail = component._embedded.componentOwner.email
                 setComponentOwner({
-                    [componentOwnerEmail]: component._embedded.componentOwner.fullName
+                    [componentOwnerEmail]: component._embedded.componentOwner.fullName ?? ''
                 })
             }
 
             let moderatorsFromComponent = {}
-            if (typeof component._embedded['sw360:moderators'] !== 'undefined') {
+            if (component._embedded && component._embedded['sw360:moderators']) {
                 moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(component._embedded['sw360:moderators'])
                 setModerators(moderatorsFromComponent)
             }
 
             const componentPayloadData: ComponentPayload = {
                 name: component.name,
-                createBy: creatBy,
+                createBy: createdBy,
                 description: component.description,
                 componentType: component.componentType,
                 moderators: Object.keys(moderatorsFromComponent),
@@ -124,7 +129,7 @@ export default function ComponentEditSummary({
                 ownerAccountingUnit: component.ownerAccountingUnit,
                 ownerGroup: component.ownerGroup,
                 ownerCountry: component.ownerCountry,
-                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(component.roles)),
+                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(component.roles ?? {})),
                 externalIds: component.externalIds,
                 additionalData: component.additionalData,
                 defaultVendorId: component.defaultVendorId,

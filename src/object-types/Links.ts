@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 interface Links {
-    self?: {
+    self: {
         href: string
     }
     curies?: [

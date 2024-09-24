@@ -10,13 +10,13 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import { Button } from 'react-bootstrap'
 
 import { Attachment, AttachmentType, HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     releaseId: string
@@ -27,24 +27,27 @@ interface AssessmentSummaryInfo {
     [key: string]: string
 }
 
-const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
+const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [toggle, setToggle] = useState(false)
-    const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo>(undefined)
+    const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo | undefined>(undefined)
 
     const cliAttachmentNumber = embeddedAttachments.filter(
         (attachment) => attachment.attachmentType == AttachmentType.COMPONENT_LICENSE_INFO_XML
     ).length
 
     const handleShowAssessmentInfo = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
+
         const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status === HttpStatus.OK) {
             const data = (await response.json()) as AssessmentSummaryInfo
             setAssessmentSummaryInfo(data)
-        } else if (response.status == HttpStatus.NO_CONTENT) {
+        } else if (response.status === HttpStatus.NO_CONTENT) {
             setAssessmentSummaryInfo({})
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
             await signOut()
         }
     }
@@ -56,8 +59,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) => {
                     <tr key={key}>
                         <td>
                             {
-                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                                t(key)
+                                t(key as never)
                             }
                         </td>
                         <td>{assessmentSummaryInfo[key]}</td>

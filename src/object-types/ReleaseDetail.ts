@@ -26,8 +26,8 @@ import SPDXDocument from './spdx/SPDXDocument'
 
 export default interface ReleaseDetail {
     id?: string
-    name?: string
-    version?: string
+    name: string
+    version: string
     releaseDate?: string
     description?: string
     componentType?: string
@@ -36,7 +36,7 @@ export default interface ReleaseDetail {
     createdOn?: string
     repository?: Repository
     mainlineState?: string
-    clearingState?: string
+    clearingState: string
     createdBy?: string
     roles?: { [k: string]: Array<string> }
     mainLicenseIds?: string[]
@@ -53,7 +53,7 @@ export default interface ReleaseDetail {
     eccInformation?: ECCInformation
     spdxId?: string
     vendor?: Vendor
-    _links?: {
+    _links: {
         'sw360:component': {
             href: string
         }
@@ -68,7 +68,7 @@ export default interface ReleaseDetail {
             }
         ]
     }
-    _embedded?: {
+    _embedded: {
         'sw360:modifiedBy'?: User
         'sw360:createdBy'?: User
         'sw360:moderators'?: User[]

@@ -13,7 +13,7 @@
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
@@ -46,10 +46,10 @@ import EditSPDXDocument from './EditSPDXDocument'
 import MessageService from '@/services/message.service'
 
 interface Props {
-    releaseId?: string
+    releaseId: string
 }
 
-const EditRelease = ({ releaseId }: Props) => {
+const EditRelease = ({ releaseId }: Props) : ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -80,36 +80,37 @@ const EditRelease = ({ releaseId }: Props) => {
     }
 
     useEffect(() => {
-        ; (async () => {
+        void (async () => {
             try {
                 const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const release: ReleaseDetail = await response.json()
+                const release: ReleaseDetail = await response.json() as ReleaseDetail
                 let createdDate = release._embedded['sw360:documentCreationInformation']?.created
                 if (CommonUtils.isNullEmptyOrUndefinedString(createdDate)) {
                     createdDate = new Date().toISOString()
                 }
-                let creators: Creator[] = release._embedded['sw360:documentCreationInformation']?.creator
+                let creators: Creator[] | undefined = release._embedded['sw360:documentCreationInformation']?.creator
                 if (CommonUtils.isNullEmptyOrUndefinedArray(creators)) {
                     if (
                         !CommonUtils.isNullOrUndefined(release._embedded) &&
                         !CommonUtils.isNullOrUndefined(release._embedded['sw360:modifiedBy'])
                     ) {
                         creators = handleCreators(
-                            release._embedded['sw360:createdBy'].fullName,
-                            release._embedded['sw360:documentCreationInformation']?.createdBy
+                            release._embedded['sw360:createdBy']?.fullName ?? '',
+                            release._embedded['sw360:documentCreationInformation']?.createdBy ?? ''
                         )
                     } else {
                         setAddNewRelease(true)
                         creators = []
                     }
                 }
-                const documentCreationInfomation: DocumentCreationInformation =
+                const documentCreationInfomation: DocumentCreationInformation | undefined =
                     release._embedded['sw360:documentCreationInformation']
                         ?
                             {
@@ -164,16 +165,18 @@ const EditRelease = ({ releaseId }: Props) => {
                 if (release['_embedded']['sw360:cotsDetail']) {
                     const cotsDetails: COTSDetails = release['_embedded']['sw360:cotsDetail']
                     setCotsDetails(cotsDetails)
-                    if (cotsDetails['_embedded'] && cotsDetails['_embedded']['sw360:cotsResponsible']) {
+                    if (cotsDetails['_embedded']) {
                         setCotsResponsible({
-                            [cotsDetails._embedded['sw360:cotsResponsible'].email]: cotsDetails._embedded['sw360:cotsResponsible'].fullName
+                            [cotsDetails._embedded['sw360:cotsResponsible'].email]: cotsDetails._embedded['sw360:cotsResponsible'].fullName ?? ''
                         })
                     }
                 }
 
                 if (release['_embedded']['sw360:licenses']) {
                     const mainLicenses = release['_embedded']['sw360:licenses'].reduce((result, item) => {
-                                                    result[item._links.self.href.split('/').at(-1)] = item.fullName
+                                                    const licenseId = item._links?.self.href.split('/').at(-1)
+                                                    if (licenseId !== undefined)
+                                                        result[licenseId] = item.fullName ?? ''
                                                     return result
                                                 }, {} as { [k: string]: string })
                     setMainLicenses(mainLicenses)
@@ -181,7 +184,9 @@ const EditRelease = ({ releaseId }: Props) => {
 
                 if (release['_embedded']['sw360:otherLicenses']) {
                     const otherLicenses = release['_embedded']['sw360:otherLicenses'].reduce((result, item) => {
-                                                    result[item._links.self.href.split('/').at(-1)] = item.fullName
+                                                    const licenseId = item._links?.self.href.split('/').at(-1)
+                                                    if (licenseId !== undefined)
+                                                        result[licenseId] = item.fullName ?? ''
                                                     return result
                                                 }, {} as { [k: string]: string })
                     setOtherLicenses(otherLicenses)
@@ -195,7 +200,7 @@ const EditRelease = ({ releaseId }: Props) => {
                 console.error(e)
             }
         })()
-    }, [])
+    }, [releaseId])
 
     const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
@@ -298,7 +303,7 @@ const EditRelease = ({ releaseId }: Props) => {
 
     const validateCreator = (SPDXPayload: SPDX): boolean => {
         if (
-            CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.documentCreationInformation.creator) &&
+            CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.documentCreationInformation?.creator) &&
             !addNewRelease
         ) {
             setErrorCreator(true)
@@ -308,12 +313,14 @@ const EditRelease = ({ releaseId }: Props) => {
     }
 
     const validateLicenseIdentifier = (SPDXPayload: SPDX): boolean => {
+        if (!SPDXPayload.spdxDocument)
+            return false
         if (CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.spdxDocument.otherLicensingInformationDetecteds)) {
             return false
         }
-        let validate: boolean = false
+        let validate = false
 
-        SPDXPayload.spdxDocument.otherLicensingInformationDetecteds?.map((item) => {
+        SPDXPayload.spdxDocument.otherLicensingInformationDetecteds.map((item) => {
             if (CommonUtils.isNullEmptyOrUndefinedString(item.licenseId) || item.licenseId === 'LicenseRef-') {
                 setErrorLicenseIdentifier(true)
                 validate = true
@@ -323,11 +330,11 @@ const EditRelease = ({ releaseId }: Props) => {
     }
 
     const validateExtractedText = (SPDXPayload: SPDX): boolean => {
-        if (CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.spdxDocument.otherLicensingInformationDetecteds)) {
+        if (CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.spdxDocument?.otherLicensingInformationDetecteds)) {
             return false
         }
-        let validate: boolean = false
-        SPDXPayload.spdxDocument.otherLicensingInformationDetecteds?.map((item) => {
+        let validate = false
+        SPDXPayload.spdxDocument.otherLicensingInformationDetecteds.map((item) => {
             if (CommonUtils.isNullEmptyOrUndefinedString(item.extractedText)) {
                 setErrorExtractedText(true)
                 validate = true
@@ -338,6 +345,8 @@ const EditRelease = ({ releaseId }: Props) => {
 
     const submit = async () => {
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         if (SPDX_ENABLE === 'true') {
             setInputValid(true)
             if (validateLicenseIdentifier(SPDXPayload) && validateExtractedText(SPDXPayload)) {

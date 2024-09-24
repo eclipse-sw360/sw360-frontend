@@ -10,12 +10,12 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 
 import { Component, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
-const ReleaseAgrregate = ({ component }: { component: Component }) => {
+const ReleaseAgrregate = ({ component }: { component: Component }) : ReactNode => {
     const [toggle, setToggle] = useState(false)
     const t = useTranslations('default')
 

@@ -9,22 +9,22 @@
 // License-Filename: LICENSE
 
 'use client'
-import { Annotations, InputKeyValue, SPDX } from '@/object-types'
+import { Annotations, InputKeyValue, PackageInformation, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import AnnotationDate from './AnnotationInformation/AnnotationDate'
 import Annotator from './AnnotationInformation/Annotator'
 
 interface Props {
-    indexAnnotations?: number
-    setIndexAnnotations?: React.Dispatch<React.SetStateAction<number>>
-    annotationsSPDXs?: Annotations[]
-    setAnnotationsSPDXs?: React.Dispatch<React.SetStateAction<Annotations[]>>
-    annotationsPackages?: Annotations[]
-    setAnnotationsPackages?: React.Dispatch<React.SetStateAction<Annotations[]>>
-    SPDXPayload?: SPDX
-    setSPDXPayload?: React.Dispatch<React.SetStateAction<SPDX>>
+    indexAnnotations: number
+    setIndexAnnotations: React.Dispatch<React.SetStateAction<number>>
+    annotationsSPDXs: Annotations[]
+    setAnnotationsSPDXs: React.Dispatch<React.SetStateAction<Annotations[]>>
+    annotationsPackages: Annotations[]
+    setAnnotationsPackages: React.Dispatch<React.SetStateAction<Annotations[]>>
+    SPDXPayload: SPDX
+    setSPDXPayload: React.Dispatch<React.SetStateAction<SPDX>>
 }
 
 const EditAnnotationInformation = ({
@@ -36,12 +36,12 @@ const EditAnnotationInformation = ({
     setAnnotationsPackages,
     SPDXPayload,
     setSPDXPayload,
-}: Props) => {
+}: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [changeSource, setChangeSource] = useState(false)
     const [isSourceSPDXDocument, setIsSourceSPDXDocument] = useState<boolean>(true)
 
-    const [dataAnnotator, setDataAnnotator] = useState<InputKeyValue>()
+    const [dataAnnotator, setDataAnnotator] = useState<InputKeyValue | undefined>(undefined)
     const handleInputKeyToAnnotator = (data: InputKeyValue) => {
         return data.key + ':' + data.value
     }
@@ -63,7 +63,7 @@ const EditAnnotationInformation = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     annotations: annotationUpdates,
-                },
+                } as SPDXDocument,
             })
         } else {
             const annotationUpdates: Annotations[] = annotationsPackages.map((annotation, index) => {
@@ -81,7 +81,7 @@ const EditAnnotationInformation = ({
                 packageInformation: {
                     ...SPDXPayload.packageInformation,
                     annotations: annotationUpdates,
-                },
+                } as PackageInformation,
             })
         }
     }
@@ -163,7 +163,7 @@ const EditAnnotationInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         annotations: annotationsSPDXs,
-                    },
+                    } as SPDXDocument,
                 })
             } else {
                 setAnnotationsSPDXs([])
@@ -172,7 +172,7 @@ const EditAnnotationInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         annotations: [],
-                    },
+                    } as SPDXDocument,
                 })
             }
         } else if (relationshipType === 'package') {
@@ -185,7 +185,7 @@ const EditAnnotationInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         annotations: annotationsPackages,
-                    },
+                    } as PackageInformation,
                 })
             } else {
                 setAnnotationsPackages([])
@@ -194,7 +194,7 @@ const EditAnnotationInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         annotations: [],
-                    },
+                    } as PackageInformation,
                 })
             }
         }
@@ -254,7 +254,7 @@ const EditAnnotationInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 annotations: arrayExternals,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -287,7 +287,7 @@ const EditAnnotationInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 annotations: arrayExternals,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -312,7 +312,7 @@ const EditAnnotationInformation = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     annotations: annotationUpdates,
-                },
+                } as SPDXDocument,
             })
         } else {
             const annotationUpdates: Annotations[] = annotationsPackages.map((annotation, index) => {
@@ -330,7 +330,7 @@ const EditAnnotationInformation = ({
                 packageInformation: {
                     ...SPDXPayload.packageInformation,
                     annotations: annotationUpdates,
-                },
+                } as PackageInformation,
             })
         }
     }
@@ -360,7 +360,7 @@ const EditAnnotationInformation = ({
                     return {
                         ...annotation,
                         annotationDate: convertInputToAnnotationDate(input),
-                    }
+                    } as Annotations
                 }
                 return annotation
             })
@@ -370,7 +370,7 @@ const EditAnnotationInformation = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     annotations: annotationUpdates,
-                },
+                } as SPDXDocument,
             })
         } else {
             const annotationUpdates = annotationsPackages.map((annotation, index) => {
@@ -378,7 +378,7 @@ const EditAnnotationInformation = ({
                     return {
                         ...annotation,
                         annotationDate: convertInputToAnnotationDate(input),
-                    }
+                    } as Annotations
                 }
                 return annotation
             })
@@ -388,7 +388,7 @@ const EditAnnotationInformation = ({
                 packageInformation: {
                     ...SPDXPayload.packageInformation,
                     annotations: annotationUpdates,
-                },
+                } as PackageInformation,
             })
         }
     }
@@ -406,7 +406,7 @@ const EditAnnotationInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         annotations: [],
-                    },
+                    } as SPDXDocument,
                 })
             } else {
                 let annotations: Annotations[] = []
@@ -420,7 +420,7 @@ const EditAnnotationInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         annotations: annotations,
-                    },
+                    } as SPDXDocument,
                 })
                 setNumberIndexSPDX(indexAnnotations)
                 setIsDeleteSucces(true)
@@ -437,7 +437,7 @@ const EditAnnotationInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         annotations: [],
-                    },
+                    } as PackageInformation,
                 })
             } else {
                 let annotations: Annotations[] = []
@@ -451,7 +451,7 @@ const EditAnnotationInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         annotations: annotations,
-                    },
+                    } as PackageInformation,
                 })
                 setNumberIndexPackage(indexAnnotations)
                 setIsDeleteSucces(true)
@@ -553,9 +553,7 @@ const EditAnnotationInformation = ({
                         </div>
                     </td>
                 </tr>
-                {(isSourceSPDXDocument
-                    ? annotationsSPDXs[indexAnnotations]
-                    : annotationsPackages[indexAnnotations]) && (
+                {
                     <>
                         <tr>
                             <td>
@@ -638,7 +636,7 @@ const EditAnnotationInformation = ({
                             </td>
                         </tr>
                     </>
-                )}
+                }
             </tbody>
         </table>
     )

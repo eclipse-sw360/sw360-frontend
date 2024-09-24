@@ -14,7 +14,7 @@ interface Attachment {
     attachmentContentId?: string
     filename: string
     sha1: string
-    attachmentType?: string
+    attachmentType: string
     createdBy?: string
     createdTeam?: string
     createdComment?: string

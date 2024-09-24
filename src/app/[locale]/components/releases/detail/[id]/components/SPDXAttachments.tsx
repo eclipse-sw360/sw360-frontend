@@ -9,14 +9,14 @@
 // License-Filename: LICENSE
 
 'use client'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
 import { FiAlertTriangle } from 'react-icons/fi'
 
 import { Attachment, AttachmentType, Embedded, HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 import SPDXLicenseView from './SPDXLicenseView'
 
@@ -25,10 +25,10 @@ interface Props {
 }
 
 interface CellData {
-    isISR?: boolean
+    isISR: boolean
     fileName?: string
     showLicenseClicked?: boolean
-    rowIndex?: number
+    rowIndex: number
     attachmentId?: string
     attachmentName?: string
     licenseInfo?: {
@@ -37,9 +37,8 @@ interface CellData {
     addLicensesState?: { [key: string]: string }
 }
 
-const SPDXAttachments = ({ releaseId }: Props) => {
+const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [tableData, setTableData] = useState<Array<Array<CellData>>>([])
 
     const columns = [
@@ -63,7 +62,7 @@ const SPDXAttachments = ({ releaseId }: Props) => {
             name: t('Action'),
             formatter: ({ isISR, showLicenseClicked, rowIndex, attachmentId }: CellData) =>
                 _(
-                    showLicenseClicked ? (
+                    (showLicenseClicked === true) ? (
                         isISR == false ? (
                             <Button variant='primary' onClick={() => void handleAddSpdxLicenses(rowIndex)}>
                                 {t('Add License To Release')}
@@ -105,11 +104,15 @@ const SPDXAttachments = ({ releaseId }: Props) => {
     ]
 
     const handleAddSpdxLicenses = async (rowIndex: number) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
+
         const requestBody = {
-            otherLicenseIds: tableData[rowIndex][2].licenseInfo.otherLicenseIds
+            otherLicenseIds: (tableData[rowIndex][2].licenseInfo?.otherLicenseIds !== undefined)
                 ? tableData[rowIndex][2].licenseInfo.otherLicenseIds
                 : [],
-            mainLicenseIds: tableData[rowIndex][2].licenseInfo.licenseIds
+            mainLicenseIds: (tableData[rowIndex][2].licenseInfo?.licenseIds !== undefined)
                 ? tableData[rowIndex][2].licenseInfo.licenseIds
                 : [],
         }
@@ -120,7 +123,7 @@ const SPDXAttachments = ({ releaseId }: Props) => {
                 requestBody,
                 session.user.access_token
             )
-            if (response.status == HttpStatus.UNAUTHORIZED) {
+            if (response.status === HttpStatus.UNAUTHORIZED) {
                 await signOut()
             } else {
                 updateAddLicenseState(response.status, rowIndex)
@@ -156,21 +159,26 @@ const SPDXAttachments = ({ releaseId }: Props) => {
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status === HttpStatus.OK) {
                 const data = (await response.json()) as { [key: string]: string | Array<string> } & Embedded<
                     Attachment,
                     'sw360:attachmentDTOes'
                 >
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                await signOut()
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
             }
         },
-        [session.user.access_token]
+        []
     )
 
-    const handleShowLicenseInfo = async (rowIndex: number, attachmentId: string) => {
+    const handleShowLicenseInfo = async (rowIndex: number, attachmentId: string | undefined) => {
+        if (attachmentId === undefined) return
+
         const licenseInfo = await fetchData(`releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`)
 
         const newData = Object.entries(tableData).map(([index, rowData]) => {
@@ -205,7 +213,7 @@ const SPDXAttachments = ({ releaseId }: Props) => {
                     attachmentId: attachment.attachmentContentId,
                 },
                 { isISR: isISR, attachmentName: attachment.filename },
-            ]
+            ] as Array<CellData>
         }
 
         const convertToTableData = (isrAttachments: Array<Attachment>, cliAndClxAttachments: Array<Attachment>) => {
@@ -224,8 +232,8 @@ const SPDXAttachments = ({ releaseId }: Props) => {
         }
 
         fetchData(`releases/${releaseId}/attachments`)
-            .then((response: Embedded<Attachment, 'sw360:attachmentDTOes'>) =>
-                response._embedded ? response._embedded['sw360:attachmentDTOes'] : []
+            .then((response: Embedded<Attachment, 'sw360:attachmentDTOes'> | undefined) =>
+                (response) ? response._embedded['sw360:attachmentDTOes'] : []
             )
             .then((attachments: Array<Attachment>) => {
                 const isrAttachments = filterAttachmentByType(attachments, [AttachmentType.INITIAL_SCAN_REPORT])

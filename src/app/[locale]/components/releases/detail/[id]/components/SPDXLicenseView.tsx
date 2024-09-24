@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { FaInfoCircle } from 'react-icons/fa'
@@ -22,10 +22,10 @@ import styles from '../detail.module.css'
 interface Props {
     licenseInfo: { [key: string]: string | Array<string> | number }
     isISR: boolean
-    attachmentName: string
+    attachmentName?: string
 }
 
-const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) => {
+const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [selectedLicenseId, setSelectedLicenseId] = useState<string>()
     const [modalShow, setModalShow] = useState(false)
@@ -110,8 +110,7 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) => {
                     <div>
                         <b>
                             {
-                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                                t(licenseInfo.otherLicense as string)
+                                t(licenseInfo.otherLicense as never)
                             }
                         </b>
                     </div>
@@ -126,18 +125,18 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) => {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {selectedLicenseId && (
+                    {!CommonUtils.isNullEmptyOrUndefinedString(selectedLicenseId) && (
                         <>
                             <div>
-                                License Name: <b>{selectedLicenseId}</b>
+                                {t('License Name')}: <b>{selectedLicenseId}</b>
                             </div>
                             <div>
-                                Source File List:
+                                {t('Source File List')}:
                                 <ul>
                                     {CommonUtils.isNullEmptyOrUndefinedArray(
                                         licenseInfo[selectedLicenseId] as Array<string>
                                     ) ? (
-                                        <li>Source file information not found in ISR</li>
+                                        <li>{t('Source file information not found in ISR')}</li>
                                     ) : (
                                         renderSourceList(licenseInfo[selectedLicenseId] as Array<string>)
                                     )}

@@ -8,12 +8,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
 import EditRelease from './components/EditRelease'
+
 interface Context {
     params: { id: string }
 }
 
-const ReleaseEditPage = async ({ params }: Context) => {
+const ReleaseEditPage = ({ params }: Context) : ReactNode => {
     const releaseId = params.id
 
     return <EditRelease releaseId={releaseId} />

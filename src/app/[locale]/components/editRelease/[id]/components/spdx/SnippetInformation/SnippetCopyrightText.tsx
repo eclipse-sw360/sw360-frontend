@@ -8,16 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    snippetCopyrightText?: string
-    setSnippetConcludedLicenseToSnippet?: (data: string) => void
-    snippetCopyrightTextExist?: boolean
-    setSnippetCopyrightTextExist?: React.Dispatch<React.SetStateAction<boolean>>
-    snippetCopyrightTextNone?: boolean
-    setSnippetCopyrightTextNone?: React.Dispatch<React.SetStateAction<boolean>>
-    snippetCopyrightTextNoasserttion?: boolean
-    setSnippetCopyrightTextNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
-    updateField?: (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => void
+    snippetCopyrightText: string
+    setSnippetConcludedLicenseToSnippet: (data: string) => void
+    snippetCopyrightTextExist: boolean
+    setSnippetCopyrightTextExist: React.Dispatch<React.SetStateAction<boolean>>
+    snippetCopyrightTextNone: boolean
+    setSnippetCopyrightTextNone: React.Dispatch<React.SetStateAction<boolean>>
+    snippetCopyrightTextNoasserttion: boolean
+    setSnippetCopyrightTextNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
+    updateField: (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
 function SnippetCopyrightText({
@@ -30,7 +32,7 @@ function SnippetCopyrightText({
     snippetCopyrightTextNoasserttion,
     setSnippetCopyrightTextNoasserttion,
     updateField,
-}: Props) {
+}: Props) : ReactNode {
     const selectSnippetCopyrightTextExist = () => {
         setSnippetCopyrightTextExist(true)
         setSnippetCopyrightTextNone(false)
@@ -73,7 +75,7 @@ function SnippetCopyrightText({
                             name='copyrightText'
                             placeholder='Enter snippet copyright text'
                             onChange={updateField}
-                            value={snippetCopyrightText ?? ''}
+                            value={snippetCopyrightText}
                             disabled={snippetCopyrightTextNone || snippetCopyrightTextNoasserttion}
                         ></textarea>
                     </div>

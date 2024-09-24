@@ -11,8 +11,9 @@
 import { COTSDetails } from '@/object-types'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 import CotsOssInformation from './CotsOssInformation'
+import { ReactNode } from 'react'
 
-const CommercialDetails = ({ costDetails }: { costDetails: COTSDetails }) => {
+const CommercialDetails = ({ costDetails }: { costDetails: COTSDetails | undefined }) : ReactNode => {
     return (
         <div className='col'>
             <CommercialDetailsAdministration costDetails={costDetails} />

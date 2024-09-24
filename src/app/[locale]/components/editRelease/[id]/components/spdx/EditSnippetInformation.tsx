@@ -9,20 +9,20 @@
 // License-Filename: LICENSE
 
 'use client'
-import { InputKeyValue, SPDX, SnippetInformation, SnippetRange } from '@/object-types'
+import { InputKeyValue, SPDX, SPDXDocument, SnippetInformation, SnippetRange } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import SnippetFileSPDXIdentifier from './SnippetInformation/SnippetFileSPDXIdentifier'
 import SnippetRanges from './SnippetInformation/SnippetRanges'
 
 interface Props {
-    indexSnippetInformation?: number
-    setIndexSnippetInformation?: React.Dispatch<React.SetStateAction<number>>
-    snippetInformations?: SnippetInformation[]
-    setSnippetInformations?: React.Dispatch<React.SetStateAction<SnippetInformation[]>>
-    SPDXPayload?: SPDX
-    setSPDXPayload?: React.Dispatch<React.SetStateAction<SPDX>>
+    indexSnippetInformation: number
+    setIndexSnippetInformation: React.Dispatch<React.SetStateAction<number>>
+    snippetInformations: SnippetInformation[]
+    setSnippetInformations: React.Dispatch<React.SetStateAction<SnippetInformation[]>>
+    SPDXPayload: SPDX
+    setSPDXPayload: React.Dispatch<React.SetStateAction<SPDX>>
 }
 
 const EditSnippetInformation = ({
@@ -32,11 +32,14 @@ const EditSnippetInformation = ({
     setSnippetInformations,
     SPDXPayload,
     setSPDXPayload,
-}: Props) => {
+}: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [snippetRanges, setSnippetRanges] = useState<SnippetRange[]>([])
 
-    const [dataSnippetFromFile, setDataSnippetFromFile] = useState<InputKeyValue>()
+    const [dataSnippetFromFile, setDataSnippetFromFile] = useState<InputKeyValue>({
+        key: '',
+        value: ''
+    })
 
     const setDataSnippetRanges = (inputs: SnippetRange[]) => {
         const snippets: SnippetInformation[] = snippetInformations.map((snippet, index) => {
@@ -54,7 +57,7 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: snippets,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -69,8 +72,7 @@ const EditSnippetInformation = ({
             setIncreIndex(parseInt(index))
         }
         setIndexSnippetInformation(parseInt(index))
-        console.log(index)
-        console.log(snippetInformations[parseInt(index)]?.licenseConcluded)
+
         if (snippetInformations[parseInt(index)]?.licenseConcluded === 'NONE') {
             setSnippetConcludedLicense('')
             setSnippetConcludedLicenseExist(false)
@@ -172,7 +174,7 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: arrayExternals,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -197,7 +199,7 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: snippets,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -222,7 +224,7 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: snippets,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -324,7 +326,7 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: snippets,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -344,21 +346,21 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: snippets,
-            },
+            } as SPDXDocument,
         })
     }
 
-    const [licenseInfoInSnippets, setLicenseInfoInSnippets] = useState<Array<string>>()
+    const [licenseInfoInSnippets, setLicenseInfoInSnippets] = useState<Array<string>>([])
     const [licenseInfoInSnippetsExist, setLicenseInfoInSnippetsExist] = useState(true)
     const [licenseInfoInSnippetsNone, setLicenseInfoInSnippetsNone] = useState(false)
     const [licenseInfoInSnippetsNoasserttion, setLicenseInfoInSnippetsNoasserttion] = useState(false)
 
-    const setAllLicensesInformationToSnippet = (data: string) => {
+    const setAllLicensesInformationToSnippet = (data: string | undefined | null) => {
         const snippets: SnippetInformation[] = snippetInformations.map((snippet, index) => {
             if (index === indexSnippetInformation) {
                 return {
                     ...snippet,
-                    licenseInfoInSnippets: CommonUtils.isNullEmptyOrUndefinedString(data) ? [] : data?.split('\n'),
+                    licenseInfoInSnippets: CommonUtils.isNullEmptyOrUndefinedString(data) ? [] : data.split('\n'),
                 }
             }
             return snippet
@@ -369,7 +371,7 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: snippets,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -395,12 +397,12 @@ const EditSnippetInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 snippets: snippets,
-            },
+            } as SPDXDocument,
         })
     }
 
-    const handleSnippetFromFile = (data: string) => {
-        if (data == null) {
+    const handleSnippetFromFile = (data: string | undefined | null) => {
+        if (CommonUtils.isNullOrUndefined(data)) {
             const input: InputKeyValue = {
                 key: '',
                 value: '',
@@ -424,7 +426,7 @@ const EditSnippetInformation = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     snippets: [],
-                },
+                } as SPDXDocument,
             })
         } else {
             let snippetInformationDatas: SnippetInformation[] = []
@@ -443,7 +445,7 @@ const EditSnippetInformation = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     snippets: snippetInformationDatas,
-                },
+                } as SPDXDocument,
             })
             if (!CommonUtils.isNullEmptyOrUndefinedArray(snippetInformationDatas)) {
                 setNumberIndex(snippetInformationDatas[0].index)
@@ -455,7 +457,7 @@ const EditSnippetInformation = ({
         setLicenseInfoInSnippetsExist(true)
         setLicenseInfoInSnippetsNone(false)
         setLicenseInfoInSnippetsNoasserttion(false)
-        setAllLicensesInformationToSnippet(licenseInfoInSnippets?.toString())
+        setAllLicensesInformationToSnippet(licenseInfoInSnippets.toString())
     }
     const selectLicenseInfoSnippetNone = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLicenseInfoInSnippetsExist(false)
@@ -565,7 +567,7 @@ const EditSnippetInformation = ({
                         </div>
                     </td>
                 </tr>
-                {snippetInformations[indexSnippetInformation] && (
+                {!CommonUtils.isNullOrUndefined(snippetInformations[indexSnippetInformation]) && (
                     <>
                         <tr>
                             <td style={{ width: '600px' }}>
@@ -587,10 +589,10 @@ const EditSnippetInformation = ({
                                                     snippetInformations[indexSnippetInformation].SPDXID
                                                 )
                                                     ? 'Snippet-'
-                                                    : snippetInformations[indexSnippetInformation].SPDXID?.startsWith(
+                                                    : snippetInformations[indexSnippetInformation].SPDXID.startsWith(
                                                           'SPDXRef-'
                                                       )
-                                                    ? snippetInformations[indexSnippetInformation].SPDXID?.substring(8)
+                                                    ? snippetInformations[indexSnippetInformation].SPDXID.substring(8)
                                                     : snippetInformations[indexSnippetInformation].SPDXID
                                             }
                                         />
@@ -712,8 +714,8 @@ const EditSnippetInformation = ({
                                                 onChange={updateField}
                                                 value={
                                                     snippetInformations[indexSnippetInformation].licenseInfoInSnippets
-                                                        ?.toString()
-                                                        .replaceAll(',', '\n') ?? ''
+                                                        .toString()
+                                                        .replaceAll(',', '\n')
                                                 }
                                                 disabled={
                                                     licenseInfoInSnippetsNone || licenseInfoInSnippetsNoasserttion
@@ -770,7 +772,7 @@ const EditSnippetInformation = ({
                                         placeholder='Enter snippet comments on license'
                                         name='licenseComments'
                                         onChange={updateField}
-                                        value={snippetInformations[indexSnippetInformation].licenseComments ?? ''}
+                                        value={snippetInformations[indexSnippetInformation].licenseComments}
                                     ></textarea>
                                 </div>
                             </td>
@@ -799,7 +801,7 @@ const EditSnippetInformation = ({
                                                 placeholder='Enter snippet copyright text'
                                                 onChange={updateField}
                                                 value={
-                                                    snippetInformations[indexSnippetInformation].copyrightText ?? ''
+                                                    snippetInformations[indexSnippetInformation].copyrightText
                                                 }
                                                 disabled={snippetCopyrightTextNone || snippetCopyrightTextNoasserttion}
                                             ></textarea>
@@ -854,7 +856,7 @@ const EditSnippetInformation = ({
                                         placeholder='Enter snippet comment'
                                         name='comment'
                                         onChange={updateField}
-                                        value={snippetInformations[indexSnippetInformation].comment ?? ''}
+                                        value={snippetInformations[indexSnippetInformation].comment}
                                     ></textarea>
                                 </div>
                             </td>
@@ -872,7 +874,7 @@ const EditSnippetInformation = ({
                                         placeholder='Enter snippet name'
                                         name='name'
                                         onChange={updateField}
-                                        value={snippetInformations[indexSnippetInformation].name ?? ''}
+                                        value={snippetInformations[indexSnippetInformation].name}
                                     />
                                 </div>
                             </td>
@@ -891,7 +893,7 @@ const EditSnippetInformation = ({
                                         name='snippetAttributionText'
                                         onChange={updateField}
                                         value={
-                                            snippetInformations[indexSnippetInformation].snippetAttributionText ?? ''
+                                            snippetInformations[indexSnippetInformation].snippetAttributionText
                                         }
                                     ></textarea>
                                 </div>

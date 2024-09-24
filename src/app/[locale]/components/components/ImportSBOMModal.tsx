@@ -10,14 +10,14 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import React, { useRef, useState } from 'react'
+import React, { ReactNode, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
 
 import { Component, HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import styles from '../components.module.css'
 
 interface Props {
@@ -39,21 +39,19 @@ interface PrepareImportData {
     releasesName?: string
 }
 
-const ImportSBOMModal = ({ show, setShow }: Props) => {
+const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [importState, setImportState] = useState(ImportSBOMState.INIT_STATE)
     const [prepateImportData, setPrepareImportData] = useState<PrepareImportData | undefined>(undefined)
     const [notAllowedMessageDisplayed, setNotAllowedMessageDisplayed] = useState(false)
     const selectedFile = useRef<File | undefined>(undefined)
-    const inputRef = useRef<HTMLInputElement>(undefined)
+    const inputRef = useRef<HTMLInputElement>()
     const router = useRouter()
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        selectedFile.current = e.currentTarget.files[0]
-        if (!selectedFile) {
+        if (!e.currentTarget.files)
             return
-        }
+        selectedFile.current = e.currentTarget.files[0]
 
         if (!selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.spdx')) {
             setNotAllowedMessageDisplayed(true)
@@ -64,6 +62,11 @@ const ImportSBOMModal = ({ show, setShow }: Props) => {
     }
 
     const prepareImport = async () => {
+        if (!selectedFile.current) return
+
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return
+
         setNotAllowedMessageDisplayed(false)
         const formData = new FormData()
         formData.append('file', selectedFile.current, selectedFile.current.name)
@@ -83,6 +86,11 @@ const ImportSBOMModal = ({ show, setShow }: Props) => {
     }
 
     const importFile = async () => {
+        if (!selectedFile.current) return
+
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return
+
         const formData = new FormData()
         formData.append('file', selectedFile.current, selectedFile.current.name)
 
@@ -111,15 +119,13 @@ const ImportSBOMModal = ({ show, setShow }: Props) => {
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            selectedFile.current = e.dataTransfer.files[0]
-            if (!selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.spdx')) {
-                setNotAllowedMessageDisplayed(true)
-                return
-            }
-            setImportState(ImportSBOMState.IMPORTING)
-            prepareImport().catch((err) => console.log(err))
+        selectedFile.current = e.dataTransfer.files[0]
+        if (!selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.spdx')) {
+            setNotAllowedMessageDisplayed(true)
+            return
         }
+        setImportState(ImportSBOMState.IMPORTING)
+        prepareImport().catch((err) => console.log(err))
     }
 
     const closeModal = () => {
@@ -168,7 +174,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) => {
                                     <br />
                                     <input
                                         className={`${styles['input']}`}
-                                        ref={inputRef}
+                                        ref={inputRef as React.LegacyRef<HTMLInputElement>}
                                         type='file'
                                         accept='.rdf,.spdx'
                                         onChange={handleFileChange}
@@ -183,9 +189,9 @@ const ImportSBOMModal = ({ show, setShow }: Props) => {
                     </>
                 )}
                 {importState === ImportSBOMState.IMPORTING && <h4>{t('Importing')}...</h4>}
-                {importState === ImportSBOMState.PREPARE_IMPORT && (
+                {importState === ImportSBOMState.PREPARE_IMPORT && prepateImportData &&
                     <>
-                        {prepateImportData.message ? (
+                        {!CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) ? (
                             <h4> {prepateImportData.message} </h4>
                         ) : (
                             <div>
@@ -205,7 +211,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) => {
                             </div>
                         )}
                     </>
-                )}
+                }
             </Modal.Body>
             <Modal.Body>
                 {importState === ImportSBOMState.IMPORT_ERROR && (
@@ -218,7 +224,10 @@ const ImportSBOMModal = ({ show, setShow }: Props) => {
                 )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                {importState === ImportSBOMState.PREPARE_IMPORT && !prepateImportData.message && (
+                {
+                    importState === ImportSBOMState.PREPARE_IMPORT
+                        && prepateImportData
+                        && CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) && (
                     <Button
                         type='button'
                         className={`fw-bold btn btn-primary button-orange`}

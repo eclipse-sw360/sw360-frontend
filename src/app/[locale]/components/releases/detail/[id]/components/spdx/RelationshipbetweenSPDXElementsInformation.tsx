@@ -11,11 +11,11 @@
 'use client'
 import { RelationshipsBetweenSPDXElements } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 interface Props {
-    relationshipSelection?: { index: number; isSPDXDocument: boolean }
-    setRelationshipSelection?: React.Dispatch<React.SetStateAction<{ index: number; isSPDXDocument: boolean }>>
+    relationshipSelection: { index: number; isSPDXDocument: boolean }
+    setRelationshipSelection: React.Dispatch<React.SetStateAction<{ index: number; isSPDXDocument: boolean }>>
     relationshipsBetweenSPDXElementSPDXs: RelationshipsBetweenSPDXElements[]
     setRelationshipsBetweenSPDXElementSPDXs: React.Dispatch<React.SetStateAction<RelationshipsBetweenSPDXElements[]>>
     relationshipsBetweenSPDXElementPackages: RelationshipsBetweenSPDXElements[]
@@ -29,14 +29,14 @@ const RelationshipbetweenSPDXElementsInformation = ({
     setRelationshipsBetweenSPDXElementSPDXs,
     relationshipsBetweenSPDXElementPackages,
     setRelationshipsBetweenSPDXElementPackages,
-}: Props) => {
+}: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [changeSource, setChangeSource] = useState(false)
 
     const changeRelationshipSource = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setChangeSource(true)
         const relationshipType: string = e.target.value
-        if (relationshipType === 'spdxDoucument') {
+        if (relationshipType === 'spdxDocument') {
             setRelationshipSelection({
                 index: 0,
                 isSPDXDocument: true,
@@ -89,7 +89,7 @@ const RelationshipbetweenSPDXElementsInformation = ({
                             className='spdx-col-2'
                             onChange={changeRelationshipSource}
                         >
-                            <option value='spdxDoucument' selected={relationshipSelection.isSPDXDocument}>
+                            <option value='spdxDocument' selected={relationshipSelection.isSPDXDocument}>
                                 SPDX Document
                             </option>
                             <option value='package' selected={!relationshipSelection.isSPDXDocument}>
@@ -135,78 +135,73 @@ const RelationshipbetweenSPDXElementsInformation = ({
                         </select>
                     </td>
                 </tr>
-
-                {(relationshipSelection.isSPDXDocument
-                    ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
-                    : relationshipsBetweenSPDXElementPackages[relationshipSelection.index]) && (
-                    <>
-                        <tr className='relationship-document'>
-                            <td>11.1 Relationship</td>
-                            <td>
-                                <div className='spdx-col-2 spdx-flex-col'>
-                                    <div className='spdx-flex-row'>
-                                        <div className='spdx-col-1 '>
-                                            {relationshipSelection.isSPDXDocument
-                                                ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
-                                                      ?.spdxElementId
-                                                : relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
-                                                      ?.spdxElementId ?? ''}
-                                        </div>
-                                        <div className='spdx-col-1 spdx-flex-row'>
-                                            {relationshipSelection.isSPDXDocument
-                                                ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
-                                                      ?.relationshipType
-                                                : relationshipsBetweenSPDXElementPackages[
-                                                      relationshipSelection.index
-                                                  ]?.relationshipType.replace('relationshipType_', '') ?? ''}
-                                        </div>
-                                        <div className='spdx-col-3'>
-                                            {relationshipSelection.isSPDXDocument
-                                                ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
-                                                      ?.relatedSpdxElement
-                                                : relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
-                                                      ?.relatedSpdxElement ?? ''}
-                                        </div>
+                <>
+                    <tr className='relationship-document'>
+                        <td>11.1 Relationship</td>
+                        <td>
+                            <div className='spdx-col-2 spdx-flex-col'>
+                                <div className='spdx-flex-row'>
+                                    <div className='spdx-col-1 '>
+                                        {relationshipSelection.isSPDXDocument
+                                            ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
+                                                    ?.spdxElementId
+                                            : relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
+                                                    ?.spdxElementId ?? ''}
+                                    </div>
+                                    <div className='spdx-col-1 spdx-flex-row'>
+                                        {relationshipSelection.isSPDXDocument
+                                            ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
+                                                    ?.relationshipType
+                                            : relationshipsBetweenSPDXElementPackages[
+                                                    relationshipSelection.index
+                                                ]?.relationshipType.replace('relationshipType_', '') ?? ''}
+                                    </div>
+                                    <div className='spdx-col-3'>
+                                        {relationshipSelection.isSPDXDocument
+                                            ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
+                                                    ?.relatedSpdxElement
+                                            : relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
+                                                    ?.relatedSpdxElement ?? ''}
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr className='relationship-document'>
-                            <td>11.2 Relationship comment</td>
-                            <td>
-                                <p className='spdx-col-2'>
-                                    {relationshipSelection.isSPDXDocument
-                                        ? relationshipsBetweenSPDXElementSPDXs[
-                                              relationshipSelection.index
-                                          ]?.relationshipComment
-                                              .trim()
-                                              .split('\n')
-                                              .map((item) => {
-                                                  return (
-                                                      <>
-                                                          {item}
-                                                          <br></br>
-                                                      </>
-                                                  )
-                                              })
-                                        : relationshipsBetweenSPDXElementPackages[
-                                              relationshipSelection.index
-                                          ]?.relationshipComment
-                                              .trim()
-                                              .split('\n')
-                                              .map((item) => {
-                                                  return (
-                                                      <>
-                                                          {item}
-                                                          <br></br>
-                                                      </>
-                                                  )
-                                              }) ?? ''}
-                                </p>
-                            </td>
-                        </tr>
-                    </>
-                )}
+                            </div>
+                        </td>
+                    </tr>
+                    <tr className='relationship-document'>
+                        <td>11.2 Relationship comment</td>
+                        <td>
+                            <p className='spdx-col-2'>
+                                {relationshipSelection.isSPDXDocument
+                                    ? relationshipsBetweenSPDXElementSPDXs[
+                                            relationshipSelection.index
+                                        ]?.relationshipComment
+                                            .trim()
+                                            .split('\n')
+                                            .map((item) => {
+                                                return (
+                                                    <>
+                                                        {item}
+                                                        <br></br>
+                                                    </>
+                                                )
+                                            })
+                                    : relationshipsBetweenSPDXElementPackages[
+                                            relationshipSelection.index
+                                        ]?.relationshipComment
+                                            .trim()
+                                            .split('\n')
+                                            .map((item) => {
+                                                return (
+                                                    <>
+                                                        {item}
+                                                        <br></br>
+                                                    </>
+                                                )
+                                            }) ?? ''}
+                            </p>
+                        </td>
+                    </tr>
+                </>
             </tbody>
         </table>
     )

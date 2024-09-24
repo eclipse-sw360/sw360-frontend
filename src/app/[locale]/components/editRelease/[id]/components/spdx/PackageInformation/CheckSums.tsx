@@ -9,15 +9,16 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
+import { ReactNode } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
-    setInputList?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
-    inputList?: InputKeyValue[]
-    setDataCheckSums?: (inputs: InputKeyValue[]) => void
+    setInputList: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
+    inputList: InputKeyValue[]
+    setDataCheckSums: (inputs: InputKeyValue[]) => void
 }
 
-function CheckSums({ inputList, setInputList, setDataCheckSums }: Props) {
+function CheckSums({ inputList, setInputList, setDataCheckSums }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: InputKeyValue[] = [...inputList]

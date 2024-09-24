@@ -10,15 +10,14 @@
 
 'use client'
 import { OtherLicensingInformationDetected, SPDXDocument } from '@/object-types'
+import { ReactNode, useState } from 'react'
 
 interface Props {
     spdxDocument?: SPDXDocument
-    indexOtherLicense?: number
-    setIndexOtherLicense?: React.Dispatch<React.SetStateAction<number>>
+    indexOtherLicense: number
+    setIndexOtherLicense: React.Dispatch<React.SetStateAction<number>>
     otherLicensingInformationDetecteds?: OtherLicensingInformationDetected[]
-    isModeFull?: boolean
-    toggleOther?: boolean
-    setToggleOther?: React.Dispatch<React.SetStateAction<boolean>>
+    isModeFull: boolean
 }
 
 const OtherLicensingInformationDetectedDetail = ({
@@ -27,9 +26,8 @@ const OtherLicensingInformationDetectedDetail = ({
     setIndexOtherLicense,
     otherLicensingInformationDetecteds,
     isModeFull,
-    toggleOther,
-    setToggleOther,
-}: Props) => {
+}: Props) : ReactNode => {
+    const [show, setShow] = useState<boolean>(true)
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const index: string = e.target.value
         setIndexOtherLicense(parseInt(index))
@@ -40,14 +38,14 @@ const OtherLicensingInformationDetectedDetail = ({
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {
-                    setToggleOther(!toggleOther)
+                    setShow(!show)
                 }}
             >
                 <tr>
                     <th colSpan={2}>10. Other Licensing Information Detected</th>
                 </tr>
             </thead>
-            <tbody hidden={toggleOther}>
+            <tbody hidden={!show}>
                 <tr>
                     <td className='spdx-label-index'>Index</td>
                     <td style={{ height: '50px' }}>
@@ -72,7 +70,8 @@ const OtherLicensingInformationDetectedDetail = ({
                         </select>
                     </td>
                 </tr>
-                {otherLicensingInformationDetecteds[indexOtherLicense] && (
+                {(otherLicensingInformationDetecteds
+                    && (typeof otherLicensingInformationDetecteds[indexOtherLicense] !== 'undefined')) && (
                     <>
                         <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
                             <td>10.1 License identifier</td>

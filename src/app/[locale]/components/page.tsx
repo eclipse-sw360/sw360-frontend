@@ -11,12 +11,13 @@
 import { Metadata } from 'next'
 
 import ComponentIndex from './components/ComponentIndex'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Components',
 }
 
-async function ComponentIndexPage() {
+function ComponentIndexPage() : ReactNode {
     return <ComponentIndex />
 }
 

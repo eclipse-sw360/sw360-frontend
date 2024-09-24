@@ -13,13 +13,14 @@
 import { useTranslations } from 'next-intl'
 
 import { Release } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface Props {
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props) => {
+const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props) : ReactNode => {
     const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {

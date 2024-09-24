@@ -11,7 +11,7 @@
 'use client'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { FaCopy, FaInfoCircle } from 'react-icons/fa'
 
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
@@ -25,7 +25,7 @@ interface Props {
     releaseId: string
 }
 
-const ReleaseGeneral = ({ release, releaseId }: Props) => {
+const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -94,7 +94,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                     <td>{t('Created by')}:</td>
                     <td>
                         {
-                            release._embedded?.['sw360:createdBy'] &&
+                            release._embedded['sw360:createdBy'] &&
                             <Link
                                 className='text-link'
                                 href={`mailto:${release._embedded['sw360:createdBy'].email}`}
@@ -112,7 +112,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                     <td>{t('Modified By')}:</td>
                     <td>
                         {
-                            release._embedded?.['sw360:modifiedBy'] &&
+                            release._embedded['sw360:modifiedBy'] &&
                             <Link
                                 className='text-link'
                                 href={`mailto:${release._embedded['sw360:modifiedBy'].email}`}
@@ -125,24 +125,22 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                 <tr>
                     <td>{t('Contributors')}:</td>
                     <td>
-                        {release['_embedded'] &&
-                            !CommonUtils.isNullEmptyOrUndefinedArray(release['_embedded']['sw360:contributors']) &&
-                            renderArrayOfUsers(release['_embedded']['sw360:contributors'])}
+                        {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:contributors']) &&
+                            renderArrayOfUsers(release._embedded['sw360:contributors'])
+                        }
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Moderators')}:</td>
                     <td>
-                        {release['_embedded'] &&
-                            !CommonUtils.isNullEmptyOrUndefinedArray(release['_embedded']['sw360:moderators']) &&
-                            renderArrayOfUsers(release['_embedded']['sw360:moderators'])}
+                        {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:moderators']) &&
+                            renderArrayOfUsers(release._embedded['sw360:moderators'])}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Subscribers')}:</td>
                     <td>
-                        {release['_embedded'] &&
-                            !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:subscribers']) &&
+                        {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:subscribers']) &&
                             renderArrayOfUsers(release._embedded['sw360:subscribers'])}
                     </td>
                 </tr>
@@ -150,14 +148,14 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                     <td>{t('Additional Roles')}:</td>
                     <td>
                         <td>
-                            {release.roles &&
+                            {!CommonUtils.isNullOrUndefined(release.roles) &&
                                 Object.keys(release.roles).map((key) => (
                                     <li key={key}>
                                         <span className='fw-bold'>
                                             {key}:{' '}
                                         </span>
                                         <span className='mapDisplayChildItemRight'>
-                                            {release.roles[key]
+                                            {!CommonUtils.isNullOrUndefined(release.roles) && release.roles[key]
                                                 .map(
                                                     (email: string): React.ReactNode => (
                                                         <a key={email} href={`mailto:${email}`}>
@@ -175,7 +173,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                 <tr>
                     <td>{t('Source Code Download URL')}:</td>
                     <td>
-                        {release.sourceCodeDownloadurl && (
+                        {!CommonUtils.isNullEmptyOrUndefinedString(release.sourceCodeDownloadurl) && (
                             <a href={release.sourceCodeDownloadurl}>{release.sourceCodeDownloadurl}</a>
                         )}
                     </td>
@@ -183,7 +181,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                 <tr>
                     <td>{t('Binary Download URL')}:</td>
                     <td>
-                        {release.binaryDownloadurl && (
+                        {!CommonUtils.isNullEmptyOrUndefinedString(release.binaryDownloadurl) && (
                             <a href={release.binaryDownloadurl}>{release.binaryDownloadurl}</a>
                         )}
                     </td>
@@ -199,8 +197,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) => {
                 <tr>
                     <td>{t('Main Licenses')}:</td>
                     <td>
-                        {release['_embedded'] &&
-                            !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:licenses']) &&
+                        {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:licenses']) &&
                             Object.entries(release._embedded['sw360:licenses'])
                                 .map(
                                     ([index, item]: [string, LicenseDetail]): React.ReactNode => (

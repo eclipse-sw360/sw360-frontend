@@ -9,17 +9,18 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface Props {
     dataAnnotator?: InputKeyValue
-    setDataAnnotator?: React.Dispatch<React.SetStateAction<InputKeyValue>>
-    setAnnotatorToAnnotation?: (input: InputKeyValue) => void
+    setDataAnnotator: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
+    setAnnotatorToAnnotation: (input: InputKeyValue) => void
 }
 
-function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }: Props) {
+function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataAnnotator
+        const list: InputKeyValue = dataAnnotator ? dataAnnotator : {} as InputKeyValue
         list[name as keyof InputKeyValue] = value
         setDataAnnotator(list)
         setAnnotatorToAnnotation(list)
@@ -38,7 +39,7 @@ function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }
                         className='form-control form-select'
                         name='key'
                         onChange={handleInputChange}
-                        value={dataAnnotator?.key}
+                        value={dataAnnotator.key}
                     >
                         <option value='Organization'>Organization</option>
                         <option value='Person'>Person</option>
@@ -52,7 +53,7 @@ function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }
                         className='form-control'
                         placeholder='Enter annotator'
                         onChange={handleInputChange}
-                        value={dataAnnotator?.value}
+                        value={dataAnnotator.value}
                     />
                 </div>
             </div>

@@ -12,7 +12,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import { TreeTable } from '@/components/sw360'
 import { Embedded, NodeData, ReleaseLink } from '@/object-types'
@@ -23,12 +23,15 @@ interface Props {
     releaseId: string
 }
 
-const LinkedReleases = ({ releaseId }: Props) => {
+const LinkedReleases = ({ releaseId }: Props) : ReactNode => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [data, setData] = useState<Array<NodeData>>([])
 
     useEffect(() => {
+        if (CommonUtils.isNullOrUndefined(session))
+            return
+
         const convertNodeData = (children: Array<ReleaseLink>): Array<NodeData> => {
             const childrenNodeData: Array<NodeData> = []
             children.forEach((child: ReleaseLink) => {
@@ -38,11 +41,9 @@ const LinkedReleases = ({ releaseId }: Props) => {
                             key={child.id}
                             href={`components/releases/details/${child.id}`}
                         >{`${child.name} ${child.version}`}</a>,
-                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                        t(child.releaseRelationship),
+                        t(child.releaseRelationship as never),
                         CommonUtils.isNullEmptyOrUndefinedArray(child.licenseIds) ? '' : child.licenseIds.join(', '),
-                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                        t(child.clearingState),
+                        t(child.clearingState as never),
                     ],
                     children: child._embedded ? convertNodeData(child._embedded['sw360:releaseLinks']) : [],
                 }
@@ -55,27 +56,23 @@ const LinkedReleases = ({ releaseId }: Props) => {
             .then((response) => response.json())
             .then((data: EmbeddedReleaseLinks) => {
                 const convertedTreeData: Array<NodeData> = []
-                if (data._embedded) {
-                    data._embedded['sw360:releaseLinks'].forEach((node: ReleaseLink) => {
-                        const convertedNode: NodeData = {
-                            rowData: [
-                                <a
-                                    key={node.id}
-                                    href={`components/releases/details/${node.id}`}
-                                >{`${node.name} ${node.version}`}</a>,
-                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                                t(node.releaseRelationship),
-                                CommonUtils.isNullEmptyOrUndefinedArray(node.licenseIds)
-                                    ? ''
-                                    : node.licenseIds.join(', '),
-                                // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                                t(node.clearingState),
-                            ],
-                            children: node._embedded ? convertNodeData(node._embedded['sw360:releaseLinks']) : [],
-                        }
-                        convertedTreeData.push(convertedNode)
-                    })
-                }
+                data._embedded['sw360:releaseLinks'].forEach((node: ReleaseLink) => {
+                    const convertedNode: NodeData = {
+                        rowData: [
+                            <a
+                                key={node.id}
+                                href={`components/releases/details/${node.id}`}
+                            >{`${node.name} ${node.version}`}</a>,
+                            t(node.releaseRelationship as never),
+                            CommonUtils.isNullEmptyOrUndefinedArray(node.licenseIds)
+                                ? ''
+                                : node.licenseIds.join(', '),
+                            t(node.clearingState as never),
+                        ],
+                        children: node._embedded ? convertNodeData(node._embedded['sw360:releaseLinks']) : [],
+                    }
+                    convertedTreeData.push(convertedNode)
+                })
                 setData(convertedTreeData)
             })
             .catch((err) => console.log(err))

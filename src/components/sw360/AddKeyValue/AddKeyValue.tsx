@@ -13,14 +13,14 @@ import { useTranslations } from 'next-intl'
 import React, { useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
-
+import { CommonUtils } from '@/utils'
 import { AddtionalDataType } from '@/object-types'
 
 interface Props {
     header: string
     keyName: string
     data?: Input[]
-    setData?: React.Dispatch<React.SetStateAction<Input[]>>
+    setData: React.Dispatch<React.SetStateAction<Input[]>>
     setObject?: AddtionalDataType
 }
 
@@ -33,7 +33,7 @@ function AddKeyValue(props: Props) {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
     useEffect(()=>{
-        setInputList(props.data !== null ? props.data : []);
+        setInputList(!CommonUtils.isNullOrUndefined(props.data) ? props.data : []);
     },[props.data])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {

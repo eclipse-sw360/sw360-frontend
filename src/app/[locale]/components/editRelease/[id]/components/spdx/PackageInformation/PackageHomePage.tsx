@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    setPackageHomePageToPackage?: (data: string) => void
-    packageHomePageExist?: boolean
-    setPackageHomePageExist?: React.Dispatch<React.SetStateAction<boolean>>
-    packageHomePageNone?: boolean
-    setPackageHomePageNone?: React.Dispatch<React.SetStateAction<boolean>>
-    packageHomePageNoasserttion?: boolean
-    setPackageHomePageNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
-    packageHomePage?: string
+    setPackageHomePageToPackage: (data: string) => void
+    packageHomePageExist: boolean
+    setPackageHomePageExist: React.Dispatch<React.SetStateAction<boolean>>
+    packageHomePageNone: boolean
+    setPackageHomePageNone: React.Dispatch<React.SetStateAction<boolean>>
+    packageHomePageNoasserttion: boolean
+    setPackageHomePageNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
+    packageHomePage: string
 }
 
 function PackageHomePage({
@@ -28,7 +30,7 @@ function PackageHomePage({
     packageHomePageNoasserttion,
     setPackageHomePageNoasserttion,
     packageHomePage,
-}: Props) {
+}: Props) : ReactNode{
     const selectPackageHomePageExist = () => {
         setPackageHomePageExist(true)
         setPackageHomePageNone(false)
@@ -75,7 +77,7 @@ function PackageHomePage({
                             name='homepage'
                             placeholder='Enter package homepage'
                             onChange={updateField}
-                            value={packageHomePage ?? ''}
+                            value={packageHomePage}
                             disabled={packageHomePageNone || packageHomePageNoasserttion}
                         />
                     </div>

@@ -9,17 +9,18 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface Props {
-    setAnnotationDate?: (input: InputKeyValue) => void
+    setAnnotationDate: (input: InputKeyValue) => void
     dataAnnotationDate?: InputKeyValue
-    setDataAnnotationDate?: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setDataAnnotationDate: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotationDate }: Props) {
+function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotationDate }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataAnnotationDate
+        const list: InputKeyValue = dataAnnotationDate ? dataAnnotationDate : {} as InputKeyValue
         list[name as keyof InputKeyValue] = value
         setDataAnnotationDate(list)
         setAnnotationDate(list)
@@ -47,7 +48,7 @@ function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotati
                             className='form-control needs-validation'
                             placeholder='creation.date.yyyy.mm.dd'
                             onChange={handleInputChange}
-                            value={dataAnnotationDate?.key ?? ''}
+                            value={dataAnnotationDate.key}
                         />
                     </div>
                     <div>
@@ -60,7 +61,7 @@ function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotati
                             className='form-control needs-validation'
                             placeholder='creation.time.hh.mm.ss'
                             onChange={handleInputChange}
-                            value={dataAnnotationDate?.value ?? ''}
+                            value={dataAnnotationDate.value}
                         />
                     </div>
                 </div>

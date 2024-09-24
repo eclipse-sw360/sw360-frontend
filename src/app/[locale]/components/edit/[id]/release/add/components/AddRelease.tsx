@@ -13,7 +13,7 @@
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
@@ -55,7 +55,7 @@ const cotsDetails: COTSDetails = {
     sourceCodeAvailable: false,
 }
 
-function AddRelease({ componentId }: Props) {
+function AddRelease({ componentId }: Props) : ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -98,16 +98,17 @@ function AddRelease({ componentId }: Props) {
     const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
 
     useEffect(() => {
-        ; (async () => {
+        void (async () => {
             try {
                 const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`components/${componentId}`, session.user.access_token)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const component: Component = await response.json()
+                const component: Component = await response.json() as Component
                 setReleasePayload({
                     ...releasePayload,
                     name: component.name,
@@ -119,17 +120,18 @@ function AddRelease({ componentId }: Props) {
                 console.error(e)
             }
         })()
-    }, [])
+    }, [componentId])
 
     const submit = async () => {
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)
-        if (response.status == HttpStatus.CREATED) {
+        if (response.status === HttpStatus.CREATED) {
             const release = (await response.json()) as ReleaseDetail
             MessageService.success(t('Release is created'))
-            const releaseId: string = CommonUtils.getIdFromUrl(release._links?.self?.href)
+            const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
             router.push('/components/editRelease/' + releaseId)
-        } else if (response.status == HttpStatus.CONFLICT) {
+        } else if (response.status === HttpStatus.CONFLICT) {
             MessageService.warn(t('Release is Duplicate'))
         } else {
             MessageService.error(t('Release Create failed'))
@@ -164,10 +166,10 @@ function AddRelease({ componentId }: Props) {
                                 setOtherLicenses={setOtherLicenses}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab != ReleaseTabIds.LINKED_RELEASES ? true : false}>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
                             <LinkedReleases releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
                         </div>
-                        <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
+                        <div className='row' hidden={selectedTab !== ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <AddCommercialDetails
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}

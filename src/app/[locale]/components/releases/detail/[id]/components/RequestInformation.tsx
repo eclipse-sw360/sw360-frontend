@@ -9,15 +9,15 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import { ClearingInformation } from '@/object-types'
 
 interface Props {
-    clearingInformation: ClearingInformation
+    clearingInformation: ClearingInformation | undefined
 }
 
-const RequestInformation = ({ clearingInformation }: Props) => {
+const RequestInformation = ({ clearingInformation }: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
     const t = useTranslations('default')
 
