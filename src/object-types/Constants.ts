@@ -10,6 +10,8 @@
 
 export const CREDENTIAL_PROVIDER = 'credential_provider'
 export const CREDENTIALS = 'credentials'
+export const KEYCLOAK_PROVIDER = 'keycloak'
+export const SW360OAUTH_PROVIDER = 'sw360-backend'
 export const LOCALES = [
     { i18n: 'en', flag: 'gb' },
     { i18n: 'ja', flag: 'jp' },
