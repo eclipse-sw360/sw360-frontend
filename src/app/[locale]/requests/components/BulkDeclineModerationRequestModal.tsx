@@ -14,7 +14,7 @@ import { ApiUtils } from '@/utils/index'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { Alert, Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
 import { signOut, useSession } from 'next-auth/react'
@@ -22,10 +22,6 @@ import { _, Table } from 'next-sw360'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 
-interface Message {
-    type: 'success' | 'danger'
-    message: string
-}
 
 interface propType {
     [key: string]: string
@@ -42,12 +38,12 @@ export default function BulkDeclineModerationRequestModal({
 }) {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
+    const [disableAcceptMr, setDisableAcceptMr] = useState(false)
+    const [disableDeclineMr, setDisableDeclineMr] = useState(false)
     const [statusCheck, setStatusCheck] = useState<number>()
     const { data: session, status } = useSession()
-    const [deleting] = useState<boolean>(undefined)
     const [tableData, setTableData] = useState<Array<any>>([])
     const [hasComment, setHasComment] = useState<boolean>(false)
-    const [message, setMessage] = useState<undefined | Message>(undefined)
     const [moderationRequestPayload, setModerationRequestPayload] =
                     useState<ModerationRequestPayload>({
         action: '',
@@ -237,7 +233,7 @@ export default function BulkDeclineModerationRequestModal({
                         })
                         return updatedData
                     })
-                    // MessageService.success(t('You have rejected the moderation request'))
+                    MessageService.success(t('You have rejected the moderation request'))
                 }
                 else if (response.status == HttpStatus.NOT_ALLOWED) {
                     setStatusCheck(HttpStatus.NOT_ALLOWED)
@@ -258,6 +254,7 @@ export default function BulkDeclineModerationRequestModal({
                         })
                         return updatedData
                     })
+                    MessageService.warn(t('Moderation request is already closed'))
                 }
                 else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                     setStatusCheck(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -278,6 +275,7 @@ export default function BulkDeclineModerationRequestModal({
                         })
                         return updatedData
                     })
+                    MessageService.error(t('There are internal server error'))
                 }
                 else if (response.status == HttpStatus.UNAUTHORIZED) {
                     return signOut()
@@ -296,6 +294,7 @@ export default function BulkDeclineModerationRequestModal({
     }
 
     const handleBulkDeclineModerationRequests = async () => {
+        setDisableAcceptMr(true)
         const updatedRejectPayload = {
             ...moderationRequestPayload,
             action: "REJECT"
@@ -317,11 +316,11 @@ export default function BulkDeclineModerationRequestModal({
                     centered
                     show={show}
                     onHide={() => {
-                        if (!deleting) {
-                            setShow(false)
-                            setMessage(undefined)
-                            setHasComment(false)
-                        }
+                        setShow(false)
+                        setHasComment(false)
+                        setStatusCheck(0)
+                        setDisableAcceptMr(false)
+                        setDisableDeclineMr(false)
                     }}
                     aria-labelledby={t('Decline All Selected Moderation Requests')}
                     scrollable
@@ -335,11 +334,6 @@ export default function BulkDeclineModerationRequestModal({
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        {message && (
-                            <Alert variant={message.type} id='declineBulkMR.message.alert'>
-                                {message.message}
-                            </Alert>
-                        )}
                         <p className='my-3'>{t('Decline All MRs')}</p> 
                         <Form>
                         <Form.Group className='mb-3'>
@@ -387,22 +381,24 @@ export default function BulkDeclineModerationRequestModal({
                             className='btn btn-dark'
                             onClick={() => {
                                 setShow(false)
-                                setMessage(undefined)
                                 setHasComment(false)
+                                setStatusCheck(0)
+                                setDisableAcceptMr(false)
+                                setDisableDeclineMr(false)
                             }}
-                            disabled={deleting}
                         >
-                            {t('Cancel')}
+                            {(disableAcceptMr || disableDeclineMr) ? t('Close') : t('Cancel')}
+                            
                         </button>
                         <button
                             className='btn btn-danger'
                             onClick={async () => {
                                 await handleBulkDeclineModerationRequests()
                             }}
-                            disabled={deleting || !hasComment}
+                            disabled={!hasComment || disableDeclineMr}
                         >
                             {t('Bulk Decline Moderation Requests')}{' '}
-                            {deleting && 
+                            {loading && 
                                 <Spinner size='sm' className='ms-1 spinner' />
                             }
                         </button>
@@ -411,10 +407,10 @@ export default function BulkDeclineModerationRequestModal({
                             onClick={async () => {
                                 // await handleBulkAcceptModerationRequests()
                             }}
-                            disabled={deleting || !hasComment}
+                            disabled={!hasComment || disableAcceptMr}
                         >
                             {t('Bulk Accept Moderation Requests')}{' '}
-                            {deleting && 
+                            {loading && 
                                 <Spinner size='sm' className='ms-1 spinner' />
                             }
                         </button>
