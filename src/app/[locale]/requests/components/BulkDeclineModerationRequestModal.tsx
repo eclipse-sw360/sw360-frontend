@@ -19,7 +19,6 @@ import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
 import { signOut, useSession } from 'next-auth/react'
 import { _, Table } from 'next-sw360'
-import { ProgressBar } from 'react-bootstrap'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 
@@ -58,9 +57,11 @@ export default function BulkDeclineModerationRequestModal({
     const computeProgress = (responseCode:number) => {
         switch (responseCode) {
             case 202:
+                return 1
             case 405:
+                return 2
             case 500:
-                return 100
+                return 3
             default:
                 return 0;
         }
@@ -91,52 +92,85 @@ export default function BulkDeclineModerationRequestModal({
             formatter: ({progressStatus}: {progressStatus:number}) => 
                 _(
                     <div  style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{width: "80%"}}>
-                            <ProgressBar now={progressStatus} label={`${progressStatus}%`} />
-                        </div>
                         <div style={{ marginLeft: '10px' }}>
                             {statusCheck === HttpStatus.ACCEPTED && (
                                 <>
-                                    <BiCheckCircle color="green" size={24} />
-                                    <OverlayTrigger overlay={
-                                        <Tooltip>
-                                            {t('Request processed successfully')}
-                                        </Tooltip>}>
-                                        <span className='d-inline-block'>
-                                            <BiInfoCircle size={24}/>
-                                        </span>
-                                    </OverlayTrigger>
+                                    <BiCheckCircle color="green" size={15} />
+                                    
                                 </>
                             )}
                             {statusCheck === HttpStatus.NOT_ALLOWED && (
                                 <>
-                                    <BsFillExclamationCircleFill  color="orange" size={24} />
-                                    <OverlayTrigger overlay={
-                                        <Tooltip>
-                                            {t('Moderation request is already closed')}
-                                        </Tooltip>}>
-                                        <span className='d-inline-block'>
-                                            <BiInfoCircle size={24}/>
-                                        </span>
-                                    </OverlayTrigger>
+                                    <BsFillExclamationCircleFill  color="orange" size={15} />
+                                    
                                 </>
                             )}
                             {statusCheck === HttpStatus.INTERNAL_SERVER_ERROR && (
                                 <>
-                                    <BiXCircle  color="red" size={24} />
-                                    <OverlayTrigger overlay={
-                                        <Tooltip>
-                                            {t('There are internal server error')}
-                                        </Tooltip>}>
-                                        <span className='d-inline-block'>
-                                            <BiInfoCircle size={24}/>
-                                        </span>
-                                    </OverlayTrigger>
+                                    <BiXCircle  color="red" size={15} />
+                                    
                                 </>
                             )}
                         </div>
+                        <div hidden={progressStatus === 0}>
+                            {
+                                progressStatus === 1 && (
+                                    <>
+                                        <div style={{ display: 'flex',
+                                                      alignItems: 'center',
+                                                      color: 'green' }}>
+                                            &nbsp;&nbsp;{t('Success')}&nbsp;&nbsp;
+                                            <OverlayTrigger overlay={
+                                                <Tooltip>
+                                                    {t('Request processed successfully')}
+                                                </Tooltip>}>
+                                                <span className='d-inline-block'>
+                                                    <BiInfoCircle size={18}
+                                                                  style={{ color: 'black' }}/>
+                                                </span>
+                                            </OverlayTrigger>
+                                        </div>
+                                    </>
+                                )
+                            }
+                            {
+                                progressStatus === 2 && (
+                                    <div style={{ display: 'flex',
+                                                  alignItems: 'center',
+                                                  color: 'orange' }}>
+                                        &nbsp;&nbsp;{t('Request Already Closed')}&nbsp;&nbsp;
+                                        <OverlayTrigger overlay={
+                                            <Tooltip>
+                                                {t('Moderation request is already closed')}
+                                            </Tooltip>}>
+                                            <span className='d-inline-block'>
+                                                <BiInfoCircle size={18}
+                                                              style={{ color: 'black' }}/>
+                                            </span>
+                                        </OverlayTrigger>
+                                    </div>
+                                )
+                            }
+                            {
+                                progressStatus === 3 && (
+                                    <div style={{ display: 'flex',
+                                                  alignItems: 'center',
+                                                  color: 'red' }}>
+                                        &nbsp;&nbsp;{t('Failed')}&nbsp;&nbsp;
+                                        <OverlayTrigger overlay={
+                                            <Tooltip>
+                                                {t('There are internal server error')}
+                                            </Tooltip>}>
+                                            <span className='d-inline-block'>
+                                                <BiInfoCircle size={18}
+                                                              style={{ color: 'black' }}/>
+                                            </span>
+                                        </OverlayTrigger>
+                                    </div>
+                                )
+                            }
                         </div>
-                  
+                    </div>
                 )
         },
     ]
