@@ -19,6 +19,8 @@ import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
 import { signOut, useSession } from 'next-auth/react'
 import { _, Table } from 'next-sw360'
+import { ProgressBar } from 'react-bootstrap'
+import { notFound } from 'next/navigation'
 
 interface Message {
     type: 'success' | 'danger'
@@ -51,17 +53,29 @@ export default function BulkDeclineModerationRequestModal({
         comment: ''
     })
 
+    const computeProgress = (responseCode:number) => {
+        switch (responseCode) {
+            case 202:
+            case 405:
+            case 500:
+                return 100
+            default:
+                return 0;
+        }
+    }
+
     const columns = [
         {
             id: 'bulkModerationRequestAction.documentName',
             name: t('Document Name'),
             sort: true,
             width: "50%",
-            formatter: ({mrId, documentName}:{mrId: string; documentName: string}) =>
+            formatter: ({moderationRequestId, documentName}:
+                        {moderationRequestId: string; documentName: string}) =>
                 _(
                     <>
                         <Link className='link'
-                            href={`/requests/moderationRequest/${mrId}`}>
+                            href={`/requests/moderationRequest/${moderationRequestId}`}>
                             {documentName}
                         </Link>
                     </>
@@ -71,7 +85,13 @@ export default function BulkDeclineModerationRequestModal({
             id: 'bulkModerationRequestAction.status',
             name: t('Status'),
             sort: true,
-            width: "50%"
+            width: "50%",
+            formatter: ({progressStatus}: {progressStatus:number}) => 
+                _(
+                    <div style={{width: "80%"}}>
+                        <ProgressBar now={progressStatus} label={`${progressStatus}%`} />
+                    </div>
+                )
         },
     ]
 
@@ -84,7 +104,7 @@ export default function BulkDeclineModerationRequestModal({
                             moderationRequestId: key,
                             documentName: value
                         },
-                        ''
+                        {progressStatus : 0}
                     ]
             })
         )
@@ -108,7 +128,7 @@ export default function BulkDeclineModerationRequestModal({
         setHasComment(hasCommentStatus)
     }
 
-    const handleRejectModerationRequest = async (singleMrId: string,
+    const rejectModerationRequest = async (singleMrId: string,
                                                  updatedRejectPayload:ModerationRequestPayload
                                                 ) => {
         const hasComment = handleCommentValidation(moderationRequestPayload.comment)
@@ -118,7 +138,27 @@ export default function BulkDeclineModerationRequestModal({
                                                    session.user.access_token)
             if (response.status == HttpStatus.ACCEPTED) {
                 await response.json()
-                MessageService.success(t('You have rejected the moderation request'))
+                const progressStatus = computeProgress(response.status)
+                setTableData((prevData) => {
+                    const updatedData = prevData.map((row) => {
+                        if (row[0].moderationRequestId === singleMrId) {
+                            return [
+                                {
+                                    moderationRequestId: row[0].moderationRequestId,
+                                    documentName: row[0].documentName,
+                                },
+                                { progressStatus }
+                            ]
+                        } else {
+                            return row
+                        }
+                    })
+                    return updatedData
+                })
+                // MessageService.success(t('You have rejected the moderation request'))
+            }
+            else if (response.status == HttpStatus.NOT_ALLOWED) {
+                return notFound()
             }
             else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
@@ -139,7 +179,7 @@ export default function BulkDeclineModerationRequestModal({
         }
         setModerationRequestPayload(updatedRejectPayload)
         for (const [key] of Object.entries(mrIdNameMap)){
-            await handleRejectModerationRequest(key, updatedRejectPayload)
+            await rejectModerationRequest(key, updatedRejectPayload)
         }
     }
 
