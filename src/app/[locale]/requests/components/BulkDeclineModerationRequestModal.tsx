@@ -21,6 +21,8 @@ import { signOut, useSession } from 'next-auth/react'
 import { _, Table } from 'next-sw360'
 import { ProgressBar } from 'react-bootstrap'
 import { notFound } from 'next/navigation'
+import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { BsFillExclamationCircleFill } from 'react-icons/bs'
 
 interface Message {
     type: 'success' | 'danger'
@@ -42,6 +44,7 @@ export default function BulkDeclineModerationRequestModal({
 }) {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
+    const [statusCheck, setStatusCheck] = useState<number>()
     const { data: session, status } = useSession()
     const [deleting] = useState<boolean>(undefined)
     const [tableData, setTableData] = useState<Array<any>>([])
@@ -88,9 +91,24 @@ export default function BulkDeclineModerationRequestModal({
             width: "50%",
             formatter: ({progressStatus}: {progressStatus:number}) => 
                 _(
-                    <div style={{width: "80%"}}>
-                        <ProgressBar now={progressStatus} label={`${progressStatus}%`} />
-                    </div>
+                    <div  style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{width: "80%"}}>
+                            <ProgressBar now={progressStatus} label={`${progressStatus}%`} />
+                        </div>
+                        <div style={{ marginLeft: '10px' }}>
+                            {statusCheck === HttpStatus.ACCEPTED && (
+                                <BiCheckCircle color="green" size={24} />
+                            )}
+                            {statusCheck === HttpStatus.NOT_ALLOWED && (
+                                <BsFillExclamationCircleFill  color="yellow" size={24} />
+                            )}
+                            {statusCheck === HttpStatus.INTERNAL_SERVER_ERROR && (
+                                <BiXCircle  color="red" size={24} />
+                            )}
+                            
+                        </div>
+                        </div>
+                  
                 )
         },
     ]
@@ -138,6 +156,7 @@ export default function BulkDeclineModerationRequestModal({
                                                    session.user.access_token)
             if (response.status == HttpStatus.ACCEPTED) {
                 await response.json()
+                setStatusCheck(HttpStatus.ACCEPTED)
                 const progressStatus = computeProgress(response.status)
                 setTableData((prevData) => {
                     const updatedData = prevData.map((row) => {
