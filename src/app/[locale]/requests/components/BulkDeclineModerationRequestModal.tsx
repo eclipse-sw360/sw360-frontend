@@ -14,14 +14,13 @@ import { ApiUtils } from '@/utils/index'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
+import { Alert, Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
 import { signOut, useSession } from 'next-auth/react'
 import { _, Table } from 'next-sw360'
 import { ProgressBar } from 'react-bootstrap'
-import { notFound } from 'next/navigation'
-import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 
 interface Message {
@@ -97,15 +96,44 @@ export default function BulkDeclineModerationRequestModal({
                         </div>
                         <div style={{ marginLeft: '10px' }}>
                             {statusCheck === HttpStatus.ACCEPTED && (
-                                <BiCheckCircle color="green" size={24} />
+                                <>
+                                    <BiCheckCircle color="green" size={24} />
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('Request processed successfully')}
+                                        </Tooltip>}>
+                                        <span className='d-inline-block'>
+                                            <BiInfoCircle size={24}/>
+                                        </span>
+                                    </OverlayTrigger>
+                                </>
                             )}
                             {statusCheck === HttpStatus.NOT_ALLOWED && (
-                                <BsFillExclamationCircleFill  color="yellow" size={24} />
+                                <>
+                                    <BsFillExclamationCircleFill  color="orange" size={24} />
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('Moderation request is already closed')}
+                                        </Tooltip>}>
+                                        <span className='d-inline-block'>
+                                            <BiInfoCircle size={24}/>
+                                        </span>
+                                    </OverlayTrigger>
+                                </>
                             )}
                             {statusCheck === HttpStatus.INTERNAL_SERVER_ERROR && (
-                                <BiXCircle  color="red" size={24} />
+                                <>
+                                    <BiXCircle  color="red" size={24} />
+                                    <OverlayTrigger overlay={
+                                        <Tooltip>
+                                            {t('There are internal server error')}
+                                        </Tooltip>}>
+                                        <span className='d-inline-block'>
+                                            <BiInfoCircle size={24}/>
+                                        </span>
+                                    </OverlayTrigger>
+                                </>
                             )}
-                            
                         </div>
                         </div>
                   
@@ -149,45 +177,87 @@ export default function BulkDeclineModerationRequestModal({
     const rejectModerationRequest = async (singleMrId: string,
                                                  updatedRejectPayload:ModerationRequestPayload
                                                 ) => {
-        const hasComment = handleCommentValidation(moderationRequestPayload.comment)
-        if (hasComment){
-            const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`,
-                                                   updatedRejectPayload,
-                                                   session.user.access_token)
-            if (response.status == HttpStatus.ACCEPTED) {
-                await response.json()
-                setStatusCheck(HttpStatus.ACCEPTED)
-                const progressStatus = computeProgress(response.status)
-                setTableData((prevData) => {
-                    const updatedData = prevData.map((row) => {
-                        if (row[0].moderationRequestId === singleMrId) {
-                            return [
-                                {
-                                    moderationRequestId: row[0].moderationRequestId,
-                                    documentName: row[0].documentName,
-                                },
-                                { progressStatus }
-                            ]
-                        } else {
-                            return row
-                        }
+        try {
+            const hasComment = handleCommentValidation(moderationRequestPayload.comment)
+            if (hasComment){
+                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`,
+                                                    updatedRejectPayload,
+                                                    session.user.access_token)
+                if (response.status == HttpStatus.ACCEPTED) {
+                    await response.json()
+                    setStatusCheck(HttpStatus.ACCEPTED)
+                    const progressStatus = computeProgress(response.status)
+                    setTableData((prevData) => {
+                        const updatedData = prevData.map((row) => {
+                            if (row[0].moderationRequestId === singleMrId) {
+                                return [
+                                    {
+                                        moderationRequestId: row[0].moderationRequestId,
+                                        documentName: row[0].documentName,
+                                    },
+                                    { progressStatus }
+                                ]
+                            } else {
+                                return row
+                            }
+                        })
+                        return updatedData
                     })
-                    return updatedData
-                })
-                // MessageService.success(t('You have rejected the moderation request'))
-            }
-            else if (response.status == HttpStatus.NOT_ALLOWED) {
-                return notFound()
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
+                    // MessageService.success(t('You have rejected the moderation request'))
+                }
+                else if (response.status == HttpStatus.NOT_ALLOWED) {
+                    setStatusCheck(HttpStatus.NOT_ALLOWED)
+                    const progressStatus = computeProgress(response.status)
+                    setTableData((prevData) => {
+                        const updatedData = prevData.map((row) => {
+                            if (row[0].moderationRequestId === singleMrId) {
+                                return [
+                                    {
+                                        moderationRequestId: row[0].moderationRequestId,
+                                        documentName: row[0].documentName,
+                                    },
+                                    { progressStatus }
+                                ]
+                            } else {
+                                return row
+                            }
+                        })
+                        return updatedData
+                    })
+                }
+                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                    setStatusCheck(HttpStatus.INTERNAL_SERVER_ERROR)
+                    const progressStatus = computeProgress(response.status)
+                    setTableData((prevData) => {
+                        const updatedData = prevData.map((row) => {
+                            if (row[0].moderationRequestId === singleMrId) {
+                                return [
+                                    {
+                                        moderationRequestId: row[0].moderationRequestId,
+                                        documentName: row[0].documentName,
+                                    },
+                                    { progressStatus }
+                                ]
+                            } else {
+                                return row
+                            }
+                        })
+                        return updatedData
+                    })
+                }
+                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                }
+                else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                }
             }
             else {
-                MessageService.error(t('There are some errors while updating moderation request'))
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
         }
-        else {
-            MessageService.error(t('Mandatory fields are empty please provide required data'))
+        catch(error) {
+            console.log(error)
         }
     }
 
