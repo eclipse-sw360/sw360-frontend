@@ -293,6 +293,95 @@ export default function BulkDeclineModerationRequestModal({
         }
     }
 
+    const acceptModerationRequest = async (singleMrId: string,
+                                                 updatedAcceptPayload:ModerationRequestPayload
+                                                ) => {
+        try {
+            const hasComment = handleCommentValidation(moderationRequestPayload.comment)
+            if (hasComment){
+                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`,
+                                                    updatedAcceptPayload,
+                                                    session.user.access_token)
+                if (response.status == HttpStatus.ACCEPTED) {
+                    await response.json()
+                    setStatusCheck(HttpStatus.ACCEPTED)
+                    const progressStatus = computeProgress(response.status)
+                    setTableData((prevData) => {
+                        const updatedData = prevData.map((row) => {
+                            if (row[0].moderationRequestId === singleMrId) {
+                                return [
+                                    {
+                                        moderationRequestId: row[0].moderationRequestId,
+                                        documentName: row[0].documentName,
+                                    },
+                                    { progressStatus }
+                                ]
+                            } else {
+                                return row
+                            }
+                        })
+                        return updatedData
+                    })
+                    MessageService.success(t('You have accepted the moderation request'))
+                }
+                else if (response.status == HttpStatus.NOT_ALLOWED) {
+                    setStatusCheck(HttpStatus.NOT_ALLOWED)
+                    const progressStatus = computeProgress(response.status)
+                    setTableData((prevData) => {
+                        const updatedData = prevData.map((row) => {
+                            if (row[0].moderationRequestId === singleMrId) {
+                                return [
+                                    {
+                                        moderationRequestId: row[0].moderationRequestId,
+                                        documentName: row[0].documentName,
+                                    },
+                                    { progressStatus }
+                                ]
+                            } else {
+                                return row
+                            }
+                        })
+                        return updatedData
+                    })
+                    MessageService.warn(t('Moderation request is already closed'))
+                }
+                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                    setStatusCheck(HttpStatus.INTERNAL_SERVER_ERROR)
+                    const progressStatus = computeProgress(response.status)
+                    setTableData((prevData) => {
+                        const updatedData = prevData.map((row) => {
+                            if (row[0].moderationRequestId === singleMrId) {
+                                return [
+                                    {
+                                        moderationRequestId: row[0].moderationRequestId,
+                                        documentName: row[0].documentName,
+                                    },
+                                    { progressStatus }
+                                ]
+                            } else {
+                                return row
+                            }
+                        })
+                        return updatedData
+                    })
+                    MessageService.error(t('There are internal server error'))
+                }
+                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                }
+                else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                }
+            }
+            else {
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
+            }
+        }
+        catch(error) {
+            console.log(error)
+        }
+    }
+
     const handleBulkDeclineModerationRequests = async () => {
         setDisableAcceptMr(true)
         const updatedRejectPayload = {
@@ -302,6 +391,18 @@ export default function BulkDeclineModerationRequestModal({
         setModerationRequestPayload(updatedRejectPayload)
         for (const [key] of Object.entries(mrIdNameMap)){
             await rejectModerationRequest(key, updatedRejectPayload)
+        }
+    }
+
+    const handleBulkAcceptModerationRequests = async () => {
+        setDisableDeclineMr(true)
+        const updatedAcceptPayload = {
+            ...moderationRequestPayload,
+            action: "Accept"
+        }
+        setModerationRequestPayload(updatedAcceptPayload)
+        for (const [key] of Object.entries(mrIdNameMap)){
+            await acceptModerationRequest(key, updatedAcceptPayload)
         }
     }
 
@@ -405,7 +506,7 @@ export default function BulkDeclineModerationRequestModal({
                         <button
                             className='btn btn-success'
                             onClick={async () => {
-                                // await handleBulkAcceptModerationRequests()
+                                await handleBulkAcceptModerationRequests()
                             }}
                             disabled={!hasComment || disableAcceptMr}
                         >
