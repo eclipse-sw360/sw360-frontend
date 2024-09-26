@@ -398,7 +398,7 @@ export default function BulkDeclineModerationRequestModal({
         setDisableDeclineMr(true)
         const updatedAcceptPayload = {
             ...moderationRequestPayload,
-            action: "Accept"
+            action: "ACCEPT"
         }
         setModerationRequestPayload(updatedAcceptPayload)
         for (const [key] of Object.entries(mrIdNameMap)){
@@ -423,7 +423,7 @@ export default function BulkDeclineModerationRequestModal({
                         setDisableAcceptMr(false)
                         setDisableDeclineMr(false)
                     }}
-                    aria-labelledby={t('Decline All Selected Moderation Requests')}
+                    aria-labelledby={t('Accept Decline All Selected Moderation Requests')}
                     scrollable
                 >
                     <Modal.Header style={{ backgroundColor: '#feefef',
@@ -431,11 +431,11 @@ export default function BulkDeclineModerationRequestModal({
                                 closeButton>
                         <Modal.Title id='delete-all-license-info-modal'>
                             <AiOutlineQuestionCircle />
-                                {t('Decline All Selected Moderation Requests')}
+                                {t('Accept Decline All Selected Moderation Requests')}
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <p className='my-3'>{t('Decline All MRs')}</p> 
+                        <p className='my-3'>{t('Accept Decline All MRs')}</p> 
                         <Form>
                         <Form.Group className='mb-3'>
                             <Form.Label className='mb-1'>
