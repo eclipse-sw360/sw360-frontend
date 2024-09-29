@@ -13,6 +13,7 @@ import AccessToken from './AccessToken'
 import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
+import { AttachmentUsage, AttachmentUsages } from './AttachmentUsages'
 import AuthToken from './AuthToken'
 import COTSDetails from './COTSDetails'
 import CVEReference from './CVEReference'
@@ -21,34 +22,40 @@ import ClearingInformation from './ClearingInformation'
 import ClearingRequest from './ClearingRequest'
 import ClearingRequestComments from './ClearingRequestComments'
 import ClearingRequestDetails from './ClearingRequestDetails'
-import CreateClearingRequestPayload from './CreateClearingRequestPayload'
-import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
 import Component from './Component'
 import ComponentPayload from './ComponentPayLoad'
+import CreateClearingRequestPayload from './CreateClearingRequestPayload'
+import ECC from './ECC'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
+import LicenseDetail from './LicenseDetail'
+import LicensePayload from './LicensePayload'
 import LinkedAttachments from './LinkedAttachments'
 import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
-import LicensePayload from './LicensePayload'
-import LicenseDetail from './LicenseDetail'
+import { Message, MessageOptions } from './Message'
 import ModerationRequest from './ModerationRequest'
 import ModerationRequestDetails from './ModerationRequestDetails'
 import ModerationRequestPayload from './ModerationRequestPayload'
+import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import { Obligation, ProjectObligationsList, LicenseObligationRelease } from './Obligation'
+import { LicenseObligationRelease, Obligation, ProjectObligationsList } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
 import ProjectPayload from './ProjectPayload'
-import ECC from './ECC'
-import { ProjectData, ProjectVulnerability, ProjectsPayloadElement, VulnerabilityRatingAndActionPayload } from './ProjectVulnerabilityTypes'
+import {
+    ProjectData,
+    ProjectVulnerability,
+    ProjectsPayloadElement,
+    VulnerabilityRatingAndActionPayload,
+} from './ProjectVulnerabilityTypes'
 import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
@@ -58,19 +65,20 @@ import RequestContent from './RequestContent'
 import Resources from './Resources'
 import RestrictedResource from './RestrictedResource'
 import RolesType from './RolesType'
+import SearchDuplicatesResponse from './SearchDuplicateResponse'
 import SearchResult from './SearchResult'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
 import ToastData from './ToastData'
-import { User, CreateUserPayload } from './User'
+import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
+import { CreateUserPayload, User } from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
 import VendorAdvisory from './VendorAdvisory'
 import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
-import { VulnerabilityTrackingStatus, ProjectVulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
-import { MessageOptions, Message } from './Message'
+import { ProjectVulnerabilityTrackingStatus, VulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
 import Annotations from './spdx/Annotations'
 import CheckSum from './spdx/CheckSum'
 import Creator from './spdx/Creator'
@@ -88,8 +96,6 @@ import SPDX from './spdx/SPDX'
 import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
-import SearchDuplicatesResponse from './SearchDuplicateResponse'
-import { AttachmentUsages, AttachmentUsage } from './AttachmentUsages'
 
 export type {
     AccessToken,
@@ -97,6 +103,8 @@ export type {
     AdministrationDataType,
     Annotations,
     Attachment,
+    AttachmentUsage,
+    AttachmentUsages,
     AuthToken,
     COTSDetails,
     CVEReference,
@@ -106,13 +114,14 @@ export type {
     ClearingRequest,
     ClearingRequestComments,
     ClearingRequestDetails,
-    CreateClearingRequestPayload,
-    UpdateClearingRequestPayload,
     Component,
     ComponentPayload,
+    CreateClearingRequestPayload,
+    CreateUserPayload,
     Creator,
     DocumentCreationInformation,
     DocumentState,
+    ECC,
     ECCInformation,
     Embedded,
     ExternalDocumentReferences,
@@ -120,33 +129,39 @@ export type {
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,
+    LicenseDetail,
+    LicenseObligationRelease,
+    LicensePayload,
     LinkedAttachments,
     LinkedRelease,
     LinkedVulnerability,
     Links,
-    LicensePayload,
-    LicenseDetail,
-    ModerationState,
+    Message,
+    MessageOptions,
     ModerationRequest,
     ModerationRequestDetails,
     ModerationRequestPayload,
+    ModerationState,
+    NavItem,
     NodeData,
     OAuthClient,
     Obligation,
     OtherLicensingInformationDetected,
+    Package,
     PackageInformation,
     PackageVerificationCode,
-    Package,
     Project,
     ProjectData,
+    ProjectObligationsList,
     ProjectPayload,
-    ECC,
     ProjectVulnerability,
+    ProjectVulnerabilityTrackingStatus,
     ProjectsPayloadElement,
     RelationshipsBetweenSPDXElements,
     Release,
     ReleaseDetail,
     ReleaseLink,
+    ReleaseNode,
     Repository,
     RequestContent,
     RequestedAction,
@@ -155,14 +170,15 @@ export type {
     RolesType,
     SPDX,
     SPDXDocument,
+    SearchDuplicatesResponse,
     SearchResult,
     Session,
     SnippetInformation,
     SnippetRange,
     SummaryDataType,
     ToastData,
+    UpdateClearingRequestPayload,
     User,
-    CreateUserPayload,
     UserCredentialInfo,
     Vendor,
     VendorAdvisory,
@@ -170,16 +186,7 @@ export type {
     VerificationStateInfo,
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
-    ProjectObligationsList,
-    LicenseObligationRelease,
-    Message,
-    MessageOptions,
     VulnerabilityTrackingStatus,
-    ProjectVulnerabilityTrackingStatus,
-    SearchDuplicatesResponse,
-    AttachmentUsages,
-    AttachmentUsage,
-    ReleaseNode,
 }
 
 // Special functions for populate data
@@ -192,10 +199,10 @@ import ClearingRequestStates from './enums/ClearingRequestStates'
 import CommonTabIds from './enums/CommonTabsIds'
 import ComponentTabIds from './enums/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
-import LicenseTabIds from './enums/LicenseTabIds'
 import HttpStatus from './enums/HttpStatus'
-import RequestDocumentTypes from './enums/RequestDocumentTypes'
+import LicenseTabIds from './enums/LicenseTabIds'
 import ReleaseTabIds from './enums/ReleaseTabIds'
+import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 
 export {
@@ -205,9 +212,9 @@ export {
     CommonTabIds,
     ComponentTabIds,
     DocumentTypes,
-    LicenseTabIds,
     HttpStatus,
-    RequestDocumentTypes,
+    LicenseTabIds,
     ReleaseTabIds,
+    RequestDocumentTypes,
     VulnerabilitiesVerificationState,
 }

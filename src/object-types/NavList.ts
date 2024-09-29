@@ -8,12 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { NavItem } from '@/object-types'
 import { useTranslations } from 'next-intl'
 
-function NavList() {
+function NavList(): NavItem[] {
     const t = useTranslations('default')
 
-    const navlist = [
+    return [
         { href: '/home', name: t('Home'), id: 'home' },
         { href: '/projects', name: t('Projects'), id: 'projects' },
         { href: '/components', name: t('Components'), id: 'components' },
@@ -45,8 +46,6 @@ function NavList() {
             ],
         },
     ]
-
-    return navlist
 }
 
 export default NavList
