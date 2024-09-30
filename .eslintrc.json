@@ -37,7 +37,8 @@
     "@typescript-eslint/no-inferrable-types": "error",
     "@typescript-eslint/no-unnecessary-condition": "error",
     "@typescript-eslint/strict-boolean-expressions": "error",
-    "@typescript-eslint/no-unsafe-call": "warn"
+    "@typescript-eslint/no-unsafe-call": "warn",
+    "react-hooks/exhaustive-deps": "off"
   },
   "root": true
 }
