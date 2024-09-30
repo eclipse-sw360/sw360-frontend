@@ -12,15 +12,15 @@ import { InputKeyValue } from '@/object-types'
 import React from 'react'
 
 interface Props {
-    setBuiltDate?: (inputs: InputKeyValue) => void
+    setBuiltDate: (inputs: InputKeyValue) => void
     dataBuiltDate?: InputKeyValue
-    setDataBuiltDate?: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setDataBuiltDate: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
 function BuiltDate({ dataBuiltDate, setDataBuiltDate, setBuiltDate }: Props) {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataBuiltDate
+        const list: InputKeyValue = dataBuiltDate ?? {} as InputKeyValue
         list[name as keyof InputKeyValue] = value
         setDataBuiltDate(list)
         setBuiltDate(list)

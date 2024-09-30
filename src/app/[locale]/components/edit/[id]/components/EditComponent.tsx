@@ -10,10 +10,10 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import {
@@ -34,10 +34,10 @@ import Releases from './Releases'
 import MessageService from '@/services/message.service'
 
 interface Props {
-    componentId?: string
+    componentId: string
 }
 
-type embeddedAttachments = Embedded<Attachment, 'sw360:attachmentDTOes'>
+type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachmentDTOes'>
 
 const tabList = [
     {
@@ -54,9 +54,8 @@ const tabList = [
     },
 ]
 
-const EditComponent = ({ componentId }: Props) => {
+const EditComponent = ({ componentId }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const params = useSearchParams()
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -90,9 +89,12 @@ const EditComponent = ({ componentId }: Props) => {
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}`,
                     Object.fromEntries(params)
@@ -103,13 +105,18 @@ const EditComponent = ({ componentId }: Props) => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                setComponent(await response.json())
+                const component = await response.json() as Component
+                setComponent(component)
             } catch (e) {
                 console.error(e)
             }
         })()
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/attachments`,
                     Object.fromEntries(params)
@@ -120,7 +127,7 @@ const EditComponent = ({ componentId }: Props) => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const dataAttachments: embeddedAttachments = await response.json()
+                const dataAttachments: EmbeddedAttachments = await response.json() as EmbeddedAttachments
                 if (!CommonUtils.isNullOrUndefined(dataAttachments)) {
                     setAttachmentData(dataAttachments._embedded['sw360:attachmentDTOes'])
                 }
@@ -130,11 +137,14 @@ const EditComponent = ({ componentId }: Props) => {
         })()
 
         return () => controller.abort()
-    }, [params, session, componentId])
+    }, [params, componentId])
 
     const submit = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status === HttpStatus.OK) {
             MessageService.success(`Component ${componentPayload.name}  updated successfully!`)
             router.push('/components/detail/' + componentId)
         } else {
@@ -190,7 +200,7 @@ const EditComponent = ({ componentId }: Props) => {
                         <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>
                             <Releases componentId={componentId} />
                         </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
+                        <div className='row' hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}>
                             <EditAttachments
                                 documentId={componentId}
                                 documentType={DocumentTypes.COMPONENT}

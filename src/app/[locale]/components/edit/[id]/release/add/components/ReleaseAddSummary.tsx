@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
@@ -20,8 +20,8 @@ import CommonUtils from '@/utils/common.utils'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
     setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
     mainLicenses?: { [k: string]: string }
@@ -39,7 +39,7 @@ function ReleaseAddSummary({
     setMainLicenses,
     otherLicenses,
     setOtherLicenses,
-}: Props) {
+}: Props) : ReactNode {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])

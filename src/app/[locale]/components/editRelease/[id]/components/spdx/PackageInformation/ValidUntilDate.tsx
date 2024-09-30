@@ -9,17 +9,18 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface Props {
-    setValidUntilDate?: (inputs: InputKeyValue) => void
+    setValidUntilDate: (inputs: InputKeyValue) => void
     dataValidUntilDate?: InputKeyValue
-    setDataValidUntilDate?: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setDataValidUntilDate: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function ValidUntilDate({ dataValidUntilDate, setDataValidUntilDate, setValidUntilDate }: Props) {
+function ValidUntilDate({ dataValidUntilDate, setDataValidUntilDate, setValidUntilDate }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataValidUntilDate
+        const list: InputKeyValue = dataValidUntilDate ?? {} as InputKeyValue
         list[name as keyof InputKeyValue] = value
         setDataValidUntilDate(list)
         setValidUntilDate(list)

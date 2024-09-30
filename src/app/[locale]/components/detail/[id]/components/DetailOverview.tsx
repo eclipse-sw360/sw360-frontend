@@ -10,9 +10,9 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
@@ -64,34 +64,38 @@ const tabList = [
     },
 ]
 
-const DetailOverview = ({ componentId }: Props) => {
+const DetailOverview = ({ componentId }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
-    const [component, setComponent] = useState<Component>(undefined)
+    const [component, setComponent] = useState<Component | undefined>(undefined)
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status === HttpStatus.OK) {
                 const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                await signOut()
-                return undefined
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
             } else {
                 return undefined
             }
         },
-        [session]
+        []
     )
 
-    const downloadBundle = () => {
+    const downloadBundle = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
         DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
             session,
@@ -101,7 +105,8 @@ const DetailOverview = ({ componentId }: Props) => {
 
     useEffect(() => {
         fetchData(`components/${componentId}`)
-            .then((component: Component) => {
+            .then((component: Component | undefined) => {
+                if (component === undefined) return
                 setComponent(component)
                 if (
                     !CommonUtils.isNullOrUndefined(component['_embedded']) &&
@@ -113,7 +118,8 @@ const DetailOverview = ({ componentId }: Props) => {
             .catch((err) => console.error(err))
 
         fetchData(`changelog/document/${componentId}`)
-            .then((changeLogs: EmbeddedChangelogs) => {
+            .then((changeLogs: EmbeddedChangelogs | undefined) => {
+                if (changeLogs === undefined) return
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
                         ? []
@@ -123,7 +129,9 @@ const DetailOverview = ({ componentId }: Props) => {
             .catch((err) => console.error(err))
 
         fetchData(`components/${componentId}/vulnerabilities`)
-            .then((data: EmbeddedVulnerabilities) => {
+            .then((data: EmbeddedVulnerabilities | undefined) => {
+                if (data === undefined) return
+
                 if (!CommonUtils.isNullOrUndefined(data)) {
                     setVulnerData(data['_embedded']['sw360:vulnerabilityDTOes'])
                 }
@@ -160,7 +168,7 @@ const DetailOverview = ({ componentId }: Props) => {
                                                 id='downloadAttachmentBundle'
                                                 type='button'
                                                 className='btn btn-secondary'
-                                                onClick={downloadBundle}
+                                                onClick={() => void downloadBundle()}
                                             >
                                                 {t('Download Attachment Bundle')}
                                             </button>
@@ -203,13 +211,13 @@ const DetailOverview = ({ componentId }: Props) => {
                         <div className='row' hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}>
                             <ReleaseOverview componentId={componentId} />
                         </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
+                        <div className='row' hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}>
                             <Attachments documentId={componentId} documentType={DocumentTypes.COMPONENT} />
                         </div>
-                        <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
+                        <div className='containers' hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}>
                             <ComponentVulnerabilities vulnerData={vulnerData} />
                         </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
+                        <div className='row' hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}>
                             <div className='col'>
                                 <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
                                     <ChangeLogList

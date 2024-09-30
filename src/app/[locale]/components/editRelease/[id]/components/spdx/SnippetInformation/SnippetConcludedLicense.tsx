@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    snippetConcludedLicense?: string
-    setSnippetConcludedLicenseToSnippet?: (data: string) => void
-    snippetConcludedLicenseExist?: boolean
-    setSnippetConcludedLicenseExist?: React.Dispatch<React.SetStateAction<boolean>>
-    snippetConcludedLicenseNone?: boolean
-    setSnippetConcludedLicenseNone?: React.Dispatch<React.SetStateAction<boolean>>
-    snippetConcludedLicenseNoasserttion?: boolean
-    setSnippetConcludedLicenseNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
+    snippetConcludedLicense: string
+    setSnippetConcludedLicenseToSnippet: (data: string) => void
+    snippetConcludedLicenseExist: boolean
+    setSnippetConcludedLicenseExist: React.Dispatch<React.SetStateAction<boolean>>
+    snippetConcludedLicenseNone: boolean
+    setSnippetConcludedLicenseNone: React.Dispatch<React.SetStateAction<boolean>>
+    snippetConcludedLicenseNoasserttion: boolean
+    setSnippetConcludedLicenseNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
     updateField?: (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
@@ -30,7 +32,7 @@ function SnippetConcludedLicense({
     snippetConcludedLicenseNoasserttion,
     setSnippetConcludedLicenseNoasserttion,
     updateField,
-}: Props) {
+}: Props) : ReactNode {
     const selectSnippetConcludedLicenseExist = () => {
         setSnippetConcludedLicenseExist(true)
         setSnippetConcludedLicenseNone(false)
@@ -73,7 +75,7 @@ function SnippetConcludedLicense({
                             name='licenseConcluded'
                             placeholder='Enter snippet concluded license'
                             onChange={updateField}
-                            value={snippetConcludedLicense ?? ''}
+                            value={snippetConcludedLicense}
                             disabled={snippetConcludedLicenseNone || snippetConcludedLicenseNoasserttion}
                         />
                     </div>

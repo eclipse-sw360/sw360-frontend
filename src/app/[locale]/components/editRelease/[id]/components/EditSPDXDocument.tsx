@@ -9,13 +9,12 @@
 // License-Filename: LICENSE
 
 'use client'
-// import { HttpStatus, Release, ReleaseDetail } from '@/object-types'
 import { HttpStatus, ReleaseDetail } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import {
     Annotations,
@@ -39,15 +38,15 @@ import EditSnippetInformation from './spdx/EditSnippetInformation'
 
 interface Props {
     releaseId: string
-    SPDXPayload?: SPDX
-    setSPDXPayload?: React.Dispatch<React.SetStateAction<SPDX>>
-    errorLicenseIdentifier?: boolean
-    errorExtractedText?: boolean
-    inputValid?: boolean
-    setErrorLicenseIdentifier?: React.Dispatch<React.SetStateAction<boolean>>
-    setErrorExtractedText?: React.Dispatch<React.SetStateAction<boolean>>
-    errorCreator?: boolean
-    setErrorCreator?: React.Dispatch<React.SetStateAction<boolean>>
+    SPDXPayload: SPDX
+    setSPDXPayload: React.Dispatch<React.SetStateAction<SPDX>>
+    errorLicenseIdentifier: boolean
+    errorExtractedText: boolean
+    inputValid: boolean
+    setErrorLicenseIdentifier: React.Dispatch<React.SetStateAction<boolean>>
+    setErrorExtractedText: React.Dispatch<React.SetStateAction<boolean>>
+    errorCreator: boolean
+    setErrorCreator: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const EditSPDXDocument = ({
@@ -61,11 +60,11 @@ const EditSPDXDocument = ({
     inputValid,
     errorCreator,
     setErrorCreator,
-}: Props) => {
+}: Props) : ReactNode => {
     const t = useTranslations('default')
     const [fullnameModifiedBy, setFullnameModifiedBy] = useState<string>('')
-    const [documentCreationInformation, setDocumentCreationInformation] = useState<DocumentCreationInformation>()
-    const [packageInformation, setPackageInformation] = useState<PackageInformation>()
+    const [documentCreationInformation, setDocumentCreationInformation] = useState<DocumentCreationInformation>({})
+    const [packageInformation, setPackageInformation] = useState<PackageInformation>({})
     const [externalDocumentRefs, setExternalDocumentRefs] = useState<ExternalDocumentReferences[]>([])
     const [indexExternalRefsData, setIndexExternalRefsData] = useState(0)
     const [externalRefsDatas, setExternalRefsDatas] = useState<ExternalReference[]>([])
@@ -92,27 +91,29 @@ const EditSPDXDocument = ({
     const [isModeFull, setIsModeFull] = useState(true)
     const [toggleOther, setToggleOther] = useState(false)
 
-    const { data: session } = useSession()
-
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status === HttpStatus.OK) {
                 const data = (await response.json()) as ReleaseDetail
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
-                return null
+                return undefined
             }
         },
-        [session]
+        []
     )
-    const [typeCategory, setTypeCategory] = useState<Array<string>>()
+    const [typeCategory, setTypeCategory] = useState<Array<string>>([])
     const [isTypeCateGoryEmpty, setIsTypeCateGoryEmpty] = useState(true)
     useEffect(() => {
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail) => {
+            .then((release: ReleaseDetail | undefined) => {
+                if (!release) return
                 //SPDX Document
                 if (
                     !CommonUtils.isNullOrUndefined(release._embedded) &&
@@ -241,11 +242,11 @@ const EditSPDXDocument = ({
                     !CommonUtils.isNullOrUndefined(release._embedded) &&
                     !CommonUtils.isNullOrUndefined(release._embedded['sw360:createdBy'])
                 ) {
-                    setFullnameModifiedBy(release._embedded['sw360:createdBy'].fullName)
+                    setFullnameModifiedBy(release._embedded['sw360:createdBy'].fullName ?? '')
                 }
             })
             .catch((err) => console.error(err))
-    }, [fetchData, releaseId, setSPDXPayload])
+    }, [releaseId])
 
     const changeModeFull = () => {
         setIsModeFull(true)
@@ -365,6 +366,8 @@ const EditSPDXDocument = ({
                         setExternalDocumentRefs={setExternalDocumentRefs}
                         SPDXPayload={SPDXPayload}
                         setSPDXPayload={setSPDXPayload}
+                        errorCreator={errorCreator}
+                        setErrorCreator={setErrorCreator}
                     />
                     <EditPackageInformation
                         isModeFull={isModeFull}

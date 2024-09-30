@@ -9,26 +9,26 @@
 // License-Filename: LICENSE
 
 'use client'
-import { OtherLicensingInformationDetected, SPDX } from '@/object-types'
+import { OtherLicensingInformationDetected, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
-    isModeFull?: boolean
-    indexOtherLicense?: number
-    setIndexOtherLicense?: React.Dispatch<React.SetStateAction<number>>
-    otherLicensingInformationDetecteds?: OtherLicensingInformationDetected[]
-    setOtherLicensingInformationDetecteds?: React.Dispatch<React.SetStateAction<OtherLicensingInformationDetected[]>>
-    SPDXPayload?: SPDX
-    setSPDXPayload?: React.Dispatch<React.SetStateAction<SPDX>>
-    errorLicenseIdentifier?: boolean
-    errorExtractedText?: boolean
-    inputValid?: boolean
-    setErrorLicenseIdentifier?: React.Dispatch<React.SetStateAction<boolean>>
-    setErrorExtractedText?: React.Dispatch<React.SetStateAction<boolean>>
-    toggleOther?: boolean
-    setToggleOther?: React.Dispatch<React.SetStateAction<boolean>>
+    isModeFull: boolean
+    indexOtherLicense: number
+    setIndexOtherLicense: React.Dispatch<React.SetStateAction<number>>
+    otherLicensingInformationDetecteds: OtherLicensingInformationDetected[]
+    setOtherLicensingInformationDetecteds: React.Dispatch<React.SetStateAction<OtherLicensingInformationDetected[]>>
+    SPDXPayload: SPDX
+    setSPDXPayload: React.Dispatch<React.SetStateAction<SPDX>>
+    errorLicenseIdentifier: boolean
+    errorExtractedText: boolean
+    inputValid: boolean
+    setErrorLicenseIdentifier: React.Dispatch<React.SetStateAction<boolean>>
+    setErrorExtractedText: React.Dispatch<React.SetStateAction<boolean>>
+    toggleOther: boolean
+    setToggleOther: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const EditOtherLicensingInformationDetected = ({
@@ -46,7 +46,7 @@ const EditOtherLicensingInformationDetected = ({
     inputValid,
     toggleOther,
     setToggleOther,
-}: Props) => {
+}: Props) : ReactNode => {
     const [increIndex, setIncreIndex] = useState(0)
     const [isAdd, setIsAdd] = useState(false)
 
@@ -136,7 +136,7 @@ const EditOtherLicensingInformationDetected = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     otherLicensingInformationDetecteds: arrayExternals,
-                },
+                } as SPDXDocument,
             })
         }
     }
@@ -164,7 +164,7 @@ const EditOtherLicensingInformationDetected = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 otherLicensingInformationDetecteds: otherLicensings,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -188,7 +188,7 @@ const EditOtherLicensingInformationDetected = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 otherLicensingInformationDetecteds: otherLicensings,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -211,7 +211,7 @@ const EditOtherLicensingInformationDetected = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 otherLicensingInformationDetecteds: otherLicensings,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -228,7 +228,7 @@ const EditOtherLicensingInformationDetected = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     otherLicensingInformationDetecteds: [],
-                },
+                } as SPDXDocument,
             })
         } else {
             let otherLicensingInformationDetectedDatas: OtherLicensingInformationDetected[] = []
@@ -247,7 +247,7 @@ const EditOtherLicensingInformationDetected = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     otherLicensingInformationDetecteds: otherLicensingInformationDetectedDatas,
-                },
+                } as SPDXDocument,
             })
             if (!CommonUtils.isNullEmptyOrUndefinedArray(otherLicensingInformationDetectedDatas)) {
                 setNumberIndex(otherLicensingInformationDetectedDatas[0].index)
@@ -291,7 +291,7 @@ const EditOtherLicensingInformationDetected = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 otherLicensingInformationDetecteds: otherLicenses,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -305,7 +305,7 @@ const EditOtherLicensingInformationDetected = ({
         setLicenseNameToOtherLicense(licenseName)
     }
 
-    const isNoneOrNoasserttionString = (data: string) => {
+    const isNotNoneOrNoasserttionString = (data: string) => {
         if (data === 'NONE' || data === 'NOASSERTION') {
             return false
         }
@@ -363,80 +363,38 @@ const EditOtherLicensingInformationDetected = ({
                         </div>
                     </td>
                 </tr>
-                {otherLicensingInformationDetecteds[indexOtherLicense] && (
-                    <>
-                        <tr>
-                            <td>
-                                <div className='form-group'>
-                                    <label className='mandatory lableSPDX' htmlFor='licenseId'>
-                                        10.1 License identifier
-                                        <span className='text-red' style={{ color: '#F7941E' }}>
-                                            *
-                                        </span>
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
-                                        <label className='sub-label'>LicenseRef-</label>
-                                        <input
-                                            id='licenseId'
-                                            className={`form-control ${errorLicenseIdentifier ? 'is-invalid' : ''} ${
-                                                !errorLicenseIdentifier && inputValid ? 'is-valid' : ''
-                                            }`}
-                                            type='text'
-                                            style={{ backgroundColor: errorLicenseIdentifier ? '#feefef' : '' }}
-                                            placeholder='Enter license identifier'
-                                            name='licenseId'
-                                            onChange={updateFieldLicenseIdentifier}
-                                            value={
-                                                otherLicensingInformationDetecteds[
-                                                    indexOtherLicense
-                                                ].licenseId?.startsWith('LicenseRef-')
-                                                    ? otherLicensingInformationDetecteds[
-                                                          indexOtherLicense
-                                                      ].licenseId?.substring(11)
-                                                    : otherLicensingInformationDetecteds[indexOtherLicense].licenseId
-                                            }
-                                        />
-                                    </div>
-                                    {errorLicenseIdentifier && (
-                                        <div
-                                            style={{
-                                                color: '#da1414',
-                                                fontSize: '0.875rem',
-                                                marginTop: '0.25rem',
-                                                width: '100%',
-                                            }}
-                                        >
-                                            <span>This field must be not empty!</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className='form-group'>
-                                    <label className='mandatory lableSPDX' htmlFor='extractedText'>
-                                        10.2 Extracted text
-                                        <span className='text-red' style={{ color: '#F7941E' }}>
-                                            *
-                                        </span>
-                                    </label>
-                                    <textarea
-                                        className={`form-control ${errorExtractedText ? 'is-invalid ' : ''} ${
-                                            !errorExtractedText && inputValid ? 'is-valid' : ''
+                <>
+                    <tr>
+                        <td>
+                            <div className='form-group'>
+                                <label className='mandatory lableSPDX' htmlFor='licenseId'>
+                                    10.1 License identifier
+                                    <span className='text-red' style={{ color: '#F7941E' }}>
+                                        *
+                                    </span>
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <label className='sub-label'>LicenseRef-</label>
+                                    <input
+                                        id='licenseId'
+                                        className={`form-control ${errorLicenseIdentifier ? 'is-invalid' : ''} ${
+                                            !errorLicenseIdentifier && inputValid ? 'is-valid' : ''
                                         }`}
-                                        style={{ backgroundColor: errorExtractedText ? '#feefef' : '' }}
-                                        id='extractedText'
-                                        rows={5}
-                                        name='extractedText'
-                                        onChange={updateField}
-                                        placeholder='Enter extracted text'
+                                        type='text'
+                                        style={{ backgroundColor: errorLicenseIdentifier ? '#feefef' : '' }}
+                                        placeholder='Enter license identifier'
+                                        name='licenseId'
+                                        onChange={updateFieldLicenseIdentifier}
                                         value={
-                                            otherLicensingInformationDetecteds[indexOtherLicense].extractedText ?? ''
+                                            otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId.startsWith('LicenseRef-')
+                                                ? otherLicensingInformationDetecteds[
+                                                        indexOtherLicense
+                                                    ].licenseId.substring(11)
+                                                : otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId
                                         }
-                                    ></textarea>
+                                    />
                                 </div>
-                                {errorExtractedText && (
+                                {errorLicenseIdentifier && (
                                     <div
                                         style={{
                                             color: '#da1414',
@@ -448,110 +406,148 @@ const EditOtherLicensingInformationDetected = ({
                                         <span>This field must be not empty!</span>
                                     </div>
                                 )}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX'>10.3 License name</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseNameExist'
-                                                type='radio'
-                                                name='licenseName'
-                                                value='EXIST'
-                                                onChange={selectLicenseNameNoasserttionExist}
-                                                checked={hasLicenseName}
-                                            />
-                                            <input
-                                                style={{ flex: 6, marginRight: '1rem' }}
-                                                id='licenseName'
-                                                className='form-control needs-validation'
-                                                type='text'
-                                                placeholder='Enter license name'
-                                                name='licenseName'
-                                                onChange={updateField}
-                                                value={
-                                                    isNoneOrNoasserttionString(
-                                                        otherLicensingInformationDetecteds[indexOtherLicense]
-                                                            .licenseName
-                                                    )
-                                                        ? otherLicensingInformationDetecteds[indexOtherLicense]
-                                                              .licenseName ?? ''
-                                                        : ''
-                                                }
-                                                disabled={!hasLicenseName}
-                                            />
-                                        </div>
-                                        <div style={{ flex: 2 }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseNameNoAssertion'
-                                                type='radio'
-                                                name='licenseName'
-                                                value='NOASSERTION'
-                                                onChange={selectLicenseNameNoasserttion}
-                                                checked={!hasLicenseName}
-                                            />
-                                            <label
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='licenseNameNoAssertion'
-                                            >
-                                                NOASSERTION
-                                            </label>
-                                        </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div className='form-group'>
+                                <label className='mandatory lableSPDX' htmlFor='extractedText'>
+                                    10.2 Extracted text
+                                    <span className='text-red' style={{ color: '#F7941E' }}>
+                                        *
+                                    </span>
+                                </label>
+                                <textarea
+                                    className={`form-control ${errorExtractedText ? 'is-invalid ' : ''} ${
+                                        !errorExtractedText && inputValid ? 'is-valid' : ''
+                                    }`}
+                                    style={{ backgroundColor: errorExtractedText ? '#feefef' : '' }}
+                                    id='extractedText'
+                                    rows={5}
+                                    name='extractedText'
+                                    onChange={updateField}
+                                    placeholder='Enter extracted text'
+                                    value={
+                                        otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
+                                    }
+                                ></textarea>
+                            </div>
+                            {errorExtractedText && (
+                                <div
+                                    style={{
+                                        color: '#da1414',
+                                        fontSize: '0.875rem',
+                                        marginTop: '0.25rem',
+                                        width: '100%',
+                                    }}
+                                >
+                                    <span>This field must be not empty!</span>
+                                </div>
+                            )}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX'>10.3 License name</label>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseNameExist'
+                                            type='radio'
+                                            name='licenseName'
+                                            value='EXIST'
+                                            onChange={selectLicenseNameNoasserttionExist}
+                                            checked={hasLicenseName}
+                                        />
+                                        <input
+                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            id='licenseName'
+                                            className='form-control needs-validation'
+                                            type='text'
+                                            placeholder='Enter license name'
+                                            name='licenseName'
+                                            onChange={updateField}
+                                            value={
+                                                isNotNoneOrNoasserttionString(
+                                                    otherLicensingInformationDetecteds[indexOtherLicense]
+                                                        ?.licenseName
+                                                )
+                                                    ? otherLicensingInformationDetecteds[indexOtherLicense]
+                                                            ?.licenseName
+                                                    : ''
+                                            }
+                                            disabled={!hasLicenseName}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 2 }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseNameNoAssertion'
+                                            type='radio'
+                                            name='licenseName'
+                                            value='NOASSERTION'
+                                            onChange={selectLicenseNameNoasserttion}
+                                            checked={!hasLicenseName}
+                                        />
+                                        <label
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='licenseNameNoAssertion'
+                                        >
+                                            NOASSERTION
+                                        </label>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
-                            <tr className='spdx-full'>
-                                <td>
-                                    <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='licenseCrossRefs'>
-                                            10.4 License cross reference
-                                        </label>
-                                        <textarea
-                                            className='form-control'
-                                            id='licenseCrossRefs'
-                                            rows={5}
-                                            placeholder='Enter license cross reference'
-                                            name='licenseCrossRefs'
-                                            onChange={updateFieldLicenseCrossRefs}
-                                            value={
-                                                otherLicensingInformationDetecteds[indexOtherLicense].licenseCrossRefs
-                                                    ?.toString()
-                                                    .replaceAll(',', '\n') ?? ''
-                                            }
-                                        ></textarea>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                        <tr>
+                            </div>
+                        </td>
+                    </tr>
+                    {isModeFull && (
+                        <tr className='spdx-full'>
                             <td>
                                 <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='licenseComment'>
-                                        10.5 License comment
+                                    <label className='lableSPDX' htmlFor='licenseCrossRefs'>
+                                        10.4 License cross reference
                                     </label>
                                     <textarea
                                         className='form-control'
-                                        id='licenseComment'
+                                        id='licenseCrossRefs'
                                         rows={5}
-                                        placeholder='Enter license comment'
-                                        name='licenseComment'
-                                        onChange={updateField}
+                                        placeholder='Enter license cross reference'
+                                        name='licenseCrossRefs'
+                                        onChange={updateFieldLicenseCrossRefs}
                                         value={
-                                            otherLicensingInformationDetecteds[indexOtherLicense].licenseComment ?? ''
+                                            otherLicensingInformationDetecteds[indexOtherLicense]?.licenseCrossRefs
+                                                .toString()
+                                                .replaceAll(',', '\n')
                                         }
                                     ></textarea>
                                 </div>
                             </td>
                         </tr>
-                    </>
-                )}
+                    )}
+                    <tr>
+                        <td>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='licenseComment'>
+                                    10.5 License comment
+                                </label>
+                                <textarea
+                                    className='form-control'
+                                    id='licenseComment'
+                                    rows={5}
+                                    placeholder='Enter license comment'
+                                    name='licenseComment'
+                                    onChange={updateField}
+                                    value={
+                                        otherLicensingInformationDetecteds[indexOtherLicense]?.licenseComment
+                                    }
+                                ></textarea>
+                            </div>
+                        </td>
+                    </tr>
+                </>
             </tbody>
         </table>
     )

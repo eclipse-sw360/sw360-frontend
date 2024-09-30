@@ -10,32 +10,36 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, ReactNode } from 'react'
 
 import { Table, _ } from '@/components/sw360'
-import { HttpStatus, LinkedRelease } from '@/object-types'
+import { Embedded, HttpStatus, LinkedRelease } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     componentId: string
 }
 
-const Releases = ({ componentId }: Props) => {
+type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
+
+const Releases = ({ componentId }: Props) : ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
-    const { data: session } = useSession()
-    const [linkedReleases, setLinkedReleases] = useState([])
+    const [linkedReleases, setLinkedReleases] = useState<Array<Array<string | string[]>>>([])
     const router = useRouter()
 
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
                     Object.fromEntries(params)
@@ -46,7 +50,7 @@ const Releases = ({ componentId }: Props) => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const releaseLinks = await response.json()
+                const releaseLinks = await response.json() as EmbeddedLinkedReleases
                 if (
                     !CommonUtils.isNullOrUndefined(releaseLinks._embedded) &&
                     !CommonUtils.isNullOrUndefined(releaseLinks._embedded['sw360:releaseLinks'])
@@ -64,7 +68,7 @@ const Releases = ({ componentId }: Props) => {
         })()
 
         return () => controller.abort()
-    }, [params, session, componentId])
+    }, [params, componentId])
 
     const columns = [
         {

@@ -9,17 +9,18 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface Props {
-    setCreated?: (input: InputKeyValue) => void
+    setCreated: (input: InputKeyValue) => void
     dataCreated?: InputKeyValue
-    setDataCreated?: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setDataCreated: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function Created({ dataCreated, setDataCreated, setCreated }: Props) {
+function Created({ dataCreated, setDataCreated, setCreated }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataCreated
+        const list: InputKeyValue = dataCreated ? dataCreated : {} as InputKeyValue
         list[name as keyof InputKeyValue] = value
         setDataCreated(list)
         setCreated(list)

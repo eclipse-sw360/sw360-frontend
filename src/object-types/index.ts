@@ -192,17 +192,17 @@ export type {
 // Special functions for populate data
 export { NavList, Preferences }
 
-// Enums
+// Enums + Constants
 import ActionType from './enums/ActionType'
-import AttachmentType from './enums/AttachmentTypes'
+import AttachmentType from './constants/AttachmentTypes'
 import ClearingRequestStates from './enums/ClearingRequestStates'
-import CommonTabIds from './enums/CommonTabsIds'
-import ComponentTabIds from './enums/ComponentTabIds'
+import CommonTabIds from './constants/CommonTabsIds'
+import ComponentTabIds from './constants/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
-import HttpStatus from './enums/HttpStatus'
 import LicenseTabIds from './enums/LicenseTabIds'
-import ReleaseTabIds from './enums/ReleaseTabIds'
+import HttpStatus from './constants/HttpStatus'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
+import ReleaseTabIds from './constants/ReleaseTabIds'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 
 export {

@@ -9,17 +9,18 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface Props {
-    setReleaseDate?: (inputs: InputKeyValue) => void
-    dataReleaseDate?: InputKeyValue
-    setDataReleaseDate?: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setReleaseDate: (inputs: InputKeyValue) => void
+    dataReleaseDate: InputKeyValue | undefined
+    setDataReleaseDate: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function ReleaseDate({ dataReleaseDate, setDataReleaseDate, setReleaseDate }: Props) {
+function ReleaseDate({ dataReleaseDate, setDataReleaseDate, setReleaseDate }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataReleaseDate
+        const list: InputKeyValue = dataReleaseDate ?? {} as InputKeyValue
         list[name as keyof InputKeyValue] = value
         setDataReleaseDate(list)
         setReleaseDate(list)

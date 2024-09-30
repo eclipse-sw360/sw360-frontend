@@ -11,21 +11,22 @@
 'use client'
 import { ExternalReference, PackageInformation } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 interface Props {
     packageInformation?: PackageInformation
     externalRefsData?: ExternalReference
-    setExternalRefsData?: React.Dispatch<React.SetStateAction<ExternalReference>>
-    isModeFull?: boolean
+    setExternalRefsData: React.Dispatch<React.SetStateAction<ExternalReference | undefined>>
+    isModeFull: boolean
 }
 
-const PackageInformationDetail = ({ packageInformation, externalRefsData, setExternalRefsData, isModeFull }: Props) => {
+const PackageInformationDetail = ({ packageInformation, externalRefsData, setExternalRefsData, isModeFull }: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (!packageInformation) return
         const index: string = e.target.value
-        setExternalRefsData(packageInformation.externalRefs[parseInt(index)])
+        setExternalRefsData(packageInformation.externalRefs ? packageInformation.externalRefs[parseInt(index)] : undefined)
     }
 
     return (
@@ -76,7 +77,7 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                 </tr>
                 <tr className='spdx-full' data-index={packageInformation?.index}>
                     <td>7.8 Files analyzed</td>
-                    <td className='spdx-col-3 spdx-uppercase'>{packageInformation?.filesAnalyzed.toString()}</td>
+                    <td className='spdx-col-3 spdx-uppercase'>{packageInformation?.filesAnalyzed?.toString()}</td>
                 </tr>
                 {isModeFull && (
                     <>
@@ -87,14 +88,14 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                     <div className='spdx-flex-row'>
                                         <div className='spdx-col-1 spdx-key'>Value</div>
                                         <div className='spdx-col-3'>
-                                            {packageInformation?.packageVerificationCode.value}
+                                            {packageInformation?.packageVerificationCode?.value}
                                         </div>
                                     </div>
                                     <div className='spdx-flex-row'>
                                         <div className='spdx-col-1 spdx-key'>Excluded files</div>
                                         <p className='spdx-col-3 ' id='excludedFiles'>
                                             {packageInformation?.packageVerificationCode?.excludedFiles
-                                                ?.sort()
+                                                .sort()
                                                 .filter((data) => !CommonUtils.isNullEmptyOrUndefinedString(data))
                                                 .map((item) => {
                                                     return (
@@ -112,7 +113,7 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                         <tr className='spdx-full' data-index={packageInformation?.index}>
                             <td>7.10 Package checksum</td>
                             <td>
-                                {packageInformation?.checksums.map((item) => {
+                                {packageInformation?.checksums?.map((item) => {
                                     return (
                                         <div
                                             key={item.index}
@@ -138,7 +139,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                     <tr className='spdx-full' data-index={packageInformation?.index}>
                         <td>7.12 Source information</td>
                         <td>
-                            {packageInformation?.sourceInfo
+                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.sourceInfo))
+                            && packageInformation.sourceInfo
                                 .trim()
                                 .split('\n')
                                 .map((item) => {
@@ -163,7 +165,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                         <td>7.14 All licenses information from files</td>
                         <td>
                             <p className='spdx-col-2 ' id='licenseInfoFromFile'>
-                                {packageInformation?.licenseInfoFromFiles
+                                {(packageInformation && packageInformation.licenseInfoFromFiles)
+                                && packageInformation.licenseInfoFromFiles
                                     .sort()
                                     .filter((license) => !CommonUtils.isNullEmptyOrUndefinedString(license))
                                     .map((item) => {
@@ -187,7 +190,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                     <td>7.16 Comments on license</td>
                     <td>
                         <p className='spdx-col-2 ' id='licenseComments'>
-                            {packageInformation?.licenseComments
+                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseComments))
+                            && packageInformation.licenseComments
                                 .trim()
                                 .split('\n')
                                 .map((item) => {
@@ -205,7 +209,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                     <td>7.17 Copyright text</td>
                     <td>
                         <p className='spdx-col-2 ' id='copyrightText'>
-                            {packageInformation?.copyrightText
+                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.copyrightText))
+                            && packageInformation.copyrightText
                                 .trim()
                                 .split('\n')
                                 .map((item) => {
@@ -226,7 +231,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                             <td>7.18 Package summary description</td>
                             <td>
                                 <p className='spdx-col-2 ' id='summary'>
-                                    {packageInformation?.summary
+                                    {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.summary))
+                                    && packageInformation.summary
                                         .trim()
                                         .split('\n')
                                         .map((item) => {
@@ -244,7 +250,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                             <td>7.19 Package detailed description</td>
                             <td>
                                 <p className='spdx-col-2 ' id='description'>
-                                    {packageInformation?.description
+                                    {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.description))
+                                    && packageInformation.description
                                         .trim()
                                         .split('\n')
                                         .map((item) => {
@@ -265,7 +272,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                     <td>7.20 Package comment</td>
                     <td>
                         <p className='spdx-col-2 ' id='packageComment'>
-                            {packageInformation?.packageComment
+                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.packageComment))
+                            && packageInformation.packageComment
                                 .trim()
                                 .split('\n')
                                 .map((item) => {
@@ -291,9 +299,10 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                             id='externalReferenceSelect${package.index}'
                                             className='spdx-col-3'
                                             onChange={displayIndex}
-                                            disabled={packageInformation?.externalRefs.length == 0}
+                                            disabled={packageInformation?.externalRefs?.length == 0}
                                         >
-                                            {packageInformation?.externalRefs
+                                            {(packageInformation && packageInformation.externalRefs)
+                                            && packageInformation.externalRefs
                                                 .toSorted((e1, e2) => e1.index - e2.index)
                                                 .map((item) => (
                                                     <option key={item.index} value={item.index}>
@@ -324,7 +333,7 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                                     className='spdx-col-3'
                                                     id='externalRefComment-${externalRefsData.index}'
                                                 >
-                                                    {externalRefsData?.comment
+                                                    {externalRefsData.comment
                                                         .trim()
                                                         .split('\n')
                                                         .map((item) => {
@@ -347,7 +356,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                             <td>7.23 Package attribution text</td>
                             <td>
                                 <p className='spdx-col-2 ' id='attributionText'>
-                                    {packageInformation?.attributionText
+                                    {(packageInformation && packageInformation.attributionText)
+                                    && packageInformation.attributionText
                                         .sort()
                                         .filter((license) => !CommonUtils.isNullEmptyOrUndefinedString(license))
                                         .map((item) => {
@@ -364,7 +374,8 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                             <td>7.24 Primary Package Purpose </td>
                             <td>
                                 <div className='spdx-col-2 ' id='primaryPackagePurpose'>
-                                    {packageInformation?.primaryPackagePurpose
+                                    {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.primaryPackagePurpose))
+                                    && packageInformation.primaryPackagePurpose
                                         .trim()
                                         .split('\n')
                                         .map((item) => {

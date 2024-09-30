@@ -9,17 +9,19 @@
 // License-Filename: LICENSE
 
 import { PackageInformation } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
+import { ReactNode } from 'react'
 
 interface Props {
-    packageInformation?: PackageInformation
-    setAllLicensesInformationToPackage?: any
-    allLicensesInformationExist?: boolean
-    setAllLicensesInformationExist?: React.Dispatch<React.SetStateAction<boolean>>
-    allLicensesInformationNone?: boolean
-    setAllLicensesInformationNone?: React.Dispatch<React.SetStateAction<boolean>>
-    allLicensesInformationNoasserttion?: boolean
-    setAllLicensesInformationNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
-    allLicensesInformation?: string[]
+    packageInformation: PackageInformation
+    setAllLicensesInformationToPackage: React.Dispatch<React.SetStateAction<string | string[]>>
+    allLicensesInformationExist: boolean
+    setAllLicensesInformationExist: React.Dispatch<React.SetStateAction<boolean>>
+    allLicensesInformationNone: boolean
+    setAllLicensesInformationNone: React.Dispatch<React.SetStateAction<boolean>>
+    allLicensesInformationNoasserttion: boolean
+    setAllLicensesInformationNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
+    allLicensesInformation: string[]
 }
 
 function PackageAllLicensesInformation({
@@ -32,7 +34,7 @@ function PackageAllLicensesInformation({
     setAllLicensesInformationNone,
     allLicensesInformationNoasserttion,
     setAllLicensesInformationNoasserttion,
-}: Props) {
+}: Props) : ReactNode {
     const selectAllLicensesInformationExist = () => {
         setAllLicensesInformationExist(true)
         setAllLicensesInformationNone(false)
@@ -69,7 +71,11 @@ function PackageAllLicensesInformation({
                             value='EXIST'
                             onClick={selectAllLicensesInformationExist}
                             checked={allLicensesInformationExist}
-                            disabled={!packageInformation?.filesAnalyzed}
+                            disabled={
+                                !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                    ? !packageInformation.filesAnalyzed
+                                    : true
+                            }
                         />
                         <textarea
                             style={{ flex: 6, marginRight: '1rem' }}
@@ -79,11 +85,13 @@ function PackageAllLicensesInformation({
                             name='licenseInfoFromFiles'
                             placeholder='Enter all licenses information from files'
                             onChange={updateField}
-                            value={allLicensesInformation?.toString().replaceAll(',', '\n')}
+                            value={allLicensesInformation.toString().replaceAll(',', '\n')}
                             disabled={
                                 allLicensesInformationNone ||
                                 allLicensesInformationNoasserttion ||
-                                !packageInformation?.filesAnalyzed
+                                (!CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                    ? !packageInformation.filesAnalyzed
+                                    : true)
                             }
                         ></textarea>
                     </div>
@@ -96,7 +104,11 @@ function PackageAllLicensesInformation({
                             value='NONE'
                             onChange={selectAllLicensesInformationNone}
                             checked={allLicensesInformationNone}
-                            disabled={!packageInformation?.filesAnalyzed}
+                            disabled={
+                                !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                    ? !packageInformation.filesAnalyzed
+                                    : true
+                            }
                         />
                         <label
                             style={{ marginRight: '2rem' }}
@@ -113,7 +125,11 @@ function PackageAllLicensesInformation({
                             value='NOASSERTION'
                             onChange={selectAllLicensesInformationNoasserttion}
                             checked={allLicensesInformationNoasserttion}
-                            disabled={!packageInformation?.filesAnalyzed}
+                            disabled={
+                                !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                    ? !packageInformation.filesAnalyzed
+                                    : true
+                            }
                         />
                         <label
                             className='form-check-label radio-label lableSPDX'

@@ -17,7 +17,7 @@ import { InputKeyValue, User } from '@/object-types'
  * @param obj - The object to check.
  * @returns True if the object is null or undefined, false otherwise.
  */
-const isNullOrUndefined = (obj: unknown): boolean => {
+const isNullOrUndefined = (obj: unknown): obj is null | undefined => {
     if (obj === null || obj === undefined) {
         return true
     }
@@ -29,7 +29,9 @@ const isNullOrUndefined = (obj: unknown): boolean => {
  * @param str - The string to check.
  * @returns True if the string is null, empty or undefined, false otherwise.
  */
-const isNullEmptyOrUndefinedString = (str: string): boolean => {
+const isNullEmptyOrUndefinedString = (str: string | undefined | null): str is null | undefined | '' => {
+    if (isNullOrUndefined(str))
+        return true
     if (str.length === 0) {
         return true
     }
@@ -62,7 +64,9 @@ const createUrlWithParams = (url: string, params: UrlWithParams): string => {
  * @param arr - The array to check.
  * @returns True if the array is null, empty or undefined, false otherwise.
  */
-const isNullEmptyOrUndefinedArray = (arr: Array<unknown>): boolean => {
+const isNullEmptyOrUndefinedArray = (arr: Array<unknown> | undefined | null): arr is null | undefined => {
+    if (isNullOrUndefined(arr))
+        return true
     if (arr.length === 0) {
         return true
     }
@@ -74,7 +78,8 @@ const isNullEmptyOrUndefinedArray = (arr: Array<unknown>): boolean => {
  * @param url - The URL string to extract the ID from.
  * @returns The ID extracted from the URL string.
  */
-const getIdFromUrl = (url: string): string => {
+const getIdFromUrl = (url: string | undefined): string => {
+    if (isNullEmptyOrUndefinedString(url)) return ''
     return url.split('/').at(-1) ?? ''
 }
 

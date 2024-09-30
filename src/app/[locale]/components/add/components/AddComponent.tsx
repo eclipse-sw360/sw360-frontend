@@ -13,7 +13,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
@@ -27,11 +27,11 @@ import {
     Vendor,
 } from '@/object-types'
 
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
 import MessageService from '@/services/message.service'
 
-export default function AddComponent() {
+export default function AddComponent() : ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const { data: session, status } = useSession()
@@ -55,7 +55,7 @@ export default function AddComponent() {
         moderators: null,
         modifiedBy: '',
         modifiedOn: '',
-        componentOwner: undefined,
+        componentOwner: null,
         ownerAccountingUnit: '',
         ownerGroup: '',
         ownerCountry: '',
@@ -98,9 +98,11 @@ export default function AddComponent() {
     }
 
     const submit = async () => {
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         const response = await ApiUtils.POST('components', componentPayload, session.user.access_token)
 
-        if (response.status == HttpStatus.CREATED) {
+        if (response.status === HttpStatus.CREATED) {
             const data = (await response.json()) as Component
             router.push('/components/edit/' + data.id)
             MessageService.success(t('Component is created'))
@@ -110,7 +112,7 @@ export default function AddComponent() {
     }
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <>

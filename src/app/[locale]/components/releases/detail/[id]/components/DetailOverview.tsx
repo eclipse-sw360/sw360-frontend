@@ -10,10 +10,11 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
+import { notFound } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 
 import Attachments from '@/components/Attachments/Attachments'
@@ -54,9 +55,8 @@ interface Props {
     releaseId: string
 }
 
-const DetailOverview = ({ releaseId }: Props) => {
+const DetailOverview = ({ releaseId }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
@@ -71,25 +71,29 @@ const DetailOverview = ({ releaseId }: Props) => {
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as ReleaseDetail &
-                    EmbeddedVulnerabilities &
-                    EmbeddedChangelogs &
-                    EmbeddedReleaseLinks
+            if (response.status === HttpStatus.OK) {
+                const data = await response.json() as ReleaseDetail & EmbeddedReleaseLinks & EmbeddedVulnerabilities & EmbeddedChangelogs
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
-                return null
+                return undefined
             }
         },
-        [session]
+        []
     )
 
     useEffect(() => {
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail) => {
+            .then((release: ReleaseDetail | undefined) => {
+                if (CommonUtils.isNullOrUndefined(release)){
+                    notFound()
+                }
+
                 setRelease(release)
 
                 if (
@@ -114,7 +118,7 @@ const DetailOverview = ({ releaseId }: Props) => {
             })
             .then((release: ReleaseDetail) => {
                 fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
-                    .then((embeddedReleaseLinks: EmbeddedReleaseLinks) => {
+                    .then((embeddedReleaseLinks: EmbeddedReleaseLinks | undefined) => {
                         embeddedReleaseLinks &&
                             setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
                     })
@@ -123,7 +127,7 @@ const DetailOverview = ({ releaseId }: Props) => {
             .catch((err) => console.error(err))
 
         fetchData(`releases/${releaseId}/vulnerabilities`)
-            .then((vulnerabilities: EmbeddedVulnerabilities) => {
+            .then((vulnerabilities: EmbeddedVulnerabilities | undefined) => {
                 if (
                     vulnerabilities &&
                     !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
@@ -137,7 +141,7 @@ const DetailOverview = ({ releaseId }: Props) => {
             .catch((err) => console.error(err))
 
         fetchData(`changelog/document/${releaseId}`)
-            .then((changeLogs: EmbeddedChangelogs) => {
+            .then((changeLogs: EmbeddedChangelogs | undefined) => {
                 changeLogs &&
                     setChangeLogList(
                         CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
@@ -148,7 +152,11 @@ const DetailOverview = ({ releaseId }: Props) => {
             .catch((err) => console.error(err))
     }, [fetchData, releaseId])
 
-    const downloadBundle = () => {
+    const downloadBundle = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
+
         DownloadService.download(
             `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
             session,
@@ -180,7 +188,7 @@ const DetailOverview = ({ releaseId }: Props) => {
                             setSelectedTab={setSelectedTab}
                             tabList={tabList}
                             vulnerabilities={vulnerData}
-                            eccStatus={release.eccInformation.eccStatus}
+                            eccStatus={release.eccInformation?.eccStatus}
                         />
                     </div>
                     <div className='col'>
@@ -195,13 +203,15 @@ const DetailOverview = ({ releaseId }: Props) => {
                                             {`${t('Version')} ${release.version}`}
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                            {releasesSameComponent &&
+                                            {
                                                 Object.entries(releasesSameComponent).map(
                                                     ([index, item]: [string, ReleaseLink]) => (
                                                         <Dropdown.Item key={index} className={styles['dropdown-item']}>
                                                             <span
                                                                 className={`${styles['badge-circle']} ${
-                                                                    styles[item.clearingState]
+                                                                    styles[!CommonUtils.isNullEmptyOrUndefinedString(item.clearingState)
+                                                                        ? item.clearingState
+                                                                        : '']
                                                                 }`}
                                                             ></span>
                                                             <Link href={`/components/releases/detail/${item.id}`}>
@@ -209,7 +219,8 @@ const DetailOverview = ({ releaseId }: Props) => {
                                                             </Link>
                                                         </Dropdown.Item>
                                                     )
-                                                )}
+                                                )
+                                            }
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
@@ -220,7 +231,7 @@ const DetailOverview = ({ releaseId }: Props) => {
                                                 id='downloadAttachmentBundle'
                                                 type='button'
                                                 className='btn btn-secondary'
-                                                onClick={downloadBundle}
+                                                onClick={() => void downloadBundle()}
                                             >
                                                 {t('Download Attachment Bundle')}
                                             </button>
@@ -281,10 +292,7 @@ const DetailOverview = ({ releaseId }: Props) => {
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <CommercialDetails
-                                costDetails={
-                                    release._embedded['sw360:cotsDetail'] && release._embedded['sw360:cotsDetail']
-                                }
-                            />
+                                costDetails={release._embedded['sw360:cotsDetail']} />
                         </div>
                         <div className='containers' hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}>
                             <ComponentVulnerabilities vulnerData={vulnerData} />

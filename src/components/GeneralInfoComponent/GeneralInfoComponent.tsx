@@ -17,10 +17,10 @@ import { ComponentPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 
 interface Props {
-    componentPayload?: ComponentPayload
-    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    vendor?: Vendor
-    setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
+    componentPayload: ComponentPayload
+    setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
+    vendor: Vendor
+    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
 }
 
 const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, setVendor }: Props) => {

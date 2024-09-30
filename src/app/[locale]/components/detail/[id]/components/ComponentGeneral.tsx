@@ -11,20 +11,21 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import { FaCopy } from 'react-icons/fa'
 
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { Component } from '@/object-types'
 import Link from 'next/link'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     component: Component
     componentId: string
 }
 
-const ComponentGeneral = ({ component, componentId }: Props) => {
+const ComponentGeneral = ({ component, componentId }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     return (
@@ -70,9 +71,9 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                             component._embedded?.createdBy &&
                             <Link
                                 className='text-link'
-                                href={`mailto:${component._embedded?.createdBy.email}`}
+                                href={`mailto:${component._embedded.createdBy.email}`}
                             >
-                                {component._embedded?.createdBy.fullName}
+                                {component._embedded.createdBy.fullName}
                             </Link>
                         }   
                     </td>
@@ -83,7 +84,7 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                 </tr>
                 <tr>
                     <td>{t('Modified On')}:</td>
-                    <td>{component['modifiedOn'] && component['modifiedOn']}</td>
+                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component['modifiedOn']) && component['modifiedOn']}</td>
                 </tr>
                 <tr>
                     <td>{t('Modified By')}:</td>
@@ -117,7 +118,7 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                     <td>{t('Homepage')}:</td>
                     <td>
                         {
-                            component.homepage &&
+                            !CommonUtils.isNullEmptyOrUndefinedString(component.homepage) &&
                             <Link
                                 className='text-link'
                                 href={component.homepage}
@@ -131,7 +132,7 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                     <td>{t('Blog')}:</td>
                     <td>
                         {
-                            component.blog &&
+                            !CommonUtils.isNullEmptyOrUndefinedString(component.blog) &&
                             <Link
                                 className='text-link'
                                 href={component.blog}
@@ -145,7 +146,7 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                     <td>{t('Wiki')}:</td>
                     <td>
                         {
-                            component.wiki &&
+                            !CommonUtils.isNullEmptyOrUndefinedString(component.wiki) &&
                             <Link
                                 className='text-link'
                                 href={component.wiki}
@@ -159,7 +160,7 @@ const ComponentGeneral = ({ component, componentId }: Props) => {
                     <td>{t('Mailing list')}:</td>
                     <td>
                         {
-                            component.mailinglist &&
+                            !CommonUtils.isNullEmptyOrUndefinedString(component.mailinglist) &&
                             <Link
                                 className='text-link'
                                 href={component.mailinglist}

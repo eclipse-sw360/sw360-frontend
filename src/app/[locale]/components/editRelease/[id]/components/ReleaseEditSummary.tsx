@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
@@ -29,13 +29,13 @@ import { CommonUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
-    release?: ReleaseDetail
+    release: ReleaseDetail
     releaseId?: string
-    actionType?: string
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    actionType: string
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor?: Vendor
-    setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
+    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
     mainLicenses?: { [k: string]: string }
     setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     otherLicenses?: { [k: string]: string }
@@ -59,7 +59,7 @@ function ReleaseEditSummary({
     cotsDetails,
     eccInformation,
     clearingInformation,
-}: Props) {
+}: Props) : ReactNode {
     const t = useTranslations('default')
     const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
@@ -107,8 +107,8 @@ function ReleaseEditSummary({
         }
 
         let vendorId = ''
-        if (typeof release._embedded['sw360:vendors'] !== 'undefined') {
-            vendorId = CommonUtils.getIdFromUrl(release._embedded['sw360:vendors'][0]._links.self.href)
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:vendors'])) {
+            vendorId = CommonUtils.getIdFromUrl(release._embedded['sw360:vendors'][0]._links?.self.href)
             const vendor: Vendor = {
                 id: vendorId,
                 fullName: release._embedded['sw360:vendors'][0].fullName,
@@ -118,12 +118,12 @@ function ReleaseEditSummary({
 
         let modifiedBy = ''
         if (typeof release._embedded['sw360:modifiedBy'] !== 'undefined') {
-            modifiedBy = release._embedded['sw360:modifiedBy'].fullName
+            modifiedBy = release._embedded['sw360:modifiedBy'].fullName ?? ''
         }
 
-        let createBy = ''
+        let createdBy = ''
         if (typeof release._embedded['sw360:createdBy'] !== 'undefined') {
-            createBy = release._embedded['sw360:createdBy'].fullName
+            createdBy = release._embedded['sw360:createdBy'].fullName ?? ''
         }
 
         let componentId = ''
@@ -155,11 +155,11 @@ function ReleaseEditSummary({
             mainlineState: release.mainlineState,
             contributors: Object.keys(contributorsFromRelease),
             createdOn: release.createdOn,
-            createBy: createBy,
+            createBy: createdBy,
             modifiedBy: modifiedBy,
             modifiedOn: release.modifiedOn,
             moderators: Object.keys(moderatorsFromRelease),
-            roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(release.roles)),
+            roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(release.roles ?? {})),
             mainLicenseIds: release.mainLicenseIds,
             otherLicenseIds: release.otherLicenseIds,
             vendorId: vendorId,

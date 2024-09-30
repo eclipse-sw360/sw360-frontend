@@ -8,13 +8,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
 import EditComponent from './components/EditComponent'
 
 interface Context {
     params: { id: string }
 }
 
-const ComponentEditPage = async ({ params }: Context) => {
+const ComponentEditPage = ({ params }: Context) : ReactNode => {
     const componentId = params.id
 
     return <EditComponent componentId={componentId} />

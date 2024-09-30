@@ -9,12 +9,12 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import { Component, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
-const SummaryRole = ({ component }: { component: Component }) => {
+const SummaryRole = ({ component }: { component: Component }) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -33,19 +33,19 @@ const SummaryRole = ({ component }: { component: Component }) => {
             <tbody hidden={toggle}>
                 <tr>
                     <td>{t('Component Owner')}:</td>
-                    <td>{component.componentOwner && <>{component.componentOwner}</>}</td>
+                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component.componentOwner) && <>{component.componentOwner}</>}</td>
                 </tr>
                 <tr>
                     <td>{t('Owner Accounting Unit')}:</td>
-                    <td>{component.ownerAccountingUnit && <>{component.ownerAccountingUnit}</>}</td>
+                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component.ownerAccountingUnit) && <>{component.ownerAccountingUnit}</>}</td>
                 </tr>
                 <tr>
                     <td>{t('Owner Billing Group')}:</td>
-                    <td>{component.ownerGroup && component.ownerGroup}</td>
+                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component.ownerGroup) && component.ownerGroup}</td>
                 </tr>
                 <tr>
                     <td>{t('Owner Country')}:</td>
-                    <td>{component.ownerCountry && component.ownerCountry}</td>
+                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component.ownerCountry) && component.ownerCountry}</td>
                 </tr>
                 <tr>
                     <td>{t('Moderators')}:</td>
@@ -80,7 +80,7 @@ const SummaryRole = ({ component }: { component: Component }) => {
                                         {key}:{' '}
                                     </span>
                                     <span>
-                                        {component.roles[key]
+                                        {component.roles && component.roles[key]
                                             .map(
                                                 (email: string): React.ReactNode => (
                                                     <a key={email} href={`mailto:${email}`}>

@@ -9,12 +9,13 @@
 // License-Filename: LICENSE
 
 import { SnippetRange } from '@/object-types'
+import { ReactNode } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
-    setDataSnippetRanges?: (inputs: SnippetRange[]) => void
-    setInputList?: React.Dispatch<React.SetStateAction<SnippetRange[]>>
-    inputList?: SnippetRange[]
+    setDataSnippetRanges: (inputs: SnippetRange[]) => void
+    setInputList: React.Dispatch<React.SetStateAction<SnippetRange[]>>
+    inputList: SnippetRange[]
 }
 
 interface SnippetRangeInput {
@@ -24,7 +25,7 @@ interface SnippetRangeInput {
     reference: string
 }
 
-function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props) {
+function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: SnippetRange[] = [...inputList]
@@ -43,7 +44,7 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
     }
 
     const handleAddClick = () => {
-        let index: number = 0
+        let index = 0
         if (inputList.length !== 0) {
             index = inputList.length
         }

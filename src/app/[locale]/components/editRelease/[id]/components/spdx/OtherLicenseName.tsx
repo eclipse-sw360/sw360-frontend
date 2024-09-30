@@ -8,11 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    licenseName?: string
-    setLicenseNameToOtherLicense?: (data: string) => void
-    isLicenseName?: boolean
-    setIsLicenseName?: React.Dispatch<React.SetStateAction<boolean>>
+    licenseName: string
+    setLicenseNameToOtherLicense: (data: string) => void
+    isLicenseName: boolean
+    setIsLicenseName: React.Dispatch<React.SetStateAction<boolean>>
     updateField?: (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
@@ -22,7 +24,7 @@ function OtherLicenseName({
     isLicenseName,
     setIsLicenseName,
     updateField,
-}: Props) {
+}: Props) : ReactNode {
     const selectLicenseNameNoasserttion = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsLicenseName(false)
         setLicenseNameToOtherLicense(e.target.value)
@@ -56,7 +58,7 @@ function OtherLicenseName({
                             placeholder='Enter license name'
                             name='licenseName'
                             onChange={updateField}
-                            value={licenseName ?? ''}
+                            value={licenseName}
                             disabled={!isLicenseName}
                         />
                     </div>

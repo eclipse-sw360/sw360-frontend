@@ -10,13 +10,14 @@
 
 import { InputKeyValue } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
+import { ReactNode } from 'react'
 
 interface Props {
-    dataPackageOriginator?: InputKeyValue
-    setDataPackageOriginator?: React.Dispatch<React.SetStateAction<InputKeyValue>>
-    setPackageOriginatorToPackage?: (input: InputKeyValue) => void
-    isPackageOriginator?: boolean
-    setIsPackageOriginator?: React.Dispatch<React.SetStateAction<boolean>>
+    dataPackageOriginator: InputKeyValue
+    setDataPackageOriginator: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setPackageOriginatorToPackage: (input: InputKeyValue) => void
+    isPackageOriginator: boolean
+    setIsPackageOriginator: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 function PackageOriginator({
@@ -25,7 +26,7 @@ function PackageOriginator({
     setPackageOriginatorToPackage,
     isPackageOriginator,
     setIsPackageOriginator,
-}: Props) {
+}: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataPackageOriginator
@@ -65,62 +66,60 @@ function PackageOriginator({
     }
 
     return (
-        dataPackageOriginator && (
-            <td colSpan={3}>
-                <div className='form-group'>
-                    <label className='lableSPDX'>7.6 Package originator</label>
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                            <input
-                                className='spdx-radio'
-                                type='radio'
-                                name='_sw360_portlet_components_ORIGINATOR'
-                                value='EXIST'
-                                onClick={selectPackageOriginatorExist}
-                                checked={isPackageOriginator}
-                            />
-                            <select
-                                id='originatorType'
-                                style={{ flex: 2, marginRight: '1rem' }}
-                                className='form-control form-select'
-                                disabled={!isPackageOriginator}
-                                name='key'
-                                value={dataPackageOriginator.key}
-                                onChange={handleInputChange}
-                            >
-                                <option value='Organization'>Organization</option>
-                                <option value='Person'>Person</option>
-                            </select>
-                            <input
-                                style={{ flex: 6, marginRight: '1rem' }}
-                                className='form-control'
-                                id='originatorValue'
-                                type='text'
-                                name='value'
-                                placeholder='Enter package originator'
-                                onChange={handleInputChange}
-                                value={dataPackageOriginator.value}
-                                disabled={!isPackageOriginator}
-                            />
-                        </div>
-                        <div style={{ flex: 2 }}>
-                            <input
-                                className='spdx-radio'
-                                id='originatorNoAssertion'
-                                type='radio'
-                                name='_sw360_portlet_components_ORIGINATOR'
-                                value='NOASSERTION'
-                                onClick={selectPackageOriginatorNoasserttion}
-                                checked={!isPackageOriginator}
-                            />
-                            <label className='form-check-label radio-label lableSPDX' htmlFor='originatorNoAssertion'>
-                                NOASSERTION
-                            </label>
-                        </div>
+        <td colSpan={3}>
+            <div className='form-group'>
+                <label className='lableSPDX'>7.6 Package originator</label>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                        <input
+                            className='spdx-radio'
+                            type='radio'
+                            name='_sw360_portlet_components_ORIGINATOR'
+                            value='EXIST'
+                            onClick={selectPackageOriginatorExist}
+                            checked={isPackageOriginator}
+                        />
+                        <select
+                            id='originatorType'
+                            style={{ flex: 2, marginRight: '1rem' }}
+                            className='form-control form-select'
+                            disabled={!isPackageOriginator}
+                            name='key'
+                            value={dataPackageOriginator.key}
+                            onChange={handleInputChange}
+                        >
+                            <option value='Organization'>Organization</option>
+                            <option value='Person'>Person</option>
+                        </select>
+                        <input
+                            style={{ flex: 6, marginRight: '1rem' }}
+                            className='form-control'
+                            id='originatorValue'
+                            type='text'
+                            name='value'
+                            placeholder='Enter package originator'
+                            onChange={handleInputChange}
+                            value={dataPackageOriginator.value}
+                            disabled={!isPackageOriginator}
+                        />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                        <input
+                            className='spdx-radio'
+                            id='originatorNoAssertion'
+                            type='radio'
+                            name='_sw360_portlet_components_ORIGINATOR'
+                            value='NOASSERTION'
+                            onClick={selectPackageOriginatorNoasserttion}
+                            checked={!isPackageOriginator}
+                        />
+                        <label className='form-check-label radio-label lableSPDX' htmlFor='originatorNoAssertion'>
+                            NOASSERTION
+                        </label>
                     </div>
                 </div>
-            </td>
-        )
+            </div>
+        </td>
     )
 }
 

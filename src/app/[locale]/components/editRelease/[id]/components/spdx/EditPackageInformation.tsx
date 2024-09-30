@@ -18,7 +18,7 @@ import {
     SPDX,
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import BuiltDate from './PackageInformation/BuiltDate'
 import CheckSums from './PackageInformation/CheckSums'
@@ -28,19 +28,19 @@ import ReleaseDate from './PackageInformation/ReleaseDate'
 import ValidUntilDate from './PackageInformation/ValidUntilDate'
 
 interface Props {
-    packageInformation?: PackageInformation
-    setPackageInformation?: React.Dispatch<React.SetStateAction<PackageInformation>>
-    isModeFull?: boolean
-    externalRefsDatas?: ExternalReference[]
-    setExternalRefsDatas?: React.Dispatch<React.SetStateAction<ExternalReference[]>>
-    setIndexExternalRefsData?: React.Dispatch<React.SetStateAction<number>>
-    indexExternalRefsData?: number
-    setTypeCategory?: React.Dispatch<React.SetStateAction<Array<string>>>
-    typeCategory?: Array<string>
-    isTypeCateGoryEmpty?: boolean
-    setIsTypeCateGoryEmpty?: React.Dispatch<React.SetStateAction<boolean>>
-    SPDXPayload?: SPDX
-    setSPDXPayload?: React.Dispatch<React.SetStateAction<SPDX>>
+    packageInformation: PackageInformation
+    setPackageInformation: React.Dispatch<React.SetStateAction<PackageInformation>>
+    isModeFull: boolean
+    externalRefsDatas: ExternalReference[]
+    setExternalRefsDatas: React.Dispatch<React.SetStateAction<ExternalReference[]>>
+    setIndexExternalRefsData: React.Dispatch<React.SetStateAction<number>>
+    indexExternalRefsData: number
+    setTypeCategory: React.Dispatch<React.SetStateAction<Array<string>>>
+    typeCategory: Array<string>
+    isTypeCateGoryEmpty: boolean
+    setIsTypeCateGoryEmpty: React.Dispatch<React.SetStateAction<boolean>>
+    SPDXPayload: SPDX
+    setSPDXPayload: React.Dispatch<React.SetStateAction<SPDX>>
 }
 
 const EditPackageInformation = ({
@@ -57,7 +57,7 @@ const EditPackageInformation = ({
     setIsTypeCateGoryEmpty,
     SPDXPayload,
     setSPDXPayload,
-}: Props) => {
+}: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [dataPackageSupplier, setDataPackageSupplier] = useState<InputKeyValue>({
         key: '',
@@ -65,13 +65,6 @@ const EditPackageInformation = ({
     })
     const [isPackageSupplier, setIsPackageSupplier] = useState(true)
     const handlePackageSupplier = (data: string) => {
-        if (data == null) {
-            const input: InputKeyValue = {
-                key: '',
-                value: '',
-            }
-            return input
-        }
         if (data === 'NOASSERTION') {
             const input: InputKeyValue = {
                 key: dataPackageSupplier.key,
@@ -94,14 +87,14 @@ const EditPackageInformation = ({
         setPackageInformation({
             ...packageInformation,
             supplier: handleInputKeyToPackageSupplier(input),
-        })
+        } as PackageInformation)
 
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 supplier: handleInputKeyToPackageSupplier(input),
-            },
+            } as PackageInformation,
         })
     }
 
@@ -112,13 +105,6 @@ const EditPackageInformation = ({
     const [isPackageOriginator, setIsPackageOriginator] = useState(true)
 
     const handlePackageOriginator = (data: string) => {
-        if (data == null) {
-            const input: InputKeyValue = {
-                key: '',
-                value: '',
-            }
-            return input
-        }
         if (data === 'NOASSERTION') {
             const input: InputKeyValue = {
                 key: dataPackageOriginator.key,
@@ -141,13 +127,13 @@ const EditPackageInformation = ({
         setPackageInformation({
             ...packageInformation,
             originator: handleInputKeyToPackageOriginator(input),
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 originator: handleInputKeyToPackageOriginator(input),
-            },
+            } as PackageInformation,
         })
     }
 
@@ -157,18 +143,18 @@ const EditPackageInformation = ({
         setPackageInformation({
             ...packageInformation,
             checksums: convertInputToChecksums(inputs),
-        })
+        } as PackageInformation)
 
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 checksums: convertInputToChecksums(inputs),
-            },
+            } as PackageInformation,
         })
     }
 
-    const convertInputToChecksums = (datas: InputKeyValue[]) => {
+    const convertInputToChecksums = (datas: InputKeyValue[] | null) => {
         if (datas === null) {
             return null
         }
@@ -187,7 +173,7 @@ const EditPackageInformation = ({
 
     const handleChangeReferenceCategory = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const referenceCategory: string = e.target.value
-        let type: string = ''
+        let type = ''
         if (referenceCategory === 'SECURITY') {
             type = 'cpe22Type'
             setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
@@ -216,7 +202,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 externalRefs: externalRefs,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -238,7 +224,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 externalRefs: externalRefs,
-            },
+            } as PackageInformation,
         })
     }
     const [increIndex, setIncreIndex] = useState(0)
@@ -285,7 +271,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 externalRefs: arrayExternals,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -300,7 +286,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 downloadLocation: data,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -315,7 +301,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 homepage: data,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -330,7 +316,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 licenseConcluded: data,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -345,7 +331,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 licenseInfoFromFiles: data,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -360,7 +346,7 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 licenseDeclared: data,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -375,26 +361,26 @@ const EditPackageInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 copyrightText: data,
-            },
+            } as PackageInformation,
         })
     }
 
     useEffect(() => {
-        if (typeof packageInformation?.checksums !== 'undefined') {
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(packageInformation.checksums)) {
             setCheckSums(convertChecksums(packageInformation.checksums))
         }
 
-        if (typeof packageInformation?.supplier !== 'undefined') {
-            packageInformation?.supplier == 'NOASSERTION' && setIsPackageSupplier(false)
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.supplier)) {
+            packageInformation.supplier == 'NOASSERTION' && setIsPackageSupplier(false)
             setDataPackageSupplier(handlePackageSupplier(packageInformation.supplier))
         }
 
-        if (typeof packageInformation?.originator !== 'undefined') {
-            packageInformation?.originator == 'NOASSERTION' && setIsPackageOriginator(false)
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.originator)) {
+            packageInformation.originator == 'NOASSERTION' && setIsPackageOriginator(false)
             setDataPackageOriginator(handlePackageOriginator(packageInformation.originator))
         }
 
-        if (typeof externalRefsDatas[indexExternalRefsData]?.referenceCategory !== 'undefined') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(externalRefsDatas[indexExternalRefsData]?.referenceCategory)) {
             if (externalRefsDatas[indexExternalRefsData].referenceCategory === 'SECURITY') {
                 setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
                 setIsTypeCateGoryEmpty(false)
@@ -406,7 +392,7 @@ const EditPackageInformation = ({
             }
         }
 
-        if (typeof packageInformation?.downloadLocation !== 'undefined') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.downloadLocation)) {
             if (packageInformation.downloadLocation === 'NONE') {
                 setPackageDownloadLocation('')
                 setPackageDownloadLocationExist(false)
@@ -422,7 +408,7 @@ const EditPackageInformation = ({
             }
         }
 
-        if (typeof packageInformation?.homepage !== 'undefined') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.homepage)) {
             if (packageInformation.homepage === 'NONE') {
                 setPackageHomePage('')
                 setPackageHomePageExist(false)
@@ -438,8 +424,8 @@ const EditPackageInformation = ({
             }
         }
 
-        if (typeof packageInformation?.licenseConcluded !== 'undefined') {
-            if (packageInformation?.licenseConcluded === 'NONE') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseConcluded)) {
+            if (packageInformation.licenseConcluded === 'NONE') {
                 setConcludedLicense('')
                 setConcludedLicenseExist(false)
                 setConcludedLicenseNone(true)
@@ -454,8 +440,8 @@ const EditPackageInformation = ({
             }
         }
 
-        if (typeof packageInformation?.licenseDeclared !== 'undefined') {
-            if (packageInformation?.licenseDeclared === 'NONE') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseDeclared)) {
+            if (packageInformation.licenseDeclared === 'NONE') {
                 setDeclaredLicense('')
                 setDeclaredLicenseExist(false)
                 setDeclaredLicenseNone(true)
@@ -470,8 +456,8 @@ const EditPackageInformation = ({
             }
         }
 
-        if (typeof packageInformation?.copyrightText !== 'undefined') {
-            if (packageInformation?.copyrightText === 'NONE') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.copyrightText)) {
+            if (packageInformation.copyrightText === 'NONE') {
                 setCopyrightText('')
                 setCopyrightTextExist(false)
                 setCopyrightTextNone(true)
@@ -486,8 +472,8 @@ const EditPackageInformation = ({
             }
         }
 
-        if (typeof packageInformation?.licenseInfoFromFiles !== 'undefined') {
-            if (packageInformation?.licenseInfoFromFiles.toString() === 'NONE') {
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(packageInformation.licenseInfoFromFiles)) {
+            if (packageInformation.licenseInfoFromFiles.toString() === 'NONE') {
                 setAllLicensesInformation([])
                 setAllLicensesInformationExist(false)
                 setAllLicensesInformationNone(true)
@@ -499,42 +485,42 @@ const EditPackageInformation = ({
                 setAllLicensesInformationNone(false)
                 setAllLicensesInformationNoasserttion(true)
             } else {
-                setAllLicensesInformation(packageInformation?.licenseInfoFromFiles)
+                setAllLicensesInformation(packageInformation.licenseInfoFromFiles)
             }
         }
 
-        if (typeof packageInformation?.releaseDate !== 'undefined') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.releaseDate)) {
             setDataReleaseDate(handleDate(packageInformation.releaseDate))
         }
-        if (typeof packageInformation?.builtDate !== 'undefined') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.builtDate)) {
             setDataBuiltDate(handleDate(packageInformation.builtDate))
         }
-        if (typeof packageInformation?.validUntilDate !== 'undefined') {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.validUntilDate)) {
             setDataValidUntilDate(handleDate(packageInformation.validUntilDate))
         }
     }, [
-        packageInformation?.builtDate,
-        packageInformation?.validUntilDate,
-        packageInformation?.releaseDate,
-        packageInformation?.downloadLocation,
-        packageInformation?.homepage,
-        packageInformation?.licenseConcluded,
-        packageInformation?.licenseDeclared,
-        packageInformation?.copyrightText,
-        packageInformation?.licenseInfoFromFiles,
+        packageInformation.builtDate,
+        packageInformation.validUntilDate,
+        packageInformation.releaseDate,
+        packageInformation.downloadLocation,
+        packageInformation.homepage,
+        packageInformation.licenseConcluded,
+        packageInformation.licenseDeclared,
+        packageInformation.copyrightText,
+        packageInformation.licenseInfoFromFiles,
     ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setPackageInformation({
             ...packageInformation,
             [e.target.name]: e.target.value,
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 [e.target.name]: e.target.value,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -544,13 +530,13 @@ const EditPackageInformation = ({
         setPackageInformation({
             ...packageInformation,
             [e.target.name]: e.target.value,
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 [e.target.name]: e.target.value.split('\n'),
-            },
+            } as PackageInformation,
         })
     }
 
@@ -558,13 +544,13 @@ const EditPackageInformation = ({
         setPackageInformation({
             ...packageInformation,
             [e.target.name]: e.target.value,
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 [e.target.name]: e.target.value,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -574,13 +560,13 @@ const EditPackageInformation = ({
         setPackageInformation({
             ...packageInformation,
             [e.target.name]: e.target.value,
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 [e.target.name]: e.target.name === 'attributionText' ? e.target.value.split('\n') : e.target.value,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -588,13 +574,13 @@ const EditPackageInformation = ({
         setPackageInformation({
             ...packageInformation,
             [e.target.name]: e.target.value,
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 [e.target.name]: 'SPDXRef-' + e.target.value,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -605,7 +591,7 @@ const EditPackageInformation = ({
                 ...packageInformation.packageVerificationCode,
                 [e.target.name]: e.target.value,
             },
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
@@ -614,7 +600,7 @@ const EditPackageInformation = ({
                     ...packageInformation.packageVerificationCode,
                     [e.target.name]: e.target.value,
                 },
-            },
+            } as PackageInformation,
         })
     }
 
@@ -627,7 +613,7 @@ const EditPackageInformation = ({
                 ...packageInformation.packageVerificationCode,
                 [e.target.name]: e.target.value.split('\n'),
             },
-        })
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
@@ -636,7 +622,7 @@ const EditPackageInformation = ({
                     ...packageInformation.packageVerificationCode,
                     [e.target.name]: e.target.value.split('\n'),
                 },
-            },
+            } as PackageInformation,
         })
     }
 
@@ -652,8 +638,8 @@ const EditPackageInformation = ({
         return inputs
     }
 
-    const [dataReleaseDate, setDataReleaseDate] = useState<InputKeyValue>()
-    const [dataBuiltDate, setDataBuiltDate] = useState<InputKeyValue>()
+    const [dataReleaseDate, setDataReleaseDate] = useState<InputKeyValue | undefined>(undefined)
+    const [dataBuiltDate, setDataBuiltDate] = useState<InputKeyValue | undefined>(undefined)
     const [dataValidUntilDate, setDataValidUntilDate] = useState<InputKeyValue>()
     const handleDate = (data: string) => {
         const input: InputKeyValue = {
@@ -677,8 +663,8 @@ const EditPackageInformation = ({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
-                builtDate: convertInputToDate(inputs),
-            },
+                builtDate: convertInputToDate(inputs) ?? '',
+            } as PackageInformation,
         })
     }
 
@@ -687,8 +673,8 @@ const EditPackageInformation = ({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
-                validUntilDate: convertInputToDate(inputs),
-            },
+                validUntilDate: convertInputToDate(inputs) ?? '',
+            } as PackageInformation,
         })
     }
 
@@ -697,22 +683,25 @@ const EditPackageInformation = ({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
-                releaseDate: convertInputToDate(inputs),
-            },
+                releaseDate: convertInputToDate(inputs) ?? '',
+            } as PackageInformation,
         })
     }
 
     const changeFilesAnalyzed = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const filesAnalyzed = !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                            ? !packageInformation.filesAnalyzed
+                            : true
         setPackageInformation({
             ...packageInformation,
-            filesAnalyzed: !packageInformation.filesAnalyzed,
-        })
+            filesAnalyzed: filesAnalyzed,
+        } as PackageInformation)
         setSPDXPayload({
             ...SPDXPayload,
             packageInformation: {
                 ...SPDXPayload.packageInformation,
-                filesAnalyzed: !packageInformation.filesAnalyzed,
-            },
+                filesAnalyzed: filesAnalyzed,
+            } as PackageInformation,
         })
         if (e.target.value === 'false') {
             const packageVerificationCode: PackageVerificationCode = {
@@ -726,7 +715,7 @@ const EditPackageInformation = ({
                     filesAnalyzed: false,
                     licenseInfoFromFiles: [],
                     packageVerificationCode: packageVerificationCode,
-                },
+                } as PackageInformation,
             })
         } else {
             setSPDXPayload({
@@ -734,9 +723,9 @@ const EditPackageInformation = ({
                 packageInformation: {
                     ...SPDXPayload.packageInformation,
                     filesAnalyzed: true,
-                    licenseInfoFromFiles: allLicensesInformation,
+                    licenseInfoFromFiles: allLicensesInformation ?? [],
                     packageVerificationCode: packageInformation.packageVerificationCode,
-                },
+                } as PackageInformation,
             })
         }
     }
@@ -762,7 +751,7 @@ const EditPackageInformation = ({
                 packageInformation: {
                     ...SPDXPayload.packageInformation,
                     externalRefs: externalRefs,
-                },
+                } as PackageInformation,
             })
             if (!CommonUtils.isNullEmptyOrUndefinedArray(externalRefs)) {
                 setNumberIndex(externalRefs[0].index)
@@ -793,7 +782,7 @@ const EditPackageInformation = ({
         setAllLicensesInformationExist(true)
         setAllLicensesInformationNone(false)
         setAllLicensesInformationNoasserttion(false)
-        setAllLicensesInformationToPackage(allLicensesInformation)
+        setAllLicensesInformationToPackage(allLicensesInformation ?? [])
     }
     const selectAllLicensesInformationNone = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAllLicensesInformationExist(false)
@@ -808,14 +797,14 @@ const EditPackageInformation = ({
         setAllLicensesInformationToPackage(e.target.value.split('\n'))
     }
 
-    const isNoneOrNoasserttion = (obj: string[]) => {
+    const isNotNoneOrNoasserttion = (obj: string[]) => {
         if (obj.toString() === 'NONE' || obj.toString() === 'NOASSERTION') {
             return false
         }
         return true
     }
 
-    const isNoneOrNoasserttionString = (data: string) => {
+    const isNotNoneOrNoasserttionString = (data: string) => {
         if (data === 'NONE' || data === 'NOASSERTION') {
             return false
         }
@@ -911,1006 +900,1043 @@ const EditPackageInformation = ({
                 </tr>
             </thead>
             <tbody hidden={toggle}>
-                {packageInformation && (
-                    <>
-                        <tr>
-                            <td>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='packageName'>
-                                        7.1 Package name
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
-                                        <input
-                                            id='packageName'
-                                            className='form-control needs-validation'
-                                            name='name'
-                                            type='text'
-                                            placeholder='Enter package name'
-                                            onChange={updateField}
-                                            value={packageInformation.name ?? ''}
-                                        />
-                                    </div>
+                <>
+                    <tr>
+                        <td>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='packageName'>
+                                    7.1 Package name
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <input
+                                        id='packageName'
+                                        className='form-control needs-validation'
+                                        name='name'
+                                        type='text'
+                                        placeholder='Enter package name'
+                                        onChange={updateField}
+                                        value={packageInformation.name ?? ''}
+                                    />
                                 </div>
-                            </td>
-                            <td>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='packageSPDXId'>
-                                        7.2 Package SPDX identifier
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
-                                        <label className='sub-label'>SPDXRef-</label>
+                            </div>
+                        </td>
+                        <td>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='packageSPDXId'>
+                                    7.2 Package SPDX identifier
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <label className='sub-label'>SPDXRef-</label>
+                                    <input
+                                        id='packageSPDXId'
+                                        className='form-control needs-validation'
+                                        type='text'
+                                        placeholder='Enter package SPDX identifier'
+                                        name='SPDXID'
+                                        defaultValue='value'
+                                        onChange={updateFieldSPDXIdentifier}
+                                        value={
+                                            CommonUtils.isNullEmptyOrUndefinedString(packageInformation.SPDXID)
+                                                ? 'Package-'
+                                                : packageInformation.SPDXID.startsWith('SPDXRef-')
+                                                ? packageInformation.SPDXID.substring(8)
+                                                : packageInformation.SPDXID
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='versionInfo'>
+                                    7.3 Package version
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <input
+                                        id='versionInfo'
+                                        className='form-control'
+                                        type='text'
+                                        placeholder='Enter package version'
+                                        name='versionInfo'
+                                        onChange={updateField}
+                                        value={packageInformation.versionInfo ?? ''}
+                                    />
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='packageFileName'>
+                                    7.4 Package file name
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <input
+                                        id='packageFileName'
+                                        className='form-control'
+                                        type='text'
+                                        placeholder='Enter package file name'
+                                        name='packageFileName'
+                                        onChange={updateField}
+                                        value={packageInformation.packageFileName ?? ''}
+                                    />
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {isModeFull && (
+                        <>
+                            <tr className='spdx-full'>
+                                <PackageSupplier
+                                    dataPackageSupplier={dataPackageSupplier}
+                                    setDataPackageSupplier={setDataPackageSupplier}
+                                    setPackageSupplierToPackage={setPackageSupplierToPackage}
+                                    isPackageSupplier={isPackageSupplier}
+                                    setIsPackageSupplier={setIsPackageSupplier}
+                                />
+                            </tr>
+                            <tr className='spdx-full'>
+                                <PackageOriginator
+                                    dataPackageOriginator={dataPackageOriginator}
+                                    setDataPackageOriginator={setDataPackageOriginator}
+                                    setPackageOriginatorToPackage={setPackageOriginatorToPackage}
+                                    isPackageOriginator={isPackageOriginator}
+                                    setIsPackageOriginator={setIsPackageOriginator}
+                                />
+                            </tr>
+                        </>
+                    )}
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX'>7.7 Package download location</label>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
                                         <input
-                                            id='packageSPDXId'
-                                            className='form-control needs-validation'
+                                            className='spdx-radio'
+                                            type='radio'
+                                            id='downloadLocationExist'
+                                            name='_sw360_portlet_components_DOWNLOAD_LOCATION'
+                                            value='EXIST'
+                                            onChange={selectPackageDownloadLocationExist}
+                                            checked={packageDownloadLocationExist}
+                                        />
+                                        <input
+                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            id='downloadLocation'
+                                            className='form-control'
                                             type='text'
-                                            placeholder='Enter package SPDX identifier'
-                                            name='SPDXID'
-                                            defaultValue='value'
-                                            onChange={updateFieldSPDXIdentifier}
+                                            name='downloadLocation'
+                                            placeholder='Enter package download location'
+                                            onChange={updateField}
                                             value={
-                                                CommonUtils.isNullEmptyOrUndefinedString(packageInformation.SPDXID)
-                                                    ? 'Package-'
-                                                    : packageInformation.SPDXID?.startsWith('SPDXRef-')
-                                                    ? packageInformation.SPDXID.substring(8)
-                                                    : packageInformation.SPDXID
+                                                (CommonUtils.isNullEmptyOrUndefinedString(packageInformation.downloadLocation))
+                                                ? ''
+                                                : isNotNoneOrNoasserttionString(packageInformation.downloadLocation)
+                                                    ? packageInformation.downloadLocation
+                                                    : ''
+                                            }
+                                            disabled={
+                                                packageDownloadLocationNone || packageDownloadLocationNoasserttion
                                             }
                                         />
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='versionInfo'>
-                                        7.3 Package version
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
+                                    <div style={{ flex: 2 }}>
                                         <input
-                                            id='versionInfo'
-                                            className='form-control'
-                                            type='text'
-                                            placeholder='Enter package version'
-                                            name='versionInfo'
-                                            onChange={updateField}
-                                            value={packageInformation.versionInfo ?? ''}
+                                            className='spdx-radio'
+                                            id='downloadLocationNone'
+                                            type='radio'
+                                            name='downloadLocation'
+                                            value='NONE'
+                                            onChange={selectPackageDownloadLocationNone}
+                                            checked={packageDownloadLocationNone}
                                         />
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='packageFileName'>
-                                        7.4 Package file name
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
+                                        <label
+                                            style={{ marginRight: '2rem' }}
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='packageDownloadLocationNone'
+                                        >
+                                            NONE
+                                        </label>
                                         <input
-                                            id='packageFileName'
-                                            className='form-control'
-                                            type='text'
-                                            placeholder='Enter package file name'
-                                            name='packageFileName'
-                                            onChange={updateField}
-                                            value={packageInformation.packageFileName ?? ''}
+                                            className='spdx-radio'
+                                            id='downloadLocationNoAssertion'
+                                            type='radio'
+                                            name='downloadLocation'
+                                            value='NOASSERTION'
+                                            onChange={selectPackageDownloadLocationNoasserttion}
+                                            checked={packageDownloadLocationNoasserttion}
                                         />
+                                        <label
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='downloadLocationNoAssertion'
+                                        >
+                                            NOASSERTION
+                                        </label>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-
-                        {isModeFull && (
-                            <>
-                                <tr className='spdx-full'>
-                                    <PackageSupplier
-                                        dataPackageSupplier={dataPackageSupplier}
-                                        setDataPackageSupplier={setDataPackageSupplier}
-                                        setPackageSupplierToPackage={setPackageSupplierToPackage}
-                                        isPackageSupplier={isPackageSupplier}
-                                        setIsPackageSupplier={setIsPackageSupplier}
-                                    />
-                                </tr>
-                                <tr className='spdx-full'>
-                                    <PackageOriginator
-                                        dataPackageOriginator={dataPackageOriginator}
-                                        setDataPackageOriginator={setDataPackageOriginator}
-                                        setPackageOriginatorToPackage={setPackageOriginatorToPackage}
-                                        isPackageOriginator={isPackageOriginator}
-                                        setIsPackageOriginator={setIsPackageOriginator}
-                                    />
-                                </tr>
-                            </>
-                        )}
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX'>7.7 Package download location</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                                            <input
-                                                className='spdx-radio'
-                                                type='radio'
-                                                id='downloadLocationExist'
-                                                name='_sw360_portlet_components_DOWNLOAD_LOCATION'
-                                                value='EXIST'
-                                                onChange={selectPackageDownloadLocationExist}
-                                                checked={packageDownloadLocationExist}
-                                            />
-                                            <input
-                                                style={{ flex: 6, marginRight: '1rem' }}
-                                                id='downloadLocation'
-                                                className='form-control'
-                                                type='text'
-                                                name='downloadLocation'
-                                                placeholder='Enter package download location'
-                                                onChange={updateField}
-                                                value={
-                                                    isNoneOrNoasserttionString(packageInformation.downloadLocation)
-                                                        ? packageInformation.downloadLocation
-                                                        : ''
-                                                }
-                                                disabled={
-                                                    packageDownloadLocationNone || packageDownloadLocationNoasserttion
-                                                }
-                                            />
-                                        </div>
-                                        <div style={{ flex: 2 }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='downloadLocationNone'
-                                                type='radio'
-                                                name='downloadLocation'
-                                                value='NONE'
-                                                onChange={selectPackageDownloadLocationNone}
-                                                checked={packageDownloadLocationNone}
-                                            />
-                                            <label
-                                                style={{ marginRight: '2rem' }}
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='packageDownloadLocationNone'
-                                            >
-                                                NONE
-                                            </label>
-                                            <input
-                                                className='spdx-radio'
-                                                id='downloadLocationNoAssertion'
-                                                type='radio'
-                                                name='downloadLocation'
-                                                value='NOASSERTION'
-                                                onChange={selectPackageDownloadLocationNoasserttion}
-                                                checked={packageDownloadLocationNoasserttion}
-                                            />
-                                            <label
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='downloadLocationNoAssertion'
-                                            >
-                                                NOASSERTION
-                                            </label>
-                                        </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX'>7.8 Files analyzed</label>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div>
+                                        <input
+                                            className='spdx-radio'
+                                            id='FilesAnalyzedTrue'
+                                            type='radio'
+                                            value='true'
+                                            name='_sw360_portlet_components_FILES_ANALYZED'
+                                            onChange={changeFilesAnalyzed}
+                                            checked={
+                                                !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                ? packageInformation.filesAnalyzed
+                                                : false
+                                            }
+                                        />
+                                        <label
+                                            style={{ marginRight: '2rem' }}
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='FilesAnalyzedTrue'
+                                        >
+                                            TRUE
+                                        </label>
+                                        <input
+                                            className='spdx-radio'
+                                            id='FilesAnalyzedFalse'
+                                            type='radio'
+                                            name='_sw360_portlet_components_FILES_ANALYZED'
+                                            value='false'
+                                            onChange={changeFilesAnalyzed}
+                                            checked={
+                                                !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                ? !packageInformation.filesAnalyzed
+                                                : true
+                                            }
+                                        />
+                                        <label
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='FilesAnalyzedFalse'
+                                        >
+                                            FALSE
+                                        </label>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX'>7.8 Files analyzed</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div>
-                                            <input
-                                                className='spdx-radio'
-                                                id='FilesAnalyzedTrue'
-                                                type='radio'
-                                                value='true'
-                                                name='_sw360_portlet_components_FILES_ANALYZED'
-                                                onChange={changeFilesAnalyzed}
-                                                checked={packageInformation?.filesAnalyzed}
-                                            />
-                                            <label
-                                                style={{ marginRight: '2rem' }}
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='FilesAnalyzedTrue'
-                                            >
-                                                TRUE
-                                            </label>
-                                            <input
-                                                className='spdx-radio'
-                                                id='FilesAnalyzedFalse'
-                                                type='radio'
-                                                name='_sw360_portlet_components_FILES_ANALYZED'
-                                                value='false'
-                                                onChange={changeFilesAnalyzed}
-                                                checked={!packageInformation?.filesAnalyzed}
-                                            />
-                                            <label
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='FilesAnalyzedFalse'
-                                            >
-                                                FALSE
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
-                            <>
-                                <tr className='spdx-full'>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='verificationCodeValue'>
-                                                7.9 Package verification code
-                                            </label>
-                                            <div>
-                                                <input
-                                                    style={{ marginBottom: '0.75rem' }}
-                                                    className='form-control'
-                                                    id='verificationCodeValue'
-                                                    name='value'
-                                                    placeholder='Enter verification code value'
-                                                    disabled={!packageInformation?.filesAnalyzed}
-                                                    onChange={updateFieldPackageVerificationCode}
-                                                    value={packageInformation.packageVerificationCode?.value ?? ''}
-                                                ></input>
-                                                <textarea
-                                                    className='form-control'
-                                                    id='excludedFiles'
-                                                    rows={5}
-                                                    name='excludedFiles'
-                                                    placeholder='Enter excluded files'
-                                                    disabled={!packageInformation?.filesAnalyzed}
-                                                    onChange={updateFieldExcludedFiles}
-                                                    value={
-                                                        packageInformation.packageVerificationCode?.excludedFiles
-                                                            ?.toString()
-                                                            .replaceAll(',', '\n') ?? ''
-                                                    }
-                                                ></textarea>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className='spdx-full'>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX'>7.10 Package checksum</label>
-                                            <div style={{ display: 'flex' }}>
-                                                <label className='sub-title lableSPDX'>Checksum</label>
-                                                <CheckSums
-                                                    inputList={checkSums}
-                                                    setInputList={setCheckSums}
-                                                    setDataCheckSums={setDataCheckSums}
-                                                />
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX'>7.11 Package home page</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='packageHomepageExist'
-                                                type='radio'
-                                                name='_sw360_portlet_components_PACKAGE_HOMEPAGE'
-                                                value='EXIST'
-                                                onClick={selectPackageHomePageExist}
-                                                checked={packageHomePageExist}
-                                            />
-                                            <input
-                                                style={{ flex: 6, marginRight: '1rem' }}
-                                                id='packageHomePage'
-                                                className='form-control'
-                                                type='text'
-                                                name='homepage'
-                                                placeholder='Enter package homepage'
-                                                onChange={updateField}
-                                                value={
-                                                    isNoneOrNoasserttionString(packageInformation?.homepage)
-                                                        ? packageInformation?.homepage
-                                                        : ''
-                                                }
-                                                disabled={packageHomePageNone || packageHomePageNoasserttion}
-                                            />
-                                        </div>
-                                        <div style={{ flex: 2 }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='packageHomepageNone'
-                                                type='radio'
-                                                name='homepage'
-                                                value='NONE'
-                                                onChange={selectPackageHomePageNone}
-                                                checked={packageHomePageNone}
-                                            />
-                                            <label
-                                                style={{ marginRight: '2rem' }}
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='packageHomePageNone'
-                                            >
-                                                NONE
-                                            </label>
-                                            <input
-                                                className='spdx-radio'
-                                                id='packageHomepageNoAssertion'
-                                                type='radio'
-                                                name='homepage'
-                                                value='NOASSERTION'
-                                                onChange={selectPackageHomePageNoasserttion}
-                                                checked={packageHomePageNoasserttion}
-                                            />
-                                            <label
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='packageHomePageNoAssertion'
-                                            >
-                                                NOASSERTION
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
+                            </div>
+                        </td>
+                    </tr>
+                    {isModeFull && (
+                        <>
                             <tr className='spdx-full'>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='sourceInformation'>
-                                            7.12 Source information
+                                        <label className='lableSPDX' htmlFor='verificationCodeValue'>
+                                            7.9 Package verification code
+                                        </label>
+                                        <div>
+                                            <input
+                                                style={{ marginBottom: '0.75rem' }}
+                                                className='form-control'
+                                                id='verificationCodeValue'
+                                                name='value'
+                                                placeholder='Enter verification code value'
+                                                disabled={
+                                                    !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                    ? !packageInformation.filesAnalyzed
+                                                    : true
+                                                }
+                                                onChange={updateFieldPackageVerificationCode}
+                                                value={packageInformation.packageVerificationCode?.value}
+                                            ></input>
+                                            <textarea
+                                                className='form-control'
+                                                id='excludedFiles'
+                                                rows={5}
+                                                name='excludedFiles'
+                                                placeholder='Enter excluded files'
+                                                disabled={
+                                                    !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                    ? !packageInformation.filesAnalyzed
+                                                    : true
+                                                }
+                                                onChange={updateFieldExcludedFiles}
+                                                value={
+                                                    !CommonUtils.isNullOrUndefined(packageInformation.packageVerificationCode)
+                                                    ? packageInformation.packageVerificationCode.excludedFiles
+                                                        .toString()
+                                                        .replaceAll(',', '\n')
+                                                    :''
+                                                }
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr className='spdx-full'>
+                                <td colSpan={3}>
+                                    <div className='form-group'>
+                                        <label className='lableSPDX'>7.10 Package checksum</label>
+                                        <div style={{ display: 'flex' }}>
+                                            <label className='sub-title lableSPDX'>Checksum</label>
+                                            <CheckSums
+                                                inputList={checkSums}
+                                                setInputList={setCheckSums}
+                                                setDataCheckSums={setDataCheckSums}
+                                            />
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </>
+                    )}
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX'>7.11 Package home page</label>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='packageHomepageExist'
+                                            type='radio'
+                                            name='_sw360_portlet_components_PACKAGE_HOMEPAGE'
+                                            value='EXIST'
+                                            onClick={selectPackageHomePageExist}
+                                            checked={packageHomePageExist}
+                                        />
+                                        <input
+                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            id='packageHomePage'
+                                            className='form-control'
+                                            type='text'
+                                            name='homepage'
+                                            placeholder='Enter package homepage'
+                                            onChange={updateField}
+                                            value={
+                                                (CommonUtils.isNullEmptyOrUndefinedString(packageInformation.homepage))
+                                                ? ''
+                                                : isNotNoneOrNoasserttionString(packageInformation.homepage)
+                                                    ? packageInformation.homepage
+                                                    : ''
+                                            }
+                                            disabled={packageHomePageNone || packageHomePageNoasserttion}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 2 }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='packageHomepageNone'
+                                            type='radio'
+                                            name='homepage'
+                                            value='NONE'
+                                            onChange={selectPackageHomePageNone}
+                                            checked={packageHomePageNone}
+                                        />
+                                        <label
+                                            style={{ marginRight: '2rem' }}
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='packageHomePageNone'
+                                        >
+                                            NONE
+                                        </label>
+                                        <input
+                                            className='spdx-radio'
+                                            id='packageHomepageNoAssertion'
+                                            type='radio'
+                                            name='homepage'
+                                            value='NOASSERTION'
+                                            onChange={selectPackageHomePageNoasserttion}
+                                            checked={packageHomePageNoasserttion}
+                                        />
+                                        <label
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='packageHomePageNoAssertion'
+                                        >
+                                            NOASSERTION
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {isModeFull && (
+                        <tr className='spdx-full'>
+                            <td colSpan={3}>
+                                <div className='form-group'>
+                                    <label className='lableSPDX' htmlFor='sourceInformation'>
+                                        7.12 Source information
+                                    </label>
+                                    <div>
+                                        <textarea
+                                            className='form-control'
+                                            id='sourceInformation'
+                                            rows={5}
+                                            name='sourceInfo'
+                                            onChange={updateField}
+                                            placeholder='Enter source information'
+                                            value={packageInformation.sourceInfo ?? ''}
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX'>7.13 Concluded license</label>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseConcludedExist'
+                                            type='radio'
+                                            name='licenseConcludedExist'
+                                            value='EXIST'
+                                            onClick={selectConcludedLicenseExist}
+                                            checked={concludedLicenseExist}
+                                        />
+                                        <input
+                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            id='licenseConcluded'
+                                            className='form-control'
+                                            type='text'
+                                            name='licenseConcluded'
+                                            placeholder='Enter concluded license'
+                                            onChange={updateField}
+                                            value={
+                                                (CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseConcluded))
+                                                ? ''
+                                                : isNotNoneOrNoasserttionString(packageInformation.licenseConcluded)
+                                                    ? packageInformation.licenseConcluded
+                                                    : ''
+                                            }
+                                            disabled={concludedLicenseNone || concludedLicenseNoasserttion}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 2 }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseConcludedNone'
+                                            type='radio'
+                                            name='licenseConcludedNone'
+                                            value='NONE'
+                                            onChange={selectConcludedLicenseNone}
+                                            checked={concludedLicenseNone}
+                                        />
+                                        <label
+                                            style={{ marginRight: '2rem' }}
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='licenseConcludedNone'
+                                        >
+                                            NONE
+                                        </label>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseConcludedNoAssertion'
+                                            type='radio'
+                                            name='licenseConcludedNoAssertion'
+                                            value='NOASSERTION'
+                                            onChange={selectConcludedLicenseNoasserttion}
+                                            checked={concludedLicenseNoasserttion}
+                                        />
+                                        <label
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='licenseConcludedNoAssertion'
+                                        >
+                                            NOASSERTION
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {isModeFull && (
+                        <tr>
+                            <td colSpan={3}>
+                                <div className='form-group'>
+                                    <label className='lableSPDX'>7.14 All licenses information from files</label>
+                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                            <input
+                                                className='spdx-radio'
+                                                id='licenseInfoFromFilesExist'
+                                                type='radio'
+                                                name='licenseInfoFromFilesExist'
+                                                value='EXIST'
+                                                onClick={selectAllLicensesInformationExist}
+                                                checked={allLicensesInformationExist}
+                                                disabled={
+                                                    !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                    ? !packageInformation.filesAnalyzed
+                                                    : true
+                                                }
+                                            />
+                                            <textarea
+                                                style={{ flex: 6, marginRight: '1rem' }}
+                                                id='licenseInfoInFileValue'
+                                                rows={5}
+                                                className='form-control'
+                                                name='licenseInfoFromFiles'
+                                                placeholder='Enter all licenses information from files'
+                                                onChange={updateFieldLicenseAllFile}
+                                                value={
+                                                    (!packageInformation.licenseInfoFromFiles)
+                                                    ? ''
+                                                    : isNotNoneOrNoasserttion(packageInformation.licenseInfoFromFiles)
+                                                        ? packageInformation.licenseInfoFromFiles
+                                                                .toString()
+                                                                .replaceAll(',', '\n')
+                                                        : ''
+                                                }
+                                                disabled={
+                                                    allLicensesInformationNone ||
+                                                    allLicensesInformationNoasserttion ||
+                                                    (!CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                        ? !packageInformation.filesAnalyzed
+                                                        : true)
+                                                }
+                                            ></textarea>
+                                        </div>
+                                        <div style={{ flex: 2 }}>
+                                            <input
+                                                className='spdx-radio'
+                                                id='licenseInfoInFileNone'
+                                                type='radio'
+                                                name='licenseInfoInFileNone'
+                                                value='NONE'
+                                                onChange={selectAllLicensesInformationNone}
+                                                checked={allLicensesInformationNone}
+                                                disabled={
+                                                    !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                    ? !packageInformation.filesAnalyzed
+                                                    : true
+                                                }
+                                            />
+                                            <label
+                                                style={{ marginRight: '2rem' }}
+                                                className='form-check-label radio-label lableSPDX'
+                                                htmlFor='licenseInfoInFileNone'
+                                            >
+                                                NONE
+                                            </label>
+                                            <input
+                                                className='spdx-radio'
+                                                id='licenseInfoFromFilesNoAssertion'
+                                                type='radio'
+                                                name='licenseInfoFromFilesNoAssertion'
+                                                value='NOASSERTION'
+                                                onChange={selectAllLicensesInformationNoasserttion}
+                                                checked={allLicensesInformationNoasserttion}
+                                                disabled={
+                                                    !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
+                                                    ? !packageInformation.filesAnalyzed
+                                                    : true
+                                                }
+                                            />
+                                            <label
+                                                className='form-check-label radio-label lableSPDX'
+                                                htmlFor='licenseInfoFromFilesNoAssertion'
+                                            >
+                                                NOASSERTION
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX'>7.15 Declared license</label>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseDeclaredExist'
+                                            type='radio'
+                                            name='licenseDeclaredExist'
+                                            value='EXIST'
+                                            onClick={selectDeclaredLicenseExist}
+                                            checked={declaredLicenseExist}
+                                        />
+                                        <input
+                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            id='licenseDeclared'
+                                            className='form-control'
+                                            type='text'
+                                            name='licenseDeclared'
+                                            placeholder='Enter declared license'
+                                            onChange={updateField}
+                                            value={
+                                                CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseDeclared)
+                                                ? ''
+                                                : isNotNoneOrNoasserttionString(packageInformation.licenseDeclared)
+                                                    ? packageInformation.licenseDeclared
+                                                    : ''
+                                            }
+                                            disabled={declaredLicenseNone || declaredLicenseNoasserttion}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 2 }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseDeclaredNone'
+                                            type='radio'
+                                            name='_sw360_portlet_components_DECLARED_LICENSE'
+                                            value='NONE'
+                                            onChange={selectDeclaredLicenseNone}
+                                            checked={declaredLicenseNone}
+                                        />
+                                        <label
+                                            style={{ marginRight: '2rem' }}
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='licenseDeclaredNone'
+                                        >
+                                            NONE
+                                        </label>
+                                        <input
+                                            className='spdx-radio'
+                                            id='licenseDeclaredNoAssertion'
+                                            type='radio'
+                                            name='licenseDeclaredNoAssertion'
+                                            value='NOASSERTION'
+                                            onChange={selectDeclaredLicenseNoasserttion}
+                                            checked={declaredLicenseNoasserttion}
+                                        />
+                                        <label
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='licenseDeclaredNoAssertion'
+                                        >
+                                            NOASSERTION
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr className='spdx-full'>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='commentsOnLicense'>
+                                    7.16 Comments on license
+                                </label>
+                                <div>
+                                    <textarea
+                                        className='form-control'
+                                        id='commentsOnLicense'
+                                        rows={5}
+                                        placeholder='Enter comments on license'
+                                        name='licenseComments'
+                                        onChange={updateField}
+                                        value={packageInformation.licenseComments ?? ''}
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX'>7.17 Copyright text</label>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='copyrightTextExist'
+                                            type='radio'
+                                            name='_sw360_portlet_components_COPYRIGHT_TEXT'
+                                            value='EXIST'
+                                            onClick={selectCopyrightTextExist}
+                                            checked={copyrightTextExist}
+                                        />
+                                        <textarea
+                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            id='copyrightText'
+                                            rows={5}
+                                            className='form-control'
+                                            name='copyrightText'
+                                            placeholder='Enter copyright text'
+                                            onChange={updateFieldCopyright}
+                                            value={
+                                                CommonUtils.isNullEmptyOrUndefinedString(packageInformation.copyrightText)
+                                                ? ''
+                                                : isNotNoneOrNoasserttionString(packageInformation.copyrightText)
+                                                    ? packageInformation.copyrightText
+                                                    : ''
+                                            }
+                                            disabled={copyrightTextNone || copyrightTextNoasserttion}
+                                        ></textarea>
+                                    </div>
+                                    <div style={{ flex: 2 }}>
+                                        <input
+                                            className='spdx-radio'
+                                            id='copyrightTextNone'
+                                            type='radio'
+                                            name='_sw360_portlet_components_COPYRIGHT_TEXT'
+                                            value='NONE'
+                                            onChange={selectCopyrightTextNone}
+                                            checked={copyrightTextNone}
+                                        />
+                                        <label
+                                            style={{ marginRight: '2rem' }}
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='copyrightTextNone'
+                                        >
+                                            NONE
+                                        </label>
+                                        <input
+                                            className='spdx-radio'
+                                            id='copyrightTextNoAssertion'
+                                            type='radio'
+                                            name='_sw360_portlet_components_COPYRIGHT_TEXT'
+                                            value='NOASSERTION'
+                                            onChange={selectCopyrightTextNoasserttion}
+                                            checked={copyrightTextNoasserttion}
+                                        />
+                                        <label
+                                            className='form-check-label radio-label lableSPDX'
+                                            htmlFor='copyrightTextNoAssertion'
+                                        >
+                                            NOASSERTION
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {isModeFull && (
+                        <>
+                            {' '}
+                            <tr className='spdx-full'>
+                                <td colSpan={3}>
+                                    <div className='form-group'>
+                                        <label className='lableSPDX' htmlFor='packageSummaryDescription'>
+                                            7.18 Package summary description
                                         </label>
                                         <div>
                                             <textarea
                                                 className='form-control'
-                                                id='sourceInformation'
+                                                id='packageSummaryDescription'
                                                 rows={5}
-                                                name='sourceInfo'
+                                                name='summary'
                                                 onChange={updateField}
-                                                placeholder='Enter source information'
-                                                value={packageInformation.sourceInfo ?? ''}
+                                                placeholder='Enter package summary description'
+                                                value={packageInformation.summary ?? ''}
                                             ></textarea>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
-                        )}
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX'>7.13 Concluded license</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseConcludedExist'
-                                                type='radio'
-                                                name='licenseConcludedExist'
-                                                value='EXIST'
-                                                onClick={selectConcludedLicenseExist}
-                                                checked={concludedLicenseExist}
-                                            />
-                                            <input
-                                                style={{ flex: 6, marginRight: '1rem' }}
-                                                id='licenseConcluded'
-                                                className='form-control'
-                                                type='text'
-                                                name='licenseConcluded'
-                                                placeholder='Enter concluded license'
-                                                onChange={updateField}
-                                                value={
-                                                    isNoneOrNoasserttionString(packageInformation?.licenseConcluded)
-                                                        ? packageInformation?.licenseConcluded
-                                                        : ''
-                                                }
-                                                disabled={concludedLicenseNone || concludedLicenseNoasserttion}
-                                            />
-                                        </div>
-                                        <div style={{ flex: 2 }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseConcludedNone'
-                                                type='radio'
-                                                name='licenseConcludedNone'
-                                                value='NONE'
-                                                onChange={selectConcludedLicenseNone}
-                                                checked={concludedLicenseNone}
-                                            />
-                                            <label
-                                                style={{ marginRight: '2rem' }}
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='licenseConcludedNone'
-                                            >
-                                                NONE
-                                            </label>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseConcludedNoAssertion'
-                                                type='radio'
-                                                name='licenseConcludedNoAssertion'
-                                                value='NOASSERTION'
-                                                onChange={selectConcludedLicenseNoasserttion}
-                                                checked={concludedLicenseNoasserttion}
-                                            />
-                                            <label
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='licenseConcludedNoAssertion'
-                                            >
-                                                NOASSERTION
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
-                            <tr>
+                            <tr className='spdx-full'>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX'>7.14 All licenses information from files</label>
-                                        <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                            <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                                                <input
-                                                    className='spdx-radio'
-                                                    id='licenseInfoFromFilesExist'
-                                                    type='radio'
-                                                    name='licenseInfoFromFilesExist'
-                                                    value='EXIST'
-                                                    onClick={selectAllLicensesInformationExist}
-                                                    checked={allLicensesInformationExist}
-                                                    disabled={!packageInformation?.filesAnalyzed}
-                                                />
-                                                <textarea
-                                                    style={{ flex: 6, marginRight: '1rem' }}
-                                                    id='licenseInfoInFileValue'
-                                                    rows={5}
-                                                    className='form-control'
-                                                    name='licenseInfoFromFiles'
-                                                    placeholder='Enter all licenses information from files'
-                                                    onChange={updateFieldLicenseAllFile}
-                                                    value={
-                                                        isNoneOrNoasserttion(packageInformation.licenseInfoFromFiles)
-                                                            ? packageInformation.licenseInfoFromFiles
-                                                                  ?.toString()
-                                                                  .replaceAll(',', '\n')
-                                                            : ''
-                                                    }
-                                                    disabled={
-                                                        allLicensesInformationNone ||
-                                                        allLicensesInformationNoasserttion ||
-                                                        !packageInformation?.filesAnalyzed
-                                                    }
-                                                ></textarea>
-                                            </div>
-                                            <div style={{ flex: 2 }}>
-                                                <input
-                                                    className='spdx-radio'
-                                                    id='licenseInfoInFileNone'
-                                                    type='radio'
-                                                    name='licenseInfoInFileNone'
-                                                    value='NONE'
-                                                    onChange={selectAllLicensesInformationNone}
-                                                    checked={allLicensesInformationNone}
-                                                    disabled={!packageInformation?.filesAnalyzed}
-                                                />
-                                                <label
-                                                    style={{ marginRight: '2rem' }}
-                                                    className='form-check-label radio-label lableSPDX'
-                                                    htmlFor='licenseInfoInFileNone'
-                                                >
-                                                    NONE
-                                                </label>
-                                                <input
-                                                    className='spdx-radio'
-                                                    id='licenseInfoFromFilesNoAssertion'
-                                                    type='radio'
-                                                    name='licenseInfoFromFilesNoAssertion'
-                                                    value='NOASSERTION'
-                                                    onChange={selectAllLicensesInformationNoasserttion}
-                                                    checked={allLicensesInformationNoasserttion}
-                                                    disabled={!packageInformation?.filesAnalyzed}
-                                                />
-                                                <label
-                                                    className='form-check-label radio-label lableSPDX'
-                                                    htmlFor='licenseInfoFromFilesNoAssertion'
-                                                >
-                                                    NOASSERTION
-                                                </label>
-                                            </div>
+                                        <label className='lableSPDX' htmlFor='packageDetailedDescription'>
+                                            7.19 Package detailed description
+                                        </label>
+                                        <div>
+                                            <textarea
+                                                className='form-control'
+                                                id='packageDetailedDescription'
+                                                rows={5}
+                                                name='description'
+                                                onChange={updateField}
+                                                placeholder='Enter package detailed description'
+                                                value={packageInformation.description ?? ''}
+                                            ></textarea>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
-                        )}
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX'>7.15 Declared license</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseDeclaredExist'
-                                                type='radio'
-                                                name='licenseDeclaredExist'
-                                                value='EXIST'
-                                                onClick={selectDeclaredLicenseExist}
-                                                checked={declaredLicenseExist}
-                                            />
-                                            <input
-                                                style={{ flex: 6, marginRight: '1rem' }}
-                                                id='licenseDeclared'
-                                                className='form-control'
-                                                type='text'
-                                                name='licenseDeclared'
-                                                placeholder='Enter declared license'
-                                                onChange={updateField}
-                                                value={
-                                                    isNoneOrNoasserttionString(packageInformation?.licenseDeclared)
-                                                        ? packageInformation?.licenseDeclared
-                                                        : ''
-                                                }
-                                                disabled={declaredLicenseNone || declaredLicenseNoasserttion}
-                                            />
-                                        </div>
-                                        <div style={{ flex: 2 }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseDeclaredNone'
-                                                type='radio'
-                                                name='_sw360_portlet_components_DECLARED_LICENSE'
-                                                value='NONE'
-                                                onChange={selectDeclaredLicenseNone}
-                                                checked={declaredLicenseNone}
-                                            />
-                                            <label
-                                                style={{ marginRight: '2rem' }}
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='licenseDeclaredNone'
-                                            >
-                                                NONE
-                                            </label>
-                                            <input
-                                                className='spdx-radio'
-                                                id='licenseDeclaredNoAssertion'
-                                                type='radio'
-                                                name='licenseDeclaredNoAssertion'
-                                                value='NOASSERTION'
-                                                onChange={selectDeclaredLicenseNoasserttion}
-                                                checked={declaredLicenseNoasserttion}
-                                            />
-                                            <label
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='licenseDeclaredNoAssertion'
-                                            >
-                                                NOASSERTION
-                                            </label>
-                                        </div>
-                                    </div>
+                        </>
+                    )}
+                    <tr className='spdx-full'>
+                        <td colSpan={3}>
+                            <div className='form-group'>
+                                <label className='lableSPDX' htmlFor='packageComment'>
+                                    7.20 Package comment
+                                </label>
+                                <div>
+                                    <textarea
+                                        className='form-control'
+                                        id='packageComment'
+                                        rows={5}
+                                        name='packageComment'
+                                        onChange={updateField}
+                                        placeholder='Enter package comment'
+                                        value={packageInformation.packageComment ?? ''}
+                                    ></textarea>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr className='spdx-full'>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='commentsOnLicense'>
-                                        7.16 Comments on license
-                                    </label>
-                                    <div>
-                                        <textarea
-                                            className='form-control'
-                                            id='commentsOnLicense'
-                                            rows={5}
-                                            placeholder='Enter comments on license'
-                                            name='licenseComments'
-                                            onChange={updateField}
-                                            value={packageInformation.licenseComments ?? ''}
-                                        ></textarea>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX'>7.17 Copyright text</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='copyrightTextExist'
-                                                type='radio'
-                                                name='_sw360_portlet_components_COPYRIGHT_TEXT'
-                                                value='EXIST'
-                                                onClick={selectCopyrightTextExist}
-                                                checked={copyrightTextExist}
-                                            />
-                                            <textarea
-                                                style={{ flex: 6, marginRight: '1rem' }}
-                                                id='copyrightText'
-                                                rows={5}
-                                                className='form-control'
-                                                name='copyrightText'
-                                                placeholder='Enter copyright text'
-                                                onChange={updateFieldCopyright}
-                                                value={
-                                                    isNoneOrNoasserttionString(packageInformation?.copyrightText)
-                                                        ? packageInformation?.copyrightText
-                                                        : ''
-                                                }
-                                                disabled={copyrightTextNone || copyrightTextNoasserttion}
-                                            ></textarea>
-                                        </div>
-                                        <div style={{ flex: 2 }}>
-                                            <input
-                                                className='spdx-radio'
-                                                id='copyrightTextNone'
-                                                type='radio'
-                                                name='_sw360_portlet_components_COPYRIGHT_TEXT'
-                                                value='NONE'
-                                                onChange={selectCopyrightTextNone}
-                                                checked={copyrightTextNone}
-                                            />
-                                            <label
-                                                style={{ marginRight: '2rem' }}
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='copyrightTextNone'
-                                            >
-                                                NONE
-                                            </label>
-                                            <input
-                                                className='spdx-radio'
-                                                id='copyrightTextNoAssertion'
-                                                type='radio'
-                                                name='_sw360_portlet_components_COPYRIGHT_TEXT'
-                                                value='NOASSERTION'
-                                                onChange={selectCopyrightTextNoasserttion}
-                                                checked={copyrightTextNoasserttion}
-                                            />
-                                            <label
-                                                className='form-check-label radio-label lableSPDX'
-                                                htmlFor='copyrightTextNoAssertion'
-                                            >
-                                                NOASSERTION
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
-                            <>
-                                {' '}
+                            </div>
+                        </td>
+                    </tr>
+                    {isModeFull && (
+                        <>
+                            {
                                 <tr className='spdx-full'>
                                     <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='packageSummaryDescription'>
-                                                7.18 Package summary description
-                                            </label>
-                                            <div>
-                                                <textarea
-                                                    className='form-control'
-                                                    id='packageSummaryDescription'
-                                                    rows={5}
-                                                    name='summary'
-                                                    onChange={updateField}
-                                                    placeholder='Enter package summary description'
-                                                    value={packageInformation.summary ?? ''}
-                                                ></textarea>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className='spdx-full'>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='packageDetailedDescription'>
-                                                7.19 Package detailed description
-                                            </label>
-                                            <div>
-                                                <textarea
-                                                    className='form-control'
-                                                    id='packageDetailedDescription'
-                                                    rows={5}
-                                                    name='description'
-                                                    onChange={updateField}
-                                                    placeholder='Enter package detailed description'
-                                                    value={packageInformation.description ?? ''}
-                                                ></textarea>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </>
-                        )}
-                        <tr className='spdx-full'>
-                            <td colSpan={3}>
-                                <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='packageComment'>
-                                        7.20 Package comment
-                                    </label>
-                                    <div>
-                                        <textarea
-                                            className='form-control'
-                                            id='packageComment'
-                                            rows={5}
-                                            name='packageComment'
-                                            onChange={updateField}
-                                            placeholder='Enter package comment'
-                                            value={packageInformation.packageComment ?? ''}
-                                        ></textarea>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
-                            <>
-                                {
-                                    <tr className='spdx-full'>
-                                        <td colSpan={3}>
-                                            <div className='form-group section section-external-ref'>
-                                                <label className='lableSPDX'>7.21 External references</label>
-                                                {
+                                        <div className='form-group section section-external-ref'>
+                                            <label className='lableSPDX'>7.21 External references</label>
+                                            {
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        paddingLeft: '1rem',
+                                                    }}
+                                                >
                                                     <div
                                                         style={{
                                                             display: 'flex',
-                                                            flexDirection: 'column',
-                                                            paddingLeft: '1rem',
+                                                            flexDirection: 'row',
+                                                            marginBottom: '0.75rem',
                                                         }}
                                                     >
-                                                        <div
+                                                        <label
                                                             style={{
-                                                                display: 'flex',
-                                                                flexDirection: 'row',
-                                                                marginBottom: '0.75rem',
+                                                                textDecoration: 'underline',
                                                             }}
+                                                            className='sub-title lableSPDX'
                                                         >
-                                                            <label
+                                                            Select Reference
+                                                        </label>
+                                                        <select
+                                                            className='form-control spdx-select form-select'
+                                                            id='externalReferences'
+                                                            onChange={displayIndex}
+                                                            disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                                externalRefsDatas
+                                                            )}
+                                                            value={
+                                                                isAdd
+                                                                    ? isDeleteSucces
+                                                                        ? indexExternalRefsData
+                                                                        : increIndex
+                                                                    : numberIndex
+                                                            }
+                                                        >
+                                                            {externalRefsDatas.map((item) => (
+                                                                <option key={item.index} value={item.index}>
+                                                                    {item.index + 1}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <FaTrashAlt
+                                                            className='spdx-delete-icon-main-index'
+                                                            onClick={deleteExternalRefsDatas}
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        className='spdx-add-button-main'
+                                                        name='add-externalRef'
+                                                        onClick={addReferences}
+                                                    >
+                                                        Add new Reference
+                                                    </button>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection: 'row',
+                                                            marginBottom: '0.75rem',
+                                                        }}
+                                                    >
+                                                        <label className='sub-title lableSPDX'>Category</label>
+                                                        <select
+                                                            style={{ width: 'auto', flex: 'auto' }}
+                                                            id='referenceCategory'
+                                                            className='form-control form-select'
+                                                            name='referenceCategory'
+                                                            onChange={handleChangeReferenceCategory}
+                                                            value={
+                                                                externalRefsDatas[indexExternalRefsData]?.referenceCategory
+                                                            }
+                                                            disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                                externalRefsDatas
+                                                            )}
+                                                        >
+                                                            <option value='SECURITY'>SECURITY</option>
+                                                            <option value='PACKAGE-MANAGER'>PACKAGE-MANAGER</option>
+                                                            <option value='PERSISTENT-ID'>PERSISTENT-ID</option>
+                                                            <option value='OTHER'>OTHER</option>
+                                                        </select>
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection: 'row',
+                                                            marginBottom: '0.75rem',
+                                                        }}
+                                                    >
+                                                        <label className='sub-title lableSPDX'>Type</label>
+                                                        {isTypeCateGoryEmpty ? (
+                                                            <input
                                                                 style={{
-                                                                    textDecoration: 'underline',
+                                                                    width: 'auto',
+                                                                    flex: 'auto',
                                                                 }}
-                                                                className='sub-title lableSPDX'
-                                                            >
-                                                                Select Reference
-                                                            </label>
-                                                            <select
-                                                                className='form-control spdx-select form-select'
-                                                                id='externalReferences'
-                                                                onChange={displayIndex}
+                                                                id='referenceType-2'
+                                                                type='text'
+                                                                className='form-control'
+                                                                placeholder='Enter type'
+                                                                name='referenceType'
+                                                                onChange={handleChangeExternalRefData}
+                                                                value={
+                                                                    externalRefsDatas[indexExternalRefsData]?.referenceType
+                                                                }
                                                                 disabled={CommonUtils.isNullEmptyOrUndefinedArray(
                                                                     externalRefsDatas
                                                                 )}
+                                                            />
+                                                        ) : (
+                                                            <select
+                                                                style={{ width: 'auto', flex: 'auto' }}
+                                                                id='referenceType-1'
+                                                                className='form-control form-select'
+                                                                name='referenceType'
+                                                                onChange={handleChangeExternalRefData}
                                                                 value={
-                                                                    isAdd
-                                                                        ? isDeleteSucces
-                                                                            ? indexExternalRefsData
-                                                                            : increIndex
-                                                                        : numberIndex
+                                                                    externalRefsDatas[indexExternalRefsData]?.referenceType
                                                                 }
+                                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                                    externalRefsDatas
+                                                                )}
                                                             >
-                                                                {externalRefsDatas?.map((item) => (
-                                                                    <option key={item.index} value={item.index}>
-                                                                        {item.index + 1}
+                                                                {typeCategory.map((item, index) => (
+                                                                    <option key={index} value={item}>
+                                                                        {item}
                                                                     </option>
                                                                 ))}
                                                             </select>
-                                                            <FaTrashAlt
-                                                                className='spdx-delete-icon-main-index'
-                                                                onClick={deleteExternalRefsDatas}
-                                                            />
-                                                        </div>
-                                                        <button
-                                                            className='spdx-add-button-main'
-                                                            name='add-externalRef'
-                                                            onClick={addReferences}
-                                                        >
-                                                            Add new Reference
-                                                        </button>
-                                                        <div
-                                                            style={{
-                                                                display: 'flex',
-                                                                flexDirection: 'row',
-                                                                marginBottom: '0.75rem',
-                                                            }}
-                                                        >
-                                                            <label className='sub-title lableSPDX'>Category</label>
-                                                            <select
-                                                                style={{ width: 'auto', flex: 'auto' }}
-                                                                id='referenceCategory'
-                                                                className='form-control form-select'
-                                                                name='referenceCategory'
-                                                                onChange={handleChangeReferenceCategory}
-                                                                value={
-                                                                    externalRefsDatas[indexExternalRefsData]
-                                                                        ?.referenceCategory ?? ''
-                                                                }
-                                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                    externalRefsDatas
-                                                                )}
-                                                            >
-                                                                <option value='SECURITY'>SECURITY</option>
-                                                                <option value='PACKAGE-MANAGER'>PACKAGE-MANAGER</option>
-                                                                <option value='PERSISTENT-ID'>PERSISTENT-ID</option>
-                                                                <option value='OTHER'>OTHER</option>
-                                                            </select>
-                                                        </div>
-                                                        <div
-                                                            style={{
-                                                                display: 'flex',
-                                                                flexDirection: 'row',
-                                                                marginBottom: '0.75rem',
-                                                            }}
-                                                        >
-                                                            <label className='sub-title lableSPDX'>Type</label>
-                                                            {isTypeCateGoryEmpty ? (
-                                                                <input
-                                                                    style={{
-                                                                        width: 'auto',
-                                                                        flex: 'auto',
-                                                                    }}
-                                                                    id='referenceType-2'
-                                                                    type='text'
-                                                                    className='form-control'
-                                                                    placeholder='Enter type'
-                                                                    name='referenceType'
-                                                                    onChange={handleChangeExternalRefData}
-                                                                    value={
-                                                                        externalRefsDatas[indexExternalRefsData]
-                                                                            ?.referenceType ?? ''
-                                                                    }
-                                                                    disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                        externalRefsDatas
-                                                                    )}
-                                                                />
-                                                            ) : (
-                                                                <select
-                                                                    style={{ width: 'auto', flex: 'auto' }}
-                                                                    id='referenceType-1'
-                                                                    className='form-control form-select'
-                                                                    name='referenceType'
-                                                                    onChange={handleChangeExternalRefData}
-                                                                    value={
-                                                                        externalRefsDatas[indexExternalRefsData]
-                                                                            ?.referenceType ?? ''
-                                                                    }
-                                                                    disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                        externalRefsDatas
-                                                                    )}
-                                                                >
-                                                                    {typeCategory?.map((item, index) => (
-                                                                        <option key={index} value={item}>
-                                                                            {item}
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
-                                                            )}
-                                                        </div>
-                                                        <div
-                                                            style={{
-                                                                display: 'flex',
-                                                                flexDirection: 'row',
-                                                                marginBottom: '0.75rem',
-                                                            }}
-                                                        >
-                                                            <label className='sub-title lableSPDX'>Locator</label>
-                                                            <input
-                                                                style={{ width: 'auto', flex: 'auto' }}
-                                                                type='text'
-                                                                className='form-control'
-                                                                id='externalReferencesLocator'
-                                                                placeholder='Enter locator'
-                                                                name='referenceLocator'
-                                                                onChange={handleChangeExternalRefData}
-                                                                value={
-                                                                    externalRefsDatas[indexExternalRefsData]
-                                                                        ?.referenceLocator ?? ''
-                                                                }
-                                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                    externalRefsDatas
-                                                                )}
-                                                            />
-                                                        </div>
-                                                        <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                                            <label className='sub-title lableSPDX'>7.22 Comment</label>
-                                                            <textarea
-                                                                style={{ width: 'auto', flex: 'auto' }}
-                                                                rows={5}
-                                                                className='form-control'
-                                                                id='externalReferencesComment'
-                                                                placeholder='Enter comment'
-                                                                name='comment'
-                                                                onChange={handleChangeExternalRefData}
-                                                                value={
-                                                                    externalRefsDatas[indexExternalRefsData]?.comment ??
-                                                                    ''
-                                                                }
-                                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                    externalRefsDatas
-                                                                )}
-                                                            ></textarea>
-                                                        </div>
+                                                        )}
                                                     </div>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </>
-                        )}
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection: 'row',
+                                                            marginBottom: '0.75rem',
+                                                        }}
+                                                    >
+                                                        <label className='sub-title lableSPDX'>Locator</label>
+                                                        <input
+                                                            style={{ width: 'auto', flex: 'auto' }}
+                                                            type='text'
+                                                            className='form-control'
+                                                            id='externalReferencesLocator'
+                                                            placeholder='Enter locator'
+                                                            name='referenceLocator'
+                                                            onChange={handleChangeExternalRefData}
+                                                            value={
+                                                                externalRefsDatas[indexExternalRefsData]?.referenceLocator
+                                                            }
+                                                            disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                                externalRefsDatas
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                                        <label className='sub-title lableSPDX'>7.22 Comment</label>
+                                                        <textarea
+                                                            style={{ width: 'auto', flex: 'auto' }}
+                                                            rows={5}
+                                                            className='form-control'
+                                                            id='externalReferencesComment'
+                                                            placeholder='Enter comment'
+                                                            name='comment'
+                                                            onChange={handleChangeExternalRefData}
+                                                            value={
+                                                                externalRefsDatas[indexExternalRefsData]?.comment
+                                                            }
+                                                            disabled={CommonUtils.isNullEmptyOrUndefinedArray(
+                                                                externalRefsDatas
+                                                            )}
+                                                        ></textarea>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </>
+                    )}
 
-                        {isModeFull && (
-                            <>
-                                <tr className='spdx-full'>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='packageAttributionText'>
-                                                7.23 Package attribution text
-                                            </label>
-                                            <div>
-                                                <textarea
-                                                    className='form-control'
-                                                    id='packageAttributionText'
-                                                    rows={5}
-                                                    name='attributionText'
-                                                    onChange={updateFieldAttributionText}
-                                                    placeholder='Enter package attribution text'
-                                                    value={
-                                                        packageInformation.attributionText
-                                                            ?.toString()
-                                                            .replaceAll(',', '\n') ?? ''
-                                                    }
-                                                ></textarea>
-                                            </div>
+                    {isModeFull && (
+                        <>
+                            <tr className='spdx-full'>
+                                <td colSpan={3}>
+                                    <div className='form-group'>
+                                        <label className='lableSPDX' htmlFor='packageAttributionText'>
+                                            7.23 Package attribution text
+                                        </label>
+                                        <div>
+                                            <textarea
+                                                className='form-control'
+                                                id='packageAttributionText'
+                                                rows={5}
+                                                name='attributionText'
+                                                onChange={updateFieldAttributionText}
+                                                placeholder='Enter package attribution text'
+                                                value={
+                                                    packageInformation.attributionText
+                                                        ?.toString()
+                                                        .replaceAll(',', '\n') ?? ''
+                                                }
+                                            ></textarea>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr className='spdx-full'>
-                                    <td colSpan={3}>
-                                        <div className='form-group'>
-                                            <label className='lableSPDX' htmlFor='primaryPackagePurpose'>
-                                                7.24 Primary Package Purpose
-                                            </label>
-                                            <div>
-                                                <textarea
-                                                    className='form-control'
-                                                    id='primaryPackagePurpose'
-                                                    rows={5}
-                                                    name='primaryPackagePurpose'
-                                                    onChange={updateField}
-                                                    placeholder='Enter primary package purpose'
-                                                    value={packageInformation.primaryPackagePurpose ?? ''}
-                                                ></textarea>
-                                            </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr className='spdx-full'>
+                                <td colSpan={3}>
+                                    <div className='form-group'>
+                                        <label className='lableSPDX' htmlFor='primaryPackagePurpose'>
+                                            7.24 Primary Package Purpose
+                                        </label>
+                                        <div>
+                                            <textarea
+                                                className='form-control'
+                                                id='primaryPackagePurpose'
+                                                rows={5}
+                                                name='primaryPackagePurpose'
+                                                onChange={updateField}
+                                                placeholder='Enter primary package purpose'
+                                                value={packageInformation.primaryPackagePurpose ?? ''}
+                                            ></textarea>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr className='spdx-full'>
-                                    <ReleaseDate
-                                        dataReleaseDate={dataReleaseDate}
-                                        setDataReleaseDate={setDataReleaseDate}
-                                        setReleaseDate={setReleaseDate}
-                                    />
-                                </tr>
-                                <tr className='spdx-full'>
-                                    <BuiltDate
-                                        setBuiltDate={setBuiltDate}
-                                        dataBuiltDate={dataBuiltDate}
-                                        setDataBuiltDate={setDataBuiltDate}
-                                    />
-                                </tr>
-                                <tr className='spdx-full'>
-                                    <ValidUntilDate
-                                        setValidUntilDate={setValidUntilDate}
-                                        dataValidUntilDate={dataValidUntilDate}
-                                        setDataValidUntilDate={setDataValidUntilDate}
-                                    />
-                                </tr>
-                            </>
-                        )}
-                    </>
-                )}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr className='spdx-full'>
+                                <ReleaseDate
+                                    dataReleaseDate={dataReleaseDate}
+                                    setDataReleaseDate={setDataReleaseDate}
+                                    setReleaseDate={setReleaseDate}
+                                />
+                            </tr>
+                            <tr className='spdx-full'>
+                                <BuiltDate
+                                    setBuiltDate={setBuiltDate}
+                                    dataBuiltDate={dataBuiltDate}
+                                    setDataBuiltDate={setDataBuiltDate}
+                                />
+                            </tr>
+                            <tr className='spdx-full'>
+                                <ValidUntilDate
+                                    setValidUntilDate={setValidUntilDate}
+                                    dataValidUntilDate={dataValidUntilDate}
+                                    setDataValidUntilDate={setDataValidUntilDate}
+                                />
+                            </tr>
+                        </>
+                    )}
+                </>
             </tbody>
         </table>
     )

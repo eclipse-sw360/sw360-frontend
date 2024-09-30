@@ -13,9 +13,9 @@ import PackageInformation from './PackageInformation'
 import SPDXDocument from './SPDXDocument'
 
 interface SPDX {
-    spdxDocument?: SPDXDocument
-    documentCreationInformation?: DocumentCreationInformation
-    packageInformation?: PackageInformation
+    spdxDocument?: SPDXDocument | null
+    documentCreationInformation?: DocumentCreationInformation | null
+    packageInformation?: PackageInformation | null
 }
 
 export default SPDX

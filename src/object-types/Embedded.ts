@@ -29,10 +29,10 @@ interface Embedded<SW360Type, SW360Key extends string> {
         ]
     }
     page?: {
-        size?: number
-        totalElements?: number
-        totalPages?: number
-        number?: number
+        size: number
+        totalElements: number
+        totalPages: number
+        number: number
     }
 }
 

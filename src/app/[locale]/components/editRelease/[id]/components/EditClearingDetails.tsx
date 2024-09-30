@@ -12,13 +12,14 @@ import { Release } from '@/object-types'
 import ClearingDetails from './ClearingDetails'
 import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'
+import { ReactNode } from 'react'
 
 interface Props {
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props) => {
+const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNode => {
     return (
         <>
             <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>

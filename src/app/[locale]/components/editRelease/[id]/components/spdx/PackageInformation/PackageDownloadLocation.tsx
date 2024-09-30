@@ -8,17 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ChangeEvent } from 'react'
+import { ChangeEvent, ReactNode } from 'react'
 
 interface Props {
-    setPackageDownloadLocationToPackage?: (data: string) => void
-    packageDownloadLocationExist?: boolean
-    setPackageDownloadLocationExist?: React.Dispatch<React.SetStateAction<boolean>>
-    packageDownloadLocationNone?: boolean
-    setPackageDownloadLocationNone?: React.Dispatch<React.SetStateAction<boolean>>
-    packageDownloadLocationNoasserttion?: boolean
-    setPackageDownloadLocationNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
-    packageDownloadLocation?: string
+    setPackageDownloadLocationToPackage: (data: string) => void
+    packageDownloadLocationExist: boolean
+    setPackageDownloadLocationExist: React.Dispatch<React.SetStateAction<boolean>>
+    packageDownloadLocationNone: boolean
+    setPackageDownloadLocationNone: React.Dispatch<React.SetStateAction<boolean>>
+    packageDownloadLocationNoasserttion: boolean
+    setPackageDownloadLocationNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
+    packageDownloadLocation: string
 }
 
 function PackageDownloadLocation({
@@ -30,7 +30,7 @@ function PackageDownloadLocation({
     packageDownloadLocationNoasserttion,
     setPackageDownloadLocationNoasserttion,
     packageDownloadLocation,
-}: Props) {
+}: Props) : ReactNode {
     const selectPackageDownloadLocationExist = () => {
         setPackageDownloadLocationExist(true)
         setPackageDownloadLocationNone(false)
@@ -77,7 +77,7 @@ function PackageDownloadLocation({
                             name='downloadLocation'
                             placeholder='Enter package download location'
                             onChange={updateField}
-                            value={packageDownloadLocation ?? ''}
+                            value={packageDownloadLocation}
                             disabled={packageDownloadLocationNone || packageDownloadLocationNoasserttion}
                         />
                     </div>

@@ -10,11 +10,12 @@
 
 import { Metadata } from 'next'
 import AddComponent from './components/AddComponent'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Components',
 }
 
-export default async function ComponentAddPage() {
+export default function ComponentAddPage() : ReactNode {
     return <AddComponent />
 }

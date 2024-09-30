@@ -10,13 +10,14 @@
 
 import { InputKeyValue } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
+import { ReactNode } from 'react'
 
 interface Props {
-    dataPackageSupplier?: InputKeyValue
-    setDataPackageSupplier?: React.Dispatch<React.SetStateAction<InputKeyValue>>
-    setPackageSupplierToPackage?: (input: InputKeyValue) => void
-    isPackageSupplier?: boolean
-    setIsPackageSupplier?: React.Dispatch<React.SetStateAction<boolean>>
+    dataPackageSupplier: InputKeyValue
+    setDataPackageSupplier: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setPackageSupplierToPackage: (input: InputKeyValue) => void
+    isPackageSupplier: boolean
+    setIsPackageSupplier: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 function PackageSupplier({
@@ -25,7 +26,7 @@ function PackageSupplier({
     setPackageSupplierToPackage,
     isPackageSupplier,
     setIsPackageSupplier,
-}: Props) {
+}: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataPackageSupplier
@@ -65,62 +66,60 @@ function PackageSupplier({
     }
 
     return (
-        dataPackageSupplier && (
-            <td colSpan={3}>
-                <div className='form-group'>
-                    <label className='lableSPDX'>7.5 Package supplier</label>
-                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
-                            <input
-                                className='spdx-radio'
-                                type='radio'
-                                name='_sw360_portlet_components_SUPPLIER'
-                                value='EXIST'
-                                onClick={selectPackageSupplierExist}
-                                checked={isPackageSupplier}
-                            />
-                            <select
-                                id='supplierType'
-                                style={{ flex: 2, marginRight: '1rem' }}
-                                className='form-control form-select'
-                                disabled={!isPackageSupplier}
-                                value={dataPackageSupplier.key}
-                                name='key'
-                                onChange={(e) => handleInputChange(e)}
-                            >
-                                <option value='Organization'>Organization</option>
-                                <option value='Person'>Person</option>
-                            </select>
-                            <input
-                                disabled={!isPackageSupplier}
-                                style={{ flex: 6, marginRight: '1rem' }}
-                                id='supplierValue'
-                                className='form-control'
-                                type='text'
-                                name='value'
-                                placeholder='Enter package supplier'
-                                onChange={(e) => handleInputChange(e)}
-                                value={dataPackageSupplier.value}
-                            />
-                        </div>
-                        <div style={{ flex: 2 }}>
-                            <input
-                                className='spdx-radio lableSPDX'
-                                id='supplierNoAssertion'
-                                type='radio'
-                                onClick={selectPackageSupplierNoasserttion}
-                                checked={!isPackageSupplier}
-                                name='_sw360_portlet_components_SUPPLIER'
-                                value='NOASSERTION'
-                            />
-                            <label className='form-check-label radio-label lableSPDX' htmlFor='supplierNoAssertion'>
-                                NOASSERTION
-                            </label>
-                        </div>
+        <td colSpan={3}>
+            <div className='form-group'>
+                <label className='lableSPDX'>7.5 Package supplier</label>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                        <input
+                            className='spdx-radio'
+                            type='radio'
+                            name='_sw360_portlet_components_SUPPLIER'
+                            value='EXIST'
+                            onClick={selectPackageSupplierExist}
+                            checked={isPackageSupplier}
+                        />
+                        <select
+                            id='supplierType'
+                            style={{ flex: 2, marginRight: '1rem' }}
+                            className='form-control form-select'
+                            disabled={!isPackageSupplier}
+                            value={dataPackageSupplier.key}
+                            name='key'
+                            onChange={(e) => handleInputChange(e)}
+                        >
+                            <option value='Organization'>Organization</option>
+                            <option value='Person'>Person</option>
+                        </select>
+                        <input
+                            disabled={!isPackageSupplier}
+                            style={{ flex: 6, marginRight: '1rem' }}
+                            id='supplierValue'
+                            className='form-control'
+                            type='text'
+                            name='value'
+                            placeholder='Enter package supplier'
+                            onChange={(e) => handleInputChange(e)}
+                            value={dataPackageSupplier.value}
+                        />
+                    </div>
+                    <div style={{ flex: 2 }}>
+                        <input
+                            className='spdx-radio lableSPDX'
+                            id='supplierNoAssertion'
+                            type='radio'
+                            onClick={selectPackageSupplierNoasserttion}
+                            checked={!isPackageSupplier}
+                            name='_sw360_portlet_components_SUPPLIER'
+                            value='NOASSERTION'
+                        />
+                        <label className='form-check-label radio-label lableSPDX' htmlFor='supplierNoAssertion'>
+                            NOASSERTION
+                        </label>
                     </div>
                 </div>
-            </td>
-        )
+            </div>
+        </td>
     )
 }
 

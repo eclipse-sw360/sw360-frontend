@@ -8,8 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum ComponentTabIds {
-    RELEASE_OVERVIEW = 'tab-Releases',
+const ReleaseTabIds = {
+    LINKED_RELEASES: 'tab-Releases',
+    CLEARING_DETAILS: 'tab-ClearingDetails',
+    ECC_DETAILS: 'tab-EccDetails',
+    COMMERCIAL_DETAILS: 'tab-CommercialDetails',
+    SPDX_DOCUMENT: 'tab-SPDXDocument',
 }
 
-export default ComponentTabIds
+export default ReleaseTabIds

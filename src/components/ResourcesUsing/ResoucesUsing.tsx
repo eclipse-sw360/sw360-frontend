@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 import { DocumentTypes, Resources } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import ComponentsUsing from './ComponentsUsing'
 import ProjectsUsing from './ProjectsUsing'
 
@@ -22,11 +22,12 @@ interface Props {
     documentName: string
 }
 
-const ResoucesUsing = ({ documentId, documentType, documentName }: Props) => {
+const ResourcesUsing = ({ documentId, documentType, documentName }: Props) => {
     const { data: session } = useSession()
-    const [resourcesUsing, setResourceUsing] = useState<Resources>(undefined)
+    const [resourcesUsing, setResourceUsing] = useState<Resources | undefined>(undefined)
 
     useEffect(() => {
+        if (CommonUtils.isNullOrUndefined(session)) return
         ApiUtils.GET(`${documentType}/usedBy/${documentId}`, session.user.access_token)
             .then((res) => res.json())
             .then((resourcesUsing: Resources) => {
@@ -59,4 +60,4 @@ const ResoucesUsing = ({ documentId, documentType, documentName }: Props) => {
     )
 }
 
-export default ResoucesUsing
+export default ResourcesUsing

@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import { ReleaseDetail } from '@/object-types'
 
@@ -19,7 +19,7 @@ interface Props {
     release: ReleaseDetail
 }
 
-const ReleaseVendor = ({ release }: Props) => {
+const ReleaseVendor = ({ release }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -39,7 +39,7 @@ const ReleaseVendor = ({ release }: Props) => {
                 <tr>
                     <td>{t('Full Name')}:</td>
                     <td>
-                        {release._embedded && release._embedded['sw360:vendors'] && (
+                        {release._embedded['sw360:vendors'] !== undefined && (
                             <span>{release._embedded['sw360:vendors'][0].fullName}</span>
                         )}
                     </td>
@@ -47,7 +47,7 @@ const ReleaseVendor = ({ release }: Props) => {
                 <tr>
                     <td>{t('Short Name')}:</td>
                     <td>
-                        {release._embedded && release._embedded['sw360:vendors'] && (
+                        {release._embedded['sw360:vendors'] !== undefined && (
                             <span>{release._embedded['sw360:vendors'][0].shortName}</span>
                         )}
                     </td>
@@ -55,7 +55,7 @@ const ReleaseVendor = ({ release }: Props) => {
                 <tr>
                     <td>URL:</td>
                     <td>
-                        {release._embedded && release._embedded['sw360:vendors'] && (
+                        {release._embedded['sw360:vendors'] !== undefined && (
                             <span>{release['_embedded']['sw360:vendors'][0].url}</span>
                         )}
                     </td>

@@ -9,18 +9,19 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface Props {
-    dataSnippetFromFile?: InputKeyValue
-    setDataSnippetFromFile?: React.Dispatch<React.SetStateAction<InputKeyValue>>
-    setSnippetFromFileToSnippet?: (input: InputKeyValue) => void
+    dataSnippetFromFile: InputKeyValue
+    setDataSnippetFromFile: React.Dispatch<React.SetStateAction<InputKeyValue>>
+    setSnippetFromFileToSnippet: (input: InputKeyValue) => void
 }
 
 function SnippetFileSPDXIdentifier({
     dataSnippetFromFile,
     setDataSnippetFromFile,
     setSnippetFromFileToSnippet,
-}: Props) {
+}: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataSnippetFromFile
@@ -30,39 +31,37 @@ function SnippetFileSPDXIdentifier({
     }
 
     return (
-        dataSnippetFromFile && (
-            <td>
-                <div className='form-group' style={{ flex: 1 }}>
-                    <label className='lableSPDX' htmlFor='snippetFromFile'>
-                        9.2 Snippet from file SPDX identifier
-                    </label>
-                    <div style={{ display: 'flex' }}>
-                        <select
-                            id='snippetFromFile'
-                            className='form-control form-select'
-                            style={{ flex: 1 }}
-                            name='key'
-                            onChange={handleInputChange}
-                            value={dataSnippetFromFile.key}
-                        >
-                            <option value='SPDXRef'>SPDXRef</option>
-                            <option value='DocumentRef'>DocumentRef</option>
-                        </select>
-                        <div style={{ margin: '0.5rem' }}>-</div>
-                        <input
-                            style={{ flex: 3 }}
-                            id='snippetFromFileValue'
-                            className='form-control'
-                            name='value'
-                            type='text'
-                            placeholder='Enter snippet from file SPDX identifier'
-                            onChange={handleInputChange}
-                            value={dataSnippetFromFile.value}
-                        />
-                    </div>
+        <td>
+            <div className='form-group' style={{ flex: 1 }}>
+                <label className='lableSPDX' htmlFor='snippetFromFile'>
+                    9.2 Snippet from file SPDX identifier
+                </label>
+                <div style={{ display: 'flex' }}>
+                    <select
+                        id='snippetFromFile'
+                        className='form-control form-select'
+                        style={{ flex: 1 }}
+                        name='key'
+                        onChange={handleInputChange}
+                        value={dataSnippetFromFile.key}
+                    >
+                        <option value='SPDXRef'>SPDXRef</option>
+                        <option value='DocumentRef'>DocumentRef</option>
+                    </select>
+                    <div style={{ margin: '0.5rem' }}>-</div>
+                    <input
+                        style={{ flex: 3 }}
+                        id='snippetFromFileValue'
+                        className='form-control'
+                        name='value'
+                        type='text'
+                        placeholder='Enter snippet from file SPDX identifier'
+                        onChange={handleInputChange}
+                        value={dataSnippetFromFile.value}
+                    />
                 </div>
-            </td>
-        )
+            </div>
+        </td>
     )
 }
 

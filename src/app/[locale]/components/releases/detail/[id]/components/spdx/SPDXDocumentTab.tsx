@@ -24,11 +24,10 @@ import {
     SnippetInformation,
     SnippetRange,
 } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import AnnotationInformation from './AnnotationInformation'
 import styles from './CssButton.module.css'
@@ -42,7 +41,7 @@ interface Props {
     releaseId: string
 }
 
-const SPDXDocumentTab = ({ releaseId }: Props) => {
+const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [spdxDocument, setSPDXDocument] = useState<SPDXDocument>()
     const [documentCreationInformation, setDocumentCreationInformation] = useState<DocumentCreationInformation>()
@@ -78,28 +77,29 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
     const [annotationsPackages, setAnnotationsPackages] = useState<Annotations[]>([])
 
     const [isModeFull, setIsModeFull] = useState(true)
-    const [toggleOther, setToggleOther] = useState(false)
-
-    const { data: session } = useSession()
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status === HttpStatus.OK) {
                 const data = (await response.json()) as ReleaseDetail
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
-                return null
+                return undefined
             }
         },
-        [session]
+        []
     )
 
     useEffect(() => {
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail) => {
+            .then((release: ReleaseDetail | undefined) => {
+                if (!release) return
                 //SPDX Document
                 if (
                     !CommonUtils.isNullOrUndefined(release._embedded) &&
@@ -263,8 +263,6 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
                         snippetRanges={snippetRanges}
                     />
                     <OtherLicensingInformationDetectedDetail
-                        toggleOther={toggleOther}
-                        setToggleOther={setToggleOther}
                         isModeFull={isModeFull}
                         spdxDocument={spdxDocument}
                         indexOtherLicense={indexOtherLicense}
@@ -303,8 +301,6 @@ const SPDXDocumentTab = ({ releaseId }: Props) => {
                         setExternalRefsData={setExternalRefsData}
                     />
                     <OtherLicensingInformationDetectedDetail
-                        toggleOther={toggleOther}
-                        setToggleOther={setToggleOther}
                         isModeFull={isModeFull}
                         spdxDocument={spdxDocument}
                         indexOtherLicense={indexOtherLicense}

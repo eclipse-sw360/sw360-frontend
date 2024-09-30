@@ -10,6 +10,7 @@
 'use client'
 
 import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
 import { useState, useEffect } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -31,7 +32,7 @@ function AddAdditionalRoles({
     const t = useTranslations('default')
     const [inputListData, setInputListData] = useState<InputKeyValue[]>([])
     useEffect(()=>{
-        setInputListData(propInputList !== null ? propInputList : [
+        setInputListData(!CommonUtils.isNullOrUndefined(propInputList) ? propInputList : [
             {
                 key: documentType === DocumentTypes.COMPONENT ? 'Commiter' : 'Stakeholder',
                 value: '',

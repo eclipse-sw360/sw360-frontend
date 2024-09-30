@@ -11,12 +11,12 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { StaticImport } from 'next/dist/shared/lib/get-img-props'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { HiOutlineLink } from 'react-icons/hi'
 
@@ -35,15 +35,14 @@ interface Props {
     calledFromModerationRequestDetail?: boolean
 }
 
-const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props) => {
+const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const [data, setData] = useState([])
+    const [data, setData] = useState<Array<Array<string | string[]>>>([])
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-    const [clearingReleaseId, setClearingReleaseId] = useState<string>(undefined)
+    const [clearingReleaseId, setClearingReleaseId] = useState<string | undefined>(undefined)
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
-    const [linkingReleaseId, setLinkingReleaseId] = useState<string>(undefined)
+    const [linkingReleaseId, setLinkingReleaseId] = useState<string | undefined>(undefined)
     const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
 
     const handleClickDelete = (releaseId: string) => {
@@ -63,22 +62,27 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status === HttpStatus.OK) {
                 const data = (await response.json()) as EmbeddedLinkedReleases
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                await signOut()
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
             } else {
-                notFound()
+                return undefined
             }
         },
-        [session.user.access_token]
+        []
     )
 
     useEffect(() => {
         fetchData(`components/${componentId}/releases`)
-            .then((releaseLinks: EmbeddedLinkedReleases) => {
+            .then((releaseLinks: EmbeddedLinkedReleases | undefined) => {
+                if (releaseLinks === undefined) return
+
                 if (
                     !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']['sw360:releaseLinks'])
@@ -86,12 +90,9 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
                         item.name,
                         [item.id, item.version],
-                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                        t(item.clearingState),
-                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                        t(item.clearingReport.clearingReportStatus),
-                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                        t(item.mainlineState),
+                        t(item.clearingState as never),
+                        t(item.clearingReport?.clearingReportStatus as never),
+                        t(item.mainlineState as never),
                         item.id,
                     ])
                     setData(data)
@@ -139,8 +140,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 _(
                     <span>
                         <Image
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                            src={fossologyIcon}
+                            src={fossologyIcon as StaticImport}
                             width={15}
                             height={15}
                             style={{ marginRight: '5px' }}
@@ -197,21 +197,21 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 <Table
                     data={data}
                     search={true}
-                    columns={calledFromModerationRequestDetail ? 
+                    columns={(calledFromModerationRequestDetail !== undefined && calledFromModerationRequestDetail) ? 
                                 moderationRequestCurrentComponentReleaseColumns :
                                 columns}
                     selector={true}
                 />
             </div>
             <DeleteReleaseModal releaseId={deletingRelease} show={deleteModalOpen} setShow={setDeleteModalOpen} />
-            {clearingReleaseId && (
+            {!CommonUtils.isNullOrUndefined(clearingReleaseId) && (
                 <FossologyClearing
                     show={fossologyClearingModelOpen}
                     setShow={setFossologyClearingModelOpen}
                     releaseId={clearingReleaseId}
                 />
             )}
-            {linkingReleaseId && (
+            {!CommonUtils.isNullOrUndefined(linkingReleaseId) && (
                 <LinkReleaseToProjectModal
                     show={linkToProjectModalOpen}
                     setShow={setLinkToProjectModalOpen}

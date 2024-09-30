@@ -48,13 +48,13 @@ const ComponentsUsing = ({ componentsUsing, documentName }: Props) => {
             component.defaultVendor?.shortName,
             _(
                 <Link
-                    key={component._links.self.href.split('/').at(-1)}
-                    href={`/components/detail/${component._links.self.href.split('/').at(-1)}`}
+                    key={component._links?.self?.href.split('/').at(-1)}
+                    href={`/components/detail/${component._links?.self?.href.split('/').at(-1)}`}
                 >
                     {component.name}
                 </Link>
             ),
-            component.mainLicenseIds.join(', '),
+            component.mainLicenseIds ? component.mainLicenseIds.join(', ') : '',
             component.componentType,
         ])
         setTableData(data)

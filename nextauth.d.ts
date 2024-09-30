@@ -39,7 +39,7 @@ interface SW360User extends DefaultUser {
 declare module 'next-auth' {
     type User = SW360User
     interface Session {
-        user?: User
+        user: User
     }
 }
 

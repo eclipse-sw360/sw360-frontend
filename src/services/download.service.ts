@@ -8,11 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ApiUtils } from '@/utils'
-import { Session } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { Session } from 'next-auth'
 
-const download = (url: string, session: Session, fileName: string): void => {
-    if (!session.user) {
+const download = (url: string, session: Session | null, fileName: string): void => {
+    if (CommonUtils.isNullOrUndefined(session)) {
         console.error('User is undefined');
         return;
     }

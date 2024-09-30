@@ -10,16 +10,17 @@
 
 import { InputKeyValue } from '@/object-types'
 import { FaTrashAlt } from 'react-icons/fa'
+import { ReactNode } from 'react'
 
 interface Props {
-    setInputList?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
-    inputList?: InputKeyValue[]
-    isAnonymous?: boolean
-    setDataCreators?: (inputs: InputKeyValue[]) => void
-    setIsDelete?: React.Dispatch<React.SetStateAction<boolean>>
+    setInputList: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
+    inputList: InputKeyValue[]
+    isAnonymous: boolean
+    setDataCreators: (inputs: InputKeyValue[]) => void
+    setIsDelete: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function Creators({ inputList, setInputList, isAnonymous, setDataCreators, setIsDelete }: Props) {
+function Creators({ inputList, setInputList, isAnonymous, setDataCreators, setIsDelete }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: InputKeyValue[] = [...inputList]

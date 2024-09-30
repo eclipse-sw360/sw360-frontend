@@ -10,13 +10,14 @@
 
 'use client'
 import { DocumentCreationInformation, ExternalDocumentReferences } from '@/object-types'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     documentCreationInformation?: DocumentCreationInformation
     externalDocumentRef?: ExternalDocumentReferences
-    setExternalDocumentRef?: React.Dispatch<React.SetStateAction<ExternalDocumentReferences>>
-    isModeFull?: boolean
+    setExternalDocumentRef: React.Dispatch<React.SetStateAction<ExternalDocumentReferences | undefined>>
+    isModeFull: boolean
 }
 
 const DocumentCreationInformationDetail = ({
@@ -24,12 +25,17 @@ const DocumentCreationInformationDetail = ({
     externalDocumentRef,
     setExternalDocumentRef,
     isModeFull,
-}: Props) => {
+}: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (!documentCreationInformation) return
         const index: string = e.target.value
-        setExternalDocumentRef(documentCreationInformation.externalDocumentRefs[parseInt(index)])
+        setExternalDocumentRef(
+            documentCreationInformation.externalDocumentRefs
+            ? documentCreationInformation.externalDocumentRefs[parseInt(index)]
+            : undefined
+        )
     }
 
     return (
@@ -78,15 +84,19 @@ const DocumentCreationInformationDetail = ({
                                             className='spdx-col-3'
                                             id='externalDocumentRefs'
                                             onChange={displayIndex}
-                                            disabled={documentCreationInformation?.externalDocumentRefs.length == 0}
+                                            disabled={documentCreationInformation?.externalDocumentRefs?.length == 0}
                                         >
-                                            {documentCreationInformation?.externalDocumentRefs
+                                            {
+                                            (documentCreationInformation && documentCreationInformation.externalDocumentRefs)
+                                            &&
+                                            documentCreationInformation.externalDocumentRefs
                                                 .toSorted((e1, e2) => e1.index - e2.index)
                                                 .map((item) => (
                                                     <option key={item.index} value={item.index}>
                                                         {item.index + 1}
                                                     </option>
-                                                ))}
+                                                ))
+                                            }
                                         </select>
                                     </div>
                                     {externalDocumentRef && (
@@ -124,20 +134,23 @@ const DocumentCreationInformationDetail = ({
                     <td>6.8 Creators</td>
                     <td>
                         <div className='spdx-col-2' id='creators'>
-                            {documentCreationInformation?.creator
-                                .toSorted((e1, e2) => e1.index - e2.index)
-                                .map((creatorData) => {
-                                    return (
-                                        <div
-                                            key={creatorData.index}
-                                            className='spdx-flex-row creator'
-                                            data-index={creatorData.index}
-                                        >
-                                            <div className='spdx-col-1 spdx-key'>{creatorData.type}</div>
-                                            <div className='spdx-col-3'>{creatorData.value}</div>
-                                        </div>
-                                    )
-                                })}
+                            {
+                                (documentCreationInformation && documentCreationInformation.creator)
+                                    && documentCreationInformation.creator
+                                    .toSorted((e1, e2) => e1.index - e2.index)
+                                    .map((creatorData) => {
+                                        return (
+                                            <div
+                                                key={creatorData.index}
+                                                className='spdx-flex-row creator'
+                                                data-index={creatorData.index}
+                                            >
+                                                <div className='spdx-col-1 spdx-key'>{creatorData.type}</div>
+                                                <div className='spdx-col-3'>{creatorData.value}</div>
+                                            </div>
+                                        )
+                                    })
+                            }
                         </div>
                     </td>
                 </tr>
@@ -150,7 +163,8 @@ const DocumentCreationInformationDetail = ({
                         <tr className='spdx-full'>
                             <td>6.10 Creator comment</td>
                             <td>
-                                {documentCreationInformation?.creatorComment
+                                {(documentCreationInformation&& !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.creatorComment))
+                                && documentCreationInformation.creatorComment
                                     .trim()
                                     .split('\n')
                                     .map((item) => {
@@ -166,7 +180,10 @@ const DocumentCreationInformationDetail = ({
                         <tr className='spdx-full'>
                             <td>6.11 Document comment</td>
                             <td>
-                                {documentCreationInformation?.documentComment
+                                {
+                                (documentCreationInformation && !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.documentComment))
+                                &&
+                                documentCreationInformation.documentComment
                                     .trim()
                                     .split('\n')
                                     .map((item) => {

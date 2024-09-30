@@ -9,21 +9,21 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { RelationshipsBetweenSPDXElements, SPDX } from '@/object-types'
+import { PackageInformation, RelationshipsBetweenSPDXElements, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 
 interface Props {
-    indexRelation?: number
-    setIndexRelation?: React.Dispatch<React.SetStateAction<number>>
+    indexRelation: number
+    setIndexRelation: React.Dispatch<React.SetStateAction<number>>
     relationshipsBetweenSPDXElementSPDXs: RelationshipsBetweenSPDXElements[]
     setRelationshipsBetweenSPDXElementSPDXs: React.Dispatch<React.SetStateAction<RelationshipsBetweenSPDXElements[]>>
     relationshipsBetweenSPDXElementPackages: RelationshipsBetweenSPDXElements[]
     setRelationshipsBetweenSPDXElementPackages: React.Dispatch<React.SetStateAction<RelationshipsBetweenSPDXElements[]>>
-    SPDXPayload?: SPDX
-    setSPDXPayload?: React.Dispatch<React.SetStateAction<SPDX>>
+    SPDXPayload: SPDX
+    setSPDXPayload: React.Dispatch<React.SetStateAction<SPDX>>
 }
 
 const EditRelationshipbetweenSPDXElementsInformation = ({
@@ -35,7 +35,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
     setRelationshipsBetweenSPDXElementPackages,
     SPDXPayload,
     setSPDXPayload,
-}: Props) => {
+}: Props) : ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [changeSource, setChangeSource] = useState(false)
     const [isSourceSPDXDocument, setIsSourceSPDXDocument] = useState<boolean>(true)
@@ -101,7 +101,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         relationships: relationshipsBetweenSPDXElementSPDXs,
-                    },
+                    } as SPDXDocument,
                 })
             } else {
                 setRelationshipsBetweenSPDXElementSPDXs([])
@@ -110,7 +110,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         relationships: [],
-                    },
+                    } as SPDXDocument,
                 })
             }
         } else if (relationshipType === 'package') {
@@ -122,7 +122,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         relationships: relationshipsBetweenSPDXElementPackages,
-                    },
+                    } as PackageInformation,
                 })
             } else {
                 setRelationshipsBetweenSPDXElementPackages([])
@@ -131,7 +131,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         relationships: [],
-                    },
+                    } as PackageInformation,
                 })
             }
         }
@@ -185,7 +185,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
             spdxDocument: {
                 ...SPDXPayload.spdxDocument,
                 relationships: arrayExternals,
-            },
+            } as SPDXDocument,
         })
     }
 
@@ -213,7 +213,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
             packageInformation: {
                 ...SPDXPayload.packageInformation,
                 relationships: arrayExternals,
-            },
+            } as PackageInformation,
         })
     }
 
@@ -240,7 +240,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                 spdxDocument: {
                     ...SPDXPayload.spdxDocument,
                     relationships: relationsUpdate,
-                },
+                } as SPDXDocument,
             })
         } else {
             const relationsUpdate: RelationshipsBetweenSPDXElements[] = relationshipsBetweenSPDXElementPackages.map(
@@ -260,7 +260,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                 packageInformation: {
                     ...SPDXPayload.packageInformation,
                     relationships: relationsUpdate,
-                },
+                } as PackageInformation,
             })
         }
     }
@@ -279,7 +279,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         relationships: [],
-                    },
+                    } as SPDXDocument,
                 })
             } else {
                 let relationships: RelationshipsBetweenSPDXElements[] = []
@@ -298,7 +298,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     spdxDocument: {
                         ...SPDXPayload.spdxDocument,
                         relationships: relationships,
-                    },
+                    } as SPDXDocument,
                 })
                 if (!CommonUtils.isNullEmptyOrUndefinedArray(relationships)) {
                     setNumberIndexSPDX(relationships[0].index)
@@ -312,7 +312,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         relationships: [],
-                    },
+                    } as PackageInformation,
                 })
             } else {
                 let relationships: RelationshipsBetweenSPDXElements[] = []
@@ -331,7 +331,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     packageInformation: {
                         ...SPDXPayload.packageInformation,
                         relationships: relationships,
-                    },
+                    } as PackageInformation,
                 })
                 if (!CommonUtils.isNullEmptyOrUndefinedArray(relationships)) {
                     setNumberIndexPackage(relationships[0].index)
@@ -434,99 +434,95 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                         </div>
                     </td>
                 </tr>
-                {(isSourceSPDXDocument
-                    ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                    : relationshipsBetweenSPDXElementPackages[indexRelation]) && (
-                    <>
-                        <tr>
-                            <td>
-                                <div className='form-group'>
-                                    <label htmlFor='spdxElement' className='lableSPDX'>
-                                        11.1 Relationship
-                                    </label>
-                                    <div style={{ display: 'flex' }}>
-                                        <input
-                                            style={{ marginRight: '1rem' }}
-                                            id='spdxElement'
-                                            className='form-control'
-                                            name='spdxElementId'
-                                            type='text'
-                                            placeholder='Enter SPDX element'
-                                            onChange={updateField}
-                                            value={
-                                                isSourceSPDXDocument
-                                                    ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                          ?.spdxElementId ?? ''
-                                                    : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                          ?.spdxElementId ?? ''
-                                            }
-                                        />
-                                        <select
-                                            className='form-control form-select'
-                                            id='relationshipType'
-                                            name='relationshipType'
-                                            style={{ marginRight: '1rem' }}
-                                            onChange={updateField}
-                                            value={
-                                                isSourceSPDXDocument
-                                                    ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                          ?.relationshipType ?? ''
-                                                    : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                          ?.relationshipType ?? ''
-                                            }
-                                        >
-                                            <option value=''></option>
-                                            {relationTypes.map((type) => (
-                                                <option key={type} value={type}>
-                                                    {type}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <input
-                                            id='relatedSPDXElement'
-                                            className='form-control'
-                                            name='relatedSpdxElement'
-                                            onChange={updateField}
-                                            type='text'
-                                            placeholder='Enter related SPDX element'
-                                            value={
-                                                isSourceSPDXDocument
-                                                    ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                          ?.relatedSpdxElement ?? ''
-                                                    : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                          ?.relatedSpdxElement ?? ''
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div className='form-group'>
-                                    <label htmlFor='relationshipComment' className='lableSPDX'>
-                                        11.2 Relationship comment
-                                    </label>
-                                    <textarea
+                <>
+                    <tr>
+                        <td>
+                            <div className='form-group'>
+                                <label htmlFor='spdxElement' className='lableSPDX'>
+                                    11.1 Relationship
+                                </label>
+                                <div style={{ display: 'flex' }}>
+                                    <input
+                                        style={{ marginRight: '1rem' }}
+                                        id='spdxElement'
                                         className='form-control'
-                                        id='relationshipComment'
+                                        name='spdxElementId'
+                                        type='text'
+                                        placeholder='Enter SPDX element'
                                         onChange={updateField}
-                                        rows={5}
-                                        name='relationshipComment'
-                                        placeholder='Enter relationship comment'
                                         value={
                                             isSourceSPDXDocument
                                                 ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                      ?.relationshipComment ?? ''
+                                                        ?.spdxElementId ?? ''
                                                 : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                      ?.relationshipComment ?? ''
+                                                        ?.spdxElementId ?? ''
                                         }
-                                    ></textarea>
+                                    />
+                                    <select
+                                        className='form-control form-select'
+                                        id='relationshipType'
+                                        name='relationshipType'
+                                        style={{ marginRight: '1rem' }}
+                                        onChange={updateField}
+                                        value={
+                                            isSourceSPDXDocument
+                                                ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
+                                                        ?.relationshipType ?? ''
+                                                : relationshipsBetweenSPDXElementPackages[indexRelation]
+                                                        ?.relationshipType ?? ''
+                                        }
+                                    >
+                                        <option value=''></option>
+                                        {relationTypes.map((type) => (
+                                            <option key={type} value={type}>
+                                                {type}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <input
+                                        id='relatedSPDXElement'
+                                        className='form-control'
+                                        name='relatedSpdxElement'
+                                        onChange={updateField}
+                                        type='text'
+                                        placeholder='Enter related SPDX element'
+                                        value={
+                                            isSourceSPDXDocument
+                                                ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
+                                                        ?.relatedSpdxElement ?? ''
+                                                : relationshipsBetweenSPDXElementPackages[indexRelation]
+                                                        ?.relatedSpdxElement ?? ''
+                                        }
+                                    />
                                 </div>
-                            </td>
-                        </tr>
-                    </>
-                )}
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div className='form-group'>
+                                <label htmlFor='relationshipComment' className='lableSPDX'>
+                                    11.2 Relationship comment
+                                </label>
+                                <textarea
+                                    className='form-control'
+                                    id='relationshipComment'
+                                    onChange={updateField}
+                                    rows={5}
+                                    name='relationshipComment'
+                                    placeholder='Enter relationship comment'
+                                    value={
+                                        isSourceSPDXDocument
+                                            ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
+                                                    ?.relationshipComment ?? ''
+                                            : relationshipsBetweenSPDXElementPackages[indexRelation]
+                                                    ?.relationshipComment ?? ''
+                                    }
+                                ></textarea>
+                            </div>
+                        </td>
+                    </tr>
+                </>
             </tbody>
         </table>
     )

@@ -11,7 +11,7 @@
 'use client'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
@@ -19,7 +19,7 @@ import DownloadService from '@/services/download.service'
 import ComponentsTable from './ComponentsTable'
 import ImportSBOMModal from './ImportSBOMModal'
 
-const ComponentIndex = () => {
+const ComponentIndex = () : ReactNode => {
     const t = useTranslations('default')
     const [numberOfComponent, setNumberOfComponent] = useState(0)
     const [importModalOpen, setImportModalOpen] = useState(false)
@@ -154,7 +154,7 @@ const ComponentIndex = () => {
     }
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <div className='container page-content'>

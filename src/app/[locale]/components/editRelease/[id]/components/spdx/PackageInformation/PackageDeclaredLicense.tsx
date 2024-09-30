@@ -8,15 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
+
 interface Props {
-    setDeclaredLicenseToPackage?: (data: string) => void
-    declaredLicenseExist?: boolean
-    setDeclaredLicenseExist?: React.Dispatch<React.SetStateAction<boolean>>
-    declaredLicenseNone?: boolean
-    setDeclaredLicenseNone?: React.Dispatch<React.SetStateAction<boolean>>
-    declaredLicenseNoasserttion?: boolean
-    setDeclaredLicenseNoasserttion?: React.Dispatch<React.SetStateAction<boolean>>
-    declaredLicense?: string
+    setDeclaredLicenseToPackage: (data: string) => void
+    declaredLicenseExist: boolean
+    setDeclaredLicenseExist: React.Dispatch<React.SetStateAction<boolean>>
+    declaredLicenseNone: boolean
+    setDeclaredLicenseNone: React.Dispatch<React.SetStateAction<boolean>>
+    declaredLicenseNoasserttion: boolean
+    setDeclaredLicenseNoasserttion: React.Dispatch<React.SetStateAction<boolean>>
+    declaredLicense: string
 }
 
 function PackageDeclaredLicense({
@@ -28,7 +30,7 @@ function PackageDeclaredLicense({
     declaredLicenseNoasserttion,
     setDeclaredLicenseNoasserttion,
     declaredLicense,
-}: Props) {
+}: Props) : ReactNode {
     const selectDeclaredLicenseExist = () => {
         setDeclaredLicenseExist(true)
         setDeclaredLicenseNone(false)
@@ -75,7 +77,7 @@ function PackageDeclaredLicense({
                             name='licenseDeclared'
                             placeholder='Enter declared license'
                             onChange={updateField}
-                            value={declaredLicense ?? ''}
+                            value={declaredLicense}
                             disabled={declaredLicenseNone || declaredLicenseNoasserttion}
                         />
                     </div>
