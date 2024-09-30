@@ -28,11 +28,13 @@ import {
     Embedded,
     HttpStatus,
     LinkedVulnerability,
+    User,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
+import MessageService from '@/services/message.service'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -73,6 +75,8 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
+    const [subscribers, setSubscribers] = useState<Array<string>>([])
+    const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -103,11 +107,20 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
         )
     }
 
+    const extractUserEmailFromSession = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
+        setUserEmail(session.user.email)
+    }
+
     useEffect(() => {
+        void extractUserEmailFromSession()
         fetchData(`components/${componentId}`)
             .then((component: Component | undefined) => {
                 if (component === undefined) return
                 setComponent(component)
+                setSubscribers(getSubcribersEmail(component))
                 if (
                     !CommonUtils.isNullOrUndefined(component['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(component['_embedded']['sw360:attachments'])
@@ -139,11 +152,42 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
             .catch((err) => console.error(err))
     }, [componentId, fetchData])
 
+    const getSubcribersEmail = (component: Component) => {
+        return (component._embedded !== undefined && component._embedded['sw360:subscribers'] !== undefined)
+            ? Object.values(component._embedded['sw360:subscribers'].map((user: User) => user.email))
+            : []
+    }
+
+    const isUserSubscribed = () => {
+        if (userEmail === undefined) return false
+        return subscribers.includes(userEmail)
+    }
+
+    const handleSubcriptions = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.user.access_token)
+        fetchData(`components/${componentId}`)
+            .then((component: Component | undefined) => {
+                if (component === undefined) return
+                setComponent(component)
+                setSubscribers(getSubcribersEmail(component))
+            }).catch((e) => console.error(e))
+    }
+
     const headerButtons = {
         Edit: { link: `/components/edit/${componentId}`, type: 'primary', name: t('Edit component') },
         Merge: { link: '', type: 'secondary', name: t('Merge') },
         Split: { link: '', type: 'secondary', name: t('Split') },
-        Subscribe: { link: '', type: 'outline-success', name: t('Subscribe') },
+        Subscribe: {
+            link: '',
+            type: isUserSubscribed() ? 'outline-danger' : 'outline-success',
+            name: isUserSubscribed() ? t('Unsubscribe') : t('Subscribe'),
+            onClick: handleSubcriptions
+        }
     }
 
     return (
