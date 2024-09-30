@@ -55,7 +55,8 @@ interface Component {
         defaultVendor?: Vendor
         modifiedBy?: User
         componentOwner?: User
-        'sw360:attachments'?: Array<Attachment>
+        'sw360:attachments'?: Array<Attachment>,
+        'sw360:subscribers'?: Array<User>
     }
 }
 
