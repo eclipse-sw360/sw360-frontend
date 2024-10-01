@@ -19,10 +19,10 @@ import { useTranslations } from 'next-intl'
 import { PageButtonHeader, QuickFilter, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 
-function LicensePage() {
+function LicensePage() : ReactNode {
     const params = useSearchParams()
     const searchParams = Object.fromEntries(params)
     const t = useTranslations('default')
@@ -54,19 +54,19 @@ function LicensePage() {
     const server = {
         url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/licenses`, searchParams),
         then: (data: Embedded<LicensePayload, 'sw360:licenses'>) => {
-            setNumberLicense(data.page.totalElements)
+            setNumberLicense( data.page ? data.page.totalElements : 0)
             return data._embedded['sw360:licenses'].map((item: LicensePayload) => [
-                item._links.self.href.split('/').pop(),
+                item._links?.self.href.split('/').pop(),
                 item.fullName,
                 _(
                     <center>
-                        {item.checked ? <BsCheck2Circle color='#287d3c' size='16' /> : <BsXCircle color='#da1414' />}
+                        {(item.checked === true) ? <BsCheck2Circle color='#287d3c' size='16' /> : <BsXCircle color='#da1414' />}
                     </center>
                 ),
                 _(<>{item.licenseType ? item.licenseType.licenseType : '--'}</>),
             ])
         },
-        total: (data: Embedded<LicensePayload, 'sw360:licenses'>) => data.page.totalElements,
+        total: (data: Embedded<LicensePayload, 'sw360:licenses'>) => data.page ? data.page.totalElements : 0,
         headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 
@@ -90,7 +90,7 @@ function LicensePage() {
         setSearch({ keyword: event.currentTarget.value })
     }
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <div className='container page-content'>

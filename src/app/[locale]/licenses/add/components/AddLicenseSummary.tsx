@@ -13,15 +13,16 @@
 import { LicensePayload } from '@/object-types'
 import AddLicenseDetail from './AddLicenseDetail'
 import AddLicenseText from './AddLicenseText'
+import { ReactNode } from 'react'
 
 interface Props {
-    licensePayload?: LicensePayload
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
-    errorShortName?: boolean
-    errorFullName?: boolean
-    inputValid?: boolean
-    setErrorShortName?: React.Dispatch<React.SetStateAction<boolean>>
-    setErrorFullName?: React.Dispatch<React.SetStateAction<boolean>>
+    licensePayload: LicensePayload
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
+    errorShortName: boolean
+    errorFullName: boolean
+    inputValid: boolean
+    setErrorShortName: React.Dispatch<React.SetStateAction<boolean>>
+    setErrorFullName: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export default function AddLicenseSummary({
@@ -32,7 +33,7 @@ export default function AddLicenseSummary({
     inputValid,
     setErrorShortName,
     setErrorFullName,
-}: Props) {
+}: Props) : ReactNode {
     return (
         <div className='col'>
             <AddLicenseDetail

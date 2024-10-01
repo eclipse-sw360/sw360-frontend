@@ -19,12 +19,14 @@ import { _ } from 'next-sw360'
 import styles from './LinkedObligations.module.css'
 
 interface Props {
-    obligations?: any[]
-    setObligations?: (obligationsLink: Array<Obligation>) => void
+    obligations: Array<(string | Obligation)[]>
+    setObligations: (obligationsLink: Array<Obligation>) => void
 }
 
+type RowData = Array<string | Obligation | { index: number, checked: boolean, obligation: string | Obligation }>
+
 const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) => {
-    const [data, setData] = useState([])
+    const [data, setData] = useState<Array<RowData>>([])
     const [isCheckAll, setIsCheckAll] = useState<boolean>(false)
     const t = useTranslations('default')
 
@@ -93,7 +95,7 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
 
             const attachmentDetail = document.getElementById(item.title)
             if (!attachmentDetail) {
-                const parent = (event.target as HTMLElement).parentElement.parentElement.parentElement
+                const parent = (event.target as HTMLElement).parentElement?.parentElement?.parentElement
                 const html = `<td colspan="10">
                     <table class="table table-borderless">
                         <tbody>
@@ -107,7 +109,7 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
                 tr.id = item.title
                 tr.innerHTML = html
 
-                parent.parentNode.insertBefore(tr, parent.nextSibling)
+                parent?.parentNode?.insertBefore(tr, parent.nextSibling)
             } else if (attachmentDetail.hidden) {
                 attachmentDetail.hidden = false
             } else {

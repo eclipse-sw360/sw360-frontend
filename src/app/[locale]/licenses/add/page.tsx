@@ -10,11 +10,12 @@
 
 import { Metadata } from 'next'
 import AddLicense from './components/AddLicense'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Licenses',
 }
 
-export default async function LicenseAddPage() {
+export default function LicenseAddPage() : ReactNode {
     return <AddLicense />
 }

@@ -21,14 +21,14 @@ import SelectTableLinkedObligations from './SelectTableLinkedObligations'
 import { BsCheck2Square } from 'react-icons/bs'
 
 interface Props {
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
-    onReRender?: () => void
-    data: Array<any>
-    setData: (data: Array<any>) => void
-    obligations: Array<any>
-    licensePayload?: LicensePayload
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
+    onReRender: () => void
+    data: Array<(string | Obligation)[]>
+    setData: (data: Array<(string | Obligation)[]>) => void
+    obligations: Array<(string | Obligation)[]>
+    licensePayload: LicensePayload
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
 
 const LinkedObligationsDialog = ({
@@ -42,7 +42,7 @@ const LinkedObligationsDialog = ({
     setLicensePayload,
 }: Props) => {
     const t = useTranslations('default')
-    const [linkedObligationsResponse, setLinkedObligationsResponse] = useState([])
+    const [linkedObligationsResponse, setLinkedObligationsResponse] = useState<Array<Obligation>>([])
 
     const handleCloseDialog = () => {
         setShow(!show)
@@ -58,11 +58,11 @@ const LinkedObligationsDialog = ({
         linkedObligationsResponseData.forEach((linkedObligations: any) => {
             data.push(linkedObligations)
         })
-        data = data.filter((v, index, a) => a.findIndex((v2) => v2[0].title === v[0].title) === index)
+        data = data.filter((v, index, a) => a.findIndex((v2) => (v2[0] as Obligation).title === (v[0] as Obligation).title) === index)
         const obligationIds: string[] = []
-        data.forEach((item: any) => {
-            if (!CommonUtils.isNullEmptyOrUndefinedString(item[0])) {
-                obligationIds.push(CommonUtils.getIdFromUrl(item[0]['_links'].self.href))
+        data.forEach((item: (string | Obligation)[]) => {
+            if (!CommonUtils.isNullOrUndefined(item[0])) {
+                obligationIds.push(CommonUtils.getIdFromUrl((item[0] as Obligation)._links?.self.href))
             }
         })
         setLicensePayload({

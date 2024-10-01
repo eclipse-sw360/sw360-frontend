@@ -19,14 +19,14 @@ import styles from './TableLinkedObligations.module.css'
 import DeleteObligationDialog from './DeleteObligationDialog'
 
 interface Props {
-    data: Array<any>
-    setData: (data: Array<any>) => void
-    setObligationIdToLicensePayLoad?: (releaseIdToRelationships: Array<string>) => void
+    data: Array<(string | Obligation)[]>
+    setData: React.Dispatch<React.SetStateAction<Array<(string | Obligation)[]>>>
+    setObligationIdToLicensePayLoad: (releaseIdToRelationships: Array<string>) => void
 }
 
 export default function TableLinkedObligations({ data, setData, setObligationIdToLicensePayLoad }: Props) {
     const t = useTranslations('default')
-    const [obligation, setObligation] = useState<Obligation>()
+    const [obligation, setObligation] = useState<Obligation | undefined>(undefined)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const deleteObligation = (item: Obligation) => {
         setObligation(item)
@@ -41,25 +41,25 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
                 ;(event.target as HTMLElement).className = styles.expand
             }
 
-            const attachmentDetail = document.getElementById(item.title)
+            const attachmentDetail = document.getElementById(item.title ?? '')
             if (!attachmentDetail) {
-                const parent = (event.target as HTMLElement).parentElement.parentElement.parentElement
-                const html = `<td colspan="10">
+                const parent = (event.target as HTMLElement).parentElement?.parentElement?.parentElement
+                const html = `<td colspan='4'>
                     <table class="table table-borderless">
                         <tbody>
                             <tr>
                             <td>${
-                                item.text.replace(/[\r\n]/g, '<br>').replace(/\t/g, '&ensp;&ensp;&ensp;&ensp;') ?? ''
+                                item.text?.replace(/[\r\n]/g, '<br>').replace(/\t/g, '&ensp;&ensp;&ensp;&ensp;') ?? ''
                             }</td>
                             </tr>
                         </tbody>
                     </table>
                 </td>`
                 const tr = document.createElement('tr')
-                tr.id = item.title
+                tr.id = item.title ?? ''
                 tr.innerHTML = html
 
-                parent.parentNode.insertBefore(tr, parent.nextSibling)
+                parent?.parentNode?.insertBefore(tr, parent.nextSibling)
             } else {
                 if (attachmentDetail.hidden == true) {
                     attachmentDetail.hidden = false
@@ -106,12 +106,13 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
             name: t('Action'),
             formatter: (item: Obligation) =>
                 _(
-                    <div style={{ textAlign: 'left' }}>
+                    <div style={{ textAlign: 'center' }}>
                         <span>
                             <FaTrashAlt className={styles['delete-btn']} onClick={() => deleteObligation(item)} />
                         </span>
                     </div>
                 ),
+            width: '7%'
         },
     ]
     const [search, setSearch] = useState({})

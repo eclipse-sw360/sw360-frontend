@@ -19,12 +19,12 @@ import { CommonUtils } from '@/utils'
 import { BsQuestionCircle } from 'react-icons/bs'
 
 interface Props {
-    data: Array<any>
-    setData: (data: Array<any>) => void
-    setObligationIdToLicensePayLoad?: (releaseIdToRelationships: Array<string>) => void
-    obligation: Obligation
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
+    data: Array<(string | Obligation)[]>
+    setData: React.Dispatch<React.SetStateAction<Array<(string | Obligation)[]>>>
+    setObligationIdToLicensePayLoad: (releaseIdToRelationships: Array<string>) => void
+    obligation: Obligation | undefined
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const DeleteObligationDialog = ({
@@ -42,7 +42,7 @@ const DeleteObligationDialog = ({
         data.forEach((element) => {
             obligations.push(element)
         })
-        obligations = obligations.filter((element) => element[1] !== obligation.title)
+        obligations = obligations.filter((element) => element[1] !== obligation?.title)
         setData(obligations)
         const obligationIds: string[] = []
         obligations.forEach((item: any) => {

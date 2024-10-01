@@ -10,24 +10,23 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, ReactNode } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { HttpStatus, LicensePayload } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { BsQuestionCircle } from 'react-icons/bs'
 
 interface Props {
-    licensePayload?: LicensePayload
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
+    licensePayload: LicensePayload
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) => {
-    const { data: session } = useSession()
+const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
     const [variant, setVariant] = useState('success')
@@ -47,6 +46,9 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) => {
     }, [])
 
     const deleteLicense = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
         const response = await ApiUtils.DELETE(`licenses/${licensePayload.shortName}`, session.user.access_token)
         try {
             if (response.status == HttpStatus.OK) {
@@ -80,53 +82,51 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) => {
     }
 
     return (
-        licensePayload && (
-            <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-                <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414' }}>
-                    <h5>
-                        <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
-                            <BsQuestionCircle />
-                            &nbsp;
-                            {t('Delete License')}?
-                        </Modal.Title>
-                    </h5>
-                    <button
-                        type='button'
-                        style={{
-                            color: 'red',
-                            backgroundColor: '#FEEFEF',
-                            alignItems: 'center',
-                            borderColor: '#FEEFEF',
-                            borderWidth: '0px',
-                            fontSize: '1.1rem',
-                            margin: '-1rem -1rem auto',
-                        }}
-                        onClick={handleCloseDialog}
-                    >
-                        <span aria-hidden='true'>&times;</span>
-                    </button>
-                </Modal.Header>
-                <Modal.Body>
-                    <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
-                        {message}
-                    </Alert>
-                    <Form>
-                        {t.rich('Do you really want to delete the license?', {
-                            name: `${licensePayload.fullName} (${licensePayload.shortName})`,
-                            strong: (chunks) => <b>{chunks}</b>,
-                        })}
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer className='justify-content-end'>
-                    <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
-                        {t('Cancel')}
-                    </Button>
-                    <Button className='login-btn' variant='danger' onClick={() => handleSubmit()} hidden={reloadPage}>
-                        {t('Delete License')}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        )
+        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+            <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414' }}>
+                <h5>
+                    <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
+                        <BsQuestionCircle />
+                        &nbsp;
+                        {t('Delete License')}?
+                    </Modal.Title>
+                </h5>
+                <button
+                    type='button'
+                    style={{
+                        color: 'red',
+                        backgroundColor: '#FEEFEF',
+                        alignItems: 'center',
+                        borderColor: '#FEEFEF',
+                        borderWidth: '0px',
+                        fontSize: '1.1rem',
+                        margin: '-1rem -1rem auto',
+                    }}
+                    onClick={handleCloseDialog}
+                >
+                    <span aria-hidden='true'>&times;</span>
+                </button>
+            </Modal.Header>
+            <Modal.Body>
+                <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
+                    {message}
+                </Alert>
+                <Form>
+                    {t.rich('Do you really want to delete the license?', {
+                        name: `${licensePayload.fullName} (${licensePayload.shortName})`,
+                        strong: (chunks) => <b>{chunks}</b>,
+                    })}
+                </Form>
+            </Modal.Body>
+            <Modal.Footer className='justify-content-end'>
+                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                    {t('Cancel')}
+                </Button>
+                <Button className='login-btn' variant='danger' onClick={() => handleSubmit()} hidden={reloadPage}>
+                    {t('Delete License')}
+                </Button>
+            </Modal.Footer>
+        </Modal>
     )
 }
 
