@@ -697,7 +697,7 @@
     "Not Checked": "未勾选",
     "NotOwnComponent": "您不拥有任何组件。",
     "Note": "",
-    "Note for comments": "注意：此评论将填充到选择批量拒绝的所有审核请求中",
+    "Note for comments": "注意：此评论将填充到选择批量接受/拒绝的所有审核请求中",
     "Number of Security Vulnerabilities": "安全漏洞数量",
     "OAuth Client": "OAuth Client",
     "ON_HOLD": "等候接听",
