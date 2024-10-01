@@ -10,14 +10,14 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { HttpStatus, LicensePayload, LicenseTabIds, Obligation } from '@/object-types'
+import { HttpStatus, LicensePayload, LicenseTabIds, Obligation, Embedded, LicenseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
@@ -25,26 +25,25 @@ import EditLicenseSummary from './EditLicenseSummary'
 import MessageService from '@/services/message.service'
 
 interface Props {
-    licenseId?: string
+    licenseId: string
 }
 
-export default function EditLicense({ licenseId }: Props) {
+type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
+
+export default function EditLicense({ licenseId }: Props) : ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
-    const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
-    const [data, setData] = useState([])
-    const [reRender, setReRender] = useState(false)
-    const params = useSearchParams()
-    const handleReRender = () => {
-        setReRender(!reRender)
-    }
-    const [addObligationDiaglog, setAddObligationDiaglog] = useState(false)
-    const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const [obligations, setObligations] = useState([])
     const router = useRouter()
-    const [inputValid, setInputValid] = useState(false)
-    const [errorFullName, setErrorFullName] = useState(false)
+    const params = useSearchParams()
+
+    const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
+    const [data, setData] = useState<Array<(string | Obligation)[]>>([])
+    const [reRender, setReRender] = useState(false)
+
+    const [addObligationDiaglog, setAddObligationDiaglog] = useState<boolean>(false)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false)
+    const [obligations, setObligations] = useState<Array<(string | Obligation)[]>>([])
+    const [inputValid, setInputValid] = useState<boolean>(false)
+    const [errorFullName, setErrorFullName] = useState<boolean>(false)
     const [licensePayload, setLicensePayload] = useState<LicensePayload>({
         shortName: '',
         fullName: '',
@@ -57,12 +56,21 @@ export default function EditLicense({ licenseId }: Props) {
         licenseTypeDatabaseId: '',
     })
 
+    const handleReRender = () => {
+        setReRender(!reRender)
+    }
+
+    const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
+
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -70,14 +78,15 @@ export default function EditLicense({ licenseId }: Props) {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const license = await response.json()
+                const license = await response.json() as LicenseDetail
                 setLicensePayload(license)
-                if (license._embedded !== undefined) {
+                if (!CommonUtils.isNullOrUndefined(license._embedded['sw360:obligations'])) {
                     const data = license._embedded['sw360:obligations'].map((item: Obligation) => [
                         item,
-                        item.title,
-                        item.obligationType &&
-                            item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase(),
+                        item.title ?? '',
+                        !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
+                            ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
+                            : '',
                         item,
                     ])
                     setData(data)
@@ -86,10 +95,13 @@ export default function EditLicense({ licenseId }: Props) {
                 console.error(e)
             }
         })()
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const response = await ApiUtils.GET(
-                    `obligations?obligationLevel=LICENSE_OBLIGATION`,
+                    'obligations?obligationLevel=LICENSE_OBLIGATION',
                     session.user.access_token,
                     signal
                 )
@@ -99,15 +111,16 @@ export default function EditLicense({ licenseId }: Props) {
                     return notFound()
                 }
 
-                const obligations = await response.json()
-                if (!CommonUtils.isNullEmptyOrUndefinedString(obligations._embedded['sw360:obligations'])) {
+                const obligations = await response.json() as EmbeddedObligations
+                if (!CommonUtils.isNullEmptyOrUndefinedArray(obligations._embedded['sw360:obligations'])) {
                     const data = obligations._embedded['sw360:obligations'].map((item: Obligation) => [
                         item,
                         item,
-                        item.title,
-                        item.obligationType &&
-                            item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase(),
-                        item.text,
+                        item.title ?? '',
+                        !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
+                            ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
+                            : '',
+                        item.text ?? '',
                     ])
                     setObligations(data)
                 }
@@ -116,7 +129,7 @@ export default function EditLicense({ licenseId }: Props) {
             }
         })()
         return () => controller.abort()
-    }, [params, session, licenseId])
+    }, [params, licenseId])
 
     const tabList = [
         {
@@ -134,15 +147,21 @@ export default function EditLicense({ licenseId }: Props) {
         if (CommonUtils.isNullEmptyOrUndefinedString(licensePayload.fullName)) {
             setErrorFullName(true)
             MessageService.error(t('Fullname not null or empty'))
+            return
+        }
+
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = (await response.json()) as LicensePayload
+            MessageService.success(t('License updated successfully!'))
+            router.push(`/licenses/detail?id=${data.shortName}&update=success`)
         } else {
-            const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as LicensePayload
-                MessageService.success(t('License updated successfully!'))
-                router.push(`/licenses/detail?id=${data.shortName}&update=success`)
-            } else {
-                MessageService.error(t('License updated failed!'))
-            }
+            MessageService.error(t('License updated failed!'))
         }
     }
 
@@ -168,72 +187,66 @@ export default function EditLicense({ licenseId }: Props) {
         Cancel: { link: `/licenses/detail?id=${licenseId}`, type: 'light', name: t('Cancel') },
     }
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            licensePayload && (
-                <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
-                    <div className='row'>
-                        <div className='col-2 sidebar'>
-                            <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
-                        </div>
-                        <DeleteLicenseDialog
+    return (
+        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                </div>
+                <DeleteLicenseDialog
+                    licensePayload={licensePayload}
+                    show={deleteDialogOpen}
+                    setShow={setDeleteDialogOpen}
+                />
+                <div className='col'>
+                    <div className='row' style={{ marginBottom: '20px' }}>
+                        {selectedTab === LicenseTabIds.OBLIGATIONS ? (
+                            <PageButtonHeader
+                                title={`${licensePayload.fullName} (${licensePayload.shortName})`}
+                                buttons={headerButtonAddObligations}
+                                checked={licensePayload.checked}
+                            ></PageButtonHeader>
+                        ) : (
+                            <PageButtonHeader
+                                title={`${licensePayload.fullName} (${licensePayload.shortName})`}
+                                buttons={headerButtons}
+                                checked={licensePayload.checked}
+                            ></PageButtonHeader>
+                        )}
+                    </div>
+                    <div
+                        className='row'
+                        style={{ fontSize: '14px' }}
+                        hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}
+                    >
+                        <EditLicenseSummary
+                            errorFullName={errorFullName}
+                            inputValid={inputValid}
+                            setErrorFullName={setErrorFullName}
                             licensePayload={licensePayload}
-                            show={deleteDialogOpen}
-                            setShow={setDeleteDialogOpen}
+                            setLicensePayload={setLicensePayload}
                         />
-                        <div className='col'>
-                            <div className='row' style={{ marginBottom: '20px' }}>
-                                {selectedTab === LicenseTabIds.OBLIGATIONS ? (
-                                    <PageButtonHeader
-                                        title={`${licensePayload.fullName} (${licensePayload.shortName})`}
-                                        buttons={headerButtonAddObligations}
-                                        checked={licensePayload.checked}
-                                    ></PageButtonHeader>
-                                ) : (
-                                    <PageButtonHeader
-                                        title={`${licensePayload.fullName} (${licensePayload.shortName})`}
-                                        buttons={headerButtons}
-                                        checked={licensePayload.checked}
-                                    ></PageButtonHeader>
-                                )}
-                            </div>
-                            <div
-                                className='row'
-                                style={{ fontSize: '14px' }}
-                                hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}
-                            >
-                                <EditLicenseSummary
-                                    errorFullName={errorFullName}
-                                    inputValid={inputValid}
-                                    setErrorFullName={setErrorFullName}
-                                    licensePayload={licensePayload}
-                                    setLicensePayload={setLicensePayload}
-                                />
-                            </div>
-                            <div className='row' hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}>
-                                <LinkedObligationsDialog
-                                    show={addObligationDiaglog}
-                                    data={data}
-                                    setData={setData}
-                                    obligations={obligations}
-                                    setShow={setAddObligationDiaglog}
-                                    onReRender={handleReRender}
-                                    licensePayload={licensePayload}
-                                    setLicensePayload={setLicensePayload}
-                                />
-                                <LinkedObligations
-                                    data={data}
-                                    setData={setData}
-                                    licensePayload={licensePayload}
-                                    setLicensePayload={setLicensePayload}
-                                />
-                            </div>
-                        </div>
+                    </div>
+                    <div className='row' hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}>
+                        <LinkedObligationsDialog
+                            show={addObligationDiaglog}
+                            data={data}
+                            setData={setData}
+                            obligations={obligations}
+                            setShow={setAddObligationDiaglog}
+                            onReRender={handleReRender}
+                            licensePayload={licensePayload}
+                            setLicensePayload={setLicensePayload}
+                        />
+                        <LinkedObligations
+                            data={data}
+                            setData={setData}
+                            licensePayload={licensePayload}
+                            setLicensePayload={setLicensePayload}
+                        />
                     </div>
                 </div>
-            )
-        )
-    }
+            </div>
+        </div>
+    )
 }

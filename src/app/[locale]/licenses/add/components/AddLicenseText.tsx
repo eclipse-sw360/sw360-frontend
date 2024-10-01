@@ -12,14 +12,15 @@
 import { useTranslations } from 'next-intl'
 import { LicensePayload } from '@/object-types'
 import styles from './LicenseDetails.module.css'
+import { ReactNode } from 'react'
 
 interface Props {
-    licensePayload?: LicensePayload
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
-    inputValid?: boolean
+    licensePayload: LicensePayload
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
+    inputValid: boolean
 }
 
-const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props) => {
+const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props) : ReactNode => {
     const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

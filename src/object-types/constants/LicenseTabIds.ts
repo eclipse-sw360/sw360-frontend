@@ -8,11 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum LicenseTabIds {
-    DETAILS = 'tab-details',
-    TEXT = 'tab-text',
-    OBLIGATIONS = 'tab-obligations',
-    CHANGE_LOG = 'tab-changeLogs',
+const LicenseTabIds = {
+    DETAILS: 'tab-details',
+    TEXT: 'tab-text',
+    OBLIGATIONS: 'tab-obligations',
+    CHANGE_LOG: 'tab-changeLogs',
 }
 
 export default LicenseTabIds

@@ -65,11 +65,3 @@
     cursor: pointer;
 }
 
-.attachment-table table:first-child tr td:first-child div {
-    text-align: center;
-}
-
-.download-btn:hover {
-    color: #f7941e;
-    cursor: pointer;
-}

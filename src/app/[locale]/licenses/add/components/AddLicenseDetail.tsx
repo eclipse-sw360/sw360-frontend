@@ -9,23 +9,25 @@
 // License-Filename: LICENSE
 
 'use client'
-import { ApiUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { LicensePayload, HttpStatus } from '@/object-types'
+import { ReactNode, useEffect, useState } from 'react'
+import { LicensePayload, HttpStatus, LicenseType, Embedded } from '@/object-types'
 import styles from './LicenseDetails.module.css'
 
 interface Props {
-    licensePayload?: LicensePayload
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
-    errorShortName?: boolean
-    errorFullName?: boolean
-    inputValid?: boolean
-    setErrorShortName?: React.Dispatch<React.SetStateAction<boolean>>
-    setErrorFullName?: React.Dispatch<React.SetStateAction<boolean>>
+    licensePayload: LicensePayload
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
+    errorShortName: boolean
+    errorFullName: boolean
+    inputValid: boolean
+    setErrorShortName: React.Dispatch<React.SetStateAction<boolean>>
+    setErrorFullName: React.Dispatch<React.SetStateAction<boolean>>
 }
+
+type EmbeddedLicenseTypes = Embedded<LicenseType, 'sw360:licenseTypes'>
 
 const AddLicenseDetail = ({
     licensePayload,
@@ -35,12 +37,11 @@ const AddLicenseDetail = ({
     inputValid,
     setErrorShortName,
     setErrorFullName,
-}: Props) => {
+}: Props) : ReactNode => {
     const [regexError, setRegexError] = useState(false)
     const t = useTranslations('default')
     const params = useSearchParams()
-    const { data: session } = useSession()
-    const [licenseTypes, setLicenseTypes] = useState([])
+    const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
     const validateShortName = (value: string) => {
         return value.match(/^[A-Za-z0-9\-.+]*$/) ? false : true
     }
@@ -71,22 +72,25 @@ const AddLicenseDetail = ({
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return
                 const response = await ApiUtils.GET(`licenseTypes`, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const licenses = await response.json()
+                const licenses = await response.json() as EmbeddedLicenseTypes
                 setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
             } catch (e) {
                 console.error(e)
             }
         })()
         return () => controller.abort()
-    }, [params, session])
+    }, [params])
 
     return (
         <div className='row mb-4' style={{ padding: '0px 12px', fontSize: '14px' }}>

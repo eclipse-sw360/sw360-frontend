@@ -9,13 +9,20 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, notFound } from 'next/navigation'
 import EditLicense from './components/EditLicense'
+import { CommonUtils } from '@/utils'
+import { ReactNode } from 'react'
 
-const LicenseEditPage = () => {
+const LicenseEditPage = () : ReactNode => {
     const searchParams = useSearchParams()
     const licenseId = searchParams.get('id')
-    return <EditLicense licenseId={licenseId} />
+
+    return (
+        (CommonUtils.isNullEmptyOrUndefinedString(licenseId))
+        ? notFound()
+        : <EditLicense licenseId={licenseId} />
+    )
 }
 
 export default LicenseEditPage

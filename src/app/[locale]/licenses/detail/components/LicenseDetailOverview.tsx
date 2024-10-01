@@ -13,20 +13,21 @@
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { PageButtonHeader, SideBar } from '@/components/sw360'
-import { Changelogs, HttpStatus, LicensePayload, LicenseTabIds } from '@/object-types'
+import { Changelogs, HttpStatus, LicenseDetail, LicenseTabIds, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
 import styles from '../detail.module.css'
 import MessageService from '@/services/message.service'
+import React from 'react'
 
 interface Props {
-    licenseId?: string
+    licenseId: string
 }
 
 const tabList = [
@@ -48,16 +49,17 @@ const tabList = [
     },
 ]
 
-const LicenseDetailOverview = ({ licenseId }: Props) => {
+type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
+
+const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
-    const [license, setLicenseDetail] = useState<LicensePayload>(undefined)
+    const [license, setLicenseDetail] = useState<LicenseDetail | undefined>(undefined)
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [isEditWhitelist, setIsEditWhitelist] = useState(false)
-    const [whitelist, setWhitelist] = useState<Map<string, boolean>>()
-    const { data: session, status } = useSession()
+    const [whitelist, setWhitelist] = useState<Map<string, boolean> | undefined>(undefined)
     const params = useSearchParams()
     const updateLicense = params.get('update')
 
@@ -67,8 +69,12 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
         }
         const controller = new AbortController()
         const signal = controller.signal
-        ;(async () => {
+
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
@@ -76,14 +82,17 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
                     return notFound()
                 }
 
-                const licenses = await response.json()
+                const licenses = await response.json() as LicenseDetail
                 setLicenseDetail(licenses)
             } catch (e) {
                 console.error(e)
             }
         })()
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const response = await ApiUtils.GET(
                     `changelog/document/${licenseId}`,
                     session.user.access_token,
@@ -95,7 +104,7 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
                     return notFound()
                 }
 
-                const data = await response.json()
+                const data = await response.json() as EmbeddedChangeLogs
 
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
@@ -108,7 +117,7 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
         })()
 
         return () => controller.abort()
-    }, [params, session, licenseId])
+    }, [params, licenseId])
 
     const handleEditWhitelist = () => {
         setIsEditWhitelist(true)
@@ -118,6 +127,13 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
     }
 
     const handleUpdateWhitelist = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        if (CommonUtils.isNullOrUndefined(whitelist))
+            return
         const whitelistObj = Object.fromEntries(whitelist)
         const response = await ApiUtils.PATCH(
             `licenses/${licenseId}/whitelist`,
@@ -154,111 +170,108 @@ const LicenseDetailOverview = ({ licenseId }: Props) => {
         Cancel: { link: '', type: 'light', onClick: handleCancel, name: t('Cancel') },
     }
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            license && (
-                <div className={`container ${styles['row-license-detail']}`}>
-                    <div className='row'>
-                        <div className='col-2 sidebar'>
-                            <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+
+    return (
+        license && (
+            <div className={`container ${styles['row-license-detail']}`}>
+                <div className='row'>
+                    <div className='col-2 sidebar'>
+                        <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                    </div>
+                    <div className='col'>
+                        <div className='row'>
+                            {selectedTab === LicenseTabIds.OBLIGATIONS ? (
+                                <>
+                                    {!CommonUtils.isNullEmptyOrUndefinedArray(license.obligationDatabaseIds) ? (
+                                        <>
+                                            {isEditWhitelist ? (
+                                                <PageButtonHeader
+                                                    title={`${license.fullName} (${license.shortName})`}
+                                                    buttons={headerButtonsUpdateWhitelist}
+                                                    checked={license.checked}
+                                                ></PageButtonHeader>
+                                            ) : (
+                                                <PageButtonHeader
+                                                    title={`${license.fullName} (${license.shortName})`}
+                                                    buttons={headerButtonsEditWhitelist}
+                                                    checked={license.checked}
+                                                ></PageButtonHeader>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <PageButtonHeader
+                                            title={`${license.fullName} (${license.shortName})`}
+                                            buttons={headerButtons}
+                                            checked={license.checked}
+                                        ></PageButtonHeader>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    {isEditWhitelist ? (
+                                        <PageButtonHeader
+                                            title={`${license.fullName} (${license.shortName})`}
+                                            buttons={headerButtonsUpdateWhitelist}
+                                            checked={license.checked}
+                                        ></PageButtonHeader>
+                                    ) : (
+                                        <>
+                                            {selectedTab === LicenseTabIds.CHANGE_LOG ? (
+                                                <PageButtonHeader
+                                                    title={`${license.fullName} (${license.shortName})`}
+                                                    buttons={headerButtons}
+                                                    checked={license.checked}
+                                                    changesLogTab={changesLogTab}
+                                                    setChangesLogTab={setChangesLogTab}
+                                                    changeLogIndex={changeLogIndex}
+                                                ></PageButtonHeader>
+                                            ) : (
+                                                <PageButtonHeader
+                                                    title={`${license.fullName} (${license.shortName})`}
+                                                    buttons={headerButtons}
+                                                    checked={license.checked}
+                                                ></PageButtonHeader>
+                                            )}
+                                        </>
+                                    )}
+                                </>
+                            )}
                         </div>
-                        <div className='col'>
-                            <div className='row'>
-                                {selectedTab === LicenseTabIds.OBLIGATIONS ? (
-                                    <>
-                                        {!CommonUtils.isNullEmptyOrUndefinedArray(license.obligationDatabaseIds) ? (
-                                            <>
-                                                {isEditWhitelist ? (
-                                                    <PageButtonHeader
-                                                        title={`${license.fullName} (${license.shortName})`}
-                                                        buttons={headerButtonsUpdateWhitelist}
-                                                        checked={license.checked}
-                                                    ></PageButtonHeader>
-                                                ) : (
-                                                    <PageButtonHeader
-                                                        title={`${license.fullName} (${license.shortName})`}
-                                                        buttons={headerButtonsEditWhitelist}
-                                                        checked={license.checked}
-                                                    ></PageButtonHeader>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <PageButtonHeader
-                                                title={`${license.fullName} (${license.shortName})`}
-                                                buttons={headerButtons}
-                                                checked={license.checked}
-                                            ></PageButtonHeader>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        {isEditWhitelist ? (
-                                            <PageButtonHeader
-                                                title={`${license.fullName} (${license.shortName})`}
-                                                buttons={headerButtonsUpdateWhitelist}
-                                                checked={license.checked}
-                                            ></PageButtonHeader>
-                                        ) : (
-                                            <>
-                                                {selectedTab === LicenseTabIds.CHANGE_LOG ? (
-                                                    <PageButtonHeader
-                                                        title={`${license.fullName} (${license.shortName})`}
-                                                        buttons={headerButtons}
-                                                        checked={license.checked}
-                                                        changesLogTab={changesLogTab}
-                                                        setChangesLogTab={setChangesLogTab}
-                                                        changeLogIndex={changeLogIndex}
-                                                    ></PageButtonHeader>
-                                                ) : (
-                                                    <PageButtonHeader
-                                                        title={`${license.fullName} (${license.shortName})`}
-                                                        buttons={headerButtons}
-                                                        checked={license.checked}
-                                                    ></PageButtonHeader>
-                                                )}
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                            <div className='row' hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}>
-                                <Detail license={license} setLicense={setLicenseDetail} />
-                            </div>
-                            <div className='row' hidden={selectedTab !== LicenseTabIds.TEXT ? true : false}>
-                                <Text license={license} />
-                            </div>
-                            <div className='row' hidden={selectedTab !== LicenseTabIds.OBLIGATIONS ? true : false}>
-                                <Obligations
-                                    licenseId={licenseId}
-                                    isEditWhitelist={isEditWhitelist}
-                                    whitelist={whitelist}
-                                    setWhitelist={setWhitelist}
-                                />
-                            </div>
-                            <div className='row' hidden={selectedTab != LicenseTabIds.CHANGE_LOG ? true : false}>
-                                <div className='col'>
-                                    <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
-                                        <ChangeLogList
-                                            setChangeLogIndex={setChangeLogIndex}
-                                            documentId={licenseId}
-                                            setChangesLogTab={setChangesLogTab}
-                                            changeLogList={changeLogList}
-                                        />
-                                    </div>
-                                    <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
-                                        <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                        <div id='cardScreen' style={{ padding: '0px' }}></div>
-                                    </div>
+                        <div className='row' hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}>
+                            <Detail license={license} setLicense={setLicenseDetail} />
+                        </div>
+                        <div className='row' hidden={selectedTab !== LicenseTabIds.TEXT ? true : false}>
+                            <Text license={license} />
+                        </div>
+                        <div className='row' hidden={selectedTab !== LicenseTabIds.OBLIGATIONS ? true : false}>
+                            <Obligations
+                                licenseId={licenseId}
+                                isEditWhitelist={isEditWhitelist}
+                                whitelist={whitelist}
+                                setWhitelist={setWhitelist}
+                            />
+                        </div>
+                        <div className='row' hidden={selectedTab != LicenseTabIds.CHANGE_LOG ? true : false}>
+                            <div className='col'>
+                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
+                                    <ChangeLogList
+                                        setChangeLogIndex={setChangeLogIndex}
+                                        documentId={licenseId}
+                                        setChangesLogTab={setChangesLogTab}
+                                        changeLogList={changeLogList}
+                                    />
+                                </div>
+                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
+                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
+                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            )
+            </div>
         )
-    }
+    )
 }
 
 export default LicenseDetailOverview

@@ -13,13 +13,14 @@
 import { LicensePayload } from '@/object-types'
 import EditLicenseDetail from './EditLicenseDetail'
 import EditLicenseText from './EditLicenseText'
+import { ReactNode } from 'react'
 
 interface Props {
-    errorFullName?: boolean
-    setErrorFullName?: React.Dispatch<React.SetStateAction<boolean>>
-    licensePayload?: LicensePayload
-    inputValid?: boolean
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
+    errorFullName: boolean
+    setErrorFullName: React.Dispatch<React.SetStateAction<boolean>>
+    licensePayload: LicensePayload
+    inputValid: boolean
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
 
 export default function EditLicenseSummary({
@@ -28,7 +29,7 @@ export default function EditLicenseSummary({
     errorFullName,
     setErrorFullName,
     inputValid,
-}: Props) {
+}: Props) : ReactNode {
     return (
         <div className='col'>
             <EditLicenseDetail

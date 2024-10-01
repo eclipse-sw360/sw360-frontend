@@ -9,21 +9,23 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, LicensePayload } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { Embedded, HttpStatus, LicensePayload, LicenseType } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import styles from './LicenseDetails.module.css'
 
 interface Props {
-    inputValid?: boolean
-    errorFullName?: boolean
-    setErrorFullName?: React.Dispatch<React.SetStateAction<boolean>>
-    licensePayload?: LicensePayload
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
+    inputValid: boolean
+    errorFullName: boolean
+    setErrorFullName: React.Dispatch<React.SetStateAction<boolean>>
+    licensePayload: LicensePayload
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
+
+type EmbeddedLicenseTypes = Embedded<LicenseType, 'sw360:licenseTypes'>
 
 const EditLicenseDetail = ({
     licensePayload,
@@ -31,11 +33,10 @@ const EditLicenseDetail = ({
     inputValid,
     errorFullName,
     setErrorFullName,
-}: Props) => {
+}: Props) : ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
-    const { data: session } = useSession()
-    const [licenseTypes, setLicenseTypes] = useState([])
+    const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.target.name === 'fullName') {
@@ -58,22 +59,25 @@ const EditLicenseDetail = ({
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const response = await ApiUtils.GET(`licenseTypes`, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const licenses = await response.json()
+                const licenses = await response.json() as EmbeddedLicenseTypes
                 setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
             } catch (e) {
                 console.error(e)
             }
         })()
         return () => controller.abort()
-    }, [params, session])
+    }, [params])
 
     return (
         <div className='row mb-4' style={{ padding: '0px 12px', fontSize: '14px' }}>
@@ -141,7 +145,7 @@ const EditLicenseDetail = ({
                             id='licenseTypeDatabaseId'
                             name='licenseTypeDatabaseId'
                             onChange={updateField}
-                            value={licensePayload?.licenseTypeDatabaseId ?? ''}
+                            value={licensePayload.licenseTypeDatabaseId ?? ''}
                         >
                             <option value=''>{t('No type selected')}</option>
                             {licenseTypes.map((item) => (

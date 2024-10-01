@@ -9,14 +9,14 @@
 // License-Filename: LICENSE
 
 'use client'
-import { LicensePayload } from '@/object-types'
+import { LicensePayload, Obligation } from '@/object-types'
 import TableLinkedObligations from './TableLinkedObligations/TableLinkedObligations'
 
 interface Props {
-    data: Array<any>
-    setData: (data: Array<any>) => void
-    licensePayload?: LicensePayload
-    setLicensePayload?: React.Dispatch<React.SetStateAction<LicensePayload>>
+    data: Array<(string | Obligation)[]>
+    setData: React.Dispatch<React.SetStateAction<Array<(string | Obligation)[]>>>
+    licensePayload: LicensePayload
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload >>
 }
 
 const LinkedObligations = ({ data, setData, licensePayload, setLicensePayload }: Props) => {

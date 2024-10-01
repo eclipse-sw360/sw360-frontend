@@ -11,27 +11,29 @@
 'use client'
 
 import TableLicense from '@/components/LinkedObligations/TableLicense'
-import { HttpStatus, Obligation } from '@/object-types'
+import { HttpStatus, LicenseDetail, Obligation } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from '../detail.module.css'
+
 interface Props {
     licenseId?: string
-    isEditWhitelist?: boolean
-    whitelist: Map<string, boolean>
-    setWhitelist: React.Dispatch<React.SetStateAction<Map<string, boolean>>>
+    isEditWhitelist: boolean
+    whitelist: Map<string, boolean> | undefined
+    setWhitelist: React.Dispatch<React.SetStateAction<Map<string, boolean> | undefined>>
 }
 
-const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props) => {
+type RowData = Array<string | Obligation | string[]>
+
+const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const [data, setData] = useState([])
-    const [dataEditWhitelist, setDataEditWhitelist] = useState([])
+    const [data, setData] = useState<Array<RowData>>([])
+    const [dataEditWhitelist, setDataEditWhitelist] = useState<Array<RowData>>([])
     const params = useSearchParams()
 
     const buildAttachmentDetail = (item: Obligation) => {
@@ -42,25 +44,25 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                 ;(event.target as HTMLElement).className = styles.expand
             }
 
-            const obligationDetail = document.getElementById(item.title)
+            const obligationDetail = document.getElementById(item.title ?? '')
             if (!obligationDetail) {
-                const parent = (event.target as HTMLElement).parentElement.parentElement.parentElement
+                const parent = (event.target as HTMLElement).parentElement?.parentElement?.parentElement
                 const html = `<td colspan="10">
                     <table class="table table-borderless">
                         <tbody>
                             <tr>
                             <td>${
-                                item.text.replace(/[\r\n]/g, '<br>').replace(/\t/g, '&ensp;&ensp;&ensp;&ensp;') ?? ''
+                                item.text?.replace(/[\r\n]/g, '<br>').replace(/\t/g, '&ensp;&ensp;&ensp;&ensp;') ?? ''
                             }</td>
                             </tr>
                         </tbody>
                     </table>
                 </td>`
                 const tr = document.createElement('tr')
-                tr.id = item.title
+                tr.id = item.title ?? ''
                 tr.innerHTML = html
 
-                parent.parentNode.insertBefore(tr, parent.nextSibling)
+                parent?.parentNode?.insertBefore(tr, parent.nextSibling)
             } else {
                 if (obligationDetail.hidden == true) {
                     obligationDetail.hidden = false
@@ -75,8 +77,11 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
@@ -84,31 +89,36 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                     return notFound()
                 }
 
-                const license = await response.json()
-                if (license._embedded === undefined) {
+                const license = await response.json() as LicenseDetail
+                if (CommonUtils.isNullEmptyOrUndefinedArray(license._embedded['sw360:obligations'])) {
                     setData([])
                 } else {
                     const data = license._embedded['sw360:obligations']
                         .map((item: Obligation) => [
                             item,
-                            item.title,
-                            item.obligationType &&
-                                item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase(),
-                            item.customPropertyToValue,
-                            item.text,
-                            item.whitelist,
+                            item.title ?? '',
+                            !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
+                                ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
+                                : '',
+                            !CommonUtils.isNullOrUndefined(item.customPropertyToValue)
+                                ? JSON.stringify(item.customPropertyToValue)
+                                : '',
+                            item.text ?? '',
+                            item.whitelist ?? [],
                         ])
-                        .filter((item: any) => item[5].length !== 0)
+                        .filter((item: RowData) => (item[5] as string[]).length  !== 0)
                     const whitelist = new Map<string, boolean>()
-                    data.forEach((element: any) => {
-                        whitelist.set(CommonUtils.getIdFromUrl(element[0]._links.self.href), true)
+                    data.forEach((element: RowData) => {
+                        whitelist.set(CommonUtils.getIdFromUrl((element[0] as Obligation)._links?.self.href), true)
                     })
                     setWhitelist(whitelist)
                     setData(data)
                     const dataEditWhitelist = license._embedded['sw360:obligations'].map((item: Obligation) => [
                         item,
-                        item.text,
-                        item.customPropertyToValue,
+                        item.text ?? '',
+                        !CommonUtils.isNullOrUndefined(item.customPropertyToValue)
+                            ? JSON.stringify(item.customPropertyToValue)
+                            : '',
                     ])
                     setDataEditWhitelist(dataEditWhitelist)
                 }
@@ -117,7 +127,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             }
         })()
         return () => controller.abort()
-    }, [params, session, licenseId])
+    }, [params, licenseId])
 
     const columns = [
         {
@@ -153,10 +163,12 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         },
     ]
 
-    const handlerRadioButton = (item: any) => {
-        const id: string = CommonUtils.getIdFromUrl(item._links.self.href)
+    const handlerRadioButton = (item: Obligation) => {
+        if (whitelist === undefined)
+            return
+        const id: string = CommonUtils.getIdFromUrl(item._links?.self.href)
         if (whitelist.has(id)) {
-            if (!whitelist.get(id)) {
+            if (whitelist.get(id) !== true) {
                 whitelist.set(id, true)
             } else {
                 whitelist.set(id, false)
@@ -171,7 +183,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         {
             id: 'obligationId',
             name: 'Whitelist',
-            formatter: (item: any) =>
+            formatter: (item: Obligation) =>
                 _(
                     <Form.Check
                         style={{ textAlign: 'center' }}

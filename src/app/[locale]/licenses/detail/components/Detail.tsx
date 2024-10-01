@@ -9,12 +9,12 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, LicenseDetail, LicensePayload } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
-import { useSession } from 'next-auth/react'
+import { HttpStatus, LicenseDetail } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { Button } from 'react-bootstrap'
 import styles from '../detail.module.css'
 import { FiCheckCircle } from 'react-icons/fi'
@@ -23,13 +23,12 @@ import { BsXCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 
 interface Props {
-    license: LicensePayload
-    setLicense: Dispatch<SetStateAction<LicensePayload>>
+    license: LicenseDetail
+    setLicense: Dispatch<SetStateAction<LicenseDetail | undefined>>
 }
 
-const Detail = ({ license, setLicense }: Props) => {
+const Detail = ({ license, setLicense }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const router = useRouter()
 
     const hanldeExternalLicenseLink = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,8 +39,13 @@ const Detail = ({ license, setLicense }: Props) => {
     }
 
     const updateExternalLicenseLink = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status === HttpStatus.OK) {
             const data = (await response.json()) as LicenseDetail
             MessageService.success(t('Update External Link Success!'))
             router.push('/licenses/detail?id=' + data.shortName)
@@ -52,7 +56,7 @@ const Detail = ({ license, setLicense }: Props) => {
 
     return (
         <div className='col'>
-            {!license.checked && (
+            {(license.checked === true) && (
                 <div
                     className={`alert ${styles['isChecked']}`}
                 >
@@ -78,7 +82,7 @@ const Detail = ({ license, setLicense }: Props) => {
                         <td>{t('Is checked')}:</td>
                         <td>
                             {' '}
-                            {license && license.checked == true ? (
+                            {(license.checked === true) ? (
                                 <span style={{ color: '#287d3c' }}>
                                     <FiCheckCircle />
                                 </span>
@@ -91,13 +95,13 @@ const Detail = ({ license, setLicense }: Props) => {
                     </tr>
                     <tr>
                         <td>{t('Type')}:</td>
-                        <td>{license.licenseType?.licenseType ?? ''}</td>
+                        <td></td>
                     </tr>
                     <tr>
                         <td>{t('OSI Approved?')}:</td>
                         <td>
                             {' '}
-                            {license && license.OSIApproved == 'YES' ? (
+                            {(license.OSIApproved === 'YES') ? (
                                 <span style={{ color: '#287d3c' }}>
                                     <FiCheckCircle /> {t('Yes')}
                                 </span>
@@ -112,7 +116,7 @@ const Detail = ({ license, setLicense }: Props) => {
                         <td>{t('FSF Free/Libre?')}:</td>
                         <td>
                             {' '}
-                            {license && license.FSFLibre == 'YES' ? (
+                            {(license.FSFLibre === 'YES') ? (
                                 <span style={{ color: '#287d3c' }}>
                                     <FiCheckCircle /> {t('Yes')}
                                 </span>
@@ -143,7 +147,7 @@ const Detail = ({ license, setLicense }: Props) => {
                                     variant='secondary'
                                     className={`${styles['button-save']}`}
                                     type='submit'
-                                    onClick={updateExternalLicenseLink}
+                                    onClick={() => void updateExternalLicenseLink()}
                                 >
                                     {t('Save')}
                                 </Button>

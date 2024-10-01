@@ -9,12 +9,13 @@
 
 import { Metadata } from 'next'
 import LicensePage from './components/LicensePage'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Licenses',
 }
 
-async function LicensesPage() {
+function LicensesPage() : ReactNode {
     return <LicensePage />
 }
 

@@ -96,6 +96,7 @@ import SPDX from './spdx/SPDX'
 import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
+import LicenseType from './LicenseType'
 
 export type {
     AccessToken,
@@ -187,6 +188,7 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
+    LicenseType,
 }
 
 // Special functions for populate data
@@ -199,7 +201,7 @@ import ClearingRequestStates from './enums/ClearingRequestStates'
 import CommonTabIds from './constants/CommonTabsIds'
 import ComponentTabIds from './constants/ComponentTabIds'
 import DocumentTypes from './enums/DocumentTypes'
-import LicenseTabIds from './enums/LicenseTabIds'
+import LicenseTabIds from './constants/LicenseTabIds'
 import HttpStatus from './constants/HttpStatus'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import ReleaseTabIds from './constants/ReleaseTabIds'
