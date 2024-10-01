@@ -15,6 +15,7 @@ import { Alert } from 'react-bootstrap'
 import styles from '../preferences.module.css'
 
 import NotificationSettings from './NotificationSettings'
+import { ReactNode } from 'react'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
@@ -26,7 +27,7 @@ interface Props {
     setNotificationSetting: React.Dispatch<React.SetStateAction<NotificationSetting>>
 }
 
-const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props) => {
+const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props) : ReactNode => {
     const t = useTranslations('default')
 
     return (

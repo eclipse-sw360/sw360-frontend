@@ -16,73 +16,95 @@ import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap'
 
 interface Props {
     generatedToken: string
 }
 
-const TokensTable = ({ generatedToken }: Props) => {
+const TokensTable = ({ generatedToken }: Props): ReactNode => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState([])
+    const [tableData, setTableData] = useState<(string | JSX.Element)[][]>([])
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = (await response.json()) as Embedded<AccessToken, 'sw360:restApiTokens'>
-            if (data._embedded === undefined) {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return
+            const response = await ApiUtils.GET(url, session.user.access_token)
+
+            if (response.status === HttpStatus.OK) {
+                const data: Embedded<AccessToken, 'sw360:restApiTokens'> = (await response.json()) as Embedded<
+                    AccessToken,
+                    'sw360:restApiTokens'
+                >
+
+                const tableData = Object.values(data._embedded['sw360:restApiTokens']).map((token: AccessToken) => {
+                    const expirationDate = new Date(
+                        Date.parse(token.createdOn + ' +0000') +
+                            token.numberOfDaysValid * 24 * 60 * 60 * 1000 -
+                            new Date().getTimezoneOffset() * 60000,
+                    )
+
+                    return [
+                        token.name,
+                        new Date(Date.parse(token.createdOn + ' +0000') - new Date().getTimezoneOffset() * 60000)
+                            .toISOString()
+                            .slice(0, 19)
+                            .replace('T', ' '),
+                        expirationDate.toISOString().slice(0, 19).replace('T', ' '),
+                        '[' + token.authorities.join(', ') + ']',
+                        _(
+                            <Button
+                                variant='danger'
+                                onClick={() => {
+                                    revokeToken(token.name).catch((error) => console.error(error))
+                                }}
+                            >
+                                {t('Revoke Token')}
+                            </Button>,
+                        ),
+                    ]
+                })
+                setTableData(tableData)
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            } else {
                 setTableData([])
-                return
             }
-            const tableData = Object.values(data._embedded['sw360:restApiTokens']).map((token: AccessToken) => {
-                const expirationDate = new Date(
-                    Date.parse(token.createdOn + ' +0000') +
-                        token.numberOfDaysValid * 24 * 60 * 60 * 1000 -
-                        new Date().getTimezoneOffset() * 60000
-                )
-                return [
-                    token.name,
-                    new Date(Date.parse(token.createdOn + ' +0000') - new Date().getTimezoneOffset() * 60000)
-                        .toISOString()
-                        .slice(0, 19)
-                        .replace('T', ' '),
-                    expirationDate.toISOString().slice(0, 19).replace('T', ' '),
-                    '[' + token.authorities.join(', ') + ']',
-                    _(
-                        <Button variant='danger' onClick={() => revokeToken(token.name)}>
-                            {t('Revoke Token')}
-                        </Button>
-                    ),
-                ]
-            })
-            setTableData(tableData)
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
-            await signOut()
-        } else {
+        } catch (error) {
+            console.error('Error fetching data:', error)
             setTableData([])
         }
     }, [])
 
     const revokeToken = async (tokenName: string) => {
-        const session = await getSession()
-        const response = await ApiUtils.DELETE(
-            CommonUtils.createUrlWithParams('users/tokens', { name: tokenName }),
-            session.user.access_token
-        )
-        if (response.status === HttpStatus.NO_CONTENT) {
-            MessageService.success(t('Revoke token sucessfully'))
-            fetchData('users/tokens')
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            signOut()
-        } else {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return
+            const response = await ApiUtils.DELETE(
+                CommonUtils.createUrlWithParams('users/tokens', { name: tokenName }),
+                session.user.access_token,
+            )
+
+            if (response.status === HttpStatus.NO_CONTENT) {
+                MessageService.success(t('Revoke token sucessfully'))
+                await fetchData('users/tokens')
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            } else {
+                MessageService.error(t('Error while processing'))
+            }
+        } catch (error) {
+            console.error('An error occurred while revoking token:', error)
             MessageService.error(t('Error while processing'))
         }
     }
 
     useEffect(() => {
-        fetchData('users/tokens')
+        fetchData('users/tokens').catch((error) => {
+            console.error(error)
+        })
     }, [fetchData, generatedToken])
 
     const columns = [
@@ -113,7 +135,16 @@ const TokensTable = ({ generatedToken }: Props) => {
         },
     ]
 
-    return <div className='row'>{tableData.length > 0 && <Table columns={columns} data={tableData} />}</div>
+    return (
+        <div className='row'>
+            {tableData.length > 0 && (
+                <Table
+                    columns={columns}
+                    data={tableData}
+                />
+            )}
+        </div>
+    )
 }
 
 export default React.memo(TokensTable)

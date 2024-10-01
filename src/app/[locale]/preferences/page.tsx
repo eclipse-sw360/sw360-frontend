@@ -11,12 +11,13 @@
 import { Metadata } from 'next'
 import NotificationSettingForm from './components/NotificationSettingForm'
 import UserAccessToken from './components/UserAccessToken'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Preferences',
 }
 
-const PreferencesPage = () => {
+const PreferencesPage = () : ReactNode => {
     return (
         <div className='container page-content'>
             <NotificationSettingForm />

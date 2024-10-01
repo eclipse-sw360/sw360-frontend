@@ -16,18 +16,29 @@ import { User } from '@/object-types'
 import { Gravatar } from 'next-sw360'
 
 import styles from '../preferences.module.css'
+import { ReactNode } from 'react'
 
 interface Props {
-    user: User
+    user: User | undefined
 }
 
-const UserInformation = ({ user }: Props) => {
+const UserInformation = ({ user }: Props) : ReactNode => {
     const t = useTranslations('default')
     const { data: session } = useSession()
-    const user_data = session
-        ? JSON.parse(Buffer.from(session.user.access_token.split('.')[1], 'base64').toString())
-        : null
-    const email_by_token = user_data ? user_data.user_name : 'admin@sw360.org'
+    let user_data: Record<string, string> | null = null
+ 
+    if (session) {
+        try {
+            const tokenPayloadBase64 = session.user.access_token.split('.')[1]
+            const decodedPayload = Buffer.from(tokenPayloadBase64, 'base64').toString()
+            user_data = JSON.parse(decodedPayload) as Record<string, string>
+        } catch (error) {
+            console.error("Failed to decode token payload:", error)
+            user_data = null
+        }
+    }
+
+    const email_by_token: string = user_data ? user_data.user_name : 'admin@sw360.org'
 
     return (
         <table className='table summary-table'>
@@ -64,12 +75,12 @@ const UserInformation = ({ user }: Props) => {
                     <td id='user-secondary-departments-roles'>
                         <ul>
                             {user?.secondaryDepartmentsAndRoles &&
-                                Object.keys(user?.secondaryDepartmentsAndRoles).map((department) => (
+                                Object.keys(user.secondaryDepartmentsAndRoles).map((department) => (
                                     <li key={department}>
                                         <span className='bold-text'>{department}</span>
                                         <span>
                                             {' -> '}
-                                            {user?.secondaryDepartmentsAndRoles[department]}
+                                            {user.secondaryDepartmentsAndRoles?.[department]}
                                         </span>
                                     </li>
                                 ))}
