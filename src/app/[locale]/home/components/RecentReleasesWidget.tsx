@@ -10,42 +10,47 @@
 
 'used-client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 
-import HomeTableHeader from './HomeTableHeader'
-import { useTranslations } from 'next-intl'
-import { ReleaseDetail, Embedded, HttpStatus } from '@/object-types'
+import { Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
-import { notFound } from 'next/navigation'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
+import HomeTableHeader from './HomeTableHeader'
 
-type EmbeddedRelease = Embedded<ReleaseDetail, 'sw360:releases'>
+type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
-function RecentReleasesWidget() {
-    const [recentRelease, setRecentRelease] = useState([])
+function RecentReleasesWidget() : ReactNode {
     const t = useTranslations('default')
-    const [loading, setLoading] = useState(true)
-    const { data: session, status } = useSession()
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json() as EmbeddedRelease
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[session]
-    )
+    const [recentRelease, setRecentRelease] = useState<Array<JSX.Element[]>>([])
+    const [loading, setLoading] = useState(true)
+
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = (await response.json()) as EmbeddedReleases
+            return data
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            notFound()
+        }
+    }, [])
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('releases/recentReleases').then((releases: EmbeddedRelease) => {
+        void fetchData('releases/recentReleases').then((releases: EmbeddedReleases | undefined) => {
+            if (releases === undefined) {
+                setLoading(false)
+                return
+            }
+
             if (
                 !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
@@ -53,13 +58,14 @@ function RecentReleasesWidget() {
                 setRecentRelease(
                     releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
                         <li key={item.name}>
-                            <Link href={'components/releases/detail/' + item.id}
+                            <Link
+                                href={'components/releases/detail/' + item.id}
                                 style={{ color: 'orange', textDecoration: 'none' }}
                             >
                                 {item.name}
                             </Link>
                         </li>,
-                    ])
+                    ]),
                 )
                 setLoading(false)
             } else {
@@ -67,30 +73,25 @@ function RecentReleasesWidget() {
                 setLoading(false)
             }
         })
-    }, [fetchData, session])
+    }, [fetchData])
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('Recent Releases')} />
-                {loading == false ? (
-                    <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentRelease}</ul>
-                ) : (
-                    <div className='col-12'>
-                        <Spinner className='spinner' />
-                    </div>
-                )}
-                {recentRelease.length === 0 && (
-                    <>
-                        <div className='subscriptionBox'>{t('No recent releases available')}</div>
-                    </>
-                )}
+            {loading == false ? (
+                <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentRelease}</ul>
+            ) : (
+                <div className='col-12'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+            {recentRelease.length === 0 && (
+                <>
+                    <div className='subscriptionBox'>{t('No recent releases available')}</div>
+                </>
+            )}
         </div>
-    )}
+    )
 }
 
-// We need use this to override typescript issue
-// Reference: https://github.com/vercel/next.js/issues/42292
-export default RecentReleasesWidget as unknown as () => JSX.Element
+export default RecentReleasesWidget

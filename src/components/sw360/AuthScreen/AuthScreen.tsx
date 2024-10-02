@@ -13,7 +13,7 @@
 import { signIn, useSession } from 'next-auth/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
@@ -21,7 +21,7 @@ import { HttpStatus } from '@/object-types'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 import { AUTH_PROVIDER } from '@/utils/env';
 
-function AuthScreen() {
+function AuthScreen() : ReactNode {
     const router = useRouter()
     const locale = useLocale()
     const t = useTranslations('default')
@@ -35,9 +35,9 @@ function AuthScreen() {
     const handleShow = () => {
         const authProvider = AUTH_PROVIDER;
         if (authProvider === 'keycloak') {
-            signIn(KEYCLOAK_PROVIDER)
+            void signIn(KEYCLOAK_PROVIDER)
         } else if (authProvider === 'sw360oauth') {
-            signIn(SW360OAUTH_PROVIDER)
+            void signIn(SW360OAUTH_PROVIDER)
         } else {
             setDialogShow(true)
         }
@@ -49,7 +49,12 @@ function AuthScreen() {
             password: password,
             redirect: false,
         }).then((result) => {
-            if (result.status == HttpStatus.OK) {
+            if (result === undefined) {
+                setMessageShow(true)
+                return
+            }
+
+            if (result.status === HttpStatus.OK) {
                 router.push(`/${locale}/home`)
             } else {
                 setMessageShow(true)
@@ -127,7 +132,7 @@ function AuthScreen() {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer className='justify-content-start'>
-                    <Button className='login-btn' variant='primary' onClick={() => handleLogin()}>
+                    <Button className='login-btn' variant='primary' onClick={() => void handleLogin()}>
                         {' '}
                         {t('Sign In')}{' '}
                     </Button>

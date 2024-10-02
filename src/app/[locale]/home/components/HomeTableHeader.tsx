@@ -8,13 +8,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
 import { BsArrowRepeat } from 'react-icons/bs'
 
 interface HomeTableHeaderProps {
     title: string
 }
 
-function HomeTableHeader({ title = '' }: HomeTableHeaderProps) {
+function HomeTableHeader({ title = '' }: HomeTableHeaderProps): ReactNode {
     return (
         <>
             <div className='tableHeader'>

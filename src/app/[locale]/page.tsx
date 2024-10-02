@@ -11,12 +11,13 @@
 import { Metadata } from 'next'
 
 import { AuthScreen } from '@/components/sw360'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Welcome - SW360',
 }
 
-async function AuthPage() {
+function AuthPage() : ReactNode {
     return <AuthScreen />
 }
 
