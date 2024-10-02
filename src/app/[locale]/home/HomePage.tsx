@@ -23,18 +23,19 @@ import MyTaskAssignmentsWidget from './components/MyTaskAssignmentsWidget'
 import MyTaskSubmissionsWidget from './components/MyTaskSubmissionsWidget'
 import RecentComponentsWidget from './components/RecentComponentsWidget'
 import RecentReleasesWidget from './components/RecentReleasesWidget'
+import { ReactNode } from 'react'
 
-function HomePage() {
+function HomePage() : ReactNode {
     const { status } = useSession()
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     }
 
     return (
         <>
             <div className='content-container container-fluid homePage'>
-                {status == 'loading' ? (
+                {status === 'loading' ? (
                     <PageSpinner />
                 ) : (
                     <div className='row'>

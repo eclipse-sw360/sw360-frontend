@@ -8,108 +8,119 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState, useEffect, useCallback } from 'react'
+import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import HomeTableHeader from './HomeTableHeader'
-import { notFound } from 'next/navigation'
-import {Embedded, HttpStatus, ModerationRequest} from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
+import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import HomeTableHeader from './HomeTableHeader'
 
-type EmbeddedTaskSubmission = Embedded<ModerationRequest, 'sw360:moderationRequests'>
+type EmbeddedTaskSubmissions = Embedded<ModerationRequest, 'sw360:moderationRequests'>
+
 interface TaskSubmissionStatusMap {
-    [key: string]: string;
+    [key: string]: string
 }
 
-
-function MyTaskSubmissionsWidget() {
-    const [taskSubmissionData, setTaskSubmissionData] = useState([])
+function MyTaskSubmissionsWidget(): ReactNode {
     const t = useTranslations('default')
+    const language = { noRecordsFound: t('NoModerationRequests') }
+    const title = t('My Task Submissions')
+
+    const [taskSubmissionData, setTaskSubmissionData] = useState<Array<(string | JSX.Element)[]>>([])
     const [loading, setLoading] = useState(true)
-    const { data: session, status } = useSession()
-    const taskSubmissionStatus : TaskSubmissionStatusMap = {
+    const taskSubmissionStatus: TaskSubmissionStatusMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
         PENDING: t('Pending'),
         REJECTED: t('REJECTED'),
-    };
-    const fetchData = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json() as EmbeddedTaskSubmission
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[session]
-    )
+    }
+
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as EmbeddedTaskSubmissions
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
+    }, [])
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest/mySubmissions').then((moderationRequests: EmbeddedTaskSubmission) => {
-            if (!CommonUtils.isNullOrUndefined(moderationRequests['_embedded']['sw360:moderationRequests'])) {
-                setTaskSubmissionData(
-                    moderationRequests['_embedded']['sw360:moderationRequests'].map((item: ModerationRequest) => [
-                        _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
-                        taskSubmissionStatus[item.moderationState],
-                        item.id,
-                    ])
-                )
-                setLoading(false)
-                }})
-        }, [fetchData, session])
+        void fetchData('moderationrequest/mySubmissions').then(
+            (moderationRequests: EmbeddedTaskSubmissions | undefined) => {
+                if (moderationRequests === undefined) {
+                    setLoading(false)
+                    return
+                }
+
+                if (!CommonUtils.isNullOrUndefined(moderationRequests['_embedded']['sw360:moderationRequests'])) {
+                    setTaskSubmissionData(
+                        moderationRequests['_embedded']['sw360:moderationRequests'].map((item: ModerationRequest) => [
+                            _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
+                            taskSubmissionStatus[item.moderationState ?? 'INPROGRESS'],
+                            item.id,
+                        ]),
+                    )
+                    setLoading(false)
+                }
+            },
+        )
+    }, [fetchData])
 
     const handleDeleteProject = (id: string) => {
         console.log(id)
     }
 
-    const title = t('My Task Submissions')
-    const columns = [t('Document Name'), t('Status'), {
-        id: 'myTaskSubmissions.actions',
-        name: t('Actions'),
-        width: '13%',
-        formatter: (id: string) =>
-            _(
-                <>
-                    <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                        <span className='d-inline-block'>
-                            <FaTrashAlt
-                                className='btn-icon'
-                                onClick={() => handleDeleteProject(id)}
-                                style={{ color: 'gray', fontSize: '18px' }}
-                            />
-                        </span>
-                    </OverlayTrigger>
-                </>
-            ),
-        sort: true,
-    },]
-    const language = { noRecordsFound: t('NoModerationRequests') }
+    const columns = [
+        t('Document Name'),
+        t('Status'),
+        {
+            id: 'myTaskSubmissions.actions',
+            name: t('Actions'),
+            width: '13%',
+            formatter: (id: string) =>
+                _(
+                    <>
+                        <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                            <span className='d-inline-block'>
+                                <FaTrashAlt
+                                    className='btn-icon'
+                                    onClick={() => handleDeleteProject(id)}
+                                    style={{ color: 'gray', fontSize: '18px' }}
+                                />
+                            </span>
+                        </OverlayTrigger>
+                    </>,
+                ),
+            sort: true,
+        },
+    ]
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
     return (
         <div>
             <HomeTableHeader title={title} />
-            {loading == false ? (
-            <Table columns={columns} data={taskSubmissionData} language={language} />
+            {loading === false ? (
+                <Table
+                    columns={columns}
+                    data={taskSubmissionData}
+                    language={language}
+                />
             ) : (
                 <div className='col-12'>
                     <Spinner className='spinner' />
                 </div>
             )}
         </div>
-    )}
+    )
 }
 
-// We need use this to override typescript issue
-// Reference: https://github.com/vercel/next.js/issues/42292
-export default MyTaskSubmissionsWidget as unknown as () => JSX.Element
+export default MyTaskSubmissionsWidget

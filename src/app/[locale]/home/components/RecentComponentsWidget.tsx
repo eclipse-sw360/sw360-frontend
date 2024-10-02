@@ -10,43 +10,46 @@
 
 'use-client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 
-import HomeTableHeader from './HomeTableHeader'
-import { useTranslations } from 'next-intl'
+import { Component, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
-import { notFound } from 'next/navigation'
-import { Component, HttpStatus, Embedded } from '@/object-types'
-import { Spinner } from 'react-bootstrap'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { Spinner } from 'react-bootstrap'
+import HomeTableHeader from './HomeTableHeader'
 
-type EmbeddedComponent = Embedded<Component, 'sw360:components'>
+type EmbeddedComponents = Embedded<Component, 'sw360:components'>
 
-
-function RecentComponentsWidget() {
-    const [recentComponent, setRecentComponent] = useState([])
+function RecentComponentsWidget(): ReactNode {
+    const [recentComponent, setRecentComponent] = useState<Array<(string | JSX.Element)[]>>([])
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
-    const { data: session, status } = useSession()
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json() as EmbeddedComponent
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[session]
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = (await response.json()) as EmbeddedComponents
+            return data
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            notFound()
+        }
+    }, [])
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('components/recentComponents').then((components: EmbeddedComponent) => {
+        void fetchData('components/recentComponents').then((components: EmbeddedComponents | undefined) => {
+            if (components === undefined) {
+                setLoading(false)
+                return
+            }
+
             if (
                 !CommonUtils.isNullOrUndefined(components['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
@@ -54,25 +57,22 @@ function RecentComponentsWidget() {
                 setRecentComponent(
                     components['_embedded']['sw360:components'].map((item: Component) => [
                         <li key={item.name}>
-                            <Link href={'components/detail/' + item.id}
+                            <Link
+                                href={'components/detail/' + item.id}
                                 style={{ color: 'orange', textDecoration: 'none' }}
                             >
                                 {item.name}
                             </Link>
                         </li>,
-                    ])
+                    ]),
                 )
                 setLoading(false)
             } else {
                 setRecentComponent([])
-                setLoading(false)
             }
         })
-    }, [fetchData, session])
+    }, [fetchData])
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('Recent Components')} />
@@ -89,10 +89,7 @@ function RecentComponentsWidget() {
                 </>
             )}
         </div>
-        )
-    }
+    )
 }
 
-// We need use this to override typescript issue
-// Reference: https://github.com/vercel/next.js/issues/42292
-export default RecentComponentsWidget as unknown as () => JSX.Element
+export default RecentComponentsWidget
