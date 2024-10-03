@@ -10,11 +10,12 @@
 import { Metadata } from 'next'
 
 import ECCDetails from './components/ECC'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'ECC',
 }
 
-export default function ECC() {
+export default function ECC() : ReactNode {
     return <ECCDetails />
 }
