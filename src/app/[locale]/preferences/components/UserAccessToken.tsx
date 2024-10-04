@@ -11,17 +11,17 @@
 'use client'
 
 import { HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from '../preferences.module.css'
 import TokensTable from './TokensTable'
-import MessageService from '@/services/message.service'
 
-const UserAccessToken = () => {
+const UserAccessToken = (): ReactNode => {
     const t = useTranslations('default')
     const [validated, setValidated] = useState(false)
     const [tokenData, setTokenData] = useState({
@@ -34,23 +34,31 @@ const UserAccessToken = () => {
     const generateToken = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const form = event.currentTarget
+
         if (form.checkValidity() === false) {
             event.stopPropagation()
             setValidated(true)
         } else {
             setValidated(false)
-            const session = await getSession()
-            const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
-            const data = await response.json()
-            if (response.status == HttpStatus.CREATED) {
-                setGeneratedToken(data)
-                setTokenData({
-                    name: '',
-                    expirationDate: '',
-                    authorities: ['READ'],
-                })
-            } else {
-                MessageService.error(data.message)
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return
+                const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
+
+                if (response.status === HttpStatus.CREATED) {
+                    const data: string = (await response.json()) as string
+                    setGeneratedToken(data)
+                    setTokenData({
+                        name: '',
+                        expirationDate: '',
+                        authorities: ['READ'],
+                    })
+                } else {
+                    const errorData: Record<string, string> = (await response.json()) as Record<string, string>
+                    MessageService.error(errorData.string)
+                }
+            } catch (error) {
+                console.error('An error occurred:', error)
             }
         }
     }
@@ -82,8 +90,18 @@ const UserAccessToken = () => {
             <div className='row'>
                 <div className='col'>
                     <h4 className={styles.decorator}>{t('REST API Tokens')}</h4>
-                    <Form noValidate validated={validated} id='generateTokenForm' onSubmit={generateToken}>
-                        <table className='table summary-table' id='restInfoTable'>
+                    <Form
+                        noValidate
+                        validated={validated}
+                        id='generateTokenForm'
+                        onSubmit={(event) => {
+                            generateToken(event).catch((error) => console.error(error))
+                        }}
+                    >
+                        <table
+                            className='table summary-table'
+                            id='restInfoTable'
+                        >
                             <thead>
                                 <tr>
                                     <th colSpan={2}>{t('REST API Token')}</th>
@@ -161,14 +179,20 @@ const UserAccessToken = () => {
                                         :
                                     </td>
                                     <td>
-                                        <label id='accesstoken' className='inlinelabel'>
+                                        <label
+                                            id='accesstoken'
+                                            className='inlinelabel'
+                                        >
                                             <b>{generatedToken}</b>
                                         </label>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
-                        <button type='submit' className='btn btn-secondary'>
+                        <button
+                            type='submit'
+                            className='btn btn-secondary'
+                        >
                             {t('Generate Token')}
                         </button>
                     </Form>

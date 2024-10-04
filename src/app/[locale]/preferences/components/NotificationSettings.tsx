@@ -11,7 +11,7 @@
 'use client'
 
 import { Preferences } from '@/object-types'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Accordion, Form } from 'react-bootstrap'
 import styles from '../preferences.module.css'
 
@@ -25,7 +25,7 @@ interface Props {
     setNotificationSetting: React.Dispatch<React.SetStateAction<NotificationSetting>>
 }
 
-const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props) => {
+const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props) : ReactNode => {
     const preferences = Preferences()
     const [isClient, setIsClient] = useState(false)
 

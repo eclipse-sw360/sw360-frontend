@@ -11,48 +11,62 @@
 'use client'
 
 import { HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { User } from '@/object-types'
 import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
 import MessageService from '@/services/message.service'
 
-const NotificationSettingForm = () => {
+interface NotificationSetting {
+    wantsMailNotification: boolean
+    notificationPreferences: { [key: string]: boolean }
+}
+
+const NotificationSettingForm = () : ReactNode => {
     const t = useTranslations('default')
-    const [user, setUser] = useState<User>(undefined)
-    const [notificationSetting, setNotificationSetting] = useState({
-        wantsMailNotification: undefined,
+    const [user, setUser] = useState<User | undefined>(undefined)
+    const [notificationSetting, setNotificationSetting] = useState<NotificationSetting>({
+        wantsMailNotification: false,
         notificationPreferences: {},
     })
 
     const updateNotificationSetting = async () => {
-        const session = await getSession()
-        const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            MessageService.success(t('Your request completed successfully'))
-            if (!notificationSetting.wantsMailNotification) {
-                fetchData('users/profile')
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return
+            const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
+            
+            if (response.status === HttpStatus.OK) {
+                MessageService.success(t('Your request completed successfully'))
+                await fetchData('users/profile')
+            } else {
+                MessageService.error(t('Error while processing'))
             }
-            return
+        } catch (error) {
+            console.error('An error occurred:', error)
+            MessageService.error(t('Error while processing'))
         }
-        MessageService.error(t('Error while processing'))
     }
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = await response.json()
+    
+        if (response.status === HttpStatus.OK) {
+            const data: User = await response.json() as User
             setUser(data)
             setNotificationSetting({
-                wantsMailNotification: data.wantsMailNotification,
-                notificationPreferences: data.notificationPreferences,
+                wantsMailNotification: data.wantsMailNotification ?? false,
+                notificationPreferences: data.notificationPreferences ?? {},
             })
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
             await signOut()
         } else {
             setUser(undefined)
@@ -64,7 +78,7 @@ const NotificationSettingForm = () => {
     }
 
     useEffect(() => {
-        fetchData('users/profile')
+        fetchData('users/profile').catch((error) => {console.error(error)})
     }, [fetchData])
 
     return (
