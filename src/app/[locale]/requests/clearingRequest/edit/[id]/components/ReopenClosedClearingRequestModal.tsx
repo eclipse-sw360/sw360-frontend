@@ -18,8 +18,8 @@ import { FaRegQuestionCircle } from "react-icons/fa"
 import { ShowInfoOnHover } from "next-sw360"
 
 interface Props {
-    show?: boolean
-    setShow?: Dispatch<SetStateAction<boolean>>
+    show: boolean
+    setShow: Dispatch<SetStateAction<boolean>>
 }
 
 export default function ReopenClosedClearingRequestModal({ show,

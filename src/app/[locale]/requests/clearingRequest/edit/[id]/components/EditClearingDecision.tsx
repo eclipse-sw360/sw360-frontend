@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
-    clearingRequestData: ClearingRequestDetails,
+    clearingRequestData: ClearingRequestDetails | undefined,
     updateClearingRequestPayload: UpdateClearingRequestPayload
     setUpdateClearingRequestPayload: React.Dispatch<React.SetStateAction<UpdateClearingRequestPayload>>
 }
@@ -170,7 +170,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                (session?.user.userGroup === ("ADMIN" || "CLEARING_ADMIN" ||
                                                              "ECC_ADMIN" || "SECURITY_ADMIN" ||
                                                              "SW360_ADMIN" || "CLEARING_EXPERT") && 
-                                !Object.hasOwn(clearingRequestData, 'lastUpdatedOn'))
+                                !Object.hasOwn(clearingRequestData ?? {}, 'lastUpdatedOn'))
                                 }
                     >
                         <td>{t('Last Updated on')}:</td>
@@ -182,7 +182,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                (session?.user.userGroup === ("ADMIN" || "CLEARING_ADMIN" ||
                                                              "ECC_ADMIN" || "SECURITY_ADMIN" ||
                                                              "SW360_ADMIN" || "CLEARING_EXPERT") && 
-                                !Object.hasOwn(clearingRequestData, 'reOpenedOn'))
+                                !Object.hasOwn(clearingRequestData ?? {}, 'reOpenedOn'))
                                 }
                     >
                         <td>{t('Reopened on')}:</td>

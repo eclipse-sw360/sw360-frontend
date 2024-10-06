@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from "next-sw360"
@@ -32,7 +32,7 @@ function OpenModerationRequest() {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
-    const [mrIdArray, setMrIdArray] = useState([])
+    const [mrIdArray, setMrIdArray] = useState<Array<string>>([])
     const [tableData, setTableData] = useState<Array<any>>([])
     const [disableBulkDecline, setDisableBulkDecline] = useState(true)
     const [bulkDeclineMRModal, setBulkDeclineMRModal] = useState(false)
@@ -44,7 +44,7 @@ function OpenModerationRequest() {
         REJECTED: t('REJECTED'),
     };
 
-    const formatDate = (timestamp: number): string => {
+    const formatDate = (timestamp: number | undefined): string | null => {
         if(!timestamp){
             return null
         }
@@ -57,6 +57,8 @@ function OpenModerationRequest() {
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as EmbeddedModerationRequest
@@ -71,40 +73,43 @@ function OpenModerationRequest() {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModerationRequest) => {
+        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModerationRequest | undefined) => {
             
-            const filteredModerationRequests = moderationRequests['_embedded']
+            const filteredModerationRequests = moderationRequests?._embedded
                                                 ['sw360:moderationRequests']
                                                 .filter((item: ModerationRequest) => {
                 return item.moderationState === 'PENDING' ||
                        item.moderationState === 'INPROGRESS';
             });
-            setTableData(
-                filteredModerationRequests.map((item: ModerationRequest) => {
-                    return [
-                        formatDate(item.timestamp),
-                        item.documentType,
-                        {
-                            id: item.id,
-                            documentName: item.documentName,
-                        },
-                        item.requestingUser,
-                        item.requestingUserDepartment,
-                        item.moderators,
-                        moderationRequestStatus[item.moderationState],
-                        {
-                            moderationRequestId: item.id,
-                            documentName: item.documentName
-                        },
-                    ]
-                }
-            ))
+            if (filteredModerationRequests !== undefined){
+                setTableData(
+                    filteredModerationRequests.map((item: ModerationRequest) => {
+                        return [
+                            formatDate(item?.timestamp),
+                            item.documentType,
+                            {
+                                id: item.id,
+                                documentName: item.documentName,
+                            },
+                            item.requestingUser,
+                            item.requestingUserDepartment,
+                            item.moderators,
+                            item?.moderationState !== undefined ?
+                                moderationRequestStatus[item?.moderationState] : undefined,
+                            {
+                                moderationRequestId: item.id,
+                                documentName: item.documentName
+                            },
+                        ]
+                    }
+                ))
+            }
             setLoading(false)
         })}, [fetchData, session])
 
     const handleCheckboxes = (moderationRequestId: string,
                               documentName: string) => {
-        const updatedMrIdArray = [...mrIdArray]
+        const updatedMrIdArray: string[] = [...mrIdArray]
         const mrMap = {...mrIdNameMap}
         if (updatedMrIdArray.includes(moderationRequestId)) {
             const index = updatedMrIdArray.indexOf(moderationRequestId)

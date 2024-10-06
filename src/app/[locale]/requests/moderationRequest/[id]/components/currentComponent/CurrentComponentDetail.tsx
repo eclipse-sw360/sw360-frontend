@@ -35,7 +35,7 @@ type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
 
 interface Props {
-    componentId: string
+    componentId: string | undefined
 }
 
 const CurrentComponentDetail = ({ componentId }: Props) => {
@@ -44,7 +44,7 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
-    const [component, setComponent] = useState<Component>(undefined)
+    const [component, setComponent] = useState<Component>()
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
 
     const tabList = [
@@ -68,6 +68,8 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
@@ -83,17 +85,17 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
 
     useEffect(() => {
         fetchData(`components/${componentId}`)
-            .then((component: Component) => {
+            .then((component: Component | undefined) => {
                 setComponent(component)
             })
             .catch((err) => console.error(err))
 
         fetchData(`changelog/document/${componentId}`)
-            .then((changeLogs: EmbeddedChangelogs) => {
+            .then((changeLogs: EmbeddedChangelogs | undefined) => {
                 setChangeLogList(
-                    CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
+                    CommonUtils.isNullOrUndefined(changeLogs?._embedded['sw360:changeLogs'])
                         ? []
-                        : changeLogs['_embedded']['sw360:changeLogs']
+                        : changeLogs?._embedded['sw360:changeLogs']
                 )
             })
             .catch((err) => console.error(err))

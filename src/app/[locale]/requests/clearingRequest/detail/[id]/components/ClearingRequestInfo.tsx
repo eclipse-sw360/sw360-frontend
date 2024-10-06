@@ -15,7 +15,7 @@ import { ClearingRequestDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 
 
-export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails }) {
+export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails | undefined}) {
     const t = useTranslations('default')
     const { status } = useSession()
 
@@ -35,30 +35,30 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data.requestingUser && data.requestingUserName
-                                ? <Link href={`mailto:${data.requestingUser}`}>{data.requestingUserName}</Link>
+                            {data?.requestingUser && data?.requestingUserName
+                                ? <Link href={`mailto:${data?.requestingUser}`}>{data?.requestingUserName}</Link>
                                 : ''}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{data.createdOn ?? ''}</td>
+                        <td>{data?.createdOn ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
-                        <td>{data.requestedClearingDate ?? ''}</td>
+                        <td>{data?.requestedClearingDate ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Business Area Line')}:</td>
-                        <td>{data.projectBU ?? ''}</td>
+                        <td>{data?.projectBU ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Type')}:</td>
-                        <td>{data.clearingType ?? ''}</td>
+                        <td>{data?.clearingType ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Requester Comment')}:</td>
-                        <td>{data.requestingUserComment ?? ''}</td>
+                        <td>{data?.requestingUserComment ?? ''}</td>
                     </tr>
                 </tbody>
             </table>

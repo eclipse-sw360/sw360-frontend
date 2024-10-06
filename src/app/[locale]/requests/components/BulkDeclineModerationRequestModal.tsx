@@ -10,14 +10,14 @@
 'use client'
 
 import { HttpStatus, ModerationRequestPayload } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { _, Table } from 'next-sw360'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
@@ -37,11 +37,10 @@ export default function BulkDeclineModerationRequestModal({
     mrIdNameMap: propType
 }) {
     const t = useTranslations('default')
-    const [loading, setLoading] = useState(true)
-    const [disableAcceptMr, setDisableAcceptMr] = useState(false)
-    const [disableDeclineMr, setDisableDeclineMr] = useState(false)
+    const [loading, setLoading] = useState<boolean>(true)
+    const [disableAcceptMr, setDisableAcceptMr] = useState<boolean>(false)
+    const [disableDeclineMr, setDisableDeclineMr] = useState<boolean>(false)
     const [statusCheck, setStatusCheck] = useState<number>()
-    const { data: session, status } = useSession()
     const [tableData, setTableData] = useState<Array<any>>([])
     const [hasComment, setHasComment] = useState<boolean>(false)
     const [moderationRequestPayload, setModerationRequestPayload] =
@@ -207,6 +206,9 @@ export default function BulkDeclineModerationRequestModal({
     const rejectModerationRequest = async (singleMrId: string,
                                                  updatedRejectPayload:ModerationRequestPayload
                                                 ) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         try {
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment){
@@ -296,6 +298,9 @@ export default function BulkDeclineModerationRequestModal({
     const acceptModerationRequest = async (singleMrId: string,
                                                  updatedAcceptPayload:ModerationRequestPayload
                                                 ) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()                                            
         try {
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment){
