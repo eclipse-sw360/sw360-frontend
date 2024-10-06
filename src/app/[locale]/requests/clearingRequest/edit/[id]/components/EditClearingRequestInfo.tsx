@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
-    clearingRequestData: ClearingRequestDetails,
+    clearingRequestData: ClearingRequestDetails | undefined,
     updateClearingRequestPayload: UpdateClearingRequestPayload
     setUpdateClearingRequestPayload : React.Dispatch<React.SetStateAction<UpdateClearingRequestPayload>>
 }
@@ -96,7 +96,7 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{clearingRequestData.createdOn ?? ''}</td>
+                        <td>{clearingRequestData?.createdOn ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
@@ -116,7 +116,7 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                     </tr>
                     <tr>
                         <td>{t('Business Area Line')}:</td>
-                        <td>{clearingRequestData.projectBU ?? ''}</td>
+                        <td>{clearingRequestData?.projectBU ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Type')}:</td>
@@ -142,7 +142,7 @@ export default function EditClearingRequestInfo({ clearingRequestData,
                     </tr>
                     <tr>
                         <td>{t('Requester Comment')}:</td>
-                        <td>{clearingRequestData.requestingUserComment ?? ''}</td>
+                        <td>{clearingRequestData?.requestingUserComment ?? ''}</td>
                     </tr>
                 </tbody>
             </table>

@@ -11,7 +11,7 @@
 'use client'
 
 import { HttpStatus, ModerationRequestPayload } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
@@ -34,11 +34,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const [openCardIndex, setOpenCardIndex] = useState<number>(0);
     const { data: session, status } = useSession()
     const router = useRouter()
-    const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails>({
+    const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails | undefined>({
         id: '',
         revision: '',
-        timestamp: null,
-        timestampOfDecision: null,
+        timestamp: undefined,
+        timestampOfDecision: undefined,
         documentId: '',
         documentType: '',
         requestingUser: '',
@@ -50,7 +50,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         requestingUserDepartment: '',
         componentType: '',
         commentRequestingUser: '',
-        commentDecisionModerator: null,
+        commentDecisionModerator: undefined,
         componentAdditions: {},
         releaseAdditions: {},
         projectAdditions: {},
@@ -60,10 +60,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         releaseDeletions: {},
         projectDeletions: {},
         licenseDeletions: {},
-        moderatorsSize: null
+        moderatorsSize: undefined
     })
     const [moderationRequestPayload, setModerationRequestPayload] =
-                                         useState<ModerationRequestPayload | undefined>({
+                                         useState<ModerationRequestPayload>({
         action: '',
         comment: ''
     })
@@ -71,6 +71,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as ModerationRequestDetails
@@ -90,19 +92,20 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         }
 
         void fetchData(`moderationrequest/${moderationRequestId}`).then(
-                      (moderationRequestDetails: ModerationRequestDetails) => {
+                      (moderationRequestDetails: ModerationRequestDetails | undefined) => {
             setModerationRequestData(moderationRequestDetails)
         })}, [fetchData, session])
 
     const handleCommentValidation = () => {
-        if (!moderationRequestPayload.comment.trim()) {
+        if (!moderationRequestPayload?.comment.trim()) {
             return false
         }
         return true
     };
 
     const handleAcceptModerationRequest = async () => {
-
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         const hasComment = handleCommentValidation()
         if (hasComment){
             const updatedAcceptPayload = {
@@ -132,7 +135,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     };
 
     const handleRejectModerationRequest = async () => {
-
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         const hasComment = handleCommentValidation()
         if (hasComment){
             const updatedRejectPayload = {
@@ -165,6 +169,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
         const hasComment = handleCommentValidation()
         if (hasComment){
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const updatedPostponePayload = {
                 ...moderationRequestPayload,
                 action: "POSTPONE"
@@ -192,6 +198,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     };
 
     const handleUnassignModerationRequest = async () => {
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         const updatedUnassignPayload = {
             ...moderationRequestPayload,
             action: "UNASSIGN"
@@ -238,13 +246,13 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                         <Row>
                             <Col lg={12} className='text-truncate buttonheader-title me-3'>
                                 {moderationRequestData &&
-                                 (moderationRequestData.documentType === "COMPONENT" ||
-                                 moderationRequestData.documentType === "RELEASE") &&
-                                `${moderationRequestData.documentName}
-                                (${moderationRequestData.componentType})`}
+                                 (moderationRequestData?.documentType === "COMPONENT" ||
+                                 moderationRequestData?.documentType === "RELEASE") &&
+                                `${moderationRequestData?.documentName}
+                                (${moderationRequestData?.componentType})`}
                                 {moderationRequestData &&
-                                 moderationRequestData.documentType === "PROJECT" &&
-                                `${moderationRequestData.documentName}`}
+                                 moderationRequestData?.documentType === "PROJECT" &&
+                                `${moderationRequestData?.documentName}`}
                             </Col>
                         </Row>
                         <Col className='ps-2 me-3 mt-3'>
@@ -355,7 +363,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                             <Card.Body className = {`${styles['card-body']}`}>
                                                 <div className="row">
                                                     <div className="col">
-                                                        <ProposedChanges moderationRequestData={moderationRequestData}/>
+                                                        <ProposedChanges 
+                                                            moderationRequestData={moderationRequestData}/>
                                                     </div>
                                                 </div>
                                             </Card.Body>
@@ -378,10 +387,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                                 aria-controls="example-collapse-text-3"
                                                 aria-expanded={openCardIndex === 2}
                                             >
-                                            { moderationRequestData.documentType === "COMPONENT" && t('Current Component') ||
-                                                moderationRequestData.documentType === "RELEASE" && t('Current Release') ||
-                                                moderationRequestData.documentType === "PROJECT" && t('Current Project') ||
-                                                moderationRequestData.documentType === "LICENSE" && t('Current License')
+                                            { moderationRequestData?.documentType === "COMPONENT" && t('Current Component') ||
+                                                moderationRequestData?.documentType === "RELEASE" && t('Current Release') ||
+                                                moderationRequestData?.documentType === "PROJECT" && t('Current Project') ||
+                                                moderationRequestData?.documentType === "LICENSE" && t('Current License')
                                             }
                                             </Button>
                                         </Card.Header>
@@ -390,12 +399,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         <div id="example-collapse-text-3">
                                             <Card.Body className = {`${styles['card-body']}`}>
                                             {
-                                                moderationRequestData.documentType === 'COMPONENT'
-                                                    && <CurrentComponentDetail componentId={moderationRequestData.documentId} /> ||
-                                                moderationRequestData.documentType === 'PROJECT'
-                                                    && <CurrentProjectDetail projectId={moderationRequestData.documentId} /> ||
-                                                moderationRequestData.documentType === 'RELEASE'
-                                                    && <CurrentReleaseDetail releaseId={moderationRequestData.documentId} />
+                                                moderationRequestData?.documentType === 'COMPONENT'
+                                                    && <CurrentComponentDetail componentId={moderationRequestData?.documentId} /> ||
+                                                moderationRequestData?.documentType === 'PROJECT'
+                                                    && <CurrentProjectDetail projectId={moderationRequestData?.documentId} /> ||
+                                                moderationRequestData?.documentType === 'RELEASE'
+                                                    && <CurrentReleaseDetail releaseId={moderationRequestData?.documentId} />
                                             }
                                             </Card.Body>
                                         </div>
