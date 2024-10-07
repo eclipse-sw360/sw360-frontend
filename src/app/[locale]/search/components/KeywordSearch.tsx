@@ -9,14 +9,14 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { Dispatch, SetStateAction, useReducer, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useReducer, useState } from 'react'
 import { PiInfoBold } from 'react-icons/pi'
 
-import { HttpStatus, SearchResult } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { Embedded, HttpStatus, SearchResult } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface SEARCH_STATE {
     project: boolean
@@ -42,6 +42,8 @@ type SEARCH_ACTIONS =
     | { type: 'TOGGLE_ENTIRE_DOCUMENT' }
     | { type: 'DESELECT_ALL' }
     | { type: 'TOGGLE_ALL' }
+
+type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 
 function reducer(state: SEARCH_STATE, action: SEARCH_ACTIONS): SEARCH_STATE {
     switch (action.type) {
@@ -128,9 +130,8 @@ function reducer(state: SEARCH_STATE, action: SEARCH_ACTIONS): SEARCH_STATE {
     }
 }
 
-function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchResult[]>> }) {
+function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchResult[] | null>> }) : ReactNode {
     const t = useTranslations('default')
-    const { data: session } = useSession()
 
     const initialState: SEARCH_STATE = {
         project: false,
@@ -163,16 +164,25 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
             }
             queryUrl += paramString
 
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                await signOut()
+                return
+            }
+
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
+                await signOut()
+                return
             } else if (response.status === HttpStatus.NO_CONTENT) {
-                return setData([])
+                setData([])
+                return
             } else if (response.status !== HttpStatus.OK) {
-                return notFound()
+                notFound()
             }
-            const data = await response.json()
-            if (data['_embedded']?.['sw360:searchResults']) setData(data['_embedded']['sw360:searchResults'])
+            const data = await response.json() as EmbeddedSearchResults
+            if (!CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:searchResults']))
+                setData(data['_embedded']['sw360:searchResults'])
         } catch (e) {
             console.error(e)
         }
@@ -348,7 +358,7 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                             </div>
                         </div>
                         <div className='row mt-4 px-2'>
-                            <button type='button' className='btn btn-sm btn-primary' onClick={handleSearch}>
+                            <button type='button' className='btn btn-sm btn-primary' onClick={() => void handleSearch()}>
                                 {t('Search')}
                             </button>
                         </div>

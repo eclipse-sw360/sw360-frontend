@@ -9,12 +9,13 @@
 
 import { Metadata } from 'next'
 import SearchPage from './components/SearchPage'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Search',
 }
 
-async function Search() {
+function Search() : ReactNode {
     return <SearchPage />
 }
 
