@@ -10,7 +10,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Alert, Spinner } from 'react-bootstrap'
 
 import { SearchResult } from '@/object-types'
@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { _, Table } from 'next-sw360'
 import KeywordSearch from './KeywordSearch'
 
-export default function Search() {
+export default function Search() : ReactNode {
     const t = useTranslations('default')
     const [data, setData] = useState<SearchResult[] | null>([])
 
