@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import { ReactNode } from 'react'
 
 import Vulnerabilities from './components/Vulnerabilities'
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     title: 'Vulnerabilites',
 }
 
-async function Vulnerability() {
+function Vulnerability() : ReactNode {
     return <Vulnerabilities />
 }
 
