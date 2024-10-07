@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus, ProjectData, ProjectsPayloadElement } from '@/object-types'
+import { HttpStatus, ProjectData, ProjectsPayloadElement, ProjectVulnerabilityTabType } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
@@ -77,10 +77,12 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
     return (
         <>
             <Tabs defaultActiveKey={projectData.id} className='mb-3' mountOnEnter={true} unmountOnExit={true}>
-                {data.length !== 0 && <Tab eventKey='summary' title='Summary'></Tab>}
+                {data.length !== 0 && <Tab eventKey='summary' title='Summary'>
+                    <VulnerabilityTab projectData={projectData} tabType={ProjectVulnerabilityTabType.SUMMARY} />
+                </Tab>}
                 {data.map((e: ProjectData) => (
                     <Tab eventKey={e.id} key={e.id} title={`${e.name} (${e.version})`}>
-                        <VulnerabilityTab projectData={e} />
+                        <VulnerabilityTab projectData={e} tabType={ProjectVulnerabilityTabType.PROJECT} />
                     </Tab>
                 ))}
             </Tabs>

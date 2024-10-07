@@ -206,6 +206,7 @@ import HttpStatus from './constants/HttpStatus'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import ReleaseTabIds from './constants/ReleaseTabIds'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
+import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 
 export {
     ActionType,
@@ -219,4 +220,5 @@ export {
     ReleaseTabIds,
     RequestDocumentTypes,
     VulnerabilitiesVerificationState,
+    ProjectVulnerabilityTabType
 }
