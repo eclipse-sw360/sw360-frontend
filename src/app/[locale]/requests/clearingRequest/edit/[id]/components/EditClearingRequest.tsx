@@ -10,11 +10,11 @@
 
 'use client'
 
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
@@ -31,11 +31,10 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
 
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
-    const { data: session, status } = useSession()
     const router = useRouter()
     const toastShownRef = useRef(false)
     const [clearingRequestData,
-           setClearingRequestData] = useState<ClearingRequestDetails>({
+           setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
             id: '',
             requestedClearingDate: '',
             projectId: '',
@@ -47,7 +46,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
             agreedClearingDate: '',
             priority: '',
             clearingType: '',
-            reOpenedOn: null,
+            reOpenedOn: undefined,
             createdOn: '',
             comments: [{}],
             _embedded: {
@@ -70,6 +69,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as ClearingRequestDetails
@@ -79,7 +81,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
             } else {
                 notFound()
             }
-        },[session]
+        },[]
     )
 
     useEffect(() => {
@@ -88,33 +90,36 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
         }
 
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
-                      (clearingRequestDetails: ClearingRequestDetails) => {
+                      (clearingRequestDetails: ClearingRequestDetails | undefined) => {
             setClearingRequestData(clearingRequestDetails)
         })
         const updatedClearingRequestData : UpdateClearingRequestPayload = {
-            requestedClearingDate: clearingRequestData.requestedClearingDate ?? '',
-            clearingType: clearingRequestData.clearingType ?? '',
-            clearingState: clearingRequestData.clearingState ?? '',
-            priority: clearingRequestData.priority ?? '',
-            clearingTeam: clearingRequestData.clearingTeam ?? '',
-            agreedClearingDate: clearingRequestData.agreedClearingDate ?? '',
-            requestingUser: clearingRequestData.requestingUser ?? ''
+            requestedClearingDate: clearingRequestData?.requestedClearingDate ?? '',
+            clearingType: clearingRequestData?.clearingType ?? '',
+            clearingState: clearingRequestData?.clearingState ?? '',
+            priority: clearingRequestData?.priority ?? '',
+            clearingTeam: clearingRequestData?.clearingTeam ?? '',
+            agreedClearingDate: clearingRequestData?.agreedClearingDate ?? '',
+            requestingUser: clearingRequestData?.requestingUser ?? ''
         }
         setUpdateClearingRequestPayload(updatedClearingRequestData)
-    }, [fetchData, session, setUpdateClearingRequestPayload])
+    }, [fetchData, setUpdateClearingRequestPayload])
 
     const handleUpdateClearingRequest = async () => {
+        const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
         try {
             const response = await ApiUtils.PATCH(
-                `clearingrequest/${clearingRequestData.id}`,
+                `clearingrequest/${clearingRequestData?.id}`,
                 updateClearingRequestPayload,
                 session.user.access_token
             )
             if (response.status == HttpStatus.OK) {
                 MessageService.success(t('Clearing Request') +
-                                         `${clearingRequestData.id} `+
+                                         `${clearingRequestData?.id} `+
                                          t('updated successfully'))
-                router.push(`/clearingRequest/detail/${clearingRequestData.id}`)
+                router.push(`/clearingRequest/detail/${clearingRequestData?.id}`)
             }
             else if (response.status == HttpStatus.UNAUTHORIZED) {
                 await signOut()
@@ -124,7 +129,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
         }
     }
 
-    const handleCancelUpdateClearingRequest = (requestId: string) => {
+    const handleCancelUpdateClearingRequest = (requestId: string | undefined) => {
         router.push(`/requests/clearingRequest/detail/${requestId}`)
     }
 
@@ -160,7 +165,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                             variant='btn btn-secondary'
                                             className='me-2 col-auto'
                                             onClick={ () => 
-                                                handleCancelUpdateClearingRequest(clearingRequestData.id)}
+                                                handleCancelUpdateClearingRequest(clearingRequestData?.id)}
                                         >
                                             {t('Cancel')}
                                         </Button>
@@ -189,10 +194,10 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 {' '}
                                                     <>
                                                         {t('Clearing Request Information For Project') + ` `}
-                                                        <a href={`/projects/detail/${clearingRequestData.projectId}`}
+                                                        <a href={`/projects/detail/${clearingRequestData?.projectId}`}
                                                            className='text-link'>
-                                                                {clearingRequestData._embedded['sw360:project'].name + 
-                                                                `(${clearingRequestData._embedded['sw360:project'].version})`}
+                                                                {clearingRequestData?._embedded?.['sw360:project']?.name + 
+                                                                `(${clearingRequestData?._embedded?.['sw360:project']?.version})`}
                                                         </a>
                                                     </>
                                             </div>  
@@ -245,7 +250,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 aria-expanded={openCardIndex === 1}
                                             >
                                             {t('Clearing Request Comments') + ' ' +
-                                             `(${clearingRequestData.comments.length})`}
+                                             `(${clearingRequestData?.comments?.length})`}
                                             </Button>
                                         </Card.Header>
                                     </div>
@@ -256,7 +261,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                     <div className="col">
                                                         {openCardIndex === 1 && (
                                                             <ClearingComments
-                                                                clearingRequestId={clearingRequestData.id} />
+                                                                clearingRequestId={clearingRequestData?.id} />
                                                         )}
                                                     </div>
                                                 </div>

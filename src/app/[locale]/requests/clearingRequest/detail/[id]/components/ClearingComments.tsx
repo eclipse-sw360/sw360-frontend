@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import { Embedded, HttpStatus, ClearingRequestComments } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { notFound } from 'next/navigation'
@@ -25,17 +25,16 @@ import Link from 'next/link'
 type EmbeddedClearingRequestComments = Embedded<ClearingRequestComments, 'sw360:comments'>
 
 export default function ClearingComments({ clearingRequestId }:
-                                         { clearingRequestId: string }) {
+                                         { clearingRequestId: string | undefined}) {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
-    const { data:session, status } = useSession()
     const [comments, setComments] = useState<Array<ClearingRequestComments>>([])
     const [inputComment, setInputComment] = useState('')
     const [commentPayload, setCommentPayload] = useState({
         text: ''
     })
 
-    const formatDate = (timestamp: number): string | null => {
+    const formatDate = (timestamp: number | undefined) : string | null => {
         if (!timestamp) {
             return null
         }
@@ -46,6 +45,9 @@ export default function ClearingComments({ clearingRequestId }:
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as EmbeddedClearingRequestComments
@@ -55,13 +57,18 @@ export default function ClearingComments({ clearingRequestId }:
             } else {
                 notFound()
             }
-        },[session]
+        },[]
     )
 
     useEffect(() => {
         setLoading(true)
         void fetchData(`clearingrequest/${clearingRequestId}/comments`).then(
-                    (clearingRequestCommentList: EmbeddedClearingRequestComments) => {
+                    (clearingRequestCommentList: EmbeddedClearingRequestComments | undefined) => {
+            if (clearingRequestCommentList === undefined) {
+                setLoading(false)
+                return
+            }
+
             if (
                 !CommonUtils.isNullOrUndefined(clearingRequestCommentList['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(clearingRequestCommentList['_embedded']['sw360:comments'])
@@ -71,7 +78,7 @@ export default function ClearingComments({ clearingRequestId }:
             }
         })
         .catch((err) => console.error(err))
-    }, [fetchData, session])
+    }, [fetchData])
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement |
@@ -84,6 +91,9 @@ export default function ClearingComments({ clearingRequestId }:
     }
 
     const handleAddComment = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         const response = await ApiUtils.POST(`clearingrequest/${clearingRequestId}/comments`,
                                               commentPayload,
                                               session.user.access_token)
@@ -130,11 +140,11 @@ export default function ClearingComments({ clearingRequestId }:
                                 </button>
                             </td>
                         </tr>
-                        {comments.map((item) => (
+                        {comments.map((item: ClearingRequestComments) => (
                             <tr key={item.commentedOn}>
                                 <td style={{padding: '5px !important', width: '3%'}}>
                                     <div>
-                                        {item._embedded['commentingUser']['fullName'].split(' ')
+                                        {item?._embedded?.commentingUser?.fullName?.split(' ')
                                                 .map(word => (word as string)[0])
                                                 .join('')
                                                 .toUpperCase() ?? ''
@@ -151,11 +161,13 @@ export default function ClearingComments({ clearingRequestId }:
                                     </div>
                                     <div>
                                         {
-                                            parse(item.text.replace(/<li>/g, '<li style="margin-left:10px;">')
-                                                           .replace(/\n/g, '<br />&emsp;&emsp;'))
+                                            item?.text && parse(
+                                                item.text.replace(/<li>/g, '<li style="margin-left:10px;">')
+                                                        .replace(/\n/g, '<br />&emsp;&emsp;')
+                                            )
                                         }
                                     </div>
-                                    <div>
+                                    <div> 
                                         {<>
                                             -- by &thinsp; {
                                                 <i>
@@ -163,14 +175,14 @@ export default function ClearingComments({ clearingRequestId }:
                                                         className='text-link'
                                                         href={`mailto:${item.commentedBy}`} >
                                                             <b>
-                                                                {item._embedded['commentingUser']['fullName']}
+                                                                {item?._embedded?.commentingUser?.fullName}
                                                             </b>
                                                     </Link>
                                                 </i> 
                                                 } &thinsp; on &thinsp; 
                                                     <i>
                                                         { 
-                                                            formatDate(item.commentedOn)
+                                                            formatDate(item?.commentedOn)
                                                         }
                                                     </i>
                                             </>

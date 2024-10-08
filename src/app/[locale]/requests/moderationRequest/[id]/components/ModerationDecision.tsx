@@ -18,7 +18,7 @@ interface ModerationRequestMap {
 }
 
 interface Props {
-    data: ModerationRequestDetails,
+    data: ModerationRequestDetails | undefined,
     moderationRequestPayload : ModerationRequestPayload,
     setModerationRequestPayload : React.Dispatch<React.SetStateAction<ModerationRequestPayload>>
 }
@@ -36,7 +36,9 @@ export default function ModerationDecision({ data,
         REJECTED: t('REJECTED'),
     };
 
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                                       HTMLInputElement |
+                                                       HTMLTextAreaElement>) => {
         setModerationRequestPayload({
             ...moderationRequestPayload,
             [event.target.name]: event.target.value,
@@ -54,13 +56,16 @@ export default function ModerationDecision({ data,
                 <tbody>
                     <tr>
                         <td>{t('Status')}:</td>
-                        <td>{moderationRequestStatus[data.moderationState] ?? ''}</td>
+                        <td>{data?.moderationState !== undefined ?
+                                moderationRequestStatus[data?.moderationState] : undefined
+                            }
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Moderator')}:</td>
                         <td>
-                            {data.reviewer
-                                ? <Link href={`mailto:${data.reviewer}`}>{data.reviewer}</Link>
+                            {data?.reviewer
+                                ? <Link href={`mailto:${data?.reviewer}`}>{data?.reviewer}</Link>
                                 : ''}
                         </td>
                     </tr>

@@ -36,10 +36,9 @@ import ReleaseDetailTabs from '@/app/[locale]/components/releases/detail/[id]/co
 import Summary from '@/app/[locale]/components/releases/detail/[id]/components/Summary'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
-type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
 
 interface Props {
-    releaseId: string
+    releaseId: string | undefined
 }
 
 const CurrentReleaseDetail = ({ releaseId }: Props) => {
@@ -55,11 +54,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as ReleaseDetail &
-                    EmbeddedChangelogs &
-                    EmbeddedReleaseLinks
+                const data = (await response.json())
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
@@ -72,21 +71,21 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
 
     useEffect(() => {
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail) => {
+            .then((release: ReleaseDetail | undefined) => {
                 setRelease(release)
 
                 if (
-                    !CommonUtils.isNullOrUndefined(release._embedded) &&
-                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
+                    !CommonUtils.isNullOrUndefined(release?._embedded) &&
+                    !CommonUtils.isNullOrUndefined(release?._embedded['sw360:attachments'])
                 ) {
-                    setEmbeddedAttachments(release._embedded['sw360:attachments'])
+                    setEmbeddedAttachments(release?._embedded['sw360:attachments'])
                 }
                 return release
             })
             .catch((err) => console.error(err))
 
         fetchData(`changelog/document/${releaseId}`)
-            .then((changeLogs: EmbeddedChangelogs) => {
+            .then((changeLogs: EmbeddedChangelogs | undefined) => {
                 changeLogs &&
                     setChangeLogList(
                         CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
@@ -106,7 +105,7 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
                             selectedTab={selectedTab}
                             setSelectedTab={setSelectedTab}
                             tabList={tabList}
-                            eccStatus={release.eccInformation.eccStatus}
+                            eccStatus={release?.eccInformation?.eccStatus}
                         />
                     </div>
                     <div className='col'>

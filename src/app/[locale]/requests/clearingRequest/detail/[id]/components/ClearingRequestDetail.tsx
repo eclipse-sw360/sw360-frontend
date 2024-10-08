@@ -11,11 +11,11 @@
 'use client'
 
 import { ClearingRequestDetails, HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
@@ -29,13 +29,12 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
 
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
-    const { data: session, status } = useSession()
     const router = useRouter()
     const toastShownRef = useRef(false);
     const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
     const [isReopenClosedCR, setIsReopenClosedCR] = useState<boolean>(false)
-    const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState(false)
-    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
+    const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState<boolean>(false)
+    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
         id: '',
         requestedClearingDate: '',
         projectId: '',
@@ -47,7 +46,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         agreedClearingDate: '',
         priority: '',
         clearingType: '',
-        reOpenedOn: null,
+        reOpenedOn: undefined,
         createdOn: '',
         comments: [{}],
         _embedded: {
@@ -65,6 +64,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as ClearingRequestDetails
@@ -74,27 +76,27 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             } else {
                 notFound()
             }
-        },[session]
+        },[]
     )
 
     useEffect(() => {
         if (!toastShownRef.current) {
             toastShownRef.current = true;
         }
-
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
-                      (clearingRequestDetails: ClearingRequestDetails) => {
-            if (!Object.hasOwn(clearingRequestDetails, 'projectId')){
-                setIsProjectDeleted(true)
+                      (clearingRequestDetails: ClearingRequestDetails | undefined) => {
+            if (!Object.hasOwn(clearingRequestDetails ?? {}, 'projectId')) {
+                setIsProjectDeleted(true);
             }
-            if (clearingRequestDetails.clearingState === 'CLOSED' ||
-                clearingRequestDetails.clearingState === 'REJECTED'){
+                        
+            if (clearingRequestDetails?.clearingState === 'CLOSED' ||
+                clearingRequestDetails?.clearingState === 'REJECTED'){
                 setIsReopenClosedCR(true)
             }
             setClearingRequestData(clearingRequestDetails)
-        })}, [fetchData, session])
+        })}, [fetchData])
 
-    const handleEditClearingRequest = (requestId: string) => {
+    const handleEditClearingRequest = (requestId: string | undefined) => {
         router.push(`/requests/clearingRequest/edit/${requestId}`)
     }
 
@@ -127,7 +129,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             className='me-2 col-auto'
                                             onClick={() => { isReopenClosedCR 
                                                         ? setShowReopenClearingRequestModal(true)
-                                                        : handleEditClearingRequest(clearingRequestData.id)}}
+                                                        : handleEditClearingRequest(clearingRequestData?.id)}}
                                             hidden={isProjectDeleted}
                                         >
                                             {
@@ -163,10 +165,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                     t('Clearing Request Information For DELETED Project')
                                                 ) : ( <>
                                                         {t('Clearing Request Information For Project') + ` `}
-                                                        <a href={`/projects/detail/${clearingRequestData.projectId}`}
+                                                        <a href={`/projects/detail/${clearingRequestData?.projectId}`}
                                                            className='text-link'>
-                                                                {clearingRequestData._embedded['sw360:project'].name + 
-                                                                `(${clearingRequestData._embedded['sw360:project'].version})`}
+                                                                {clearingRequestData?._embedded?.['sw360:project']?.name + 
+                                                                `(${clearingRequestData?._embedded?.['sw360:project']?.version})`}
                                                         </a>
                                                     </>
                                                 )}
@@ -210,7 +212,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 aria-expanded={openCardIndex === 1}
                                             >
                                             {t('Clearing Request Comments') + ' ' +
-                                             `(${clearingRequestData.comments.length})`}
+                                             `(${clearingRequestData?.comments?.length})`}
                                             </Button>
                                         </Card.Header>
                                     </div>
@@ -221,7 +223,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                     <div className="col">
                                                         {openCardIndex === 1 && (
                                                             <ClearingComments
-                                                                clearingRequestId={clearingRequestData.id} />
+                                                                clearingRequestId={clearingRequestData?.id} />
                                                         )}
                                                     </div>
                                                 </div>

@@ -19,7 +19,7 @@ interface ClearingRequestDataMap {
 }
 
 interface Props {
-    data: ClearingRequestDetails
+    data: ClearingRequestDetails | undefined
 }
 
 export default function ClearingDecision({ data }: Props ) {
@@ -61,32 +61,37 @@ export default function ClearingDecision({ data }: Props ) {
                 <tbody>
                     <tr>
                         <td>{t('Request Status')}:</td>
-                        <td>{clearingRequestStatus[data.clearingState]}</td>
+                        <td>{data?.clearingState !== undefined ? 
+                                clearingRequestStatus[data?.clearingState] :
+                                undefined}</td>
                     </tr>
                     <tr>
                         <td>{t('Priority')}:</td>
                         <td>
-                            {clearingRequestPriority[data.priority]}
+                            {data?.priority !== undefined ?
+                                clearingRequestPriority[data?.priority] :
+                                undefined
+                            }
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Team')}:</td>
                         <td>
-                            {data.clearingTeam
-                                ? <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
+                            {data?.clearingTeam
+                                ? <Link href={`mailto:${data?.clearingTeam}`}>{data?.clearingTeamName}</Link>
                                 : ''}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Agreed Clearing Date')}:</td>
                         <td>
-                            {data.agreedClearingDate ?? ''}
+                            {data?.agreedClearingDate ?? ''}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Request Closed on')}:</td>
                         <td>
-                            {data._embedded.requestClosedOn}
+                            {data?._embedded?.requestClosedOn}
                         </td>
                     </tr>
                     <tr>

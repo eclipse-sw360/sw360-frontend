@@ -21,7 +21,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { RequestDocumentTypes } from '@/object-types'
 import TableHeader from './TableHeader'
 import { Table, _ } from 'next-sw360'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 
@@ -32,8 +32,9 @@ interface interimDataType extends Record<string,any> {
 
 
 export default function ProposedChanges({ moderationRequestData }:
-                                        { moderationRequestData: ModerationRequestDetails }) {
-
+                                        { moderationRequestData: ModerationRequestDetails |
+                                                                 undefined
+                                         }) {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const dafaultTitle = t('BASIC FIELD CHANGES')
@@ -106,6 +107,8 @@ export default function ProposedChanges({ moderationRequestData }:
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json()
@@ -118,7 +121,7 @@ export default function ProposedChanges({ moderationRequestData }:
         },[session]
     )
 
-    const dataExtractor = (interimData: Component | Project | ReleaseDetail) => {
+    const dataExtractor = (interimData: Component | Project | ReleaseDetail | undefined) => {
 
         const documentAdditions = moderationRequestData[requestAdditionType as keyof 
                                                             ModerationRequestDetails] as interimDataType
@@ -233,31 +236,31 @@ export default function ProposedChanges({ moderationRequestData }:
     }
 
     useEffect(() => {
-        if (moderationRequestData.documentType == RequestDocumentTypes.COMPONENT){
+        if (moderationRequestData?.documentType == RequestDocumentTypes.COMPONENT){
             setRequestAdditionType(RequestDocumentTypes.COMPONENT_ADDITION)
             setRequestDeletionType(RequestDocumentTypes.COMPONENT_DELETION)
             console.log(requestAdditionType, requestDeletionType)
-            void fetchData(`components/${moderationRequestData.documentId}`).then(
+            void fetchData(`components/${moderationRequestData?.documentId}`).then(
                             (componentDetail: Component) => {
                                 dataExtractor(componentDetail)
             })
         }
-        else if (moderationRequestData.documentType == RequestDocumentTypes.LICENSE){
+        else if (moderationRequestData?.documentType == RequestDocumentTypes.LICENSE){
             setRequestAdditionType(RequestDocumentTypes.LICENSE_ADDITION)
             setRequestDeletionType(RequestDocumentTypes.LICENSE_DELETION)
         }
-        else if (moderationRequestData.documentType == RequestDocumentTypes.PROJECT){
+        else if (moderationRequestData?.documentType == RequestDocumentTypes.PROJECT){
             setRequestAdditionType(RequestDocumentTypes.PROJECT_ADDITION)
             setRequestDeletionType(RequestDocumentTypes.PROJECT_DELETION)
-            void fetchData(`projects/${moderationRequestData.documentId}`).then(
+            void fetchData(`projects/${moderationRequestData?.documentId}`).then(
                             (projectDetail: Project) => {
                                 dataExtractor(projectDetail)
             })
         }
-        else if (moderationRequestData.documentType == RequestDocumentTypes.RELEASE){
+        else if (moderationRequestData?.documentType == RequestDocumentTypes.RELEASE){
             setRequestAdditionType(RequestDocumentTypes.RELEASE_ADDITION)
             setRequestDeletionType(RequestDocumentTypes.RELEASE_DELETION)
-            void fetchData(`releases/${moderationRequestData.documentId}`).then(
+            void fetchData(`releases/${moderationRequestData?.documentId}`).then(
                             (releaseDetail: ReleaseDetail) => {
                                 dataExtractor(releaseDetail)
             })
@@ -273,8 +276,8 @@ export default function ProposedChanges({ moderationRequestData }:
             { documentDelete === true ? (
                 <>
                     <div className='subscriptionBoxDanger'>
-                        {t('The') + ` ${(moderationRequestData.documentType).toLowerCase()} ` +
-                        ` ${moderationRequestData.documentName} ` +
+                        {t('The') + ` ${(moderationRequestData?.documentType)?.toLowerCase()} ` +
+                        ` ${moderationRequestData?.documentName} ` +
                         t('is requested to be deleted')}
                     </div>
                 </>   
