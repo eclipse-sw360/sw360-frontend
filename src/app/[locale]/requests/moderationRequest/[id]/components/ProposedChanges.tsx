@@ -17,18 +17,27 @@ import { Component,
          Project,
          ReleaseDetail } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, ReactNode } from 'react'
 import { RequestDocumentTypes } from '@/object-types'
 import TableHeader from './TableHeader'
 import { Table, _ } from 'next-sw360'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
+import { TDataArray } from 'gridjs/dist/src/types'
 
 
-interface interimDataType extends Record<string,any> {
-    [k: string]: any,
+interface interimDataType {
+    [k: string] :  string | Object| Array<Object> |
+                   boolean | number | Array<string> | undefined
 }
+
+type ArrayType = Array<[
+                         string,
+                        [string | Array<string> , boolean],
+                         string | JSX.Element,
+                        [Array<string | Array<string> | JSX.Element | Array<JSX.Element> | undefined>, boolean]
+                    ]>
 
 
 export default function ProposedChanges({ moderationRequestData }:
@@ -41,7 +50,7 @@ export default function ProposedChanges({ moderationRequestData }:
     const attachmentTitle = t('ATTACHMENTS')
     const [requestAdditionType, setRequestAdditionType] = useState<string>('')
     const [requestDeletionType, setRequestDeletionType] = useState<string>('')
-    const [proposedBasicChangesData, setProposedBasicChangesData] = useState([])
+    const [proposedBasicChangesData, setProposedBasicChangesData] = useState<ArrayType>([])
     const [documentDelete, setDocumentDelete] = useState<boolean>(false)
     const [proposedAttachmentChangesData] = useState([])
     const columns = [
@@ -75,7 +84,7 @@ export default function ProposedChanges({ moderationRequestData }:
             id: 'proposedChanges.formerValue',
             name: t('Former Value'),
             sort: true,
-            formatter: ((formerValue: any) =>
+            formatter: ((formerValue: string | JSX.Element) =>
                 _(
                     <>
                         {formerValue}
@@ -121,118 +130,162 @@ export default function ProposedChanges({ moderationRequestData }:
         },[session]
     )
 
+    const convertToReactNode = (value: string | Object| Array<Object> |
+                                       boolean | number | Array<string> ): ReactNode => {
+        if (typeof value === 'string' || typeof value === 'number') {
+            return value
+        }
+        if (typeof value === 'boolean') {
+            return value ? 'true' : 'false'
+        }
+        if (Array.isArray(value)) {
+            return value.map((item, index) => (
+                <span key={index}>
+                    {typeof item === 'object' ? JSON.stringify(item) : item}
+                </span>
+        ))
+        }
+        if (typeof value === 'object') {
+            return JSON.stringify(value)
+        }
+
+        return ''
+    }
+
+  
+
     const dataExtractor = (interimData: Component | Project | ReleaseDetail | undefined) => {
 
-        const documentAdditions = moderationRequestData[requestAdditionType as keyof 
-                                                            ModerationRequestDetails] as interimDataType
-        const documentDeletions = moderationRequestData[requestDeletionType as keyof
-                                                            ModerationRequestDetails] as interimDataType
-        const changedData: Array<any> = [];
-        let isObject:boolean = false
-        
-        // Check if there is a document delete request raised
-        if (moderationRequestData['requestDocumentDelete'] == true) {
-            setDocumentDelete(true)
-        }
-        else {
-            // Condition when the existing data is modified
-            for ( const key in documentDeletions) {
-                if (key in documentAdditions) {
-                    if (documentDeletions[key] != documentAdditions[key]) {
-                        if (typeof documentAdditions[key] === "object" && 
-                            typeof documentDeletions[key] === "object" &&
-                            Object.keys(documentAdditions[key]).length !== 0 &&
-                            Object.keys(documentDeletions[key]).length === 0) {
-                                isObject = true
-                                for (const k in documentAdditions[key]) {
-                                    const updatedValue: any[] = []
-                                    const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
-                                                        (interimData as interimDataType)[key] !== '' && 
-                                                        Object.hasOwn((interimData as interimDataType)[key], k) ?
-                                                        Object.values((interimData as interimDataType)[key][k]).flat() : []
-                                    updatedValue.push(...valueFromDB)
-                                    updatedValue.push(
-                                        <b key={`${key}[${k}]`} style={{color: 'green'}}>
-                                            {documentAdditions[key][k]}
-                                        </b>
-                                    )
-                                    changedData.push([`${key}[${k}]:`,
-                                                    [valueFromDB, isObject],
-                                                    t('n a modified list'),
-                                                    [updatedValue, isObject]])
+        if (moderationRequestData !== undefined && interimData !== undefined){
+            const documentAdditions = moderationRequestData[requestAdditionType as keyof 
+                                                                ModerationRequestDetails] as interimDataType
+            const documentDeletions = moderationRequestData[requestDeletionType as keyof
+                                                                ModerationRequestDetails] as interimDataType
+            const changedData: ArrayType = [];
+            let propsDataType: Component | Project | ReleaseDetail | undefined;
+            let isObject:boolean = false
+            
+            // Check if there is a document delete request raised
+            if (moderationRequestData['requestDocumentDelete'] == true) {
+                setDocumentDelete(true)
+            }
+            else {
+                // Condition when the existing data is modified
+                for ( const key in documentDeletions) {
+                    if (key in documentAdditions) {
+                        if (documentDeletions[key] != documentAdditions[key]) {
+                            if (typeof documentAdditions[key] === "object" && 
+                                typeof documentDeletions[key] === "object" &&
+                                Object.keys(documentAdditions[key]).length !== 0 &&
+                                Object.keys(documentDeletions[key]).length === 0) {
+                                    isObject = true
+                                    for (const k in documentAdditions[key]) {
+                                        const updatedValue: Array<Array<string> | JSX.Element> = []
+                                        const valueFromDB : Array<string> = (Object.hasOwn(interimData, key) &&
+                                                            interimData[key as keyof typeof propsDataType] !== '' && 
+                                                            Object.hasOwn(interimData[key as keyof typeof propsDataType], k) ?
+                                                            Object.values(interimData[key as keyof typeof propsDataType][k]).flat() : []) as string[]
+                                        updatedValue.push(
+                                            (Object.hasOwn(interimData, key) &&
+                                                            interimData[key as keyof typeof propsDataType] !== '' && 
+                                                            Object.hasOwn(interimData[key as keyof typeof propsDataType], k) ?
+                                                            Object.values(interimData[key as keyof typeof propsDataType][k]).flat() : []) as string[]
+                                        )
+                                        updatedValue.push(
+                                            <b key={`${key}[${k}]`} style={{color: 'green'}}>
+                                                {
+                                                    typeof documentAdditions[key] === "object" &&
+                                                    !Array.isArray(documentAdditions[key]) ?
+                                                        (documentAdditions[key] as { [key: string]: string | number | boolean | string[] })[k] : ''
+                                                }
+                                            </b>
+                                        )
+                                        changedData.push([`${key}[${k}]:`,
+                                                        [valueFromDB, isObject],
+                                                        t('n a modified list'),
+                                                        [updatedValue, isObject]])
 
-                                }
-                        }
-                    else if (typeof documentAdditions[key] === "object" && 
-                            typeof documentDeletions[key] === "object" &&
-                            Object.keys(documentDeletions[key]).length !== 0 &&
-                            Object.keys(documentAdditions[key]).length === 0) {
-                                isObject = true
-                                for (const k in documentDeletions[key]) {
-                                    const updatedValue: any[] = []
-                                    let filteredDataFromDB: string[] = []
-                                    if(Object.hasOwn(interimData as interimDataType, key) &&
-                                       Object.hasOwn((interimData as interimDataType)[key], k)) {
-                                        filteredDataFromDB = (interimData as interimDataType)[key][k]
-                                                                    .filter((item: string) => 
-                                                                        !documentDeletions[key][k].includes(item))
                                     }
-                                    const valueFromDB = Object.hasOwn(interimData as interimDataType, key) &&
-                                                        (interimData as interimDataType)[key] !== '' && 
-                                                        Object.hasOwn((interimData as interimDataType)[key], k)?
-                                                        Object.values((interimData as interimDataType)[key][k]).flat() : []
-                                    updatedValue.push(...filteredDataFromDB)
-                                    updatedValue.push(
-                                        <b key={`${key}[${k}]`} style={{color: 'red'}}>
-                                            {documentDeletions[key][k]}
-                                        </b>
-                                    )
-                                    changedData.push([`${key}[${k}]:`,
-                                                    [valueFromDB, isObject],
-                                                    t('n a modified list'),
-                                                    [updatedValue, isObject]])
                             }
+                        else if (typeof documentAdditions[key] === "object" && 
+                                typeof documentDeletions[key] === "object" &&
+                                Object.keys(documentDeletions[key]).length !== 0 &&
+                                Object.keys(documentAdditions[key]).length === 0) {
+                                    isObject = true
+                                    for (const k in documentDeletions[key]) {
+                                        const updatedValue: Array<string | Array<string> | JSX.Element> = []
+                                        let filteredDataFromDB: Array<string> = []
+                                        if(Object.hasOwn(interimData, key) &&
+                                           Object.hasOwn(interimData[key as keyof typeof propsDataType], k)) {
+                                            filteredDataFromDB = (interimData[key as keyof typeof propsDataType][k] as string[]).filter((item: string) => 
+                                                                            !(documentDeletions[key] as any).includes(item))
+                                        }
+                                        const valueFromDB = (Object.hasOwn(interimData, key) &&
+                                                            interimData[key as keyof typeof propsDataType] !== '' && 
+                                                            Object.hasOwn(interimData[key as keyof typeof propsDataType], k)?
+                                                            Object.values(interimData[key as keyof typeof propsDataType][k]).flat() : [])as string[]
+                                        updatedValue.push(...filteredDataFromDB)
+                                        updatedValue.push(
+                                            <b key={`${key}[${k}]`} style={{color: 'red'}}>
+                                                {
+                                                    typeof documentAdditions[key] === "object" &&
+                                                    !Array.isArray(documentAdditions[key]) ?
+                                                        (documentAdditions[key] as { [key: string]: string | number | boolean | string[] })[k] : ''
+                                                }
+                                            </b>
+                                        )
+                                        changedData.push([`${key}[${k}]:`,
+                                                        [valueFromDB, isObject],
+                                                        t('n a modified list'),
+                                                        [updatedValue, isObject]])
+                                }
+                            }
+                        else {
+                            const updatedValue: Array<JSX.Element> = []
+                            let updatedFormerValue: JSX.Element = <></>
+                            if (documentAdditions[key] !== undefined){
+                                updatedValue.push(
+                                    <b key={`${key}`} style={{color: 'green'}}>
+                                        {convertToReactNode(documentAdditions[key])}
+                                    </b>
+                            )}
+                            if (documentDeletions[key] !== undefined){
+                                updatedFormerValue = (
+                                    <b key={`${key}`} style={{color: 'red'}}>
+                                        {convertToReactNode(documentDeletions[key])}
+                                    </b>
+                            )}
+                            changedData.push([key,
+                                [interimData[key as keyof typeof propsDataType], isObject],
+                                updatedFormerValue,
+                                [updatedValue, isObject]])
                         }
-                    else {
-                        const updatedValue: any[] = []
-                        updatedValue.push(
-                            <b key={`${key}`} style={{color: 'green'}}>
-                                {documentAdditions[key]}
-                            </b>
-                        )
-                        const updatedFormerValue = (
-                            <b key={`${key}`} style={{color: 'red'}}>
-                                {documentDeletions[key]}
-                            </b>
-                        )
+                    }
+                }}
+
+                // Condition when the new data are added  
+                for (const key in documentAdditions) {
+                    if (!(key in documentDeletions) &&
+                         (documentAdditions[key] !== '') &&
+                         (documentAdditions[key] !== undefined)) {
+                        isObject = false
+                        const updatedValue: Array<JSX.Element> = []
+                            updatedValue.push(
+                                <b key={`${key}`} style={{color: 'green'}}>
+                                    {convertToReactNode(documentAdditions[key])}
+                                </b>
+                            )
                         changedData.push([key,
-                            [(interimData as interimDataType)[key], isObject],
-                            updatedFormerValue,
+                            Object.hasOwn(interimData, key) &&
+                                interimData[key as keyof typeof propsDataType] !== '' ?
+                                [interimData[key as keyof typeof propsDataType], isObject] :
+                                ['', isObject],
+                            '',
                             [updatedValue, isObject]])
                     }
-                }
-            }}
-
-            // Condition when the new data are added  
-            for (const key in documentAdditions) {
-                if (!(key in documentDeletions) && (documentAdditions[key] !== '')) {
-                    isObject = false
-                    const updatedValue: any[] = []
-                        updatedValue.push(
-                            <b key={`${key}`} style={{color: 'green'}}>
-                                {documentAdditions[key]}
-                            </b>
-                        )
-                    changedData.push([key,
-                        Object.hasOwn(interimData as interimDataType, key) &&
-                            (interimData as interimDataType)[key] !== '' ?
-                            [(interimData as interimDataType)[key], isObject] :
-                            ['', isObject],
-                        '',
-                        [updatedValue, isObject]])
-                }
-            }}
-            setProposedBasicChangesData(changedData)
+                }}
+                setProposedBasicChangesData(changedData)
+        }
     }
 
     useEffect(() => {
@@ -295,7 +348,7 @@ export default function ProposedChanges({ moderationRequestData }:
                             <TableHeader title={dafaultTitle} />
                             <div className = {`${styles}`}>
                                 <Table columns={columns}
-                                    data={proposedBasicChangesData}
+                                    data={proposedBasicChangesData as TDataArray}
                                     pagination={{ limit: 5 }}
                                     selector={false}/>
                             </div>
