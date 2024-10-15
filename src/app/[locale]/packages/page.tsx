@@ -8,14 +8,14 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
+import { ReactNode } from 'react'
 import Packages from './components/Packages'
 
 export const metadata: Metadata = {
     title: 'Packages',
 }
 
-async function PackagesList() {
+function PackagesList() : ReactNode {
     return <Packages />
 }
 

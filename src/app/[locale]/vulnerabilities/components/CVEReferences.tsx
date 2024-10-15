@@ -10,10 +10,10 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { CVEReference, Vulnerability } from '@/object-types'
+import { Vulnerability } from '@/object-types'
 
 function CVEReferences({
     payload,
@@ -21,29 +21,45 @@ function CVEReferences({
 }: {
     payload: Vulnerability
     setPayload: Dispatch<SetStateAction<Vulnerability>>
-}) {
+}): ReactNode {
     const t = useTranslations('default')
 
     const addReference = () => {
-        setPayload((prev: Vulnerability) => {
-            return { ...prev, cveReferences: [...prev.cveReferences, { year: '', number: '' }] }
-        })
+        setPayload((prev: Vulnerability) => ({
+            ...prev,
+            cveReferences: [...(prev.cveReferences ?? []), '-'],
+        }))
     }
 
-    const handleChange = (
+    const handleYearChange = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
-        i: number
+        i: number,
     ) => {
-        setPayload((prev: Vulnerability) => {
-            const refs = prev.cveReferences
-            refs[i][e.target.name as keyof CVEReference] = e.target.value
-            return { ...prev, cveReferences: refs }
-        })
+        const ref = payload.cveReferences?.[i] ?? ''
+        const extractedNumber = ref.split('-')[1] || ''
+        const updatedReference = `${e.target.value}-${extractedNumber || ''}`
+        const updatedReferences = [...(payload.cveReferences ?? [])]
+        updatedReferences[i] = updatedReference
+
+        setPayload((prev) => ({ ...prev, cveReferences: updatedReferences }))
+    }
+
+    const handleNumberChange = (
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
+        i: number,
+    ) => {
+        const ref = payload.cveReferences?.[i] ?? ''
+        const extractedYear = ref.split('-')[0] || ''
+        const updatedReference = `${extractedYear}-${e.target.value}`
+        const updatedReferences = [...(payload.cveReferences ?? [])]
+        updatedReferences[i] = updatedReference
+
+        setPayload((prev) => ({ ...prev, cveReferences: updatedReferences }))
     }
 
     const deleteReference = (i: number) => {
         setPayload((prev: Vulnerability) => {
-            const refs = prev.cveReferences.slice()
+            const refs = (prev.cveReferences ?? []).slice()
             refs.splice(i, 1)
             return { ...prev, cveReferences: refs }
         })
@@ -55,12 +71,21 @@ function CVEReferences({
                 <div className='row header mb-2 pb-2 px-2'>
                     <h6>{t('CVE References')}</h6>
                 </div>
-                {payload?.cveReferences.map((elem, i) => (
-                    <div className='row mb-2' key={i}>
+                {payload.cveReferences?.map((elem, i) => (
+                    <div
+                        className='row mb-2'
+                        key={i}
+                    >
                         <div className='col-lg-5'>
-                            <label htmlFor='vulnerabilityDetail.cveReferences.year' className='form-label fw-medium'>
+                            <label
+                                htmlFor='vulnerabilityDetail.cveReferences.year'
+                                className='form-label fw-medium'
+                            >
                                 {t('CVE Year')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{ color: '#F7941E' }}
+                                >
                                     *
                                 </span>
                             </label>
@@ -69,15 +94,13 @@ function CVEReferences({
                                 min={0}
                                 max={9999}
                                 name='year'
-                                value={elem.year}
+                                value={elem.split('-')[0]}
                                 onKeyDown={(e) => {
-                                    if (e.key === '+' || e.key === '-' || e.key === '.' || e.key === 'e') {
+                                    if (['+', '-', '.', 'e'].includes(e.key)) {
                                         e.preventDefault()
                                     }
                                 }}
-                                onChange={(e) => {
-                                    handleChange(e, i)
-                                }}
+                                onChange={(e) => {handleYearChange(e, i)}}
                                 className='form-control'
                                 id='vulnerabilityDetail.cveReferences.year'
                                 placeholder={t('Enter CVE Year')}
@@ -85,9 +108,15 @@ function CVEReferences({
                             />
                         </div>
                         <div className='col-lg-6'>
-                            <label htmlFor='vulnerabilityDetail.cveReferences.number' className='form-label fw-medium'>
+                            <label
+                                htmlFor='vulnerabilityDetail.cveReferences.number'
+                                className='form-label fw-medium'
+                            >
                                 {t('CVE Number')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{ color: '#F7941E' }}
+                                >
                                     *
                                 </span>
                             </label>
@@ -95,16 +124,14 @@ function CVEReferences({
                                 type='number'
                                 min={0}
                                 max={999999999}
+                                name='number'
+                                value={elem.split('-')[1]}
                                 onKeyDown={(e) => {
-                                    if (e.key === '+' || e.key === '-' || e.key === '.' || e.key === 'e') {
+                                    if (['+', '-', '.', 'e'].includes(e.key)) {
                                         e.preventDefault()
                                     }
                                 }}
-                                name='number'
-                                value={elem.number}
-                                onChange={(e) => {
-                                    handleChange(e, i)
-                                }}
+                                onChange={(e) => {handleNumberChange(e, i)}}
                                 className='form-control'
                                 id='vulnerabilityDetail.cveReferences.number'
                                 placeholder={t('Enter CVE Number')}
@@ -112,12 +139,20 @@ function CVEReferences({
                             />
                         </div>
                         <div className='col-lg-1 d-flex align-items-end pb-2'>
-                            <FaTrashAlt className='btn-icon' size={22} onClick={() => deleteReference(i)} />
+                            <FaTrashAlt
+                                className='btn-icon'
+                                size={22}
+                                onClick={() => deleteReference(i)}
+                            />
                         </div>
                     </div>
                 ))}
                 <div className='col-lg-4 mt-2'>
-                    <button type='button' onClick={addReference} className={`fw-bold btn btn-secondary`}>
+                    <button
+                        type='button'
+                        onClick={addReference}
+                        className={`fw-bold btn btn-secondary`}
+                    >
                         {t('Click to add CVE Reference')}
                     </button>
                 </div>

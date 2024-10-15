@@ -12,14 +12,20 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
 import { HttpStatus, Changelogs } from '@/object-types'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiUtils } from '@/utils'
 
-function ChangeLog({ packageId }: { packageId: string }) {
+interface PackageChangelogs {
+    _embedded: {
+      "sw360:changeLogs": Array<Changelogs>
+    }
+  }
+
+function ChangeLog({ packageId }: { packageId: string }) : ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [key, setKey] = useState('list-change')
@@ -32,7 +38,7 @@ function ChangeLog({ packageId }: { packageId: string }) {
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
                 const response = await ApiUtils.GET(
                     `changelog/document/${packageId}`,
@@ -44,13 +50,11 @@ function ChangeLog({ packageId }: { packageId: string }) {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-
-                const data = await response.json()
-
+        
+                const data = await response.json() as PackageChangelogs
+        
                 setChangeLogList(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
-                        ? []
-                        : data['_embedded']['sw360:changeLogs']
+                    data['_embedded']['sw360:changeLogs']
                 )
             } catch (e) {
                 console.error(e)
@@ -62,7 +66,7 @@ function ChangeLog({ packageId }: { packageId: string }) {
 
     return (
         <>
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
+            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k ?? '')}>
                 <div className='row'>
                     <div className='col ps-0'>
                         <Nav variant='pills' className='d-inline-flex'>

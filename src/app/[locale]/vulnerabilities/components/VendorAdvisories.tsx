@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, ReactNode } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { VendorAdvisory, Vulnerability } from '@/object-types'
@@ -21,12 +21,12 @@ function AddVendorAdvisory({
 }: {
     payload: Vulnerability
     setPayload: Dispatch<SetStateAction<Vulnerability>>
-}) {
+}) : ReactNode {
     const t = useTranslations('default')
 
     const addAdvisory = () => {
         setPayload((prev: Vulnerability) => {
-            return { ...prev, vendorAdvisories: [...prev.vendorAdvisories, { vendor: '', name: '', url: '' }] }
+            return { ...prev, vendorAdvisories: [...(prev.vendorAdvisories ?? []), { vendor: '', name: '', url: '' }] }
         })
     }
 
@@ -35,7 +35,7 @@ function AddVendorAdvisory({
         i: number
     ) => {
         setPayload((prev: Vulnerability) => {
-            const refs = prev.vendorAdvisories
+            const refs = prev.vendorAdvisories ?? []
             refs[i][e.target.name as keyof VendorAdvisory] = e.target.value
             return { ...prev, vendorAdvisories: refs }
         })
@@ -43,7 +43,7 @@ function AddVendorAdvisory({
 
     const deleteAdvisory = (i: number) => {
         setPayload((prev: Vulnerability) => {
-            const refs = prev.vendorAdvisories.slice()
+            const refs = (prev.vendorAdvisories ?? []).slice()
             refs.splice(i, 1)
             return { ...prev, vendorAdvisories: refs }
         })
@@ -55,7 +55,7 @@ function AddVendorAdvisory({
                 <div className='row header mb-2 pb-2 px-2'>
                     <h6>{t('Vendor Advisories')}</h6>
                 </div>
-                {payload.vendorAdvisories.map((elem, i) => (
+                {payload.vendorAdvisories?.map((elem, i) => (
                     <div className='row mb-2' key={i}>
                         <div className='col-lg-3'>
                             <label

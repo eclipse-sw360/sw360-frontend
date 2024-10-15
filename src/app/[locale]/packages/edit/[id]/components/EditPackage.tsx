@@ -9,31 +9,32 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react'
 import { Package, HttpStatus } from "@/object-types"
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
 import { Tab, ListGroup, Spinner } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { getSession, signOut } from 'next-auth/react'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import MessageService from '@/services/message.service'
 import { useRouter } from 'next/navigation'
 import { notFound } from 'next/navigation'
 
-export default function EditPackage({ packageId }: { packageId: string }) {
+export default function EditPackage({ packageId }: { packageId: string }) : ReactNode {
 
     const t = useTranslations('default')
     const router = useRouter()
-    const [packagePayload, setPackagePayload] = useState<Package>(null)
+    const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
     const [updatingPackage, setUpdatingPackage] = useState(false)
 
     useEffect(() => {
-        ;(async () => {
+        void(async () => {
             try {
                 const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return
                 const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token)
                 if(response.status === HttpStatus.OK) {
-                    setPackagePayload(await response.json())
+                    setPackagePayload(await response.json() as Package)
                 } else {
                     notFound()
                 }
@@ -47,21 +48,20 @@ export default function EditPackage({ packageId }: { packageId: string }) {
         try {
             setUpdatingPackage(true)
             const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.PATCH(`packages/${packageId}`, { 
                 ...packagePayload, 
-                packageManager: packagePayload.purl.substring(4, packagePayload.purl.indexOf('/')).toUpperCase()
+                packageManager: packagePayload?.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase()
             }, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 MessageService.success(t('Package updated successfully'))
                 router.push('/packages')
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
             } else {
-                const res = await response.json()
+                const res = await response.json() as Record<string, string>
                 MessageService.error(`${t('Something went wrong')}: ${res.message}`)
             }
-        } catch (e) {
-            console.error(e)
         } finally {
             setUpdatingPackage(false)
         }
@@ -83,8 +83,8 @@ export default function EditPackage({ packageId }: { packageId: string }) {
                             <Tab.Pane eventKey='summary'>
                                 {
                                     packagePayload ? 
-                                    <CreateOrEditPackage packagePayload={packagePayload} setPackagePayload={setPackagePayload} 
-                                        handleSubmit={handleEditPackage} isPending={updatingPackage} isEditPage={true} />:
+                                    <CreateOrEditPackage packagePayload={packagePayload} setPackagePayload={setPackagePayload as Dispatch<SetStateAction<Package>>} 
+                                        handleSubmit={() => {handleEditPackage().catch((e) => console.error(e))}} isPending={updatingPackage} isEditPage={true} />:
                                     <div className='col-12 mt-1 text-center'>
                                         <Spinner className='spinner' />
                                     </div>

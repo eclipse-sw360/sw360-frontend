@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import { ReactNode } from 'react'
 
 import EditVulnerability from './components/EditVulnerability'
 
@@ -19,7 +20,7 @@ interface Context {
     params: { id: string }
 }
 
-const Vulnerability = async ({ params }: Context) => {
+const Vulnerability = ({ params }: Context) : ReactNode => {
     return <EditVulnerability vulnerabilityId={params.id} />
 }
 

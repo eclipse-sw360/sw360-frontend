@@ -9,30 +9,32 @@
 
 'use client'
 
-import { Embedded, Vulnerability, Session } from '@/object-types'
+import { Session } from 'next-auth'
+import { Embedded, Vulnerability } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, QuickFilter, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useState, ReactNode } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
+import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
 
 type EmbeddedVulnerabilities = Embedded<Vulnerability, 'sw360:vulnerabilityApiDTOes'>
 
 const VulnerabilitesTable = React.memo(Table, () => true)
 
-function Vulnerabilities() {
+function Vulnerabilities() : ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const params = useSearchParams()
-    const [numVulnerabilities, setNumVulnerabilities] = useState<null | number>(null)
+    const [numVulnerabilities, setNumVulnerabilities] = useState<null | number>(0)
     const [vulnerabilityToBeDeleted, setVulnerabilityToBeDeleted] = useState<null | string>(null)
     const router = useRouter()
+    const { data: session, status } = useSession()
 
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
@@ -118,13 +120,14 @@ function Vulnerabilities() {
     ]
 
     const initServerPaginationConfig = (session: Session) => {
+        if(CommonUtils.isNullOrUndefined(session)) return
         return {
             url: CommonUtils.createUrlWithParams(
                 `${SW360_API_URL}/resource/api/vulnerabilities`,
                 Object.fromEntries(params)
             ),
             then: (data: EmbeddedVulnerabilities) => {
-                setNumVulnerabilities(data.page.totalElements)
+                setNumVulnerabilities(data.page?.totalElements ?? 0)
                 if (!CommonUtils.isNullEmptyOrUndefinedArray(data._embedded['sw360:vulnerabilityApiDTOes'])) {
                     return data._embedded['sw360:vulnerabilityApiDTOes'].map((elem: Vulnerability) => [
                         elem.externalId ?? '',
@@ -136,51 +139,55 @@ function Vulnerabilities() {
                     ])
                 }
             },
-            total: (data: EmbeddedVulnerabilities) => data.page.totalElements,
+            total: (data: EmbeddedVulnerabilities) => data.page?.totalElements,
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
 
-    return (
-        <>
-            <DeleteVulnerabilityModal
-                vulnerabilityId={vulnerabilityToBeDeleted}
-                setVulnerability={setVulnerabilityToBeDeleted}
-            />
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-lg-2 sidebar'>
-                        <QuickFilter id='vunerabilities.quickSearch' />
-                        <br/>
-                        <AdvancedSearch title='Advanced Filter' fields={advancedSearch} />
-                    </div>
-                    <div className='col-lg-10'>
-                        <div className='row d-flex justify-content-between ms-1'>
-                            <div className='col-lg-5'>
-                                <div className='row'>
-                                    <button className='btn btn-primary col-auto' onClick={handleAddVulnerability}>
-                                        {t('Add Vulnerability')}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className='col-auto buttonheader-title'>
-                                {`${t('VULNERABILITIES')} (${numVulnerabilities ?? ''})`}
-                            </div>
+    if (status === 'unauthenticated') {
+        return signOut()
+    } else {
+        return (
+            <>
+                <DeleteVulnerabilityModal
+                    vulnerabilityId={vulnerabilityToBeDeleted}
+                    setVulnerability={setVulnerabilityToBeDeleted}
+                />
+                <div className='container page-content'>
+                    <div className='row'>
+                        <div className='col-lg-2 sidebar'>
+                            <QuickFilter id='vunerabilities.quickSearch' />
+                            <br/>
+                            <AdvancedSearch title='Advanced Filter' fields={advancedSearch} />
                         </div>
-                        <div className='row mt-3'>
-                            {status === 'authenticated' ? (
-                                <VulnerabilitesTable columns={columns} server={initServerPaginationConfig(session)} selector={true} sort={false} />
-                            ) : (
-                                <div className='col-12 d-flex justify-content-center align-items-center'>
-                                    <Spinner className='spinner' />
+                        <div className='col-lg-10'>
+                            <div className='row d-flex justify-content-between ms-1'>
+                                <div className='col-lg-5'>
+                                    <div className='row'>
+                                        <button className='btn btn-primary col-auto' onClick={handleAddVulnerability}>
+                                            {t('Add Vulnerability')}
+                                        </button>
+                                    </div>
                                 </div>
-                            )}
+                                <div className='col-auto buttonheader-title'>
+                                    {`${t('VULNERABILITIES')} (${numVulnerabilities ?? 0})`}
+                                </div>
+                            </div>
+                            <div className='row mt-3'>
+                                {status === 'authenticated' ? (
+                                    <VulnerabilitesTable columns={columns} server={initServerPaginationConfig(session) as ServerStorageOptions} selector={true} sort={false} />
+                                ) : (
+                                    <div className='col-12 d-flex justify-content-center align-items-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </>
-    )
+            </>
+        )
+    }
 }
 
 export default Vulnerabilities

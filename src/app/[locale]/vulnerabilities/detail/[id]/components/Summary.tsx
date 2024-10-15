@@ -11,10 +11,10 @@
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Vulnerability } from '@/object-types'
 
-export default function Summary({ summaryData }: { summaryData: Vulnerability }) {
+export default function Summary({ summaryData }: { summaryData: Vulnerability }) : ReactNode {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -34,35 +34,35 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                 <tbody hidden={toggle}>
                     <tr>
                         <td>{t('Title')}:</td>
-                        <td>{summaryData.title && summaryData.title}</td>
+                        <td>{(summaryData.title ?? '') && (summaryData.title ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Description')}:</td>
-                        <td>{summaryData.description && summaryData.description}</td>
+                        <td>{(summaryData.description ?? '') && (summaryData.description ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('External Id')}:</td>
-                        <td>{summaryData.externalId && summaryData.externalId}</td>
+                        <td>{(summaryData.externalId ?? '') && (summaryData.externalId ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Publish Date')}:</td>
-                        <td>{summaryData.publishDate && summaryData.publishDate}</td>
+                        <td>{(summaryData.publishDate ?? '') && (summaryData.publishDate ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Last update')}:</td>
-                        <td>{summaryData.lastExternalUpdate && summaryData.lastExternalUpdate}</td>
+                        <td>{(summaryData.lastExternalUpdate ?? '') && (summaryData.lastExternalUpdate ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Priority')}:</td>
-                        <td>{summaryData.priority && summaryData.priority}</td>
+                        <td>{(summaryData.priority ?? '') && (summaryData.priority ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Priority Text')}:</td>
-                        <td>{summaryData.priorityText && summaryData.priorityText}</td>
+                        <td>{(summaryData.priorityText ?? '') && (summaryData.priorityText ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Action')}:</td>
-                        <td>{summaryData.action && summaryData.action}</td>
+                        <td>{(summaryData.action ?? '') && (summaryData.action ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Impact')}:</td>
@@ -88,9 +88,14 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                             <ul className='px-0'>
                                 {summaryData.assignedExtComponentIds?.map((elem, i) => {
                                     return (
-                                        <li key={i} style={{ display: 'inline' }}>
+                                        <li
+                                            key={i}
+                                            style={{ display: 'inline' }}
+                                        >
                                             {elem}
-                                            {i === summaryData.assignedExtComponentIds.length - 1 ? '' : ', '}{' '}
+                                            {i === (summaryData.assignedExtComponentIds?.length ?? 0) - 1
+                                                ? ''
+                                                : ', '}{' '}
                                         </li>
                                     )
                                 })}
@@ -103,9 +108,12 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                             <ul className='px-0'>
                                 {summaryData.cveReferences?.map((elem, i) => {
                                     return (
-                                        <li key={i} style={{ display: 'inline' }}>
+                                        <li
+                                            key={i}
+                                            style={{ display: 'inline' }}
+                                        >
                                             {`CVE-${elem}`}
-                                            {i === summaryData.cveReferences.length - 1 ? '' : ', '}{' '}
+                                            {i === (summaryData.cveReferences?.length ?? 0) - 1 ? '' : ', '}{' '}
                                         </li>
                                     )
                                 })}
@@ -130,8 +138,8 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     </tr>
                     <tr>
                         <td>{`${t('Vulnerability scoring')} (CVSS)`}:</td>
-                        <td>{`${summaryData.cvss && summaryData.cvss} (${'as of'}: ${
-                            summaryData.cvssTime && summaryData.cvssTime
+                        <td>{`${(summaryData.cvss ?? 0) && (summaryData.cvss ?? 0)} (${'as of'}: ${
+                            (summaryData.cvssTime ?? '') && (summaryData.cvssTime ?? '')
                         })`}</td>
                     </tr>
                     <tr>
@@ -151,10 +159,10 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     <tr>
                         <td>{t('Common weakness enumeration')}:</td>
                         <td>
-                            {summaryData.cwe && (
+                            {(summaryData.cwe ?? '') && (
                                 <Link
                                     className='text-link'
-                                    href={`https://cve.circl.lu/cwe/${summaryData.cwe.substring(4)}`}
+                                    href={`https://cve.circl.lu/cwe/${summaryData.cwe?.substring(4)}`}
                                     target='_blank'
                                 >
                                     {summaryData.cwe}

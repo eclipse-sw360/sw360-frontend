@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
 import { Package } from '@/object-types'
@@ -22,7 +22,7 @@ const Capitalize = (text: string) => {
         : undefined
 }
 
-export default function Summary({ summaryData }: { summaryData: Package }) {
+export default function Summary({ summaryData }: { summaryData: Package }) : ReactNode {
     const t = useTranslations('default')
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
 
@@ -33,7 +33,7 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                     <span className='d-inline-block'>
                         <BiClipboard
                             onClick={() => {
-                                navigator.clipboard.writeText(text)
+                                navigator.clipboard.writeText(text).catch((e) => console.error(e))
                             }}
                         />
                     </span>
@@ -72,16 +72,16 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                     </tr>
                     <tr>
                         <td>{t('Package Type')}:</td>
-                        <td>{Capitalize(summaryData.packageType) ?? ''}</td>
+                        <td>{Capitalize(summaryData.packageType ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{`PURL (${t('Package URL')})`}:</td>
                         <td>
                             {
-                                summaryData.purl &&
+                                (summaryData.purl ?? '') &&
                                 <Link
                                     className={`text-link`}
-                                    href={summaryData.purl}
+                                    href={summaryData.purl ?? ''}
                                 >
                                     {summaryData.purl}
                                 </Link>
@@ -96,10 +96,10 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                         <td>{`VCS (${t('Version Control System')})`}:</td>
                         <td>
                             {
-                                summaryData.vcs &&
+                                (summaryData.vcs ?? '') &&
                                 <Link
                                     className={`text-link`}
-                                    href={summaryData.vcs}
+                                    href={summaryData.vcs ?? ''}
                                 >
                                     {summaryData.vcs}
                                 </Link>
@@ -110,10 +110,10 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                         <td>{t('Homepage URL')}:</td>
                         <td>
                             {
-                                summaryData.homepageUrl &&
+                                (summaryData.homepageUrl ?? '') &&
                                 <Link
                                     className={`text-link`}
-                                    href={summaryData.homepageUrl}
+                                    href={summaryData.homepageUrl ?? ''}
                                 >
                                     {summaryData.homepageUrl}
                                 </Link>
@@ -128,7 +128,7 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                                     <Link className='text-link' href={`/licenses/${elem}`} key={elem}>
                                         {elem}
                                     </Link>
-                                    {i === summaryData.licenseIds.length - 1 ? '' : ','}{' '}
+                                    {i < (summaryData.licenseIds?.length ?? 0) - 1 && ', '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -165,9 +165,9 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                                 summaryData._embedded?.createdBy &&
                                 <Link
                                     className={`text-link`}
-                                    href={`mailto:${summaryData._embedded.createdBy.email ?? ''}`}
+                                    href={`mailto:${summaryData._embedded.createdBy.email}`}
                                 >
-                                    {summaryData._embedded.createdBy.fullName ?? ''}
+                                    {summaryData._embedded.createdBy.email}
                                 </Link>
                             }
                         </td>
@@ -185,7 +185,7 @@ export default function Summary({ summaryData }: { summaryData: Package }) {
                                     className={`text-link`}
                                     href={`mailto:${summaryData._embedded.modifiedBy.email}`}
                                 >
-                                    {summaryData._embedded.modifiedBy.fullName}
+                                    {summaryData._embedded.modifiedBy.email}
                                 </Link>
                             }
                         </td>

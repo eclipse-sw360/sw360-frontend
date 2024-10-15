@@ -9,6 +9,7 @@
 
 import { Metadata } from 'next'
 import PackageDetailTab from './components/PackageDetailTab'
+import { ReactNode } from 'react'
 
 interface Context {
     params: { id: string }
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
     title: 'Packages',
 }
 
-const Detail = async ({ params }: Context) => {
+const Detail = ({ params }: Context) : ReactNode => {
     return <PackageDetailTab packageId={params.id} />
 }
 

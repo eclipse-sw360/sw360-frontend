@@ -10,12 +10,13 @@
 import { Metadata } from 'next'
 
 import CreatePackage from './components/CreatePackage'
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Packages',
 }
 
-async function PackagesList() {
+function PackagesList() : ReactNode {
     return <CreatePackage />
 }
 

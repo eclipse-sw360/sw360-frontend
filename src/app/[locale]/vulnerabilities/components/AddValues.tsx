@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, ReactNode } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { Vulnerability } from '@/object-types'
@@ -21,13 +21,13 @@ export default function AddValues({
     payloadKeyName,
     payload,
     setPayload,
-}: {
+} : {
     componentName: string
     entityName: string
     payloadKeyName: keyof Vulnerability
     payload: Vulnerability
     setPayload: Dispatch<SetStateAction<Vulnerability>>
-}) {
+}) : ReactNode {
     const t = useTranslations('default')
 
     const addValue = () => {

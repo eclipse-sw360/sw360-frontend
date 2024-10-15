@@ -9,11 +9,11 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Embedded, Package, Session } from '@/object-types'
+import { useEffect, useState, ReactNode } from 'react'
+import { Embedded, Package } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
@@ -22,6 +22,7 @@ import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from "./PackageManagers"
+import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
 
@@ -32,7 +33,7 @@ interface DeletePackageModalMetData {
     packageVersion: string
 }
 
-export default function Packages() {
+export default function Packages() : ReactNode {
     const { data: session, status } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -111,13 +112,14 @@ export default function Packages() {
         },
     ]
 
-    const initServerPaginationConfig = (session: Session) => {
+    const initServerPaginationConfig = () => {
+        if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/packages`, Object.fromEntries(params)),
             then: (data: EmbeddedPackages) => {
                 return data._embedded['sw360:packages'].map((elem: Package) => [
                     {
-                        id: elem['_links']['self']['href'].split('/').at(-1),
+                        id: elem._links?.self.href.split('/').at(-1) ?? '',
                         name: elem.name ?? '',
                         version: elem.version ?? ''
                     },
@@ -126,13 +128,13 @@ export default function Packages() {
                     '',
                     elem.packageManager ?? '',
                     {
-                        id: elem['_links']['self']['href'].split('/').at(-1),
+                        id: elem._links?.self.href.split('/').at(-1) ?? '',
                         name: elem.name ?? '',
                         version: elem.version ?? ''
                     },
                 ])
             },
-            total: (data: EmbeddedPackages) => data.page.totalElements,
+            total: (data: EmbeddedPackages) => data.page?.totalElements,
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
@@ -165,33 +167,37 @@ export default function Packages() {
         }
     ]
 
-    return (
-        <>
-            <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData} isEditPage={false}/>
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2'>
-                        <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
-                    </div>
-                    <div className='col-10'>
-                        <div className='row'>
-                            <div className='col d-flex justify-content-between'>
-                                <button className='btn btn-primary col-auto' onClick={handleCreatePackage}>
-                                    {t('Add Package')}
-                                </button>
-                                <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
-                            </div>
+    if (status === 'unauthenticated') {
+        return signOut()
+    } else {
+        return (
+            <>
+                <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData} isEditPage={false}/>
+                <div className='container page-content'>
+                    <div className='row'>
+                        <div className='col-2'>
+                            <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
                         </div>
-                        {
-                            status === 'authenticated' ? 
-                            <Table columns={columns} server={initServerPaginationConfig(session)} selector={true} sort={false} /> :
-                            <div className='col-12 d-flex justify-content-center align-items-center'>
-                                <Spinner className='spinner' />
+                        <div className='col-10'>
+                            <div className='row'>
+                                <div className='col d-flex justify-content-between'>
+                                    <button className='btn btn-primary col-auto' onClick={handleCreatePackage}>
+                                        {t('Add Package')}
+                                    </button>
+                                    <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
+                                </div>
                             </div>
-                        }
+                            {
+                                status === 'authenticated' ? 
+                                <Table columns={columns} server={initServerPaginationConfig() as ServerStorageOptions} selector={true} sort={false} /> :
+                                <div className='col-12 d-flex justify-content-center align-items-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
-        </>
-    )
+            </>
+        )
+    }
 }
