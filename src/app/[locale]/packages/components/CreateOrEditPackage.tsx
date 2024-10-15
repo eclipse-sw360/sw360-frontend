@@ -9,15 +9,14 @@
 
 'use client'
 
-import { useState } from 'react'
-import { Package } from "@/object-types"
-import { useTranslations } from "next-intl"
-import { Dispatch, SetStateAction } from "react"
+import { Package } from '@/object-types'
+import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { packageManagers } from "./PackageManagers"
-import { IoIosClose } from "react-icons/io"
 import { useRouter } from 'next/navigation'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { IoIosClose } from 'react-icons/io'
 import DeletePackageModal from './DeletePackageModal'
+import { packageManagers } from './PackageManagers'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -26,8 +25,19 @@ interface DeletePackageModalMetData {
     packageVersion: string
 }
 
-export default function CreateOrEditPackage({ packagePayload, setPackagePayload, handleSubmit, isPending, isEditPage }: 
-    { packagePayload: Package, setPackagePayload: Dispatch<SetStateAction<Package>>, handleSubmit: () => void, isPending: boolean, isEditPage: boolean }) {
+export default function CreateOrEditPackage({
+    packagePayload,
+    setPackagePayload,
+    handleSubmit,
+    isPending,
+    isEditPage,
+}: {
+    packagePayload: Package
+    setPackagePayload: Dispatch<SetStateAction<Package>>
+    handleSubmit: () => void
+    isPending: boolean
+    isEditPage: boolean
+}): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
 
@@ -35,16 +45,24 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
         setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     }
 
-    const [deletePackageModalMetaData, setDeletePackageModalMetaData] = 
-        useState<DeletePackageModalMetData>({ show: false, packageId: '', packageName: '', packageVersion: '' })
+    const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
+        show: false,
+        packageId: '',
+        packageName: '',
+        packageVersion: '',
+    })
 
     return (
         <>
-            <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData} isEditPage={isEditPage} />
+            <DeletePackageModal
+                modalMetaData={deletePackageModalMetaData}
+                setModalMetaData={setDeletePackageModalMetaData}
+                isEditPage={isEditPage}
+            />
             <form
                 id='add_or_edit_package_form_submit'
                 method='post'
-                className="mb-3"
+                className='mb-3'
                 onSubmit={(e) => {
                     e.preventDefault()
                     handleSubmit()
@@ -56,20 +74,24 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                         className='mb-3 me-1 col-auto btn btn-primary'
                         disabled={isPending}
                     >
-                        {isEditPage?t('Update Package'):t('Create Package')}
+                        {isEditPage ? t('Update Package') : t('Create Package')}
                     </button>
-                    {
-                        isEditPage &&
+                    {isEditPage && (
                         <button
                             type='button'
                             className='mb-3 me-1 col-auto btn btn-danger'
-                            onClick={() => setDeletePackageModalMetaData(
-                                { show: true, packageId: packagePayload._links.self.href.split('/').at(-1), packageName: packagePayload.name, packageVersion: packagePayload.version })
+                            onClick={() =>
+                                setDeletePackageModalMetaData({
+                                    show: true,
+                                    packageId: packagePayload._links?.self.href.split('/').at(-1) ?? '',
+                                    packageName: packagePayload.name ?? '',
+                                    packageVersion: packagePayload.version ?? '',
+                                })
                             }
                         >
                             {t('Delete Package')}
                         </button>
-                    }
+                    )}
                     <button
                         type='button'
                         className='mb-3 me-1 col-auto btn btn-secondary'
@@ -83,10 +105,13 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                     <h6>{t('Summary')}</h6>
                 </div>
 
-                <div className="ms-2">
-                <div className='row mb-3 with-divider pb-2 ms-1'>
+                <div className='ms-2'>
+                    <div className='row mb-3 with-divider pb-2 ms-1'>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.name' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.name'
+                                className='form-label fw-medium'
+                            >
                                 {t('Name')} <span style={{ color: 'red' }}>*</span>
                             </label>
                             <input
@@ -101,7 +126,10 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.version' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.version'
+                                className='form-label fw-medium'
+                            >
                                 {t('Version')} <span style={{ color: 'red' }}>*</span>
                             </label>
                             <input
@@ -116,7 +144,10 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.packageType' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.packageType'
+                                className='form-label fw-medium'
+                            >
                                 {t('Package Type')} <span style={{ color: 'red' }}>*</span>
                             </label>
                             <select
@@ -138,15 +169,21 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                                 <option value='LIBRARY'>{t('Library')}</option>
                                 <option value='OPERATING_SYSTEM'>{t('Operating System')}</option>
                             </select>
-                            <div className='form-text' id='createOrEditPackage.packageType.HelpBlock'>
-                                <ShowInfoOnHover text={t('PACKAGE_TYPE_HELP_BLOCK')} />
-                                {' '}{t('Learn more about package types')}.
+                            <div
+                                className='form-text'
+                                id='createOrEditPackage.packageType.HelpBlock'
+                            >
+                                <ShowInfoOnHover text={t('PACKAGE_TYPE_HELP_BLOCK')} />{' '}
+                                {t('Learn more about package types')}.
                             </div>
                         </div>
                     </div>
                     <div className='row mb-3 with-divider pb-3 ms-1'>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.purl' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.purl'
+                                className='form-label fw-medium'
+                            >
                                 {`PURL (${t('Package URL')})`} <span style={{ color: 'red' }}>*</span>
                             </label>
                             <input
@@ -161,7 +198,10 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.packageManager' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.packageManager'
+                                className='form-label fw-medium'
+                            >
                                 {t('Package Manager')} <span style={{ color: 'red' }}>*</span>
                             </label>
                             <select
@@ -174,13 +214,21 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                                 disabled
                             >
                                 <option value=''>-- {t('Will be set automatically via PURL')} --</option>
-                                {
-                                    packageManagers.map(p => <option key={p} value={p.toUpperCase()}>{p}</option>)
-                                }
+                                {packageManagers.map((p) => (
+                                    <option
+                                        key={p}
+                                        value={p.toUpperCase()}
+                                    >
+                                        {p}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.vcs' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.vcs'
+                                className='form-label fw-medium'
+                            >
                                 {`VCS (${t('Version Control System')})`}
                             </label>
                             <input
@@ -196,7 +244,10 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                     </div>
                     <div className='row mb-3 with-divider pb-3 ms-1'>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.licenseIds' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.licenseIds'
+                                className='form-label fw-medium'
+                            >
                                 {t('Main licenses')}
                             </label>
                             <input
@@ -204,26 +255,35 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                                 className='form-control'
                                 id='createOrEditPackage.licenseIds'
                                 placeholder={t('Click to set Licenses')}
-                                value={packagePayload.licenseIds?.join(", ") ?? ''}
+                                value={packagePayload.licenseIds?.join(', ') ?? ''}
                                 readOnly
                             />
                         </div>
-                        <div className="col-lg-4">
-                            <label htmlFor='createOrEditPackage.release' className='form-label fw-medium'>
+                        <div className='col-lg-4'>
+                            <label
+                                htmlFor='createOrEditPackage.release'
+                                className='form-label fw-medium'
+                            >
                                 {t('Release')}
                             </label>
-                            <div className="input-group">
-                                <input 
-                                    type="text" 
-                                    className="form-control" 
-                                    placeholder={t('Click to link a Release')} 
+                            <div className='input-group'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder={t('Click to link a Release')}
                                     id='createOrEditPackage.release'
+                                    value={packagePayload.releaseId ?? ''}
                                 />
-                                <span className="input-group-text"><IoIosClose /></span>
+                                <span className='input-group-text'>
+                                    <IoIosClose />
+                                </span>
                             </div>
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.homepageUrl' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.homepageUrl'
+                                className='form-label fw-medium'
+                            >
                                 {t('Homepage URL')}
                             </label>
                             <input
@@ -239,7 +299,10 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                     </div>
                     <div className='row mb-3 with-divider pb-3 ms-1'>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.createdOn' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.createdOn'
+                                className='form-label fw-medium'
+                            >
                                 {t('Created On')}
                             </label>
                             <input
@@ -251,7 +314,10 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.createdBy' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.createdBy'
+                                className='form-label fw-medium'
+                            >
                                 {t('Created by')}
                             </label>
                             <input
@@ -259,26 +325,32 @@ export default function CreateOrEditPackage({ packagePayload, setPackagePayload,
                                 className='form-control'
                                 id='createOrEditPackage.createdBy'
                                 placeholder={t('Will be set automatically')}
-                                value={packagePayload.createdBy ?? ''}
+                                value={packagePayload._embedded?.createdBy?.email ?? ''}
                                 readOnly
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createOrEditPackage.modifiedBy' className='form-label fw-medium'>
+                            <label
+                                htmlFor='createOrEditPackage.modifiedBy'
+                                className='form-label fw-medium'
+                            >
                                 {t('Modified By')}
                             </label>
                             <input
                                 type='text'
                                 className='form-control'
                                 id='createOrEditPackage.modifiedBy'
-                                value={packagePayload.modifiedBy ?? ''}
+                                value={packagePayload._embedded?.modifiedBy?.email ?? ''}
                                 placeholder={t('Will be set automatically')}
                                 readOnly
                             />
                         </div>
                     </div>
                     <div className='form-group'>
-                        <label className='form-label fw-medium' htmlFor='createOrEditPackage.description'>
+                        <label
+                            className='form-label fw-medium'
+                            htmlFor='createOrEditPackage.description'
+                        >
                             {t('Description')}
                         </label>
                         <textarea

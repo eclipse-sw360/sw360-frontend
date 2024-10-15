@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import { HttpStatus } from '@/object-types'
 import { getSession, signOut } from 'next-auth/react'
@@ -34,7 +34,7 @@ interface AlertData {
 }
 
 export default function DeletePackageModal({ modalMetaData, setModalMetaData, isEditPage }: 
-    { modalMetaData: DeletePackageModalMetData, setModalMetaData: Dispatch<SetStateAction<DeletePackageModalMetData>>, isEditPage: boolean }) {
+    { modalMetaData: DeletePackageModalMetData, setModalMetaData: Dispatch<SetStateAction<DeletePackageModalMetData>>, isEditPage: boolean }) : ReactNode {
     const t = useTranslations('default')
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [deleting, setDeleting] = useState<boolean | null>(null)
@@ -66,7 +66,7 @@ export default function DeletePackageModal({ modalMetaData, setModalMetaData, is
                     })
                 }
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
             } else {
                 if(isEditPage) {
                     MessageService.error(t('Package cannot be deleted'))
@@ -99,7 +99,7 @@ export default function DeletePackageModal({ modalMetaData, setModalMetaData, is
                 centered
                 show={modalMetaData.show}
                 onHide={() => {
-                    if (!deleting) {
+                    if (deleting !== null) {
                         setModalMetaData({ show: false, packageId: modalMetaData.packageId, packageName: '', packageVersion: '' })
                     }
                 }}
@@ -126,19 +126,19 @@ export default function DeletePackageModal({ modalMetaData, setModalMetaData, is
                             <button
                                 className='btn btn-dark'
                                 onClick={() => setModalMetaData({ show: false, packageId: '', packageName: '', packageVersion: '' })}
-                                disabled={deleting}
+                                disabled={deleting ?? undefined}
                             >
                                 {t('Cancel')}
                             </button>
                             <button
                                 className='btn btn-danger'
-                                onClick={async () => {
-                                    await deletePackage()
+                                onClick={() => {
+                                    deletePackage().catch((e) => console.error(e))
                                 }}
-                                disabled={deleting}
+                                disabled={deleting ?? undefined}
                             >
                                 {t('Delete Package')}
-                                {deleting && <Spinner size='sm' className='ms-1 spinner' />}
+                                {deleting === true && <Spinner size='sm' className='ms-1 spinner' />}
                             </button>   
                         </>:
                         <button

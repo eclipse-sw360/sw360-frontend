@@ -9,17 +9,17 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import { Package, HttpStatus } from "@/object-types"
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
 import { Tab, ListGroup } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import { getSession, signOut } from 'next-auth/react'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import MessageService from '@/services/message.service'
 import { useRouter } from 'next/navigation'
 
-export default function CreatePackage() {
+export default function CreatePackage() : ReactNode {
 
     const t = useTranslations('default')
     const router = useRouter()
@@ -33,18 +33,19 @@ export default function CreatePackage() {
         try {
             setCreatingPackage(true)
             const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.POST('packages', { 
                 ...packagePayload, 
                 createdBy: session.user.email,
-                packageManager: packagePayload.purl.substring(4, packagePayload.purl.indexOf('/')).toUpperCase()
+                packageManager: packagePayload.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase()
             }, session.user.access_token)
             if (response.status == HttpStatus.CREATED) {
                 MessageService.success(t('Package created successfully'))
                 router.push('/packages')
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
             } else {
-                const res = await response.json()
+                const res = await response.json() as Record<string, string>
                 MessageService.error(`${t('Something went wrong')}: ${res.message}`)
             }
         } catch (e) {
@@ -56,20 +57,32 @@ export default function CreatePackage() {
 
     return (
         <>
-            <Tab.Container defaultActiveKey='summary' mountOnEnter={true} unmountOnExit={true}>
-                <div className="row mx-2 mt-3">
-                    <div className="col-lg-2">
+            <Tab.Container
+                defaultActiveKey='summary'
+                mountOnEnter={true}
+                unmountOnExit={true}
+            >
+                <div className='row mx-2 mt-3'>
+                    <div className='col-lg-2'>
                         <ListGroup>
-                            <ListGroup.Item action eventKey='summary'>
+                            <ListGroup.Item
+                                action
+                                eventKey='summary'
+                            >
                                 <div className='my-2'>{t('Summary')}</div>
                             </ListGroup.Item>
                         </ListGroup>
                     </div>
-                    <div className="col ms-2 me-4 mt-2">
+                    <div className='col ms-2 me-4 mt-2'>
                         <Tab.Content>
                             <Tab.Pane eventKey='summary'>
-                                <CreateOrEditPackage packagePayload={packagePayload} setPackagePayload={setPackagePayload} 
-                                    handleSubmit={handleCreatePackage} isPending={creatingPackage} isEditPage={false} />
+                                <CreateOrEditPackage
+                                    packagePayload={packagePayload}
+                                    setPackagePayload={setPackagePayload}
+                                    handleSubmit={() => {handleCreatePackage().catch((e) => console.error(e))}}
+                                    isPending={creatingPackage}
+                                    isEditPage={false}
+                                />
                             </Tab.Pane>
                         </Tab.Content>
                     </div>

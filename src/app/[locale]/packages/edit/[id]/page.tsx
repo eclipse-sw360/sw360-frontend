@@ -10,6 +10,7 @@
 import { Metadata } from 'next'
 
 import EditPackage from './components/EditPackage'
+import { ReactNode } from 'react'
 
 interface Context {
     params: { id: string }
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     title: 'Packages',
 }
 
-async function PackagesList({ params }: Context) {
+function PackagesList({ params }: Context) : ReactNode {
     return <EditPackage packageId={params.id} />
 }
 

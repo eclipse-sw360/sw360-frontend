@@ -10,17 +10,17 @@
 'use client'
 
 import { HttpStatus, Package } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, ReactNode } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
 import MessageService from '@/services/message.service'
 import Summary from './Summary'
 import ChangeLog from './Changelog'
 
-export default function PackageDetailTab({ packageId }: { packageId: string }) {
+export default function PackageDetailTab({ packageId }: { packageId: string }) : ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
@@ -32,7 +32,7 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) {
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
                 const response = await ApiUtils.GET(
                     `packages/${packageId}`,
@@ -45,7 +45,7 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) {
                     return notFound()
                 }
 
-                const data = await response.json()
+                const data = await response.json() as Package
 
                 setSummaryData({ id: packageId, ...data })
             } catch (e) {
@@ -57,7 +57,8 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) {
     }, [packageId, session, status])
 
     const handleEditPackage = () => {
-        if (session.user.email === summaryData['_embedded']['createdBy']['email']){
+        if (CommonUtils.isNullOrUndefined(session)) return
+        if (session.user.email === summaryData?._embedded?.createdBy?.email){
             MessageService.success(t('You are editing the original document'))
             router.push(`/packages/edit/${packageId}`)
         }
