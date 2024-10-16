@@ -66,6 +66,8 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
     }, [t])
 
     const deleteProject = async () => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(projectId))
+            return
         const response = await ApiUtils.DELETE(`projects/${projectId}`, session.user.access_token)
         try {
             if (response.status == HttpStatus.OK) {
@@ -88,6 +90,8 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
 
     useEffect(() => {
         const fetchData = async (projectId: string) => {
+            if (CommonUtils.isNullEmptyOrUndefinedString(projectId))
+                return
             if (session) {
                 const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
                 if (projectsResponse.status == HttpStatus.OK) {
