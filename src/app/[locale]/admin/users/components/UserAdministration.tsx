@@ -20,8 +20,7 @@ import { User, Embedded } from '@/object-types'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
-type EmbeddedUsers = Embedded<User, 'sw360:users'>
+import CommonUtils from '@/utils/common.utils'
 
 export default function UserAdminstration() {
     const t = useTranslations('default')
@@ -107,23 +106,26 @@ export default function UserAdminstration() {
         },
     ]
 
-    const server = {
-        url: `${SW360_API_URL}/resource/api/users`,
-        then: (data: EmbeddedUsers) => {
-            setNum(data.page.totalElements)
-            return data._embedded['sw360:users'].map((elem: User) => [
-                elem.givenName ?? '',
-                elem.lastName ?? '',
-                elem.email ?? '',
-                elem.deactivated ? 'Inactive' : 'Active',
-                elem.department ?? '',
-                '',
-                '',
-                elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-            ])
-        },
-        total: (data: EmbeddedUsers) => data.page.totalElements,
-        headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
+    const initServerPaginationConfig = () => {
+        if (CommonUtils.isNullOrUndefined(session)) return
+        return {
+            url: `${SW360_API_URL}/resource/api/users`,
+            then: (data: Embedded<User, 'sw360:users'>) => {
+                setNum(data.page ? data.page.totalElements : 0)
+                return data._embedded['sw360:users'].map((elem: User) => [
+                    elem.givenName ?? '',
+                    elem.lastName ?? '',
+                    elem.email ?? '',
+                    elem.deactivated ? 'Inactive' : 'Active',
+                    elem.department ?? '',
+                    '',
+                    '',
+                    CommonUtils.getIdFromUrl(elem._links?.self.href),
+                ])
+            },
+            total: (data: Embedded<User, 'sw360:users'>) => data.page ? data.page.totalElements : 0,
+            headers: { Authorization: `${session.user.access_token}` },
+        }
     }
 
     const advancedSearch = [
@@ -174,7 +176,7 @@ export default function UserAdminstration() {
                         {
                             status === 'authenticated' ?
                             <div className="ms-1">
-                                <Table columns={columns} server={server} selector={true} sort={false}/>
+                                <Table columns={columns} server={initServerPaginationConfig()} selector={true} sort={false}/>
                             </div> :
                             <div className='col-12 mt-1 text-center'>
                                 <Spinner className='spinner' />
