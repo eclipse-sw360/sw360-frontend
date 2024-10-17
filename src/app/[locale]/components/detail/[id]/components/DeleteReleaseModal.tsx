@@ -53,6 +53,8 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     }, [])
 
     const deleteComponent = async () => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(releaseId))
+            return
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session))
             return
@@ -86,6 +88,8 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
+            if (CommonUtils.isNullEmptyOrUndefinedString(releaseId))
+                return
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session))
                 return

@@ -54,6 +54,8 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     }, [t])
 
     const deleteComponent = async () => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(componentId))
+            return
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session))
             return signOut()
@@ -90,6 +92,8 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
+            if (CommonUtils.isNullEmptyOrUndefinedString(componentId))
+                return
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session))
                 return signOut()

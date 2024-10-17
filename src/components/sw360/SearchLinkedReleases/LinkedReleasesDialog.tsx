@@ -61,7 +61,7 @@ const LinkedReleasesDialog = ({
 
         ;(async () => {
             try {
-                const queryUrl = CommonUtils.createUrlWithParams(`releases?allDetails=true`, Object.fromEntries(params))
+                const queryUrl = CommonUtils.createUrlWithParams(`releases`, { ...Object.fromEntries(params), allDetails: 'true' })
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
