@@ -15,7 +15,7 @@ import { Table, _ } from 'next-sw360'
 import { getSession, signOut,  } from 'next-auth/react'
 import { useState } from 'react'
 import { notFound } from 'next/navigation'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, SearchDuplicatesResponse } from '@/object-types'
 
 export default function DatabaseSanitation() {
@@ -26,6 +26,8 @@ export default function DatabaseSanitation() {
         try {
             setDuplicates(null)
             const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(
                 'databaseSanitation/searchDuplicate',
                 session.user.access_token,
