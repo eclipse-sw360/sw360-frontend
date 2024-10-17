@@ -12,70 +12,46 @@ import { AuthToken, HttpStatus, OAuthClient, RequestContent, UserCredentialInfo 
 import { SW360_API_URL } from '@/utils/env'
 
 const generateToken = async (userData: UserCredentialInfo) => {
-    const clientManagementURL: string = SW360_API_URL + '/authorization/client-management'
-    let credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64')
-
-    const opts: RequestContent = { method: 'GET', headers: {}, body: null }
-
-    opts.headers['Content-Type'] = 'application/json'
-    opts.headers['Authorization'] = `Basic ${credentials}`
-
-    let oAuthClient: OAuthClient | null = null
-
-    await fetch(clientManagementURL, opts)
-        .then((response) => {
-            if (response.status == HttpStatus.OK) {
-                return response.text()
-            } else {
-                return null
-            }
-        })
-        .then((json) => {
-            try {
-                const oauth_clients: Array<OAuthClient> = JSON.parse(json) as Array<OAuthClient>
-                oAuthClient = oauth_clients[0]
-            } catch (err) {
-                oAuthClient = null
-            }
-        })
-        .catch(() => {
-            oAuthClient = null
-        })
-
-    if (oAuthClient == null) {
+    try {
+        const clientManagementURL: string = SW360_API_URL + '/authorization/client-management'
+        let credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64')
+    
+        const opts: RequestContent = { method: 'GET', headers: {}, body: null }
+    
+        opts.headers['Content-Type'] = 'application/json'
+        opts.headers['Authorization'] = `Basic ${credentials}`
+    
+        let oAuthClient: OAuthClient | null = null
+    
+        const response = await fetch(clientManagementURL, opts)
+        if (response.status === HttpStatus.OK) {
+            const oauth_clients = await response.json() as Array<OAuthClient>
+            oAuthClient = oauth_clients[0]
+        }
+    
+        if (oAuthClient == null) {
+            return null
+        }
+    
+        credentials = Buffer.from(`${oAuthClient.client_id}:${oAuthClient.client_secret}`, `binary`).toString('base64')
+    
+        opts.headers['Authorization'] = `Basic ${credentials}`
+        const authorizationURL: string =
+            SW360_API_URL +
+            '/authorization/oauth/token?grant_type=password&username=' +
+            userData.username +
+            '&password=' +
+            userData.password
+    
+        let sw360token: AuthToken | null = null
+        const tokenResponse = await fetch(authorizationURL, opts)
+        if (tokenResponse.status == HttpStatus.OK) {
+            sw360token = await tokenResponse.json() as AuthToken
+        } 
+        return sw360token
+    } catch(e) {
         return null
     }
-
-    credentials = Buffer.from(`${oAuthClient.client_id}:${oAuthClient.client_secret}`, `binary`).toString('base64')
-
-    opts.headers['Authorization'] = `Basic ${credentials}`
-    const authorizationURL: string =
-        SW360_API_URL +
-        '/authorization/oauth/token?grant_type=password&username=' +
-        userData.username +
-        '&password=' +
-        userData.password
-
-    let sw360token: AuthToken | null = null
-    await fetch(authorizationURL, opts)
-        .then((response) => {
-            if (response.status == HttpStatus.OK) {
-                return response.text()
-            } else {
-                return undefined
-            }
-        })
-        .then((json) => {
-            try {
-                sw360token = JSON.parse(json) as AuthToken
-            } catch (err) {
-                sw360token = null
-            }
-        })
-        .catch(() => {
-            oAuthClient = null
-        })
-    return sw360token
 }
 
 const generateBasicToken = async (userData: UserCredentialInfo) => {
