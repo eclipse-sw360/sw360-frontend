@@ -9,8 +9,8 @@
 
 'use client'
 
-import { ApiUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from "next-sw360"
 import Link from 'next/link'
@@ -30,7 +30,6 @@ function ClosedModerationRequest() {
 
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
-    const { data: session, status } = useSession()
     const [tableData, setTableData] = useState<Array<any>>([])
     const moderationRequestStatus : ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
@@ -39,7 +38,10 @@ function ClosedModerationRequest() {
         REJECTED: t('REJECTED'),
     };
 
-    const formatDate = (timestamp: number): string => {
+    const formatDate = (timestamp: number | undefined): string | null => {
+        if (!timestamp) {
+            return null
+        }
         const date = new Date(timestamp);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -49,6 +51,9 @@ function ClosedModerationRequest() {
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as EmbeddedModeratoinRequest
@@ -58,30 +63,32 @@ function ClosedModerationRequest() {
             } else {
                 notFound()
             }
-        },[session]
+        },[]
     )
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModeratoinRequest) => {
-            const filteredModerationRequests = moderationRequests['_embedded']['sw360:moderationRequests'].filter((item: ModerationRequest) => {
+        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModeratoinRequest | undefined) => {
+            const filteredModerationRequests = moderationRequests?._embedded['sw360:moderationRequests'].filter((item: ModerationRequest) => {
                 return item.moderationState === 'APPROVED' || item.moderationState === 'REJECTED';
             });
-
-            setTableData(
-                filteredModerationRequests.map((item: ModerationRequest) => [
-                    formatDate(item.timestamp),
-                    item.componentType,
-                    _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
-                    item.requestingUser,
-                    item.requestingUserDepartment,
-                    item.moderators,
-                    moderationRequestStatus[item.moderationState],
-                    '',
-                ])
-            )
+            if (filteredModerationRequests !== undefined){
+                setTableData(
+                    filteredModerationRequests.map((item: ModerationRequest) => [
+                        formatDate(item?.timestamp),
+                        item.componentType,
+                        _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
+                        item.requestingUser,
+                        item.requestingUserDepartment,
+                        item.moderators,
+                        item?.moderationState !== undefined ?
+                            moderationRequestStatus[item?.moderationState] : undefined,
+                        '',
+                    ])
+                )
+            }
             setLoading(false)
-        })}, [fetchData, session])
+        })}, [fetchData])
 
     const columns = [
         {

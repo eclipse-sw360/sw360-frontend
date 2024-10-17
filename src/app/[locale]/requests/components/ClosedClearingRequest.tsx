@@ -13,9 +13,9 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { Embedded, HttpStatus } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -32,7 +32,6 @@ interface ProjectData {
 function ClosedClearingRequest() {
 
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<Array<any>>([])
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
@@ -208,6 +207,9 @@ function ClosedClearingRequest() {
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as EmbeddedClearingRequest
@@ -217,49 +219,50 @@ function ClosedClearingRequest() {
             } else {
                 notFound()
             }
-        },[session]
+        },[]
     )
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest) => {
-            const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
+        void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest | undefined) => {
+            const filteredClearingRequests = clearingRequests?._embedded['sw360:clearingRequests']
                                                                 .filter((item: ClearingRequest) => {
                 return item.clearingState === 'REJECTED' || item.clearingState === 'CLOSED';
             });
-            setTableData(
-                filteredClearingRequests.map((item: ClearingRequest) => {
-                    if (!Object.hasOwn(item, 'projectId')){
-                        setIsProjectDeleted(true)
-                    }
-                    return [
-                                {
-                                    requestId: item.id
-                                },
-                                item.projectBU ?? t('Not Available'),
-                                isProjectDeleted ? {
-                                    isProjectDeleted: true
-                                    } : {
-                                    isProjectDeleted: false,
-                                    projectId: item.projectId ?? '',
-                                    projectName: item.projectName ?? ''
-                                },
-                                item.clearingState ?? '',
-                                item.requestingUser ?? '',
-                                item.clearingTeam ?? '',
-                                item.createdOn ?? '',
-                                item.requestedClearingDate ?? '',
-                                item.agreedClearingDate ?? '',
-                                item.requestClosedOn ?? '',
-                                item.clearingType ?? '',
-                                {
-                                    requestId: item.id
-                                },
-                            ]
-                })
-            )
+            if (filteredClearingRequests !== undefined){
+                setTableData(
+                    filteredClearingRequests.map((item: ClearingRequest) => {
+                        if (!Object.hasOwn(item, 'projectId')){
+                            setIsProjectDeleted(true)
+                        }
+                        return [
+                                    {
+                                        requestId: item.id
+                                    },
+                                    item.projectBU ?? t('Not Available'),
+                                    isProjectDeleted ? {
+                                        isProjectDeleted: true
+                                        } : {
+                                        isProjectDeleted: false,
+                                        projectId: item.projectId ?? '',
+                                        projectName: item.projectName ?? ''
+                                    },
+                                    item.clearingState ?? '',
+                                    item.requestingUser ?? '',
+                                    item.clearingTeam ?? '',
+                                    item.createdOn ?? '',
+                                    item.requestedClearingDate ?? '',
+                                    item.agreedClearingDate ?? '',
+                                    item.requestClosedOn ?? '',
+                                    item.clearingType ?? '',
+                                    {
+                                        requestId: item.id
+                                    },
+                                ]
+                    })
+            )}
             setLoading(false)
-        })}, [fetchData, session])
+        })}, [fetchData])
 
     if (status === 'unauthenticated') {
         signOut()

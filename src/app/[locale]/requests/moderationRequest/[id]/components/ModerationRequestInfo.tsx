@@ -14,10 +14,13 @@ import { useTranslations } from 'next-intl'
 import { ModerationRequestDetails } from '@/object-types'
 
 
-export default function ModerationRequestInfo({ data }: { data: ModerationRequestDetails }) {
+export default function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | undefined }) {
     const t = useTranslations('default')
 
-    const formatDate = (timestamp: number): string => {
+    const formatDate = (timestamp: number | undefined): string | null => {
+        if(!timestamp){
+            return null
+        }
         const date = new Date(timestamp);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -37,14 +40,14 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data.requestingUser
-                                ? <Link href={`mailto:${data.requestingUser}`}>{data.requestingUser}</Link>
+                            {data?.requestingUser
+                                ? <Link href={`mailto:${data?.requestingUser}`}>{data?.requestingUser}</Link>
                                 : ''}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Submitted On')}:</td>
-                        <td>{formatDate(data.timestamp) ?? ''}</td>
+                        <td>{formatDate(data?.timestamp) ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Comment on Moderation Request')}:</td>
@@ -54,7 +57,7 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
                                 id='moderationRequest.commentRequestingUser'
                                 aria-describedby={t('Comment on Moderation Request')}
                                 style={{ height: '120px' }}
-                                value={data.commentRequestingUser ?? ''}
+                                value={data?.commentRequestingUser ?? ''}
                                 readOnly
                             />
                         </td>

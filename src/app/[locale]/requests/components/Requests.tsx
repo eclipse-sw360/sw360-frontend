@@ -17,7 +17,7 @@ import ClosedModerationRequest from './ClosedModerationRequest'
 import OpenClearingRequest from './OpenClearingRequest'
 import ClosedClearingRequest from './ClosedClearingRequest'
 import { useCallback, useEffect, useState } from 'react'
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { ClearingRequest, Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
@@ -140,6 +140,8 @@ function Requests() {
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json()

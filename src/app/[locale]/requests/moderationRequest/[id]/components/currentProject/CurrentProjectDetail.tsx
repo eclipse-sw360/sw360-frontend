@@ -10,7 +10,7 @@
 'use client'
 
 import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
@@ -31,7 +31,7 @@ import ProjectAttachments from
 import ChangeLog from
             '@/app/[locale]/projects/detail/[id]/components/Changelog'
 
-export default function CurrentProjectDetail({ projectId }: { projectId: string }) {
+export default function CurrentProjectDetail({ projectId }: { projectId: string | undefined }) {
 
     const t = useTranslations('default')
     const { data: session, status } = useSession()
@@ -39,12 +39,12 @@ export default function CurrentProjectDetail({ projectId }: { projectId: string 
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
 
     useEffect(() => {
-        if (status !== 'authenticated') return
-
         const controller = new AbortController()
         const signal = controller.signal
 
         ;(async () => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             try {
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
@@ -70,7 +70,7 @@ export default function CurrentProjectDetail({ projectId }: { projectId: string 
     }, [projectId, session, status])
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
     return (
         <>

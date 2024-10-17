@@ -13,9 +13,9 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
-import { ApiUtils } from '@/utils/index'
-import { Embedded, HttpStatus } from '@/object-types'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { Embedded, HttpStatus, Session } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -43,13 +43,13 @@ interface ProjectData {
 
 function LicenseClearing(licenseClearing: LicenseClearing) {
     const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
+    const { data: session, status } = useSession()
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
         ;(async () => {
             try {
-                const session = await getSession()
                 if (!session) {
                     return signOut()
                 }
@@ -76,6 +76,9 @@ function LicenseClearing(licenseClearing: LicenseClearing) {
         return () => controller.abort()
     }, [licenseClearing.projectId])
 
+    if (status === 'unauthenticated') {
+        signOut()
+    } else {
     return (
         <>
             { lcData ? (
@@ -101,19 +104,22 @@ function LicenseClearing(licenseClearing: LicenseClearing) {
                 </div>
             )}
         </>        
-    )
+    )}
 }
 
 function OpenClearingRequest() {
 
     const t = useTranslations('default')
-    const [loading, setLoading] = useState(true)
-    const { data: session, status } = useSession()
-    const [isProjectDeleted, setIsProjectDeleted] = useState(false)
+    const { data:session, status } = useSession()
+    const [loading, setLoading] = useState<boolean>(true)
+    const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
     const [tableData, setTableData] = useState<Array<any>>([])
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session)){
+                return signOut()
+            }
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as EmbeddedClearingRequest
@@ -123,63 +129,64 @@ function OpenClearingRequest() {
             } else {
                 notFound()
             }
-        },[session]
+        },[]
     )
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest) => {
-            const filteredClearingRequests = clearingRequests['_embedded']['sw360:clearingRequests']
+        void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest | undefined) => {
+            const filteredClearingRequests = clearingRequests?._embedded['sw360:clearingRequests']
                                                                 .filter((item: ClearingRequest) => {
                 return item.clearingState != 'REJECTED' && item.clearingState != 'CLOSED';
             });
-            setTableData(
-                filteredClearingRequests.map((item: ClearingRequest) => {
-                    if (!Object.hasOwn(item, 'projectId')){
-                        setIsProjectDeleted(true)
-                    }
-                    return [
-                                {
-                                    requestId: item.id
-                                },
-                                item.projectBU ?? t('Not Available'),
-                                isProjectDeleted ? {
-                                    isProjectDeleted: true
-                                    } : {
-                                    isProjectDeleted: false,
-                                    projectId: item.projectId ?? '',
-                                    projectName: item.projectName ?? ''
-                                },
-                                isProjectDeleted ? {
-                                    isProjectDeleted: true
-                                    } : { 
+            if (filteredClearingRequests !== undefined){
+                setTableData(
+                    filteredClearingRequests.map((item: ClearingRequest) => {
+                        if (!Object.hasOwn(item, 'projectId')){
+                            setIsProjectDeleted(true)
+                        }
+                        return [
+                                    {
+                                        requestId: item.id
+                                    },
+                                    item.projectBU ?? t('Not Available'),
+                                    isProjectDeleted ? {
+                                        isProjectDeleted: true
+                                        } : {
                                         isProjectDeleted: false,
                                         projectId: item.projectId ?? '',
-                                        openReleases: true
+                                        projectName: item.projectName ?? ''
                                     },
-                                item.clearingState ?? '', 
-                                item.priority ?? '',
-                                item.requestingUser ?? '',
-                                isProjectDeleted ? {
-                                    isProjectDeleted: true
-                                    } : { 
-                                        isProjectDeleted: false,
-                                        projectId: item.projectId ?? '',
-                                        clearingProgress: true
+                                    isProjectDeleted ? {
+                                        isProjectDeleted: true
+                                        } : { 
+                                            isProjectDeleted: false,
+                                            projectId: item.projectId ?? '',
+                                            openReleases: true
+                                        },
+                                    item.clearingState ?? '', 
+                                    item.priority ?? '',
+                                    item.requestingUser ?? '',
+                                    isProjectDeleted ? {
+                                        isProjectDeleted: true
+                                        } : { 
+                                            isProjectDeleted: false,
+                                            projectId: item.projectId ?? '',
+                                            clearingProgress: true
+                                        },
+                                    item.createdOn ?? '',
+                                    item.requestedClearingDate ?? '',
+                                    item.agreedClearingDate ?? '',
+                                    item.clearingType ?? '',
+                                    {
+                                        requestId: item.id,
+                                        requestingUser: item.requestingUser
                                     },
-                                item.createdOn ?? '',
-                                item.requestedClearingDate ?? '',
-                                item.agreedClearingDate ?? '',
-                                item.clearingType ?? '',
-                                {
-                                    requestId: item.id,
-                                    requestingUser: item.requestingUser
-                                },
-                            ]
-                })
-            )
+                                ]
+                    })
+            )}
             setLoading(false)
-        })}, [fetchData, session])
+        })}, [fetchData])
 
     const columns = [
         {
@@ -473,14 +480,15 @@ function OpenClearingRequest() {
                                 {t('Edit')}
                             </Tooltip>}>
                             <Button className='btn-transparent'
-                                    hidden={isProjectDeleted  || (session.user.userGroup  === 'USER' &&
-                                                                  session.user.email !== requestingUser)}>
+                                    hidden={isProjectDeleted  || (session?.user?.userGroup  === 'USER' &&
+                                                                  session?.user?.email !== requestingUser)}>
                                 <Link href={`/requests/clearingRequest/edit/${requestId}`}
                                     className='overlay-trigger'>
                                     <FaPencilAlt className='btn-icon'/>
                                 </Link>
                             </Button>
                         </OverlayTrigger>
+                        
                     </>
                 )
         }

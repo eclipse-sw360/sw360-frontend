@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ApiUtils } from '@/utils/index'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from "next-sw360"
@@ -19,6 +19,7 @@ import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { notFound } from 'next/navigation'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 import { Spinner } from 'react-bootstrap'
+import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 
 type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 interface ModerationRequestMap {
@@ -31,7 +32,11 @@ function OpenModerationRequest() {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
+    const [mrIdArray, setMrIdArray] = useState<Array<string>>([])
     const [tableData, setTableData] = useState<Array<any>>([])
+    const [disableBulkDecline, setDisableBulkDecline] = useState(true)
+    const [bulkDeclineMRModal, setBulkDeclineMRModal] = useState(false)
+    const [mrIdNameMap, setMrIdNameMap] = useState<{[key: string]: string}>({});
     const moderationRequestStatus : ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
@@ -39,7 +44,7 @@ function OpenModerationRequest() {
         REJECTED: t('REJECTED'),
     };
 
-    const formatDate = (timestamp: number): string => {
+    const formatDate = (timestamp: number | undefined): string | null => {
         if(!timestamp){
             return null
         }
@@ -52,6 +57,8 @@ function OpenModerationRequest() {
 
     const fetchData = useCallback(
         async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as EmbeddedModerationRequest
@@ -66,46 +73,88 @@ function OpenModerationRequest() {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModerationRequest) => {
-            const filteredModerationRequests = moderationRequests['_embedded']['sw360:moderationRequests']
-                                                                .filter((item: ModerationRequest) => {
-                return item.moderationState === 'PENDING' || item.moderationState === 'INPROGRESS';
+        void fetchData('moderationrequest').then((moderationRequests: EmbeddedModerationRequest | undefined) => {
+            
+            const filteredModerationRequests = moderationRequests?._embedded
+                                                ['sw360:moderationRequests']
+                                                .filter((item: ModerationRequest) => {
+                return item.moderationState === 'PENDING' ||
+                       item.moderationState === 'INPROGRESS';
             });
-
-            setTableData(
-                filteredModerationRequests.map((item: ModerationRequest) => [
-                    formatDate(item.timestamp),
-                    item.documentType,
-                    _(<Link href={`/requests/moderationRequest/${item.id}`}>{item.documentName}</Link>),
-                    item.requestingUser,
-                    item.requestingUserDepartment,
-                    item.moderators,
-                    moderationRequestStatus[item.moderationState],
-                    '',
-                ])
-            )
+            if (filteredModerationRequests !== undefined){
+                setTableData(
+                    filteredModerationRequests.map((item: ModerationRequest) => {
+                        return [
+                            formatDate(item?.timestamp),
+                            item.documentType,
+                            {
+                                id: item.id,
+                                documentName: item.documentName,
+                            },
+                            item.requestingUser,
+                            item.requestingUserDepartment,
+                            item.moderators,
+                            item?.moderationState !== undefined ?
+                                moderationRequestStatus[item?.moderationState] : undefined,
+                            {
+                                moderationRequestId: item.id,
+                                documentName: item.documentName
+                            },
+                        ]
+                    }
+                ))
+            }
             setLoading(false)
         })}, [fetchData, session])
+
+    const handleCheckboxes = (moderationRequestId: string,
+                              documentName: string) => {
+        const updatedMrIdArray: string[] = [...mrIdArray]
+        const mrMap = {...mrIdNameMap}
+        if (updatedMrIdArray.includes(moderationRequestId)) {
+            const index = updatedMrIdArray.indexOf(moderationRequestId)
+            updatedMrIdArray.splice(index, 1)
+            delete mrMap[moderationRequestId]
+        } else {
+            mrMap[moderationRequestId] = documentName
+            updatedMrIdArray.push(moderationRequestId)
+        }
+        setMrIdArray(updatedMrIdArray)
+        setMrIdNameMap(mrMap)
+        setDisableBulkDecline(updatedMrIdArray.length === 0)
+    }
 
     const columns = [
         {
             id: 'openModerationRequest.date',
             name: t('Date'),
+            width: 'auto',
             sort: true,
         },
         {
             id: 'openModerationRequest.type',
             name: t('Type'),
+            width: 'auto',
             sort: true,
         },
         {
             id: 'openModerationRequest.documentName',
             name: t('Document Name'),
+            width: 'auto',
             sort: true,
+            formatter: ({id, documentName}: {id: string, documentName: string}) =>
+                _(
+                    <>
+                        <Link href={`/requests/moderationRequest/${id}`}>
+                            {documentName}
+                        </Link>
+                    </>
+                ),
         },
         {
             id: 'openModerationRequest.requestingUser',
             name: t('Requesting User'),
+            width: 'auto',
             formatter: (email: string) =>
                 _(
                     <>
@@ -119,11 +168,13 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.department',
             name: t('Department'),
+            width: 'auto',
             sort: true,
         },
         {
             id: 'openModerationRequest.moderators',
             name: t('Moderators'),
+            width: 'auto',
             formatter: (moderators: string[]) =>
                 _(
                     <ExpandingModeratorCell moderators={moderators} />
@@ -138,7 +189,22 @@ function OpenModerationRequest() {
         {
             id: 'openModerationRequest.actions',
             name: t('Actions'),
-            sort: true,
+            width: 'auto',
+            formatter: ({moderationRequestId, documentName}:
+                            {moderationRequestId: string, documentName: string}) =>
+            _(
+                <div className='form-check'>
+                    <input
+                        className='form-check-input'
+                        type='checkbox'
+                        name='moderationRequestId'
+                        value={moderationRequestId}
+                        id={moderationRequestId}
+                        checked={mrIdArray.includes(moderationRequestId)}
+                        onChange={() => handleCheckboxes(moderationRequestId, documentName)}
+                    />
+                </div>
+            ),
         }
     ]
 
@@ -147,11 +213,28 @@ function OpenModerationRequest() {
     } else {
     return (
         <>
+            <BulkDeclineModerationRequestModal
+                show={bulkDeclineMRModal}
+                setShow={setBulkDeclineMRModal}
+                mrIdNameMap={mrIdNameMap}
+            />
             <div className='row mb-4'>
+                <div className='col-12'>
+                    <button className='btn btn-danger'
+                            disabled={disableBulkDecline}
+                            onClick={() => setBulkDeclineMRModal(true)}
+                            >
+                        {t('Bulk Actions')}
+                    </button>
+                </div>
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     {loading == false ? (
                         <div style={{ paddingLeft: '0px' }}>
-                            <Table columns={columns} data={tableData} sort={false} selector={true} />
+                            <Table columns={columns}
+                                   data={tableData}
+                                   sort={false}
+                                   selector={true}
+                            />
                         </div>
                         ) : (
                                 <Spinner className='spinner' />
