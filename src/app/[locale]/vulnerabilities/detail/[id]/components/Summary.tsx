@@ -71,7 +71,7 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                                 {summaryData.impact &&
                                     Object.entries(summaryData.impact).map(([key, val]) => (
                                         <li key={key}>
-                                            <b>{`${t('VALUE', { value: key })}: `}</b>
+                                            <b>{t(key as never)}: </b>
                                             {val}
                                         </li>
                                     ))}
@@ -149,7 +149,7 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                                 {summaryData.access &&
                                     Object.entries(summaryData.access).map(([key, val]) => (
                                         <li key={key}>
-                                            <b>{`${t('VALUE', { value: key })}: `}</b>
+                                            <b>{t(key as never)}: </b>
                                             {val}
                                         </li>
                                     ))}

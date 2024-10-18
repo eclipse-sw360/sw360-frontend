@@ -8,13 +8,14 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import { ReactNode } from 'react'
 import LicenseAdministration from './components/LicenseAdministration'
 
 export const metadata: Metadata = {
     title: 'Admin',
 }
 
-async function LicenseAdministrationPage() {
+function LicenseAdministrationPage() : ReactNode {
     return <LicenseAdministration />
 }
 
