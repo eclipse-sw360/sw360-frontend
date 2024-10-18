@@ -14,20 +14,21 @@ import DownloadService from '@/services/download.service'
 import { ApiUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRef, useState } from 'react'
+import { useRef, useState, ReactNode } from 'react'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 import MessageService from '@/services/message.service'
 
-export default function LicenseAdministration() {
+export default function LicenseAdministration() : ReactNode {
     const t = useTranslations('default')
     const file = useRef<File | undefined>()
     const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.currentTarget.files && e.currentTarget.files.length === 0) {
-            return
-        }
-        file.current = e.currentTarget.files[0]
+        const files = e.currentTarget.files
+        
+        if (!files || files.length === 0) return
+        
+        file.current = files[0]
     }
 
     const uploadLicenses = async () => {
@@ -45,11 +46,11 @@ export default function LicenseAdministration() {
             }
             const response = await ApiUtils.POST('licenses/upload', formData, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
-                signOut()
+                await signOut()
             } else if (response.status === HttpStatus.OK) {
                 MessageService.success(t('Licenses uploaded successfully'))
             } else {
-                const data = await response.json()
+                const data = await response.json() as object
                 console.log(data)
                 MessageService.error(t('Something went wrong'))
             }
@@ -80,7 +81,7 @@ export default function LicenseAdministration() {
                         <button
                             type='button'
                             className='btn btn-primary col-auto me-2'
-                            onClick={downloadLicenseArchive}
+                            onClick={() => {downloadLicenseArchive().catch((e) => console.error(e))}}
                         >
                             {t('Download License Archive')}
                         </button>
@@ -127,7 +128,7 @@ export default function LicenseAdministration() {
                             {t('Overwrite if ids match')}
                         </label>
                     </div>
-                    <button type='button' className='btn btn-secondary col-auto mt-3' onClick={uploadLicenses}>
+                    <button type='button' className='btn btn-secondary col-auto mt-3' onClick={() => {uploadLicenses().catch((e) => console.error(e))}}>
                         {t('Upload Licenses')}
                     </button>
                 </div>

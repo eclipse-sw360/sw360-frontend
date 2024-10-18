@@ -13,7 +13,7 @@ import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -28,9 +28,9 @@ export default function DeleteAllLicenseInformationModal({
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
-}) {
+}) : ReactNode {
     const t = useTranslations('default')
-    const [deleting, setDeleting] = useState<boolean>(undefined)
+    const [deleting, setDeleting] = useState<boolean>(false)
     const [message, setMessage] = useState<undefined | Message>(undefined)
 
     const handleDelete = async () => {
@@ -70,22 +70,34 @@ export default function DeleteAllLicenseInformationModal({
                 aria-labelledby={t('Delete All Licenses')}
                 scrollable
             >
-                <Modal.Header style={{ backgroundColor: '#feefef', color: '#da1414' }} closeButton>
+                <Modal.Header
+                    style={{ backgroundColor: '#feefef', color: '#da1414' }}
+                    closeButton
+                >
                     <Modal.Title id='delete-all-license-info-modal'>
                         <AiOutlineQuestionCircle /> {t('Delete All Licenses')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {message && (
-                        <Alert variant={message.type} id='deleteLicences.message.alert'>
+                        <Alert
+                            variant={message.type}
+                            id='deleteLicences.message.alert'
+                        >
                             {message.message}
                         </Alert>
                     )}
-                    <Alert variant='warning' id='deleteLicences.warning.alert'>
+                    <Alert
+                        variant='warning'
+                        id='deleteLicences.warning.alert'
+                    >
                         {t('other documents might use the licenses')}
                     </Alert>
                     <p className='my-3'>{t('DELETE_ALL_LICENSE')}</p>
-                    <Alert variant='primary' id='deleteLicences.info.alert'>
+                    <Alert
+                        variant='primary'
+                        id='deleteLicences.info.alert'
+                    >
                         {t('This function is meant to be followed by a new license import')}
                     </Alert>
                 </Modal.Body>
@@ -102,13 +114,18 @@ export default function DeleteAllLicenseInformationModal({
                     </button>
                     <button
                         className='btn btn-danger'
-                        onClick={async () => {
-                            await handleDelete()
+                        onClick={() => {
+                            handleDelete().catch((e) => console.error(e))
                         }}
                         disabled={deleting}
                     >
                         {t('Delete All License Information')}{' '}
-                        {deleting && <Spinner size='sm' className='ms-1 spinner' />}
+                        {deleting && (
+                            <Spinner
+                                size='sm'
+                                className='ms-1 spinner'
+                            />
+                        )}
                     </button>
                 </Modal.Footer>
             </Modal>
