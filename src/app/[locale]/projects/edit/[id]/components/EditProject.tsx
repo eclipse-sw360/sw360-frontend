@@ -18,7 +18,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -37,6 +37,24 @@ function EditProject({ projectId }: { projectId: string }) {
         id: '',
         fullName: '',
     })
+
+    const searchParams = useSearchParams()
+    const TABS = ['summary', 'administration', 'linkedProjectsAndReleases', 'attachments', 'obligations']
+    const DEFAULT_ACTIVE_TAB = 'summary'
+    const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
+
+    useEffect(() => {
+        let tab = searchParams.get('tab') 
+        if (!tab || TABS.indexOf(tab) === -1) {
+            tab = DEFAULT_ACTIVE_TAB
+        }
+        setActiveKey(tab as string)
+    }, [searchParams])
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
+        router.push(`?tab=${key}`)
+    }
 
     const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
 
@@ -319,7 +337,7 @@ function EditProject({ projectId }: { projectId: string }) {
                 }}
             >
                 <div>
-                    <Tab.Container defaultActiveKey='summary' mountOnEnter={true} unmountOnExit={true}>
+                    <Tab.Container activeKey={activeKey} onSelect={(k) => handleSelect(k)} mountOnEnter={true} unmountOnExit={true}>
                         <Row>
                             <Col sm='auto' className='me-3'>
                                 <ListGroup>
