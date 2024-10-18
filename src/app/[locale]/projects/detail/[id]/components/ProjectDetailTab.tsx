@@ -13,7 +13,7 @@ import { AdministrationDataType, HttpStatus, SummaryDataType, ActionType } from 
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import LinkProjects from '../../../components/LinkProjects'
@@ -36,6 +36,19 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const DEFAULT_ACTIVE_TAB = 'summary'
+    const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
+
+    useEffect(() => {
+        const fragment = searchParams.get('tab') || DEFAULT_ACTIVE_TAB 
+        setActiveKey(fragment)
+    }, [searchParams])
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
+        router.push(`?tab=${key}`)
+    }
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -71,11 +84,11 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
     const handleEditProject = (projectId: string) => {
         if (session.user.email === summaryData['_embedded']['createdBy']['email']){
             MessageService.success(t('You are editing the original document'))
-            router.push(`/projects/edit/${projectId}`)
+            router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
         }
         else {
             MessageService.success(t('You will create a moderation request if you update'))
-            router.push(`/projects/edit/${projectId}`)
+            router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
         }
     }
 
@@ -83,7 +96,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
         <>
             <LinkProjects show={show} setShow={setShow} projectId={projectId} />
             <div className='container page-content'>
-                <Tab.Container defaultActiveKey='summary' mountOnEnter={true} unmountOnExit={true}>
+                <Tab.Container activeKey={activeKey} onSelect={(k) => handleSelect(k)} mountOnEnter={true} unmountOnExit={true}>
                     <Row>
                         <Col sm='auto' className='me-3'>
                             <ListGroup>
