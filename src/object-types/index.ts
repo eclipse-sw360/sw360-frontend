@@ -33,6 +33,7 @@ import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
 import LicenseDetail from './LicenseDetail'
 import LicensePayload from './LicensePayload'
+import LicenseType from './LicenseType'
 import LinkedAttachments from './LinkedAttachments'
 import LinkedRelease from './LinkedRelease'
 import LinkedVulnerability from './LinkedVulnerability'
@@ -45,7 +46,7 @@ import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import { Obligation, ProjectObligationsList, LicenseObligationRelease, ProjectObligation } from './Obligation'
+import { LicenseObligationRelease, Obligation, ProjectObligation, ProjectObligationsList } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import Project from './Project'
@@ -96,7 +97,6 @@ import SPDX from './spdx/SPDX'
 import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
-import LicenseType from './LicenseType'
 
 export type {
     AccessToken,
@@ -133,6 +133,7 @@ export type {
     LicenseDetail,
     LicenseObligationRelease,
     LicensePayload,
+    LicenseType,
     LinkedAttachments,
     LinkedRelease,
     LinkedVulnerability,
@@ -153,6 +154,7 @@ export type {
     PackageVerificationCode,
     Project,
     ProjectData,
+    ProjectObligation,
     ProjectObligationsList,
     ProjectPayload,
     ProjectVulnerability,
@@ -188,26 +190,25 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
-    LicenseType,
-    ProjectObligation
 }
 
 // Special functions for populate data
 export { NavList, Preferences }
 
 // Enums + Constants
-import ActionType from './enums/ActionType'
 import AttachmentType from './constants/AttachmentTypes'
-import ClearingRequestStates from './enums/ClearingRequestStates'
 import CommonTabIds from './constants/CommonTabsIds'
 import ComponentTabIds from './constants/ComponentTabIds'
-import DocumentTypes from './enums/DocumentTypes'
-import LicenseTabIds from './constants/LicenseTabIds'
 import HttpStatus from './constants/HttpStatus'
-import RequestDocumentTypes from './enums/RequestDocumentTypes'
+import LicenseTabIds from './constants/LicenseTabIds'
 import ReleaseTabIds from './constants/ReleaseTabIds'
-import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
+import ActionType from './enums/ActionType'
+import ClearingRequestStates from './enums/ClearingRequestStates'
+import DocumentTypes from './enums/DocumentTypes'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
+import RequestDocumentTypes from './enums/RequestDocumentTypes'
+import UserGroupType from './enums/UserGroupType'
+import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 
 export {
     ActionType,
@@ -218,8 +219,9 @@ export {
     DocumentTypes,
     HttpStatus,
     LicenseTabIds,
+    ProjectVulnerabilityTabType,
     ReleaseTabIds,
     RequestDocumentTypes,
+    UserGroupType,
     VulnerabilitiesVerificationState,
-    ProjectVulnerabilityTabType
 }

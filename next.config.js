@@ -8,7 +8,8 @@
 // License-Filename: LICENSE
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withNextIntl = require('next-intl/plugin')()
+const createNextIntlPlugin = require('next-intl/plugin')
+const withNextIntl = createNextIntlPlugin()
 
 const nextConfig = {
     reactStrictMode: true,

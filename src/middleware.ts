@@ -9,20 +9,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { UserGroupType } from '@/object-types'
 import { withAuth } from 'next-auth/middleware'
-import createIntlMiddleware from 'next-intl/middleware'
+import createMiddleware from 'next-intl/middleware'
 import { NextRequest } from 'next/server'
+import { routing } from './i18n/routing'
 import { locales } from './object-types/Constants'
 
 const publicPages = ['/']
 
 const adminPages = ['/admin']
 
-const intlMiddleware = createIntlMiddleware({
-    locales,
-    defaultLocale: 'en',
-    localePrefix: 'never',
-})
+const intlMiddleware = createMiddleware(routing)
 
 const authMiddleware = withAuth(
     // Note that this callback is only invoked if
@@ -36,7 +34,7 @@ const authMiddleware = withAuth(
         pages: {
             signIn: '/',
         },
-    }
+    },
 )
 
 const authAdminMiddleware = withAuth(
@@ -46,24 +44,26 @@ const authAdminMiddleware = withAuth(
     (req) => intlMiddleware(req),
     {
         callbacks: {
-            authorized: ({ token }) => token !== null && token.userGroup === 'ADMIN',
+            authorized: ({ token }) => token !== null && (token.userGroup as UserGroupType) === UserGroupType.ADMIN,
         },
         pages: {
             signIn: '/',
         },
-    }
+    },
 )
 
-export default function middleware(req: NextRequest) {
+import { NextResponse } from 'next/server';
+
+export default function middleware(req: NextRequest): NextResponse | Promise<NextResponse> {
     const publicPathnameRegex = RegExp(
         `^(/(${locales.join('|')}))?(${publicPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})/?$`,
-        'i'
+        'i',
     )
     const isPublicPage = publicPathnameRegex.test(req.nextUrl.pathname)
 
     const adminPathnameRegex = RegExp(
         `^(/(${locales.join('|')}))?(${adminPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})/?$`,
-        'i'
+        'i',
     )
     const isAdminPage = adminPathnameRegex.test(req.nextUrl.pathname)
 
