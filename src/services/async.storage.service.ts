@@ -46,10 +46,10 @@ export class AsyncStorageUtils {
      * @param key -
      */
     static getObject<T>(key: StorageKey): T | null {
-        const value = localStorage.getItem(key)
-        if (!value) return null
+        const value: string | null = localStorage.getItem(key)
+        if (value == null) return null
 
-        return JSON.parse(value)
+        return JSON.parse(value) as T
     }
 
     /**
