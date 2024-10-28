@@ -11,7 +11,7 @@ import KeycloakProvider from "next-auth/providers/keycloak";
 import { NextAuthOptions } from 'next-auth'
 import { jwtDecode } from 'jwt-decode'
 
-import UserGroupType from '../../../../object-types/enums/UserGroupType';
+import { UserGroupType } from '@/object-types';
 
 const keycloakProvider = KeycloakProvider({
     clientId: `${process.env.SW360_KEYCLOAK_CLIENT_ID}`,
@@ -31,8 +31,7 @@ const keycloakAuthOption: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, account }) {
-            const nowTimeStamp = Math.floor(Date.now() / 1000)
-            if (account) {
+            if (account && account.access_token && account.id_token && account.expires_at && account.refresh_token) {
                 token.decoded = jwtDecode(account.access_token)
                 token.access_token = "Bearer " + account.id_token
                 token.expires_in = account.expires_at
@@ -40,12 +39,8 @@ const keycloakAuthOption: NextAuthOptions = {
                 const tokenDetails = JSON.parse(JSON.stringify(token.decoded))
                 const userGroup = getUserGroup(tokenDetails)
                 token.userGroup = Array.isArray(userGroup) ? userGroup[0] : userGroup;
-                return token
-            } else if (nowTimeStamp < token.expires_in) {
-                return token
-            } else {
-                console.log('Token is expired!!')
             }
+            return token
         },
         async session({ session, token }) {
             // Send properties to the client, like an access_token from a provider.

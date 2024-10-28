@@ -14,7 +14,7 @@ import { CREDENTIAL_PROVIDER } from '@/constants'
 import AuthService from '@/services/auth.service'
 import { HttpStatus, UserCredentialInfo } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { NextAuthOptions } from 'next-auth'
+import { NextAuthOptions, User } from 'next-auth'
 
 const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
     providers: [
@@ -54,7 +54,7 @@ const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
-            return { ...token, ...user }
+            return { ...token, ...user } as User
         },
         async session({ session, token }) {
             // Send properties to the client, like an access_token from a provider.
