@@ -12,7 +12,7 @@ import { CREDENTIAL_PROVIDER } from '@/constants'
 import AuthService from '@/services/auth.service'
 import { HttpStatus, UserCredentialInfo } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { NextAuthOptions } from 'next-auth'
+import { NextAuthOptions, User } from 'next-auth'
 
 const basicAuthOption: NextAuthOptions = {
     providers: [
@@ -53,7 +53,7 @@ const basicAuthOption: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
-            return { ...token, ...user }
+            return { ...token, ...user } as User
         },
         async session({ session, token }) {
             session.user = token
