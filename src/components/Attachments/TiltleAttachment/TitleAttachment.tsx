@@ -12,7 +12,7 @@ import React from 'react'
 import { useTranslations } from 'next-intl'
 import styles from './TitleAttachment.module.css'
 
-export default function TitleAttachment() {
+export default function TitleAttachment() : JSX.Element{
     const t = useTranslations('default')
     return (
         <>

@@ -8,11 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-const AdditionalData = ({ additionalData }: any) => {
+interface Props {
+  additionalData: { [k: string]: string } | undefined
+}
+
+const AdditionalData = ({ additionalData }: Props) : JSX.Element => {
   const regexEmail = /^\w+([.-]\w+)*@\w+([.-]\w+)*(\.\w{2,3})+$/;
   const regexUrl = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/g;
   return (
-    <> {
+    <>{(additionalData !== undefined) &&
       Object.keys(additionalData).map((key) => {
         if (additionalData[key].match(regexEmail)) {
           return (
