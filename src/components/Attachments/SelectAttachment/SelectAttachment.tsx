@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useRef, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
@@ -18,6 +18,7 @@ import { Button, Modal } from 'react-bootstrap'
 import { Attachment, ComponentPayload, DocumentTypes, Release } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import styles from './SelectAttachment.module.css'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     show: boolean
@@ -43,14 +44,17 @@ function SelectAttachment({
     releasePayload,
     setReleasePayload,
     documentType,
-}: Props) {
+}: Props) : JSX.Element {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const [files, setFiles] = useState([])
-    const inputRef = useRef(null)
+    const [files, setFiles] = useState<Array<File>>([])
+    const inputRef = useRef<HTMLInputElement>(null)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.prototype.slice.call(e.target.files)
+        if (e.target.files == null || e.target.files.length === 0) {
+            setFiles([])
+            return
+        }
+        const files = Array.prototype.slice.call(e.target.files) as Array<File>
         setFiles(files)
     }
 
@@ -62,9 +66,6 @@ function SelectAttachment({
     }
 
     const handleUploadFiles = async () => {
-        if (!files) {
-            return
-        }
         const formData = new FormData()
 
         for (const iterator of files) {
@@ -72,6 +73,9 @@ function SelectAttachment({
         }
 
         const url = SW360_API_URL + '/resource/api/attachments'
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         fetch(url, {
             method: 'POST',
             body: formData,
@@ -80,22 +84,24 @@ function SelectAttachment({
             },
         })
             .then((res) => res.json())
-            .then((json) => {
+            .then((json: Array<Attachment>) => {
                 json.map((item: Attachment) => attachmentUpload.push(item))
                 setAttachmentFromUpload(attachmentUpload)
                 if (documentType === DocumentTypes.COMPONENT) {
+                    if (setComponentPayload === undefined) return
                     setComponentPayload({
                         ...componentPayload,
                         attachmentDTOs: attachmentUpload,
                     })
                 } else {
+                    if (setReleasePayload === undefined) return
                     setReleasePayload({
                         ...releasePayload,
                         attachmentDTOs: attachmentUpload,
                     })
                 }
                 onReRender()
-            })
+            }).catch((err) => console.error(err))
         setShow(!show)
     }
 
@@ -163,7 +169,7 @@ function SelectAttachment({
                 <Button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
                     {t('Pause')}
                 </Button>
-                <Button type='button' className={`fw-bold btn btn-light button-orange`} onClick={handleUploadFiles}>
+                <Button type='button' className={`fw-bold btn btn-light button-orange`} onClick={() => void handleUploadFiles()}>
                     {t('Upload')}
                 </Button>
             </Modal.Footer>

@@ -13,14 +13,14 @@ import React from 'react'
 import { useTranslations } from 'next-intl'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { Attachment, AttachmentType, DocumentTypes } from '@/object-types'
+import { Attachment, DocumentTypes } from '@/object-types'
 import styles from './TableAttachment.module.css'
 
 interface Props {
-    setAttachmentData?: React.Dispatch<React.SetStateAction<Array<Attachment>>>
-    data?: Array<Attachment>
-    setAttachmentToComponentData?: AttachmentType
-    setAttachmentToReleasePayload?: AttachmentType
+    setAttachmentData: React.Dispatch<React.SetStateAction<Array<Attachment>>>
+    data: Array<Attachment>
+    setAttachmentToComponentData?: void
+    setAttachmentToReleasePayload?: void
     documentType?: string
 }
 
@@ -30,13 +30,16 @@ function TableAttachment({
     // setAttachmentToComponentData,
     // setAttachmentToReleasePayload,
     documentType,
-}: Props) {
+}: Props) : JSX.Element {
     const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
-        // const { name, value } = e.target
+        // TODO: Function is not complete, needs to be fixed
+
+        const { name, value } = e.target
         const list: Array<Attachment> = [...data]
-        // list[index][name as keyof Attachment] = value
-        index
+        // @ts-expect-error: Function is not complete, needs to be fixed
+        list[index][name as keyof Attachment] = value
+
         setAttachmentData(list)
         if (documentType === DocumentTypes.COMPONENT) {
             // setAttachmentToComponentData(list)
@@ -63,14 +66,14 @@ function TableAttachment({
                     return (
                         <div key={item.attachmentContentId}>
                             <div className={`${styles['div-row']}`}>
-                                <label className={`${styles['label-filename']}`}>{item.filename ?? ''}</label>
+                                <label className={`${styles['label-filename']}`}>{item.filename}</label>
                                 <select
                                     className={`${styles['select-type']}`}
                                     aria-label='component_type'
                                     id='component_type'
                                     name='attachmentType'
                                     onChange={(e) => handleInputChange(e, index)}
-                                    value={item.attachmentType ?? ''}
+                                    value={item.attachmentType}
                                 >
                                     <option value='SOURCE'>{t('Source file')}</option>
                                     <option value='CLEARING_REPORT'>{t('Clearing Report')}</option>

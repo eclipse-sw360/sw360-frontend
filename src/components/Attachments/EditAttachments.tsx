@@ -8,11 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
-import { Attachment, ComponentPayload, DocumentTypes, HttpStatus, Release } from '@/object-types'
+import { Attachment, ComponentPayload, DocumentTypes, Embedded, HttpStatus, Release } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import styles from './Attachment.module.css'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
@@ -28,6 +28,8 @@ interface Props {
     setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
 }
 
+type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachmentDTOes'>
+
 function EditAttachments({
     documentId,
     documentType,
@@ -35,9 +37,8 @@ function EditAttachments({
     setComponentPayload,
     releasePayload,
     setReleasePayload,
-}: Props) {
+}: Props) : JSX.Element {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [attachmentData, setAttachmentData] = useState<Array<Attachment>>([])
     const [reRender, setReRender] = useState(false)
     const handleReRender = () => {
@@ -60,40 +61,46 @@ function EditAttachments({
     //     })
     // }
 
-    const fetchData: any = useCallback(
+    const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
+            if (response.status === HttpStatus.OK) {
+                const data = await response.json() as EmbeddedAttachments
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                signOut()
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
             } else {
-                return []
+                return undefined
             }
         },
-        [session.user.access_token]
+        []
     )
 
     useEffect(() => {
-        fetchData(`${documentType}/${documentId}/attachments`).then((attachments: any) => {
+        fetchData(`${documentType}/${documentId}/attachments`).then((attachments: EmbeddedAttachments | undefined) => {
+            if (attachments === undefined) return
             if (
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
             ) {
                 const attachmentDetails: Array<Attachment> = []
-                attachments['_embedded']['sw360:attachmentDTOes'].map((item: any) => {
+                attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => {
                     attachmentDetails.push(item)
                 })
                 setAttachmentData(attachmentDetails)
                 if (documentType === DocumentTypes.COMPONENT) {
-                    setComponentPayload({
-                        ...componentPayload,
-                        attachmentDTOs: attachmentDetails,
-                    })
+                    if(setComponentPayload !== undefined) {
+                        setComponentPayload({
+                            ...componentPayload,
+                            attachmentDTOs: attachmentDetails,
+                        })
+                    }
                 }
             }
-        })
+        }).catch((err) => console.error(err))
     }, [documentId, documentType, fetchData, setComponentPayload, componentPayload])
 
     return (

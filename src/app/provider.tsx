@@ -15,6 +15,6 @@ type Props = {
     children?: React.ReactNode
 }
 
-export const Providers = ({ children }: Props) => {
+export const Providers = ({ children }: Props) : JSX.Element => {
     return <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
 }
