@@ -12,11 +12,15 @@ import React, { memo } from 'react'
 import { Table } from '../sw360'
 
 interface Props {
-    data: any
-    columns: any
+    data: Array<(string | JSX.Element)[]>
+    columns: {
+        id: string;
+        name: string;
+        sort?: boolean;
+    }[]
 }
 
-const compare = (preState: any, nextState: any) => {
+const compare = (preState: Props, nextState: Props) => {
     return Object.entries(preState.data).sort().toString() === Object.entries(nextState.data).sort().toString()
 }
 
