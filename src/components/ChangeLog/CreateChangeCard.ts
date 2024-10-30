@@ -8,14 +8,23 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
+import { Changes } from '../../object-types/Changelogs'
+
 function convertToJsonObject(fieldValue: any) {
   if (fieldValue !== null && fieldValue !== undefined) {
     if (typeof fieldValue === 'object') {
       return fieldValue;
     } else if (typeof fieldValue == 'string') {
       return fieldValue
-    }
-    else {
+    } else {
       return JSON.parse(fieldValue);
     }
   }
@@ -30,9 +39,10 @@ function createElementFromHTML(htmlString: string) {
   return div.firstChild;
 }
 
-function createChangesCards(changes: any, transFieldName: string) {
-  const cardScreen = document.getElementById("cardScreen");
-  cardScreen.innerHTML = "";
+function createChangesCards(changes: Changes[] | undefined | null, transFieldName: string) : void {
+  const cardScreen = document.getElementById('cardScreen')
+  if (cardScreen === null) return
+  cardScreen.innerHTML = ''
   let cardId = 0;
   const templateStringHTML = `
     <div id="template" className="d-none">
@@ -70,11 +80,12 @@ function createChangesCards(changes: any, transFieldName: string) {
   if (changes !== null && changes !== undefined && changes.length > 0) {
     for (let i = 0; i < changes.length; i++) {
       cardId++;
-      const template = templateHtml.cloneNode(true) as HTMLElement
+      const template = templateHtml?.cloneNode(true) as HTMLElement
       template.classList.remove("d-none");
       template.id = "template-" + cardId;
 
-      const cardHead: any = template.querySelector("h3")
+      const cardHead = template.querySelector("h3")
+      if (cardHead === null) return
       cardHead.innerHTML = `${transFieldName}: ` + changes[i].fieldName;
       cardHead.style.color = 'white';
       cardHead.style.fontWeight = 'bold';
@@ -88,15 +99,15 @@ function createChangesCards(changes: any, transFieldName: string) {
       cardHead.style.marginTop = '10px';
 
 
-      const changesTable = templateTableHtml.cloneNode(true) as HTMLElement;
+      const changesTable = templateTableHtml?.cloneNode(true) as HTMLElement;
       changesTable.classList.remove("d-none");
       changesTable.removeAttribute("id");
       changeLogObjDifferentiator(changes[i].fieldValueOld, changesTable.querySelectorAll("td")[0], "text-danger",
         changes[i].fieldValueNew, changesTable.querySelectorAll("td")[1], "text-success", 1);
       const tableContainer = template.querySelector("#tableContainer");
-      tableContainer.append(changesTable);
-      tableContainer.removeAttribute("id");
-      const parentNode = tableContainer.parentElement as HTMLElement;
+      tableContainer?.append(changesTable);
+      tableContainer?.removeAttribute("id");
+      const parentNode = tableContainer?.parentElement as HTMLElement;
       parentNode.setAttribute("id", "collapse-" + cardId)
       parentNode.setAttribute("aria-labelledby", "heading-" + cardId)
       parentNode.setAttribute("data-parent", "#template-" + cardId);
@@ -105,7 +116,7 @@ function createChangesCards(changes: any, transFieldName: string) {
   }
 }
 
-function changeLogObjDifferentiator(fieldValueOld: any, oldChangesCard: any, oldChangesCardTextColor: any, fieldValueNew: any, newChangesCard: any, newChangesCardTextColor: any, indentlevel: any) {
+function changeLogObjDifferentiator(fieldValueOld: any, oldChangesCard: HTMLElement, oldChangesCardTextColor: string, fieldValueNew: any, newChangesCard: HTMLElement, newChangesCardTextColor: string, indentlevel: number) {
   const leftSpanHightlighter = "<span class='text-dark' style='background-color:#f9b2ba'>",
     rightSpanHighlighter = "<span class='text-dark' style='background-color:#a6f1b8'>"
   fieldValueOld = convertToJsonObject(fieldValueOld);
@@ -169,7 +180,7 @@ function diffArray(fieldValueOld: any, fieldValueNew: any, leftSpanHightlighter:
   copyFromSourceToDestinationArray(fieldValueNewTmp, fieldValueNew);
 }
 
-function highlightArray(primaryField: any, primaryFieldTmp: any, secondaryField: any, secondaryFieldTmp: any,
+function highlightArray(primaryField: any, primaryFieldTmp: Array<any>, secondaryField: any, secondaryFieldTmp: Array<any>,
   primarySpanHightlighter: string, secondarySpanHighlighter: string, spaceForClosingBraces: any,
   selector: any, differentiateObject: any, indentlevel: any) {
   for (const primaryValue of primaryField) {
@@ -258,7 +269,7 @@ function highlightObject(fieldValuePrimary: any, fieldValueSecondary: any, prima
     if (fieldValueSecondary[key] === null || fieldValueSecondary[key] === undefined) {
       let highlighted = fieldValuePrimary[key];
       if (typeof fieldValuePrimary[key] === 'object') {
-        highlighted = JSON.stringify(fieldValuePrimary[key], undefined, 5 * (indentlevel + 1));
+        highlighted = JSON.stringify(fieldValuePrimary[key], undefined, 5 * (indentlevel + 1))
         highlighted = highlighted.substring(0, highlighted.length - 1) + spaceForClosingBraces + highlighted.substring(highlighted.length - 1);
       }
       fieldValuePrimary[primarySpanHightlighter + key + '</span>'] = primarySpanHightlighter + highlighted + '</span>';
@@ -278,7 +289,7 @@ function highlightObject(fieldValuePrimary: any, fieldValueSecondary: any, prima
   }
 }
 
-function prepareDiffString(changesArrTmp: any, result: any, highLighter: any, val: any) {
+function prepareDiffString(changesArrTmp: any, result: string, highLighter: any, val: any) {
   if (changesArrTmp.length !== 0) {
     if (result.length != 0) {
       result += " ";

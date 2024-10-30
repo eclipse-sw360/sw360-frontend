@@ -13,28 +13,29 @@ import CommonUtils from '@/utils/common.utils'
 import PrettyFormatData from '@/components/PrettyFormatData/PrettyFormatData'
 import createChangesCards from '../CreateChangeCard'
 import { useTranslations } from 'next-intl'
+import { Changelogs } from '@/object-types'
 
 interface Props {
-    changeLogData: any
+    changeLogData: Changelogs | undefined
 }
 
-const ChangeLogDetail = ({ changeLogData }: Props) => {
+const ChangeLogDetail = ({ changeLogData }: Props) : JSX.Element => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
     useEffect(() => {
-        if (changeLogData && changeLogData.changes) {
-            const changes = JSON.parse(JSON.stringify(changeLogData.changes))
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(changeLogData?.changes)) {
+            const changes = changeLogData.changes
             createChangesCards(changes, t('Field Name'))
         } else {
             createChangesCards([], t('Field Name'))
         }
     }, [changeLogData, t])
 
-    const handleReferenceDoc: any = () => {
+    const handleReferenceDoc = () => {
         if (
-            CommonUtils.isNullOrUndefined(changeLogData.referenceDoc) &&
-            CommonUtils.isNullOrUndefined(changeLogData.info)
+            CommonUtils.isNullOrUndefined(changeLogData?.referenceDoc) &&
+            CommonUtils.isNullOrUndefined(changeLogData?.info)
         ) {
             return (
                 <>
@@ -78,7 +79,7 @@ const ChangeLogDetail = ({ changeLogData }: Props) => {
 
     return (
         <>
-            {changeLogData && (
+            {(changeLogData !== undefined) && (
                 <>
                     <table className='table label-value-table' style={{ marginBottom: '2rem' }}>
                         <thead
