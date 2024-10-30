@@ -24,7 +24,7 @@ import { IoMdGitMerge } from 'react-icons/io'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
-export default function VendorsList() {
+export default function VendorsList(): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const { data: session, status } = useSession()
@@ -80,14 +80,14 @@ export default function VendorsList() {
     const server = {
         url: `${SW360_API_URL}/resource/api/vendors`,
         then: (data: EmbeddedVendors) => {
-            setNumVendors(data.page.totalElements)
+            setNumVendors(data.page?.totalElements ?? 0)
             return data._embedded['sw360:vendors'].map((elem: Vendor) => [
                 elem.fullName ?? '',
                 elem.shortName ?? '',
                 elem.url ?? '',
             ])
         },
-        total: (data: EmbeddedVendors) => data.page.totalElements,
+        total: (data: EmbeddedVendors) => data.page?.totalElements ?? 0,
         headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 

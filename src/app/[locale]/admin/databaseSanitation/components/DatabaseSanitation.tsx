@@ -18,7 +18,7 @@ import { notFound } from 'next/navigation'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, SearchDuplicatesResponse } from '@/object-types'
 
-export default function DatabaseSanitation() {
+export default function DatabaseSanitation(): JSX.Element {
     const t = useTranslations('default')
     const [duplicates, setDuplicates] = useState<SearchDuplicatesResponse | null | undefined>(undefined)
 
@@ -37,7 +37,7 @@ export default function DatabaseSanitation() {
             } else if (response.status !== HttpStatus.OK) {
                 return notFound()
             }
-            const data: SearchDuplicatesResponse = await response.json()
+            const data = (await response.json() as SearchDuplicatesResponse)
             setDuplicates(data)
         } catch(e)   {
             console.error(e)
@@ -146,7 +146,7 @@ export default function DatabaseSanitation() {
                     <button
                         type='button'
                         className='btn btn-primary col-auto'
-                        onClick={() => searchDuplicate()}
+                        onClick={() => void searchDuplicate()}
                     >
                         {t('Search duplicate identifiers')}
                     </button>

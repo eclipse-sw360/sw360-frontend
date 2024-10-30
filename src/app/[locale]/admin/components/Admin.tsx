@@ -19,7 +19,7 @@ import { ImUsers } from 'react-icons/im'
 import { RiArrowUpDownFill, RiOrganizationChart } from 'react-icons/ri'
 import { RxCalendar } from 'react-icons/rx'
 
-const AdminMainPage = () => {
+const AdminMainPage = (): JSX.Element => {
     const t = useTranslations('default')
 
     return (

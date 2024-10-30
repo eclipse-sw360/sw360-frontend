@@ -17,7 +17,7 @@ import { ApiUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import MessageService from '@/services/message.service'
 
-export default function CreateUser() { 
+export default function CreateUser(): JSX.Element { 
     const t = useTranslations('default')
     const [user, setUser] = useState<CreateUserPayload>({
         email: '',
@@ -64,7 +64,7 @@ export default function CreateUser() {
         <>
             <div className='mx-5 mt-3'>
                 <div className="row mb-4">
-                    <button className='btn btn-primary col-auto me-2' onClick={handleCreateUser}>
+                    <button className='btn btn-primary col-auto me-2' onClick={() => void handleCreateUser()}>
                         {t('Create User')}
                     </button>
                     <button className='btn btn-light col-auto' onClick={handleCancel}>
@@ -86,7 +86,7 @@ export default function CreateUser() {
                             <input
                                 type='text'
                                 name='givenName'
-                                value={user?.givenName}
+                                value={user.givenName}
                                 onChange={handleChange}
                                 className='form-control'
                                 id='addUser.givenName'
@@ -104,7 +104,7 @@ export default function CreateUser() {
                             <input
                                 type='text'
                                 name='lastName'
-                                value={user?.lastName}
+                                value={user.lastName}
                                 onChange={handleChange}
                                 className='form-control'
                                 id='addUser.lastName'
@@ -124,7 +124,7 @@ export default function CreateUser() {
                             <input
                                 type='text'
                                 name='email'
-                                value={user?.email}
+                                value={user.email}
                                 onChange={handleChange}
                                 className='form-control'
                                 id='addUser.email'
@@ -142,7 +142,7 @@ export default function CreateUser() {
                             <input
                                 type='password'
                                 name='password'
-                                value={user?.password}
+                                value={user.password}
                                 onChange={handleChange}
                                 className='form-control'
                                 id='addUser.password'
@@ -162,7 +162,7 @@ export default function CreateUser() {
                             <input
                                 type='text'
                                 name='department'
-                                value={user?.department}
+                                value={user.department}
                                 onChange={handleChange}
                                 className='form-control'
                                 id='addUser.department'

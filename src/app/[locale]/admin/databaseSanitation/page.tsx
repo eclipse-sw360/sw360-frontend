@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: 'Admin',
 }
 
-function DatabaseSanitationAdministrationPage() {
+function DatabaseSanitationAdministrationPage(): JSX.Element {
     return <DatabaseSanitation/>
 }
 

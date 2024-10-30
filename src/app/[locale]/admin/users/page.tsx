@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: 'Admin',
 }
 
-async function LicenseAdministrationPage() {
+function LicenseAdministrationPage(): JSX.Element {
     return <UserAdministration/>
 }
 

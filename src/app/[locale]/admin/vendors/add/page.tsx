@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     title: 'Admin - Vendors',
 }
 
-const AddVendorPage = async () => {
+const AddVendorPage = (): JSX.Element => {
     return <AddVendor />
 }
 

@@ -19,7 +19,7 @@ export default function VendorDetailForm({
 }: {
     payload: Vendor
     setPayload: Dispatch<SetStateAction<Vendor>>
-}) {
+}): JSX.Element {
     const t = useTranslations('default')
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
@@ -43,7 +43,7 @@ export default function VendorDetailForm({
                         <input
                             type='text'
                             name='fullName'
-                            value={payload?.fullName}
+                            value={payload.fullName}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.fullName'
@@ -61,7 +61,7 @@ export default function VendorDetailForm({
                         <input
                             type='text'
                             name='shortName'
-                            value={payload?.shortName}
+                            value={payload.shortName}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.shortName'
@@ -79,7 +79,7 @@ export default function VendorDetailForm({
                         <input
                             type='url'
                             name='url'
-                            value={payload?.url}
+                            value={payload.url}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.url'
