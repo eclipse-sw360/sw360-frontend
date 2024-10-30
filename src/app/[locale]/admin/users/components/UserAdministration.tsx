@@ -22,7 +22,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CommonUtils from '@/utils/common.utils'
 
-export default function UserAdminstration() {
+export default function UserAdminstration(): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [num, setNum]  = useState< null | number >(null)
@@ -115,8 +115,8 @@ export default function UserAdminstration() {
                 return data._embedded['sw360:users'].map((elem: User) => [
                     elem.givenName ?? '',
                     elem.lastName ?? '',
-                    elem.email ?? '',
-                    elem.deactivated ? 'Inactive' : 'Active',
+                    elem.email,
+                    (elem.deactivated === undefined || elem.deactivated === false) ? 'Inactive' : 'Active',
                     elem.department ?? '',
                     '',
                     '',
@@ -168,7 +168,7 @@ export default function UserAdminstration() {
                             <button className='btn btn-primary col-auto' onClick={handleAddUsers}>
                                 {t('Add User')}
                             </button>
-                            <div className='col-auto buttonheader-title'>{`${t('Users')} (${num ? num : ''})`}</div>
+                            <div className='col-auto buttonheader-title'>{`${t('Users')} (${(num === null) ? num : ''})`}</div>
                         </div>
                         <h5 className="mt-3 mb-1 ms-1 header-underlined">
                             {t('Users')}

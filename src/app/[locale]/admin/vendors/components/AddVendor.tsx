@@ -10,17 +10,17 @@
 'use client'
 
 import { HttpStatus, Vendor } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import VendorDetailForm from './VendorDetailForm'
 import MessageService from '@/services/message.service'
 
-export default function AddVendor() {
+export default function AddVendor(): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const { status } = useSession()
     const router = useRouter()
     const [vendorData, setVendorData] = useState<Vendor>({
         fullName: '',
@@ -34,6 +34,9 @@ export default function AddVendor() {
 
     const handleSubmit = async () => {
         try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const payload: Vendor = {
                 fullName: vendorData.fullName,
                 shortName: vendorData.shortName,
@@ -64,7 +67,7 @@ export default function AddVendor() {
                     method='post'
                     onSubmit={(e) => {
                         e.preventDefault()
-                        handleSubmit()
+                        void handleSubmit()
                     }}
                 >
                     <div className='row mb-4'>
