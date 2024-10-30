@@ -36,7 +36,7 @@ interface TableProps extends Partial<Config> {
 class TableLicense extends Component<TableProps, unknown> {
     private wrapper: RefObject<HTMLDivElement> = createRef()
     // Grid.js instance
-    private readonly instance: Grid = null
+    private readonly instance: Grid | null = null
     private tableProps: TableProps = {}
 
     constructor(props: TableProps) {
@@ -60,11 +60,12 @@ class TableLicense extends Component<TableProps, unknown> {
         this.instance = new Grid(this.tableProps)
     }
 
-    getInstance(): Grid {
+    getInstance(): Grid | null {
         return this.instance
     }
 
     componentDidMount(): void {
+        if (this.instance === null || this.wrapper.current === null) return
         if (this.wrapper.current.childNodes.length > 0) {
             this.wrapper.current.innerHTML = ''
         }
@@ -72,12 +73,14 @@ class TableLicense extends Component<TableProps, unknown> {
     }
 
     componentDidUpdate(): void {
+        if (this.instance === null) return
         this.instance.config.plugin.remove('pagination')
         this.instance.config.plugin.remove('search')
         this.instance.updateConfig(this.props).forceRender()
     }
 
-    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) : void => {
+        if (this.instance === null) return
         this.instance.config.plugin.remove('pagination')
         const pageSize = parseInt(event.target.value, 10)
         this.instance
@@ -99,7 +102,7 @@ class TableLicense extends Component<TableProps, unknown> {
         return (
             <>
                 <div className={styles['div-table-license']}>
-                    {this.props.selector && (
+                    {(this.props.selector === true) && (
                         <>
                             <div className='col-auto' style={{ fontSize: '14px' }}>
                                 <div className='dataTables_length' style={{ fontSize: '0.875rem' }}>
@@ -117,7 +120,7 @@ class TableLicense extends Component<TableProps, unknown> {
                                     <span>entries</span>
                                 </div>
                             </div>
-                            {this.props.searchFunction && (
+                            {(this.props.searchFunction !== undefined) && (
                                 <FilterSearch title={this.props.title} searchFunction={this.props.searchFunction} />
                             )}
                         </>

@@ -14,7 +14,7 @@ interface Props {
     title?: string
     searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
 }
-function FilterSearch({ title, searchFunction }: Props) {
+function FilterSearch({ title, searchFunction }: Props) : JSX.Element {
     return (
         <div
         className={styles['div-filter']}

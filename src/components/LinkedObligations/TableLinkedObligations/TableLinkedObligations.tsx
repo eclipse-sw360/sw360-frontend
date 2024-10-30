@@ -24,7 +24,7 @@ interface Props {
     setObligationIdToLicensePayLoad: (releaseIdToRelationships: Array<string>) => void
 }
 
-export default function TableLinkedObligations({ data, setData, setObligationIdToLicensePayLoad }: Props) {
+export default function TableLinkedObligations({ data, setData, setObligationIdToLicensePayLoad }: Props): JSX.Element {
     const t = useTranslations('default')
     const [obligation, setObligation] = useState<Obligation | undefined>(undefined)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
