@@ -13,11 +13,11 @@ import { Release } from '@/object-types'
 import { useTranslations } from 'next-intl'
 
 interface Props {
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props) => {
+const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
