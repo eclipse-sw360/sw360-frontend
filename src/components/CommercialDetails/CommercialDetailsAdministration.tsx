@@ -18,10 +18,10 @@ import { Release } from '@/object-types'
 import { SelectUsersDialog } from 'next-sw360'
 
 interface Props {
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
-    cotsResponsible?: { [k: string]: string }
-    setCotsResponsible?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
+    cotsResponsible: { [k: string]: string }
+    setCotsResponsible: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 const CommercialDetailsAdministration = ({
@@ -29,7 +29,7 @@ const CommercialDetailsAdministration = ({
     setReleasePayload,
     cotsResponsible,
     setCotsResponsible,
-}: Props) => {
+}: Props): JSX.Element => {
     const t = useTranslations('default')
     const [dialogCotsResponsibleOpen, setDialogCotsResponsibleOpen] = useState(false)
     const handleClickSearchComponentOwner = useCallback(() => setDialogCotsResponsibleOpen(true), [])
