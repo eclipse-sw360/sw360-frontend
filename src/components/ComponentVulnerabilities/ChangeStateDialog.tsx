@@ -10,18 +10,25 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
+import MessageService from '@/services/message.service'
+
+interface SelectedVulnerability  {
+    releaseId: string
+    vulnerExternalId: string
+    index: string
+}
 
 interface Props {
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
     state: string
-    selectedVulner: Array<any>
+    selectedVulner: Array<SelectedVulnerability>
 }
 
 interface ChangeStatePayload {
@@ -34,25 +41,29 @@ interface ChangeStatePayload {
     verificationState: string
 }
 
-const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) => {
+const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JSX.Element => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [comment, setComment] = useState('')
 
     const handleCloseDialog = () => {
         setShow(!show)
     }
 
-    const updateState: any = useCallback(
+    const updateState = useCallback(
         async (url: string, data: ChangeStatePayload) => {
-            return await ApiUtils.PATCH(url, data, session.user.access_token)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Session has expired'))
+                return
+            } 
+            await ApiUtils.PATCH(url, data, session.user.access_token)
         },
-        [session]
+        []
     )
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (selectedVulner.length > 0) {
-            selectedVulner.forEach(async (item) => {
+            for (const item of selectedVulner) {
                 const payload: ChangeStatePayload = {
                     releaseVulnerabilityRelationDTOs: [
                         {
@@ -63,7 +74,7 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) => {
                     verificationState: state,
                 }
                 await updateState(`releases/${item.releaseId}/vulnerabilities`, payload)
-            })
+            }
             window.location.reload()
         }
     }
@@ -81,7 +92,7 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) => {
                         number: selectedVulner.length,
                         strong: (chunks) => <b>{chunks}</b>,
                     })}
-                    : <b>{t('VALUE', { value: state })}</b>.
+                    : <b>{t(state as never)}</b>.
                     <hr />
                     <Form.Group className='mb-3'>
                         <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
@@ -99,7 +110,7 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) => {
                     {' '}
                     {t('Close')}{' '}
                 </Button>
-                <Button className='login-btn' variant='primary' onClick={handleSubmit}>
+                <Button className='login-btn' variant='primary' onClick={() => void handleSubmit()}>
                     {t('Change State')}
                 </Button>
             </Modal.Footer>

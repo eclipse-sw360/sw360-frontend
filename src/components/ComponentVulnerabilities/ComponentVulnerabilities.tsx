@@ -24,19 +24,36 @@ interface Props {
     vulnerData: Array<LinkedVulnerability>
 }
 
-const ComponentVulnerabilities = ({ vulnerData }: Props) => {
+interface SelectedVulnerability  {
+    releaseId: string
+    vulnerExternalId: string
+    index: string
+}
+
+type RowData = (string | string[] | VerificationStateInfo[] | FirstCellData)[]
+
+interface FirstCellData {
+    index: string
+    checked: boolean
+    releaseId: string
+    vulnerExternalId: string
+}
+
+const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
     const t = useTranslations('default')
     const [dialogOpen, setDialogOpen] = useState(false)
     const [state, setState] = useState('NOT_CHECKED')
-    const [data, setData] = useState([])
-    const [selectedVulner, setSelectedVulner] = useState<Array<any>>([])
+    const [data, setData] = useState<RowData[]>([])
+    const [selectedVulner, setSelectedVulner] = useState<Array<SelectedVulnerability>>([])
     const [checkAll, setCheckAll] = useState<boolean>(false)
 
-    const handleCheckBox = (index: number, checked: boolean) => {
-        const newData = Object.entries(data).map(([i, rowData]: any) => {
-            if (i == index) {
+    const handleCheckBox = (index: string, checked: boolean) => {
+        const newData = Object.entries(data).map(([i, rowData]) => {
+            const firstCell = rowData[0] as FirstCellData
+
+            if (i === index) {
                 rowData[0] = {
-                    ...rowData[0],
+                    ...firstCell,
                     checked: !checked,
                 }
             }
@@ -47,9 +64,11 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
     }
 
     const handleCheckAll = () => {
-        const newData = Object.entries(data).map(([, rowData]: any) => {
+        const newData = Object.values(data).map((rowData) => {
+            const firstCell = rowData[0] as FirstCellData
+
             rowData[0] = {
-                ...rowData[0],
+                ...firstCell,
                 checked: !checkAll,
             }
             return rowData
@@ -61,11 +80,13 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
 
     const handleClick = () => {
         const selectingVulner = Object.entries(data)
-            .map(([index, item]: any) => {
-                if (item[0].checked === true) {
+            .map(([index, item]) => {
+                const firstCell = item[0] as FirstCellData
+
+                if (firstCell.checked === true) {
                     return {
-                        releaseId: item[0].releaseId,
-                        vulnerExternalId: item[0].vulnerExternalId,
+                        releaseId: firstCell.releaseId,
+                        vulnerExternalId: firstCell.vulnerExternalId,
                         index: index,
                     }
                 }
@@ -80,7 +101,7 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
         {
             id: 'check',
             name: _(<Form.Check defaultChecked={checkAll} type='checkbox' onClick={handleCheckAll}></Form.Check>),
-            formatter: ({ checked, index }: any) =>
+            formatter: ({ checked, index } : { checked: boolean, index: string}) =>
                 _(
                     <Form.Check
                         defaultChecked={checked}
@@ -125,10 +146,10 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
             id: 'verification',
             name: t('Verification'),
             formatter: (verificationStateInfos: Array<VerificationStateInfo>) =>
-                _(
+                (verificationStateInfos.length > 0) && _(
                     <VerificationTooltip verificationStateInfos={verificationStateInfos}>
                         <FaInfoCircle style={{ marginRight: '5px', color: 'gray', width: '15px', height: '15px' }} />
-                        {verificationStateInfos.at(-1).verificationState}
+                        {verificationStateInfos.at(-1)?.verificationState}
                     </VerificationTooltip>
                 ),
             sort: true,
@@ -137,20 +158,20 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) => {
     ]
 
     useEffect(() => {
-        const mappedData = Object.entries(vulnerData).map(([index, item]: any) => [
+        const mappedData = Object.entries(vulnerData).map(([index, item]) => [
             {
                 index: index,
                 checked: false,
                 releaseId: item.releaseVulnerabilityRelation.releaseId,
                 vulnerExternalId: item.externalId,
             },
-            item.intReleaseName,
+            item.intReleaseName ?? '',
             [item.externalId, item.releaseVulnerabilityRelation.vulnerabilityId],
-            item.priority,
+            item.priority ?? '',
             item.releaseVulnerabilityRelation.matchedBy,
-            item.title,
-            item.releaseVulnerabilityRelation.verificationStateInfo,
-            item.projectAction,
+            item.title ?? '',
+            item.releaseVulnerabilityRelation.verificationStateInfo ?? [],
+            item.projectAction ?? '',
         ])
         setData(mappedData)
     }, [vulnerData])

@@ -36,12 +36,12 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
     const t = useTranslations('default')
 
     useEffect(() => {
-        if (!CommonUtils.isNullOrUndefined(vulnerabilities)) {
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(vulnerabilities)) {
             let numberOfCheckOrUnchecked = 0
             let numberOfIncorrect = 0
             vulnerabilities.forEach((vulnerability: LinkedVulnerability) => {
                 const verificationState =
-                    vulnerability.releaseVulnerabilityRelation.verificationStateInfo.at(-1).verificationState
+                    vulnerability.releaseVulnerabilityRelation.verificationStateInfo?.at(-1)?.verificationState
                 if (
                     verificationState == VulnerabilitiesVerificationState.CHECKED ||
                     verificationState == VulnerabilitiesVerificationState.NOT_CHECKED
@@ -71,8 +71,7 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                         onClick={handleSelectTab}
                     >
                         {
-                            // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                            t(tab.name)
+                            t(tab.name as never)
                         }
                         <span id={styles.numberOfVulnerabilitiesDiv} className='badge badge-light'>
                             {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
@@ -87,7 +86,7 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                         id={tab.id}
                         onClick={handleSelectTab}
                     >
-                        {tab.name} <span className={`${styles[eccStatus]}`}></span>
+                        {tab.name} <span className={`${styles[eccStatus ?? '']}`}></span>
                     </a>
                 )
             }
