@@ -11,7 +11,7 @@
 import { AuthToken, HttpStatus, OAuthClient, RequestContent, UserCredentialInfo } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 
-const generateToken = async (userData: UserCredentialInfo) => {
+const generateToken = async (userData: UserCredentialInfo): Promise<null | AuthToken> => {
     try {
         const clientManagementURL: string = SW360_API_URL + '/authorization/client-management'
         let credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64')
@@ -54,7 +54,7 @@ const generateToken = async (userData: UserCredentialInfo) => {
     }
 }
 
-const generateBasicToken = async (userData: UserCredentialInfo) => {
+const generateBasicToken = (userData: UserCredentialInfo): string => {
     const credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64')
     const sw360token = `Basic ${credentials}`
     return sw360token
