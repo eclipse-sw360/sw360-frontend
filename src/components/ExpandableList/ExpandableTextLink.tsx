@@ -12,7 +12,7 @@
 import { useState } from 'react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
-export default function ExpandableTextList({ list }: { list: string[] }) {
+export default function ExpandableTextList({ list }: { list: string[] }): JSX.Element {
     const [ isExpanded, setExpanded ] = useState(false)
     const fullString = list.join(', ')
     const previewString = fullString.slice(0, 10).concat('...')

@@ -16,27 +16,30 @@ import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
 import { _ } from '@/components/sw360'
-import { HttpStatus } from '@/object-types'
+import { Embedded, HttpStatus, Project, Release } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PiCheckBold } from 'react-icons/pi'
 import ProjectTable from './ProjectTable'
+import MessageService from '@/services/message.service'
 
 interface Props {
     releaseId?: string
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) => {
+type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
+
+const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.Element => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const searchText = useRef('')
-    const linkedProjectIds = useRef([])
+    const linkedProjectIds = useRef<Array<string>>([])
 
-    const [tableData, setTableData] = useState([])
+    const [tableData, setTableData] = useState<Array<(string | JSX.Element)[]>>([])
     const [linkingReleaseName, setLinkingReleaseName] = useState('')
     const [withLinkedProject, setWithLinkedProject] = useState(true)
-    const [selectedProjectId, setSelectedProjectId] = useState<string>(undefined)
+    const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined)
     const [selectedProjectName, setSelectedProjectName] = useState<string>('')
     const [showMessage, setShowMessage] = useState(false)
 
@@ -51,22 +54,30 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) => {
     }
 
     const handleLinkToProject = () => {
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         if (selectedProjectId !== undefined) {
             ApiUtils.PATCH(`projects/${selectedProjectId}/releases`, [releaseId], session.user.access_token).then(
                 () => {
                     setShowMessage(true)
                 }
-            )
+            ).catch((err) => console.error(err))
         }
     }
 
     const getLinkedProjects = async () => {
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.user.access_token)
         if (response.status === HttpStatus.OK) {
-            const data = await response.json()
+            const data = await response.json() as EmbeddedProjects
             if (!CommonUtils.isNullOrUndefined(data._embedded['sw360:projects'])) {
-                data._embedded['sw360:projects'].forEach((project: any) => {
-                    linkedProjectIds.current.push(project._links.self.href.split('/').at(-1))
+                data._embedded['sw360:projects'].forEach((project: Project) => {
+                    linkedProjectIds.current.push(project._links?.self.href.split('/').at(-1) ?? '')
                 })
             }
         }
@@ -78,23 +89,27 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) => {
     }
 
     const handleSearchProject = async () => {
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         await getLinkedProjects()
 
         const url = searchText.current.trim().length === 0 ? 'projects' : `projects?name=${searchText.current.trim()}`
-        const projectsData: any = []
+        const projectsData: Array<(string | JSX.Element)[]> = []
         ApiUtils.GET(url, session.user.access_token)
             .then((response) => response.json())
-            .then((projects) => {
-                projects._embedded['sw360:projects'].forEach((project: any) => {
-                    if (linkedProjectIds.current.includes(project._links.self.href.split('/').at(-1))) {
+            .then((projects : EmbeddedProjects) => {
+                projects._embedded['sw360:projects'].forEach((project: Project) => {
+                    if (linkedProjectIds.current.includes(project._links?.self.href.split('/').at(-1) ?? '')) {
                         if (withLinkedProject === true) {
                             projectsData.push([
-                                _(<PiCheckBold color='green' />),
+                                _(<PiCheckBold color='green' />) as JSX.Element,
                                 project.name,
-                                project.version,
-                                project.state,
-                                project.responsible,
-                                project.description,
+                                project.version ?? '',
+                                project.state ?? '',
+                                project.projectResponsible ?? '',
+                                project.description ?? '',
                             ])
                         }
                     } else {
@@ -104,31 +119,36 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) => {
                                     type='radio'
                                     name='project'
                                     onClick={() =>
-                                        changeSelection(project.name, project._links.self.href.split('/').at(-1))
+                                        changeSelection(project.name, project._links?.self.href.split('/').at(-1) ?? '')
                                     }
                                 />
                             ),
                             project.name,
-                            project.version,
-                            project.state,
-                            project.responsible,
-                            project.description,
+                            project.version ?? '',
+                            project.state ?? '',
+                            project.projectResponsible ?? '',
+                            project.description ?? '',
                         ])
                     }
                 })
                 setTableData(projectsData)
-            })
+            }).catch((err) => console.error(err))
     }
 
     useEffect(() => {
+        if (session === null) return
         ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
             .then((response) => response.json())
-            .then((release) => {
+            .then((release : Release) => {
                 setLinkingReleaseName(`${release.name}(${release.version})`)
-            })
+            }).catch((err) => console.error(err))
     }, [releaseId, session])
 
-    const columns = [
+    const columns : {
+        id: string;
+        name: string;
+        sort?: boolean;
+    }[] = [
         {
             id: 'select',
             name: '',
@@ -192,7 +212,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) => {
                             />
                         </Col>
                         <Col lg='3'>
-                            <Button variant='secondary' onClick={() => handleSearchProject()}>
+                            <Button variant='secondary' onClick={() => void handleSearchProject()}>
                                 {t('Search')}
                             </Button>
                         </Col>
@@ -227,7 +247,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) => {
                             className='login-btn'
                             variant='primary'
                             onClick={handleLinkToProject}
-                            disabled={!selectedProjectId}
+                            disabled={selectedProjectId === undefined}
                         >
                             {t('Link To Project')}
                         </Button>
