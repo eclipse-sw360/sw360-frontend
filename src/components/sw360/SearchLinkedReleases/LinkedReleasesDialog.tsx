@@ -10,13 +10,13 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { HttpStatus, LinkedRelease, Release } from '@/object-types'
+import { Embedded, HttpStatus, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import SelectTableLinkedReleases from './SelectTableLinkedReleases'
 
@@ -24,11 +24,13 @@ interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
     onReRender: () => void
-    releaseLinks: LinkedRelease[]
-    setReleaseLinks: React.Dispatch<React.SetStateAction<LinkedRelease[]>>
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releaseLinks: ReleaseLink[]
+    setReleaseLinks: React.Dispatch<React.SetStateAction<ReleaseLink[]>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
+
+type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
 const LinkedReleasesDialog = ({
     show,
@@ -38,14 +40,13 @@ const LinkedReleasesDialog = ({
     setReleaseLinks,
     releasePayload,
     setReleasePayload,
-}: Props) => {
+}: Props) : JSX.Element => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const [data, setData] = useState()
+    const [data, setData] = useState<(string | ReleaseDetail)[][]>([])
     const params = useSearchParams()
-    const [linkedReleases] = useState([])
-    const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<LinkedRelease[]>()
-    const [releases, setReleases] = useState([])
+    const [linkedReleases] = useState<Array<ReleaseDetail>>([])
+    const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<ReleaseLink[]>([])
+    const [releases, setReleases] = useState<(string | ReleaseDetail)[][]>([])
 
     const handleCloseDialog = () => {
         setShow(!show)
@@ -59,8 +60,11 @@ const LinkedReleasesDialog = ({
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`releases`, { ...Object.fromEntries(params), allDetails: 'true' })
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -68,18 +72,18 @@ const LinkedReleasesDialog = ({
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const releases = await response.json()
+                const releases = await response.json() as EmbeddedReleases
                 if (
                     !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
                 ) {
-                    const data = releases['_embedded']['sw360:releases'].map((item: any) => [
+                    const data = releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
                         item,
-                        item.vendor ? item.vendor.fullName : ' ',
+                        item.vendor ? (item.vendor.fullName ?? '') : '',
                         item.name,
                         item.version,
                         item.clearingState,
-                        item.mainlineState,
+                        item.mainlineState ?? 'OPEN',
                     ])
                     setData(data)
                 }
@@ -88,10 +92,10 @@ const LinkedReleasesDialog = ({
             }
         })()
         return () => controller.abort()
-    }, [params, session])
+    }, [params])
 
     const handleClickSelectLinkedReleases = () => {
-        linkedReleasesResponse.forEach((linkedRelease: LinkedRelease) => {
+        linkedReleasesResponse.forEach((linkedRelease: ReleaseLink) => {
             releaseLinks.push(linkedRelease)
         })
         const mapReleaseRelationship = new Map<string, string>()
@@ -109,8 +113,8 @@ const LinkedReleasesDialog = ({
         onReRender()
     }
 
-    const getLinkedReleases: (releaseLink: LinkedRelease[]) => void = useCallback(
-        (releaseLink: LinkedRelease[]) => setLinkedReleasesResponse(releaseLink),
+    const getLinkedReleases: (releaseLink: ReleaseLink[]) => void = useCallback(
+        (releaseLink: ReleaseLink[]) => setLinkedReleasesResponse(releaseLink),
         []
     )
 

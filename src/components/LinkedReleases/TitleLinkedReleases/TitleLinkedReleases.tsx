@@ -11,7 +11,7 @@
 import React from 'react'
 import { useTranslations } from 'next-intl'
 import styles from './TitleLinkedReleases.module.css'
-export default function TitleLinkedReleases() {
+export default function TitleLinkedReleases() : JSX.Element {
     const t = useTranslations('default')
     return (
         <>

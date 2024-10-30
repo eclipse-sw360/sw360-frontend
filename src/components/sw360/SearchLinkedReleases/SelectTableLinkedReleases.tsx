@@ -13,28 +13,28 @@
 import React from 'react'
 import { Form } from 'react-bootstrap'
 
-import { LinkedRelease } from '@/object-types'
+import { ReleaseLink, ReleaseDetail } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { _ } from 'next-sw360'
 import LinkedReleasesTable from './LinkedReleasesTable'
 
 interface Props {
-    releases?: any[]
-    setLinkedReleases?: any
-    linkedReleases?: LinkedRelease[]
+    releases: (string | ReleaseDetail)[][]
+    setLinkedReleases: (releaseLink: ReleaseLink[]) => void
+    linkedReleases: ReleaseDetail[]
 }
 
 const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases }: Props) => {
-    const handlerRadioButton = (item: any) => {
-        if (linkedReleases.includes(item)) {
-            const index = linkedReleases.indexOf(item)
+    const handlerRadioButton = (item: ReleaseDetail) => {
+        if (linkedReleases.map(rel => rel.id).includes(item.id)) {
+            const index = linkedReleases.map(rel => rel.id).indexOf(item.id)
             linkedReleases.splice(index, 1)
         } else {
             linkedReleases.push(item)
         }
-        const releaseLinks: LinkedRelease[] = []
-        linkedReleases.forEach((item: any) => {
-            const releaseLink: LinkedRelease = {
+        const releaseLinks: ReleaseLink[] = []
+        linkedReleases.forEach((item: ReleaseDetail) => {
+            const releaseLink: ReleaseLink = {
                 id: CommonUtils.getIdFromUrl(item._links.self.href),
                 name: item.name,
                 version: item.version,
@@ -52,7 +52,7 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
         {
             id: 'releaseId',
             name: '',
-            formatter: (item: string) =>
+            formatter: (item: ReleaseDetail) : JSX.Element =>
                 _(
                     <Form.Check
                         name='moderatorId'
@@ -61,7 +61,7 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
                             handlerRadioButton(item)
                         }}
                     ></Form.Check>
-                ),
+                ) as JSX.Element,
             width: '7%',
         },
         {

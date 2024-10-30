@@ -12,25 +12,25 @@ import { useTranslations } from 'next-intl'
 import React from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { LinkedRelease } from '@/object-types'
+import { ReleaseLink } from '@/object-types'
 import styles from './TableLinkedReleases.module.css'
 
 interface Props {
-    setReleaseLinks?: React.Dispatch<React.SetStateAction<LinkedRelease[]>>
-    releaseLinks?: LinkedRelease[]
-    setReleaseIdToRelationshipsToReleasePayLoad?: (releaseIdToRelationships: Map<string, string>) => void
+    setReleaseLinks: React.Dispatch<React.SetStateAction<ReleaseLink[]>>
+    releaseLinks: ReleaseLink[]
+    setReleaseIdToRelationshipsToReleasePayLoad: (releaseIdToRelationships: Map<string, string>) => void
 }
 
 export default function TableLinkedReleases({
     releaseLinks,
     setReleaseLinks,
     setReleaseIdToRelationshipsToReleasePayLoad,
-}: Props) {
+}: Props) : JSX.Element {
     const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
-        const list: LinkedRelease[] = [...releaseLinks]
-        list[index][name as keyof LinkedRelease] = value
+        const list = [...releaseLinks]
+        list[index][name as keyof ReleaseLink] = value as never
         const map = new Map<string, string>()
         list.forEach((item) => {
             map.set(item.id, item.releaseRelationship)
@@ -40,7 +40,7 @@ export default function TableLinkedReleases({
     }
 
     const handleClickDelete = (index: number) => {
-        const list: LinkedRelease[] = [...releaseLinks]
+        const list: ReleaseLink[] = [...releaseLinks]
         list.splice(index, 1)
         const map = new Map<string, string>()
         list.forEach((item) => {
@@ -53,14 +53,14 @@ export default function TableLinkedReleases({
     return (
         <>
             <div className='row'>
-                {releaseLinks.map((item: LinkedRelease, index: number) => {
+                {releaseLinks.map((item: ReleaseLink, index: number) => {
                     return (
                         <div key={index}>
                             <div className={`${styles['div-row']}`}>
                                 <input
                                     className={`${styles['input-field']}`}
                                     name='vendor'
-                                    value={item.vendor ?? ''}
+                                    value={item.vendor}
                                     type='text'
                                     placeholder='Enter Vendor'
                                     readOnly
@@ -68,14 +68,14 @@ export default function TableLinkedReleases({
                                 <input
                                     className={`${styles['input-field']}`}
                                     type='text'
-                                    value={item.name ?? ''}
+                                    value={item.name}
                                     name='name'
                                     readOnly
                                 />
                                 <input
                                     className={`${styles['input-field']}`}
                                     type='text'
-                                    value={item.version ?? ''}
+                                    value={item.version}
                                     name='version'
                                     readOnly
                                 />
@@ -84,7 +84,7 @@ export default function TableLinkedReleases({
                                     aria-label='releaseRelationship'
                                     id='releaseRelationship'
                                     name='releaseRelationship'
-                                    value={item.releaseRelationship ?? ''}
+                                    value={item.releaseRelationship}
                                     onChange={(e) => handleInputChange(e, index)}
                                 >
                                     <option value='CONTAINED'>{t('CONTAINED')}</option>

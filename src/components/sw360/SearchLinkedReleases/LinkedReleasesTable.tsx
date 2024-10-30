@@ -8,15 +8,22 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReleaseDetail } from '@/object-types'
 import { Table } from 'next-sw360'
 import { memo } from 'react'
 
 interface Props {
-    data: any
-    columns: any
+    data: (string | ReleaseDetail)[][]
+    columns: {
+        id: string
+        name: string
+        formatter?: (item: ReleaseDetail) => JSX.ElementAttributesProperty
+        width?: string
+        sort?: boolean
+    }[]
 }
 
-const compare = (preState: any, nextState: any) => {
+const compare = (preState: Props, nextState: Props) => {
     return Object.entries(preState.data).sort().toString() === Object.entries(nextState.data).sort().toString()
 }
 

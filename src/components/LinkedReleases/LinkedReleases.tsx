@@ -13,7 +13,7 @@
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
-import { ActionType, LinkedRelease, Release } from '@/object-types'
+import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
 import styles from './LinkedReases.module.css'
@@ -21,16 +21,16 @@ import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
 import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
 interface Props {
-    release?: any
+    release?: ReleaseDetail
     actionType?: string
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
 const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations('default')
     const [reRender, setReRender] = useState(false)
-    const [releaseLinks, setReleaseLinks] = useState<LinkedRelease[]>([])
+    const [releaseLinks, setReleaseLinks] = useState<ReleaseLink[]>([])
     const handleReRender = () => {
         setReRender(!reRender)
     }
@@ -46,13 +46,13 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
     }
 
     useEffect(() => {
-        if (actionType === ActionType.EDIT) {
+        if (actionType === ActionType.EDIT && release !== undefined) {
             if (
                 !CommonUtils.isNullOrUndefined(release['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:releaseLinks'])
             ) {
-                const linkedReleases: LinkedRelease[] = []
-                release['_embedded']['sw360:releaseLinks'].map((item: any) => [linkedReleases.push(item)])
+                const linkedReleases: ReleaseLink[] = []
+                release['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [linkedReleases.push(item)])
                 setReleaseLinks(linkedReleases)
             }
         }
