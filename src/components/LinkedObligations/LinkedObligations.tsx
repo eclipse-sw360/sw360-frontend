@@ -19,7 +19,7 @@ interface Props {
     setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload >>
 }
 
-const LinkedObligations = ({ data, setData, licensePayload, setLicensePayload }: Props) => {
+const LinkedObligations = ({ data, setData, licensePayload, setLicensePayload }: Props): JSX.Element => {
     const setObligationIdToLicensePayLoad = (obligationIds: Array<string>) => {
         setLicensePayload({
             ...licensePayload,

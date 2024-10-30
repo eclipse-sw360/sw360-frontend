@@ -34,19 +34,19 @@ const DeleteObligationDialog = ({
     setObligationIdToLicensePayLoad,
     show,
     setShow,
-}: Props) => {
+}: Props) : JSX.Element => {
     const t = useTranslations('default')
 
     const handleSubmit = () => {
-        let obligations: Array<any> = []
+        let obligations: Array<(string | Obligation)[]> = []
         data.forEach((element) => {
             obligations.push(element)
         })
         obligations = obligations.filter((element) => element[1] !== obligation?.title)
         setData(obligations)
         const obligationIds: string[] = []
-        obligations.forEach((item: any) => {
-            obligationIds.push(CommonUtils.getIdFromUrl(item[0]['_links'].self.href))
+        obligations.forEach((item) => {
+            obligationIds.push(CommonUtils.getIdFromUrl((item[0] as Obligation)._links?.self.href))
         })
         setObligationIdToLicensePayLoad(obligationIds)
         setShow(!show)
@@ -57,50 +57,54 @@ const DeleteObligationDialog = ({
     }
 
     return (
-        obligation && (
-            <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-                <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414', fontWeight: '700' }}>
-                    <h5>
-                        <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
-                            <BsQuestionCircle />
-                            &nbsp;
-                            {t('Delete Obligation')}?
-                        </Modal.Title>
-                    </h5>
-                    <button
-                        type='button'
-                        style={{
-                            color: 'red',
-                            backgroundColor: '#FEEFEF',
-                            alignItems: 'center',
-                            borderColor: '#FEEFEF',
-                            borderWidth: '0px',
-                            fontSize: '1.1rem',
-                            margin: '-1rem -1rem auto',
-                        }}
-                        onClick={handleCloseDialog}
-                    >
-                        <span aria-hidden='true'>&times;</span>
-                    </button>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        {t.rich('Do you really want to delete the Obligation?', {
-                            name: obligation.title,
-                            strong: (chunks) => <b>{chunks}</b>,
-                        })}
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer className='justify-content-end'>
-                    <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
-                        {t('Cancel')}
-                    </Button>
-                    <Button className='login-btn' variant='danger' onClick={() => handleSubmit()}>
-                        {t('Delete Obligation')}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        )
+        <>
+        {
+            (obligation !== undefined) && (
+                <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+                    <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414', fontWeight: '700' }}>
+                        <h5>
+                            <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
+                                <BsQuestionCircle />
+                                &nbsp;
+                                {t('Delete Obligation')}?
+                            </Modal.Title>
+                        </h5>
+                        <button
+                            type='button'
+                            style={{
+                                color: 'red',
+                                backgroundColor: '#FEEFEF',
+                                alignItems: 'center',
+                                borderColor: '#FEEFEF',
+                                borderWidth: '0px',
+                                fontSize: '1.1rem',
+                                margin: '-1rem -1rem auto',
+                            }}
+                            onClick={handleCloseDialog}
+                        >
+                            <span aria-hidden='true'>&times;</span>
+                        </button>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            {t.rich('Do you really want to delete the Obligation?', {
+                                name: obligation.title,
+                                strong: (chunks) => <b>{chunks}</b>,
+                            })}
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer className='justify-content-end'>
+                        <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                            {t('Cancel')}
+                        </Button>
+                        <Button className='login-btn' variant='danger' onClick={() => handleSubmit()}>
+                            {t('Delete Obligation')}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            )
+        }
+        </>
     )
 }
 
