@@ -22,9 +22,9 @@ interface Props {
     changeLogList: Array<Changelogs>
 }
 
-const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props) => {
+const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props) : JSX.Element => {
     const t = useTranslations('default')
-    const [changeLogData, setChangeLogData] = useState([])
+    const [changeLogData, setChangeLogData] = useState<string[][]>([])
 
     useEffect(() => {
         const data = Object.entries(changeLogList).map(([index, item]: [index: string, item: Changelogs]) => [
@@ -60,13 +60,15 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
             name: t('Actions'),
             formatter: (index: string) =>
                 _(
-                    <FaFileAlt
-                        style={{ color: '#F7941E', fontSize: '18px' }}
-                        onClick={() => {
-                            setChangeLogIndex(parseInt(index))
-                            setChangesLogTab('view-log')
-                        }}
-                    />
+                    <div className='cursor-pointer'>
+                        <FaFileAlt
+                            style={{ color: '#F7941E', fontSize: '18px' }}
+                            onClick={() => {
+                                setChangeLogIndex(parseInt(index))
+                                setChangesLogTab('view-log')
+                            }}
+                        />
+                    </div>
                 ),
         },
     ]
