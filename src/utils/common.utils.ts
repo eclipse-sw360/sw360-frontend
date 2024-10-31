@@ -123,7 +123,9 @@ const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
  */
-const convertObjectToMapRoles = (data: { [k: string]: Array<string> }): InputKeyValue[] => {
+const convertObjectToMapRoles = (data: { [k: string]: Array<string> } | null | undefined): InputKeyValue[] => {
+    if (isNullOrUndefined(data))
+        return []
     const inputRoles: InputKeyValue[] = []
     const mapRoles = new Map(Object.entries(data))
     mapRoles.forEach((value, key) => {
