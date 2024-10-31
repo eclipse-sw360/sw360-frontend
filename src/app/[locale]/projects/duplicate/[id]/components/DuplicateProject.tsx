@@ -283,7 +283,7 @@ function DuplicateProject({projectId}:Props) {
 
     const createProject = async () => {
         const session = await getSession()
-        const createProjectUrl = ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP ? `projects/network/duplicate/${projectId}` : `projects/duplicate/${projectId}`
+        const createProjectUrl = (ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network/duplicate/${projectId}` : `projects/duplicate/${projectId}`
         const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
 
         if (response.status == HttpStatus.CREATED) {

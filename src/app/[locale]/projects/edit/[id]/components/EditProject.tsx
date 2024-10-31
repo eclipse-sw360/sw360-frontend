@@ -298,7 +298,7 @@ function EditProject({ projectId }: { projectId: string }) {
     const updateProject = async () => {
         const session = await getSession()
         const requests = [
-            ApiUtils.PATCH(ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP ? `projects/network/${projectId}` : `projects/${projectId}`, projectPayload, session.user.access_token),
+            ApiUtils.PATCH((ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network/${projectId}` : `projects/${projectId}`, projectPayload, session.user.access_token),
         ]
         if(Object.keys(obligations).length !== 0) {
             requests.push(ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, obligations, session.user.access_token))
