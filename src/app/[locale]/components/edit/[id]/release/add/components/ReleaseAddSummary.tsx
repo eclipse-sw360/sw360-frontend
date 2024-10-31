@@ -22,12 +22,12 @@ import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
-    vendor?: Vendor
-    setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses?: { [k: string]: string }
-    setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses?: { [k: string]: string }
-    setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    vendor: Vendor
+    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
+    mainLicenses: { [k: string]: string }
+    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    otherLicenses: { [k: string]: string }
+    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 function ReleaseAddSummary({

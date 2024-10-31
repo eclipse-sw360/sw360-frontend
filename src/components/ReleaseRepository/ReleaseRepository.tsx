@@ -17,11 +17,11 @@ import { Release } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
 
 interface Props {
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) => {
+const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) : JSX.Element => {
     const t = useTranslations('default')
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {

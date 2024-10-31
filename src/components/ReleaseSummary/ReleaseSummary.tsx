@@ -20,18 +20,18 @@ import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
     actionType?: string
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
-    vendor?: Vendor
-    setVendor?: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses?: { [k: string]: string }
-    setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses?: { [k: string]: string }
-    setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributors?: { [k: string]: string }
-    setContributors?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    moderators?: { [k: string]: string }
-    setModerators?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
+    vendor: Vendor
+    setVendor: React.Dispatch<React.SetStateAction<Vendor>>
+    mainLicenses: { [k: string]: string }
+    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    otherLicenses: { [k: string]: string }
+    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    contributors: { [k: string]: string }
+    setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    moderators: { [k: string]: string }
+    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
 const ReleaseSummary = ({
