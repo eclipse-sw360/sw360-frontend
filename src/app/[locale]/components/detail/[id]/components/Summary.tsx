@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ResourcesUsing from '@/components/ResourcesUsing/ResoucesUsing'
+import ResourcesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { Component, DocumentTypes } from '@/object-types'
 import ComponentGeneral from './ComponentGeneral'
 import ReleaseAgrregateData from './ReleaseAggregate'

@@ -22,7 +22,7 @@ interface Props {
     documentName: string
 }
 
-const ResourcesUsing = ({ documentId, documentType, documentName }: Props) => {
+const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.Element => {
     const { data: session } = useSession()
     const [resourcesUsing, setResourceUsing] = useState<Resources | undefined>(undefined)
 
@@ -37,26 +37,27 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props) => {
     }, [documentId, documentType, session])
 
     return (
-        resourcesUsing &&
-        resourcesUsing._embedded && (
-            <>
-                {resourcesUsing._embedded['sw360:projects'] &&
-                    resourcesUsing._embedded['sw360:projects'].length > 0 && (
+        <> {
+            (resourcesUsing !== undefined) && (
+                <>
+                    {!CommonUtils.isNullEmptyOrUndefinedArray(resourcesUsing._embedded['sw360:projects']) && (
                         <ProjectsUsing
                             projectUsings={resourcesUsing._embedded['sw360:projects']}
                             documentName={documentName}
-                            restrictedResource={resourcesUsing._embedded['sw360:restrictedResources']?.[0]}
+                            restrictedResource={
+                                !CommonUtils.isNullOrUndefined(resourcesUsing._embedded['sw360:restrictedResources'])
+                                ? resourcesUsing._embedded['sw360:restrictedResources'][0] : undefined}
                         />
                     )}
-                {resourcesUsing._embedded['sw360:components'] &&
-                    resourcesUsing._embedded['sw360:components'].length > 0 && (
+                    {!CommonUtils.isNullEmptyOrUndefinedArray(resourcesUsing._embedded['sw360:components']) && (
                         <ComponentsUsing
                             componentsUsing={resourcesUsing._embedded['sw360:components']}
                             documentName={documentName}
                         />
                     )}
-            </>
-        )
+                </>
+            )
+        }</>
     )
 }
 

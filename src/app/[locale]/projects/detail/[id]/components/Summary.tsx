@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
-import ResoucesUsing from '@/components/ResourcesUsing/ResoucesUsing'
+import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { SummaryDataType, DocumentTypes } from '@/object-types'
 
 const Capitalize = (text: string) => {
