@@ -12,9 +12,9 @@ import { Component, Links, Project, RestrictedResource } from '@/object-types'
 
 interface Resources {
     _embedded: {
-        'sw360:projects': Array<Project>
-        'sw360:components': Array<Component>
-        'sw360:restrictedResources': Array<RestrictedResource>
+        'sw360:projects'?: Array<Project>
+        'sw360:components'?: Array<Component>
+        'sw360:restrictedResources'?: Array<RestrictedResource>
     }
     _links: Links
 }

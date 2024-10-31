@@ -42,14 +42,14 @@ const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationState
     )
 }
 
-const VerificationTooltip = ({ verificationStateInfos, children }: Props) => {
+const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.Element => {
     const [show, setShow] = useState(false)
     return (
         <div className={styles.tooltip} onMouseOver={() => setShow(true)} onMouseLeave={() => setShow(false)}>
             {show && (
                 <div className={`${styles['tooltip-content']}`}>
                     <ol className={styles.formatedMessageForVul} reversed>
-                        {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]: any) => (
+                        {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (
                             <VerificationStateFormater key={index} stateInfo={info} />
                         ))}
                     </ol>

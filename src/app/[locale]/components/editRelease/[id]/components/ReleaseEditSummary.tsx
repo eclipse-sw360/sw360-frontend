@@ -34,13 +34,13 @@ interface Props {
     actionType: string
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
-    vendor?: Vendor
+    vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses?: { [k: string]: string }
-    setMainLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses?: { [k: string]: string }
-    setOtherLicenses?: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    cotsDetails?: COTSDetails
+    mainLicenses: { [k: string]: string }
+    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    otherLicenses: { [k: string]: string }
+    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    cotsDetails: COTSDetails
     eccInformation?: ECCInformation
     clearingInformation?: ClearingInformation
 }
