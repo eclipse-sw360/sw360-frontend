@@ -19,7 +19,7 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function Administration({ projectPayload, setProjectPayload }: Props) {
+export default function Administration({ projectPayload, setProjectPayload }: Props): JSX.Element {
     return (
         <>
             <div className='ms-1'>

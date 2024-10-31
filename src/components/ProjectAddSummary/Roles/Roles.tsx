@@ -50,7 +50,7 @@ export default function Roles({
         securityResponsibles,
         setSecurityResponsibles
     } : Props
-) {
+) : JSX.Element {
     const t = useTranslations('default')
 
     const [showDepartmentModal, setShowDepartmentModal] = useState<boolean>(false)

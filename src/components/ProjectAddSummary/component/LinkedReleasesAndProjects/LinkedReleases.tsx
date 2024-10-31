@@ -14,33 +14,49 @@ import LinkedReleasesModal from '@/components/sw360/LinkedReleasesModal/LinkedRe
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { ProjectPayload } from '@/object-types'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     projectPayload: ProjectPayload
-    existingReleaseData: Map<string, any>
+    existingReleaseData: Map<string, LinkedReleaseData> | undefined
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LinkedReleases({ projectPayload, existingReleaseData, setProjectPayload }: Props) {
+interface LinkedReleaseData {
+    comment: string
+    mainlineState: string
+    name: string
+    releaseRelation: string
+    version: string
+}
+
+type RowData = Array<string | {
+    updatedReleaseRelation?: string
+    key?: string
+    updatedProjectMainlineState?: string
+    updatedComment?: string
+}>
+
+export default function LinkedReleases({ projectPayload, existingReleaseData, setProjectPayload }: Props) : JSX.Element {
 
     const t = useTranslations('default')
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
-    const [linkedReleaseData, setLinkedReleaseData] = useState<Map<string, any>>(new Map())
-    const [tableData, setTableData] = useState<Array<any>>([])
+    const [linkedReleaseData, setLinkedReleaseData] = useState<Map<string, LinkedReleaseData>>(new Map())
+    const [tableData, setTableData] = useState<Array<RowData>>([])
 
     const updateReleaseRelation = (
-        ReleaseId: string,
+        releaseId: string,
         updatedReleaseRelation: string,
-        linkedReleaseData: Map<string, any>
+        linkedReleaseData: Map<string, LinkedReleaseData>
     ) => {
         try {
-            if (linkedReleaseData.has(ReleaseId)) {
+            if (linkedReleaseData.has(releaseId)) {
                 linkedReleaseData.forEach((value, key) => {
-                    if (key === ReleaseId) {
+                    if ((key === releaseId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedReleases)) {
                         value.releaseRelation = updatedReleaseRelation
                         setLinkedReleaseData(linkedReleaseData)
-                        projectPayload.linkedReleases[ReleaseId].releaseRelation = updatedReleaseRelation
-                        const data: any = extractDataFromMap(linkedReleaseData)
+                        projectPayload.linkedReleases[releaseId].releaseRelation = updatedReleaseRelation
+                        const data = extractDataFromMap(linkedReleaseData)
                         setTableData(data)
                     }
                 })
@@ -53,16 +69,18 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
     const updateProjectMainlineState = (
         releaseId: string,
         updatedProjectMainlineState: string,
-        linkedReleaseData: Map<string, any>
+        linkedReleaseData: Map<string, LinkedReleaseData>
     ) => {
         try {
             if (linkedReleaseData.has(releaseId)) {
+                if (projectPayload.linkedReleases === undefined)
+                    return
                 linkedReleaseData.forEach((value, key) => {
-                    if (key === releaseId) {
+                    if ((key === releaseId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedReleases)) {
                         value.mainlineState = updatedProjectMainlineState
                         setLinkedReleaseData(linkedReleaseData)
                         projectPayload.linkedReleases[releaseId].mainlineState = updatedProjectMainlineState
-                        const data: any = extractDataFromMap(linkedReleaseData)
+                        const data = extractDataFromMap(linkedReleaseData)
                         setTableData(data)
                     }
                 })
@@ -74,15 +92,15 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
     
     const handleComments = ( releaseId:string,
                              updatedComment:string,
-                             linkedReleaseData: Map<string, any>) => {
+                             linkedReleaseData: Map<string, LinkedReleaseData>) => {
         try {
             if (linkedReleaseData.has(releaseId)) {
                 linkedReleaseData.forEach((value, key) => {
-                    if (key === releaseId) {
+                    if ((key === releaseId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedReleases)) {
                         value.comment = updatedComment
                         setLinkedReleaseData(linkedReleaseData)
                         projectPayload.linkedReleases[releaseId].comment = updatedComment
-                        const data: any = extractDataFromMap(linkedReleaseData)
+                        const data = extractDataFromMap(linkedReleaseData)
                         setTableData(data)
                     }
                 })
@@ -92,8 +110,8 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
         }
     }
 
-    const extractDataFromMap = (linkedReleaseData: Map<string, any>) => {
-        const extractedData: any = []
+    const extractDataFromMap = (linkedReleaseData: Map<string, LinkedReleaseData>) => {
+        const extractedData: Array<RowData> = []
         linkedReleaseData.forEach((value, key) => {
             const updatedReleaseRelation = value.releaseRelation
             const updatedProjectMainlineState = value.mainlineState
@@ -108,9 +126,7 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
     }
 
     useEffect(() => {
-
-        if (existingReleaseData && linkedReleaseData.size === 0){
-
+        if ((existingReleaseData !== undefined) && linkedReleaseData.size === 0){
             const data = extractDataFromMap(existingReleaseData)
             setTableData(data)
             setLinkedReleaseData(existingReleaseData)
@@ -144,7 +160,7 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                             id='linkedReleaseData.releaseRelation'
                             aria-describedby='linkedReleaseData.releaseRelation.HelpBlock'
                             name='releaseRelation'
-                            value={linkedReleaseData.get(key) ?.releaseRelation || releaseRelation}
+                            value={linkedReleaseData.get(key)?.releaseRelation ?? releaseRelation}
                             onChange={(event) => {
                                 const updatedReleaseRelationStatus = event.target.value
                                 updateReleaseRelation(key, updatedReleaseRelationStatus, linkedReleaseData)
@@ -178,7 +194,7 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                             id='linkedReleaseData.mainlineState'
                             aria-describedby='linkedReleaseData.mainlineState'
                             name='mainlineState'
-                            value={linkedReleaseData.get(key) ?.mainlineState || mainlineState}
+                            value={linkedReleaseData.get(key)?.mainlineState ?? mainlineState}
                             onChange={(event) => {
                                 const updatedProjectMainlineState = event.target.value
                                 updateProjectMainlineState(key, updatedProjectMainlineState, linkedReleaseData)
@@ -207,7 +223,7 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                         id='linkedReleaseData.comment'
                         aria-describedby='linkedReleaseData.comment'
                         name='comment'
-                        defaultValue={linkedReleaseData.get(key) ?.comment || comments}
+                        defaultValue={linkedReleaseData.get(key)?.comment ?? comments}
                         onBlur={(event) => {
                             const updatedComment = event.target.value
                             handleComments(key, updatedComment, linkedReleaseData)

@@ -8,17 +8,20 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-const getJsonPrettyFormat = (obj: any) => {
-    let jsonView: any = JSON.stringify(obj, undefined, 5)
+const getJsonPrettyFormat = (obj: unknown) : JSX.Element | string => {
+    let jsonView: string | JSX.Element = JSON.stringify(obj, undefined, 5)
     if (obj !== null && obj !== undefined) {
         jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {jsonView} </pre>
     }
     return jsonView
 }
 
-const getJsonArrPrettyFormat = (obj: any) => {
-    let jsonView: any = JSON.stringify(obj, undefined, 5)
-    if (obj !== null && obj !== undefined && obj.length > 0) {
+const getJsonArrPrettyFormat = (obj: Array<unknown> | null | undefined) => {
+    if (obj === null || obj === undefined)
+        return <pre></pre>
+
+    let jsonView: string | JSX.Element = JSON.stringify(obj, undefined, 5)
+    if (obj.length > 0) {
         jsonView = <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}> {jsonView} </pre>
     }
     return jsonView
@@ -30,7 +33,7 @@ const getStringPrettyFormat = (string: string) => {
     return jsonView
 }
 
-function PrettyFormatData({ data }: any) {
+function PrettyFormatData({ data }: { data: unknown }) : string | JSX.Element {
     if (data === null || data === undefined) {
         return <pre> </pre>
     }
@@ -46,6 +49,7 @@ function PrettyFormatData({ data }: any) {
 
         return getJsonPrettyFormat(data)
     }
+    return <></>
 }
 
 export default PrettyFormatData

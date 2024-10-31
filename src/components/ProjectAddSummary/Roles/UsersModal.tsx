@@ -22,7 +22,7 @@ interface UserType {
     department: string
 }
 
-export default function UsersModal({ show, setShow }: { show: boolean; setShow: (show: boolean) => void }) {
+export default function UsersModal({ show, setShow }: { show: boolean; setShow: (show: boolean) => void }) : JSX.Element {
     const t = useTranslations('default')
 
     const columns = [

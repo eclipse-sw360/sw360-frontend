@@ -27,7 +27,7 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) => {
+const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) : JSX.Element => {
     const t = useTranslations('default')
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<ReleaseLink[]>([])
