@@ -104,7 +104,7 @@ function AddProjects() {
     const createProject = async () => {
         try {
             const session = await getSession()
-            const createUrl = ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP ? `projects/network` : 'projects'
+            const createUrl = (ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network` : 'projects'
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
 
             if (response.status == HttpStatus.CREATED) {
