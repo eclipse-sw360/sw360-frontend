@@ -20,9 +20,9 @@ interface Props {
     documentName: string
 }
 
-const ComponentsUsing = ({ componentsUsing, documentName }: Props) => {
+const ComponentsUsing = ({ componentsUsing, documentName }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState([])
+    const [tableData, setTableData] = useState<Array<(string | JSX.Element)[]>>([])
 
     const columns = [
         {
@@ -45,17 +45,17 @@ const ComponentsUsing = ({ componentsUsing, documentName }: Props) => {
 
     useEffect(() => {
         const data = componentsUsing.map((component: Component) => [
-            component.defaultVendor?.shortName,
+            component.defaultVendor?.shortName ?? '',
             _(
                 <Link
-                    key={component._links?.self?.href.split('/').at(-1)}
-                    href={`/components/detail/${component._links?.self?.href.split('/').at(-1)}`}
+                    key={component._links?.self.href.split('/').at(-1)}
+                    href={`/components/detail/${component._links?.self.href.split('/').at(-1)}`}
                 >
                     {component.name}
                 </Link>
-            ),
+            ) as JSX.Element,
             component.mainLicenseIds ? component.mainLicenseIds.join(', ') : '',
-            component.componentType,
+            component.componentType ?? '',
         ])
         setTableData(data)
     }, [componentsUsing])

@@ -14,16 +14,17 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Alert } from 'react-bootstrap'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     projectUsings: Array<Project>
     documentName: string
-    restrictedResource: RestrictedResource | null
+    restrictedResource: RestrictedResource | null | undefined
 }
 
-const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Props) => {
+const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState([])
+    const [tableData, setTableData] = useState<Array<(string | JSX.Element)[]>>([])
 
     const columns = [
         {
@@ -44,14 +45,14 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
         const data = projectUsings.map((project: Project) => [
             _(
                 <Link
-                    key={project._links.self.href.split('/').at(-1)}
-                    href={`/projects/detail/${project._links.self.href.split('/').at(-1)}`}
+                    key={project._links?.self.href.split('/').at(-1)}
+                    href={`/projects/detail/${project._links?.self.href.split('/').at(-1)}`}
                 >
-                    {project.version ? `${project.name} (${project.version})` : project.name}
+                    {CommonUtils.isNullEmptyOrUndefinedString(project.version) ? `${project.name} (${project.version})` : project.name}
                 </Link>
-            ),
-            project.businessUnit,
-            _(<Link href={`mailTo:${project.projectResponsible}}`}>{project.projectResponsible}</Link>),
+            ) as JSX.Element,
+            project.businessUnit ?? '',
+            _(<Link href={`mailTo:${project.projectResponsible}}`}>{project.projectResponsible}</Link>) as JSX.Element,
         ])
         setTableData(data)
     }, [projectUsings])
