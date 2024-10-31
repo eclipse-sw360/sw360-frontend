@@ -76,7 +76,7 @@ export default function Summary({
     setLeadArchitect,
     securityResponsibles,
     setSecurityResponsibles
-}: Props) {
+}: Props): JSX.Element {
     const t = useTranslations('default')
 
     return (

@@ -13,15 +13,16 @@ import sw360ProfileIcon from '@/assets/images/profile.svg'
 import navbarStyles from './ProfileDropdown.module.css'
 import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
-const UserProfile = <Image className={navbarStyles.profileImage} src={sw360ProfileIcon} alt='Profile' />
+const UserProfile = <Image className={navbarStyles.profileImage} src={sw360ProfileIcon as StaticImport} alt='Profile' />
 
-function ProfileDropdown() {
+function ProfileDropdown() : JSX.Element {
     const t = useTranslations('default')
     return (
         <NavDropdown id='profileDropdown' title={UserProfile}>
             <NavDropdown.Divider />
-            <NavDropdown.Item href='' onClick={() => signOut({ callbackUrl: '/' })}>
+            <NavDropdown.Item href='' onClick={() => void signOut({ callbackUrl: '/' })}>
                 {t('Logout')}
             </NavDropdown.Item>
         </NavDropdown>

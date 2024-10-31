@@ -19,7 +19,7 @@ interface DepartmentType {
     priority: string
 }
 
-export default function DepartmentModal({ show, setShow }: { show: boolean; setShow: (show: boolean) => void }) {
+export default function DepartmentModal({ show, setShow }: { show: boolean; setShow: (show: boolean) => void }) : JSX.Element {
     const t = useTranslations('default')
 
     const columns = [

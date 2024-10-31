@@ -23,7 +23,7 @@ interface Param {
     setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
 
-export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param) {
+export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param): JSX.Element {
     const t = useTranslations('default')
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
     const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
@@ -240,7 +240,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                                className='form-control'
                                id='addProjects.modifiedOn'
                                readOnly={true}
-                               value={projectPayload.modifiedOn ? projectPayload.modifiedOn : ""}
+                               value={projectPayload.modifiedOn ?? ''}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -253,7 +253,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.modifiedBy'
                             placeholder={t('Will be set automatically')}
                             readOnly={true}
-                            value={projectPayload.modifiedBy ? projectPayload.modifiedBy : ""}
+                            value={projectPayload.modifiedBy ?? ''}
                         />
                     </div>
                 </div>

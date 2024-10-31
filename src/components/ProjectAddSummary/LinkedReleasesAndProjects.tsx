@@ -18,11 +18,19 @@ import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork
 interface Props {
     projectId?: string
     projectPayload: ProjectPayload
-    existingReleaseData?: Map<string, any>
+    existingReleaseData?: Map<string, LinkedReleaseData>
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LinkedReleasesAndProjects({ projectId, projectPayload, setProjectPayload, existingReleaseData }: Props) {
+interface LinkedReleaseData {
+    comment: string
+    mainlineState: string
+    name: string
+    releaseRelation: string
+    version: string
+}
+
+export default function LinkedReleasesAndProjects({ projectId, projectPayload, setProjectPayload, existingReleaseData }: Props): JSX.Element {
     return (
         <>
             <div className='ms-1'>

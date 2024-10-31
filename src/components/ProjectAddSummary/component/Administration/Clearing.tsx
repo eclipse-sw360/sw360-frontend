@@ -19,7 +19,7 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function Clearing({ projectPayload, setProjectPayload }: Props) {
+export default function Clearing({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
 

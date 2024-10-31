@@ -18,7 +18,7 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LicenseInfoHeader({ projectPayload, setProjectPayload }: Props) {
+export default function LicenseInfoHeader({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                                        HTMLInputElement |

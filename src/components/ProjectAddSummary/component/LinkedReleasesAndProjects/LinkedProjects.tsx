@@ -14,31 +14,41 @@ import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjec
 import { ProjectPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LinkedProjects({ projectPayload, setProjectPayload }: Props) {
+interface LinkedProjectData {
+    enableSvm: boolean
+    name: string
+    projectRelationship: string
+    version: string
+}
+
+type RowData = (string | boolean | { updatedProjectRelationship: string; key: string; })[]
+
+export default function LinkedProjects({ projectPayload, setProjectPayload }: Props) : JSX.Element {
     const t = useTranslations('default')
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
-    const [linkedProjectData, setLinkedProjectData] = useState<Map<string, any>>(new Map())
-    const [tableData, setTableData] = useState<Array<any>>([])
+    const [linkedProjectData, setLinkedProjectData] = useState<Map<string, LinkedProjectData>>(new Map())
+    const [tableData, setTableData] = useState<Array<RowData>>([])
 
     const updateProjectData = (
         projectId: string,
         updatedProjectRelationship: string,
-        linkedProjectData: Map<string, any>
+        linkedProjectData: Map<string, LinkedProjectData>
     ) => {
         try {
             if (linkedProjectData.has(projectId)) {
                 linkedProjectData.forEach((value, key) => {
-                    if (key === projectId) {
+                    if ((key === projectId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedProjects)) {
                         value.projectRelationship = updatedProjectRelationship
                         setLinkedProjectData(linkedProjectData)
                         projectPayload.linkedProjects[projectId].projectRelationship = updatedProjectRelationship
-                        const data: any = extractDataFromMap(linkedProjectData)
+                        const data = extractDataFromMap(linkedProjectData)
                         setTableData(data)
                     }
                 })
@@ -98,8 +108,8 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
         setTableData(data)
     }, [linkedProjectData])
 
-    const extractDataFromMap = (linkedProjectData: Map<string, any>) => {
-        const extractedData: any = []
+    const extractDataFromMap = (linkedProjectData: Map<string, LinkedProjectData>) => {
+        const extractedData: Array<RowData> = []
         linkedProjectData.forEach((value, key) => {
             const updatedProjectRelationship = value.projectRelationship
             extractedData.push([value.name, value.version, { updatedProjectRelationship, key }, value.enableSvm])
