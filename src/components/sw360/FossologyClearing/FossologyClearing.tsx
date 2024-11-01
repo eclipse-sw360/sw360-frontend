@@ -10,18 +10,19 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
 
-import { Attachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus } from '@/object-types'
+import { Attachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import styles from './fossologyClearing.module.css'
+import { getSession } from 'next-auth/react'
+import MessageService from '@/services/message.service'
 
 interface Props {
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
     releaseId: string
 }
 
@@ -44,21 +45,26 @@ const clearingMessages: { [key: string]: { [key: string]: string } } = {
     },
 }
 
-const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
+interface Message {
+    content: string
+    variant: string
+    show: boolean
+}
+
+const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const STEP_PERCENT = 16.66
     const PERCENT_DONE = 99.96
     const RELOAD_ATTACHMENTS_PERCENT = 66.46
-    const progressInterval = useRef(undefined)
-    const countDownInterval = useRef(undefined)
+    const progressInterval = useRef<number | undefined>(undefined)
+    const countDownInterval = useRef<number | undefined>(undefined)
     const numberOfSourceAttachment = useRef(0)
 
     const [timeInterval, setTimeInterval] = useState<number>(5)
-    const [release, setRelease] = useState(undefined)
+    const [release, setRelease] = useState<ReleaseDetail | undefined>(undefined)
     const [confirmShow, setConfirmShow] = useState(false)
 
-    const [message, setMessage] = useState({
+    const [message, setMessage] = useState<Message>({
         content: '',
         variant: 'success',
         show: false,
@@ -74,23 +80,43 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
     }
 
     const clearAllInterval = useCallback(() => {
-        countDownInterval.current = clearInterval(countDownInterval.current)
-        progressInterval.current = clearInterval(progressInterval.current)
+        if (countDownInterval.current !== undefined) {
+            clearInterval(countDownInterval.current);
+            countDownInterval.current = undefined
+        }
+
+        if (progressInterval.current !== undefined) {
+            clearInterval(progressInterval.current);
+            progressInterval.current = undefined
+        }
         resetTimeCountDown()
     }, [])
 
     const fetchData = useCallback(
         async (url: string) => {
-            return ApiUtils.GET(url, session.user.access_token)
-                .then((response) => response.json())
-                .catch(() => undefined)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Session has expired'))
+                return undefined
+            }
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === HttpStatus.UNAUTHORIZED) {
+                MessageService.error(t('Session has expired'))
+                return undefined
+            } else if (response.status === HttpStatus.OK) {
+                const data = await response.json() as ReleaseDetail & FossologyProcessStatus
+                return data
+            } else {
+                return undefined
+            }
         },
-        [session]
+        []
     )
 
-    const fetchRelease = useCallback(async () => {
+    const fetchRelease = useCallback(() => {
         const url = `releases/${releaseId}`
-        fetchData(url).then((data) => {
+        fetchData(url).then((data: ReleaseDetail | undefined) => {
+            if (data === undefined) return
             setRelease(data)
             numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
             if (!isClearingAllowed()) {
@@ -102,7 +128,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
                 })
                 return
             }
-        })
+        }).catch((err) => console.error(err))
     }, [releaseId, clearAllInterval, fetchData])
 
     const handleCloseDialog = () => {
@@ -116,8 +142,8 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
         setShow(false)
     }
 
-    const handleOutdated = () => {
-        handleFossologyClearing({ markFossologyProcessOutdated: true })
+    const handleOutdated = async () => {
+        await handleFossologyClearing({ markFossologyProcessOutdated: 'true' })
         showMessage(clearingMessages.SET_OUTDATED)
         setConfirmShow(false)
     }
@@ -133,7 +159,8 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
 
     const checkFossologyProcessStatus = useCallback(async () => {
         const url = `releases/${releaseId}/checkFossologyProcessStatus`
-        const response: FossologyProcessStatus = await fetchData(url)
+        const response = await fetchData(url) as FossologyProcessStatus | undefined
+        if (response === undefined) return
 
         if (response.status === 'SUCCESS') {
             setProgressStatus({
@@ -158,8 +185,8 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
     const startIntervalCheckFossologyProcessStatus = useCallback(() => {
         startCountDownt()
 
-        const interval = setInterval(() => {
-            checkFossologyProcessStatus()
+        const interval = window.setInterval(() => {
+            checkFossologyProcessStatus().catch(err => console.error(err))
             resetTimeCountDown()
         }, 5000)
         progressInterval.current = interval
@@ -167,6 +194,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
 
     const reloadReport = async () => {
         hideMessage()
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return undefined
+        }
         const url = `releases/${releaseId}/reloadFossologyReport`
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === HttpStatus.OK) {
@@ -180,7 +212,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
     }
 
     const handleFossologyClearing = useCallback(
-        async (params: any) => {
+        async (params: { [key: string]: string }) => {
             hideMessage()
             clearAllInterval()
             const triggerStatus = await triggerFossologyClearing(params)
@@ -213,10 +245,10 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
             progressPercent = 0 * STEP_PERCENT
         }
 
-        if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'DONE') {
+        if (fossologyProcessInfo.processSteps.at(-1)?.stepStatus === 'DONE') {
             progressText += ' done'
             progressPercent += 2 * STEP_PERCENT
-        } else if (fossologyProcessInfo.processSteps.at(-1).stepStatus === 'IN_WORK') {
+        } else if (fossologyProcessInfo.processSteps.at(-1)?.stepStatus === 'IN_WORK') {
             progressText += ' in progress'
             progressPercent += 1 * STEP_PERCENT
         } else {
@@ -231,7 +263,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
     }
 
     const hideMessage = () => {
-        setMessage((prev: any) => ({
+        setMessage((prev: Message) => ({
             ...prev,
             show: false,
         }))
@@ -246,7 +278,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
     }
 
     const startCountDownt = () => {
-        const interval = setInterval(() => {
+        const interval = window.setInterval(() => {
             setTimeInterval((prev) => prev - 1)
         }, 1000)
         countDownInterval.current = interval
@@ -270,19 +302,19 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
         if (show === true) {
             if (release === undefined) {
                 fetchRelease()
-                checkFossologyProcessStatus()
+                checkFossologyProcessStatus().catch(err => console.log(err))
             } else {
                 if (progressStatus.percent >= PERCENT_DONE) {
                     showMessage(clearingMessages.CLEARING_SUCCESS)
                     return
                 }
                 if (
-                    !countDownInterval.current &&
-                    !progressInterval.current &&
+                    (countDownInterval.current !== undefined) &&
+                    (progressInterval.current !== undefined) &&
                     progressStatus.percent === 0 &&
                     numberOfSourceAttachment.current == 1
                 ) {
-                    handleFossologyClearing({})
+                    handleFossologyClearing({}).catch(err => console.log(err))
                 }
 
                 if (progressStatus.percent >= PERCENT_DONE) {
@@ -328,10 +360,10 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
                     </div>
                     <div>
                         {t('Found source attachment')}:
-                        {release && numberOfSourceAttachment.current === 1
+                        {(release && numberOfSourceAttachment.current === 1 && release._embedded['sw360:attachments'] !== undefined)
                             ? release._embedded['sw360:attachments']
                                   .filter((attachment: Attachment) => attachment.attachmentType === 'SOURCE')
-                                  .at(0).filename
+                                  .at(0)?.filename
                             : 'unknown'}
                     </div>
                     <div className='row mt-2'>
@@ -362,7 +394,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
                                 {' '}
                                 {t('Set Outdated')}{' '}
                             </Button>
-                            <Button variant='light' onClick={reloadReport}>
+                            <Button variant='light' onClick={() => void reloadReport()}>
                                 {' '}
                                 {t('Reload Report')}{' '}
                             </Button>
@@ -398,7 +430,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props) => {
                         {' '}
                         {t('Cancel')}{' '}
                     </Button>
-                    <Button variant='danger' onClick={handleOutdated}>
+                    <Button variant='danger' onClick={() => void handleOutdated()}>
                         {' '}
                         {t('Set To Outdated')}{' '}
                     </Button>

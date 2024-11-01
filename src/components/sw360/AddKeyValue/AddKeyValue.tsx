@@ -29,7 +29,7 @@ interface Input {
     value: string
 }
 
-function AddKeyValue(props: Props) {
+function AddKeyValue(props: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
     useEffect(()=>{

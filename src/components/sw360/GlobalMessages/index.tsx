@@ -17,13 +17,13 @@ import { Message } from '@/object-types'
 import { Alert } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
-
+import { CommonUtils } from '@/utils'
 
 interface Props {
     id?: string
 }
 
-const MessageIcon = ( { messageType }: { messageType: string}) => {
+const MessageIcon = ( { messageType }: { messageType: string | undefined }) => {
     switch (messageType) {
         case 'success':
             return <IoMdCheckmarkCircle />
@@ -34,7 +34,7 @@ const MessageIcon = ( { messageType }: { messageType: string}) => {
     }
 }
 
-function GlobalMessages({ id = 'default-message'}: Props) {
+function GlobalMessages({ id = 'default-message'}: Props): JSX.Element {
     const pathname = usePathname()
     const autoCloseTime = 7000
     const mounted = useRef(false)
@@ -46,7 +46,7 @@ function GlobalMessages({ id = 'default-message'}: Props) {
         const subscription = MessageService.enableSubscribing(id)
             .subscribe(message => {
                 // clear message when an empty text is received
-                if (!message.text) {
+                if (CommonUtils.isNullEmptyOrUndefinedString(message.text)) {
                     setMessages(messages => {
                         // filter out messages without 'keepAfterRouteChange' flag
                         const filteredMessages = messages.filter(m => m.keepAfterRouteChange);
@@ -60,7 +60,7 @@ function GlobalMessages({ id = 'default-message'}: Props) {
                     setMessages(messages => ([...messages, message]))
 
                     // auto close message if required
-                    if (message.autoClose) {
+                    if (message.autoClose === true) {
                         setTimeout(() => removeMessage(message), autoCloseTime)
                     }
                 }

@@ -7,6 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 'use client'
 
 import { MD5 } from 'crypto-js'
@@ -19,9 +20,9 @@ import sw360ProfileIcon from '@/assets/images/profile.svg'
 import { useLocalStorage } from '@/hooks'
 import styles from './Gravatar.module.css'
 
-function Gravatar({ email, noCache = false }: { email: string; noCache?: boolean }) {
-    const [gravatarImage, setGravatarImage] = useLocalStorage('gravatarImage', null)
-    const [useGravatar, setUseGravatar] = useLocalStorage('useGravatar', false)
+function Gravatar({ email }: { email: string }) : JSX.Element {
+    const [gravatarImage, setGravatarImage] = useLocalStorage<string | undefined | null>('gravatarImage', null)
+    const [useGravatar, setUseGravatar] = useLocalStorage<boolean>('useGravatar', false)
 
     function handleCheckboxChange() {
         setUseGravatar((prevValue: boolean) => {
@@ -31,6 +32,7 @@ function Gravatar({ email, noCache = false }: { email: string; noCache?: boolean
     }
 
     const downloadGravatarImage = useCallback(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const gravatarUrl = `https://www.gravatar.com/avatar/${MD5(email)}?d=404`
 
         fetch(gravatarUrl)
@@ -45,11 +47,11 @@ function Gravatar({ email, noCache = false }: { email: string; noCache?: boolean
 
     useEffect(() => {
         if (useGravatar) {
-            if (!gravatarImage && noCache) {
+            if (gravatarImage === null) {
                 downloadGravatarImage()
             }
         }
-    }, [useGravatar, gravatarImage, setGravatarImage, downloadGravatarImage, noCache])
+    }, [useGravatar, gravatarImage, setGravatarImage, downloadGravatarImage])
 
     const iconSize = 64
 
@@ -67,7 +69,7 @@ function Gravatar({ email, noCache = false }: { email: string; noCache?: boolean
                 </div>
                 <div className='gap-2 d-flex align-items-center justify-contents-end'>
                     <Image
-                        src={useGravatar ? gravatarImage : sw360ProfileIcon.src}
+                        src={useGravatar ? (gravatarImage ?? '') : (sw360ProfileIcon.src as string)}
                         width={iconSize}
                         height={iconSize}
                         alt='Gravatar'

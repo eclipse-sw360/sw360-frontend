@@ -15,7 +15,7 @@ import { usePathname, useRouter } from '../../../navigation'
 
 import { LOCALES } from '@/constants'
 
-function LanguageSwitcher() {
+function LanguageSwitcher() : JSX.Element {
     const [, startTransition] = useTransition()
     const router = useRouter()
     const pathname = usePathname()

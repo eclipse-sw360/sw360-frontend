@@ -14,7 +14,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import Link from 'next/link'
 import styles from './footer.module.css'
 
-function Footer() {
+function Footer() : JSX.Element {
     return (
         <>
             <footer className={`${styles.sw360footer} footer d-flex flex-column`}>

@@ -9,7 +9,7 @@
 
 import { Spinner } from 'react-bootstrap'
 
-function PageSpinner() {
+function PageSpinner() : JSX.Element {
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
             <Spinner className='spinner'>

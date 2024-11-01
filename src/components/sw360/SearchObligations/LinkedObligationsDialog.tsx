@@ -40,7 +40,7 @@ const LinkedObligationsDialog = ({
     obligations,
     licensePayload,
     setLicensePayload,
-}: Props) => {
+}: Props) : JSX.Element => {
     const t = useTranslations('default')
     const [linkedObligationsResponse, setLinkedObligationsResponse] = useState<Array<Obligation>>([])
 
@@ -51,11 +51,11 @@ const LinkedObligationsDialog = ({
     const handleClickSelectObligations = () => {
         const linkedObligationsResponseData = linkedObligationsResponse.map((item: Obligation) => [
             item,
-            item.title,
-            item.obligationType && item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase(),
+            item.title ?? '',
+            !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType) ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase() : '',
             item,
         ])
-        linkedObligationsResponseData.forEach((linkedObligations: any) => {
+        linkedObligationsResponseData.forEach((linkedObligations: (string | Obligation)[]) => {
             data.push(linkedObligations)
         })
         data = data.filter((v, index, a) => a.findIndex((v2) => (v2[0] as Obligation).title === (v[0] as Obligation).title) === index)

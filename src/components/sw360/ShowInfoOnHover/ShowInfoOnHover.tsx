@@ -11,7 +11,7 @@ import { ReactNode } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
-const ShowInfoOnHover = ({ text }: { text: string | ReactNode}) => {
+const ShowInfoOnHover = ({ text }: { text: string | ReactNode}) : JSX.Element => {
     return (
         <>
             <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>} placement='bottom'>

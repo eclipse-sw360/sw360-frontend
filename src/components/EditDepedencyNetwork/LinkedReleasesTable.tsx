@@ -12,7 +12,7 @@ import { Table } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
 import { useTranslations } from 'next-intl'
 
-const LinkedReleasesTable = ({ children }: { children: React.ReactNode }) => {
+const LinkedReleasesTable = ({ children }: { children: React.ReactNode }) : JSX.Element => {
     return (
         <Table>
             <TableHeader />

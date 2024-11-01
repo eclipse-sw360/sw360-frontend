@@ -13,15 +13,16 @@ import { useTranslations } from 'next-intl'
 import React, { useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { HttpStatus, Vendor } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, getSession } from 'next-auth/react'
+import MessageService from '@/services/message.service'
 
 interface AlertData {
     variant: string
     message: JSX.Element
 }
 
-const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Dispatch<React.SetStateAction<boolean>> }) => {
+const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Dispatch<React.SetStateAction<boolean>> }) : JSX.Element => {
     const t = useTranslations('default')
     const [vendor, setVendor] = useState<Vendor>({
         fullName: '',
@@ -39,6 +40,11 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
         try {
             setLoading(true)
             const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Session has expired'))
+                setLoading(false)
+                return
+            }
             const payload: Vendor = {
                 fullName: vendor.fullName,
                 shortName: vendor.shortName,
@@ -57,16 +63,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                     ),
                 })
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                setAlert({
-                    variant: 'danger',
-                    message: (
-                        <>
-                            <p>
-                                {t('Cannot add vendor')}
-                            </p>
-                        </>
-                    ),
-                })
+                MessageService.error(t('Session has expired'))
                 setLoading(false)
                 return signOut()
             } else if (response.status === HttpStatus.CONFLICT) {
@@ -122,7 +119,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                         <input
                             type='text'
                             name='fullName'
-                            value={vendor?.fullName}
+                            value={vendor.fullName}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.fullName'
@@ -140,7 +137,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                         <input
                             type='text'
                             name='shortName'
-                            value={vendor?.shortName}
+                            value={vendor.shortName}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.shortName'
@@ -158,7 +155,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                         <input
                             type='url'
                             name='url'
-                            value={vendor?.url}
+                            value={vendor.url}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.url'
@@ -185,7 +182,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                 >
                     {t('Close')}
                 </button>
-                <button type='button' className='fw-bold btn btn-primary me-2' onClick={handleSubmit} disabled={loading}>
+                <button type='button' className='fw-bold btn btn-primary me-2' onClick={() => void handleSubmit()} disabled={loading}>
                     {t('Add Vendor')}
                 </button>
             </Modal.Footer>

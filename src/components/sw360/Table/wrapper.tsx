@@ -8,6 +8,9 @@
 // License-Filename: LICENSE
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 'use client'
 import { h, createRef as gCreateRef, Component as gComponent } from 'gridjs'
@@ -29,6 +32,8 @@ export class ReactWrapper extends gComponent<{
     }
 
     render() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         return h(this.props.parent, { ref: this.ref })
     }
 }

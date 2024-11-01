@@ -9,13 +9,13 @@
 
 'use client'
 
-import { HttpStatus, ProjectPayload } from '@/object-types'
+import { Embedded, HttpStatus, Project, ProjectPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import { notFound } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { ChangeEvent, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
@@ -25,11 +25,25 @@ interface AlertData {
 }
 
 interface Props {
-    setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, any>>>
+    setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, ProjectRelationship>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
     setShow: (show: boolean) => void
+}
+
+type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
+
+type RowData = (string | boolean | {
+    state: string
+    clearingState: string
+})[]
+
+interface ProjectRelationship {
+    enableSvm: boolean
+    name: string
+    projectRelationship: string
+    version?: string
 }
 
 export default function LinkProjectsModal({
@@ -38,14 +52,14 @@ export default function LinkProjectsModal({
     setProjectPayload,
     show,
     setShow,
-}: Props) {
+}: Props): JSX.Element {
     const t = useTranslations('default')
-    const [projectData, setProjectData] = useState<any[] | null>(null)
-    const [linkProjects, setLinkProjects] = useState<Map<string, any>>(new Map())
+    const [projectData, setProjectData] = useState<RowData[]>([])
+    const [linkProjects, setLinkProjects] = useState<Map<string, ProjectRelationship>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
     const searchValueRef = useRef<HTMLInputElement>(null)
     const topRef = useRef(null)
-    const { data: session, status } = useSession()
+    const isExactMatch = useRef<boolean>(false)
 
     const columns = [
         {
@@ -132,58 +146,75 @@ export default function LinkProjectsModal({
     ]
 
     const extractInterimProjectData = (projectId: string) => {
-        const interimProjData = []
         for (let i = 0; i < projectData.length; i++) {
             if (projectData[i][0] === projectId) {
-                interimProjData.push(projectData[i][1], projectData[i][2], projectData[i][6])
-                return interimProjData
+                return {
+                    name: projectData[i][1] as string,
+                    version: projectData[i][2] as string,
+                    projectRelationship: 'CONTAINED',
+                    enableSvm: projectData[i][6] as boolean
+                }
             }
         }
+        return undefined
     }
 
-    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<any> => {
+    const handleExactMatchChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const isExactMatchSelected = event.target.checked;
+        isExactMatch.current = isExactMatchSelected
+    }
+
+    const handleSearch = async ({ searchValue }: { searchValue: string }) => {
         try {
             const queryUrl = CommonUtils.createUrlWithParams('projects', {
                 name: `${searchValue}`,
-                luceneSearch: 'true',
+                luceneSearch: `${isExactMatch.current}`,
             })
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Session has expired'))
+                return
+            }
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
             if (response.status !== HttpStatus.OK) {
-                return notFound()
+                MessageService.error(t('Error while processing'))
+                return
             }
-            const data = await response.json()
+            const data = await response.json() as EmbeddedProjects
 
             const dataTableFormat =
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
                     ? []
-                    : data['_embedded']['sw360:projects'].map((elem: any) => [
-                          elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                          elem.name,
-                          elem.version,
-                          { state: elem.state, clearingState: elem.clearingState },
-                          elem.projectResponsible,
-                          elem.description,
-                          (elem.enableSvm = true),
-                      ])
+                    : data['_embedded']['sw360:projects'].map((project: Project) => [
+                        CommonUtils.getIdFromUrl(project._links?.self.href),
+                        project.name,
+                        project.version ?? '',
+                        { state: project.state ?? 'ACTIVE', clearingState: project.clearingState ?? 'OPEN' },
+                        project.projectResponsible ?? '',
+                        project.description ?? '',
+                        (project.enableSvm === true),
+                    ])
             setProjectData(dataTableFormat)
         } catch (e) {
             console.error(e)
         }
     }
 
-    const projectPayloadSetter = (projectPayloadData: Map<string, any>) => {
+    const projectPayloadSetter = (projectPayloadData: Map<string, ProjectRelationship>) => {
         try {
             if (projectPayloadData.size > 0) {
-                projectPayloadData.forEach((value, key) => {
-                    const projectId = key
-                    const updatedProjectPayload = { ...projectPayload }
+                const updatedProjectPayload = { ...projectPayload }
+                if (updatedProjectPayload.linkedProjects === undefined) {
+                    updatedProjectPayload.linkedProjects = {}
+                }
+                for (const [projectId, linkedProject] of projectPayloadData) {
                     updatedProjectPayload.linkedProjects[projectId] = {
-                        projectRelationship: value.projectRelationship,
-                        enableSvm: value.enableSvm,
+                        projectRelationship: linkedProject.projectRelationship,
+                        enableSvm: linkedProject.enableSvm,
                     }
-                    setProjectPayload(updatedProjectPayload)
-                })
+                }
+                setProjectPayload(updatedProjectPayload)
             }
         } catch (e) {
             console.error(e)
@@ -196,106 +227,96 @@ export default function LinkProjectsModal({
             m.delete(projectId)
         } else {
             const interimData = extractInterimProjectData(projectId)
-            m.set(projectId, {
-                name: interimData[0],
-                version: interimData[1],
-                projectRelationship: 'CONTAINED',
-                enableSvm: interimData[2],
-            })
+            if (interimData === undefined) return
+            m.set(projectId, interimData)
         }
         setLinkProjects(m)
     }
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <>
-                <Modal
-                    size='lg'
-                    centered
-                    show={show}
-                    onHide={() => {
-                        setShow(false)
-                        setProjectData(null)
-                        setAlert(null)
-                        setLinkProjects(new Map())
-                    }}
-                    aria-labelledby={t('Link Projects')}
-                    scrollable
-                >
-                    <Modal.Header closeButton>
-                        <Modal.Title id='linked-projects-modal'>{t('Link Projects')}</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body ref={topRef}>
-                        {alert && (
-                            <Alert variant={alert.variant} id='linkProjects.alert'>
-                                {alert.message}
-                            </Alert>
-                        )}
-                        <Form>
-                            <Col>
-                                <Row className='mb-3'>
-                                    <Col xs={6}>
-                                        <Form.Control
-                                            type='text'
-                                            placeholder={`${t('Enter Search Text')}...`}
-                                            name='searchValue'
-                                            ref={searchValueRef}
-                                        />
-                                    </Col>
-                                    <Col xs='auto'>
-                                        <Form.Group controlId='exact-match-group'>
-                                            <Form.Check inline name='exact-match' type='checkbox' id='exact-match' />
-                                            <Form.Label className='pt-2'>
-                                                {t('Exact Match')}{' '}
-                                                <sup>
-                                                    <FaInfoCircle />
-                                                </sup>
-                                            </Form.Label>
-                                        </Form.Group>
-                                    </Col>
-                                    <Col xs='auto'>
-                                        <Button
-                                            variant='secondary'
-                                            onClick={async () => {
-                                                await handleSearch({ searchValue: searchValueRef.current.value })
-                                            }}
-                                        >
-                                            {t('Search')}
-                                        </Button>
-                                    </Col>
-                                </Row>
-                                <Row>{projectData && <Table columns={columns} data={projectData} sort={false} />}</Row>
-                            </Col>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button
-                            variant='dark'
-                            onClick={() => {
-                                setShow(false)
-                                setProjectData(null)
-                                setAlert(null)
-                                setLinkProjects(new Map())
-                            }}
-                        >
-                            {t('Close')}
-                        </Button>
-                        <Button
-                            variant='primary'
-                            onClick={() => {
-                                setLinkedProjectData(linkProjects)
-                                setShow(false)
-                                projectPayloadSetter(linkProjects)
-                            }}
-                            disabled={linkProjects.size === 0}
-                        >
-                            {t('Link Projects')}
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            </>
-        )
+    const closeModal = () => {
+        setShow(false)
+        setProjectData([])
+        setAlert(null)
+        setLinkProjects(new Map())
+        isExactMatch.current = false
     }
+
+    return (
+        <Modal
+            size='lg'
+            centered
+            show={show}
+            onHide={() => {
+                closeModal()
+            }}
+            aria-labelledby={t('Link Projects')}
+            scrollable
+        >
+            <Modal.Header closeButton>
+                <Modal.Title id='linked-projects-modal'>{t('Link Projects')}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body ref={topRef}>
+                {alert && (
+                    <Alert variant={alert.variant} id='linkProjects.alert'>
+                        {alert.message}
+                    </Alert>
+                )}
+                <Form>
+                    <Col>
+                        <Row className='mb-3'>
+                            <Col xs={6}>
+                                <Form.Control
+                                    type='text'
+                                    placeholder={`${t('Enter Search Text')}...`}
+                                    name='searchValue'
+                                    ref={searchValueRef}
+                                />
+                            </Col>
+                            <Col xs='auto'>
+                                <Form.Group controlId='exact-match-group'>
+                                    <Form.Check inline name='exact-match' type='checkbox' id='exact-match' onChange={handleExactMatchChange} />
+                                    <Form.Label className='pt-2'>
+                                        {t('Exact Match')}{' '}
+                                        <sup>
+                                            <FaInfoCircle />
+                                        </sup>
+                                    </Form.Label>
+                                </Form.Group>
+                            </Col>
+                            <Col xs='auto'>
+                                <Button
+                                    variant='secondary'
+                                    onClick={() => void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })}
+                                >
+                                    {t('Search')}
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Row><Table columns={columns} data={projectData} sort={false} /></Row>
+                    </Col>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button
+                    variant='dark'
+                    onClick={() => {
+                        closeModal()
+                    }}
+                >
+                    {t('Close')}
+                </Button>
+                <Button
+                    variant='primary'
+                    onClick={() => {
+                        setLinkedProjectData(linkProjects)
+                        setShow(false)
+                        projectPayloadSetter(linkProjects)
+                    }}
+                    disabled={linkProjects.size === 0}
+                >
+                    {t('Link Projects')}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    )
 }

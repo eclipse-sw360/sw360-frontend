@@ -23,6 +23,7 @@ import SearchReleasesModal from '../sw360/SearchReleasesModal/SearchReleasesModa
 import { Embedded, HttpStatus, ReleaseDetail, ReleaseLink, ReleaseNode, ProjectPayload } from '@/object-types'
 import styles from './component.module.css'
 import { useTranslations } from 'next-intl'
+import MessageService from '@/services/message.service'
 
 interface CheckCyclicLinkPayload {
     linkedToReleases?: Array<string>
@@ -38,6 +39,14 @@ interface IProps {
     projectId?: string
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
+
+type EmptyEmbeddedResponse = {
+    _embedded?: {
+        'sw360:releaseLinks': undefined
+    }
 }
 
 const releaseRelationship = {
@@ -81,21 +90,21 @@ const ADD_RELEASE_MODES = {
     CHILDREN: 1,
 }
 
-const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }: IProps) => {
+const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }: IProps) : JSX.Element => {
     const t = useTranslations('default')
 
-    const showMessageTimeOut = useRef(undefined)
+    const showMessageTimeOut = useRef<number | undefined>(undefined)
     const addReleaseMode = useRef<number | undefined>(undefined)
     const nodeToAddChildren = useRef<ReleaseNode | undefined>(undefined)
     const nodeRefToRemove = useRef<{
         removedNode: ReleaseNode,
-        parentNode: ReleaseNode
-    }>(undefined)
-    const linkedToReleases = useRef(undefined)
+        parentNode?: ReleaseNode
+    } | undefined>(undefined)
+    const linkedToReleases = useRef<string[] | undefined>(undefined)
 
-    const compareSpinner = useRef(undefined);
+    const compareSpinner = useRef<HTMLDivElement>(null);
     const [selectedReleases, setSelectedReleases] = useState<Array<ReleaseDetail>>([])
-    const [network, setNetwork] = useState<Array<ReleaseNode>>(undefined)
+    const [network, setNetwork] = useState<Array<ReleaseNode> | undefined>(undefined)
     const [duplicatedReleases, setDuplicatedReleases] = useState<Array<string>>([])
     const [displayedCyclicLinks, setDisplayedCyclicLinks] = useState<Array<string>>([])
 
@@ -107,7 +116,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
     const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false)
 
     // Create linked release rows in table from the current network recusively
-    const renderLinkedReleases = (releases: Array<ReleaseNode>, parentNode: ReleaseNode = undefined, level: number = 0, releaseIdPath: Array<string> = []) => {
+    const renderLinkedReleases = (releases: Array<ReleaseNode>, parentNode: ReleaseNode | undefined = undefined, level = 0, releaseIdPath: Array<string> = []) => {
         return Object.values(releases).map((release: ReleaseNode): ReactNode => {
             const pathIdToNode = [...releaseIdPath, release.releaseId]
 
@@ -130,8 +139,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                     </td>
                     <td className='align-middle'>
                         <Form.Select
-                            onFocus={() => fetchOtherVersionsOfRelease(release)}
-                            onChange={(event) => updateReleaseOfNode(release, parentNode, releaseIdPath, event)}
+                            onFocus={() => void fetchOtherVersionsOfRelease(release)}
+                            onChange={(event) => void updateReleaseOfNode(release, parentNode, releaseIdPath, event)}
                         >
                             {
                                 release.otherReleaseVersions
@@ -153,7 +162,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                     </td>
                     <td style={{ width: '5%' }} className='align-middle text-center'>
                         <Tooltip text={t('Load default child releases')}>
-                            <ImSpinner11 size={19} className='cursor-pointer' onClick={() => loadDefaultNetwork(release)} />
+                            <ImSpinner11 size={19} className='cursor-pointer' onClick={() => void loadDefaultNetwork(release)} />
                         </Tooltip>
                     </td>
                     <td className='align-middle'>
@@ -214,7 +223,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         addReleaseMode.current = ADD_RELEASE_MODES.ROOT
     }
 
-    const removeNode = (parentNode: ReleaseNode, removedRelease: ReleaseNode) => {
+    const removeNode = (parentNode: ReleaseNode | undefined, removedRelease: ReleaseNode) => {
         nodeRefToRemove.current = {
             removedNode: removedRelease,
             parentNode: parentNode,
@@ -223,16 +232,30 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
     }
 
     const loadDefaultNetwork = async (releaseNode: ReleaseNode) => {
+        if (network === undefined) return
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         const response = await ApiUtils.GET(`releases/${releaseNode.releaseId}/releases?transitive=true`, session.user.access_token)
-        const data = await response.json() as Embedded<ReleaseLink, 'sw360:releaseLinks'>
-        const defaultNetwork = (data._embedded) ? convertReleaseLinksToReleaseNodes(data._embedded['sw360:releaseLinks']) : []
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        if (response.status !== HttpStatus.OK) {
+            MessageService.error(t('Error while processing'))
+            return
+        }
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        const data = await response.json() as EmbeddedReleaseLinks | EmptyEmbeddedResponse
+        const defaultNetwork = (data._embedded !== undefined) ? convertReleaseLinksToReleaseNodes(data._embedded['sw360:releaseLinks']) : []
         releaseNode.releaseLink = defaultNetwork
         setNetwork([...network])
         showMessage('success')
     }
 
-    const convertReleaseLinksToReleaseNodes = (releaseLinks: Array<ReleaseLink>): Array<ReleaseNode> => {
+    const convertReleaseLinksToReleaseNodes = (releaseLinks: Array<ReleaseLink> | undefined): Array<ReleaseNode> => {
         if (releaseLinks === undefined)
             return []
         return releaseLinks.map((rel: ReleaseLink): ReleaseNode => {
@@ -251,8 +274,20 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     const fetchNetwork = useCallback(async () => {
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         const response = await ApiUtils.GET(`projects/network/${projectId}/linkedReleases`, session.user.access_token)
-        const data = await response.json()
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        if (response.status !== HttpStatus.OK) {
+            MessageService.error(t('Error while processing'))
+            return
+        }
+        const data = await response.json() as Array<ReleaseNode>
         setNetwork(data)
     }, [projectId])
 
@@ -260,6 +295,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const releasesDuplicateInSameLevel = []
         const releaseNodes: Array<ReleaseNode> = []
         for (const rel of validSelectedReleases) {
+            if (rel.id === undefined) continue
             if (!releasesInSameLevel.includes(rel.id)) {
                 const newNode: ReleaseNode = {
                     releaseId: rel.id,
@@ -309,6 +345,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
     }
 
     const confirmToDelete = () => {
+        if (network === undefined) return
         if (nodeRefToRemove.current === undefined) {
             closeConfirmDeleteModal()
             return
@@ -330,16 +367,19 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
     }
 
     const changeMainlineState = (release: ReleaseNode, event: React.ChangeEvent<HTMLSelectElement>) => {
+        if (network === undefined) return
         release.mainlineState = event.target.value
         setNetwork([...network])
     }
 
     const changeReleaseRelationship = (release: ReleaseNode, event: React.ChangeEvent<HTMLSelectElement>) => {
+        if (network === undefined) return
         release.releaseRelationship = event.target.value
         setNetwork([...network])
     }
 
     const changeComment = (release: ReleaseNode, event: React.ChangeEvent<HTMLInputElement>) => {
+        if (network === undefined) return
         release.comment = event.target.value
         setNetwork([...network])
     }
@@ -349,7 +389,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         - If changed version has cyclic link with parent and child releases => show warning message + not allow to change
         - If changed version already exists at the same level =>  show warning message + not allow to change
     */
-    const updateReleaseOfNode = async (release: ReleaseNode, parentNode: ReleaseNode, releaseIdPath: Array<string>, event: React.ChangeEvent<HTMLSelectElement>) => {
+    const updateReleaseOfNode = async (release: ReleaseNode, parentNode: ReleaseNode | undefined, releaseIdPath: Array<string>, event: React.ChangeEvent<HTMLSelectElement>) => {
+        if (network === undefined) return
         closeMessage()
         const selectedReleaseId = event.target.value
         const selectedIndex = event.target.selectedIndex
@@ -403,10 +444,23 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     // Fetch other versions of release when clicking on select version box
     const fetchOtherVersionsOfRelease = async (release: ReleaseNode) => {
-        if (!release.otherReleaseVersions === undefined) return
+        if (network === undefined) return
+        if (!(release.otherReleaseVersions === undefined)) return
 
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         const response = await ApiUtils.GET(`components/${release.componentId}/releases`, session.user.access_token)
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        if (response.status !== HttpStatus.OK) {
+            MessageService.error(t('Error while processing'))
+            return
+        }
         const releases = await response.json() as Embedded<ReleaseLink, 'sw360:releaseLinks'>
 
         const otherVersions = Object.values(releases._embedded['sw360:releaseLinks']).map(rel => {
@@ -423,17 +477,31 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     const compareWithDefault = async () => {
         if (network === undefined) return
-
-        compareSpinner.current.style.display = 'inline-block'
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+
+        if (compareSpinner.current !== null) {
+            compareSpinner.current.style.display = 'inline-block'
+        }
+
         const response = await ApiUtils.POST('projects/network/compareDefaultNetwork', network, session.user.access_token)
         const comparedNetwork = await response.json() as Array<ReleaseNode>
         setNetwork(comparedNetwork)
-        compareSpinner.current.style.display = 'none'
+
+        if (compareSpinner.current !== null) {
+            compareSpinner.current.style.display = 'none'
+        }
     }
 
     const getCyclicLinks = async (linkedReleases: Array<string>, linkedToReleases: Array<string>, checkingReleaseId: string) => {
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return []
+        }
         const cyclicCheckPayload: CheckCyclicLinkPayload = {
             linkedReleases: linkedReleases,
             linkedToReleases: linkedToReleases,
@@ -458,7 +526,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const validSelectedReleases: Array<ReleaseDetail> = []
         const cyclicLinks: Array<string> = []
         for (const release of selectedReleases) {
-            const cyclicLinksOfRelease = await getCyclicLinks([], linkedToReleases.current, release.id)
+            if (release.id === undefined) continue
+            const cyclicLinksOfRelease = await getCyclicLinks([], linkedToReleases.current ?? [], release.id)
             if (cyclicLinksOfRelease.length === 0) {
                 validSelectedReleases.push(release)
             }
@@ -476,11 +545,13 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
             return
         if (addReleaseMode.current === ADD_RELEASE_MODES.ROOT) {
             setDisplayedCyclicLinks([])
-            const newReleaseNodes = createReleaseNodeFromReleaseIds(selectedReleases, network.map(rel => rel.releaseId))
-            setNetwork([...network, ...newReleaseNodes])
+            const newReleaseNodes = createReleaseNodeFromReleaseIds(selectedReleases, (network ?? []).map(rel => rel.releaseId))
+            setNetwork([...(network ?? []), ...newReleaseNodes])
             addReleaseMode.current = undefined
         } else {
+
             getNotCyclicReleaseToLink().then(validSelectedReleases => {
+                if (nodeToAddChildren.current === undefined || network === undefined) return
                 const newReleaseNodes = createReleaseNodeFromReleaseIds(validSelectedReleases, nodeToAddChildren.current.releaseLink.map(rel => rel.releaseId))
                 nodeToAddChildren.current.releaseLink = [...nodeToAddChildren.current.releaseLink, ...newReleaseNodes]
                 setNetwork([...network])
@@ -501,7 +572,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
             setNetwork([])
             return
         }
-        fetchNetwork()
+        fetchNetwork().catch(err => console.error(err))
     }, [projectId])
 
     useEffect(() => {
@@ -518,7 +589,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                     {t('Linked Releases')}
                     <hr className='my-2 mb-2' />
                 </h6>
-                <Button variant='outline-success' className='float-start' onClick={compareWithDefault}>
+                <Button variant='outline-success' className='float-start' onClick={() => void compareWithDefault()}>
                     {t('Compare with default network')} {' '}
                     <Spinner ref={compareSpinner} className='spinner' size='sm' style={{ display: 'none' }} />
                 </Button>
@@ -583,7 +654,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                                 {t('Do you really want to remove the link to release')}
                                 {' '}
                                 <b>
-                                    {`${nodeRefToRemove.current?.removedNode.releaseName} (${nodeRefToRemove.current?.removedNode.releaseVersion})`}
+                                    {`${nodeRefToRemove.current.removedNode.releaseName} (${nodeRefToRemove.current.removedNode.releaseVersion})`}
                                 </b> ?
                             </p>
                         }

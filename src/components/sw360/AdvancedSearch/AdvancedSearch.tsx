@@ -37,7 +37,7 @@ interface SearchParams {
     [k: string]: string
 }
 
-function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
+function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
     const params = Object.fromEntries(useSearchParams())
@@ -47,7 +47,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
     const handleSearchParam = (event: React.ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         setSearchParam((prev: SearchParams) => ({
             ...prev,
-            [event.target?.name]: event.target.value,
+            [event.target.name]: event.target.value,
         }))
     }
 
@@ -148,6 +148,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props) {
                         </Form.Select>
                     </Form.Group>
                 )
+            } else {
+                return <></>
             }
         })
     }

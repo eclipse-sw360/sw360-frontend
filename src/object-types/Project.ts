@@ -54,6 +54,7 @@ interface Project {
     projectOwner?: string
     projectManager?: string
     createdBy?: string
+    enableSvm?: boolean
     linkedProjects?: {
         [key: string]: {
             projectRelationship: string

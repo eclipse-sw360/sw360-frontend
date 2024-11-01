@@ -23,7 +23,7 @@ interface CountryData {
     name: string
 }
 
-function SelectCountry(props: Props) {
+function SelectCountry(props: Props): JSX.Element {
     const t = useTranslations('default')
     return (
         <>

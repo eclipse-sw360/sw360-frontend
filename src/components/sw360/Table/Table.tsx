@@ -24,7 +24,7 @@ type MessageFormat = (...args: []) => string
 type Message = string | MessageFormat
 export type Language = { [key: string]: Message | Language }
 
-interface TableProps extends Partial<Config> {
+export interface TableProps extends Partial<Config> {
     selector?: boolean
     language?: Language
 }
@@ -52,7 +52,7 @@ const createTableProps = (tableProps: TableProps) => {
 class Table extends Component<TableProps, unknown> {
     private wrapper: RefObject<HTMLDivElement> = createRef()
     // Grid.js instance
-    private readonly instance: Grid = null
+    private readonly instance: Grid | null = null
     private tableProps: TableProps = {}
 
     constructor(props: TableProps) {
@@ -62,11 +62,12 @@ class Table extends Component<TableProps, unknown> {
         this.instance = new Grid(this.tableProps)
     }
 
-    getInstance(): Grid {
+    getInstance(): Grid | null {
         return this.instance
     }
 
     componentDidMount(): void {
+        if (this.wrapper.current === null || this.instance === null) return
         if (this.wrapper.current.childNodes.length > 0) {
             this.wrapper.current.innerHTML = ''
         }
@@ -74,13 +75,16 @@ class Table extends Component<TableProps, unknown> {
     }
 
     componentDidUpdate(): void {
+        if (this.instance === null) return
         this.instance.config.plugin.remove('pagination')
         this.instance.config.plugin.remove('search')
         this.tableProps = createTableProps(this.props)
         this.instance.updateConfig(this.tableProps).forceRender()
     }
 
-    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+        if (this.instance === null) return
+
         this.instance.config.plugin.remove('pagination')
         const pageSize = parseInt(event.target.value, 10)
         this.instance
@@ -101,7 +105,7 @@ class Table extends Component<TableProps, unknown> {
     render(): React.ReactElement {
         return (
             <>
-                {this.props.selector && (
+                {(this.props.selector === true) && (
                     <div className='col-11 mt-3 mb-3'>
                         <div className='dataTables_length'>
                             <span className='my-2'>Show</span>

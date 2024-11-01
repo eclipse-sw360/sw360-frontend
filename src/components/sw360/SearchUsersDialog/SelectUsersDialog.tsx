@@ -10,7 +10,7 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useState, useRef } from 'react'
 import { Button, Modal } from 'react-bootstrap'
@@ -18,6 +18,7 @@ import { Button, Modal } from 'react-bootstrap'
 import { HttpStatus, User, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import UsersTable from './UsersTable'
+import MessageService from '@/services/message.service'
 
 interface Props {
     show: boolean
@@ -27,9 +28,13 @@ interface Props {
     multiple: boolean
 }
 
-const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, multiple = false}: Props) => {
+type EmbeddedUsers = Embedded<User, 'sw360:users'>
+
+type RowData = (string | User)[]
+
+const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, multiple = false}: Props) : JSX.Element => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState([])
+    const [tableData, setTableData] = useState<Array<RowData>>([])
     const [selectingUsers, setSelectingUsers] = useState({})
     const searchText = useRef<string>('')
 
@@ -41,22 +46,27 @@ const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, mul
     const searchUsers= async () => {
         const session = await getSession()
         const queryUrl = CommonUtils.createUrlWithParams(`users`, { email: searchText.current })
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         const response = await ApiUtils.GET(queryUrl, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {
-            return signOut()
+            MessageService.error(t('Session has expired'))
+            return
         }
 
-        const users: Embedded<User, 'sw360:users'> = await response.json()
+        const users = await response.json() as EmbeddedUsers
         if (
             !CommonUtils.isNullOrUndefined(users['_embedded']) &&
             !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])
         ) {
             const data = users['_embedded']['sw360:users'].map((user: User) => [
                 user,
-                user.givenName,
-                user.lastName,
+                user.givenName ?? '',
+                user.lastName ?? '',
                 user.email,
-                user.department,
+                user.department ?? '',
             ])
             setTableData(data)
         }
@@ -89,7 +99,7 @@ const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, mul
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <button type='button' className='btn btn-secondary me-2' onClick={searchUsers}>
+                        <button type='button' className='btn btn-secondary me-2' onClick={() => void searchUsers()}>
                             {t('Search')}
                         </button>
                         <button type='button' className='btn btn-secondary me-2' onClick={resetSelection}>

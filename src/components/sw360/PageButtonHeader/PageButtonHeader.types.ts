@@ -11,10 +11,17 @@ import { ReactNode } from 'react'
 
 export interface PageButtonHeaderProps {
     title?: string
-    buttons?: { [key: string]: { [key: string]: any } }
+    buttons?: { [key: string]: ButtonProps }
     children?: ReactNode
     checked?: boolean
     changesLogTab?: string
     changeLogIndex?: number
     setChangesLogTab?: (key: string) => void
+}
+
+interface ButtonProps {
+    link: string
+    name: string
+    type: string
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void
 }

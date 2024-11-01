@@ -17,22 +17,22 @@ import { Form } from 'react-bootstrap'
 import { LicenseDetail } from '@/object-types'
 import { _ } from 'next-sw360'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 interface Props {
-    licenseDatas?: any[]
-    setLicenses?: (licenses: { [k: string]: string }) => void
-    selectedLicenses?: { [k: string]: string }
+    licenseDatas: Array<(LicenseDetail | string)[]>
+    setLicenses: (licenses: { [k: string]: string }) => void
+    selectedLicenses: { [k: string]: string }
 }
 
-const LicensesTable = ({ licenseDatas, setLicenses, selectedLicenses }: Props) => {
+const LicensesTable = ({ licenseDatas, setLicenses, selectedLicenses }: Props): JSX.Element => {
 
     const handleCheckbox = (item: LicenseDetail) => {
         const copiedLicenses = { ...selectedLicenses }
-        const licenseId = item._links.self.href.split('/').at(-1) 
+        const licenseId = item._links?.self.href.split('/').at(-1) 
+        if (licenseId === undefined) return
         if (Object.keys(copiedLicenses).includes(licenseId)) {
             delete copiedLicenses[licenseId]
         } else {
-            copiedLicenses[licenseId] = item.fullName
+            copiedLicenses[licenseId] = item.fullName ?? ''
         }
         setLicenses(copiedLicenses)
     }
@@ -46,7 +46,7 @@ const LicensesTable = ({ licenseDatas, setLicenses, selectedLicenses }: Props) =
                     <Form.Check
                         name='licenseId'
                         type='checkbox'
-                        defaultChecked={Object.keys(selectedLicenses).includes(item._links.self.href.split('/').at(-1))}
+                        defaultChecked={Object.keys(selectedLicenses).includes(item._links?.self.href.split('/').at(-1) ?? '')}
                         onClick={() => {
                             handleCheckbox(item)
                         }}

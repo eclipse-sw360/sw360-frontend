@@ -23,7 +23,7 @@ interface Props {
     setShowToast: React.Dispatch<SetStateAction<ToastData>>
 }
 
-const ToastMessage = ({ show, type, message, contextual, onClose, setShowToast }: Props) => {
+const ToastMessage = ({ show, type, message, contextual, onClose, setShowToast }: Props): JSX.Element => {
     const handleClose = () => {
         setShowToast({
             show: false,
