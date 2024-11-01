@@ -23,7 +23,9 @@ interface Props {
     setObligations: (obligationsLink: Array<Obligation>) => void
 }
 
-type RowData = Array<string | Obligation | { index: number, checked: boolean, obligation: string | Obligation }>
+type RadioButtonProp = { index: string, checked: boolean, obligation: string | Obligation }
+
+type RowData = Array<string | Obligation | RadioButtonProp>
 
 const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) => {
     const [data, setData] = useState<Array<RowData>>([])
@@ -31,61 +33,61 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
     const t = useTranslations('default')
 
     useEffect(() => {
-        const mapperData = Object.entries(obligations).map((item, index) => [
-            item[1][0],
+        const mapperData = Object.entries(obligations).map(([index, item]) => [
+            item[0],
             {
                 index: index,
                 checked: false,
-                obligation: item[1][0],
+                obligation: item[0],
             },
-            item[1][2],
-            item[1][3],
-            item[1][4],
+            item[2],
+            item[3],
+            item[4],
         ])
         setData(mapperData)
     }, [obligations])
 
-    const handlerRadioButton = (index: number, checked: boolean) => {
-        const newData = Object.entries(data).map(([i, rowData]: any) => {
-            if (i == index) {
+    const handlerRadioButton = (index: string, checked: boolean) => {
+        const newData = Object.entries(data).map(([i, rowData]) => {
+            if (i === index) {
                 rowData[1] = {
-                    ...rowData[1],
+                    ...rowData[1] as RadioButtonProp,
                     checked: !checked,
-                }
+                } as RadioButtonProp
             }
             return rowData
         })
         setData(newData)
 
         const linkObligation: Obligation[] = []
-        Object.entries(data).forEach((item: any) => {
-            if (item[1][1].checked === true) {
-                linkObligation.push(item[1][0])
+        Object.entries(data).forEach((item: [string, RowData]) => {
+            if ((item[1][1] as RadioButtonProp).checked === true) {
+                linkObligation.push(item[1][0] as Obligation)
             }
         })
         setObligations(linkObligation)
     }
 
     const handleCheckAll = () => {
-        const newData = Object.entries(data).map(([, rowData]: any) => {
+        const newData = Object.values(data).map(rowData => {
             rowData[1] = {
-                ...rowData[1],
+                ...rowData[1] as RadioButtonProp,
                 checked: !isCheckAll,
-            }
+            } as RadioButtonProp
             return rowData
         })
         setData(newData)
         setIsCheckAll((prev) => !prev)
         const linkObligation: Obligation[] = []
-        Object.entries(data).forEach((item: any) => {
-            if (item[1][1].checked === true) {
-                linkObligation.push(item[1][0])
+        Object.entries(data).forEach((item: [string, RowData]) => {
+            if ((item[1][1] as RadioButtonProp).checked === true) {
+                linkObligation.push(item[1][0] as Obligation)
             }
         })
         setObligations(linkObligation)
     }
 
-    const buildAttachmentDetail = (item: any) => {
+    const buildAttachmentDetail = (item: Obligation) => {
         return (event: React.MouseEvent<HTMLElement>) => {
             if ((event.target as HTMLElement).className == styles.expand) {
                 ;(event.target as HTMLElement).className = styles.collapse
@@ -93,10 +95,10 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
                 ;(event.target as HTMLElement).className = styles.expand
             }
 
-            const attachmentDetail = document.getElementById(item.title)
+            const attachmentDetail = document.getElementById(item.title ?? '')
             if (!attachmentDetail) {
                 const parent = (event.target as HTMLElement).parentElement?.parentElement?.parentElement
-                const html = `<td colspan="10">
+                const html = `<td colspan="4">
                     <table class="table table-borderless">
                         <tbody>
                             <tr>
@@ -106,7 +108,7 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
                     </table>
                 </td>`
                 const tr = document.createElement('tr')
-                tr.id = item.title
+                tr.id = item.title ?? ''
                 tr.innerHTML = html
 
                 parent?.parentNode?.insertBefore(tr, parent.nextSibling)
@@ -136,7 +138,7 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
                     onClick={handleCheckAll}
                 ></input>
             ),
-            formatter: ({ checked, index }: any) =>
+            formatter: ({ checked, index }: { checked: boolean, index: string}) =>
                 _(
                     <input
                         className='checkbox-control'

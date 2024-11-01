@@ -14,23 +14,25 @@ import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { HttpStatus, LicenseDetail } from '@/object-types'
+import { Embedded, HttpStatus, LicenseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
-import { notFound } from 'next/navigation'
+import { getSession } from 'next-auth/react'
 import LicensesTable from './LicensesTable'
+import MessageService from '@/services/message.service'
 
 interface Props {
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
-    selectLicenses?: (licenses: { [k: string]: string }) => void
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
+    selectLicenses: (licenses: { [k: string]: string }) => void
     releaseLicenses: { [k: string]: string }
 }
 
-const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Props) => {
+type EmbeddedLicenses = Embedded<LicenseDetail, 'sw360:licenses'>
+
+const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [selectedLicenses, setSelectedLicenses] = useState<{ [k: string]: string }>(releaseLicenses)
-    const [licenseDatas, setLicenseDatas] = useState([])
+    const [licenseDatas, setLicenseDatas] = useState<Array<(LicenseDetail | string)[]>>([])
 
     const searchText = useRef<string>('')
 
@@ -40,14 +42,20 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
 
     const searchLicenses = async () => {
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
         const queryUrl = CommonUtils.createUrlWithParams(`licenses`, {})
         const response = await ApiUtils.GET(queryUrl, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {
-            return signOut()
+            MessageService.error(t('Session has expired'))
+            return
         } else if (response.status !== HttpStatus.OK) {
-            return notFound()
+            MessageService.error(t('Error while processing'))
+            return
         }
-        const licenses = await response.json()
+        const licenses = await response.json() as EmbeddedLicenses
         if (typeof licenses == 'undefined') {
             setLicenseDatas([])
             return
@@ -56,7 +64,7 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
             !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
             !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
         ) {
-            const data = licenses['_embedded']['sw360:licenses'].map((item: LicenseDetail) => [item, item.fullName])
+            const data = licenses['_embedded']['sw360:licenses'].map((item: LicenseDetail) => [item, item.fullName ?? ''])
             setLicenseDatas(data)
         }
     }
@@ -87,7 +95,7 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                             <button
                                 type='button'
                                 className={`fw-bold btn btn-light button-plain me-2`}
-                                onClick={searchLicenses}
+                                onClick={() => void searchLicenses()}
                             >
                                 {t('Search')}
                             </button>

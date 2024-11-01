@@ -7,6 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 'use client'
 
 import { signOut } from 'next-auth/react'
@@ -17,19 +18,17 @@ import { Image, NavDropdown } from 'react-bootstrap'
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 import { useLocalStorage } from '@/hooks'
 
-function ProfileDropdown() {
+function ProfileDropdown() : JSX.Element {
     const t = useTranslations('default')
-    const [profileImage, setProfileImage] = useState(sw360ProfileIcon.src)
-    const [useGravatar] = useLocalStorage('useGravatar', false)
-    const [gravatarImage] = useLocalStorage('gravatarImage', null)
+    const [profileImage, setProfileImage] = useState<string>(sw360ProfileIcon.src as string)
+    const [useGravatar] = useLocalStorage<boolean>('useGravatar', false)
+    const [gravatarImage] = useLocalStorage<string | null>('gravatarImage', null)
 
     useEffect(() => {
         if (useGravatar) {
-            if (gravatarImage) {
-                setProfileImage(gravatarImage ? gravatarImage : sw360ProfileIcon.src)
-            }
+            setProfileImage((gravatarImage !== null) ? gravatarImage : sw360ProfileIcon?.src as string)
         } else {
-            setProfileImage(sw360ProfileIcon.src)
+            setProfileImage(sw360ProfileIcon?.src as string)
         }
     }, [gravatarImage, useGravatar])
 
@@ -42,7 +41,7 @@ function ProfileDropdown() {
         >
             <NavDropdown.Item href='/preferences'>{t('Preferences')}</NavDropdown.Item>
             <NavDropdown.Divider />
-            <NavDropdown.Item href='' onClick={() => signOut({ callbackUrl: '/' })}>
+            <NavDropdown.Item href='' onClick={() => void signOut({ callbackUrl: '/' })}>
                 {t('Logout')}
             </NavDropdown.Item>
         </NavDropdown>

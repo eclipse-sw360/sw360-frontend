@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react'
 import { Nav } from 'react-bootstrap'
 import { BsSun, BsSunFill } from 'react-icons/bs'
 
-function ThemeSwitcher() {
+function ThemeSwitcher() : JSX.Element {
     const [userTheme, setUserTheme] = useState('')
     function setTheme(theme: string) {
         setUserTheme(theme)

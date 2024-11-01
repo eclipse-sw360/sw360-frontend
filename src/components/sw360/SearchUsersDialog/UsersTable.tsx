@@ -14,22 +14,24 @@ import React, { useEffect, useRef } from 'react'
 import { Form } from 'react-bootstrap'
 import { _ } from 'next-sw360'
 import { User } from '@/object-types'
-import Table from '../Table/Table'
+import Table, { TableProps } from '../Table/Table'
+
+type RowData = (string | User)[]
 
 interface Props {
-    tableData: any[]
+    tableData: RowData[]
     setSelectingUsers: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     selectingUsers: { [k: string]: string }
     multiple: boolean
 }
 
-const compare = (preState: any, nextState: any) => {
-    return Object.entries(preState.data).sort().toString() === Object.entries(nextState.data).sort().toString()
+const compare = (preState: TableProps, nextState: TableProps) => {
+    return Object.entries(preState.data ?? {}).sort().toString() === Object.entries(nextState.data ?? {}).sort().toString()
 }
 
 const MemoTable = React.memo(Table, compare) 
 
-const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: Props) => {
+const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: Props): JSX.Element => {
     const selectedUsersInTable = useRef<{ [k: string]: string }>({})
 
     const handleSelectUser = (user: User) => {
@@ -39,12 +41,12 @@ const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: 
             if (Object.keys(copiedSelectingUsers).includes(userEmail)) {
                 delete copiedSelectingUsers[userEmail]
             } else {
-                copiedSelectingUsers[userEmail] = user.fullName
+                copiedSelectingUsers[userEmail] = user.fullName ?? ''
             }
             selectedUsersInTable.current = copiedSelectingUsers
             setSelectingUsers(selectedUsersInTable.current)
         } else {
-            selectedUsersInTable.current = { [userEmail]: user.fullName }
+            selectedUsersInTable.current = { [userEmail]: user.fullName ?? '' }
             setSelectingUsers(selectedUsersInTable.current)
         }
     }

@@ -21,13 +21,13 @@ interface Option {
     flag: string
 }
 
-function LocaleSwitcher() {
+function LocaleSwitcher(): JSX.Element {
     const [, startTransition] = useTransition()
     const router = useRouter()
     const locale = useLocale()
     const pathname = usePathname()
 
-    const [, setSelectedOption] = React.useState<Option | null>(null)
+    const [, setSelectedOption] = React.useState<Option | undefined>(undefined)
 
     function getCurrentFlag() {
         const current = LOCALES.find((cur) => cur.i18n === locale)
@@ -38,10 +38,12 @@ function LocaleSwitcher() {
         const langName = new Intl.DisplayNames([locale], { type: 'language' })
         return langName.of(lang)
     }
-    const handleSelect = (selectedId: string) => {
+
+    const handleSelect = (selectedId: string | null) => {
+        if (selectedId === null) return
         const option = LOCALES.find((option) => option.i18n === selectedId)
-        const nextLocale = option.i18n
-        setSelectedOption(option || null)
+        const nextLocale = option?.i18n
+        setSelectedOption(option || undefined)
 
         startTransition(() => {
             router.replace(pathname, { locale: nextLocale })

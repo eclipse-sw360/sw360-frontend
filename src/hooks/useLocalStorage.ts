@@ -9,10 +9,10 @@
 
 import { useEffect, useState } from 'react'
 
-function useLocalStorage(key: string, initialValue: any) {
-    const [storedValue, setStoredValue] = useState(null)
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
+    const [storedValue, setStoredValue] = useState<T>(initialValue)
 
-    const setValue = (value: any) => {
+    const setValue = (value: T | ((val: T) => T)) => {
         try {
             const valueToStore = value instanceof Function ? value(storedValue) : value
             setStoredValue(valueToStore)
@@ -24,10 +24,11 @@ function useLocalStorage(key: string, initialValue: any) {
 
     useEffect(() => {
         const item = window.localStorage.getItem(key)
-        setStoredValue(item ? JSON.parse(item) : initialValue)
+        setStoredValue((item !== null) ? JSON.parse(item) as T : initialValue)
 
         const handleStorageChange = () => {
-            setStoredValue(JSON.parse(window.localStorage.getItem(key) || 'null'))
+            const currentItem = window.localStorage.getItem(key)
+            setStoredValue(currentItem !== null ? JSON.parse(currentItem) as T : initialValue)
         }
 
         window.addEventListener('storage', handleStorageChange)

@@ -11,15 +11,16 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { notFound, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { HttpStatus, Vendor, VendorType } from '@/object-types'
+import { Embedded, HttpStatus, Vendor, VendorType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import SelectTableVendor from './SelectTableVendor'
 import AddVendorDialog from './AddVendor'
+import MessageService from '@/services/message.service'
 
 interface Props {
     show: boolean
@@ -27,14 +28,17 @@ interface Props {
     selectVendor: VendorType
 }
 
-const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
+type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
+
+type RowData = (string | Vendor)[]
+
+const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const [ showAddVendor, setShowAddVendor ] = useState(false)
+    const [ showAddVendor, setShowAddVendor] = useState(false)
     const params = useSearchParams()
-    const [data, setData] = useState()
-    const [vendor, setVendor] = useState<Vendor>()
-    const [vendors, setVendors] = useState([])
+    const [data, setData] = useState<RowData[]>([])
+    const [vendor, setVendor] = useState<Vendor | undefined>(undefined)
+    const [vendors, setVendors] = useState<RowData[]>([])
     const handleCloseDialog = () => {
         setShow(!show)
     }
@@ -47,25 +51,31 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
                 const queryUrl = CommonUtils.createUrlWithParams(`vendors`, Object.fromEntries(params))
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) {
+                    MessageService.error(t('Session has expired'))
+                    return
+                }
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
+                    MessageService.error(t('Session has expired'))
+                    return
                 } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                    return
                 }
-                const vendors = await response.json()
+                const vendors = await response.json() as EmbeddedVendors
                 if (
                     !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
                 ) {
                     const data = vendors['_embedded']['sw360:vendors'].map((item: Vendor) => [
                         item,
-                        item.fullName,
-                        item.shortName,
-                        item.url,
+                        item.fullName ?? '',
+                        item.shortName ?? '',
+                        item.url ?? '',
                         '',
                     ])
                     setData(data)
@@ -75,9 +85,10 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) => {
             }
         })()
         return () => controller.abort()
-    }, [params, session])
+    }, [params])
 
     const handleClickSelectVendor = () => {
+        if (vendor === undefined) return
         selectVendor(vendor)
         setShow(!show)
     }

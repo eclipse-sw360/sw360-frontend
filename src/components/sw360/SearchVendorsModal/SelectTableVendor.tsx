@@ -17,14 +17,16 @@ import { Vendor, VendorType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 
+type RowData = (string | Vendor)[]
+
 interface Props {
-    vendors: any[]
+    vendors: RowData[]
     setVendor: VendorType
 }
 
 const SelectTableVendor = ({ vendors, setVendor }: Props) => {
     const handlerRadioButton = (item: Vendor) => {
-        const vendorId: string = CommonUtils.getIdFromUrl(item._links.self.href)
+        const vendorId: string = CommonUtils.getIdFromUrl(item._links?.self.href)
         const vendorResponse: Vendor = {
             id: vendorId,
             fullName: item.fullName,
@@ -36,7 +38,7 @@ const SelectTableVendor = ({ vendors, setVendor }: Props) => {
         {
             id: 'vendorId',
             name: '',
-            formatter: (item: any) =>
+            formatter: (item: Vendor) =>
                 _(<Form.Check type='radio' name='VendorId' onChange={() => handlerRadioButton(item)}></Form.Check>),
         },
         {

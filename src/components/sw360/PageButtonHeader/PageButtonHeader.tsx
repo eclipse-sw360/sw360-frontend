@@ -7,6 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 'use client'
 
 import Link from 'next/link'
@@ -23,7 +24,7 @@ function PageButtonHeader({
     changesLogTab,
     changeLogIndex,
     setChangesLogTab,
-}: PageButtonHeaderProps) {
+}: PageButtonHeaderProps) : JSX.Element {
     let buttonList: JSX.Element[] = []
     if (buttons) {
         buttonList = Object.entries(buttons).map(([key, value]) => {
@@ -37,7 +38,7 @@ function PageButtonHeader({
                         style={{ marginRight: '10px' }}
                         onClick={value.onClick}
                     >
-                        {value?.name}
+                        {value.name}
                     </button>
                 </Link>
             )
@@ -55,7 +56,7 @@ function PageButtonHeader({
                     </div>
                 </div>
             </div>
-            {title && (
+            {(title !== undefined) && (
                 <div className={`col text-truncate ${styles['buttonheader-title']}`}>
                     <div>
                         {title}
@@ -75,7 +76,7 @@ function PageButtonHeader({
                     </div>
                 </div>
             )}
-            {changesLogTab && (
+            {(changesLogTab !== undefined) && (
                 <div className={`list-group-companion ${styles['div-changelog']}`}>
                     <div
                         className='nav nav-pills justify-content-center bg-light font-weight-bold'
@@ -86,7 +87,7 @@ function PageButtonHeader({
                         <div>
                             <a
                                 className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''} ${styles['a-changelog']}`}
-                                onClick={() => setChangesLogTab('list-change')}
+                                onClick={() => (setChangesLogTab !== undefined) && setChangesLogTab('list-change')}
                                
                             >
                                 {t('Change Log')}
@@ -96,7 +97,7 @@ function PageButtonHeader({
                             <a
                                 className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''} ${styles['a-changes']}`}
                                 onClick={() => {
-                                    changeLogIndex !== -1 && setChangesLogTab('view-log')
+                                    changeLogIndex !== -1 && (setChangesLogTab !== undefined) && setChangesLogTab('view-log')
                                 }}
                             >
                                 {t('Changes')}

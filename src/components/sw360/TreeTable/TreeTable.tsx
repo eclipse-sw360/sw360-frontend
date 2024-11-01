@@ -9,6 +9,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -64,15 +69,15 @@ interface TreeTableProps {
     sort?: boolean
 }
 
-const TreeTable = ({ data, setData, columns, onExpand, search, language, selector, sort }: TreeTableProps) => {
-    const [tabledata, setTableData] = useState([])
+const TreeTable = ({ data, setData, columns, onExpand, search, language, selector, sort }: TreeTableProps): JSX.Element => {
+    const [tabledata, setTableData] = useState<any[]>([])
     useEffect(() => {
-        const newData: any = []
+        console.log(data)
+        const newData: any[] = []
         data.forEach((item: NodeData) => {
             manipulateData(item, 0, newData)
         })
         setTableData(newData)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
     const expandRow = (item: NodeData) => {
@@ -118,13 +123,13 @@ const TreeTable = ({ data, setData, columns, onExpand, search, language, selecto
         return parsedRowData
     }
 
-    const manipulateData = (item: NodeData, level = 0, newData: any = []) => {
-        if (item.children.length > 0 || item.isExpandable) {
-            const isExpanded: boolean = item.isExpanded
+    const manipulateData = (item: NodeData, level = 0, newData: any[] = []) => {
+        if ((item.children !== undefined && item.children.length > 0) || item.isExpandable === true) {
+            const isExpanded: boolean = item.isExpanded === true
             newData.push(parseRowData(item, isExpanded, true, level))
             if (isExpanded) {
                 level += 1
-                item.children.forEach((childItem: NodeData) => manipulateData(childItem, level, newData))
+                item.children?.forEach((childItem: NodeData) => manipulateData(childItem, level, newData))
             }
         } else {
             newData.push(parseRowData(item, false, false, level))

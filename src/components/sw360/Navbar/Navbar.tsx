@@ -19,14 +19,15 @@ import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-boo
 import sw360logo from '@/assets/images/sw360-logo.svg'
 import { NavList } from '@/object-types'
 import { LocaleSwitcher, ProfileDropdown } from 'next-sw360'
+import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
-function Navbar() {
+function Navbar(): JSX.Element {
     const router = useRouter()
 
     const { data: session, status } = useSession()
     const [show, setShow] = useState(false)
     const selectedLayoutSegment = useSelectedLayoutSegment()
-    const pathname = selectedLayoutSegment ? `/${selectedLayoutSegment}` : '/'
+    const pathname = (selectedLayoutSegment !== null) ? `/${selectedLayoutSegment}` : '/'
 
     const navlist = NavList()
 
@@ -64,7 +65,7 @@ function Navbar() {
                                 }
                             }}
                         >
-                            {item.childs.map((child) => (
+                            {item.childs?.map((child) => (
                                 <NavDropdown.Item href={child.href} key={child.id}>
                                     {child.name}
                                 </NavDropdown.Item>
@@ -87,7 +88,7 @@ function Navbar() {
             <BSNavbar expand='lg' className='bg-body-tertiary'>
                 <Container fluid>
                     <BSNavbar.Brand href='/'>
-                        <Image src={sw360logo} height={57} width={147} alt='SW360 Logo' />
+                        <Image src={sw360logo as StaticImport} height={57} width={147} alt='SW360 Logo' />
                     </BSNavbar.Brand>
                     <BSNavbar.Toggle aria-controls='navbarScroll' />
                     <BSNavbar.Collapse id='navbarScroll'>

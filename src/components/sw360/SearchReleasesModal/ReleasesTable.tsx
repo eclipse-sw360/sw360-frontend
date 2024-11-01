@@ -15,20 +15,21 @@ import { Form } from 'react-bootstrap'
 import { _ } from 'next-sw360'
 import Table from '../Table/Table'
 import { ReleaseDetail } from '@/object-types'
+import { TableProps } from '../Table/Table'
 
 interface Props {
-    tableData: any[],
+    tableData: (string | ReleaseDetail)[][],
     selectingReleaseOnTable: Array<ReleaseDetail>
     setSelectingReleaseOnTable: React.Dispatch<React.SetStateAction<Array<ReleaseDetail>>>
 }
 
-const compare = (preState: any, nextState: any) => {
-    return Object.entries(preState.data).sort().toString() === Object.entries(nextState.data).sort().toString()
+const compare = (preState: TableProps, nextState: TableProps) => {
+    return Object.entries(preState.data ?? {}).sort().toString() === Object.entries(nextState.data ?? {}).sort().toString()
 }
 
 const MemoTable = React.memo(Table, compare)
 
-const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingReleaseOnTable }: Props) => {
+const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingReleaseOnTable }: Props) : JSX.Element => {
     const releases = useRef<Array<ReleaseDetail>>([])
     const noRecordsFoundString = { noRecordsFound: 'No releases found.' }
     const handleSelectRelease = (relDetail: ReleaseDetail) => {

@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 
 const MainlineStates: { [k: string]: string } = {
@@ -37,7 +38,8 @@ const EnumValues: { [k: string]: string } = {
     ...ReleaseRelations,
 }
 
-const EnumValueWithToolTip = ({ value, t }: { value: string, t: any }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const EnumValueWithToolTip = ({ value, t }: { value: string, t: any }) : JSX.Element => {
 
     return (
         <OverlayTrigger

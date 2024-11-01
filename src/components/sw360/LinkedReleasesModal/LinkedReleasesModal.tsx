@@ -7,73 +7,104 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-"use client"
+'use client'
 
-import { HttpStatus, ProjectPayload } from '@/object-types'
+import { Embedded, HttpStatus, ProjectPayload, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { ChangeEvent, useRef, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
 
 interface Props {
-    setLinkedReleaseData: React.Dispatch<React.SetStateAction<Map<string, any>>>
+    setLinkedReleaseData: React.Dispatch<React.SetStateAction<Map<string, ReleaseRelationship>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
     setShow: (show: boolean) => void
 }
 
+type RowData = (string | SummaryReleaseInfo)[]
+
+interface SummaryReleaseInfo {
+    name?: string
+    componentId?: string
+    releaseVersion?: string
+    releaseId?: string
+}
+
+interface ReleaseRelationship {
+    name?: string
+    version?: string
+    releaseRelation?: string
+    mainlineState?: string
+    comment?: string
+}
+
+type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
 export default function LinkedReleasesModal({ setLinkedReleaseData,
                                               projectPayload,
                                               setProjectPayload,
                                               show,
-                                              setShow }: Props) {
+                                              setShow }: Props): JSX.Element {
 
     const t = useTranslations('default')
-    const [releaseData, setReleaseData] = useState<any[] | null>(null)
-    const [linkReleases, setLinkReleases] = useState<Map<string, any>>(new Map())
+    const [releaseData, setReleaseData] = useState<RowData[]>([])
+    const [linkReleases, setLinkReleases] = useState<Map<string, ReleaseRelationship>>(new Map())
     const searchValueRef = useRef<HTMLInputElement>(null)
-    const { data: session, status } = useSession()
     const [loading, setLoading] = useState(false)
+    const isExactMatch = useRef<boolean>(false)
 
-    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<any> => {
+    const handleSearch = async ({ searchValue }: { searchValue: string }) => {
+        const session = await getSession()
         setLoading(true)
         try {
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Session has expired'))
+                setLoading(false)
+                return
+            }
             const queryUrl = CommonUtils.createUrlWithParams('releases', {
                 name: `${searchValue}`,
-                luceneSearch: 'true',
+                luceneSearch: `${isExactMatch.current}`,
                 allDetails: 'true'
             })
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status !== HttpStatus.OK) {
-                return notFound()
+            if (response.status === HttpStatus.UNAUTHORIZED) {
+                MessageService.error(t('Session has expired'))
+                setLoading(false)
+                return
             }
-            const data = await response.json()
+
+            if (response.status !== HttpStatus.OK) {
+                MessageService.error(t('Error while processing'))
+                return
+            }
+            const data = await response.json() as EmbeddedReleases
 
             const tableData =
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
                 CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
                     ? []
-                    : data['_embedded']['sw360:releases'].map((elem: any) => [
-                          elem.id,
-                          elem.vendorName ? elem.vendorName : '',
-                          {
-                            name : elem.name,
-                            componentId : elem['_links']['sw360:component']['href'].split('/').pop()
-                          },
-                          {
-                            releaseVersion : elem.version,
-                            releaseId : elem.id
-                          },
-                          elem.clearingState,
-                          elem.mainlineState
+                    : data['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
+                        release.id ?? '',
+                        (release.vendor) ? (release.vendor.fullName ?? '') : '',
+                        {
+                            name : release.name,
+                            componentId : release['_links']['sw360:component']['href'].split('/').pop() ?? ''
+                        },
+                        {
+                            releaseVersion : release.version,
+                            releaseId : release.id ?? ''
+                        },
+                        release.clearingState,
+                        release.mainlineState ?? 'OPEN'
                       ])
             setReleaseData(tableData)
             setLoading(false)
@@ -82,35 +113,40 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
         }
     }
 
-    const projectPayloadSetter = (projectPayloadData: Map<string, any>) => {
+    const projectPayloadSetter = (projectPayloadData: Map<string, ReleaseRelationship>) => {
         try {
             if (projectPayloadData.size > 0) {
-                projectPayloadData.forEach((value, key) => {
-                    const releaseId = key
-                    const updatedProjectPayload = { ...projectPayload }
+                const updatedProjectPayload = { ...projectPayload }
+                if (updatedProjectPayload.linkedReleases === undefined) {
+                    updatedProjectPayload.linkedReleases = {}
+                }
+                for (const [releaseId, relationship] of projectPayloadData) {
                     updatedProjectPayload.linkedReleases[releaseId] = {
-                        releaseRelation: value.releaseRelation,
-                        mainlineState: value.mainlineState,
-                        comment: ''
+                        releaseRelation: relationship.releaseRelation,
+                        mainlineState: relationship.mainlineState,
+                        comment: relationship.comment
                     }
-                    setProjectPayload(updatedProjectPayload)
-                })
+                }
+                setProjectPayload(updatedProjectPayload)
             }
         } catch (e) {
             console.error(e)
         }
     }
 
-    const extractInterimReleaseData = (releaseId: string) => {
-        const interimReleaseData = []
+    const extractInterimReleaseData = (releaseId: string) : ReleaseRelationship | undefined => {
         for (let i = 0; i < releaseData.length; i++) {
             if (releaseData[i][0] === releaseId) {
-                interimReleaseData.push(releaseData[i][2]['name'],
-                                        releaseData[i][3]['releaseVersion'],
-                                        releaseData[i][5])
-                return interimReleaseData
+                return {
+                    name: (releaseData[i][2] as SummaryReleaseInfo).name ?? '',
+                    version: (releaseData[i][3] as SummaryReleaseInfo).releaseVersion,
+                    mainlineState: releaseData[i][5] as string,
+                    releaseRelation: 'UNKNOWN',
+                    comment: ''
+                }
             }
         }
+        return undefined
     }
 
     const handleCheckboxes = (releaseId: string) => {
@@ -119,15 +155,15 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
             m.delete(releaseId)
         } else {
             const interimData = extractInterimReleaseData(releaseId)
-            m.set(releaseId, {
-                name: interimData[0],
-                version: interimData[1],
-                releaseRelation: 'UNKNOWN',
-                mainlineState: interimData[2],
-                comment: ''
-            })
+            if (interimData === undefined) return
+            m.set(releaseId, interimData)
         }
         setLinkReleases(m)
+    }
+
+    const handleExactMatchChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const isExactMatchSelected = event.target.checked;
+        isExactMatch.current = isExactMatchSelected
     }
 
     const columns = [
@@ -196,123 +232,120 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
         },
     ]
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-    return (
-        <>
-            <Modal
-                size="lg"
-                centered
-                show={show}
-                onHide={() => {
-                    setShow(false)
-                    setReleaseData(null)
-                    setLinkReleases(new Map())
 
-                }}
-                aria-labelledby={t('Link Releases')}
-                scrollable
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title id="linked-projects-modal">
-                        {t('Link Releases')}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Col>
-                            <Row className="mb-3">
-                                <Col xs={6}>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder={`${t('Enter Search Text')}...`}
-                                        name='searchValue'
-                                        ref={searchValueRef}
-                                    />
-                                </Col>
-                                <Col xs='auto'>
-                                    <Button
-                                        type="submit"
-                                        variant="secondary"
-                                        onClick={async () => {
-                                            await handleSearch({ searchValue: searchValueRef.current.value })
+    return (
+        <Modal
+            size='lg'
+            centered
+            show={show}
+            onHide={() => {
+                setShow(false)
+                setReleaseData([])
+                setLinkReleases(new Map())
+                isExactMatch.current = false
+            }}
+            aria-labelledby={t('Link Releases')}
+            scrollable
+        >
+            <Modal.Header closeButton>
+                <Modal.Title id='linked-projects-modal'>
+                    {t('Link Releases')}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Col>
+                        <Row className='mb-3'>
+                            <Col xs={6}>
+                                <Form.Control
+                                    type='text'
+                                    placeholder={`${t('Enter Search Text')}...`}
+                                    name='searchValue'
+                                    ref={searchValueRef}
+                                />
+                            </Col>
+                            <Col xs='auto'>
+                                <Button
+                                    type='submit'
+                                    variant='secondary'
+                                    onClick={() => void handleSearch({ searchValue: searchValueRef.current?.value ?? ''})}
+                                >
+                                    {t('Search')}
+                                </Button>
+                            </Col>
+                            <Col ls='auto'>
+                                <Button type='submit'
+                                        variant='secondary'
+                                >
+                                    {t(`Releases of linked projects`)}
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Form.Group controlId='exact-match-group'>
+                                <Form.Check
+                                        inline
+                                        name='exact-match'
+                                        type='checkbox'
+                                        id='exact-match'
+                                        onChange={handleExactMatchChange}
+                                />
+                                <Form.Label className='pt-2'>
+                                            {t('Exact Match')}{' '}
+                                            <sup>
+                                                <FaInfoCircle />
+                                            </sup>
+                                        </Form.Label>
+                            </Form.Group>
+                        </Row>
+                        <Row>
+                            {
+                                loading === false ? (
+                                    <Table
+                                        columns={columns}
+                                        data={releaseData}
+                                        sort={false} />
+                                ) : (
+                                    <div className='col-12'
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
                                         }}
                                     >
-                                        {t('Search')}
-                                    </Button>
-                                </Col>
-                                <Col ls='auto'>
-                                    <Button type="submit"
-                                            variant="secondary"
-                                    >
-                                        {t(`Releases of linked projects`)}
-                                    </Button>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Form.Group controlId="exact-match-group">
-                                    <Form.Check
-                                            inline
-                                            name="exact-match"
-                                            type="checkbox"
-                                            id="exact-match"
-                                    />
-                                    <Form.Label className='pt-2'>
-                                                {t('Exact Match')}{' '}
-                                                <sup>
-                                                    <FaInfoCircle />
-                                                </sup>
-                                            </Form.Label>
-                                </Form.Group>
-                            </Row>
-                            <Row>
-                                {
-                                    loading == false ? ( releaseData &&
-                                        <Table
-                                            columns={columns}
-                                            data={releaseData}
-                                            sort={false}/>
-                                        ) : (
-                                                <div className='col-12'
-                                                     style={{
-                                                        display: 'flex',
-                                                        justifyContent: 'center',
-                                                        alignItems: 'center'}}
-                                                >
-                                                    <Spinner className='spinner' />
-                                                </div>
-                                        )
-                                }
-                            </Row>
-                        </Col>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="dark"
-                        onClick={() => {
-                            setShow(false)
-                            setReleaseData(null)
-                            setLinkReleases(new Map())
-                        }}
-                    >
-                        {t('Close')}
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            setShow(false)
-                            setLinkedReleaseData((prevLinkReleases) =>
-                                new Map([...prevLinkReleases, ...linkReleases]))
-                            projectPayloadSetter(linkReleases)
-                        }}
-                        disabled={linkReleases.size === 0}
-                    >
-                        {t('Link Releases')}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        </>
-    )}
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )
+                            }
+                        </Row>
+                    </Col>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button
+                    variant='dark'
+                    onClick={() => {
+                        setShow(false)
+                        setReleaseData([])
+                        setLinkReleases(new Map())
+                        isExactMatch.current = false
+                    }}
+                >
+                    {t('Close')}
+                </Button>
+                <Button
+                    variant='primary'
+                    onClick={() => {
+                        setShow(false)
+                        setLinkedReleaseData((prevLinkReleases) =>
+                            new Map([...prevLinkReleases, ...linkReleases]))
+                        projectPayloadSetter(linkReleases)
+                    }}
+                    disabled={linkReleases.size === 0}
+                >
+                    {t('Link Releases')}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    )
 }

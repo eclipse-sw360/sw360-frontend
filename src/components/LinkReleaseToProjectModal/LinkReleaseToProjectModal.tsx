@@ -32,7 +32,7 @@ type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
 const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.Element => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
+    const { status, data: session } = useSession()
     const searchText = useRef('')
     const linkedProjectIds = useRef<Array<string>>([])
 
@@ -177,84 +177,86 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
     ]
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton>
-                <Modal.Title>{t('Link Release to Project')}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body style={{ overflow: 'scroll' }}>
-                <Alert variant='success' show={showMessage}>
-                    {t.rich('The release has been successfully linked to project', {
-                        releaseName: linkingReleaseName,
-                        projectName: selectedProjectName,
-                        strong: (chunks) => <b>{chunks}</b>,
-                    })}
+        <>{(status === 'authenticated') &&
+            <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('Link Release to Project')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ overflow: 'scroll' }}>
+                    <Alert variant='success' show={showMessage}>
+                        {t.rich('The release has been successfully linked to project', {
+                            releaseName: linkingReleaseName,
+                            projectName: selectedProjectName,
+                            strong: (chunks) => <b>{chunks}</b>,
+                        })}
+                        <br />
+                        {t.rich(
+                            'Click here to edit the release relation as well as the project mainline state in the project',
+                            {
+                                link: (chunks) => (
+                                    <a className='link' href={`/projects/detail/${selectedProjectId}`}>
+                                        {chunks}
+                                    </a>
+                                ),
+                            }
+                        )}
+                    </Alert>
+                    <Form>
+                        <Row>
+                            <Col lg='5'>
+                                <Form.Control
+                                    type='text'
+                                    placeholder={`${t('Enter text search')}...`}
+                                    onChange={(e) => {
+                                        searchText.current = e.target.value
+                                    }}
+                                />
+                            </Col>
+                            <Col lg='3'>
+                                <Button variant='secondary' onClick={() => void handleSearchProject()}>
+                                    {t('Search')}
+                                </Button>
+                            </Col>
+                            <Col lg='4'>
+                                <Form.Check
+                                    type='checkbox'
+                                    id='show-linked-project'
+                                    label={t('Show already linked projects')}
+                                    style={{ fontWeight: 'bold' }}
+                                    defaultChecked={withLinkedProject}
+                                    onClick={() => setWithLinkedProject(!withLinkedProject)}
+                                />
+                            </Col>
+                        </Row>
+                    </Form>
                     <br />
-                    {t.rich(
-                        'Click here to edit the release relation as well as the project mainline state in the project',
-                        {
-                            link: (chunks) => (
-                                <a className='link' href={`/projects/detail/${selectedProjectId}`}>
-                                    {chunks}
-                                </a>
-                            ),
-                        }
-                    )}
-                </Alert>
-                <Form>
-                    <Row>
-                        <Col lg='5'>
-                            <Form.Control
-                                type='text'
-                                placeholder={`${t('Enter text search')}...`}
-                                onChange={(e) => {
-                                    searchText.current = e.target.value
-                                }}
-                            />
-                        </Col>
-                        <Col lg='3'>
-                            <Button variant='secondary' onClick={() => void handleSearchProject()}>
-                                {t('Search')}
-                            </Button>
-                        </Col>
-                        <Col lg='4'>
-                            <Form.Check
-                                type='checkbox'
-                                id='show-linked-project'
-                                label={t('Show already linked projects')}
-                                style={{ fontWeight: 'bold' }}
-                                defaultChecked={withLinkedProject}
-                                onClick={() => setWithLinkedProject(!withLinkedProject)}
-                            />
-                        </Col>
-                    </Row>
-                </Form>
-                <br />
-                <ProjectTable data={tableData} columns={columns} />
-            </Modal.Body>
-            <Modal.Footer className='justify-content-end'>
-                {showMessage === true ? (
-                    <Button className='delete-btn' variant='primary' onClick={handleCloseDialog}>
-                        {' '}
-                        {t('Close')}{' '}
-                    </Button>
-                ) : (
-                    <>
-                        <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                    <ProjectTable data={tableData} columns={columns} />
+                </Modal.Body>
+                <Modal.Footer className='justify-content-end'>
+                    {showMessage === true ? (
+                        <Button className='delete-btn' variant='primary' onClick={handleCloseDialog}>
                             {' '}
                             {t('Close')}{' '}
                         </Button>
-                        <Button
-                            className='login-btn'
-                            variant='primary'
-                            onClick={handleLinkToProject}
-                            disabled={selectedProjectId === undefined}
-                        >
-                            {t('Link To Project')}
-                        </Button>
-                    </>
-                )}
-            </Modal.Footer>
-        </Modal>
+                    ) : (
+                        <>
+                            <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                                {' '}
+                                {t('Close')}{' '}
+                            </Button>
+                            <Button
+                                className='login-btn'
+                                variant='primary'
+                                onClick={handleLinkToProject}
+                                disabled={selectedProjectId === undefined}
+                            >
+                                {t('Link To Project')}
+                            </Button>
+                        </>
+                    )}
+                </Modal.Footer>
+            </Modal>
+        }</>
     )
 }
 

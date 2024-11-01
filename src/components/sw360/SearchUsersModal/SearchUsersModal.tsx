@@ -9,7 +9,7 @@
 
 import { useTranslations } from 'next-intl'
 
-function SearchUsersModal() {
+function SearchUsersModal(): JSX.Element {
     const t = useTranslations('default')
     return (
         <>

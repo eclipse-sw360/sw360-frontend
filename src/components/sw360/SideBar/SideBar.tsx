@@ -30,7 +30,7 @@ interface Props {
     eccStatus?: string
 }
 
-const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccStatus }: Props) => {
+const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccStatus }: Props): JSX.Element => {
     const [numberOfCheckedOrUncheckedVulnerabilities, setNumberOfCheckedOrUncheckedVulnerabilities] = useState(0)
     const [numberOfIncorrectVulnerabilities, setNumberOfIncorrectVulnerabilities] = useState(0)
     const t = useTranslations('default')
@@ -98,8 +98,7 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                     onClick={handleSelectTab}
                 >
                     {
-                        // @ts-expect-error: TS2345 invalidate translation even if is valid under
-                        t(tab.name)
+                        t(tab.name as never)
                     }
                 </a>
             )

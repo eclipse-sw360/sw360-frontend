@@ -17,7 +17,10 @@ interface ReleaseNode {
     releaseRelationship: string
     comment: string
     releaseLink: Array<ReleaseNode>
-    otherReleaseVersions?: Array<any>
+    otherReleaseVersions?: Array<{
+        version: string
+        id: string
+    }>
     isDiff?: boolean | undefined
 }
 

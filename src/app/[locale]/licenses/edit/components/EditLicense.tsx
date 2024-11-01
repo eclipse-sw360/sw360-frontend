@@ -159,7 +159,7 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
         if (response.status == HttpStatus.OK) {
             const data = (await response.json()) as LicensePayload
             MessageService.success(t('License updated successfully!'))
-            router.push(`/licenses/detail?id=${data.shortName}&update=success`)
+            router.push(`/licenses/detail?id=${data.shortName}`)
         } else {
             MessageService.error(t('License updated failed!'))
         }

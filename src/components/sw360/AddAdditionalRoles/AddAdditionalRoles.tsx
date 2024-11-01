@@ -28,7 +28,7 @@ function AddAdditionalRoles({
     setDataInputList,
     inputList: propInputList,
     setInputList: propSetInputList,
-}: Props) {
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputListData, setInputListData] = useState<InputKeyValue[]>([])
     useEffect(()=>{
@@ -77,8 +77,7 @@ function AddAdditionalRoles({
                 <span className='fw-bold'>{t('Additional Roles')}</span>
             </div>
             <div className='row'>
-                {inputListData &&
-                    inputListData.map((elem, j) => {
+                {inputListData.map((elem, j) => {
                         return (
                             <div className='row mb-2' key={j}>
                                 <div className='col-lg-5'>
