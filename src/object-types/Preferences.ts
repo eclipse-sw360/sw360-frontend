@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 
-function Preferences() {
+function Preferences() : { key: string; documentType: string; entries: { id: string; name: string; }[] }[] {
     const t = useTranslations('default')
 
     const PREFERENCES = [
