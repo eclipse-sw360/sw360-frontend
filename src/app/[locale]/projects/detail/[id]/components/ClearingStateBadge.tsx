@@ -37,7 +37,7 @@ const ReleaseClearingStateMapping: {[k: string]: string} = {
     'REPORT_APPROVED': 'REPORT_APPROVED',
 }
 
-const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props) => {
+const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props) : JSX.Element => {
 
     return (
         <div className='text-center'>
@@ -46,6 +46,7 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                     ?
                     <OverlayTrigger
                         overlay={
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                             <Tooltip>{`${t('Release Clearing State')}: ${t(ReleaseClearingStateMapping[clearingState])}`}</Tooltip>
                         }
                     >
@@ -65,8 +66,9 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                     </OverlayTrigger>
                     :
                     <>
-                        <OverlayTrigger
+                        {(projectState !== undefined) && <OverlayTrigger
                             overlay={
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                                 <Tooltip>{`${t('Project State')}: ${t(capitalize(projectState))}`}</Tooltip>
                             }
                         >
@@ -76,8 +78,10 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                                 <span className='state-box projectStateInactive capsule-left'>{'PS'}</span>
                             )}
                         </OverlayTrigger>
+                        }
                         <OverlayTrigger
                             overlay={
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                                 <Tooltip>{`${t('Project Clearing State')}: ${t(capitalize(clearingState))}`}</Tooltip>
                             }
                         >

@@ -8,6 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 'use client'
 
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
@@ -38,14 +40,14 @@ interface LicensesToSourcesMapping {
 
 const sortIgnoreCase = (array: Array<string>) => array.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
 
-const TogglerLicenseList = ({ licenses, releaseId, t }: { licenses?: Array<string>, releaseId: string, t: any }) => {
+const TogglerLicenseList = ({ licenses, releaseId, t }: { licenses?: Array<string>, releaseId: string, t: any }) : JSX.Element => {
     const [toggle, setToggle] = useState(false)
     const [isFileModalOpen, setIsFileModalOpen] = useState(false)
-    const [selectedLicense, setSelectedLicense] = useState(undefined)
+    const [selectedLicense, setSelectedLicense] = useState<string | undefined>(undefined)
 
     return (
         !CommonUtils.isNullEmptyOrUndefinedArray(licenses)
-        &&
+        ?
         <div className='d-flex'>
             {
                 (licenses.length > 1)
@@ -81,13 +83,18 @@ const TogglerLicenseList = ({ licenses, releaseId, t }: { licenses?: Array<strin
                         <ViewFileListIcon license={licenses[0]} t={t} openModal={(license) => { setIsFileModalOpen(true); setSelectedLicense(license) }} />
                     </div>
             }
-            <FileListModal license={selectedLicense} releaseId={releaseId} isFileModalOpen={isFileModalOpen} setIsFileModalOpen={setIsFileModalOpen} t={t} />
+            {
+                (selectedLicense !== undefined)
+                ? <FileListModal license={selectedLicense} releaseId={releaseId} isFileModalOpen={isFileModalOpen} setIsFileModalOpen={setIsFileModalOpen} t={t} />
+                : <></>
+            }
         </div>
+        :<></>
     )
 }
 
 interface FileListModalProps {
-    license?: string
+    license: string
     releaseId: string
     isFileModalOpen: boolean
     setIsFileModalOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -95,8 +102,8 @@ interface FileListModalProps {
 }
 
 const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen, t }: FileListModalProps) => {
-    const [licensesToSourceFilesMapping, setLicensesToSourceFilesMapping] = useState<LicensesToSourcesMapping>(undefined)
-    const [licenseMappingData, setLicenseMappingData] = useState<LicenseData>(undefined)
+    const [licensesToSourceFilesMapping, setLicensesToSourceFilesMapping] = useState<LicensesToSourcesMapping | undefined>(undefined)
+    const [licenseMappingData, setLicenseMappingData] = useState<LicenseData | undefined>(undefined)
 
     const closeModal = () => {
         setLicenseMappingData(undefined)
@@ -106,10 +113,12 @@ const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen
 
     const fetchReleasesToFilesMapping = useCallback(async () => {
         const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return
         const response = await ApiUtils.GET(`releases/${releaseId}/licensesToSourceFiles`, session.user.access_token)
-        const data = await response.json()
+        const data = await response.json() as LicensesToSourcesMapping
         setLicensesToSourceFilesMapping(data)
-        if (data.status === 'success') {
+        if (data.status === 'success' && data.licensesData !== undefined) {
             for (const licenseData of data.licensesData) {
                 if (
                     (licenseData.licenseName.toUpperCase() === license.toUpperCase())
@@ -124,11 +133,11 @@ const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen
 
     useEffect(() => {
         if (!isFileModalOpen) return
-        fetchReleasesToFilesMapping()
+        void fetchReleasesToFilesMapping()
     }, [isFileModalOpen, fetchReleasesToFilesMapping])
 
     return (
-        (licensesToSourceFilesMapping) &&
+        (licensesToSourceFilesMapping) ?
         <Modal show={isFileModalOpen} onHide={() => { closeModal() }}
             backdrop='static'
             className={`view-file-list ${licensesToSourceFilesMapping.status === 'failure' ? 'modal-warning' : 'modal-info'}`}
@@ -181,6 +190,7 @@ const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen
                 </Button>
             </Modal.Footer>
         </Modal>
+        : <></>
     )
 }
 
