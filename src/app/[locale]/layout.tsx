@@ -17,11 +17,9 @@ import '@/styles/gridjs/sw360.css'
 
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
-import { unstable_setRequestLocale } from 'next-intl/server'
-import { notFound } from 'next/navigation'
+import { getLocale, getMessages } from 'next-intl/server'
 import { ReactNode } from 'react'
 
-import { LOCALES } from '@/constants'
 import { Footer, Navbar, GlobalMessages } from 'next-sw360'
 import { Providers } from '../provider'
 
@@ -34,30 +32,19 @@ export const metadata: Metadata = {
     metadataBase: new URL('https://eclipse.org/sw360/'),
 }
 
-export function generateStaticParams() {
-    return LOCALES.map((locale) => ({ locale: locale.i18n }))
-}
-
 type Props = {
     children: ReactNode
-    params: { locale: string }
 }
 
-async function RootLayout({ children, params: { locale } }: Props) {
-    let messages
-    try {
-        messages = (await import(`@/messages/${locale}.json`)).default
-    } catch (error) {
-        notFound()
-    }
-
-    unstable_setRequestLocale(locale)
+async function RootLayout({ children }: Props): Promise<JSX.Element> {
+    const locale = await getLocale();
+    const messages = await getMessages();
 
     return (
         <html lang={locale}>
             <body>
                 <Providers>
-                    <NextIntlClientProvider locale={locale} messages={messages}>
+                    <NextIntlClientProvider messages={messages}>
                         <div id='container' className='d-flex flex-column min-vh-100'>
                             <GlobalMessages />
                             <Navbar />
