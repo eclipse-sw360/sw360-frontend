@@ -10,7 +10,7 @@
 
 'use client'
 
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
@@ -28,6 +28,7 @@ import {
     releaseClearingStates, projectClearingState
 } from './LicenseClearingFilters'
 import ClearingStateBadge from './ClearingStateBadge'
+import MessageService from '@/services/message.service'
 
 interface ListViewData {
     isAccessible: boolean
@@ -46,8 +47,10 @@ interface ListViewData {
     projectState?: string
 }
 
-const upperCaseWithUnderscore = (text: string) => {
-    return text
+type RowData = (string | ListViewData | JSX.Element)[]
+
+const upperCaseWithUnderscore = (text: string | undefined) => {
+    return (text !== undefined)
         ? text.trim().toUpperCase().replace(/ /g, '_')
         : undefined
 }
@@ -66,7 +69,6 @@ const nameFormatter = (name: string) => {
 }
 
 const includesIgnoreCase = (array: Array<string>, element: string) => {
-    console.log(array.some(item => item.toLowerCase() === element.toLowerCase()))
     return array.some(item => item.toLowerCase() === element.toLowerCase())
 }
 
@@ -82,16 +84,16 @@ const DependencyNetworkListView = ({
     projectId: string
 }) => {
     const t = useTranslations('default')
-    const [data, setData] = useState(undefined)
-    const [displayedData, setDisplayedData] = useState(undefined)
-    const [search, setSearch] = useState({ keyword: '' })
+    const [data, setData] = useState< Array<RowData> | undefined>(undefined)
+    const [displayedData, setDisplayedData] = useState< Array<RowData> | undefined>(undefined)
+    const [search, setSearch] = useState<{ keyword?: string | undefined } | undefined>({ keyword: '' })
 
     const [filters, setFilters] = useState<{ [k: string]: Array<string> }>(filterOptions)
     const language = { noRecordsFound: t('No linked releases or projects') }
 
     const updateFilters = (event: React.ChangeEvent<HTMLInputElement>) => {
         const filterName = event.target.name
-        if (event.target.checked == true) {
+        if (event.target.checked === true) {
             if (filters[filterName].length === filterOptions[filterName].length) {
                 setFilters({
                     ...filters,
@@ -284,7 +286,9 @@ const DependencyNetworkListView = ({
             formatter: (data: ListViewData) => 
             _(
                 <div className='text-center'>
-                    <ClearingStateBadge key={data.id} isRelease={data.isRelease == 'true'} clearingState={upperCaseWithUnderscore(data.clearingState)} projectState={upperCaseWithUnderscore(data.projectState)} t={t} />
+                    <ClearingStateBadge key={data.id} isRelease={data.isRelease == 'true'}
+                            clearingState={upperCaseWithUnderscore(data.clearingState) as string}
+                            projectState={upperCaseWithUnderscore(data.projectState)} t={t} />
                 </div>
             ),
             sort: {
@@ -318,8 +322,12 @@ const DependencyNetworkListView = ({
     ]
 
     useEffect(() => {
-        ;(async () => {
+        void (async () => {
             const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Session has expired'))
+                return
+            }
             try {
                 const listViewResponse = await ApiUtils.GET(
                     `projects/network/${projectId}/listView`,
@@ -353,7 +361,7 @@ const DependencyNetworkListView = ({
                                 </Link>
                             </OverlayTrigger>
                         </div>
-                    ),
+                    ) as JSX.Element,
                 ])
                 setData(tableData)
                 filterData(tableData)
@@ -363,11 +371,11 @@ const DependencyNetworkListView = ({
         })()
     }, [])
 
-    const filterData = (data: Array<Array<any>>) => {
-        const filteredData = data.filter((item: Array<any>) =>
-            includesIgnoreCase(filters.types, item[1])
-            && includesIgnoreCase(filters.relations, item[4])
-            && includesIgnoreCase(filters.states, item[6].clearingState)
+    const filterData = (data: Array<RowData>) => {
+        const filteredData = data.filter((item: RowData) =>
+            includesIgnoreCase(filters.types, item[1] as string)
+            && includesIgnoreCase(filters.relations, item[4] as string)
+            && includesIgnoreCase(filters.states, (item[6] as ListViewData).clearingState)
         )
 
         setDisplayedData(filteredData)

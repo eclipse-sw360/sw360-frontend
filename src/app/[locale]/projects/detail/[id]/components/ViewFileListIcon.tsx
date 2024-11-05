@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
 
@@ -19,7 +20,7 @@ interface Props {
     openModal: (license: string) => void
 }
 
-const ViewFileListIcon = ({ license, t, openModal }: Props) => {
+const ViewFileListIcon = ({ license, t, openModal }: Props): JSX.Element => {
     return (
         <OverlayTrigger placement='right-end' overlay={<Tooltip>{t('View file list')}</Tooltip>}>
             <span className='d-inline-block' onClick={() => openModal(license)}>
@@ -28,6 +29,5 @@ const ViewFileListIcon = ({ license, t, openModal }: Props) => {
         </OverlayTrigger>
     )
 }
-
 
 export default ViewFileListIcon
