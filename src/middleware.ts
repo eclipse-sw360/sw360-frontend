@@ -70,8 +70,10 @@ export default function middleware(req: NextRequest): NextResponse | Promise<Nex
     if (isPublicPage) {
         return intlMiddleware(req)
     } else if (isAdminPage) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return (authAdminMiddleware as any)(req)
     } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return (authMiddleware as any)(req)
     }
 }
