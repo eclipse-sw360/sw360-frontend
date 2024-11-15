@@ -11,7 +11,16 @@
 
 import { Attachment, Links, Package, Release, User } from '@/object-types'
 
-interface Project {
+export interface ProjectLinkedRelease {
+    createdBy: string
+    release: string
+    mainlineState: string
+    comment: string
+    createdOn: string
+    relation: string
+}
+
+export interface Project {
     id?: string
     name: string
     considerReleasesFromExternalList?: boolean
@@ -61,15 +70,8 @@ interface Project {
             enableSvm: boolean
         }
     }
-    linkedReleases?: {
-        createdBy?: string
-        release?: string
-        mainlineState?: string
-        comment?: string
-        createdOn?: string
-        relation?: string
-    }[]
-    _links?: Links
+    linkedReleases?: ProjectLinkedRelease[]
+    _links: Links
     _embedded?: {
         leadArchitect?: User
         projectManager?: User
@@ -85,5 +87,3 @@ interface Project {
         'sw360:linkedProjects'?: Array<Project>
     }
 }
-
-export default Project

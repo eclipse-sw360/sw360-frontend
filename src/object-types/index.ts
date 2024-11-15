@@ -49,7 +49,7 @@ import OAuthClient from './OAuthClient'
 import { LicenseObligationRelease, Obligation, ProjectObligation, ProjectObligationsList } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
-import Project from './Project'
+import { Project, ProjectLinkedRelease } from './Project'
 import ProjectPayload from './ProjectPayload'
 import {
     ProjectData,
@@ -190,6 +190,7 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
+    ProjectLinkedRelease
 }
 
 // Special functions for populate data
