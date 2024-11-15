@@ -9,23 +9,25 @@
 
 'use client'
 
-import { HttpStatus, NodeData, AttachmentUsages, Project, Release } from '@/object-types'
+import { HttpStatus, NodeData, AttachmentUsages, Project, Release, Embedded, ProjectLinkedRelease, AttachmentUsage } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, SetStateAction, Dispatch } from 'react'
 import { Spinner } from 'react-bootstrap'
+
+type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function AttachmentUsagesComponent({ projectId }: { projectId: string }) {
+export default function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    const [data, setData] = useState<Array<NodeData | null>>(null)
+    const [data, setData] = useState<Array<NodeData>>()
 
     const columns = [
         {
@@ -88,7 +90,7 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
         }
     ]
 
-    const fetchProjectAndReleaseDetails = (linkedProjects: Project[], projectId: string, proj: Project[]) => {
+    const fetchProjectAndReleaseDetails = (linkedProjects: Project[] | undefined, projectId: string, proj: Project[]) => {
         if(!linkedProjects || proj.length !== 0) {
             return
         }
@@ -98,15 +100,15 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                 proj[0] = p
                 return
             } else {
-                fetchProjectAndReleaseDetails(p?.["_embedded"]?.["sw360:linkedProjects"], projectId, proj)
+                fetchProjectAndReleaseDetails(p["_embedded"]?.["sw360:linkedProjects"], projectId, proj)
             }
         }
     }
 
     const formatReleaseAttachmentDataToTableData = (r: Release, release: NodeData, attachmentUsages: AttachmentUsages) => {
-        for(const att of r.attachments) {
+        for(const att of r.attachments ?? []) {
             let sourceCodeBundleChecked = false, manuallySetChecked = false, licenseInfoChecked = false
-            const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"]?.[0]?.filter((elem: any) => elem.attachmentContentId === att.attachmentContentId)
+            const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0]?.filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
             for(const u of usages) {
                 if (u.usageData) {
                     if(u.usageData.sourcePackage) {
@@ -122,31 +124,31 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
             }
             const attachment: NodeData = {
                 rowData: [
-                    <div key={`${att.filename ?? ''}_name_attachment`}>
-                        {att.filename ?? ''}
+                    <div key={`${att.filename}_name_attachment`}>
+                        {att.filename}
                     </div>,
-                    <div key={`${att.filename ?? ''}_relation_attachment`}>
+                    <div key={`${att.filename}_relation_attachment`}>
                         {''}
                     </div>,
-                    <div key={`${att.filename ?? ''}_uploadedBy_attachment`}>
-                        {att.createdBy ?? ''}
+                    <div key={`${att.filename}_uploadedBy_attachment`}>
+                        {att.createdBy}
                     </div>,
-                    <div key={`${att.filename ?? ''}_type_attachment`}>
+                    <div key={`${att.filename}_type_attachment`}>
                         {att.attachmentType}
                     </div>,
                     <input
-                        key={`${att.filename ?? ''}_used_in_license_info_attachment`}
+                        key={`${att.filename}_used_in_license_info_attachment`}
                         id='attachmentUsages.checkbox'
                         type='checkbox'
                         className='form-check-input'
                         checked={licenseInfoChecked}
                         readOnly
                     />,
-                    <div key={`${att.filename ?? ''}_used_in_license_info_conclusions_attachment`}>
+                    <div key={`${att.filename}_used_in_license_info_conclusions_attachment`}>
                         {''}
                     </div>,
                     <input
-                        key={`${att.filename ?? ''}_used_in_source_code_bundle_attachment`}
+                        key={`${att.filename}_used_in_source_code_bundle_attachment`}
                         id='attachmentUsages.sourceCodeBundle.checkbox'
                         type='checkbox'
                         className='form-check-input'
@@ -154,7 +156,7 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                         readOnly
                     />,
                     <input
-                    key={`${att.filename ?? ''}_other_attachment`}
+                    key={`${att.filename}_other_attachment`}
                         id='attachmentUsages.other.checkbox'
                         type='checkbox'
                         className='form-check-input'
@@ -164,6 +166,8 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                 ], 
                 children: []
             }
+            if(!release.children)
+                release.children = []
             release.children.push(attachment)
         }
     }
@@ -173,7 +177,7 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        ;void (async () => {
             try {
                 const res_licenseClearing = await ApiUtils.GET(
                     `projects/${projectId}/attachmentUsage?transitive=true`,
@@ -197,30 +201,30 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                     return notFound()
                 }
 
-                const attachmentUsages = await responses[0].json()
-                const linkedProjects = await responses[1].json()
+                const attachmentUsages = await responses[0].json() as AttachmentUsages
+                const linkedProjects = await responses[1].json() as LinkedProjects
 
                 const tableData: NodeData[] = []
 
                 for (const p in attachmentUsages['linkedProjects'] ?? {}) {
-                    const proj: any[] = []
+                    const proj: Project[] = []
                     fetchProjectAndReleaseDetails(linkedProjects['_embedded']['sw360:projects'], p, proj)
                     if(proj.length === 0) {
                         continue
                     }
                     const releases = new Set<string>()
-                    proj[0].linkedReleases?.map((r: any) => {
-                        releases.add(r.release.split('/').at(-1))
+                    proj[0].linkedReleases?.map((r: ProjectLinkedRelease) => {
+                        releases.add(r.release.split('/').at(-1) as string)
                     })
                     const projId = proj[0]["_links"]["self"]["href"].split('/').at(-1)
                     const node: NodeData = {
                         rowData: [
                             <Link key={`${projId}_name_project`} 
                                 href={`/projects/detail/${projId}`}>
-                                {`${proj[0].name ?? ''} ${proj[0].version ?? ''}`}
+                                {`${proj[0].name} ${proj[0].version ?? ''}`}
                             </Link>,
                             <div key={`${projId}_relationship_project`}>
-                                {Capitalize(attachmentUsages['linkedProjects'][p].projectRelationship ?? '')}
+                                {Capitalize(attachmentUsages['linkedProjects']?.[p].projectRelationship ?? '')}
                             </div>,
                             <div key={`${projId}_uploadedBy_project`}>
                                 {''}
@@ -244,22 +248,21 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                         children: []
                     }
                     for(const r of attachmentUsages['_embedded']['sw360:release']) {
-                        if(releases.has(r['_links']['self']['href'].split('/').at(-1))) {
+                        const rel = r['_links']?.['self']['href'].split('/').at(-1)
+                        if(rel !== undefined && releases.has(rel)) {
                                 const release: NodeData = {
                                     rowData: [
                                         <Link 
                                             key={`${projId}_name_release`} 
                                             href={`/components/releases/detail/${
-                                                r['_links']['self']['href'].split('/').at(-1)
+                                                rel
                                             }`}
                                         >
                                             {`${r.name ?? ''} ${r.version ?? ''}`}
                                         </Link>,
                                         <div key={`${projId}_relation_release`}>
                                             {
-                                                Capitalize(attachmentUsages['releaseIdToUsage']?.[
-                                                    r['_links']['self']['href'].split('/').at(-1)
-                                                ]?.releaseRelation ?? '')
+                                                Capitalize(attachmentUsages['releaseIdToUsage']?.[rel]?.releaseRelation ?? '')
                                             }
                                         </div>,
                                         <div key={`${projId}_uploadedBy_release`}>
@@ -284,53 +287,49 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                                     children: []
                                 }
                                 formatReleaseAttachmentDataToTableData(r, release, attachmentUsages)
+                                if(!node.children)
+                                    node.children = []
                                 node.children.push(release)
                         }
                     }
                     attachmentUsages['_embedded']['sw360:release'] = 
-                    attachmentUsages['_embedded']['sw360:release'].filter((r: any) => 
-                        !releases.has(r['_links']['self']['href'].split('/').at(-1))
+                    attachmentUsages['_embedded']['sw360:release'].filter((r: Release) => 
+                        !releases.has(r['_links']?.['self']['href'].split('/').at(-1) ?? '')
                     )
                     tableData.push(node)
                 }
 
                 for(const r of attachmentUsages['_embedded']['sw360:release']) {
+                    const rel = r['_links']?.['self']['href'].split('/').at(-1) ?? ''
                     const release: NodeData = {
                         rowData: [
                             <Link 
-                                key={`${r['_links']['self']['href'].split('/').at(-1)}_name_release`} 
-                                href={`/components/releases/detail/${
-                                    r['_links']['self']['href'].split('/').at(-1)
-                                }`}
+                                key={`${rel}_name_release`} 
+                                href={`/components/releases/detail/${rel}`}
                             >
                                 {`${r.name ?? ''} ${r.version ?? ''}`}
                             </Link>,
-                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_relation_release`}>
+                            <div key={`${rel}_relation_release`}>
                                 {
-                                    Capitalize(attachmentUsages['releaseIdToUsage']?.[
-                                        r['_links']['self']['href'].split('/').at(-1)
-                                    ]?.releaseRelation ?? '')
+                                    Capitalize(attachmentUsages['releaseIdToUsage']?.[rel]?.releaseRelation ?? '')
                                 }
                             </div>,
-                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_uploadedBy_release`}>
+                            <div key={`${rel}_uploadedBy_release`}>
                                 {''}
                             </div>,
-                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_type_release`}>
+                            <div key={`${rel}_type_release`}>
                                 {''}
                             </div>,
-                            <div key={`${r['_links']['self']['href'].split('/').at(-1)}_used_in_license_info_release`}>
+                            <div key={`${rel}_used_in_license_info_release`}>
                                 {''}
                             </div>,
-                            <div key={`${
-                                r['_links']['self']['href'].split('/').at(-1)}_used_in_license_info_conclusions_release`}>
+                            <div key={`${rel}_used_in_license_info_conclusions_release`}>
                                 {''}
                             </div>,
-                            <div key={`${
-                                r['_links']['self']['href'].split('/').at(-1)}_used_in_license_info_source_code_bundle`}>
+                            <div key={`${rel}_used_in_license_info_source_code_bundle`}>
                                 {''}
                             </div>,
-                            <div key={`${
-                                r['_links']['self']['href'].split('/').at(-1)}_other_release`}>
+                            <div key={`${rel}_other_release`}>
                                 {''}
                             </div>
                         ],
@@ -352,7 +351,7 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
         <>
             {
                 data
-                ? <TreeTable columns={columns} data={data} setData={setData} selector={true} sort={false} />
+                ? <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />
                 : <div className='col-12 text-center'>
                     <Spinner className='spinner' />
                 </div>

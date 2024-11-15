@@ -10,9 +10,9 @@
 import Release from './Release'
 
 export interface AttachmentUsages {
-    _embedded?: {
-        "sw360:release"?: Release[]
-        "sw360:attachmentUsages"?: AttachmentUsage[][]
+    _embedded: {
+        "sw360:release": Release[]
+        "sw360:attachmentUsages": AttachmentUsage[][]
     }
     linkedProjects?: {
         [key: string]: {
@@ -31,6 +31,15 @@ export interface AttachmentUsages {
             createdBy?: string
         }
     }
+    releaseIdToUsage?: {
+        [key: string]: {
+            releaseRelation : string
+            mainlineState : string
+            comment : string
+            createdOn : string
+            createdBy : string
+        }
+    }
 }
 
 export interface AttachmentUsage {
@@ -38,7 +47,7 @@ export interface AttachmentUsage {
     owner?: {
         releaseId: string
     }
-    attachmentContentId?: string
+    attachmentContentId: string
     usedBy?: {
         projectId: string
     }
