@@ -28,15 +28,15 @@ function enableSubscribing(id = defaultId): Observable<Message> {
 }
 
 // convenience methods
-function success(message: string, options?: MessageOptions | undefined): void {
+function success(message: string, options?: MessageOptions): void {
     showMessage(MessageType.Success, message, 'Success', options)
 }
 
-function error(message: string, options?: MessageOptions | undefined): void {
+function error(message: string, options?: MessageOptions): void {
     showMessage(MessageType.Error, message, 'Error', options)
 }
 
-function info(message: string, options?: MessageOptions | undefined): void {
+function info(message: string, options?: MessageOptions): void {
     showMessage(MessageType.Info, message, 'Info', options)
 }
 

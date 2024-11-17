@@ -12,7 +12,7 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import authOptions from '../auth/[...nextauth]/authOptions'
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
     const session = await getServerSession(authOptions)
 
     if (!session) {
@@ -20,8 +20,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-        authenticated: !!session,
+        authenticated: true,
         session,
     })
 }
-1

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     title: 'Requests',
 }
 
-async function RequestsPage() {
+function RequestsPage(): JSX.Element {
     return <Requests />
 }
 
