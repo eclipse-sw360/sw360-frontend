@@ -10,24 +10,80 @@
 'use client'
 
 import { HttpStatus, NodeData, AttachmentUsages, Project, Release, Embedded, ProjectLinkedRelease, AttachmentUsage } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { signOut, useSession, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { useEffect, useState, SetStateAction, Dispatch } from 'react'
 import { Spinner } from 'react-bootstrap'
+import MessageService from '@/services/message.service'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
+interface SaveUsagesPayload {
+    selected: string[]
+    deselected: string[]
+    selectedConcludedUsages: string[]
+    deselectedConcludedUsages: string[]
+}
+
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+
+function isLicenseInfoDisabled(type: string): boolean {
+    const types = ['CLX', 'CRT', 'SRC', 'CLI', 'DOC', 'DSN', 'RDT', 'SRR', 'SRX', 'SRS', 'BIN', 'BIS', 'DRT', 'LRT', 'LAT', 'SCR', 'OTH', 'RDM', 'SECA', 'ISR', 'SBOM', 'IUS']
+    if(types.indexOf(type) !== -1) {
+        return true
+    }
+    return false
+}
+
+function isSourceCodeBundleDisabled(type: string): boolean {
+    const types = ['CLX', 'CRT', 'CLI', 'DOC', 'DSN', 'RDT', 'SRR', 'SRX', 'BIN', 'BIS', 'DRT', 'LRT', 'LAT', 'SCR', 'OTH', 'RDM', 'SECA', 'ISR', 'SBOM', 'IUS']
+    if(types.indexOf(type) !== -1) {
+        return true
+    }
+    return false
+}
 
 export default function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [data, setData] = useState<Array<NodeData>>()
+    const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
+        selected: [],
+        deselected: [],
+        selectedConcludedUsages: [],
+        deselectedConcludedUsages: []
+    })
+    const [saveUsagesLoading, setSaveUsagesLoading] = useState(false)
+    const [attachmentUsagesAndLinkedProjects, setAttachmentUsagesAndLinkedProjects] = useState<{
+        attachmentUsages: AttachmentUsages
+        linkedProjects: LinkedProjects
+    }>()
+
+    const handleSaveUsages = async () => {
+        try {
+            setSaveUsagesLoading(true)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Something went wrong'))
+                return signOut()
+            }
+            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload, session.user.access_token)
+            if(response.status !== HttpStatus.CREATED) {
+                MessageService.error(t('Something went wrong'))
+                return notFound()
+            }
+            MessageService.success(t('AttachmentUsages saved successfully'))
+        } catch(e) {
+            console.error(e)
+        } finally {
+            setSaveUsagesLoading(false)
+        }
+    }
 
     const columns = [
         {
@@ -105,23 +161,8 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
         }
     }
 
-    const formatReleaseAttachmentDataToTableData = (r: Release, release: NodeData, attachmentUsages: AttachmentUsages) => {
+    const formatReleaseAttachmentDataToTableData = (r: Release, release: NodeData) => {
         for(const att of r.attachments ?? []) {
-            let sourceCodeBundleChecked = false, manuallySetChecked = false, licenseInfoChecked = false
-            const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0]?.filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
-            for(const u of usages) {
-                if (u.usageData) {
-                    if(u.usageData.sourcePackage) {
-                        sourceCodeBundleChecked = true
-                    }
-                    if (u.usageData.manuallySet) {
-                        manuallySetChecked = true
-                    }
-                    if (u.usageData.licenseInfo) {
-                        licenseInfoChecked = true
-                    }
-                }
-            }
             const attachment: NodeData = {
                 rowData: [
                     <div key={`${att.filename}_name_attachment`}>
@@ -138,37 +179,95 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                     </div>,
                     <input
                         key={`${att.filename}_used_in_license_info_attachment`}
-                        id='attachmentUsages.checkbox'
-                        type='checkbox'
-                        className='form-check-input'
-                        checked={licenseInfoChecked}
-                        readOnly
+                        type="checkbox"
+                        className="form-check-input"
+                        disabled={isLicenseInfoDisabled(att.attachmentType)}
+                        checked={saveUsagesPayload.selected.indexOf(`${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId}`) !== -1}
+                        onChange={() => {
+                            const val = `${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId}`
+                            if(saveUsagesPayload.selected.indexOf(val) === -1) {
+                                setSaveUsagesPayload({
+                                    ...saveUsagesPayload,
+                                    selected: [...saveUsagesPayload.selected, val],
+                                    deselected: saveUsagesPayload.deselected.filter(item => item !== val)
+                                })
+                            } else {
+                                setSaveUsagesPayload({
+                                    ...saveUsagesPayload,
+                                    selected: saveUsagesPayload.selected.filter(item => item !== val),
+                                    deselected: [...saveUsagesPayload.deselected, val]
+                                })
+                            }
+                        }}
                     />,
                     <div key={`${att.filename}_used_in_license_info_conclusions_attachment`}>
                         {''}
                     </div>,
                     <input
                         key={`${att.filename}_used_in_source_code_bundle_attachment`}
-                        id='attachmentUsages.sourceCodeBundle.checkbox'
-                        type='checkbox'
-                        className='form-check-input'
-                        checked={sourceCodeBundleChecked}
-                        readOnly
+                        type="checkbox"
+                        className="form-check-input"
+                        disabled={isSourceCodeBundleDisabled(att.attachmentType)}
+                        checked={saveUsagesPayload.selected.indexOf(`${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`) !== -1}
+                        onChange={() => {
+                            const val = `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`
+                            if(saveUsagesPayload.selected.indexOf(val) === -1) {
+                                setSaveUsagesPayload({
+                                    ...saveUsagesPayload,
+                                    selected: [...saveUsagesPayload.selected, val],
+                                    deselected: saveUsagesPayload.deselected.filter(item => item !== val)
+                                })
+                            } else {
+                                setSaveUsagesPayload({
+                                    ...saveUsagesPayload,
+                                    selected: saveUsagesPayload.selected.filter(item => item !== val),
+                                    deselected: [...saveUsagesPayload.deselected, val]
+                                })
+                            }
+                        }}
                     />,
                     <input
-                    key={`${att.filename}_other_attachment`}
-                        id='attachmentUsages.other.checkbox'
-                        type='checkbox'
-                        className='form-check-input'
-                        checked={manuallySetChecked}
-                        readOnly
-                    />
+                        key={`${att.filename}_other_attachment`}
+                        type="checkbox"
+                        className="form-check-input"
+                        disabled={isSourceCodeBundleDisabled(att.attachmentType)}
+                        checked={saveUsagesPayload.selected.indexOf(`${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${att.attachmentContentId}`) !== -1}
+                        onChange={() => {
+                            const val = `${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${att.attachmentContentId}`
+                            if(saveUsagesPayload.selected.indexOf(val) === -1) {
+                                setSaveUsagesPayload({
+                                    ...saveUsagesPayload,
+                                    selected: [...saveUsagesPayload.selected, val],
+                                    deselected: saveUsagesPayload.deselected.filter(item => item !== val)
+                                })
+                            } else {
+                                setSaveUsagesPayload({
+                                    ...saveUsagesPayload,
+                                    selected: saveUsagesPayload.selected.filter(item => item !== val),
+                                    deselected: [...saveUsagesPayload.deselected, val]
+                                })
+                            }
+                        }}
+                    />,
                 ], 
                 children: []
             }
             if(!release.children)
                 release.children = []
             release.children.push(attachment)
+        }
+    }
+
+    const setExpandedFieldsOfNewData = (prevState: NodeData[], newState: NodeData[]) => {
+        for(let i = 0; i < prevState.length ; ++i) {
+            if(prevState[i].isExpanded !== undefined)
+                newState[i].isExpanded = prevState[i].isExpanded
+
+            const prevChildren = prevState[i].children;
+            const newChildren = newState[i].children;
+            if (prevChildren && prevChildren.length > 0 && newChildren && newChildren.length > 0) {
+                setExpandedFieldsOfNewData(prevChildren, newChildren);
+            }
         }
     }
 
@@ -204,141 +303,43 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
                 const attachmentUsages = await responses[0].json() as AttachmentUsages
                 const linkedProjects = await responses[1].json() as LinkedProjects
 
-                const tableData: NodeData[] = []
+                setAttachmentUsagesAndLinkedProjects({
+                    attachmentUsages: attachmentUsages,
+                    linkedProjects: linkedProjects
+                })
 
-                for (const p in attachmentUsages['linkedProjects'] ?? {}) {
-                    const proj: Project[] = []
-                    fetchProjectAndReleaseDetails(linkedProjects['_embedded']['sw360:projects'], p, proj)
-                    if(proj.length === 0) {
-                        continue
-                    }
-                    const releases = new Set<string>()
-                    proj[0].linkedReleases?.map((r: ProjectLinkedRelease) => {
-                        releases.add(r.release.split('/').at(-1) as string)
-                    })
-                    const projId = proj[0]["_links"]["self"]["href"].split('/').at(-1)
-                    const node: NodeData = {
-                        rowData: [
-                            <Link key={`${projId}_name_project`} 
-                                href={`/projects/detail/${projId}`}>
-                                {`${proj[0].name} ${proj[0].version ?? ''}`}
-                            </Link>,
-                            <div key={`${projId}_relationship_project`}>
-                                {Capitalize(attachmentUsages['linkedProjects']?.[p].projectRelationship ?? '')}
-                            </div>,
-                            <div key={`${projId}_uploadedBy_project`}>
-                                {''}
-                            </div>,
-                            <div key={`${projId}_type_project`}>
-                                {''}
-                            </div>,
-                            <div key={`${projId}_used_in_license_info_project`}>
-                                {''}
-                            </div>,
-                            <div key={`${projId}_used_in_license_info_conclusions_project`}>
-                                {''}
-                            </div>,
-                            <div key={`${projId}_used_in_source_code_bundle_project`}>
-                                {''}
-                            </div>,
-                            <div key={`${projId}_other_project`}>
-                                {''}
-                            </div>
-                        ], 
-                        children: []
-                    }
-                    for(const r of attachmentUsages['_embedded']['sw360:release']) {
-                        const rel = r['_links']?.['self']['href'].split('/').at(-1)
-                        if(rel !== undefined && releases.has(rel)) {
-                                const release: NodeData = {
-                                    rowData: [
-                                        <Link 
-                                            key={`${projId}_name_release`} 
-                                            href={`/components/releases/detail/${
-                                                rel
-                                            }`}
-                                        >
-                                            {`${r.name ?? ''} ${r.version ?? ''}`}
-                                        </Link>,
-                                        <div key={`${projId}_relation_release`}>
-                                            {
-                                                Capitalize(attachmentUsages['releaseIdToUsage']?.[rel]?.releaseRelation ?? '')
-                                            }
-                                        </div>,
-                                        <div key={`${projId}_uploadedBy_release`}>
-                                            {''}
-                                        </div>,
-                                        <div key={`${projId}_type_release`}>
-                                            {''}
-                                        </div>,
-                                        <div key={`${projId}_used_in_license_info_release`}>
-                                            {''}
-                                        </div>,
-                                        <div key={`${projId}_used_in_license_info_conclusions_release`}>
-                                            {''}
-                                        </div>,
-                                        <div key={`${projId}_used_in_source_code_bundle_release`}>
-                                            {''}
-                                        </div>,
-                                        <div key={`${projId}_other_release`}>
-                                            {''}
-                                        </div>,
-                                    ],
-                                    children: []
-                                }
-                                formatReleaseAttachmentDataToTableData(r, release, attachmentUsages)
-                                if(!node.children)
-                                    node.children = []
-                                node.children.push(release)
-                        }
-                    }
-                    attachmentUsages['_embedded']['sw360:release'] = 
-                    attachmentUsages['_embedded']['sw360:release'].filter((r: Release) => 
-                        !releases.has(r['_links']?.['self']['href'].split('/').at(-1) ?? '')
-                    )
-                    tableData.push(node)
+                const saveUsages: SaveUsagesPayload = {
+                    selected: [],
+                    deselected: [],
+                    selectedConcludedUsages: [],
+                    deselectedConcludedUsages: []
                 }
 
                 for(const r of attachmentUsages['_embedded']['sw360:release']) {
-                    const rel = r['_links']?.['self']['href'].split('/').at(-1) ?? ''
-                    const release: NodeData = {
-                        rowData: [
-                            <Link 
-                                key={`${rel}_name_release`} 
-                                href={`/components/releases/detail/${rel}`}
-                            >
-                                {`${r.name ?? ''} ${r.version ?? ''}`}
-                            </Link>,
-                            <div key={`${rel}_relation_release`}>
-                                {
-                                    Capitalize(attachmentUsages['releaseIdToUsage']?.[rel]?.releaseRelation ?? '')
+                    for(const att of r.attachments ?? []) {
+                        const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0]?.filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
+                        for(const u of usages) {
+                            if (u.usageData) {
+                                if(u.usageData.sourcePackage) {
+                                    saveUsages.selected = [...new Set<string>([
+                                        ...saveUsages.selected, `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`
+                                    ])]
                                 }
-                            </div>,
-                            <div key={`${rel}_uploadedBy_release`}>
-                                {''}
-                            </div>,
-                            <div key={`${rel}_type_release`}>
-                                {''}
-                            </div>,
-                            <div key={`${rel}_used_in_license_info_release`}>
-                                {''}
-                            </div>,
-                            <div key={`${rel}_used_in_license_info_conclusions_release`}>
-                                {''}
-                            </div>,
-                            <div key={`${rel}_used_in_license_info_source_code_bundle`}>
-                                {''}
-                            </div>,
-                            <div key={`${rel}_other_release`}>
-                                {''}
-                            </div>
-                        ],
-                        children: []
+                                if (u.usageData.manuallySet) {
+                                    saveUsages.selected = [...new Set<string>([
+                                        ...saveUsages.selected, `${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${att.attachmentContentId}`
+                                    ])]
+                                }
+                                if (u.usageData.licenseInfo) {
+                                    saveUsages.selected = [...new Set<string>([
+                                        ...saveUsages.selected, `${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId}`
+                                    ])]
+                                }
+                            }
+                        }
                     }
-                    formatReleaseAttachmentDataToTableData(r, release, attachmentUsages)
-                    tableData.push(release)
                 }
-                setData(tableData)
+                setSaveUsagesPayload(saveUsages)
             } catch (e) {
                 console.error(e)
             }
@@ -347,8 +348,158 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
         return () => controller.abort()
     }, [status, projectId, session, t])
 
+    useEffect(() => {
+        if(attachmentUsagesAndLinkedProjects === undefined)
+            return
+        const tableData: NodeData[] = []
+
+        const attachmentUsages = structuredClone(attachmentUsagesAndLinkedProjects.attachmentUsages)
+        const linkedProjects = structuredClone(attachmentUsagesAndLinkedProjects.linkedProjects)
+
+        for (const p in attachmentUsages['linkedProjects'] ?? {}) {
+            const proj: Project[] = []
+            fetchProjectAndReleaseDetails(linkedProjects['_embedded']['sw360:projects'], p, proj)
+            if(proj.length === 0) {
+                continue
+            }
+            const releases = new Set<string>()
+            proj[0].linkedReleases?.map((r: ProjectLinkedRelease) => {
+                releases.add(r.release.split('/').at(-1) as string)
+            })
+            const projId = proj[0]["_links"]["self"]["href"].split('/').at(-1)
+            const node: NodeData = {
+                rowData: [
+                    <Link key={`${projId}_name_project`} 
+                        href={`/projects/detail/${projId}`}>
+                        {`${proj[0].name} ${proj[0].version ?? ''}`}
+                    </Link>,
+                    <div key={`${projId}_relationship_project`}>
+                        {Capitalize(attachmentUsages['linkedProjects']?.[p].projectRelationship ?? '')}
+                    </div>,
+                    <div key={`${projId}_uploadedBy_project`}>
+                        {''}
+                    </div>,
+                    <div key={`${projId}_type_project`}>
+                        {''}
+                    </div>,
+                    <div key={`${projId}_used_in_license_info_project`}>
+                        {''}
+                    </div>,
+                    <div key={`${projId}_used_in_license_info_conclusions_project`}>
+                        {''}
+                    </div>,
+                    <div key={`${projId}_used_in_source_code_bundle_project`}>
+                        {''}
+                    </div>,
+                    <div key={`${projId}_other_project`}>
+                        {''}
+                    </div>
+                ], 
+                children: []
+            }
+            for(const r of attachmentUsages['_embedded']['sw360:release']) {
+                const rel = r['_links']?.['self']['href'].split('/').at(-1)
+                if(rel !== undefined && releases.has(rel)) {
+                        const release: NodeData = {
+                            rowData: [
+                                <Link 
+                                    key={`${projId}_name_release`} 
+                                    href={`/components/releases/detail/${
+                                        rel
+                                    }`}
+                                >
+                                    {`${r.name ?? ''} ${r.version ?? ''}`}
+                                </Link>,
+                                <div key={`${projId}_relation_release`}>
+                                    {
+                                        Capitalize(attachmentUsages['releaseIdToUsage']?.[rel]?.releaseRelation ?? '')
+                                    }
+                                </div>,
+                                <div key={`${projId}_uploadedBy_release`}>
+                                    {''}
+                                </div>,
+                                <div key={`${projId}_type_release`}>
+                                    {''}
+                                </div>,
+                                <div key={`${projId}_used_in_license_info_release`}>
+                                    {''}
+                                </div>,
+                                <div key={`${projId}_used_in_license_info_conclusions_release`}>
+                                    {''}
+                                </div>,
+                                <div key={`${projId}_used_in_source_code_bundle_release`}>
+                                    {''}
+                                </div>,
+                                <div key={`${projId}_other_release`}>
+                                    {''}
+                                </div>,
+                            ],
+                            children: []
+                        }
+                        formatReleaseAttachmentDataToTableData(r, release)
+                        if(!node.children)
+                            node.children = []
+                        node.children.push(release)
+                }
+            }
+            attachmentUsages['_embedded']['sw360:release'] = 
+            attachmentUsages['_embedded']['sw360:release'].filter((r: Release) => 
+                !releases.has(r['_links']?.['self']['href'].split('/').at(-1) ?? '')
+            )
+            tableData.push(node)
+        }
+
+        for(const r of attachmentUsages['_embedded']['sw360:release']) {
+            const rel = r['_links']?.['self']['href'].split('/').at(-1) ?? ''
+            const release: NodeData = {
+                rowData: [
+                    <Link 
+                        key={`${rel}_name_release`} 
+                        href={`/components/releases/detail/${rel}`}
+                    >
+                        {`${r.name ?? ''} ${r.version ?? ''}`}
+                    </Link>,
+                    <div key={`${rel}_relation_release`}>
+                        {
+                            Capitalize(attachmentUsages['releaseIdToUsage']?.[rel]?.releaseRelation ?? '')
+                        }
+                    </div>,
+                    <div key={`${rel}_uploadedBy_release`}>
+                        {''}
+                    </div>,
+                    <div key={`${rel}_type_release`}>
+                        {''}
+                    </div>,
+                    <div key={`${rel}_used_in_license_info_release`}>
+                        {''}
+                    </div>,
+                    <div key={`${rel}_used_in_license_info_conclusions_release`}>
+                        {''}
+                    </div>,
+                    <div key={`${rel}_used_in_license_info_source_code_bundle`}>
+                        {''}
+                    </div>,
+                    <div key={`${rel}_other_release`}>
+                        {''}
+                    </div>
+                ],
+                children: []
+            }
+            formatReleaseAttachmentDataToTableData(r, release)
+            tableData.push(release)
+        }
+        setData((prevState) => {
+            if(prevState !== undefined)
+                setExpandedFieldsOfNewData(prevState, tableData)
+            return tableData
+        })
+    }, [attachmentUsagesAndLinkedProjects, saveUsagesPayload])
+
     return (
-        <>
+        <>  
+            <button type='button' className='btn btn-secondary mb-2' onClick={() => void handleSaveUsages()}>
+                {t('Save Usages')}{' '}{saveUsagesLoading === true && <Spinner className='spinner' size='sm'/>}
+            </button>
             {
                 data
                 ? <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />

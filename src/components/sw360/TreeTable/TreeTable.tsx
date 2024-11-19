@@ -72,7 +72,6 @@ interface TreeTableProps {
 const TreeTable = ({ data, setData, columns, onExpand, search, language, selector, sort }: TreeTableProps): JSX.Element => {
     const [tabledata, setTableData] = useState<any[]>([])
     useEffect(() => {
-        console.log(data)
         const newData: any[] = []
         data.forEach((item: NodeData) => {
             manipulateData(item, 0, newData)
