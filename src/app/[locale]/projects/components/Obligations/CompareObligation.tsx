@@ -9,7 +9,7 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
 import { notFound } from 'next/navigation'
@@ -18,10 +18,9 @@ import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'r
 import { FaInfoCircle } from 'react-icons/fa'
 
 import { Table, _ } from '@/components/sw360'
-import { Embedded, HttpStatus, Project } from '@/object-types'
+import { HttpStatus, Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
-type EmbeddedProject = Embedded<Project, 'sw360:projects'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
@@ -38,18 +37,17 @@ export default function CompareObligation({
     show: boolean
     setShow: (show: boolean) => void
     setSelectedProjectId: (id: string | null) => void
-}) {
+}): JSX.Element {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const [projectData, setProjectData] = useState<any[] | null>(null)
-    const [compareProject, setCompareProject] = useState<Map<string, any>>(new Map())
+    const [projectData, setProjectData] = useState<(object | string)[][] | null>(null)
+    const [compareProject, setCompareProject] = useState<Map<string, object>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
     const searchValueRef = useRef<HTMLInputElement>(null)
     const topRef = useRef(null)
     const [pid, setPid] = useState('')
 
     const scrollToTop = () => {
-        topRef.current.scrollTo({ top: 0, left: 0 })
+        (topRef.current as HTMLDivElement | null)?.scrollTo({ top: 0, left: 0 })
     }
 
     const columns = [
@@ -137,8 +135,11 @@ export default function CompareObligation({
         },
     ]
 
-    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<EmbeddedProject> => {
+    const handleSearch = async ({ searchValue }: { searchValue: string }) => {
         try {
+            const session = await getSession()
+            if(CommonUtils.isNullOrUndefined(session))
+                return
             const response = await ApiUtils.GET(
                 `projects?name=${searchValue}&luceneSearch=false`,
                 session.user.access_token
@@ -148,21 +149,20 @@ export default function CompareObligation({
             } else if (response.status !== HttpStatus.OK) {
                 return notFound()
             }
-            const data = await response.json()
-            const dataTableFormat =
-                CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
-                    ? []
-                    : data['_embedded']['sw360:projects'].map((elem: Project) => {
-                        return [
-                          elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                          elem.name,
-                          elem.version,
-                          { state: elem.state, clearingState: elem.clearingState },
-                          elem.projectResponsible,
-                          elem.description,
-                        ];
-                    });
+            const data = await response.json() as Project
+            const dataTableFormat: (object | string)[][] =
+                CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:projects'])
+                ? []
+                : data['_embedded']['sw360:projects'].map((elem: Project) => {
+                    return [
+                        elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+                        elem.name,
+                        elem.version ?? '',
+                        { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
+                        elem.projectResponsible ?? '',
+                        elem.description ?? '',
+                    ];
+                })
             setProjectData(dataTableFormat)
         } catch (e) {
             console.error(e)
@@ -230,8 +230,8 @@ export default function CompareObligation({
                                 <Col xs='auto'>
                                     <Button
                                         variant='secondary'
-                                        onClick={async () => {
-                                            await handleSearch({ searchValue: searchValueRef.current.value })
+                                        onClick={() => {
+                                            void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })
                                         }}
                                     >
                                         {t('Search')}
@@ -256,7 +256,7 @@ export default function CompareObligation({
                     </Button>
                     <Button
                         variant='primary'
-                        onClick={async () => {
+                        onClick={() => {
                             scrollToTop()
                             setAlert({ variant: 'success', message: <>{t('comparing')}</> })
                             setSelectedProjectId(pid)

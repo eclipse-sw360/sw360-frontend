@@ -54,7 +54,6 @@ import ProjectPayload from './ProjectPayload'
 import {
     ProjectData,
     ProjectVulnerability,
-    ProjectsPayloadElement,
     VulnerabilityRatingAndActionPayload,
 } from './ProjectVulnerabilityTypes'
 import Release from './Release'
@@ -97,6 +96,7 @@ import SPDX from './spdx/SPDX'
 import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
+import LicenseClearing from './LicenseClearing'
 
 export type {
     AccessToken,
@@ -159,7 +159,6 @@ export type {
     ProjectPayload,
     ProjectVulnerability,
     ProjectVulnerabilityTrackingStatus,
-    ProjectsPayloadElement,
     RelationshipsBetweenSPDXElements,
     Release,
     ReleaseDetail,
@@ -190,7 +189,8 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
-    ProjectLinkedRelease
+    ProjectLinkedRelease,
+    LicenseClearing
 }
 
 // Special functions for populate data

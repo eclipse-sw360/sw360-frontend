@@ -38,7 +38,7 @@ export default function LicenseClearing({
     clearingState?: string
     clearingRequestId?: string
     isCalledFromModerationRequestCurrentProject?: boolean
-}) {
+}): JSX.Element {
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
     const router = useRouter()
@@ -60,7 +60,7 @@ export default function LicenseClearing({
                                         setShow = {setShowViewClearingRequestModal}
                                         projectName = {projectName}
                                         clearingRequestId = {clearingRequestId}/>
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
+            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
                 <div className='row'
                      hidden={isCalledFromModerationRequestCurrentProject}>
                     <div className='col ps-0'>

@@ -10,23 +10,13 @@
 'use client'
 
 import { HttpStatus, Project } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
-
-const DEFAULT_PROJECT_DATA: Project = {
-    name: '',
-    _embedded: {
-        'sw360:releases': [],
-        'sw360:projects': [],
-        'sw360:attachments': [],
-        'sw360:packages': [],
-    },
-}
 
 interface Data {
     attachment?: number
@@ -36,16 +26,15 @@ interface Data {
 }
 
 interface Props {
-    projectId?: string
-    show?: boolean
-    setShow?: React.Dispatch<React.SetStateAction<boolean>>
+    projectId: string
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
-    const { data: session } = useSession()
+function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
-    const [project, setProject] = useState<Project>(DEFAULT_PROJECT_DATA)
+    const [project, setProject] = useState<Project>()
     const [internalData, setInternalData] = useState<Data>({ attachment: 0, project: 0, release: 0, package: 0 })
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState('')
@@ -66,11 +55,12 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
     }, [t])
 
     const deleteProject = async () => {
-        if (CommonUtils.isNullEmptyOrUndefinedString(projectId))
-            return
-        const response = await ApiUtils.DELETE(`projects/${projectId}`, session.user.access_token)
         try {
-            if (response.status == HttpStatus.OK) {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return
+            const response = await ApiUtils.DELETE(`projects/${projectId}`, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
                 displayMessage('success', t('Delete project successful!'))
                 router.push('/projects')
                 setReloadPage(true)
@@ -90,27 +80,25 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
 
     useEffect(() => {
         const fetchData = async (projectId: string) => {
-            if (CommonUtils.isNullEmptyOrUndefinedString(projectId))
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
                 return
-            if (session) {
-                const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
-                if (projectsResponse.status == HttpStatus.OK) {
-                    const projectData = (await projectsResponse.json()) as Project
-                    setProject(projectData)
-                    handleInternalDataCount(projectData)
-                } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
-                    await signOut()
-                } else {
-                    setProject(DEFAULT_PROJECT_DATA)
-                    handleError()
-                }
+            const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
+            if (projectsResponse.status == HttpStatus.OK) {
+                const projectData = (await projectsResponse.json()) as Project
+                setProject(projectData)
+                handleInternalDataCount(projectData)
+            } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            } else {
+                handleError()
             }
         }
 
         fetchData(projectId).catch((err) => {
             console.error(err)
         })
-    }, [show, projectId, handleError, session])
+    }, [show, projectId, handleError])
 
     const handleSubmit = () => {
         deleteProject().catch((err) => {
@@ -130,26 +118,26 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
 
     const handleInternalDataCount = (projectData: Project) => {
         const dataCount: Data = {}
-        if (projectData._embedded['sw360:attachments']) {
+        if (projectData._embedded?.['sw360:attachments']) {
             dataCount.attachment = projectData._embedded['sw360:attachments'].length
             setVisuallyHideLinkedData(false)
         }
-        if (projectData._embedded['sw360:projects']) {
+        if (projectData._embedded?.['sw360:projects']) {
             dataCount.project = projectData._embedded['sw360:projects'].length
             setVisuallyHideLinkedData(false)
         }
-        if (projectData._embedded['sw360:releases']) {
+        if (projectData._embedded?.['sw360:releases']) {
             dataCount.release = projectData._embedded['sw360:releases'].length
             setVisuallyHideLinkedData(false)
         }
-        if (projectData._embedded['sw360:packages']) {
+        if (projectData._embedded?.['sw360:packages']) {
             dataCount.package = projectData._embedded['sw360:packages'].length
             setVisuallyHideLinkedData(false)
         }
         setInternalData(dataCount)
     }
 
-    const handleUserComment = (e: any) => {
+    const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
         setComment(e.target.value)
     }
 
@@ -162,42 +150,52 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props) {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
-                    {message}
-                </Alert>
-                <Form>
-                    <Form.Group>
-                        <Form.Label className='mb-3'>
-                            {t.rich('Do you really want to delete the project?', {
-                                name: project.name,
-                                strong: (data) => <b>{data}</b>,
-                            })}
-                        </Form.Label>
-                        <br />
-                        <Form.Label className='mb-1' visuallyHidden={visuallyHideLinkedData}>
-                            {t.rich('This project contains', {
-                                name: project.name,
-                                strong: (data) => <b>{data}</b>,
-                                visuallyHideLinkedData,
-                            })}
-                            <ul>
-                                {Object.entries(internalData).map(([key, value]) => (
-                                    <li key={key}>{`${value} linked ${key}`}</li>
-                                ))}
-                            </ul>
-                        </Form.Label>
-                    </Form.Group>
-                    <hr />
-                    <Form.Group className='mb-3'>
-                        <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
-                        <Form.Control
-                            as='textarea'
-                            aria-label='With textarea'
-                            placeholder='Comment your message...'
-                            onChange={handleUserComment}
-                        />
-                    </Form.Group>
-                </Form>
+                <>
+                    {
+                        project === undefined ?
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>:
+                        <>
+                            <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
+                                {message}
+                            </Alert>
+                            <Form>
+                                <Form.Group>
+                                    <Form.Label className='mb-3'>
+                                        {t.rich('Do you really want to delete the project?', {
+                                            name: project.name,
+                                            strong: (data) => <b>{data}</b>,
+                                        })}
+                                    </Form.Label>
+                                    <br />
+                                    <Form.Label className='mb-1' visuallyHidden={visuallyHideLinkedData}>
+                                        {t.rich('This project contains', {
+                                            name: project.name,
+                                            strong: (data) => <b>{data}</b>,
+                                            visuallyHideLinkedData,
+                                        })}
+                                        <ul>
+                                            {Object.entries(internalData).map(([key, value]) => (
+                                                <li key={key}>{`${value} linked ${key}`}</li>
+                                            ))}
+                                        </ul>
+                                    </Form.Label>
+                                </Form.Group>
+                                <hr />
+                                <Form.Group className='mb-3'>
+                                    <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
+                                    <Form.Control
+                                        as='textarea'
+                                        aria-label='With textarea'
+                                        placeholder='Comment your message...'
+                                        onChange={handleUserComment}
+                                    />
+                                </Form.Group>
+                            </Form>
+                        </>
+                    }
+                </>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>

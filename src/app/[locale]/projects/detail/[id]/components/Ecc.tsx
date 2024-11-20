@@ -16,13 +16,14 @@ import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { Spinner } from 'react-bootstrap'
+import { CommonUtils } from '@/utils'
 
 type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function EccDetails({ projectId }: { projectId: string }) {
+export default function EccDetails({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -85,32 +86,35 @@ export default function EccDetails({ projectId }: { projectId: string }) {
         },
     ]
 
-    const server = {
-        url: `${SW360_API_URL}/resource/api/projects/${projectId}/releases/ecc?transitive=true`,
-        then: (data: EmbeddedProjectReleaseEcc) => {
-            return data._embedded['sw360:releases'].map((elem: ECC) => [
-                Capitalize(elem.eccInformation.eccStatus ?? ''),
-                {
-                    version: elem.version ?? '',
-                    name: elem.name ?? '',
-                    id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                },
-                elem.version ?? '',
-                elem.eccInformation.creatorGroup ?? '',
-                elem.eccInformation.assessorContactPerson ?? '',
-                elem.eccInformation.assessorDepartment ?? '',
-                elem.eccInformation.assessmentDate ?? '',
-                elem.eccInformation.eccn ?? '',
-            ])
-        },
-        total: (data: EmbeddedProjectReleaseEcc) => data.page.totalElements,
-        headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
+    const initServerPaginationConfig = () => {
+        if (CommonUtils.isNullOrUndefined(session)) return
+        return {
+            url: `${SW360_API_URL}/resource/api/projects/${projectId}/releases/ecc?transitive=true`,
+            then: (data: EmbeddedProjectReleaseEcc) => {
+                return data._embedded['sw360:releases'].map((elem: ECC) => [
+                    Capitalize(elem.eccInformation.eccStatus),
+                    {
+                        version: elem.version,
+                        name: elem.name,
+                        id: elem['_links']?.['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+                    },
+                    elem.version,
+                    elem.eccInformation.creatorGroup,
+                    elem.eccInformation.assessorContactPerson,
+                    elem.eccInformation.assessorDepartment,
+                    elem.eccInformation.assessmentDate,
+                    elem.eccInformation.eccn,
+                ])
+            },
+            total: (data: EmbeddedProjectReleaseEcc) => data.page?.totalElements ?? 0,
+            headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
+        }
     }
 
     return (
         <>
             {status === 'authenticated' ? (
-                <Table columns={columns} server={server} selector={true} sort={false} />
+                <Table columns={columns} server={initServerPaginationConfig()} selector={true} sort={false} />
             ) : (
                 <div className='col-12' style={{ textAlign: 'center' }}>
                     <Spinner className='spinner' />

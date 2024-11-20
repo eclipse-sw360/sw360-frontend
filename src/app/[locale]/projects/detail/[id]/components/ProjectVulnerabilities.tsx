@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus, ProjectData, ProjectsPayloadElement, ProjectVulnerabilityTabType } from '@/object-types'
+import { HttpStatus, ProjectData, ProjectVulnerabilityTabType, Embedded, Project } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
@@ -17,25 +17,24 @@ import { useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import VulnerabilityTab from './VulnerabilityTab'
 
-const extractLinkedProjects = (projectPayload: ProjectsPayloadElement[], projectData: ProjectData[]) => {
-    if(!projectPayload) {
-        return
-    }
+type LinkedProjects = Embedded<Project, 'sw360:projects'>
+
+const extractLinkedProjects = (projectPayload: Project[], projectData: ProjectData[]) => {
     for (const x of projectPayload) {
         projectData.push({
             id: x['_links']['self']['href'].substring(x['_links']['self']['href'].lastIndexOf('/') + 1),
             name: x.name,
-            version: x.version,
-            enableSvm: x.enableSvm,
-            enableVulnerabilitiesDisplay: x.enableVulnerabilitiesDisplay,
+            version: x.version ?? '',
+            enableSvm: x.enableSvm ?? false,
+            enableVulnerabilitiesDisplay: x.enableVulnerabilitiesDisplay ?? false,
         })
         if(x._embedded?.['sw360:linkedProjects']) {
-            extractLinkedProjects(x._embedded?.['sw360:linkedProjects'], projectData)
+            extractLinkedProjects(x._embedded['sw360:linkedProjects'], projectData)
         }
     }
 }
 
-export default function ProjectVulnerabilities({ projectData }: { projectData: ProjectData }) {
+export default function ProjectVulnerabilities({ projectData }: { projectData: ProjectData }): JSX.Element {
     const { data: session, status } = useSession()
     const [data, setData] = useState<ProjectData[]>([])
 
@@ -45,7 +44,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
                 const response = await ApiUtils.GET(
                     `projects/${projectData.id}/linkedProjects?transitive=true`,
@@ -58,12 +57,12 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                     return notFound()
                 }
 
-                const data = await response.json()
+                const data = await response.json() as LinkedProjects
 
                 const d: ProjectData[] = []
                 d.push(projectData)
 
-                extractLinkedProjects(data._embedded?.['sw360:projects'], d)
+                extractLinkedProjects(data._embedded['sw360:projects'], d)
 
                 setData(d)
             } catch (e) {

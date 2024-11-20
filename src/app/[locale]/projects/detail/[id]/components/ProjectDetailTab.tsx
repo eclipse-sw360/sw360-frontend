@@ -10,8 +10,8 @@
 'use client'
 
 import { AdministrationDataType, HttpStatus, SummaryDataType, ActionType } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -29,7 +29,7 @@ import ProjectAttachments from './Attachments'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 import MessageService from '@/services/message.service'
 
-export default function ViewProjects({ projectId }: { projectId: string }) {
+export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
@@ -41,7 +41,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
 
     useEffect(() => {
-        const fragment = searchParams.get('tab') || DEFAULT_ACTIVE_TAB 
+        const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB 
         setActiveKey(fragment)
     }, [searchParams])
 
@@ -51,13 +51,14 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
     }
 
     useEffect(() => {
-        if (status !== 'authenticated') return
-
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
                     session.user.access_token,
@@ -69,10 +70,10 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                     return notFound()
                 }
 
-                const data = await response.json()
+                const data = await response.json() as SummaryDataType | AdministrationDataType
 
-                setSummaryData({ id: projectId, ...data })
-                setAdministrationData(data)
+                setSummaryData(data as SummaryDataType)
+                setAdministrationData(data as AdministrationDataType)
             } catch (e) {
                 console.error(e)
             }
@@ -82,7 +83,9 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
     }, [projectId, session, status])
 
     const handleEditProject = (projectId: string) => {
-        if (session.user.email === summaryData['_embedded']['createdBy']['email']){
+        if(CommonUtils.isNullOrUndefined(session))
+            return
+        if (session.user.email === summaryData?.['_embedded']?.['createdBy']?.['email']){
             MessageService.success(t('You are editing the original document'))
             router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
         }
@@ -181,10 +184,10 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='licenseClearing'>
-                                        {summaryData && (
+                                        {(summaryData && administrationData) && (
                                             <LicenseClearing
                                                 projectId={projectId}
-                                                projectName={summaryData.name ?? ''}
+                                                projectName={summaryData.name}
                                                 projectVersion={summaryData.version ?? ''}
                                                 clearingState={administrationData.clearingState ?? ''}
                                                 clearingRequestId={summaryData.clearingRequestId ?? ''}
@@ -203,7 +206,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                             <VulnerabilityTrackingStatusComponent 
                                                 projectData={{
                                                     id: projectId,
-                                                    name: summaryData.name ?? '',
+                                                    name: summaryData.name,
                                                     version: summaryData.version ?? '',
                                                     enableSvm: summaryData.enableSvm ?? false,
                                                     enableVulnerabilitiesDisplay:
@@ -223,7 +226,7 @@ export default function ViewProjects({ projectId }: { projectId: string }) {
                                             <ProjectVulnerabilities
                                                 projectData={{
                                                     id: projectId,
-                                                    name: summaryData.name ?? '',
+                                                    name: summaryData.name,
                                                     version: summaryData.version ?? '',
                                                     enableSvm: summaryData.enableSvm ?? false,
                                                     enableVulnerabilitiesDisplay:
