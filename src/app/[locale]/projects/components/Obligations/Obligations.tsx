@@ -18,7 +18,7 @@ import { ActionType, ProjectObligation } from '@/object-types'
 import CompareObligation from './CompareObligation'
 
 export default function Obligations({ projectId, actionType, payload, setPayload }: 
-    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>> }) {
+    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>> }): JSX.Element {
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
     const [show, setShow] = useState(false)
@@ -27,7 +27,7 @@ export default function Obligations({ projectId, actionType, payload, setPayload
     return (
         <>
         <CompareObligation show={show} setShow={setShow} setSelectedProjectId={setSelectedProjectId} />
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
+            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
                 <div className='row'>
                     <div className='col ps-0'>
                         <Nav variant='pills' className='d-inline-flex'>

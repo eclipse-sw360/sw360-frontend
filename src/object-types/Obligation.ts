@@ -49,7 +49,7 @@ export interface ProjectObligation {
 }
 
 export interface ProjectObligationsList {
-    licenseObligations: ProjectObligation
+    obligations: ProjectObligation
     page?: {
         size?: number
         totalElements?: number

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { Embedded, HttpStatus, Project as TypeProject, Session } from '@/object-types'
+import { Embedded, HttpStatus, Project as TypeProject } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -45,14 +45,13 @@ function LicenseClearing({ projectId }: { projectId: string }) {
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-
-        ;(async () => {
+        void (async () => {
             try {
                 const session = await getSession()
                 if (!session) {
                     return signOut()
                 }
-
+    
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearingCount`,
                     session.user.access_token,
@@ -63,17 +62,16 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-
-                const data = await response.json()
-
+    
+                const data = await response.json() as LicenseClearingData
+    
                 setLcData(data)
             } catch (e) {
                 console.error(e)
             }
         })()
-
         return () => controller.abort()
-    }, [projectId])
+    }, [])
 
     return (
         <>
@@ -81,14 +79,14 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                 <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
             ) : (
                 <div className='col-12 text-center'>
-                    <Spinner className='spinner' />
+                    <Spinner className='spinner' size='sm'/>
                 </div>
             )}
         </>
     )
 }
 
-function Project() {
+function Project(): JSX.Element {
     const { data: session, status } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -220,14 +218,15 @@ function Project() {
         },
     ]
 
-    const initServerPaginationConfig = (session: Session) => {
+    const initServerPaginationConfig = () => {
+        if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
             then: (data: EmbeddedProjects) => {
                 return data._embedded['sw360:projects'].map((elem: TypeProject) => [
                     {
                         id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                        name: elem.name ?? '',
+                        name: elem.name,
                         version: elem.version ?? ''
                     },
                     elem.description ?? '',
@@ -237,7 +236,7 @@ function Project() {
                     elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                 ])
             },
-            total: (data: EmbeddedProjects) => data.page.totalElements,
+            total: (data: EmbeddedProjects) => data.page?.totalElements ?? 0,
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
@@ -345,7 +344,10 @@ function Project() {
     return (
         <>
             <ImportSBOMModal importSBOMMetadata={importSBOMMetadata} setImportSBOMMetadata={setImportSBOMMetadata} />
-            <DeleteProjectDialog projectId={deleteProjectId} show={deleteDialogOpen} setShow={setDeleteDialogOpen} />
+            {
+                deleteProjectId &&
+                <DeleteProjectDialog projectId={deleteProjectId} show={deleteDialogOpen} setShow={setDeleteDialogOpen} />
+            }
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
@@ -379,7 +381,7 @@ function Project() {
                             <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
                         </div>
                         {status === 'authenticated' ? (
-                            <Table columns={columns} server={initServerPaginationConfig(session)} selector={true} sort={false} />
+                            <Table columns={columns} server={initServerPaginationConfig()} selector={true} sort={false} />
                         ) : (
                             <div className='col-12 d-flex justify-content-center align-items-center'>
                                 <Spinner className='spinner' />

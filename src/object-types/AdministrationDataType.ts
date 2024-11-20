@@ -8,23 +8,23 @@
 // License-Filename: LICENSE
 
 interface AdministrationDataType {
-    clearingState: string
-    clearingDetails: string
-    preevaluationDeadline: string
-    clearingSummary: string
-    specialRisksOSS: string
-    generalRisks3rdParty: string
-    specialRisks3rdParty: string
-    deliveryChannels: string
-    remarksAdditionalRequirements: string
-    state: string
-    systemTestStart: string
-    systemTestEnd: string
-    deliveryStart: string
-    phaseOutSince: string
-    licenseInfoHeader: string
-    _embedded: {
-        clearingTeam: {
+    clearingState?: string
+    clearingDetails?: string
+    preevaluationDeadline?: string
+    clearingSummary?: string
+    specialRisksOSS?: string
+    generalRisks3rdParty?: string
+    specialRisks3rdParty?: string
+    deliveryChannels?: string
+    remarksAdditionalRequirements?: string
+    state?: string
+    systemTestStart?: string
+    systemTestEnd?: string
+    deliveryStart?: string
+    phaseOutSince?: string
+    licenseInfoHeader?: string
+    _embedded?: {
+        clearingTeam?: {
             email: string
         }
     }

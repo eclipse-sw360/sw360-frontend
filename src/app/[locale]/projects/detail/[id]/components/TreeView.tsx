@@ -9,14 +9,14 @@
 
 'use client'
 
-import { HttpStatus, NodeData } from '@/object-types'
+import { HttpStatus, NodeData, Embedded, Project, LicenseClearing, Release } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
@@ -24,7 +24,9 @@ import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function TreeView({ projectId }: { projectId: string }) {
+type LinkedProjects = Embedded<Project, 'sw360:projects'>
+
+export default function TreeView({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [data, setData] = useState<Array<NodeData> | null>(null)
@@ -92,87 +94,181 @@ export default function TreeView({ projectId }: { projectId: string }) {
         },
     ]
 
-    useEffect(() => {
-        if (status !== 'authenticated') return
-        const controller = new AbortController()
-        const signal = controller.signal
+    const extractLinkedProjectsAndTheirLinkedReleases = (
+        licenseClearingData: LicenseClearing,
+        linkedProjectsData: Project[] | undefined
+    ): NodeData[] => {
+        if (!linkedProjectsData) return []
+        const treeData: NodeData[] = []
 
-        const extractLinkedProjectsAndTheirLinkedReleases = (
-            licenseClearingData: any,
-            linkedProjectsData: any
-        ): NodeData[] => {
-            if (!linkedProjectsData) return []
-            const treeData: NodeData[] = []
-    
-            for (const p of linkedProjectsData) {
-                const nodeProject: NodeData = {
+        for (const p of linkedProjectsData) {
+            const nodeProject: NodeData = {
+                rowData: [
+                    <Link
+                        href={`/projects/detail/${p['_links']['self']['href'].substring(
+                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                        )}`}
+                        className='text-link text-center'
+                        key={`${p['_links']['self']['href'].substring(
+                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                        )}-link`}
+                    >
+                        {`${p.name} (${p.version ?? ''})`}
+                    </Link>,
+                    <div
+                        className='text-center'
+                        key={`${p['_links']['self']['href'].substring(
+                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                        )}-projectType`}
+                    >
+                        {Capitalize(p.projectType ?? '')}
+                    </div>,
+                    <>{''}</>,
+                    <>{''}</>,
+                    <>{''}</>,
+                    <div
+                        className='text-center'
+                        key={`${p['_links']['self']['href'].substring(
+                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                        )}-state`}
+                    >
+                        <OverlayTrigger
+                            overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(p.state ?? '')}`}</Tooltip>}
+                        >
+                            {p.state === 'ACTIVE' ? (
+                                <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
+                            ) : (
+                                <span className='badge bg-secondary capsule-left overlay-badge'>{'PS'}</span>
+                            )}
+                        </OverlayTrigger>
+                        <OverlayTrigger
+                            overlay={
+                                <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
+                                    p.clearingState ?? ''
+                                )}`}</Tooltip>
+                            }
+                        >
+                            {p.clearingState === 'OPEN' ? (
+                                <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
+                            ) : p.clearingState === 'IN_PROGRESS' ? (
+                                <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
+                            ) : (
+                                <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
+                            )}
+                        </OverlayTrigger>
+                    </div>,
+                    <>{''}</>,
+                    <>{''}</>,
+                    <>{''}</>,
+                    <div
+                        className='text-center'
+                        key={`${p['_links']['self']['href'].substring(
+                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                        )}-edit`}
+                    >
+                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                            <Link
+                                href={`/projects/edit/${p['_links']['self']['href'].substring(
+                                    p['_links']['self']['href'].lastIndexOf('/') + 1
+                                )}`}
+                                className='overlay-trigger'
+                            >
+                                <FaPencilAlt className='btn-icon' />
+                            </Link>
+                        </OverlayTrigger>
+                    </div>,
+                ],
+                children: extractLinkedProjectsAndTheirLinkedReleases(
+                    licenseClearingData,
+                    p['_embedded']?.['sw360:linkedProjects']
+                ),
+            }
+
+            for (const l of p['linkedReleases'] ?? []) {
+                const res = licenseClearingData['_embedded']['sw360:release'].filter(
+                    (e: Release) =>
+                        e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
+                        l.release.substring(l.release.lastIndexOf('/') + 1)
+                )
+                const nodeRelease: NodeData = {
                     rowData: [
                         <Link
-                            href={`/projects/detail/${p['_links']['self']['href'].substring(
-                                p['_links']['self']['href'].lastIndexOf('/') + 1
-                            )}`}
+                            href={`/components/releases/detail/${l.release.substring(l.release.lastIndexOf('/') + 1)}`}
                             className='text-link text-center'
-                            key={`${p['_links']['self']['href'].substring(
-                                p['_links']['self']['href'].lastIndexOf('/') + 1
-                            )}-link`}
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-link`}
                         >
-                            {`${p.name ?? ''} (${p.version ?? ''})`}
+                            {`${res[0].name} (${res[0].version})`}
                         </Link>,
                         <div
                             className='text-center'
-                            key={`${p['_links']['self']['href'].substring(
-                                p['_links']['self']['href'].lastIndexOf('/') + 1
-                            )}-projectType`}
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-componentType`}
                         >
-                            {Capitalize(p.projectType ?? '')}
+                            {Capitalize(res[0].componentType ?? '')}
                         </div>,
-                        <>{''}</>,
-                        <>{''}</>,
-                        <>{''}</>,
                         <div
                             className='text-center'
-                            key={`${p['_links']['self']['href'].substring(
-                                p['_links']['self']['href'].lastIndexOf('/') + 1
-                            )}-state`}
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-relation`}
+                        >
+                            {Capitalize(l.relation)}
+                        </div>,
+                        <div
+                            className='text-center'
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-mainLicenses`}
+                        >
+                            {(res[0].mainLicenseIds ?? []).join(', ')}
+                        </div>,
+                        <div
+                            className='text-center'
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-otherLicenses`}
+                        >
+                            <ExpandableTextList list={res[0].otherLicenseIds ?? []} />
+                        </div>,
+                        <div
+                            className='text-center'
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-state`}
                         >
                             <OverlayTrigger
-                                overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(p.state ?? '')}`}</Tooltip>}
-                            >
-                                {p.state === 'ACTIVE' ? (
-                                    <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
-                                ) : (
-                                    <span className='badge bg-secondary capsule-left overlay-badge'>{'PS'}</span>
-                                )}
-                            </OverlayTrigger>
-                            <OverlayTrigger
                                 overlay={
-                                    <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
-                                        p.clearingState ?? ''
+                                    <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
+                                        res[0].clearingState ?? ''
                                     )}`}</Tooltip>
                                 }
                             >
-                                {p.clearingState === 'OPEN' ? (
-                                    <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
-                                ) : p.clearingState === 'IN_PROGRESS' ? (
-                                    <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
+                                {res[0].clearingState === 'NEW_CLEARING' ? (
+                                    <span className='badge bg-danger overlay-badge'>{'CS'}</span>
+                                ) : res[0].clearingState === 'REPORT_AVAILABLE' ? (
+                                    <span className='badge bg-primary overlay-badge'>{'CS'}</span>
                                 ) : (
-                                    <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
+                                    <span className='badge bg-success overlay-badge'>{'CS'}</span>
                                 )}
                             </OverlayTrigger>
                         </div>,
-                        <>{''}</>,
-                        <>{''}</>,
-                        <>{''}</>,
                         <div
                             className='text-center'
-                            key={`${p['_links']['self']['href'].substring(
-                                p['_links']['self']['href'].lastIndexOf('/') + 1
-                            )}-edit`}
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-mainlineState`}
+                        >
+                            {Capitalize(l.mainlineState)}
+                        </div>,
+                        <div
+                            className='text-center'
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-projectMainLineState`}
+                        >
+                            {Capitalize(l.mainlineState)}
+                        </div>,
+                        <div
+                            className='text-center'
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-comment`}
+                        >
+                            {l.comment}
+                        </div>,
+                        <div
+                            className='text-center'
+                            key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-edit`}
                         >
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link
-                                    href={`/projects/edit/${p['_links']['self']['href'].substring(
-                                        p['_links']['self']['href'].lastIndexOf('/') + 1
+                                    href={`/components/releases/edit/${l.release.substring(
+                                        l.release.lastIndexOf('/') + 1
                                     )}`}
                                     className='overlay-trigger'
                                 >
@@ -181,119 +277,23 @@ export default function TreeView({ projectId }: { projectId: string }) {
                             </OverlayTrigger>
                         </div>,
                     ],
-                    children: extractLinkedProjectsAndTheirLinkedReleases(
-                        licenseClearingData,
-                        p?.['_embedded']?.['sw360:linkedProjects']
-                    ),
+                    children: [],
                 }
-    
-                if (!licenseClearingData['linkedReleases']) {
-                    continue
-                }
-    
-                for (const l of p['linkedReleases'] ?? []) {
-                    const res = licenseClearingData['_embedded']['sw360:release'].filter(
-                        (e: any) =>
-                            e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
-                            l.release.substring(l.release.lastIndexOf('/') + 1)
-                    )
-                    const nodeRelease: NodeData = {
-                        rowData: [
-                            <Link
-                                href={`/components/releases/detail/${l.release.substring(l.release.lastIndexOf('/') + 1)}`}
-                                className='text-link text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-link`}
-                            >
-                                {`${res[0].name} (${res[0].version})`}
-                            </Link>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-componentType`}
-                            >
-                                {Capitalize(res[0].componentType ?? '')}
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-relation`}
-                            >
-                                {Capitalize(l.relation ?? '')}
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-mainLicenses`}
-                            >
-                                {(res[0].mainLicenseIds ?? []).join(', ')}
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-otherLicenses`}
-                            >
-                                <ExpandableTextList list={res[0].otherLicenseIds ?? []} />
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-state`}
-                            >
-                                <OverlayTrigger
-                                    overlay={
-                                        <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
-                                            res[0].clearingState ?? ''
-                                        )}`}</Tooltip>
-                                    }
-                                >
-                                    {res[0].clearingState === 'NEW_CLEARING' ? (
-                                        <span className='badge bg-danger overlay-badge'>{'CS'}</span>
-                                    ) : res[0].clearingState === 'REPORT_AVAILABLE' ? (
-                                        <span className='badge bg-primary overlay-badge'>{'CS'}</span>
-                                    ) : (
-                                        <span className='badge bg-success overlay-badge'>{'CS'}</span>
-                                    )}
-                                </OverlayTrigger>
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-mainlineState`}
-                            >
-                                {Capitalize(l.mainlineState ?? '')}
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-projectMainLineState`}
-                            >
-                                {Capitalize(l.mainlineState ?? '')}
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-comment`}
-                            >
-                                {l.comment ?? ''}
-                            </div>,
-                            <div
-                                className='text-center'
-                                key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-edit`}
-                            >
-                                <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                                    <Link
-                                        href={`/components/releases/edit/${l.release.substring(
-                                            l.release.lastIndexOf('/') + 1
-                                        )}`}
-                                        className='overlay-trigger'
-                                    >
-                                        <FaPencilAlt className='btn-icon' />
-                                    </Link>
-                                </OverlayTrigger>
-                            </div>,
-                        ],
-                        children: [],
-                    }
-                    nodeProject.children.push(nodeRelease)
-                }
-                treeData.push(nodeProject)
+                if(nodeProject.children === undefined)
+                    nodeProject.children = []
+                nodeProject.children.push(nodeRelease)
             }
-            return treeData
+            treeData.push(nodeProject)
         }
+        return treeData
+    }
+
+    useEffect(() => {
+        if (status !== 'authenticated') return
+        const controller = new AbortController()
+        const signal = controller.signal
         
-        ;(async () => {
+        void (async () => {
             try {
                 const res_licenseClearing = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearing?transitive=true`,
@@ -317,14 +317,14 @@ export default function TreeView({ projectId }: { projectId: string }) {
                     return notFound()
                 }
 
-                const licenseClearingData = await responses[0].json()
-                const linkedProjectsData = await responses[1].json()
+                const licenseClearingData = await responses[0].json() as LicenseClearing
+                const linkedProjectsData = await responses[1].json() as LinkedProjects
 
                 const releases: NodeData[] = []
-                for (const l of licenseClearingData['linkedReleases'] ?? []) {
+                for (const l of licenseClearingData['linkedReleases']) {
                     const res = licenseClearingData['_embedded']['sw360:release'].filter(
-                        (e: any) =>
-                            e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
+                        (e: Release) =>
+                            e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
                             l.release.substring(l.release.lastIndexOf('/') + 1)
                     )
                     const nodeRelease: NodeData = {
@@ -348,7 +348,7 @@ export default function TreeView({ projectId }: { projectId: string }) {
                                 className='text-center'
                                 key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-relation`}
                             >
-                                {Capitalize(l.relation ?? '')}
+                                {Capitalize(l.relation)}
                             </div>,
                             <div
                                 className='text-center'
@@ -386,19 +386,19 @@ export default function TreeView({ projectId }: { projectId: string }) {
                                 className='text-center'
                                 key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-mainLineState`}
                             >
-                                {Capitalize(l.mainlineState ?? '')}
+                                {Capitalize(l.mainlineState)}
                             </div>,
                             <div
                                 className='text-center'
                                 key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-projectMainLineState`}
                             >
-                                {Capitalize(l.mainlineState ?? '')}
+                                {Capitalize(l.mainlineState)}
                             </div>,
                             <div
                                 className='text-center'
                                 key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-comment`}
                             >
-                                {l.comment ?? ''}
+                                {l.comment}
                             </div>,
                             <div
                                 className='text-center'
@@ -425,7 +425,7 @@ export default function TreeView({ projectId }: { projectId: string }) {
                     ...releases,
                     ...extractLinkedProjectsAndTheirLinkedReleases(
                         licenseClearingData,
-                        linkedProjectsData?.['_embedded']?.['sw360:projects']
+                        linkedProjectsData['_embedded']['sw360:projects']
                     ),
                 ])
             } catch (e) {
@@ -441,7 +441,7 @@ export default function TreeView({ projectId }: { projectId: string }) {
         <>
             {
                 data ?
-                <TreeTable columns={columns} data={data} setData={setData} selector={true} sort={false} />:
+                <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />:
                 <div className='col-12 mt-1 text-center'>
                     <Spinner className='spinner' />
                 </div>

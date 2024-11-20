@@ -13,11 +13,12 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Table, _ } from '@/components/sw360'
-import { ProjectObligationsList, Session, LicenseObligationRelease } from '@/object-types'
+import { ProjectObligationsList, LicenseObligationRelease } from '@/object-types'
 import { useSession } from 'next-auth/react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { Spinner } from 'react-bootstrap'
 import { SW360_API_URL } from '@/utils/env'
+import { CommonUtils } from '@/utils'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -32,9 +33,9 @@ function ExpandableList({ previewString, releases }: { previewString: string, re
                     <span><BsCaretDownFill onClick={() => setExpanded(false)} />{' '}</span>
                     {releases.map((release: LicenseObligationRelease, index: number) => {
                         return (
-                            <li key={release.id ?? ''} style={{ display: 'inline' }}>
-                                <Link href={`/components/releases/detail/${release.id ?? ''}`} className='text-link'>
-                                    {`${release.name ?? ''} ${release.version ?? ''}`}
+                            <li key={release.id} style={{ display: 'inline' }}>
+                                <Link href={`/components/releases/detail/${release.id}`} className='text-link'>
+                                    {`${release.name} ${release.version}`}
                                 </Link>
                                 {index >= releases.length - 1 ? '' : ', '}{' '}
                             </li>
@@ -57,8 +58,7 @@ function ShowObligationTextOnExpand({id, infoText, colLength}: {id: string, info
     useEffect(() => {
         if(isExpanded) {
             const el = document.getElementById(id)
-            const par = el.parentElement.parentElement.parentElement
-            console.log(par)
+            const par = el?.parentElement?.parentElement?.parentElement
             const tr = document.createElement('tr')
             tr.id = `${id}_text`
             const td = document.createElement('td')
@@ -69,7 +69,7 @@ function ShowObligationTextOnExpand({id, infoText, colLength}: {id: string, info
             licenseObligationText.className = 'ps-5 pt-2 pe-3'
             td.appendChild(licenseObligationText)
             tr.appendChild(td)
-            par.parentNode.insertBefore(tr, par.nextSibling)
+            par?.parentNode?.insertBefore(tr, par.nextSibling)
         }
         else {
             const el = document.getElementById(`${id}_text`)
@@ -90,7 +90,7 @@ function ShowObligationTextOnExpand({id, infoText, colLength}: {id: string, info
     )
 }
 
-export default function LicenseObligation({ projectId }: { projectId: string }) {
+export default function LicenseObligation({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -138,7 +138,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }) 
             id: 'licenseObligation.releases',
             name: t('Releases'),
             formatter: (releases: LicenseObligationRelease[]) => {
-                const previewString = releases.map((r) => `${r.name ?? ''} ${r.version ?? ''}`).join(', ').substring(0, 10)
+                const previewString = releases.map((r) => `${r.name} ${r.version}`).join(', ').substring(0, 10)
                 return _(
                     <ExpandableList releases={releases} previewString={previewString} />
                 )
@@ -167,12 +167,13 @@ export default function LicenseObligation({ projectId }: { projectId: string }) 
         }
     ]
 
-    const initServerPaginationConfig = (session: Session) => {
+    const initServerPaginationConfig = () => {
+        if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: `${SW360_API_URL}/resource/api/projects/${projectId}/licenseObligations`,
             then: (data: ProjectObligationsList) => {
                 const tableRows = []
-                for(const [key, val] of Object.entries(data.licenseObligations)) {
+                for(const [key, val] of Object.entries(data.obligations)) {
                     const row = []
                     row.push(
                         ...[
@@ -193,7 +194,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }) 
                 }
                 return tableRows
             },
-            total: (data: ProjectObligationsList) => data.page.totalElements,
+            total: (data: ProjectObligationsList) => data.page?.totalElements ?? 0,
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
@@ -202,7 +203,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }) 
         <>
             {
                 (status === 'authenticated') ? 
-                <Table columns={columns} server={initServerPaginationConfig(session)} selector={false} />:
+                <Table columns={columns} server={initServerPaginationConfig()} selector={false} />:
                 <Spinner className='spinner col-12 mt-1 text-center' />
             }
         </>

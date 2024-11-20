@@ -17,15 +17,17 @@ import { Nav, Tab } from 'react-bootstrap'
 
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { HttpStatus } from '@/object-types'
+import { Changelogs, HttpStatus, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
+type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
+
 function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }: 
-                   { projectId: string, isCalledFromModerationRequestCurrentProject?: boolean }) {
+                   { projectId: string, isCalledFromModerationRequestCurrentProject?: boolean }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [key, setKey] = useState('list-change')
-    const [changeLogList, setChangeLogList] = useState<Array<any>>([])
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>([])
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
 
     useEffect(() => {
@@ -34,7 +36,7 @@ function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }:
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
                 const response = await ApiUtils.GET(
                     `changelog/document/${projectId}`,
@@ -47,7 +49,7 @@ function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }:
                     return notFound()
                 }
 
-                const data = await response.json()
+                const data = await response.json() as EmbeddedChangeLogs
 
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
@@ -64,7 +66,7 @@ function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }:
 
     return (
         <>
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k)}>
+            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
                 <div className='row' hidden={isCalledFromModerationRequestCurrentProject}>
                     <div className='col ps-0'>
                         <Nav variant='pills' className='d-inline-flex'>

@@ -317,7 +317,7 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
 
                 for(const r of attachmentUsages['_embedded']['sw360:release']) {
                     for(const att of r.attachments ?? []) {
-                        const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0]?.filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
+                        const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0].filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
                         for(const u of usages) {
                             if (u.usageData) {
                                 if(u.usageData.sourcePackage) {

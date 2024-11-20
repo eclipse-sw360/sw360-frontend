@@ -16,6 +16,7 @@ interface Release {
     cpeid?: string
     version?: string
     componentId?: string
+    componentType?: string
     releaseDate?: string
     externalIds?: { [k: string]: string } | null
     additionalData?: { [k: string]: string } | null

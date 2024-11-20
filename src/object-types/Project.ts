@@ -62,6 +62,7 @@ export interface Project {
     visibility?: string
     projectOwner?: string
     projectManager?: string
+    enableVulnerabilitiesDisplay?: boolean
     createdBy?: string
     enableSvm?: boolean
     linkedProjects?: {

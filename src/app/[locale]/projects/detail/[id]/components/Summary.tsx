@@ -23,7 +23,7 @@ const Capitalize = (text: string) => {
         : undefined
 }
 
-export default function Summary({ summaryData }: { summaryData: SummaryDataType }) {
+export default function Summary({ summaryData }: { summaryData: SummaryDataType }): JSX.Element {
     const t = useTranslations('default')
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
     const [toggleRoles, setToggleRoles] = useState(false)
@@ -36,7 +36,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     <span className='d-inline-block'>
                         <BiClipboard
                             onClick={() => {
-                                navigator.clipboard.writeText(text)
+                                void navigator.clipboard.writeText(text)
                             }}
                         />
                     </span>
@@ -63,12 +63,12 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     <tr>
                         <td>{t('Id')}:</td>
                         <td>
-                            {summaryData.id ?? ''} <Clipboard text={summaryData.id ?? ''} />
+                            {summaryData.id} <Clipboard text={summaryData.id} />
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Name')}:</td>
-                        <td>{summaryData.name ?? ''}</td>
+                        <td>{summaryData.name}</td>
                     </tr>
                     <tr>
                         <td>{t('Version')}:</td>
@@ -80,22 +80,22 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{summaryData.createdOn ?? ''}</td>
+                        <td>{summaryData.createdOn}</td>
                     </tr>
                     <tr>
                         <td>{t('Created By')}:</td>
                         <td>
                             <Link
                                 className={`text-link`}
-                                href={`mailto:${summaryData._embedded?.createdBy.email ?? ''}`}
+                                href={`mailto:${summaryData._embedded?.createdBy?.email ?? ''}`}
                             >
-                                {summaryData._embedded?.createdBy.fullName ?? ''}
+                                {summaryData._embedded?.createdBy?.fullName ?? ''}
                             </Link>
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Modified On')}:</td>
-                        <td>{summaryData.modifiedOn ?? ''}</td>
+                        <td>{summaryData.modifiedOn}</td>
                     </tr>
                     <tr>
                         <td>{t('Modified By')}:</td>
@@ -204,7 +204,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
 
                     <tr>
                         <td>{t('Owner Country')}:</td>
-                        <td>{summaryData.ownerCountry ? new Intl.DisplayNames(['en'], { type: 'region' }).of(summaryData.ownerCountry) : ''}</td>
+                        <td>{summaryData.ownerCountry !== undefined ? new Intl.DisplayNames(['en'], { type: 'region' }).of(summaryData.ownerCountry) : ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Lead Architect')}:</td>
@@ -225,7 +225,8 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                     <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
                                         {elem.fullName}
                                     </Link>
-                                    {i === summaryData._embedded['sw360:moderators'].length - 1 ? '' : ','}{' '}
+                                    {summaryData._embedded?.['sw360:moderators']?.length !== undefined &&
+                                        i === summaryData._embedded['sw360:moderators'].length - 1 ? '' : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -238,7 +239,8 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                     <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
                                         {elem.fullName}
                                     </Link>
-                                    {i === summaryData._embedded['sw360:contributors'].length - 1 ? '' : ','}{' '}
+                                    {summaryData._embedded?.['sw360:contributors']?.length !== undefined &&
+                                        i === summaryData._embedded['sw360:contributors'].length - 1 ? '' : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -251,7 +253,8 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                     <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
                                         {elem.fullName}
                                     </Link>
-                                    {i === summaryData._embedded?.securityResponsibles.length - 1 ? '' : ','}{' '}
+                                    {summaryData._embedded?.securityResponsibles?.length !== undefined &&
+                                        i === summaryData._embedded.securityResponsibles.length - 1 ? '' : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -259,7 +262,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     <tr>
                         <td>{t('Additional Roles')}:</td>
                         <td>
-                            {Object.entries(summaryData.roles ?? {}).map(([name, value]) => (
+                            {Object.entries(summaryData.roles ?? {}).map(([name, value]: [string, string[]]) => (
                                 <li key={name}>
                                     <span className='fw-bold'>{name}</span>{' '}
                                     {value.map((v: string, i: number) => (
@@ -303,9 +306,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                 </tbody>
             </table>
             <ResoucesUsing
-                documentId={summaryData.id ?? ''}
+                documentId={summaryData.id}
                 documentType={DocumentTypes.PROJECT}
-                documentName={summaryData.name ?? ''}
+                documentName={summaryData.name}
             />
         </>
     )

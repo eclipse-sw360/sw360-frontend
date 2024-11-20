@@ -14,16 +14,20 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 import { Table, _ } from '@/components/sw360'
-import { HttpStatus, Attachment, Embedded } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { signOut, useSession, getSession } from 'next-auth/react'
+import { HttpStatus, Attachment } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { signOut, getSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { LuDownload } from "react-icons/lu"
 import { Spinner } from 'react-bootstrap'
 import DownloadService from '@/services/download.service'
 
-type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
+interface EmbeddedAttachments {
+    _embedded?: {
+        'sw360:attachments'?: Array<Attachment>
+    }
+}
 
 const handleAttachmentDownload = async ({projectId, attachmentId, attachmentName} :{ projectId: string, attachmentId: string, attachmentName: string }) => {
     try {
@@ -40,7 +44,7 @@ function ShowAttachmentTextOnExpand({id, sha1, uploadedOn, uploadedComment, chec
     useEffect(() => {
         if(isExpanded) {
             const el = document.getElementById(id)
-            const par = el.parentElement.parentElement.parentElement
+            const par = el?.parentElement?.parentElement?.parentElement
             const tr = document.createElement('tr')
             tr.id = `${id}_text`
             const td = document.createElement('td')
@@ -82,7 +86,7 @@ function ShowAttachmentTextOnExpand({id, sha1, uploadedOn, uploadedComment, chec
             td.appendChild(attachmentDetailsSecondRow)
 
             tr.appendChild(td)
-            par.parentNode.insertBefore(tr, par.nextSibling)
+            par?.parentNode?.insertBefore(tr, par.nextSibling)
         }
         else {
             const el = document.getElementById(`${id}_text`)
@@ -103,10 +107,9 @@ function ShowAttachmentTextOnExpand({id, sha1, uploadedOn, uploadedComment, chec
     )
 }
 
-export default function ProjectAttachments({ projectId }: { projectId: string }) {
+export default function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
-    const [data, setData] = useState<any[] | null>(null)
+    const [data, setData] = useState<(string | object)[][] | null>(null)
 
     const columns = [
         {
@@ -182,7 +185,7 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
             name: t('Actions'),
             formatter: ({ projectId, attachmentId, attachmentName }: { projectId: string, attachmentId: string, attachmentName: string }) =>
             _(
-                <LuDownload className='btn-icon' size={18} onClick={() => handleAttachmentDownload({ projectId, attachmentId, attachmentName })}/>
+                <LuDownload className='btn-icon' size={18} onClick={() => void handleAttachmentDownload({ projectId, attachmentId, attachmentName })}/>
             ),
             sort: true,
             width: '6%'
@@ -190,12 +193,14 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
     ]
 
     useEffect(() => {
-        if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session))
+                    return
                 const res = await ApiUtils.GET(
                     `projects/${projectId}/attachments`,
                     session.user.access_token,
@@ -208,19 +213,19 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
                     return notFound()
                 }
 
-                const projectAttachments: EmbeddedAttachments = await res.json()
+                const projectAttachments = await res.json() as EmbeddedAttachments
 
-                const tableData: any[] = []
+                const tableData: (string | object)[][] = []
                 for (const attachment of projectAttachments["_embedded"]?.["sw360:attachments"] ?? []) {
                     tableData.push([
                         {
-                            id: `projectAttachments.${attachment.sha1}`, sha1: attachment.sha1 ?? '',
+                            id: `projectAttachments.${attachment.sha1}`, sha1: attachment.sha1,
                             uploadedOn: attachment.createdOn ?? '', uploadedComment: attachment.createdComment ?? '',
                             checkedOn: attachment.checkedOn ?? '', checkedComment: attachment.checkedComment ?? ''
                         },
                         attachment.filename,
                         attachment.size ?? 'n/a',
-                        attachment.attachmentType ?? '',
+                        attachment.attachmentType,
                         attachment.createdTeam ?? '',
 						attachment.createdBy ?? '',
 						attachment.checkedTeam ?? '',
@@ -236,7 +241,7 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
         })()
 
         return () => controller.abort()
-    }, [status, projectId, session, t])
+    }, [projectId, t])
 
     return (
         <>
