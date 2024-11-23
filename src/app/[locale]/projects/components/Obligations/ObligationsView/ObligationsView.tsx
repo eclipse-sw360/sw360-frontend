@@ -16,7 +16,7 @@ import LicenseObligation from './LicenseObligation'
 import { ActionType, ProjectObligation } from '@/object-types'
 
 export default function ObligationView({ projectId, actionType, payload, setPayload, selectedProjectId }:
-    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null }): JSX.Element {
+    Readonly<{ projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null }>): JSX.Element {
     const t = useTranslations('default')
     return (
         <Tabs defaultActiveKey='license-obligation' className='mb-3' mountOnEnter={true} unmountOnExit={true}>
