@@ -9,7 +9,7 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -39,17 +39,16 @@ export default function LinkProjects({
     projectId: string
     show: boolean
     setShow: (show: boolean) => void
-}) {
+}): JSX.Element {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    const [projectData, setProjectData] = useState<any[] | null>(null)
-    const [linkProjects, setLinkProjects] = useState<Map<string, any>>(new Map())
+    const [projectData, setProjectData] = useState<(object | string)[][] | null>(null)
+    const [linkProjects, setLinkProjects] = useState<Map<string, object>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
     const searchValueRef = useRef<HTMLInputElement>(null)
-    const topRef = useRef(null)
+    const topRef = useRef<HTMLDivElement | null>(null)
 
     const scrollToTop = () => {
-        topRef.current.scrollTo({ top: 0, left: 0 })
+        topRef.current?.scrollTo({ top: 0, left: 0 })
     }
 
     const columns = [
@@ -136,18 +135,22 @@ export default function LinkProjects({
         },
     ]
 
-    const handleSearch = async ({ searchValue }: { searchValue: string }): Promise<EmbeddedProject> => {
+    const handleSearch = async ({ searchValue }: { searchValue: string }) => {
         try {
+            const session = await getSession()
+            if(CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const url = (CommonUtils.isNullEmptyOrUndefinedString(searchValue))
+                ? `projects`
+                : `projects?name=${searchValue}&luceneSearch=true`
             const response = await ApiUtils.GET(
-                `projects?name=${searchValue}&luceneSearch=true`,
+                url,
                 session.user.access_token
             )
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else if (response.status !== HttpStatus.OK) {
+            if (response.status !== HttpStatus.OK) {
                 return notFound()
             }
-            const data = await response.json()
+            const data = await response.json() as EmbeddedProject
             const dataTableFormat =
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
                 CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
@@ -155,10 +158,10 @@ export default function LinkProjects({
                     : data['_embedded']['sw360:projects'].map((elem: Project) => [
                           elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                           elem.name,
-                          elem.version,
+                          elem.version ?? '',
                           { state: elem.state, clearingState: elem.clearingState },
-                          elem.projectResponsible,
-                          elem.description,
+                          elem.projectResponsible ?? '',
+                          elem.description ?? '',
                       ])
             setProjectData(dataTableFormat)
         } catch (e) {
@@ -176,11 +179,14 @@ export default function LinkProjects({
         setLinkProjects(m)
     }
 
-    const handleLinkProjects = async ({ projectId }: { projectId: string }): Promise<any> => {
+    const handleLinkProjects = async ({ projectId }: { projectId: string }) => {
         try {
             const data = { linkedProjects: Object.fromEntries(linkProjects) }
+            const session = await getSession()
+            if(CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.user.access_token)
-            const res = await response.json()
+            const res = await response.json() as Project
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else if (response.status === HttpStatus.FORBIDDEN || response.status === HttpStatus.BAD_REQUEST) {
@@ -189,7 +195,7 @@ export default function LinkProjects({
                     message: (
                         <>
                             <p>
-                                {t('project_cannot_be_created')}. {res.message}
+                            {t('project_cannot_be_created')}.
                             </p>
                         </>
                     ),
@@ -269,9 +275,7 @@ export default function LinkProjects({
                                 <Col xs='auto'>
                                     <Button
                                         variant='secondary'
-                                        onClick={async () => {
-                                            await handleSearch({ searchValue: searchValueRef.current.value })
-                                        }}
+                                        onClick={() => void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })}
                                     >
                                         {t('Search')}
                                     </Button>
@@ -295,8 +299,8 @@ export default function LinkProjects({
                     </Button>
                     <Button
                         variant='primary'
-                        onClick={async () => {
-                            await handleLinkProjects({ projectId })
+                        onClick={() => {
+                            void handleLinkProjects({ projectId })
                             scrollToTop()
                         }}
                         disabled={linkProjects.size === 0}

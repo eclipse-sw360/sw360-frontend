@@ -13,7 +13,7 @@ interface Context {
     params: { id: string }
 }
 
-const ProjectEditPage = async ({ params }: Context) => {
+const ProjectEditPage = ({ params }: Context): JSX.Element => {
     const projectId = params.id
 
     return <EditProject projectId={projectId} />

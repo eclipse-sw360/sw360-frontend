@@ -23,7 +23,7 @@ interface Props {
 export default function GenerateLicenseInfo({projectId,
                                                   projectName,
                                                   projectVersion
-                                                  }: Props) {
+                                                  }: Props): JSX.Element {
     const t = useTranslations('default')
     const handleDownloadLicenseInfo = (projectId: string) => {
         console.log('download license info', projectId, projectName, projectVersion)

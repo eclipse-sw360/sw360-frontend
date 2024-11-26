@@ -9,13 +9,13 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 
 import { HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 import styles from '../projects.module.css'
 
 interface Props {
@@ -40,28 +40,27 @@ interface ImportSBOMMetadata {
     show: boolean
 }
 
-const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props) => {
+const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [importState, setImportState] = useState(ImportSBOMState.INIT_STATE)
     const [fileFormatError, setFileFormatError] = useState<AlertData | null>(null)
     const [importError, setImportError] = useState<AlertData | null>(null)
-    const selectedFile = useRef<File | undefined>(undefined)
-    const inputRef = useRef<HTMLInputElement>(undefined)
+    const selectedFile = useRef<File | null>(null)
+    const inputRef = useRef<HTMLInputElement | null>(null)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        selectedFile.current = e.currentTarget.files[0]
-        if (!selectedFile || !selectedFile.current) {
+        selectedFile.current = e.currentTarget.files?.[0] ?? null
+        if (!selectedFile.current) {
             return
         }
         if (importSBOMMetadata.importType === 'SPDX') {
             if (!selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.xml')) {
                 setFileFormatError({ variant: 'danger', message: <p>
                     {
-                        selectedFile.current ?
                         t.rich('SBOM_IMPORT_FILE_FORMAT_ERROR', {
                             fileName: selectedFile.current.name,
                             files: '.rdf, .xml'
-                        }): ''
+                        })
                     }
                 </p>})
                 return
@@ -70,11 +69,10 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props) =
             if (!selectedFile.current.name.endsWith('.json') && !selectedFile.current.name.endsWith('.xml')) {
                 setFileFormatError({ variant: 'danger', message: <p>
                     {
-                        selectedFile.current ? 
                         t.rich('SBOM_IMPORT_FILE_FORMAT_ERROR', {
                             fileName: selectedFile.current.name,
                             files: '.json, .xml'
-                        }): ''
+                        })
                     }
                 </p>})
                 return
@@ -85,9 +83,15 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props) =
 
     const importFile = async () => {
         try {
+            const session = await getSession()
+            if(CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            if(!selectedFile.current) {
+                setImportError({ variant: 'danger', message: <p>{t('SBOM import failed')}</p> })
+                return
+            }
             const formData = new FormData()
             formData.append('file', selectedFile.current, selectedFile.current.name)
-            const session = await getSession()
             const response = await ApiUtils.POST(
                 `projects/import/SBOM?type=${importSBOMMetadata.importType}`,
                 formData,
@@ -114,39 +118,37 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props) =
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
-        if (e.dataTransfer.items && e.dataTransfer.items[0]) {
+        if (e.dataTransfer.items.length !== 0) {
             if(e.dataTransfer.items[0].kind === 'file') {
                 selectedFile.current = e.dataTransfer.items[0].getAsFile()
             } else {
                 return
             }
-        } else if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        } else if (e.dataTransfer.files.length !== 0) {
             selectedFile.current = e.dataTransfer.files[0]
         } else {
             return
         }
         if (importSBOMMetadata.importType === 'SPDX') {
-            if (!selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.xml')) {
+            if (selectedFile.current && !selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.xml')) {
                 setFileFormatError({ variant: 'danger', message: <p>
                     {
-                        selectedFile.current ? 
                         t.rich('SBOM_IMPORT_FILE_FORMAT_ERROR', {
                             fileName: selectedFile.current.name,
                             files: '.rdf, .xml'
-                        }): ''
+                        })
                     }
                 </p>})
                 return
             }
         } else {
-            if (!selectedFile.current.name.endsWith('.json') && !selectedFile.current.name.endsWith('.xml')) {
+            if (selectedFile.current && !selectedFile.current.name.endsWith('.json') && !selectedFile.current.name.endsWith('.xml')) {
                 setFileFormatError({ variant: 'danger', message: <p>
                     {
-                        selectedFile.current ? 
                         t.rich('SBOM_IMPORT_FILE_FORMAT_ERROR', {
                             fileName: selectedFile.current.name,
                             files: '.json, .xml'
-                        }): ''
+                        })
                     }
                 </p>})
                 return
@@ -257,7 +259,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props) =
                     <p className='fw-bold'>
                         {
                             t.rich('click to import', {
-                                fileName: selectedFile.current.name,
+                                fileName: selectedFile.current?.name ?? '',
                                 blue: (chunks) => <span className='text-primary'>{chunks}</span>
                             })
                         }
@@ -268,7 +270,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props) =
                         importError ? 
                         <>
                             <div className="fw-bold mb-2">{t.rich('Import Error', {
-                                fileName: selectedFile.current.name,
+                                fileName: selectedFile.current?.name ?? '',
                                 blue: (chunks) => <span className='text-primary'>{chunks}</span>
                             })}</div>
                             <Alert
@@ -292,7 +294,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props) =
                     <button
                         type='button'
                         className='fw-bold btn btn-primary'
-                        onClick={() => importFile()}
+                        onClick={() => void importFile()}
                     >
                         {t('Upload and Import')}
                     </button>
