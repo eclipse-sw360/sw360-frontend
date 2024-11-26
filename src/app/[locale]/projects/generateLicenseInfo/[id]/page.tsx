@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Projects',
 }
 
-const GenerateLicenseInformation = async ({ params }: Context) => {
+const GenerateLicenseInformation = ({ params }: Context): JSX.Element => {
     const projectId = params.id
 
     return <GenerateLicenseInfo projectId={projectId} />

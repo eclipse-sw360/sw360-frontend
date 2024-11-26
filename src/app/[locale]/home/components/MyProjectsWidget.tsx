@@ -61,7 +61,7 @@ function MyProjectsWidget(): ReactNode {
                     setData(
                         projects['_embedded']['sw360:projects'].map((item: Project) => [
                             _(
-                                <Link href={'projects/detail/' + CommonUtils.getIdFromUrl(item._links?.self.href)}>
+                                <Link href={'projects/detail/' + CommonUtils.getIdFromUrl(item._links.self.href)}>
                                     {item.name}{' '}
                                     {CommonUtils.isNullEmptyOrUndefinedString(item.version) && `(${item.version})`}
                                 </Link>,

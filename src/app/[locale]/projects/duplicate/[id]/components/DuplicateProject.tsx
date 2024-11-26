@@ -12,14 +12,14 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 interface Props{
@@ -30,10 +30,19 @@ interface LinkedReleaseProps {
     release?: string
     relation?: string
     mainlineState?: string
+    releaseRelation?: string
     comment?: string
 }
 
-function DuplicateProject({projectId}:Props) {
+interface LinkedReleaseData {
+    comment: string
+    mainlineState: string
+    name: string
+    releaseRelation: string
+    version: string
+}
+
+function DuplicateProject({projectId}:Props): JSX.Element {
 
     const router = useRouter()
     const t = useTranslations('default')
@@ -56,7 +65,7 @@ function DuplicateProject({projectId}:Props) {
     const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
-    const [existingReleaseData, setExistingReleaseData] = useState<Map<string, any>>()
+    const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()
     const [isDuplicateProjectFetched, setIsDuplicateProjectFetched] = useState(false)
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
@@ -71,10 +80,7 @@ function DuplicateProject({projectId}:Props) {
         defaultVendorId: '',
         modifiedOn: '',
         modifiedBy: '',
-        externalUrls: null,
         additionalData: {},
-        externalIds: null,
-        roles: null,
         ownerAccountingUnit: '',
         ownerGroup: '',
         ownerCountry: '',
@@ -135,159 +141,168 @@ function DuplicateProject({projectId}:Props) {
     }
 
     const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
-        const map = new Map<string, any>();
-        const linkedReleasesObject: { [key: string]: any } = {}
-        await Promise.all(linkedReleases.map(async (obj) => {
-            const releaseId = obj['release'].split('/').pop();
-            const releaseData = await fetchData(`releases/${releaseId}`);
-            map.set(releaseId, {
-                'name': releaseData.name,
-                'version': releaseData.version,
-                'releaseRelation': obj['relation'],
-                'mainlineState': obj['mainlineState'],
-                'comment': obj['comment'],
-            })
-            setExistingReleaseData(map)
-            linkedReleasesObject[releaseId] = {
-                'releaseRelation': obj['relation'],
-                'mainlineState': obj['mainlineState'],
-                'comment': obj['comment'],
-            };
-        }))
-        setProjectPayload((prevProjectPayload) => ({
-            ...prevProjectPayload,
-            linkedReleases: linkedReleasesObject,
-        }));
+        try {
+            const map = new Map<string, LinkedReleaseData>();
+            const linkedReleasesObject: { [key: string]: LinkedReleaseProps } = {}
+            const session = await getSession()
+            if(CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            for(const l of linkedReleases) {
+                const releaseId = l['release']?.split('/').pop()
+                if(releaseId === undefined)
+                    continue
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
+                const releaseData = await response.json() as ReleaseDetail
+                map.set(releaseId, {
+                    'name': releaseData.name,
+                    'version': releaseData.version,
+                    'releaseRelation': l.relation ?? '',
+                    'mainlineState': l.mainlineState ?? '',
+                    'comment': l.comment ?? '',
+                })
+                setExistingReleaseData(map)
+                linkedReleasesObject[releaseId] = {
+                    'releaseRelation': l.relation,
+                    'mainlineState': l.mainlineState,
+                    'comment': l.comment,
+                }
+            }
+            setProjectPayload((prevProjectPayload) => ({
+                ...prevProjectPayload,
+                linkedReleases: linkedReleasesObject,
+            }))
+        } catch(e) {
+            console.error(e)
+        }
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as Project
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[]
-    )
-
     useEffect(() => {
-        void fetchData(`projects/${projectId}`).then((project: Project) => {
-            if (typeof project.externalIds !== 'undefined') {
-                setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
+        void (async () => {
+            try {
+                const session = await getSession()
+                if(CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+                const response = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
+                if (response.status !== HttpStatus.OK) {
+                   return notFound()
+                }
+                const project = await response.json() as Project
+                if (project.externalIds !== undefined) {
+                    setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
+                }
+    
+                if (project.externalUrls !== undefined) {
+                    setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
+                }
+    
+                if (project.additionalData !== undefined) {
+                    setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
+                }
+    
+                if (project.roles !== undefined) {
+                    setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
+                }
+    
+                if (project.linkedReleases !== undefined) {
+                    void setObjectToMap(project.linkedReleases)
+                }
+    
+                if (project["_embedded"]?.["leadArchitect"] !== undefined) {
+                    setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]:
+                                        project["_embedded"]["leadArchitect"].fullName ?? '' })
+                }
+    
+                if (project["_embedded"]?.["projectOwner"] !== undefined) {
+                    setProjectOwner({ [project["_embedded"]["projectOwner"].email]:
+                                       project["_embedded"]["projectOwner"].fullName ?? '' })
+                }
+    
+                if (project["_embedded"]?.["projectManager"] !== undefined) {
+                    setProjectManager({ [project["_embedded"]["projectManager"].email]:
+                                         project["_embedded"]["projectManager"].fullName ?? '' })
+                }
+    
+                if (project["_embedded"]?.["sw360:moderators"] !== undefined) {
+                    const moderatorMap = new Map<string, string>()
+                    project["_embedded"]["sw360:moderators"].map((moderator) => {
+                        moderatorMap.set(moderator.email, moderator.fullName ?? '')
+                    })
+                    setModerators(Object.fromEntries(moderatorMap))
+                }
+    
+                if (project["_embedded"]?.["sw360:contributors"] !== undefined) {
+                    const contributorMap = new Map<string, string>()
+                    project["_embedded"]["sw360:contributors"].map((contributor) => {
+                        contributorMap.set(contributor.email, contributor.fullName ?? '')
+                    })
+                    setContributors(Object.fromEntries(contributorMap))
+                }
+    
+                if (project["_embedded"]?.["sw360:securityResponsibles"] !== undefined) {
+                    const securityResponsiblesMap = new Map<string, string>()
+                    project["_embedded"]["sw360:securityResponsibles"].map((securityResponsible) => {
+                        securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName ?? '')
+                    })
+                    setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
+                }
+    
+                const projectPayloadData: ProjectPayload = {
+                    name: project.name,
+                    version: project.version ?? '',
+                    visibility: project.visibility ?? 'EVERYONE',
+                    createdBy: project._embedded?.createdBy?.fullName ?? '',
+                    projectType: project.projectType ?? 'PRODUCT',
+                    tag: project.tag ?? '',
+                    description: project.description ?? '',
+                    domain: project.domain ?? '',
+                    modifiedOn: project.modifiedOn ?? '',
+                    modifiedBy: project.modifiedBy ?? '',
+                    externalIds: project.externalIds ?? {},
+                    externalUrls:project.externalUrls ?? {},
+                    additionalData: project.additionalData ?? {},
+                    roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)),
+                    ownerAccountingUnit: project.ownerAccountingUnit ?? '',
+                    ownerGroup: project.ownerGroup ?? '',
+                    ownerCountry: project.ownerCountry ?? '',
+                    clearingState: project.clearingState ?? 'OPEN',
+                    businessUnit: project.businessUnit ?? 'CT',
+                    preevaluationDeadline: project.preevaluationDeadline ?? '',
+                    clearingSummary: project.clearingSummary ?? '',
+                    specialRisksOSS: project.specialRisksOSS ?? '',
+                    generalRisks3rdParty: project.generalRisks3rdParty ?? '',
+                    specialRisks3rdParty: project.specialRisks3rdParty ?? '',
+                    deliveryChannels: project.deliveryChannels ?? '',
+                    remarksAdditionalRequirements: project.remarksAdditionalRequirements ?? '',
+                    state: project.state ?? 'ACTIVE',
+                    systemTestStart: project.systemTestStart ?? '',
+                    systemTestEnd: project.systemTestEnd ?? '',
+                    deliveryStart: project.deliveryStart ?? '',
+                    phaseOutSince: project.phaseOutSince ?? '',
+                    licenseInfoHeaderText: project.licenseInfoHeaderText ?? '',
+                    securityResponsibles: project.securityResponsibles ?? [],
+                    contributors: (project._embedded?.['sw360:contributors'] ?? []).map(user => user.email),
+                    moderators: (project._embedded?.['sw360:moderators'] ?? []).map(user => user.email),
+                    projectOwner: project._embedded?.projectOwner?.email ?? '',
+                    leadArchitect: project._embedded?.leadArchitect?.email ?? '',
+                    linkedReleases: projectPayload.linkedReleases ?? {},
+                }
+                setProjectPayload(projectPayloadData)
+                setIsDuplicateProjectFetched(true)
+            } catch(e) {
+                console.error(e)
             }
-
-            if (typeof project.externalUrls !== 'undefined') {
-                setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
-            }
-
-            if (typeof project.additionalData !== 'undefined') {
-                setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
-            }
-
-            if (typeof project.roles !== 'undefined') {
-                setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
-            }
-
-            if (typeof project.linkedReleases !== 'undefined') {
-                setObjectToMap(project.linkedReleases)
-            }
-
-            if (typeof project["_embedded"]["leadArchitect"] !== 'undefined') {
-                setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]:
-                                    project["_embedded"]["leadArchitect"].fullName })
-            }
-
-            if (typeof project["_embedded"]["projectOwner"] !== 'undefined') {
-                setProjectOwner({ [project["_embedded"]["projectOwner"].email]:
-                                   project["_embedded"]["projectOwner"].fullName })
-            }
-
-            if (typeof project["_embedded"]["projectManager"] !== 'undefined') {
-                setProjectManager({ [project["_embedded"]["projectManager"].email]:
-                                     project["_embedded"]["projectManager"].fullName })
-            }
-
-            if (typeof project["_embedded"]["sw360:moderators"] !== 'undefined') {
-                const moderatorMap = new Map<string, string>()
-                project["_embedded"]["sw360:moderators"].map((moderator) => {
-                    moderatorMap.set(moderator.email, moderator.fullName)
-                })
-                setModerators(Object.fromEntries(moderatorMap))
-            }
-
-            if (typeof project["_embedded"]["sw360:contributors"] !== 'undefined') {
-                const contributorMap = new Map<string, string>()
-                project["_embedded"]["sw360:contributors"].map((contributor) => {
-                    contributorMap.set(contributor.email, contributor.fullName)
-                })
-                setContributors(Object.fromEntries(contributorMap))
-            }
-
-            if (typeof project["_embedded"]["sw360:securityResponsibles"] !== 'undefined') {
-                const securityResponsiblesMap = new Map<string, string>()
-                project["_embedded"]["sw360:securityResponsibles"].map((securityResponsible) => {
-                    securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName)
-                })
-                setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
-            }
-
-            const projectPayloadData: ProjectPayload = {
-                name: project.name,
-                version: project.version ?? '',
-                visibility: project.visibility ?? 'EVERYONE',
-                createdBy: project._embedded.createdBy.fullName ?? '',
-                projectType: project.projectType ?? 'PRODUCT',
-                tag: project.tag ?? '',
-                description: project.description ?? '',
-                domain: project.domain ?? '',
-                modifiedOn: project.modifiedOn ?? '',
-                modifiedBy: project.modifiedBy ?? '',
-                externalIds: project.externalIds ?? {},
-                externalUrls:project.externalUrls ?? {},
-                additionalData: project.additionalData ?? {},
-                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)) ?? {},
-                ownerAccountingUnit: project.ownerAccountingUnit ?? '',
-                ownerGroup: project.ownerGroup ?? '',
-                ownerCountry: project.ownerCountry ?? '',
-                clearingState: project.clearingState ?? 'OPEN',
-                businessUnit: project.businessUnit ?? 'CT',
-                preevaluationDeadline: project.preevaluationDeadline ?? '',
-                clearingSummary: project.clearingSummary ?? '',
-                specialRisksOSS: project.specialRisksOSS ?? '',
-                generalRisks3rdParty: project.generalRisks3rdParty ?? '',
-                specialRisks3rdParty: project.specialRisks3rdParty ?? '',
-                deliveryChannels: project.deliveryChannels ?? '',
-                remarksAdditionalRequirements: project.remarksAdditionalRequirements ?? '',
-                state: project.state ?? 'ACTIVE',
-                systemTestStart: project.systemTestStart ?? '',
-                systemTestEnd: project.systemTestEnd ?? '',
-                deliveryStart: project.deliveryStart ?? '',
-                phaseOutSince: project.phaseOutSince ?? '',
-                licenseInfoHeaderText: project.licenseInfoHeaderText ?? '',
-                securityResponsibles: project.securityResponsibles ?? [],
-                contributors: (project._embedded?.['sw360:contributors'] ?? []).map(user => user.email),
-                moderators: (project._embedded?.['sw360:moderators'] ?? []).map(user => user.email),
-                projectOwner: project._embedded?.projectOwner?.email ?? '',
-                leadArchitect: project._embedded?.leadArchitect?.email ?? '',
-                linkedReleases: projectPayload?.linkedReleases ?? {},
-            }
-            setProjectPayload(projectPayloadData)
-            setIsDuplicateProjectFetched(true)
-        })
-    }, [projectId, fetchData, setProjectPayload])
+        })()
+    }, [projectId, setProjectPayload])
 
     const createProject = async () => {
         const session = await getSession()
+        if(CommonUtils.isNullOrUndefined(session))
+            return signOut()
         const createProjectUrl = (ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network/duplicate/${projectId}` : `projects/duplicate/${projectId}`
         const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
 
         if (response.status == HttpStatus.CREATED) {
-            const data = await response.json()
+            const data = await response.json() as Project
             MessageService.success(t('Your project is created'))
             router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
         } else {
@@ -333,21 +348,21 @@ function DuplicateProject({projectId}:Props) {
                                                 variant='primary'
                                                 type='submit'
                                                 className='me-2 col-auto'
-                                                onClick={createProject}
+                                                onClick={() => void createProject()}
                                             >
                                                 {t('Create Project')}
                                             </Button>
                                             <Button
                                                 variant='secondary'
                                                 className='col-auto'
-                                                onClick={handleCancelClick}
+                                                onClick={() => handleCancelClick()}
                                             >
                                                 {t('Cancel')}
                                             </Button>
                                         </Row>
                                     </Col>
                                     <Col lg={4} className='text-truncate buttonheader-title'>
-                                        {projectPayload && `${projectPayload.name} (${projectPayload.version})`}
+                                        {`${projectPayload.name} (${projectPayload.version})`}
                                     </Col>
                                 </Row>
                                 <Row className='mt-5'>

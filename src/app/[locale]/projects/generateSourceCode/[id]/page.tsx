@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Projects',
 }
 
-const GenerateSourceCode = async ({ params }: Context) => {
+const GenerateSourceCode = ({ params }: Context): JSX.Element => {
     const projectId = params.id
 
     return <GenerateSourceCodeBundle projectId={projectId} />

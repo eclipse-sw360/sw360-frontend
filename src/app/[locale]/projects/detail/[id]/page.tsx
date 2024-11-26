@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Projects',
 }
 
-const Detail = async ({ params }: Context) => {
+const Detail = ({ params }: Context): JSX.Element => {
     return <ProjectDetailTab projectId={params.id} />
 }
 

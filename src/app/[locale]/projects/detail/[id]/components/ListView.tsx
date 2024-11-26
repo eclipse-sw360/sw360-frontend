@@ -9,9 +9,9 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { HttpStatus, LicenseClearing, Project, Release, Embedded } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
@@ -56,9 +56,11 @@ interface ListViewData {
     actions: string
 }
 
+type LinkedProjects = Embedded<Project, 'sw360:projects'>
+
 const extractLinkedProjectsAndTheirLinkedReleases = (
-    licenseClearingData: any,
-    linkedProjectsData: any,
+    licenseClearingData: LicenseClearing,
+    linkedProjectsData: Project[] | undefined,
     finalData: ListViewData[],
     path: string[]
 ) => {
@@ -69,7 +71,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
         finalData.push({
             elementType: ElementType.LINKED_PROJECT,
             elem: {
-                name: p.name ?? '',
+                name: p.name,
                 version: p.version ?? '',
                 id: p['_links']['self']['href'].substring(p['_links']['self']['href'].lastIndexOf('/') + 1),
             },
@@ -88,15 +90,11 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             actions: p['_links']['self']['href'].substring(p['_links']['self']['href'].lastIndexOf('/') + 1),
         })
 
-        if (!licenseClearingData['linkedReleases']) {
-            continue
-        }
-
         for (const l of p['linkedReleases'] ?? []) {
             const id = l.release.substring(l.release.lastIndexOf('/') + 1)
             const res = licenseClearingData['_embedded']['sw360:release'].filter(
-                (e: any) =>
-                    e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
+                (e: Release) =>
+                    e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
             )
             finalData.push({
                 elementType: ElementType.LINKED_RELEASE,
@@ -108,20 +106,20 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                 type: res[0].componentType ?? '',
                 projectPath: path.slice(),
                 releasePath: [],
-                relation: l.relation ?? '',
+                relation: l.relation,
                 mainLicenses: res[0].mainLicenseIds ?? [],
                 state: {
                     clearingState: res[0].clearingState ?? '',
                 },
-                releaseMainlineState: l.mainlineState ?? '',
-                projectMainlineState: l.mainlineState ?? '',
-                comment: l.comment ?? '',
+                releaseMainlineState: l.mainlineState,
+                projectMainlineState: l.mainlineState,
+                comment: l.comment,
                 actions: id,
             })
         }
         extractLinkedProjectsAndTheirLinkedReleases(
             licenseClearingData,
-            p?.['_embedded']?.['sw360:linkedProjects'],
+            p['_embedded']?.['sw360:linkedProjects'],
             finalData,
             path
         )
@@ -132,31 +130,30 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
 const extractLinkedReleases = (
     projectName: string,
     projectVersion: string,
-    licenseClearingData: any,
+    licenseClearingData: LicenseClearing,
     finalData: ListViewData[],
     path: string[]
 ) => {
-    if (!licenseClearingData && !licenseClearingData?.['linkedReleases']) return
     path.push(`${projectName} (${projectVersion})`)
-    for (const l of licenseClearingData['linkedReleases'] ?? []) {
+    for (const l of licenseClearingData['linkedReleases']) {
         const id = l.release.substring(l.release.lastIndexOf('/') + 1)
         const res = licenseClearingData['_embedded']['sw360:release'].filter(
-            (e: any) => e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
+            (e: Release) => e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
         )
         finalData.push({
             elementType: ElementType.LINKED_RELEASE,
             elem: {
-                name: res[0].name,
-                version: res[0].version,
+                name: res[0].name ?? '',
+                version: res[0].version ?? '',
                 id: id,
             },
-            type: res[0].componentType,
+            type: res[0].componentType ?? '',
             projectPath: path.slice(),
             releasePath: [],
             relation: l.relation,
-            mainLicenses: res[0].mainLicenseIds,
+            mainLicenses: res[0].mainLicenseIds ?? [],
             state: {
-                clearingState: res[0].clearingState,
+                clearingState: res[0].clearingState ?? '',
             },
             releaseMainlineState: l.mainlineState,
             projectMainlineState: l.mainlineState,
@@ -174,10 +171,9 @@ export default function ListView({
     projectId: string
     projectName: string
     projectVersion: string
-}) {
+}): JSX.Element {
     const t = useTranslations('default')
-    const [data, setData] = useState<null | any[]>()
-    const { data: session, status } = useSession()
+    const [data, setData] = useState<null | (object | string)[][]>()
 
     const columns = [
         {
@@ -367,12 +363,14 @@ export default function ListView({
     ]
 
     useEffect(() => {
-        if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
+                const session = await getSession()
+                if(CommonUtils.isNullOrUndefined(session))
+                    return signOut()
                 const res_licenseClearing = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearing?transitive=true`,
                     session.user.access_token,
@@ -395,31 +393,31 @@ export default function ListView({
                     return notFound()
                 }
 
-                const licenseClearingData = await responses[0].json()
-                const linkedProjectsData = await responses[1].json()
+                const licenseClearingData = await responses[0].json() as LicenseClearing
+                const linkedProjectsData = await responses[1].json() as LinkedProjects
 
                 const finalData: ListViewData[] = []
                 const path: string[] = []
                 extractLinkedReleases(projectName, projectVersion, licenseClearingData, finalData, path)
                 extractLinkedProjectsAndTheirLinkedReleases(
                     licenseClearingData,
-                    linkedProjectsData?.['_embedded']?.['sw360:projects'],
+                    linkedProjectsData['_embedded']['sw360:projects'],
                     finalData,
                     path
                 )
 
                 const d = finalData.map((e) => [
-                    { ...e.elem, type: e.elementType ?? '' },
-                    e.type ?? '',
-                    e.projectPath ?? '',
-                    e.releasePath ?? '',
-                    e.relation ?? '',
-                    e.mainLicenses ?? [],
+                    { ...e.elem, type: e.elementType },
+                    e.type,
+                    e.projectPath,
+                    e.releasePath,
+                    e.relation,
+                    e.mainLicenses,
                     { state: e.state, elementType: e.elementType },
-                    e.releaseMainlineState ?? '',
-                    e.projectMainlineState ?? '',
-                    e.comment ?? '',
-                    { id: e.elem.id ?? '', type: e.elementType ?? '' },
+                    e.releaseMainlineState,
+                    e.projectMainlineState,
+                    e.comment,
+                    { id: e.elem.id, type: e.elementType },
                 ])
                 setData(d)
             } catch (e) {
@@ -428,7 +426,7 @@ export default function ListView({
         })()
 
         return () => controller.abort()
-    }, [projectId, projectName, projectVersion, session, status])
+    }, [projectId, projectName, projectVersion])
 
     return (
         <>

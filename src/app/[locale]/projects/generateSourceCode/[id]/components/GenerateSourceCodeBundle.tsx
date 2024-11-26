@@ -23,7 +23,7 @@ interface Props {
 export default function GenerateSourceCodeBundle({projectId,
                                                   projectName,
                                                   projectVersion
-                                                  }: Props) {
+                                                  }: Props): JSX.Element {
     const t = useTranslations('default')
     const handleDownloadProject = (projectId: string) => {
         console.log('download  project', projectId, projectName, projectVersion)

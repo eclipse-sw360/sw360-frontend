@@ -13,7 +13,7 @@ interface Context {
     params: { id: string }
 }
 
-const ProjectDuplicatePage = async ({ params }: Context) => {
+const ProjectDuplicatePage = ({ params }: Context): JSX.Element => {
     const projectId = params.id
 
     return <DuplicateProject projectId={projectId} />
