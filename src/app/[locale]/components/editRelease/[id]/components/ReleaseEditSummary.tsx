@@ -106,7 +106,7 @@ function ReleaseEditSummary({
             setAddtionalData(CommonUtils.convertObjectToMap(release.additionalData))
         }
 
-        let vendorId = ''
+        let vendorId = null
         if (!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:vendors'])) {
             vendorId = CommonUtils.getIdFromUrl(release._embedded['sw360:vendors'][0]._links?.self.href)
             const vendor: Vendor = {
@@ -114,16 +114,6 @@ function ReleaseEditSummary({
                 fullName: release._embedded['sw360:vendors'][0].fullName,
             }
             setVendor(vendor)
-        }
-
-        let modifiedBy = ''
-        if (typeof release._embedded['sw360:modifiedBy'] !== 'undefined') {
-            modifiedBy = release._embedded['sw360:modifiedBy'].fullName ?? ''
-        }
-
-        let createdBy = ''
-        if (typeof release._embedded['sw360:createdBy'] !== 'undefined') {
-            createdBy = release._embedded['sw360:createdBy'].fullName ?? ''
         }
 
         let componentId = ''
@@ -154,10 +144,6 @@ function ReleaseEditSummary({
             clearingState: release.clearingState,
             mainlineState: release.mainlineState,
             contributors: Object.keys(contributorsFromRelease),
-            createdOn: release.createdOn,
-            createBy: createdBy,
-            modifiedBy: modifiedBy,
-            modifiedOn: release.modifiedOn,
             moderators: Object.keys(moderatorsFromRelease),
             roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(release.roles ?? {})),
             mainLicenseIds: release.mainLicenseIds,
@@ -202,6 +188,7 @@ function ReleaseEditSummary({
                         setContributors={setContributors}
                         moderators={moderators}
                         setModerators={setModerators}
+                        releaseDetail={release}
                     />
                     <div className='row mb-4'>
                         <AddAdditionalRoles

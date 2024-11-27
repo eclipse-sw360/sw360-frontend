@@ -212,15 +212,11 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
         additionalData: null,
         mainlineState: 'OPEN',
         contributors: null,
-        createdOn: '',
-        createBy: '',
-        modifiedBy: '',
-        modifiedOn: '',
         moderators: null,
         roles: null,
         mainLicenseIds: null,
         otherLicenseIds: null,
-        vendorId: '',
+        vendorId: null,
         languages: null,
         operatingSystems: null,
         softwarePlatforms: null,
@@ -345,8 +341,11 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
 
     const submit = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+
         if (SPDX_ENABLE === 'true') {
             setInputValid(true)
             if (validateLicenseIdentifier(SPDXPayload) && validateExtractedText(SPDXPayload)) {
@@ -365,26 +364,27 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
                     SPDXPayload,
                     session.user.access_token
                 )
-                if (responseUpdateSPDX.status == HttpStatus.OK) {
-                    MessageService.success(`SPDX updated successfully!`)
+                if (responseUpdateSPDX.status === HttpStatus.UNAUTHORIZED) {
+                    MessageService.error(t('Session has expired'))
+                    return
+                }
+                if (responseUpdateSPDX.status !== HttpStatus.OK && responseUpdateSPDX.status !== HttpStatus.ACCEPTED) {
+                    MessageService.error('Release update failed')
+                    return
                 }
             }
         }
 
-        if (
-            !validateLicenseIdentifier(SPDXPayload) &&
-            !validateExtractedText(SPDXPayload) &&
-            !validateCreator(SPDXPayload)
-        ) {
-            const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const release = (await response.json()) as ReleaseDetail
-                MessageService.success(`Release ${release.name} (${release.version})  updated successfully!`)
-                const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
-                router.push('/components/releases/detail/' + releaseId)
-            } else {
-                MessageService.success(`Release Create failed`)
-            }
+        const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const release = (await response.json()) as ReleaseDetail
+            MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
+            router.push('/components/releases/detail/' + releaseId)
+        } else if (response.status === HttpStatus.ACCEPTED) {
+            MessageService.success(t('Moderation request is created'))
+            router.push('/components/releases/detail/' + releaseId)
+        } else {
+            MessageService.error('Release update failed')
         }
     }
 

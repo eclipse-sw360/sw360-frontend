@@ -31,7 +31,7 @@ interface Release {
     roles?: { [k: string]: Array<string> } | null
     mainLicenseIds?: Array<string> | null
     otherLicenseIds?: Array<string> | null
-    vendorId?: string
+    vendorId?: string | null
     languages?: Array<string> | null
     operatingSystems?: Array<string> | null
     softwarePlatforms?: Array<string> | null

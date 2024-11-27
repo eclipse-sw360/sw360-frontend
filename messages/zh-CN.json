@@ -658,6 +658,7 @@
     "Moderation Request": "审核请求",
     "Moderation Request Information": "审核请求信息",
     "Moderation request is already closed": "审核请求已关闭。\n无法执行操作。",
+    "Moderation request is created": "审核请求已创建",
     "Moderation request is created!": "",
     "Moderator": "",
     "Moderators": "版主",
