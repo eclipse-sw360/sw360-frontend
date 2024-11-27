@@ -16,10 +16,10 @@ import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, ReactNode } from 'react'
 import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ModerationDecision from './ModerationDecision'
 import ModerationRequestInfo from './ModerationRequestInfo'
@@ -28,10 +28,10 @@ import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
 
-function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
+function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }): ReactNode | undefined {
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
-    const { data: session, status } = useSession()
+    const { status } = useSession()
     const router = useRouter()
     const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails | undefined>({
         id: '',
@@ -67,21 +67,19 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     })
     const toastShownRef = useRef(false)
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as ModerationRequestDetails
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },
-        [session],
-    )
+    const fetchData = async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = (await response.json()) as ModerationRequestDetails
+            return data
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            notFound()
+        }
+    }
 
     useEffect(() => {
         if (!toastShownRef.current) {
@@ -94,7 +92,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 setModerationRequestData(moderationRequestDetails)
             },
         )
-    }, [fetchData, session])
+    }, [])
 
     const handleCommentValidation = () => {
         if (!moderationRequestPayload.comment.trim()) {
@@ -104,80 +102,128 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     }
 
     const handleAcceptModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const hasComment = handleCommentValidation()
-        if (hasComment) {
-            const updatedAcceptPayload = {
-                ...moderationRequestPayload,
-                action: 'ACCEPT',
-            }
-            setModerationRequestPayload(updatedAcceptPayload)
-            const response = await ApiUtils.PATCH(
-                `moderationrequest/${moderationRequestId}`,
-                updatedAcceptPayload,
-                session.user.access_token,
-            )
-            if (response.status == HttpStatus.ACCEPTED) {
-                await response.json()
-                MessageService.success(t('You have accepted the moderation request'))
-                router.push('/requests')
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const hasComment = handleCommentValidation()
+            if (hasComment) {
+                const updatedAcceptPayload = {
+                    ...moderationRequestPayload,
+                    action: 'ACCEPT',
+                }
+                setModerationRequestPayload(updatedAcceptPayload)
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${moderationRequestId}`,
+                    updatedAcceptPayload,
+                    session.user.access_token,
+                )
+                if (response.status == HttpStatus.ACCEPTED) {
+                    await response.json()
+                    MessageService.success(t('You have accepted the moderation request'))
+                    router.push('/requests')
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                    router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                }
             } else {
-                MessageService.error(t('There are some errors while updating moderation request'))
-                router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-        } else {
-            MessageService.error(t('Mandatory fields are empty please provide required data'))
+        } catch(e) {
+            console.error(e)
         }
     }
 
     const handleRejectModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const hasComment = handleCommentValidation()
-        if (hasComment) {
-            const updatedRejectPayload = {
-                ...moderationRequestPayload,
-                action: 'REJECT',
-            }
-            setModerationRequestPayload(updatedRejectPayload)
-            const response = await ApiUtils.PATCH(
-                `moderationrequest/${moderationRequestId}`,
-                updatedRejectPayload,
-                session.user.access_token,
-            )
-            if (response.status == HttpStatus.ACCEPTED) {
-                await response.json()
-                MessageService.success(t('You have rejected the moderation request'))
-                router.push('/requests')
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const hasComment = handleCommentValidation()
+            if (hasComment) {
+                const updatedRejectPayload = {
+                    ...moderationRequestPayload,
+                    action: 'REJECT',
+                }
+                setModerationRequestPayload(updatedRejectPayload)
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${moderationRequestId}`,
+                    updatedRejectPayload,
+                    session.user.access_token,
+                )
+                if (response.status == HttpStatus.ACCEPTED) {
+                    await response.json()
+                    MessageService.success(t('You have rejected the moderation request'))
+                    router.push('/requests')
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                    router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                }
             } else {
-                MessageService.error(t('There are some errors while updating moderation request'))
-                router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-        } else {
-            MessageService.error(t('Mandatory fields are empty please provide required data'))
+        } catch(e) {
+            console.error(e)
         }
     }
 
     const handlePostponeModerationRequest = async () => {
-        const hasComment = handleCommentValidation()
-        if (hasComment) {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const updatedPostponePayload = {
-                ...moderationRequestPayload,
-                action: 'POSTPONE',
+        try {
+            const hasComment = handleCommentValidation()
+            if (hasComment) {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const updatedPostponePayload = {
+                    ...moderationRequestPayload,
+                    action: 'POSTPONE',
+                }
+                setModerationRequestPayload(updatedPostponePayload)
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${moderationRequestId}`,
+                    updatedPostponePayload,
+                    session.user.access_token,
+                )
+                if (response.status == HttpStatus.ACCEPTED) {
+                    await response.json()
+                    MessageService.success(t('You have postponed the moderation request'))
+                    router.push('/requests')
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                    router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                }
+            } else {
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-            setModerationRequestPayload(updatedPostponePayload)
+        } catch(e) {
+            console.error(e)
+        }
+    }
+
+    const handleUnassignModerationRequest = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const updatedUnassignPayload = {
+                ...moderationRequestPayload,
+                action: 'UNASSIGN',
+            }
+            setModerationRequestPayload(updatedUnassignPayload)
             const response = await ApiUtils.PATCH(
                 `moderationrequest/${moderationRequestId}`,
-                updatedPostponePayload,
+                updatedUnassignPayload,
                 session.user.access_token,
             )
             if (response.status == HttpStatus.ACCEPTED) {
                 await response.json()
-                MessageService.success(t('You have postponed the moderation request'))
+                MessageService.success(t('You have unassigned yourself from the moderation request'))
+                router.push('/requests')
+            } else if (response.status == HttpStatus.CONFLICT) {
+                await response.json()
+                MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
                 router.push('/requests')
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
@@ -185,36 +231,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 MessageService.error(t('There are some errors while updating moderation request'))
                 router.push(`/requests/moderationRequest/${moderationRequestId}`)
             }
-        } else {
-            MessageService.error(t('Mandatory fields are empty please provide required data'))
-        }
-    }
-
-    const handleUnassignModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const updatedUnassignPayload = {
-            ...moderationRequestPayload,
-            action: 'UNASSIGN',
-        }
-        setModerationRequestPayload(updatedUnassignPayload)
-        const response = await ApiUtils.PATCH(
-            `moderationrequest/${moderationRequestId}`,
-            updatedUnassignPayload,
-            session.user.access_token,
-        )
-        if (response.status == HttpStatus.ACCEPTED) {
-            await response.json()
-            MessageService.success(t('You have unassigned yourself from the moderation request'))
-            router.push('/requests')
-        } else if (response.status == HttpStatus.CONFLICT) {
-            await response.json()
-            MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
-            router.push('/requests')
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            MessageService.error(t('There are some errors while updating moderation request'))
-            router.push(`/requests/moderationRequest/${moderationRequestId}`)
+        } catch(e) {
+            console.error(e)
         }
     }
 
@@ -227,7 +245,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     }
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <div className='ms-5 mt-2'>

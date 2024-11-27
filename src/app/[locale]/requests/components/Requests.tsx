@@ -16,10 +16,10 @@ import OpenModerationRequest from './OpenModerationRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
 import OpenClearingRequest from './OpenClearingRequest'
 import ClosedClearingRequest from './ClosedClearingRequest'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { ClearingRequest, Embedded, HttpStatus, ModerationRequest } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, useSession, getSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 
 
@@ -27,10 +27,10 @@ type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRe
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
 
-function Requests() {
+function Requests(): ReactNode | undefined {
 
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const { status } = useSession()
     const [openModerationRequestCount, setOpenModerationRequestCount] = useState(0)
     const [closedModerationRequestCount, setClosedModerationRequestCount] = useState(0)
     const [openClearingRequestCount, setOpenClearingRequestCount] = useState(0)
@@ -138,49 +138,44 @@ function Requests() {
         }
     ]
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return 
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return
-            } else {
-                notFound()
-            }
-        },[session]
-    )
-
     useEffect(() => {
-        void fetchData('moderationrequest')
-                .then((moderationRequests: EmbeddedModerationRequest | undefined) => {
-                    if(!moderationRequests) return
-                    let openMRCount = 0
-                    let closedMRCount = 0
-                    moderationRequests['_embedded']['sw360:moderationRequests']
-                    .filter((item: ModerationRequest) => {
-                        if (item.moderationState === 'PENDING' ||
-                            item.moderationState === 'INPROGRESS') {
-                                openMRCount++;
-                        }
-                        else if (item.moderationState === 'APPROVED' ||
-                                 item.moderationState === 'REJECTED') {
-                                    closedMRCount++;
-                        }
-                    })
+        const controller = new AbortController()
+        const signal = controller.signal
+        void (async () => {
+            try {
+                const session = await getSession()
+                if(CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+                const moderationRequestsPrmosies = ApiUtils.GET('moderationrequest', session.user.access_token, signal)
+                const clearingRequestsPromises = ApiUtils.GET('clearingrequests', session.user.access_token, signal)
+
+                const responses = await Promise.all([moderationRequestsPrmosies, clearingRequestsPromises])
+                if(responses[0].status !== HttpStatus.OK || responses[1].status !== HttpStatus.OK) {
+                    return notFound()
+                }
+
+                const moderationRequests = await responses[0].json() as EmbeddedModerationRequest
+                let openMRCount = 0
+                let closedMRCount = 0
+                moderationRequests['_embedded']['sw360:moderationRequests']
+                .map((item: ModerationRequest) => {
+                    if (item.moderationState === 'PENDING' ||
+                        item.moderationState === 'INPROGRESS') {
+                            openMRCount++;
+                    }
+                    else if (item.moderationState === 'APPROVED' ||
+                            item.moderationState === 'REJECTED') {
+                                closedMRCount++;
+                    }
+                })
                 setOpenModerationRequestCount(openMRCount)
                 setClosedModerationRequestCount(closedMRCount)
-            })
-        void fetchData('clearingrequests')
-            .then((clearingRequests: EmbeddedClearingRequest | undefined) => {
-                if(!clearingRequests) return
+
+                const clearingRequests = await responses[1].json() as EmbeddedClearingRequest
                 let openCRCount = 0
                 let closedCRCount = 0
                 clearingRequests['_embedded']['sw360:clearingRequests']
-                .filter((item: ClearingRequest) => {
+                .map((item: ClearingRequest) => {
                     if (item.clearingState === 'NEW' ||
                         item.clearingState === 'ACCEPTED' ||
                         item.clearingState === 'IN_QUEUE' ||
@@ -198,11 +193,18 @@ function Requests() {
                 })
                 setOpenClearingRequestCount(openCRCount)
                 setClosedClearingRequestCount(closedCRCount)
-        })
-        }, [fetchData, session])
+                
+            } catch(e) {
+                console.error(e)
+            }
+        })()
+        return () => {
+            controller.abort()
+        }
+        }, [])
 
     if (status === 'unauthenticated') {
-        signOut()
+        void signOut()
     } else {
         return (
             <>
