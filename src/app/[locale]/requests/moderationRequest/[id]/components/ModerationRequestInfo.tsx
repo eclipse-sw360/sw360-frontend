@@ -12,13 +12,14 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ModerationRequestDetails } from '@/object-types'
+import { ReactNode } from 'react'
 
 
-export default function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | undefined }) {
+export default function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | undefined }): ReactNode {
     const t = useTranslations('default')
 
     const formatDate = (timestamp: number | undefined): string | null => {
-        if(timestamp == null){
+        if(timestamp == undefined){
             return null
         }
         const date = new Date(timestamp);
@@ -41,7 +42,7 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
                         <td>{t('Requesting User')}:</td>
                         <td>
                             {((data?.requestingUser) != null)
-                                ? <Link href={`mailto:${data?.requestingUser}`}>{data?.requestingUser}</Link>
+                                ? <Link href={`mailto:${data.requestingUser}`}>{data.requestingUser}</Link>
                                 : ''}
                         </td>
                     </tr>

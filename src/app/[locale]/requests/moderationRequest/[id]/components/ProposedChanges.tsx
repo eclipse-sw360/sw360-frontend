@@ -20,11 +20,11 @@ import {
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { TDataArray } from 'gridjs/dist/src/types'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, useSession, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import { notFound } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import TableHeader from './TableHeader'
 
 interface interimDataType {
@@ -44,9 +44,9 @@ export default function ProposedChanges({
     moderationRequestData,
 }: {
     moderationRequestData: ModerationRequestDetails | undefined
-}) {
+}): ReactNode | undefined {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const { status } = useSession()
     const dafaultTitle = t('BASIC FIELD CHANGES')
     const attachmentTitle = t('ATTACHMENTS')
     const [requestAdditionType, setRequestAdditionType] = useState<string>('')
@@ -102,8 +102,8 @@ export default function ProposedChanges({
         },
     ]
 
-    const fetchData = useCallback(
-        async (url: string) => {
+    const fetchData = async (url: string) => {
+            const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
@@ -114,9 +114,7 @@ export default function ProposedChanges({
             } else {
                 notFound()
             }
-        },
-        [session],
-    )
+        }
 
     const convertToReactNode = (
         value: string | object | Array<object> | boolean | number | Array<string> | undefined,
@@ -344,7 +342,7 @@ export default function ProposedChanges({
     }, [moderationRequestData])
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <>

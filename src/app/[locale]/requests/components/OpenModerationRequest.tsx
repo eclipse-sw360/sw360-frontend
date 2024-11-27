@@ -9,14 +9,14 @@
 
 'use client'
 
-import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
+import { useEffect, useState, useCallback, ReactNode } from 'react'
+import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { notFound } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
@@ -26,12 +26,12 @@ interface ModerationRequestMap {
     [key: string]: string
 }
 
-function OpenModerationRequest() {
+function OpenModerationRequest(): ReactNode {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const { data: session, status } = useSession()
     const [mrIdArray, setMrIdArray] = useState<Array<string>>([])
-    const [tableData, setTableData] = useState<Array<any>>([])
+    const [tableData, setTableData] = useState<(object | string | string[])[][]>([])
     const [disableBulkDecline, setDisableBulkDecline] = useState(true)
     const [bulkDeclineMRModal, setBulkDeclineMRModal] = useState(false)
     const [mrIdNameMap, setMrIdNameMap] = useState<{ [key: string]: string }>({})
@@ -43,7 +43,7 @@ function OpenModerationRequest() {
     }
 
     const formatDate = (timestamp: number | undefined): string | null => {
-        if (timestamp == null) {
+        if(timestamp === undefined){
             return null
         }
         const date = new Date(timestamp)
@@ -55,7 +55,9 @@ function OpenModerationRequest() {
 
     const fetchData = useCallback(
         async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session)) return
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as EmbeddedModerationRequest
@@ -82,18 +84,17 @@ function OpenModerationRequest() {
                 setTableData(
                     filteredModerationRequests.map((item: ModerationRequest) => {
                         return [
-                            formatDate(item.timestamp),
-                            item.documentType,
+                            formatDate(item.timestamp) ?? '',
+                            item.documentType ?? '',
                             {
                                 id: item.id,
                                 documentName: item.documentName,
                             },
-                            item.requestingUser,
-                            item.requestingUserDepartment,
-                            item.moderators,
-                            item.moderationState !== undefined
-                                ? moderationRequestStatus[item.moderationState]
-                                : undefined,
+                            item.requestingUser ?? '',
+                            item.requestingUserDepartment ?? '',
+                            item.moderators ?? [],
+                            item.moderationState !== undefined ?
+                                moderationRequestStatus[item.moderationState] : '',
                             {
                                 moderationRequestId: item.id,
                                 documentName: item.documentName,
@@ -204,7 +205,7 @@ function OpenModerationRequest() {
     ]
 
     if (status === 'unauthenticated') {
-        signOut()
+        void signOut()
     } else {
         return (
             <>

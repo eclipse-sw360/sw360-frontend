@@ -11,9 +11,9 @@
 
 import { ClearingRequestDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
+import { ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { ReactElement } from 'react'
 
 interface ClearingRequestDataMap {
     [key: string]: string
@@ -23,7 +23,7 @@ interface Props {
     data: ClearingRequestDetails | undefined
 }
 
-export default function ClearingDecision({ data }: Readonly<Props>): ReactElement<any, any> | undefined {
+export default function ClearingDecision({ data }: Readonly<Props>): ReactNode | undefined {
     const t = useTranslations('default')
     const { status } = useSession()
     const clearingRequestStatus: ClearingRequestDataMap = {
@@ -70,11 +70,9 @@ export default function ClearingDecision({ data }: Readonly<Props>): ReactElemen
                     <tr>
                         <td>{t('Clearing Team')}:</td>
                         <td>
-                            {data?.clearingTeam != null ? (
-                                <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
-                            ) : (
-                                ''
-                            )}
+                            {data?.clearingTeam !== undefined
+                                ? <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
+                                : ''}
                         </td>
                     </tr>
                     <tr>
