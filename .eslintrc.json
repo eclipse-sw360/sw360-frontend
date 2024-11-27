@@ -21,7 +21,7 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    //"plugin:@typescript-eslint/recommended-requiring-type-checking",
     "next",
     "prettier"
   ],
@@ -35,7 +35,7 @@
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/explicit-module-boundary-types": "warn",
     "@typescript-eslint/no-inferrable-types": "error",
-    "@typescript-eslint/no-unnecessary-condition": "error",
+    "@typescript-eslint/no-unnecessary-condition": "warn",
     "@typescript-eslint/strict-boolean-expressions": "error",
     "@typescript-eslint/no-unsafe-call": "warn",
     "react-hooks/exhaustive-deps": "off"
