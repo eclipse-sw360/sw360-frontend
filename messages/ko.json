@@ -658,6 +658,7 @@
     "Moderation Request": "검토 요청",
     "Moderation Request Information": "중재 요청 정보",
     "Moderation request is already closed": "검토 요청이 이미 종료되었습니다. \n작업을 수행할 수 없습니다.",
+    "Moderation request is created": "검토 요청이 생성되었습니다.",
     "Moderation request is created!": "",
     "Moderator": "",
     "Moderators": "모더레이터",

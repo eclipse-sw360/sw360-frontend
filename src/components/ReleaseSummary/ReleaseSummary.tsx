@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { ActionType, Release, Vendor } from '@/object-types'
+import { ActionType, Release, ReleaseDetail, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog, SelectUsersDialog } from 'next-sw360'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
@@ -32,6 +32,7 @@ interface Props {
     setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
     moderators: { [k: string]: string }
     setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    releaseDetail?: ReleaseDetail
 }
 
 const ReleaseSummary = ({
@@ -48,6 +49,7 @@ const ReleaseSummary = ({
     setContributors,
     moderators,
     setModerators,
+    releaseDetail
 }: Props) => {
     const t = useTranslations('default')
     const [currentDate] = useState(new Date().toLocaleDateString())
@@ -138,7 +140,9 @@ const ReleaseSummary = ({
     }
 
     const defaultValueCreatedOn = () => {
-        return actionType === ActionType.EDIT ? releasePayload.createdOn : currentDate
+        return (actionType === ActionType.EDIT && releaseDetail !== undefined)
+            ? (releaseDetail.createdOn ?? '')
+            : currentDate
     }
 
     const defaultValueClearingState = () => {
@@ -452,7 +456,7 @@ const ReleaseSummary = ({
                                     aria-describedby='Create by'
                                     readOnly={true}
                                     name='createBy'
-                                    value={releasePayload.createBy ?? ''}
+                                    value={(releaseDetail !== undefined) ? releaseDetail._embedded['sw360:createdBy']?.fullName : ''}
                                 />
                             </div>
                             <div className='col-lg-4'>
@@ -518,7 +522,7 @@ const ReleaseSummary = ({
                                     aria-describedby='Modified on'
                                     readOnly={true}
                                     name='modifiedOn'
-                                    value={releasePayload.modifiedOn ?? ''}
+                                    value={(releaseDetail !== undefined) ? releaseDetail.modifiedOn : ''}
                                 />
                             </div>
                             <div className='col-lg-4'>
@@ -533,7 +537,7 @@ const ReleaseSummary = ({
                                     aria-describedby='Modified By'
                                     readOnly={true}
                                     name='modifiedBy'
-                                    value={releasePayload.modifiedBy ?? ''}
+                                    value={(releaseDetail !== undefined) ? releaseDetail._embedded['sw360:modifiedBy']?.fullName : ''}
                                 />
                             </div>
                         </div>
