@@ -9,86 +9,83 @@
 
 'use client'
 
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Table, _ } from "next-sw360"
-import Link from 'next/link'
-import { useEffect, useState, useCallback } from 'react'
 import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Table, _ } from 'next-sw360'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import ExpandingModeratorCell from './ExpandingModeratorCell'
+import { useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import ExpandingModeratorCell from './ExpandingModeratorCell'
 
 type EmbeddedModeratoinRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 interface ModerationRequestMap {
-    [key: string]: string;
+    [key: string]: string
 }
 
-
 function ClosedModerationRequest() {
-
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<Array<any>>([])
-    const moderationRequestStatus : ModerationRequestMap = {
+    const moderationRequestStatus: ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
         PENDING: t('Pending'),
         REJECTED: t('REJECTED'),
-    };
+    }
 
     const formatDate = (timestamp: number | undefined): string | null => {
-        if (!timestamp) {
+        if (timestamp == null) {
             return null
         }
-        const date = new Date(timestamp);
-        const year = date.getFullYear();
+        const date = new Date(timestamp)
+        const year = date.getFullYear()
         const month = String(date.getMonth() + 1).padStart(2, '0')
         const day = String(date.getDate()).padStart(2, '0')
         return `${year}-${month}-${day}`
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json() as EmbeddedModeratoinRequest
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[]
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = (await response.json()) as EmbeddedModeratoinRequest
+            return data
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            notFound()
+        }
+    }, [])
 
     useEffect(() => {
         setLoading(true)
         void fetchData('moderationrequest').then((moderationRequests: EmbeddedModeratoinRequest | undefined) => {
-            const filteredModerationRequests = moderationRequests?._embedded['sw360:moderationRequests'].filter((item: ModerationRequest) => {
-                return item.moderationState === 'APPROVED' || item.moderationState === 'REJECTED';
-            });
-            if (filteredModerationRequests !== undefined){
+            const filteredModerationRequests = moderationRequests?._embedded['sw360:moderationRequests'].filter(
+                (item: ModerationRequest) => {
+                    return item.moderationState === 'APPROVED' || item.moderationState === 'REJECTED'
+                },
+            )
+            if (filteredModerationRequests !== undefined) {
                 setTableData(
                     filteredModerationRequests.map((item: ModerationRequest) => [
-                        formatDate(item?.timestamp),
+                        formatDate(item.timestamp),
                         item.componentType,
                         _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
                         item.requestingUser,
                         item.requestingUserDepartment,
                         item.moderators,
-                        item?.moderationState !== undefined ?
-                            moderationRequestStatus[item?.moderationState] : undefined,
+                        item.moderationState !== undefined ? moderationRequestStatus[item.moderationState] : undefined,
                         '',
-                    ])
+                    ]),
                 )
             }
             setLoading(false)
-        })}, [fetchData])
+        })
+    }, [fetchData])
 
     const columns = [
         {
@@ -111,11 +108,12 @@ function ClosedModerationRequest() {
             name: t('Requesting User'),
             formatter: (email: string) =>
                 _(
-                    <>
-                        <Link href={`mailto:${email}`} className='text-link'>
-                            {email}
-                        </Link>
-                    </>
+                    <Link
+                        href={`mailto:${email}`}
+                        className='text-link'
+                    >
+                        {email}
+                    </Link>,
                 ),
             sort: true,
         },
@@ -127,10 +125,7 @@ function ClosedModerationRequest() {
         {
             id: 'closedModerationRequest.moderators',
             name: t('Moderators'),
-            formatter: (moderators: string[]) =>
-                _(
-                    <ExpandingModeratorCell moderators={moderators} />
-                ),
+            formatter: (moderators: string[]) => _(<ExpandingModeratorCell moderators={moderators} />),
             sort: true,
         },
         {
@@ -142,28 +137,31 @@ function ClosedModerationRequest() {
             id: 'closedModerationRequest.actions',
             name: t('Actions'),
             sort: true,
-        }
+        },
     ]
 
     if (status === 'unauthenticated') {
         signOut()
     } else {
-    return (
-        <>
+        return (
             <div className='row mb-4'>
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     {loading == false ? (
                         <div style={{ paddingLeft: '0px' }}>
-                            <Table columns={columns} data={tableData} sort={false} selector={true} />
+                            <Table
+                                columns={columns}
+                                data={tableData}
+                                sort={false}
+                                selector={true}
+                            />
                         </div>
-                        ) : (
-                                <Spinner className='spinner' />
-                        )
-                    }
+                    ) : (
+                        <Spinner className='spinner' />
+                    )}
                 </div>
             </div>
-        </>
-    )}
+        )
+    }
 }
 
 export default ClosedModerationRequest

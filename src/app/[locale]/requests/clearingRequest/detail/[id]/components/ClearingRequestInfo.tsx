@@ -9,22 +9,22 @@
 
 'use client'
 
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { ReactElement } from 'react'
 
-
-export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails | undefined}) {
+export default function ClearingRequestInfo({
+    data,
+}: Readonly<{ data: ClearingRequestDetails | undefined }>): ReactElement<any, any> | undefined {
     const t = useTranslations('default')
     const { status } = useSession()
-
 
     if (status === 'unauthenticated') {
         signOut()
     } else {
-    return (
-        <>
+        return (
             <table className='table summary-table'>
                 <thead>
                     <tr>
@@ -35,9 +35,11 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data?.requestingUser && data?.requestingUserName
-                                ? <Link href={`mailto:${data?.requestingUser}`}>{data?.requestingUserName}</Link>
-                                : ''}
+                            {data?.requestingUser != null && data.requestingUserName != null ? (
+                                <Link href={`mailto:${data.requestingUser}`}>{data.requestingUserName}</Link>
+                            ) : (
+                                ''
+                            )}
                         </td>
                     </tr>
                     <tr>
@@ -62,6 +64,6 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     </tr>
                 </tbody>
             </table>
-        </>
-    )}
+        )
+    }
 }

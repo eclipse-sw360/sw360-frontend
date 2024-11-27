@@ -7,31 +7,30 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
 'use client'
 
-import { HttpStatus, ModerationRequestPayload } from '@/object-types'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { signOut, useSession } from 'next-auth/react'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
-import { ModerationRequestDetails } from '@/object-types'
-import ModerationRequestInfo from './ModerationRequestInfo'
+import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ModerationDecision from './ModerationDecision'
-import MessageService from '@/services/message.service'
+import ModerationRequestInfo from './ModerationRequestInfo'
 import ProposedChanges from './ProposedChanges'
+import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
-import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
-
 
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
-
     const t = useTranslations('default')
-    const [openCardIndex, setOpenCardIndex] = useState<number>(0);
+    const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const { data: session, status } = useSession()
     const router = useRouter()
     const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails | undefined>({
@@ -60,199 +59,193 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         releaseDeletions: {},
         projectDeletions: {},
         licenseDeletions: {},
-        moderatorsSize: undefined
+        moderatorsSize: undefined,
     })
-    const [moderationRequestPayload, setModerationRequestPayload] =
-                                         useState<ModerationRequestPayload>({
+    const [moderationRequestPayload, setModerationRequestPayload] = useState<ModerationRequestPayload>({
         action: '',
-        comment: ''
+        comment: '',
     })
-    const toastShownRef = useRef(false);
+    const toastShownRef = useRef(false)
 
     const fetchData = useCallback(
         async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json() as ModerationRequestDetails
+                const data = (await response.json()) as ModerationRequestDetails
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
                 notFound()
             }
-        },[session]
+        },
+        [session],
     )
 
     useEffect(() => {
         if (!toastShownRef.current) {
-            MessageService.success(t('You have assigned yourself to this moderation request'));
-            toastShownRef.current = true;
+            MessageService.success(t('You have assigned yourself to this moderation request'))
+            toastShownRef.current = true
         }
 
         void fetchData(`moderationrequest/${moderationRequestId}`).then(
-                      (moderationRequestDetails: ModerationRequestDetails | undefined) => {
-            setModerationRequestData(moderationRequestDetails)
-        })}, [fetchData, session])
+            (moderationRequestDetails: ModerationRequestDetails | undefined) => {
+                setModerationRequestData(moderationRequestDetails)
+            },
+        )
+    }, [fetchData, session])
 
     const handleCommentValidation = () => {
-        if (!moderationRequestPayload?.comment.trim()) {
+        if (!moderationRequestPayload.comment.trim()) {
             return false
         }
         return true
-    };
+    }
 
     const handleAcceptModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const hasComment = handleCommentValidation()
-        if (hasComment){
+        if (hasComment) {
             const updatedAcceptPayload = {
                 ...moderationRequestPayload,
-                action: "ACCEPT"
+                action: 'ACCEPT',
             }
             setModerationRequestPayload(updatedAcceptPayload)
-            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                                updatedAcceptPayload,
-                                                session.user.access_token)
+            const response = await ApiUtils.PATCH(
+                `moderationrequest/${moderationRequestId}`,
+                updatedAcceptPayload,
+                session.user.access_token,
+            )
             if (response.status == HttpStatus.ACCEPTED) {
                 await response.json()
                 MessageService.success(t('You have accepted the moderation request'))
                 router.push('/requests')
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
-            }
-            else {
+            } else {
                 MessageService.error(t('There are some errors while updating moderation request'))
                 router.push(`/requests/moderationRequest/${moderationRequestId}`)
             }
-        }
-        else {
+        } else {
             MessageService.error(t('Mandatory fields are empty please provide required data'))
         }
-    };
+    }
 
     const handleRejectModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const hasComment = handleCommentValidation()
-        if (hasComment){
+        if (hasComment) {
             const updatedRejectPayload = {
                 ...moderationRequestPayload,
-                action: "REJECT"
+                action: 'REJECT',
             }
             setModerationRequestPayload(updatedRejectPayload)
-            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                                updatedRejectPayload,
-                                                session.user.access_token)
+            const response = await ApiUtils.PATCH(
+                `moderationrequest/${moderationRequestId}`,
+                updatedRejectPayload,
+                session.user.access_token,
+            )
             if (response.status == HttpStatus.ACCEPTED) {
                 await response.json()
                 MessageService.success(t('You have rejected the moderation request'))
                 router.push('/requests')
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
-            }
-            else {
+            } else {
                 MessageService.error(t('There are some errors while updating moderation request'))
                 router.push(`/requests/moderationRequest/${moderationRequestId}`)
             }
-        }
-        else {
+        } else {
             MessageService.error(t('Mandatory fields are empty please provide required data'))
         }
-    };
+    }
 
     const handlePostponeModerationRequest = async () => {
-
         const hasComment = handleCommentValidation()
-        if (hasComment){
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+        if (hasComment) {
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const updatedPostponePayload = {
                 ...moderationRequestPayload,
-                action: "POSTPONE"
+                action: 'POSTPONE',
             }
             setModerationRequestPayload(updatedPostponePayload)
-            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                                updatedPostponePayload,
-                                                session.user.access_token)
+            const response = await ApiUtils.PATCH(
+                `moderationrequest/${moderationRequestId}`,
+                updatedPostponePayload,
+                session.user.access_token,
+            )
             if (response.status == HttpStatus.ACCEPTED) {
                 await response.json()
                 MessageService.success(t('You have postponed the moderation request'))
                 router.push('/requests')
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
-            }
-            else {
+            } else {
                 MessageService.error(t('There are some errors while updating moderation request'))
                 router.push(`/requests/moderationRequest/${moderationRequestId}`)
             }
-        }
-        else {
+        } else {
             MessageService.error(t('Mandatory fields are empty please provide required data'))
         }
-    };
+    }
 
     const handleUnassignModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const updatedUnassignPayload = {
             ...moderationRequestPayload,
-            action: "UNASSIGN"
+            action: 'UNASSIGN',
         }
         setModerationRequestPayload(updatedUnassignPayload)
-        const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                               updatedUnassignPayload,
-                                               session.user.access_token)
+        const response = await ApiUtils.PATCH(
+            `moderationrequest/${moderationRequestId}`,
+            updatedUnassignPayload,
+            session.user.access_token,
+        )
         if (response.status == HttpStatus.ACCEPTED) {
             await response.json()
             MessageService.success(t('You have unassigned yourself from the moderation request'))
             router.push('/requests')
-        }
-        else if (response.status == HttpStatus.CONFLICT) {
+        } else if (response.status == HttpStatus.CONFLICT) {
             await response.json()
             MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
             router.push('/requests')
-        }
-        else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
             return signOut()
-        }
-        else {
+        } else {
             MessageService.error(t('There are some errors while updating moderation request'))
             router.push(`/requests/moderationRequest/${moderationRequestId}`)
         }
-    };
+    }
 
     const handleCancel = () => {
         router.push('/requests')
     }
 
     const toggleCollapse = (index: number) => {
-        setOpenCardIndex(prevIndex => (prevIndex === index ? -1 : index));
-    };
-
+        setOpenCardIndex((prevIndex) => (prevIndex === index ? -1 : index))
+    }
 
     if (status === 'unauthenticated') {
         signOut()
     } else {
-    return (
-        <div className='ms-5 mt-2'>
+        return (
+            <div className='ms-5 mt-2'>
                 <Tab.Container>
                     <Row>
                         <Row>
-                            <Col lg={12} className='text-truncate buttonheader-title me-3'>
+                            <Col
+                                lg={12}
+                                className='text-truncate buttonheader-title me-3'
+                            >
                                 {moderationRequestData &&
-                                 (moderationRequestData?.documentType === "COMPONENT" ||
-                                 moderationRequestData?.documentType === "RELEASE") &&
-                                `${moderationRequestData?.documentName}
-                                (${moderationRequestData?.componentType})`}
+                                    (moderationRequestData.documentType === 'COMPONENT' ||
+                                        moderationRequestData.documentType === 'RELEASE') &&
+                                    `${moderationRequestData.documentName}
+                                (${moderationRequestData.componentType})`}
                                 {moderationRequestData &&
-                                 moderationRequestData?.documentType === "PROJECT" &&
-                                `${moderationRequestData?.documentName}`}
+                                    moderationRequestData.documentType === 'PROJECT' &&
+                                    `${moderationRequestData.documentName}`}
                             </Col>
                         </Row>
                         <Col className='ps-2 me-3 mt-3'>
@@ -273,17 +266,18 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         >
                                             {t('Decline Request')}
                                         </Button>
-                                        <Button variant='secondary'
-                                                className='me-2 col-auto'
-                                                onClick={handlePostponeModerationRequest}
-                                            >
+                                        <Button
+                                            variant='secondary'
+                                            className='me-2 col-auto'
+                                            onClick={handlePostponeModerationRequest}
+                                        >
                                             {t('Postpone Request')}
                                         </Button>
                                         <Button
                                             variant='secondary'
                                             className='me-2 col-auto'
                                             onClick={handleUnassignModerationRequest}
-                                            >
+                                        >
                                             {t('Remove Me From Moderators')}
                                         </Button>
                                         <Button
@@ -297,40 +291,42 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Col>
                             </Row>
                             <Row className='mt-3'>
-                                <Card className = {`${styles['card']}`}>
-                                    <div onClick={() => toggleCollapse(0)}
-                                            style={{ cursor: 'pointer', padding: '0'}}
+                                <Card className={`${styles['card']}`}>
+                                    <div
+                                        onClick={() => toggleCollapse(0)}
+                                        style={{ cursor: 'pointer', padding: '0' }}
                                     >
                                         <Card.Header
-                                                className = {`
-                                                                ${openCardIndex === 0 ?
-                                                                styles['cardHeader-expanded'] : ''}`}
-                                                id = {`${styles['cardHeader']}`}>
-
+                                            className={`
+                                                                ${
+                                                                    openCardIndex === 0
+                                                                        ? styles['cardHeader-expanded']
+                                                                        : ''
+                                                                }`}
+                                            id={`${styles['cardHeader']}`}
+                                        >
                                             <Button
-                                                variant="button"
+                                                variant='button'
                                                 className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls="example-collapse-text-1"
+                                                aria-controls='example-collapse-text-1'
                                                 aria-expanded={openCardIndex === 0}
                                             >
-                                            {t('Moderation Request Information')}
+                                                {t('Moderation Request Information')}
                                             </Button>
                                         </Card.Header>
                                     </div>
                                     <Collapse in={openCardIndex === 0}>
-                                        <div id="example-collapse-text-1">
-                                            <Card.Body className = {`${styles['card-body']}`}>
-                                                <div className="row">
-                                                    <div className="col">
-                                                        <ModerationRequestInfo
-                                                            data={moderationRequestData}
-                                                        />
+                                        <div id='example-collapse-text-1'>
+                                            <Card.Body className={`${styles['card-body']}`}>
+                                                <div className='row'>
+                                                    <div className='col'>
+                                                        <ModerationRequestInfo data={moderationRequestData} />
                                                     </div>
-                                                    <div className="col">
+                                                    <div className='col'>
                                                         <ModerationDecision
                                                             data={moderationRequestData}
-                                                            moderationRequestPayload = {moderationRequestPayload}
-                                                            setModerationRequestPayload = {setModerationRequestPayload}
+                                                            moderationRequestPayload={moderationRequestPayload}
+                                                            setModerationRequestPayload={setModerationRequestPayload}
                                                         />
                                                     </div>
                                                 </div>
@@ -340,31 +336,38 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Card>
                             </Row>
                             <Row>
-                                <Card className = {`${styles['card']}`}>
-                                    <div onClick={() => toggleCollapse(1)}
-                                            style={{ cursor: 'pointer', padding: '0'}}>
+                                <Card className={`${styles['card']}`}>
+                                    <div
+                                        onClick={() => toggleCollapse(1)}
+                                        style={{ cursor: 'pointer', padding: '0' }}
+                                    >
                                         <Card.Header
-                                                className = {`
-                                                                ${openCardIndex === 1 ?
-                                                                styles['cardHeader-expanded'] : ''}`}
-                                                                id = {`${styles['cardHeader']}`}>
+                                            className={`
+                                                                ${
+                                                                    openCardIndex === 1
+                                                                        ? styles['cardHeader-expanded']
+                                                                        : ''
+                                                                }`}
+                                            id={`${styles['cardHeader']}`}
+                                        >
                                             <Button
-                                                variant="button"
+                                                variant='button'
                                                 className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls="example-collapse-text-2"
+                                                aria-controls='example-collapse-text-2'
                                                 aria-expanded={openCardIndex === 1}
                                             >
-                                            {t('Proposed Changes')}
+                                                {t('Proposed Changes')}
                                             </Button>
                                         </Card.Header>
                                     </div>
                                     <Collapse in={openCardIndex === 1}>
-                                        <div id="example-collapse-text-2">
-                                            <Card.Body className = {`${styles['card-body']}`}>
-                                                <div className="row">
-                                                    <div className="col">
-                                                        <ProposedChanges 
-                                                            moderationRequestData={moderationRequestData}/>
+                                        <div id='example-collapse-text-2'>
+                                            <Card.Body className={`${styles['card-body']}`}>
+                                                <div className='row'>
+                                                    <div className='col'>
+                                                        <ProposedChanges
+                                                            moderationRequestData={moderationRequestData}
+                                                        />
                                                     </div>
                                                 </div>
                                             </Card.Body>
@@ -373,39 +376,55 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Card>
                             </Row>
                             <Row>
-                                <Card className = {`${styles['card']}`}>
-                                    <div onClick={() => toggleCollapse(2)}
-                                            style={{ cursor: 'pointer', padding: '0'}}>
+                                <Card className={`${styles['card']}`}>
+                                    <div
+                                        onClick={() => toggleCollapse(2)}
+                                        style={{ cursor: 'pointer', padding: '0' }}
+                                    >
                                         <Card.Header
-                                                className = {`
-                                                                ${openCardIndex === 2 ?
-                                                                styles['cardHeader-expanded'] : ''}`}
-                                                                id = {`${styles['cardHeader']}`}>
+                                            className={`
+                                                                ${
+                                                                    openCardIndex === 2
+                                                                        ? styles['cardHeader-expanded']
+                                                                        : ''
+                                                                }`}
+                                            id={`${styles['cardHeader']}`}
+                                        >
                                             <Button
-                                                variant="button"
+                                                variant='button'
                                                 className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls="example-collapse-text-3"
+                                                aria-controls='example-collapse-text-3'
                                                 aria-expanded={openCardIndex === 2}
                                             >
-                                            { moderationRequestData?.documentType === "COMPONENT" && t('Current Component') ||
-                                                moderationRequestData?.documentType === "RELEASE" && t('Current Release') ||
-                                                moderationRequestData?.documentType === "PROJECT" && t('Current Project') ||
-                                                moderationRequestData?.documentType === "LICENSE" && t('Current License')
-                                            }
+                                                {(moderationRequestData?.documentType === 'COMPONENT' &&
+                                                    t('Current Component')) ||
+                                                    (moderationRequestData?.documentType === 'RELEASE' &&
+                                                        t('Current Release')) ||
+                                                    (moderationRequestData?.documentType === 'PROJECT' &&
+                                                        t('Current Project')) ||
+                                                    (moderationRequestData?.documentType === 'LICENSE' &&
+                                                        t('Current License'))}
                                             </Button>
                                         </Card.Header>
                                     </div>
                                     <Collapse in={openCardIndex === 2}>
-                                        <div id="example-collapse-text-3">
-                                            <Card.Body className = {`${styles['card-body']}`}>
-                                            {
-                                                moderationRequestData?.documentType === 'COMPONENT'
-                                                    && <CurrentComponentDetail componentId={moderationRequestData?.documentId} /> ||
-                                                moderationRequestData?.documentType === 'PROJECT'
-                                                    && <CurrentProjectDetail projectId={moderationRequestData?.documentId} /> ||
-                                                moderationRequestData?.documentType === 'RELEASE'
-                                                    && <CurrentReleaseDetail releaseId={moderationRequestData?.documentId} />
-                                            }
+                                        <div id='example-collapse-text-3'>
+                                            <Card.Body className={`${styles['card-body']}`}>
+                                                {(moderationRequestData?.documentType === 'COMPONENT' && (
+                                                    <CurrentComponentDetail
+                                                        componentId={moderationRequestData.documentId}
+                                                    />
+                                                )) ||
+                                                    (moderationRequestData?.documentType === 'PROJECT' && (
+                                                        <CurrentProjectDetail
+                                                            projectId={moderationRequestData.documentId}
+                                                        />
+                                                    )) ||
+                                                    (moderationRequestData?.documentType === 'RELEASE' && (
+                                                        <CurrentReleaseDetail
+                                                            releaseId={moderationRequestData.documentId}
+                                                        />
+                                                    ))}
                                             </Card.Body>
                                         </div>
                                     </Collapse>
@@ -415,7 +434,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     </Row>
                 </Tab.Container>
             </div>
-    )}
+        )
+    }
 }
 
 export default ModerationRequestDetail

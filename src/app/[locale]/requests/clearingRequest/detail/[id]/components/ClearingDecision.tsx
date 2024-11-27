@@ -9,24 +9,24 @@
 
 'use client'
 
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { ReactElement } from 'react'
 
 interface ClearingRequestDataMap {
-    [key: string]: string;
+    [key: string]: string
 }
 
 interface Props {
     data: ClearingRequestDetails | undefined
 }
 
-export default function ClearingDecision({ data }: Props ) {
-
+export default function ClearingDecision({ data }: Readonly<Props>): ReactElement<any, any> | undefined {
     const t = useTranslations('default')
     const { status } = useSession()
-    const clearingRequestStatus : ClearingRequestDataMap = {
+    const clearingRequestStatus: ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
         ACCEPTED: t('ACCEPTED'),
@@ -36,22 +36,20 @@ export default function ClearingDecision({ data }: Props ) {
         CLOSED: t('Closed'),
         AWAITING_RESPONSE: t('Awaiting Response'),
         ON_HOLD: t('On Hold'),
-        SANITY_CHECK: t('Sanity Check')
-    };
+        SANITY_CHECK: t('Sanity Check'),
+    }
 
-    const clearingRequestPriority : ClearingRequestDataMap = {
+    const clearingRequestPriority: ClearingRequestDataMap = {
         LOW: t('Low'),
         MEDIUM: t('Medium'),
         HIGH: t('High'),
-        CRITICAL: t('Critical')
-    };
-
+        CRITICAL: t('Critical'),
+    }
 
     if (status === 'unauthenticated') {
         signOut()
     } else {
-    return (
-        <>
+        return (
             <table className='table summary-table'>
                 <thead>
                     <tr>
@@ -61,47 +59,38 @@ export default function ClearingDecision({ data }: Props ) {
                 <tbody>
                     <tr>
                         <td>{t('Request Status')}:</td>
-                        <td>{data?.clearingState !== undefined ? 
-                                clearingRequestStatus[data?.clearingState] :
-                                undefined}</td>
+                        <td>
+                            {data?.clearingState !== undefined ? clearingRequestStatus[data.clearingState] : undefined}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Priority')}:</td>
-                        <td>
-                            {data?.priority !== undefined ?
-                                clearingRequestPriority[data?.priority] :
-                                undefined
-                            }
-                        </td>
+                        <td>{data?.priority !== undefined ? clearingRequestPriority[data.priority] : undefined}</td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Team')}:</td>
                         <td>
-                            {data?.clearingTeam
-                                ? <Link href={`mailto:${data?.clearingTeam}`}>{data?.clearingTeamName}</Link>
-                                : ''}
+                            {data?.clearingTeam != null ? (
+                                <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
+                            ) : (
+                                ''
+                            )}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Agreed Clearing Date')}:</td>
-                        <td>
-                            {data?.agreedClearingDate ?? ''}
-                        </td>
+                        <td>{data?.agreedClearingDate ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Request Closed on')}:</td>
-                        <td>
-                            {data?._embedded?.requestClosedOn}
-                        </td>
+                        <td>{data?._embedded?.requestClosedOn}</td>
                     </tr>
                     <tr>
                         <td>{t('Last Updated on')}:</td>
-                        <td>
-                            {''}
-                        </td>
+                        <td>{''}</td>
                     </tr>
                 </tbody>
             </table>
-        </>
-    )}
+        )
+    }
 }
