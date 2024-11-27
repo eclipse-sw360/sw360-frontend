@@ -18,7 +18,7 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
     const t = useTranslations('default')
 
     const formatDate = (timestamp: number | undefined): string | null => {
-        if(!timestamp){
+        if(timestamp == null){
             return null
         }
         const date = new Date(timestamp);
@@ -40,7 +40,7 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data?.requestingUser
+                            {((data?.requestingUser) != null)
                                 ? <Link href={`mailto:${data?.requestingUser}`}>{data?.requestingUser}</Link>
                                 : ''}
                         </td>
