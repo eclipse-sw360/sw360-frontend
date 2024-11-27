@@ -11,7 +11,8 @@
 
 import crypto from 'crypto';
 import { SW360_API_URL, SW360_REST_CLIENT_ID, SW360_REST_CLIENT_SECRET } from '@/utils/env';
-import { NextAuthOptions, User } from 'next-auth';
+import { NextAuthOptions, User, AuthProfile, TokenSet } from 'next-auth';
+import { UserGroupType } from '@/object-types';
 
 let codeVerifier: crypto.BinaryLike;
 
@@ -36,7 +37,7 @@ const sw360OauthOption: NextAuthOptions = {
       },
       clientId: SW360_REST_CLIENT_ID,
       clientSecret: SW360_REST_CLIENT_SECRET,
-      profile: async (profiles, tokens) => {
+      profile: (profiles: AuthProfile, tokens: TokenSet): User => {
         return {
           exp: tokens.exp,
           expires_in: tokens.expires_in,
@@ -44,7 +45,7 @@ const sw360OauthOption: NextAuthOptions = {
           refresh_token: tokens.refresh_token,
           scope: tokens.scope,
           token_type: tokens.token_type,
-          userGroup: profiles.userGroup,
+          userGroup: profiles.userGroup as UserGroupType,
           email: profiles.email,
           access_token: 'Bearer ' + tokens.access_token,
           id: profiles.sub,
@@ -58,10 +59,10 @@ const sw360OauthOption: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    jwt({ token, user }) {
       return { ...token, ...user } as User
     },
-    async session({ session, token }) {
+    session({ session, token }) {
       // Send properties to the client, like an access_token from a provider.
       session.user = token
       return session

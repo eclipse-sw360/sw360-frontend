@@ -10,7 +10,7 @@
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { CREDENTIAL_PROVIDER } from '@/constants'
 import AuthService from '@/services/auth.service'
-import { HttpStatus, UserCredentialInfo } from '@/object-types'
+import { HttpStatus, UserCredentialInfo, User as AppUser } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { NextAuthOptions, User } from 'next-auth'
 
@@ -23,22 +23,23 @@ const basicAuthOption: NextAuthOptions = {
             async authorize(credentials) {
                 // Add logic here to look up the user from the credentials supplied
                 try {
-                    const { username, password } = credentials as any
+                    const { username, password } = credentials as {
+                        username: string,
+                        password: string,
+                    }
                     const userCredential: UserCredentialInfo = {
                         username: username,
                         password: password,
                     }
 
-                    const authToken = await AuthService.generateBasicToken(userCredential)
-
-                    if (authToken === null) throw new Error('Error while fetching Auth Token')
+                    const authToken = AuthService.generateBasicToken(userCredential)
 
                     const response = await ApiUtils.GET(`users/${username}`, authToken)
                     if (response.status !== HttpStatus.OK) {
                         throw new Error('Error while fetching User Group')
                     }
-                    const data = await response.json()
-                    return { access_token: authToken, userGroup: data.userGroup, email: username } as any
+                    const data = await response.json() as AppUser
+                    return { access_token: authToken, userGroup: data.userGroup, email: username } as User
                 } catch (e) {
                     console.error(e)
                     return null
@@ -52,10 +53,10 @@ const basicAuthOption: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user }) {
+        jwt({ token, user }) {
             return { ...token, ...user } as User
         },
-        async session({ session, token }) {
+        session({ session, token }) {
             session.user = token
             return session
         },

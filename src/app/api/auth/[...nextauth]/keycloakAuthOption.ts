@@ -7,11 +7,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import KeycloakProvider from "next-auth/providers/keycloak";
+import KeycloakProvider from "next-auth/providers/keycloak"
 import { NextAuthOptions } from 'next-auth'
 import { jwtDecode } from 'jwt-decode'
-
-import { UserGroupType } from '@/object-types';
+import { UserGroupType } from '@/object-types'
 
 const keycloakProvider = KeycloakProvider({
     clientId: `${process.env.SW360_KEYCLOAK_CLIENT_ID}`,
@@ -21,7 +20,6 @@ const keycloakProvider = KeycloakProvider({
     authorization: { params: { scope: "openid READ WRITE" } },
 })
 
-
 const keycloakAuthOption: NextAuthOptions = {
     providers: [keycloakProvider],
 
@@ -30,25 +28,26 @@ const keycloakAuthOption: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, account }) {
-            if (account && account.access_token && account.id_token && account.expires_at && account.refresh_token) {
+        jwt({ token, account }) {
+            if (account && account.access_token !== undefined && account.id_token !== undefined 
+                && account.expires_at !== undefined && account.refresh_token !== undefined) {
                 token.decoded = jwtDecode(account.access_token)
                 token.access_token = "Bearer " + account.id_token
                 token.expires_in = account.expires_at
                 token.refresh_token = account.refresh_token
-                const tokenDetails = JSON.parse(JSON.stringify(token.decoded))
+                const tokenDetails = JSON.parse(JSON.stringify(token.decoded)) as { userGroup?: string[] }
                 const userGroup = getUserGroup(tokenDetails)
-                token.userGroup = Array.isArray(userGroup) ? userGroup[0] : userGroup;
+                token.userGroup = userGroup[0]
             }
             return token
         },
-        async session({ session, token }) {
+        session({ session, token }) {
             // Send properties to the client, like an access_token from a provider.
             session.user.access_token = token.access_token
             const decodedToken = jwtDecode(token.access_token)
-            const tokenDetails = JSON.parse(JSON.stringify(decodedToken))
-            const user_Group = getUserGroup(tokenDetails)
-            session.user.userGroup  = Array.isArray(user_Group) ? user_Group[0] : user_Group;
+            const tokenDetails = JSON.parse(JSON.stringify(decodedToken)) as { userGroup?: string[] }
+            const userGroup = getUserGroup(tokenDetails)
+            session.user.userGroup = userGroup[0]
             return session
         },
     },
@@ -59,9 +58,9 @@ const keycloakAuthOption: NextAuthOptions = {
 }
 
 
-function getUserGroup(tokenDetails: any) {
+function getUserGroup(tokenDetails: { userGroup?: string[] }): UserGroupType[] {
     return tokenDetails.userGroup ?
-        (tokenDetails.userGroup as string[]).map((elem) => {
+        tokenDetails.userGroup.map((elem) => {
             if (elem === '/ADMIN') {
                 return UserGroupType.ADMIN;
             } else if (elem === '/CLEARING_ADMIN') {
