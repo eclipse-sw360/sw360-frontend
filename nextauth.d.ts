@@ -9,16 +9,8 @@
 // License-Filename: LICENSE
 
 import 'next-auth'
-
-enum UserGroupType {
-    USER = 'USER',
-    ADMIN = 'ADMIN',
-    CLEARING_ADMIN = 'CLEARING_ADMIN',
-    ECC_ADMIN = 'ECC_ADMIN',
-    SECURITY_ADMIN = 'SECURITY_ADMIN',
-    SW360_ADMIN = 'SW360_ADMIN',
-    CLEARING_EXPERT = 'CLEARING_EXPERT',
-}
+import { UserGroupType } from '@/object-types'
+import { Profile, DefaultUser } from 'next-auth'
 
 interface SW360User extends DefaultUser {
     id: string
@@ -36,8 +28,13 @@ interface SW360User extends DefaultUser {
     decoded: string
 }
 
+interface SW360Profile extends Profile {
+    userGroup: UserGroupType
+}
+
 declare module 'next-auth' {
     type User = SW360User
+    type AuthProfile = SW360Profile
     interface Session {
         user: User
     }
