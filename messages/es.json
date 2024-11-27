@@ -1,4 +1,5 @@
 {
+  "BA-BL/Group": "BA-BL/Grupo",
   "default": {
     "(n/a)": "",
     "A package with the same name and version already exists": "Ya existe un paquete con el mismo nombre y versión.",

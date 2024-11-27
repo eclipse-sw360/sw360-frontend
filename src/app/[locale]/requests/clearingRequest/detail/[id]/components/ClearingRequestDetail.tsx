@@ -12,18 +12,19 @@
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { ClearingRequestDetails, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import dynamic from 'next/dynamic'
 import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, ReactNode } from 'react'
 import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
 import ClearingDecision from './ClearingDecision'
 import ClearingRequestInfo from './ClearingRequestInfo'
 
-function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
+function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }): ReactNode | undefined {
+
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const router = useRouter()
@@ -47,6 +48,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         createdOn: '',
         comments: [{}],
     })
+    const { status } = useSession()
 
     const ClearingComments = dynamic(() => import('./ClearingComments'), {
         ssr: false,

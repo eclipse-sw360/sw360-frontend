@@ -44,7 +44,7 @@ export default function ProposedChanges({
     moderationRequestData,
 }: {
     moderationRequestData: ModerationRequestDetails | undefined
-}) {
+}): ReactNode | undefined {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const dafaultTitle = t('BASIC FIELD CHANGES')
@@ -344,7 +344,7 @@ export default function ProposedChanges({
     }, [moderationRequestData])
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <>

@@ -10,6 +10,7 @@
 'use client'
 
 import { ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
+import { ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
@@ -23,7 +24,10 @@ interface Props {
     setModerationRequestPayload: React.Dispatch<React.SetStateAction<ModerationRequestPayload>>
 }
 
-export default function ModerationDecision({ data, moderationRequestPayload, setModerationRequestPayload }: Props) {
+export default function ModerationDecision({ data,
+                                             moderationRequestPayload,
+                                             setModerationRequestPayload }: Props ): ReactNode {
+
     const t = useTranslations('default')
     const moderationRequestStatus: ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
