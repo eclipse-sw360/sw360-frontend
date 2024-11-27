@@ -1152,7 +1152,7 @@ const EditPackageInformation = ({
                                                     : true
                                                 }
                                                 onChange={updateFieldPackageVerificationCode}
-                                                value={packageInformation.packageVerificationCode?.value}
+                                                value={packageInformation.packageVerificationCode?.value ?? ''}
                                             ></input>
                                             <textarea
                                                 className='form-control'
@@ -1168,6 +1168,7 @@ const EditPackageInformation = ({
                                                 onChange={updateFieldExcludedFiles}
                                                 value={
                                                     !CommonUtils.isNullOrUndefined(packageInformation.packageVerificationCode)
+                                                    && (packageInformation.packageVerificationCode.excludedFiles !== undefined)
                                                     ? packageInformation.packageVerificationCode.excludedFiles
                                                         .toString()
                                                         .replaceAll(',', '\n')

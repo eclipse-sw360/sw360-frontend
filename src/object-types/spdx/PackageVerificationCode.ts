@@ -9,8 +9,8 @@
 // License-Filename: LICENSE
 
 interface PackageVerificationCode {
-    excludedFiles: Array<string>
-    value: string
+    excludedFiles?: Array<string>
+    value?: string
 }
 
 export default PackageVerificationCode

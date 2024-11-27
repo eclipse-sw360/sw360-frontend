@@ -88,23 +88,25 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                     <div className='spdx-flex-row'>
                                         <div className='spdx-col-1 spdx-key'>Value</div>
                                         <div className='spdx-col-3'>
-                                            {packageInformation?.packageVerificationCode?.value}
+                                            {packageInformation?.packageVerificationCode?.value ?? ''}
                                         </div>
                                     </div>
                                     <div className='spdx-flex-row'>
                                         <div className='spdx-col-1 spdx-key'>Excluded files</div>
                                         <p className='spdx-col-3 ' id='excludedFiles'>
-                                            {packageInformation?.packageVerificationCode?.excludedFiles
-                                                .sort()
-                                                .filter((data) => !CommonUtils.isNullEmptyOrUndefinedString(data))
-                                                .map((item) => {
-                                                    return (
-                                                        <>
-                                                            {item}
-                                                            <br></br>
-                                                        </>
-                                                    )
-                                                })}
+                                            {(packageInformation?.packageVerificationCode?.excludedFiles !== undefined) &&
+                                                packageInformation.packageVerificationCode.excludedFiles
+                                                    .sort()
+                                                    .filter((data) => !CommonUtils.isNullEmptyOrUndefinedString(data))
+                                                    .map((item) => {
+                                                        return (
+                                                            <>
+                                                                {item}
+                                                                <br></br>
+                                                            </>
+                                                        )
+                                                    })
+                                            }
                                         </p>
                                     </div>
                                 </div>
