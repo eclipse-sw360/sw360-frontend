@@ -237,7 +237,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
     return (
         <div className='ms-5 mt-2'>

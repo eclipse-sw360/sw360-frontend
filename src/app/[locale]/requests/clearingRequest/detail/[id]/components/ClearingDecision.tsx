@@ -12,7 +12,6 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 
 interface ClearingRequestDataMap {
     [key: string]: string;
@@ -22,10 +21,9 @@ interface Props {
     data: ClearingRequestDetails | undefined
 }
 
-export default function ClearingDecision({ data }: Props ) {
+export default function ClearingDecision({ data }: Props ): JSX.Element {
 
     const t = useTranslations('default')
-    const { status } = useSession()
     const clearingRequestStatus : ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
@@ -46,10 +44,6 @@ export default function ClearingDecision({ data }: Props ) {
         CRITICAL: t('Critical')
     };
 
-
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
     return (
         <>
             <table className='table summary-table'>
@@ -62,14 +56,14 @@ export default function ClearingDecision({ data }: Props ) {
                     <tr>
                         <td>{t('Request Status')}:</td>
                         <td>{data?.clearingState !== undefined ? 
-                                clearingRequestStatus[data?.clearingState] :
+                                clearingRequestStatus[data.clearingState] :
                                 undefined}</td>
                     </tr>
                     <tr>
                         <td>{t('Priority')}:</td>
                         <td>
                             {data?.priority !== undefined ?
-                                clearingRequestPriority[data?.priority] :
+                                clearingRequestPriority[data.priority] :
                                 undefined
                             }
                         </td>
@@ -77,8 +71,8 @@ export default function ClearingDecision({ data }: Props ) {
                     <tr>
                         <td>{t('Clearing Team')}:</td>
                         <td>
-                            {data?.clearingTeam
-                                ? <Link href={`mailto:${data?.clearingTeam}`}>{data?.clearingTeamName}</Link>
+                            {data?.clearingTeam !== undefined
+                                ? <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
                                 : ''}
                         </td>
                     </tr>
@@ -103,5 +97,5 @@ export default function ClearingDecision({ data }: Props ) {
                 </tbody>
             </table>
         </>
-    )}
+    )
 }

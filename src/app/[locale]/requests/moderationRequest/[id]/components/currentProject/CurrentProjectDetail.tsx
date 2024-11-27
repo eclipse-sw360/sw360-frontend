@@ -14,7 +14,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Summary from 
             '@/app/[locale]/projects/detail/[id]/components/Summary'
@@ -31,7 +31,7 @@ import ProjectAttachments from
 import ChangeLog from
             '@/app/[locale]/projects/detail/[id]/components/Changelog'
 
-export default function CurrentProjectDetail({ projectId }: { projectId: string | undefined }) {
+export default function CurrentProjectDetail({ projectId }: { projectId: string }): ReactNode {
 
     const t = useTranslations('default')
     const { data: session, status } = useSession()
@@ -42,7 +42,7 @@ export default function CurrentProjectDetail({ projectId }: { projectId: string 
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             if (CommonUtils.isNullOrUndefined(session))
                 return signOut()
             try {
@@ -57,10 +57,10 @@ export default function CurrentProjectDetail({ projectId }: { projectId: string 
                     return notFound()
                 }
 
-                const data = await response.json()
+                const data = await response.json() as SummaryDataType | AdministrationDataType
 
-                setSummaryData({ id: projectId, ...data })
-                setAdministrationData(data)
+                setSummaryData({ ...data, id: projectId } as SummaryDataType)
+                setAdministrationData(data as AdministrationDataType)
             } catch (e) {
                 console.error(e)
             }
@@ -127,7 +127,7 @@ export default function CurrentProjectDetail({ projectId }: { projectId: string 
                                         {summaryData && (
                                             <LicenseClearing
                                                 projectId={projectId}
-                                                projectName={summaryData.name ?? ''}
+                                                projectName={summaryData.name}
                                                 projectVersion={summaryData.version ?? ''}
                                                 isCalledFromModerationRequestCurrentProject={true}
                                             />
@@ -142,7 +142,7 @@ export default function CurrentProjectDetail({ projectId }: { projectId: string 
                                             <VulnerabilityTrackingStatusComponent 
                                                 projectData={{
                                                     id: projectId,
-                                                    name: summaryData.name ?? '',
+                                                    name: summaryData.name,
                                                     version: summaryData.version ?? '',
                                                     enableSvm: summaryData.enableSvm ?? false,
                                                     enableVulnerabilitiesDisplay:

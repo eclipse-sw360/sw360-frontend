@@ -345,7 +345,7 @@ export default function ProposedChanges({
     }, [moderationRequestData])
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <>

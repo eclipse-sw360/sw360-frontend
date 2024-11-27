@@ -12,17 +12,10 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ClearingRequestDetails } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 
-
-export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails | undefined}) {
+export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails | undefined}): JSX.Element {
     const t = useTranslations('default')
-    const { status } = useSession()
 
-
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
     return (
         <>
             <table className='table summary-table'>
@@ -35,8 +28,8 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data?.requestingUser && data?.requestingUserName
-                                ? <Link href={`mailto:${data?.requestingUser}`}>{data?.requestingUserName}</Link>
+                            {data?.requestingUser !== undefined && data.requestingUserName !== undefined
+                                ? <Link href={`mailto:${data.requestingUser}`}>{data.requestingUserName}</Link>
                                 : ''}
                         </td>
                     </tr>
@@ -63,5 +56,5 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                 </tbody>
             </table>
         </>
-    )}
+    )
 }

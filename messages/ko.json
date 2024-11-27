@@ -1,4 +1,5 @@
 {
+  "BA-BL/Group": "BA-BL/그룹",
   "default": {
     "(n/a)": "",
     "A package with the same name and version already exists": "이름과 버전이 같은 패키지가 이미 존재합니다.",

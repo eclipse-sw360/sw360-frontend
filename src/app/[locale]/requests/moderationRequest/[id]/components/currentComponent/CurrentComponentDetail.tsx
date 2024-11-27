@@ -11,7 +11,7 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, ReactNode } from 'react'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -35,10 +35,10 @@ type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
 
 interface Props {
-    componentId: string | undefined
+    componentId: string
 }
 
-const CurrentComponentDetail = ({ componentId }: Props) => {
+const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -95,7 +95,7 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(changeLogs?._embedded['sw360:changeLogs'])
                         ? []
-                        : changeLogs?._embedded['sw360:changeLogs']
+                        : changeLogs._embedded['sw360:changeLogs']
                 )
             })
             .catch((err) => console.error(err))

@@ -12,9 +12,10 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
+import { ReactNode } from 'react'
 
 interface ModerationRequestMap {
-    [key: string]: string;
+    [key: string]: string
 }
 
 interface Props {
@@ -26,7 +27,7 @@ interface Props {
 
 export default function ModerationDecision({ data,
                                              moderationRequestPayload,
-                                             setModerationRequestPayload }: Props ) {
+                                             setModerationRequestPayload }: Props ): ReactNode {
 
     const t = useTranslations('default')
     const moderationRequestStatus : ModerationRequestMap = {
@@ -57,15 +58,15 @@ export default function ModerationDecision({ data,
                     <tr>
                         <td>{t('Status')}:</td>
                         <td>{data?.moderationState !== undefined ?
-                                moderationRequestStatus[data?.moderationState] : undefined
+                                moderationRequestStatus[data.moderationState] : undefined
                             }
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Moderator')}:</td>
                         <td>
-                            {data?.reviewer
-                                ? <Link href={`mailto:${data?.reviewer}`}>{data?.reviewer}</Link>
+                            {data?.reviewer !== undefined
+                                ? <Link href={`mailto:${data.reviewer}`}>{data.reviewer}</Link>
                                 : ''}
                         </td>
                     </tr>
@@ -81,7 +82,7 @@ export default function ModerationDecision({ data,
                                 name='comment'
                                 aria-describedby={t('Comment on Moderation Decision')}
                                 style={{ height: '120px' }}
-                                value={moderationRequestPayload?.comment || ''}
+                                value={moderationRequestPayload.comment || ''}
                                 onChange={updateInputField}
                                 required
                             />

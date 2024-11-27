@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Requests',
 }
 
-const EditClearingRequestPage = async ({ params }: Context) => {
+const EditClearingRequestPage = ({ params }: Context): JSX.Element => {
     return <EditClearingRequest clearingRequestId={params.id} />
 }
 

@@ -10,12 +10,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Table, _ } from "next-sw360"
 import { useTranslations } from 'next-intl'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { Embedded, HttpStatus } from '@/object-types'
-import { signOut, getSession } from 'next-auth/react'
+import { signOut, getSession, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { ClearingRequest } from '@/object-types'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -29,12 +29,13 @@ interface ProjectData {
     projectName?: string
 }
 
-function ClosedClearingRequest() {
+function ClosedClearingRequest(): ReactNode {
 
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
-    const [tableData, setTableData] = useState<Array<any>>([])
+    const [tableData, setTableData] = useState<Array<(object | string)[]>>([])
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
+    const { status } = useSession()
 
     const columns = [
         {
@@ -62,7 +63,7 @@ function ClosedClearingRequest() {
             sort: true,
             formatter: (projectData: ProjectData) =>
                 _(
-                    projectData.isProjectDeleted ? t('Project Deleted') :
+                    (projectData.isProjectDeleted !== undefined && projectData.isProjectDeleted === true) ? t('Project Deleted') :
                     <>
                         <Link href={`/projects/detail/${projectData.projectId}`}
                               className='text-link'>
@@ -265,7 +266,7 @@ function ClosedClearingRequest() {
         })}, [fetchData])
 
     if (status === 'unauthenticated') {
-        signOut()
+        void signOut()
     } else {
     return (
         <>

@@ -13,11 +13,11 @@ import { HttpStatus, ModerationRequestPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState, ReactNode } from 'react'
 import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
-import { signOut, getSession } from 'next-auth/react'
+import { signOut, getSession, useSession } from 'next-auth/react'
 import { _, Table } from 'next-sw360'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
@@ -35,7 +35,7 @@ export default function BulkDeclineModerationRequestModal({
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
     mrIdNameMap: propType
-}) {
+}) : ReactNode {
     const t = useTranslations('default')
     const [loading, setLoading] = useState<boolean>(true)
     const [disableAcceptMr, setDisableAcceptMr] = useState<boolean>(false)
@@ -43,6 +43,7 @@ export default function BulkDeclineModerationRequestModal({
     const [statusCheck, setStatusCheck] = useState<number>()
     const [tableData, setTableData] = useState<Array<any>>([])
     const [hasComment, setHasComment] = useState<boolean>(false)
+    const { status } = useSession()
     const [moderationRequestPayload, setModerationRequestPayload] =
                     useState<ModerationRequestPayload>({
         action: '',
@@ -413,7 +414,7 @@ export default function BulkDeclineModerationRequestModal({
 
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <>

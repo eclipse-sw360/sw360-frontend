@@ -12,9 +12,9 @@
 
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { signOut, getSession } from 'next-auth/react'
+import { signOut, getSession, useSession } from 'next-auth/react'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
@@ -27,12 +27,12 @@ import { ClearingRequestDetails,
          HttpStatus } from '@/object-types'
 
 
-function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string }) {
-
+function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string }): ReactNode {
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const router = useRouter()
     const toastShownRef = useRef(false)
+    const { status } = useSession()
     const [clearingRequestData,
            setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
             id: '',
@@ -48,13 +48,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
             clearingType: '',
             reOpenedOn: undefined,
             createdOn: '',
-            comments: [{}],
-            _embedded: {
-                "sw360:project": {
-                    name: '',
-                    version: ''
-                }
-            }
+            comments: [{}]
         })
     const [updateClearingRequestPayload, 
            setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
@@ -138,7 +132,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     };
 
     if (status === 'unauthenticated') {
-        signOut()
+        void signOut()
     } else {
     return (
         <div className='ms-5 mt-2'>
@@ -157,7 +151,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                         <Button
                                             variant='btn btn-primary'
                                             className='me-2 col-auto'
-                                            onClick={handleUpdateClearingRequest}
+                                            onClick={() => void handleUpdateClearingRequest()}
                                         >
                                             {t('Update Request')}
                                         </Button>

@@ -11,7 +11,7 @@
 
 import { signOut, useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react"
+import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from "react"
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
 import { CreateClearingRequestPayload } from "@/object-types"
 import { FaRegQuestionCircle } from "react-icons/fa"
@@ -24,7 +24,7 @@ interface Props {
 
 export default function ReopenClosedClearingRequestModal({ show,
                                                            setShow
-                                                         }: Props) {
+                                                         }: Props): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [message, setMessage] = useState('')
@@ -121,7 +121,7 @@ export default function ReopenClosedClearingRequestModal({ show,
     
 
     if (status === 'unauthenticated') {
-        signOut()
+        void signOut()
     } else {
         return (
             <>
@@ -173,7 +173,7 @@ export default function ReopenClosedClearingRequestModal({ show,
                                             type='date'
                                             id='createClearingRequest.requestedClearingDate'
                                             name='requestedClearingDate'
-                                            value={createClearingRequestPayload?.requestedClearingDate ?? ''}
+                                            value={createClearingRequestPayload.requestedClearingDate ?? ''}
                                             onChange={updateInputField}
                                             disabled={isDisabled}
                                             min={minDate}
@@ -262,8 +262,8 @@ export default function ReopenClosedClearingRequestModal({ show,
                         <Button
                             className='login-btn'
                             variant='primary'
-                            disabled={!createClearingRequestPayload.clearingType ||
-                                      !createClearingRequestPayload.requestedClearingDate}
+                            disabled={createClearingRequestPayload.clearingType !== undefined ||
+                                      createClearingRequestPayload.requestedClearingDate !== undefined}
                             onClick={() => handleSubmit()}
                             hidden={reloadPage}
                         >

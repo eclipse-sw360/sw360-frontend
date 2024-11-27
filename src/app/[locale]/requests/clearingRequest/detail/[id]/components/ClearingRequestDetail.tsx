@@ -25,7 +25,7 @@ import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/Reop
 import dynamic from 'next/dynamic'
 
 
-function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }) {
+function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: string }): JSX.Element {
 
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
@@ -48,14 +48,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         clearingType: '',
         reOpenedOn: undefined,
         createdOn: '',
-        comments: [{}],
-        _embedded: {
-            "sw360:project": {
-                name: '',
-                version: ''
-            },
-            requestClosedOn: ''
-        }
+        comments: [{}]
     })
 
     const ClearingComments = dynamic(() => import('./ClearingComments'), {
@@ -104,9 +97,6 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         setOpenCardIndex(prevIndex => (prevIndex === index ? -1 : index));
     };
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
     return (
         <>
             <ReopenClosedClearingRequestModal show = {showReopenClearingRequestModal}
@@ -237,7 +227,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                 </Tab.Container>
             </div>
         </>
-    )}
+    )
 }
 
 export default ClearingRequestDetail

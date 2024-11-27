@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Project from './Project'
+import { Project } from './Project'
 import { User } from './User'
 
 export default interface ClearingRequestDetails{
