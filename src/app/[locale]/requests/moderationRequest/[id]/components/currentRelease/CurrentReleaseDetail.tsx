@@ -7,11 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import ClearingDetails from '@/app/[locale]/components/releases/detail/[id]/components/ClearingDetails'
+import ECCDetails from '@/app/[locale]/components/releases/detail/[id]/components/ECCDetails'
+import LinkedReleases from '@/app/[locale]/components/releases/detail/[id]/components/LinkedReleases'
+import ReleaseDetailTabs from '@/app/[locale]/components/releases/detail/[id]/components/ReleaseDetailTabs'
+import Summary from '@/app/[locale]/components/releases/detail/[id]/components/Summary'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -25,15 +27,11 @@ import {
     Embedded,
     HttpStatus,
     ReleaseDetail,
-    ReleaseLink,
     ReleaseTabIds,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import ClearingDetails from '@/app/[locale]/components/releases/detail/[id]/components/ClearingDetails'
-import ECCDetails from '@/app/[locale]/components/releases/detail/[id]/components/ECCDetails'
-import LinkedReleases from '@/app/[locale]/components/releases/detail/[id]/components/LinkedReleases'
-import ReleaseDetailTabs from '@/app/[locale]/components/releases/detail/[id]/components/ReleaseDetailTabs'
-import Summary from '@/app/[locale]/components/releases/detail/[id]/components/Summary'
+import { signOut, useSession } from 'next-auth/react'
+import { useCallback, useEffect, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -54,11 +52,10 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
 
     const fetchData = useCallback(
         async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = (await response.json())
+                const data = await response.json()
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 return signOut()
@@ -66,7 +63,7 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
                 return null
             }
         },
-        [session]
+        [session],
     )
 
     useEffect(() => {
@@ -76,9 +73,9 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
 
                 if (
                     !CommonUtils.isNullOrUndefined(release?._embedded) &&
-                    !CommonUtils.isNullOrUndefined(release?._embedded['sw360:attachments'])
+                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
                 ) {
-                    setEmbeddedAttachments(release?._embedded['sw360:attachments'])
+                    setEmbeddedAttachments(release._embedded['sw360:attachments'])
                 }
                 return release
             })
@@ -90,7 +87,7 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
                     setChangeLogList(
                         CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
                             ? []
-                            : changeLogs._embedded['sw360:changeLogs']
+                            : changeLogs._embedded['sw360:changeLogs'],
                     )
             })
             .catch((err) => console.error(err))
@@ -105,32 +102,59 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
                             selectedTab={selectedTab}
                             setSelectedTab={setSelectedTab}
                             tabList={tabList}
-                            eccStatus={release?.eccInformation?.eccStatus}
+                            eccStatus={release.eccInformation?.eccStatus}
                         />
                     </div>
                     <div className='col'>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary release={release} releaseId={releaseId} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                        >
+                            <Summary
+                                release={release}
+                                releaseId={releaseId}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
+                        >
                             <LinkedReleases releaseId={releaseId} />
                         </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}
+                        >
                             <ClearingDetails
                                 release={release}
                                 releaseId={releaseId}
                                 embeddedAttachments={embeddedAttachments}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}
+                        >
                             <ECCDetails release={release} />
                         </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments documentId={releaseId} documentType={DocumentTypes.RELEASE} />
+                        <div
+                            className='row'
+                            hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}
+                        >
+                            <Attachments
+                                documentId={releaseId}
+                                documentType={DocumentTypes.RELEASE}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}
+                        >
                             <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changesLogTab != 'list-change' ? true : false}
+                                >
                                     <ChangeLogList
                                         setChangeLogIndex={setChangeLogIndex}
                                         documentId={releaseId}
@@ -138,9 +162,15 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
                                         changeLogList={changeLogList}
                                     />
                                 </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changesLogTab != 'view-log' ? true : false}
+                                >
                                     <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
+                                    <div
+                                        id='cardScreen'
+                                        style={{ padding: '0px' }}
+                                    ></div>
                                 </div>
                             </div>
                         </div>
