@@ -9,38 +9,37 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails,
-         UpdateClearingRequestPayload } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { ClearingRequestDetails, UpdateClearingRequestPayload } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
+import { useEffect, useState } from 'react'
 
 interface Props {
-    clearingRequestData: ClearingRequestDetails | undefined,
+    clearingRequestData: ClearingRequestDetails | undefined
     updateClearingRequestPayload: UpdateClearingRequestPayload
     setUpdateClearingRequestPayload: React.Dispatch<React.SetStateAction<UpdateClearingRequestPayload>>
 }
 
 interface ClearingRequestDataMap {
-    [key: string]: string;
+    [key: string]: string
 }
 
-export default function EditClearingDecision({ clearingRequestData,
-                                               updateClearingRequestPayload,
-                                               setUpdateClearingRequestPayload }: Props) {
-
+export default function EditClearingDecision({
+    clearingRequestData,
+    updateClearingRequestPayload,
+    setUpdateClearingRequestPayload,
+}: Props) {
     const t = useTranslations('default')
-    const { data:session, status } = useSession()
+    const { data: session, status } = useSession()
     const [minDate, setMinDate] = useState('')
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
 
-
     useEffect(() => {
-        const currentDate = new Date();
-        setMinDate(currentDate.toISOString().split('T')[0]);
+        const currentDate = new Date()
+        setMinDate(currentDate.toISOString().split('T')[0])
     }, [])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
@@ -52,21 +51,17 @@ export default function EditClearingDecision({ clearingRequestData,
         })
     }
 
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                     HTMLInputElement |
-                                     HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setUpdateClearingRequestPayload({
             ...updateClearingRequestPayload,
             [event.target.name]: event.target.value,
         })
     }
 
-
     if (status === 'unauthenticated') {
         signOut()
     } else {
-    return (
-        <>
+        return (
             <table className={`table label-value-table ${styles['summary-table']}`}>
                 <thead>
                     <tr>
@@ -96,10 +91,12 @@ export default function EditClearingDecision({ clearingRequestData,
                                 <option value='SANITY_CHECK'>{t('Sanity Check')}</option>
                                 <option value='PENDING_INPUT'>{t('Pending Input')}</option>
                             </select>
-                            <div className='form-text'
-                                 id='editClearingDecision.requestStatus.HelpBlock'>
-                                 <ShowInfoOnHover text={t('Clearing request status info')}/>
-                                                {' '}{t('Learn more about clearing request status')}.
+                            <div
+                                className='form-text'
+                                id='editClearingDecision.requestStatus.HelpBlock'
+                            >
+                                <ShowInfoOnHover text={t('Clearing request status info')} />{' '}
+                                {t('Learn more about clearing request status')}.
                             </div>
                         </td>
                     </tr>
@@ -112,7 +109,7 @@ export default function EditClearingDecision({ clearingRequestData,
                                 name='priority'
                                 value={updateClearingRequestPayload.priority}
                                 onChange={updateInputField}
-                                disabled={session?.user.userGroup === "USER"}
+                                disabled={session?.user.userGroup === 'USER'}
                                 required
                             >
                                 <option value='LOW'>{t('Low')}</option>
@@ -120,10 +117,12 @@ export default function EditClearingDecision({ clearingRequestData,
                                 <option value='HIGH'>{t('High')}</option>
                                 <option value='CRITICAL'>{t('Critical')}</option>
                             </select>
-                            <div className='form-text'
-                                 id='editClearingDecision.priority.HelpBlock'>
-                                 <ShowInfoOnHover text={t('Clearing request priority info')}/>
-                                                {' '}{t('Learn more about clearing request priority')}.
+                            <div
+                                className='form-text'
+                                id='editClearingDecision.priority.HelpBlock'
+                            >
+                                <ShowInfoOnHover text={t('Clearing request priority info')} />{' '}
+                                {t('Learn more about clearing request priority')}.
                             </div>
                         </td>
                     </tr>
@@ -138,7 +137,6 @@ export default function EditClearingDecision({ clearingRequestData,
                                 name='clearingTeam'
                                 onClick={() => setDialogOpenClearingTeam(true)}
                                 value={updateClearingRequestPayload.clearingTeam}
-
                             />
                             <SelectUsersDialog
                                 show={dialogOpenClearingTeam}
@@ -160,38 +158,48 @@ export default function EditClearingDecision({ clearingRequestData,
                                 aria-describedby='agreedClearingDate'
                                 name='agreedClearingDate'
                                 value={updateClearingRequestPayload.agreedClearingDate}
-                                disabled={session?.user.userGroup === "USER"}
+                                disabled={session?.user.userGroup === 'USER'}
                                 onChange={updateInputField}
                                 min={minDate}
                             />
                         </td>
                     </tr>
-                    <tr hidden={session?.user.userGroup === "USER" || 
-                               (session?.user.userGroup === ("ADMIN" || "CLEARING_ADMIN" ||
-                                                             "ECC_ADMIN" || "SECURITY_ADMIN" ||
-                                                             "SW360_ADMIN" || "CLEARING_EXPERT") && 
+                    <tr
+                        hidden={
+                            session?.user.userGroup === 'USER' ||
+                            ([
+                                'ADMIN',
+                                'CLEARING_ADMIN',
+                                'ECC_ADMIN',
+                                'SECURITY_ADMIN',
+                                'SW360_ADMIN',
+                                'CLEARING_EXPERT',
+                            ].includes(session?.user.userGroup ?? '') &&
                                 !Object.hasOwn(clearingRequestData ?? {}, 'lastUpdatedOn'))
-                                }
+                        }
                     >
                         <td>{t('Last Updated on')}:</td>
-                        <td>
-                            {clearingRequestData?.lastUpdatedOn ?? ''}
-                        </td>
+                        <td>{clearingRequestData?.lastUpdatedOn ?? ''}</td>
                     </tr>
-                    <tr hidden={session?.user.userGroup === "USER" || 
-                               (session?.user.userGroup === ("ADMIN" || "CLEARING_ADMIN" ||
-                                                             "ECC_ADMIN" || "SECURITY_ADMIN" ||
-                                                             "SW360_ADMIN" || "CLEARING_EXPERT") && 
+                    <tr
+                        hidden={
+                            session?.user.userGroup === 'USER' ||
+                            ([
+                                'ADMIN',
+                                'CLEARING_ADMIN',
+                                'ECC_ADMIN',
+                                'SECURITY_ADMIN',
+                                'SW360_ADMIN',
+                                'CLEARING_EXPERT',
+                            ].includes(session?.user.userGroup ?? '') &&
                                 !Object.hasOwn(clearingRequestData ?? {}, 'reOpenedOn'))
-                                }
+                        }
                     >
                         <td>{t('Reopened on')}:</td>
-                        <td>
-                            {clearingRequestData?.reOpenedOn ?? ''}
-                        </td>
+                        <td>{clearingRequestData?.reOpenedOn ?? ''}</td>
                     </tr>
                 </tbody>
             </table>
-        </>
-    )}
+        )
+    }
 }
