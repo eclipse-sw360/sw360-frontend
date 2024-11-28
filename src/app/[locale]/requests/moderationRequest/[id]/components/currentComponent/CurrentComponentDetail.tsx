@@ -9,9 +9,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import ReleaseOverview from '@/app/[locale]/components/detail/[id]/components/ReleaseOverview'
+import Summary from '@/app/[locale]/components/detail/[id]/components/Summary'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -27,9 +26,10 @@ import {
     LinkedVulnerability,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import ReleaseOverview from '@/app/[locale]/components/detail/[id]/components/ReleaseOverview'
-import Summary from '@/app/[locale]/components/detail/[id]/components/Summary'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -38,7 +38,7 @@ interface Props {
     componentId: string | undefined
 }
 
-const CurrentComponentDetail = ({ componentId }: Props) => {
+const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -68,8 +68,7 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
 
     const fetchData = useCallback(
         async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
@@ -80,7 +79,7 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
                 notFound()
             }
         },
-        [session]
+        [session],
     )
 
     useEffect(() => {
@@ -95,53 +94,83 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(changeLogs?._embedded['sw360:changeLogs'])
                         ? []
-                        : changeLogs?._embedded['sw360:changeLogs']
+                        : changeLogs._embedded['sw360:changeLogs'],
                 )
             })
             .catch((err) => console.error(err))
     }, [componentId, fetchData])
 
-    return (
-        component && (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
+    return component ? (
+        <div className='container page-content'>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <SideBar
+                        selectedTab={selectedTab}
+                        setSelectedTab={setSelectedTab}
+                        tabList={tabList}
+                    />
+                </div>
+                <div className='col'>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== CommonTabIds.SUMMARY}
+                    >
+                        <Summary
+                            component={component}
+                            componentId={componentId ?? ''}
                         />
                     </div>
-                    <div className='col'>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary component={component} componentId={componentId} />
-                        </div>
-                        <div className='row' hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}>
-                            <ReleaseOverview componentId={componentId} calledFromModerationRequestDetail={true} />
-                        </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments documentId={componentId} documentType={DocumentTypes.COMPONENT} />
-                        </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
-                            <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
-                                    <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
-                                        documentId={componentId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
-                                    />
-                                </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
-                                </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW}
+                    >
+                        <ReleaseOverview
+                            componentId={componentId ?? ''}
+                            calledFromModerationRequestDetail={true}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.ATTACHMENTS}
+                    >
+                        <Attachments
+                            documentId={componentId ?? ''}
+                            documentType={DocumentTypes.COMPONENT}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.CHANGE_LOG}
+                    >
+                        <div className='col'>
+                            <div
+                                className='row'
+                                hidden={changesLogTab != 'list-change'}
+                            >
+                                <ChangeLogList
+                                    setChangeLogIndex={setChangeLogIndex}
+                                    documentId={componentId ?? ''}
+                                    setChangesLogTab={setChangesLogTab}
+                                    changeLogList={changeLogList}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={changesLogTab != 'view-log'}
+                            >
+                                <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
+                                <div
+                                    id='cardScreen'
+                                    style={{ padding: '0px' }}
+                                ></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        )
+        </div>
+    ) : (
+        <></>
     )
 }
 

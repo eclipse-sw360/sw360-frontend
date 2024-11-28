@@ -31,11 +31,14 @@ import Embedded from './Embedded'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
+import LicenseClearing from './LicenseClearing'
 import LicenseDetail from './LicenseDetail'
 import LicensePayload from './LicensePayload'
 import LicenseType from './LicenseType'
 import LinkedAttachments from './LinkedAttachments'
+import LinkedProjectData from './LinkedProjectData'
 import LinkedRelease from './LinkedRelease'
+import LinkedReleaseData from './LinkedReleaseData'
 import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
 import { Message, MessageOptions } from './Message'
@@ -51,11 +54,7 @@ import Package from './Package'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
 import ProjectPayload from './ProjectPayload'
-import {
-    ProjectData,
-    ProjectVulnerability,
-    VulnerabilityRatingAndActionPayload,
-} from './ProjectVulnerabilityTypes'
+import { ProjectData, ProjectVulnerability, VulnerabilityRatingAndActionPayload } from './ProjectVulnerabilityTypes'
 import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
@@ -96,7 +95,6 @@ import SPDX from './spdx/SPDX'
 import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
-import LicenseClearing from './LicenseClearing'
 
 export type {
     AccessToken,
@@ -130,12 +128,15 @@ export type {
     FossologyProcessInfo,
     FossologyProcessStatus,
     InputKeyValue,
+    LicenseClearing,
     LicenseDetail,
     LicenseObligationRelease,
     LicensePayload,
     LicenseType,
     LinkedAttachments,
+    LinkedProjectData,
     LinkedRelease,
+    LinkedReleaseData,
     LinkedVulnerability,
     Links,
     Message,
@@ -154,6 +155,7 @@ export type {
     PackageVerificationCode,
     Project,
     ProjectData,
+    ProjectLinkedRelease,
     ProjectObligation,
     ProjectObligationsList,
     ProjectPayload,
@@ -189,8 +191,6 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
-    ProjectLinkedRelease,
-    LicenseClearing
 }
 
 // Special functions for populate data

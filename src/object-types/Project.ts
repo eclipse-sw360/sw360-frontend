@@ -88,3 +88,5 @@ export interface Project {
         'sw360:linkedProjects'?: Array<Project>
     }
 }
+
+export default Project

@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Embedded, HttpStatus, ProjectPayload, ReleaseDetail } from '@/object-types'
+import { Embedded, HttpStatus, LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
@@ -20,9 +20,8 @@ import { ChangeEvent, useRef, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
-
 interface Props {
-    setLinkedReleaseData: React.Dispatch<React.SetStateAction<Map<string, ReleaseRelationship>>>
+    setLinkedReleaseData: React.Dispatch<React.SetStateAction<Map<string, LinkedReleaseData>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
@@ -41,19 +40,20 @@ interface SummaryReleaseInfo {
 interface ReleaseRelationship {
     name?: string
     version?: string
-    releaseRelation?: string
-    mainlineState?: string
+    releaseRelation: string
+    mainlineState: string
     comment?: string
 }
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
-export default function LinkedReleasesModal({ setLinkedReleaseData,
-                                              projectPayload,
-                                              setProjectPayload,
-                                              show,
-                                              setShow }: Props): JSX.Element {
-
+export default function LinkedReleasesModal({
+    setLinkedReleaseData,
+    projectPayload,
+    setProjectPayload,
+    show,
+    setShow,
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const [releaseData, setReleaseData] = useState<RowData[]>([])
     const [linkReleases, setLinkReleases] = useState<Map<string, ReleaseRelationship>>(new Map())
@@ -73,7 +73,7 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
             const queryUrl = CommonUtils.createUrlWithParams('releases', {
                 name: `${searchValue}`,
                 luceneSearch: `${isExactMatch.current}`,
-                allDetails: 'true'
+                allDetails: 'true',
             })
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -86,25 +86,25 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
                 MessageService.error(t('Error while processing'))
                 return
             }
-            const data = await response.json() as EmbeddedReleases
+            const data = (await response.json()) as EmbeddedReleases
 
             const tableData =
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
                 CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
                     ? []
                     : data['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
-                        release.id ?? '',
-                        (release.vendor) ? (release.vendor.fullName ?? '') : '',
-                        {
-                            name : release.name,
-                            componentId : release['_links']['sw360:component']['href'].split('/').pop() ?? ''
-                        },
-                        {
-                            releaseVersion : release.version,
-                            releaseId : release.id ?? ''
-                        },
-                        release.clearingState,
-                        release.mainlineState ?? 'OPEN'
+                          release.id ?? '',
+                          release.vendor ? release.vendor.fullName ?? '' : '',
+                          {
+                              name: release.name,
+                              componentId: release['_links']['sw360:component']['href'].split('/').pop() ?? '',
+                          },
+                          {
+                              releaseVersion: release.version,
+                              releaseId: release.id ?? '',
+                          },
+                          release.clearingState,
+                          release.mainlineState ?? 'OPEN',
                       ])
             setReleaseData(tableData)
             setLoading(false)
@@ -124,7 +124,7 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
                     updatedProjectPayload.linkedReleases[releaseId] = {
                         releaseRelation: relationship.releaseRelation,
                         mainlineState: relationship.mainlineState,
-                        comment: relationship.comment
+                        comment: relationship.comment,
                     }
                 }
                 setProjectPayload(updatedProjectPayload)
@@ -134,7 +134,7 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
         }
     }
 
-    const extractInterimReleaseData = (releaseId: string) : ReleaseRelationship | undefined => {
+    const extractInterimReleaseData = (releaseId: string): ReleaseRelationship | undefined => {
         for (let i = 0; i < releaseData.length; i++) {
             if (releaseData[i][0] === releaseId) {
                 return {
@@ -142,7 +142,7 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
                     version: (releaseData[i][3] as SummaryReleaseInfo).releaseVersion,
                     mainlineState: releaseData[i][5] as string,
                     releaseRelation: 'UNKNOWN',
-                    comment: ''
+                    comment: '',
                 }
             }
         }
@@ -162,7 +162,7 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
     }
 
     const handleExactMatchChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const isExactMatchSelected = event.target.checked;
+        const isExactMatchSelected = event.target.checked
         isExactMatch.current = isExactMatchSelected
     }
 
@@ -185,7 +185,7 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
                             checked={linkReleases.has(releaseId)}
                             onChange={() => handleCheckboxes(releaseId)}
                         />
-                    </div>
+                    </div>,
                 ),
         },
         {
@@ -200,10 +200,8 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
             formatter: ({ name, componentId }: { name: string; componentId: string }) =>
                 _(
                     <>
-                        <Link href={`/components/detail/${componentId}`}>
-                               {name}
-                        </Link>
-                    </>
+                        <Link href={`/components/detail/${componentId}`}>{name}</Link>
+                    </>,
                 ),
         },
         {
@@ -213,10 +211,8 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
             formatter: ({ releaseVersion, releaseId }: { releaseVersion: string; releaseId: string }) =>
                 _(
                     <>
-                         <Link href={`/components/releases/detail/${releaseId}`}>
-                               {releaseVersion}
-                        </Link>
-                    </>
+                        <Link href={`/components/releases/detail/${releaseId}`}>{releaseVersion}</Link>
+                    </>,
                 ),
             sort: true,
         },
@@ -231,7 +227,6 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
             sort: true,
         },
     ]
-
 
     return (
         <Modal
@@ -248,9 +243,7 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
             scrollable
         >
             <Modal.Header closeButton>
-                <Modal.Title id='linked-projects-modal'>
-                    {t('Link Releases')}
-                </Modal.Title>
+                <Modal.Title id='linked-projects-modal'>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
@@ -268,14 +261,17 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
                                 <Button
                                     type='submit'
                                     variant='secondary'
-                                    onClick={() => void handleSearch({ searchValue: searchValueRef.current?.value ?? ''})}
+                                    onClick={() =>
+                                        void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })
+                                    }
                                 >
                                     {t('Search')}
                                 </Button>
                             </Col>
                             <Col ls='auto'>
-                                <Button type='submit'
-                                        variant='secondary'
+                                <Button
+                                    type='submit'
+                                    variant='secondary'
                                 >
                                     {t(`Releases of linked projects`)}
                                 </Button>
@@ -284,39 +280,39 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
                         <Row>
                             <Form.Group controlId='exact-match-group'>
                                 <Form.Check
-                                        inline
-                                        name='exact-match'
-                                        type='checkbox'
-                                        id='exact-match'
-                                        onChange={handleExactMatchChange}
+                                    inline
+                                    name='exact-match'
+                                    type='checkbox'
+                                    id='exact-match'
+                                    onChange={handleExactMatchChange}
                                 />
                                 <Form.Label className='pt-2'>
-                                            {t('Exact Match')}{' '}
-                                            <sup>
-                                                <FaInfoCircle />
-                                            </sup>
-                                        </Form.Label>
+                                    {t('Exact Match')}{' '}
+                                    <sup>
+                                        <FaInfoCircle />
+                                    </sup>
+                                </Form.Label>
                             </Form.Group>
                         </Row>
                         <Row>
-                            {
-                                loading === false ? (
-                                    <Table
-                                        columns={columns}
-                                        data={releaseData}
-                                        sort={false} />
-                                ) : (
-                                    <div className='col-12'
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <Spinner className='spinner' />
-                                    </div>
-                                )
-                            }
+                            {loading === false ? (
+                                <Table
+                                    columns={columns}
+                                    data={releaseData}
+                                    sort={false}
+                                />
+                            ) : (
+                                <div
+                                    className='col-12'
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
                         </Row>
                     </Col>
                 </Form>
@@ -337,8 +333,19 @@ export default function LinkedReleasesModal({ setLinkedReleaseData,
                     variant='primary'
                     onClick={() => {
                         setShow(false)
-                        setLinkedReleaseData((prevLinkReleases) =>
-                            new Map([...prevLinkReleases, ...linkReleases]))
+                        setLinkedReleaseData((prevLinkReleases) => {
+                            const newLinkReleases = new Map(prevLinkReleases)
+                            linkReleases.forEach((value, key) => {
+                                newLinkReleases.set(key, {
+                                    name: value.name ?? '',
+                                    version: value.version ?? '',
+                                    releaseRelation: value.releaseRelation,
+                                    mainlineState: value.mainlineState,
+                                    comment: value.comment,
+                                })
+                            })
+                            return newLinkReleases
+                        })
                         projectPayloadSetter(linkReleases)
                     }}
                     disabled={linkReleases.size === 0}

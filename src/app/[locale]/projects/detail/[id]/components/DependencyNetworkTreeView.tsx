@@ -10,28 +10,31 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { _, TreeTable, EnumValueWithToolTip } from 'next-sw360'
-import React, { useEffect, useState, useRef, useCallback, ChangeEvent } from 'react'
-import { Tooltip, OverlayTrigger, ButtonGroup, Dropdown, DropdownButton, Spinner } from 'react-bootstrap'
-import { GoSingleSelect } from 'react-icons/go'
-import Form from 'react-bootstrap/Form'
-import styles from '../detail.module.css'
-import Link from 'next/link'
-import { FaPencilAlt, FaSort } from 'react-icons/fa'
 import { Attachment, Embedded } from '@/object-types'
-import ClearingStateBadge from './ClearingStateBadge'
-import Alert from 'react-bootstrap/Alert'
-import {
-    releaseTypes, projectTypes,
-    releaseRelations, projectRelations,
-    releaseClearingStates, projectClearingState
-} from './LicenseClearingFilters'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { EnumValueWithToolTip, TreeTable, _ } from 'next-sw360'
+import Link from 'next/link'
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import Alert from 'react-bootstrap/Alert'
+import Form from 'react-bootstrap/Form'
+import { FaPencilAlt, FaSort } from 'react-icons/fa'
+import { GoSingleSelect } from 'react-icons/go'
+import styles from '../detail.module.css'
+import ClearingStateBadge from './ClearingStateBadge'
+import {
+    projectClearingState,
+    projectRelations,
+    projectTypes,
+    releaseClearingStates,
+    releaseRelations,
+    releaseTypes,
+} from './LicenseClearingFilters'
 import TogglerLicenseList from './TogglerLicenseList'
-import MessageService from '@/services/message.service'
 
 interface Props {
     projectId: string
@@ -76,8 +79,8 @@ interface ProjectClearingState {
 }
 
 interface NodeAdditionalData {
-    node: ClearingState,
-    isRelease: boolean,
+    node: ClearingState
+    isRelease: boolean
     releaseIndexPath: Array<number>
     projectOrigin: string
 }
@@ -109,14 +112,14 @@ const filterOptions: { [k: string]: Array<string> } = {
 }
 
 const nameFormatter = (name: string) => {
-    if (name.length <= 40)
-        return <>{name}</>
+    if (name.length <= 40) return <>{name}</>
 
     return (
-        <OverlayTrigger placement='right-end' overlay={<Tooltip>{name}</Tooltip>}>
-            <span className='d-inline-block'>
-                {name.slice(0, 40)}...
-            </span>
+        <OverlayTrigger
+            placement='right-end'
+            overlay={<Tooltip>{name}</Tooltip>}
+        >
+            <span className='d-inline-block'>{name.slice(0, 40)}...</span>
         </OverlayTrigger>
     )
 }
@@ -127,7 +130,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     const [sortOption, setSortOption] = useState<SortOption | undefined>(undefined)
     const language = { noRecordsFound: t('No linked releases or projects') }
     const [isExpandedAllMessageShow, setIsExpandedAllMessageShow] = useState(false)
-    const [search, setSearch] = useState<{ keyword? : string } | undefined>({ keyword: '' })
+    const [search, setSearch] = useState<{ keyword?: string } | undefined>({ keyword: '' })
     const hasExpanded = useRef(false)
 
     const [data, setData] = useState<ProjectClearingState | undefined>(undefined)
@@ -136,7 +139,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
 
     const [noOfLinkedResources, setNoOfLinkedResources] = useState({
         releases: 0,
-        projects: 0
+        projects: 0,
     })
 
     const updateFilters = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,24 +148,24 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             if (filters[filterName].length === filterOptions[filterName].length) {
                 setFilters({
                     ...filterOptions,
-                    [filterName]: [event.target.value]
+                    [filterName]: [event.target.value],
                 })
             } else {
                 setFilters({
                     ...filterOptions,
-                    [filterName]: [...filters[filterName], event.target.value]
+                    [filterName]: [...filters[filterName], event.target.value],
                 })
             }
         } else {
             if (filters[filterName].length === 1) {
                 setFilters({
                     ...filterOptions,
-                    [filterName]: [...filterOptions[filterName]]
+                    [filterName]: [...filterOptions[filterName]],
                 })
             } else {
                 setFilters({
                     ...filterOptions,
-                    [filterName]: [...filters[filterName].filter(el => el != event.target.value)]
+                    [filterName]: [...filters[filterName].filter((el) => el != event.target.value)],
                 })
             }
         }
@@ -206,16 +209,22 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             return
         }
         if (item.additionalData.isRelease === false) {
-            const response = await ApiUtils.GET(`projects/network/${item.additionalData.node.id}/linkedResources`, session.user.access_token)
-            const responseData = await response.json() as ProjectClearingState
+            const response = await ApiUtils.GET(
+                `projects/network/${item.additionalData.node.id}/linkedResources`,
+                session.user.access_token,
+            )
+            const responseData = (await response.json()) as ProjectClearingState
             item.additionalData.node.linkedReleases = responseData.linkedReleases
             item.additionalData.node.subprojects = responseData.subprojects
             item.additionalData.node.isExpanded = true
             item.isNodeFetched = true
             setData({ ...data })
         } else {
-            const response = await ApiUtils.GET(`projects/network/${item.additionalData.node.projectId}/releases?path=${item.additionalData.releaseIndexPath.filter((el: number | undefined) => el !== undefined).join('->')}`, session.user.access_token)
-            const responseData = await response.json() as EmbeddedReleaseLinks
+            const response = await ApiUtils.GET(
+                `projects/network/${item.additionalData.node.projectId}/releases?path=${item.additionalData.releaseIndexPath.filter((el: number | undefined) => el !== undefined).join('->')}`,
+                session.user.access_token,
+            )
+            const responseData = (await response.json()) as EmbeddedReleaseLinks
             item.additionalData.node.linkedReleases = responseData._embedded['sw360:releaseLinks']
             item.additionalData.node.isExpanded = true
             item.isNodeFetched = true
@@ -225,12 +234,14 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     }
 
     const collapseAll = () => {
-        const allCollapsed = Object.values(treeData).map((node: DependencyNetworkNodeData): DependencyNetworkNodeData => {
-            node.isExpanded = false
-            if (node.additionalData === undefined) return node
-            node.additionalData.node.isExpanded = false
-            return node
-        })
+        const allCollapsed = Object.values(treeData).map(
+            (node: DependencyNetworkNodeData): DependencyNetworkNodeData => {
+                node.isExpanded = false
+                if (node.additionalData === undefined) return node
+                node.additionalData.node.isExpanded = false
+                return node
+            },
+        )
         setTreeData(allCollapsed)
         setIsExpandedAllMessageShow(false)
     }
@@ -239,20 +250,19 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         if (sortOption === undefined || sortOption.col !== columnName) {
             setSortOption({
                 col: columnName,
-                sortAscending: true
+                sortAscending: true,
             })
             return
         }
 
         setSortOption({
             ...sortOption,
-            sortAscending: !sortOption.sortAscending
+            sortAscending: !sortOption.sortAscending,
         })
     }
 
     const compareFn = (obj1: ClearingState, obj2: ClearingState) => {
-        if (sortOption === undefined)
-            return 0
+        if (sortOption === undefined) return 0
         let propName = sortOption.col as keyof ClearingState
         if (propName === 'releaseRelationship' && obj1[propName] === undefined) {
             propName = 'relation'
@@ -279,19 +289,20 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     }
 
     const convertToString = (item: unknown) => {
-        if (item === undefined || item === null)
-            return ''
-        if (typeof item === 'string')
-            return item
+        if (item === undefined || item === null) return ''
+        if (typeof item === 'string') return item
         return JSON.stringify(item)
     }
 
     const sortData = (data: ProjectClearingState): ProjectClearingState => {
-        if (sortOption === undefined)
-            return data
+        if (sortOption === undefined) return data
 
-        const sortedLinkedReleases = (data.linkedReleases !== undefined) ? ([...data.linkedReleases] as ClearingState[]).sort(compareFn) : undefined
-        const sortedSubProjects = (data.subprojects !== undefined) ? ([...data.subprojects] as ClearingState[]).sort(compareFn) : undefined
+        const sortedLinkedReleases =
+            data.linkedReleases !== undefined
+                ? ([...data.linkedReleases] as ClearingState[]).sort(compareFn)
+                : undefined
+        const sortedSubProjects =
+            data.subprojects !== undefined ? ([...data.subprojects] as ClearingState[]).sort(compareFn) : undefined
         return { ...data, linkedReleases: sortedLinkedReleases, subprojects: sortedSubProjects }
     }
 
@@ -300,41 +311,65 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             id: 'licenseClearing.name',
             name: _(
                 <>
-                    {(isExpandedAllMessageShow) &&
-                        <Alert variant='warning' onClose={() => setIsExpandedAllMessageShow(false)}
-                            className={styles['expanded-all-message']} dismissible>
+                    {isExpandedAllMessageShow && (
+                        <Alert
+                            variant='warning'
+                            onClose={() => setIsExpandedAllMessageShow(false)}
+                            className={styles['expanded-all-message']}
+                            dismissible
+                        >
                             {t('All the levels are expanded')}!
                         </Alert>
-                    }
+                    )}
                     <div>
                         <span>{t('Name')}</span>
-                        <FaSort className='cursor-pointer' onClick={() => sortColumn('name')} />
-                        {
-                            (noOfLinkedResources.releases !== 0 || noOfLinkedResources.projects !== 0) && <>
+                        <FaSort
+                            className='cursor-pointer'
+                            onClick={() => sortColumn('name')}
+                        />
+                        {(noOfLinkedResources.releases !== 0 || noOfLinkedResources.projects !== 0) && (
+                            <>
                                 {' ('}
-                                <a href='#' onClick={() => expandNextLevel()} className='expand-next text-primary'>{t('Expand Next Level')}</a>
+                                <a
+                                    href='#'
+                                    onClick={() => expandNextLevel()}
+                                    className='expand-next text-primary'
+                                >
+                                    {t('Expand Next Level')}
+                                </a>
                                 {' | '}
-                                <a href='#' onClick={() => collapseAll()} className='collapse-all text-primary'>{t('Collapse all')}</a>
+                                <a
+                                    href='#'
+                                    onClick={() => collapseAll()}
+                                    className='collapse-all text-primary'
+                                >
+                                    {t('Collapse all')}
+                                </a>
                                 {') '}
                             </>
-                        }
+                        )}
                     </div>
-                    {
-                        (noOfLinkedResources.releases !== 0 || noOfLinkedResources.projects !== 0) && <div>
-                            <span className='linked-releases'>{t('Linked Releases')}: {noOfLinkedResources.releases}</span>, {' '}
-                            <span className='linked-projects'>{t('Linked Projects')}: {noOfLinkedResources.projects}</span>
+                    {(noOfLinkedResources.releases !== 0 || noOfLinkedResources.projects !== 0) && (
+                        <div>
+                            <span className='linked-releases'>
+                                {t('Linked Releases')}: {noOfLinkedResources.releases}
+                            </span>
+                            ,{' '}
+                            <span className='linked-projects'>
+                                {t('Linked Projects')}: {noOfLinkedResources.projects}
+                            </span>
                         </div>
-                    }
-                </>
+                    )}
+                </>,
             ),
-            width: '26%'
+            width: '26%',
         },
         {
             id: 'licenseClearing.type',
             name: _(
                 <>
                     <OverlayTrigger overlay={<Tooltip>{t('Component Type Filter')}</Tooltip>}>
-                        <span>{t('Type')} {' '}</span>
+                        <span>{t('Type')} </span>
                     </OverlayTrigger>
                     <DropdownButton
                         as={ButtonGroup}
@@ -345,25 +380,29 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                     >
                         <span className='px-3'>{t('Component Type')}</span>
                         <Dropdown.Divider />
-                        {
-                            Object.keys(releaseTypes).map((releaseType: string) =>
-                                <span key={releaseType}>
-                                    <Form.Check
-                                        className={`${styles.selection}`}
-                                        type='checkbox'
-                                        id={`type-${releaseType}`}
-                                        value={releaseType}
-                                        name='types'
-                                        label={releaseTypes[releaseType]}
-                                        defaultChecked={(filters.types.length !== filterOptions.types.length) && filters.types.includes(releaseType)}
-                                        onChange={updateFilters}
-                                    />
-                                </span>
-                            )
-                        }
+                        {Object.keys(releaseTypes).map((releaseType: string) => (
+                            <span key={releaseType}>
+                                <Form.Check
+                                    className={`${styles.selection}`}
+                                    type='checkbox'
+                                    id={`type-${releaseType}`}
+                                    value={releaseType}
+                                    name='types'
+                                    label={releaseTypes[releaseType]}
+                                    defaultChecked={
+                                        filters.types.length !== filterOptions.types.length &&
+                                        filters.types.includes(releaseType)
+                                    }
+                                    onChange={updateFilters}
+                                />
+                            </span>
+                        ))}
                     </DropdownButton>
-                    <FaSort className='cursor-pointer' onClick={() => sortColumn('componentType')} />
-                </>
+                    <FaSort
+                        className='cursor-pointer'
+                        onClick={() => sortColumn('componentType')}
+                    />
+                </>,
             ),
             width: '10%',
         },
@@ -372,7 +411,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             name: _(
                 <>
                     <OverlayTrigger overlay={<Tooltip>{t('Release Relation Filter')}</Tooltip>}>
-                        <span>{t('Relation')} {' '}</span>
+                        <span>{t('Relation')} </span>
                     </OverlayTrigger>
                     <DropdownButton
                         as={ButtonGroup}
@@ -383,25 +422,29 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                     >
                         <span className='px-3'>{t('Release Relation')}</span>
                         <Dropdown.Divider />
-                        {
-                            Object.keys(releaseRelations).map((relation: string) =>
-                                <span key={relation}>
-                                    <Form.Check
-                                        className={`${styles.selection}`}
-                                        type='checkbox'
-                                        id={`relation-${relation}`}
-                                        value={relation}
-                                        name='relations'
-                                        label={releaseRelations[relation]}
-                                        defaultChecked={(filters.relations.length !== filterOptions.relations.length) && filters.relations.includes(relation)}
-                                        onChange={updateFilters}
-                                    />
-                                </span>
-                            )
-                        }
+                        {Object.keys(releaseRelations).map((relation: string) => (
+                            <span key={relation}>
+                                <Form.Check
+                                    className={`${styles.selection}`}
+                                    type='checkbox'
+                                    id={`relation-${relation}`}
+                                    value={relation}
+                                    name='relations'
+                                    label={releaseRelations[relation]}
+                                    defaultChecked={
+                                        filters.relations.length !== filterOptions.relations.length &&
+                                        filters.relations.includes(relation)
+                                    }
+                                    onChange={updateFilters}
+                                />
+                            </span>
+                        ))}
                     </DropdownButton>
-                    <FaSort className='cursor-pointer' onClick={() => sortColumn('releaseRelationship')} />
-                </>
+                    <FaSort
+                        className='cursor-pointer'
+                        onClick={() => sortColumn('releaseRelationship')}
+                    />
+                </>,
             ),
             width: '10%',
         },
@@ -410,8 +453,11 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             name: _(
                 <>
                     {t('Main licenses')}
-                    <FaSort className='cursor-pointer' onClick={() => sortColumn('licenseIds')} />
-                </>
+                    <FaSort
+                        className='cursor-pointer'
+                        onClick={() => sortColumn('licenseIds')}
+                    />
+                </>,
             ),
             width: '9%',
         },
@@ -425,7 +471,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             name: _(
                 <>
                     <OverlayTrigger overlay={<Tooltip>{t('Release Clearing State Filter')}</Tooltip>}>
-                        <span>{t('State')} {' '}</span>
+                        <span>{t('State')} </span>
                     </OverlayTrigger>
                     <DropdownButton
                         as={ButtonGroup}
@@ -436,34 +482,38 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                     >
                         <span className='px-3'>{t('Release Clearing State')}</span>
                         <Dropdown.Divider />
-                        {
-                            Object.keys(releaseClearingStates).map((state: string) =>
-                                <span key={state}>
-                                    <Form.Check
-                                        className={`${styles.selection}`}
-                                        type='checkbox'
-                                        id={`state-${state}`}
-                                        value={state}
-                                        name='states'
-                                        defaultChecked={(filters.states.length !== filterOptions.states.length) && filters.states.includes(state)}
-                                        label={releaseClearingStates[state]}
-                                        onChange={updateFilters}
-                                    />
-                                </span>
-                            )
-                        }
+                        {Object.keys(releaseClearingStates).map((state: string) => (
+                            <span key={state}>
+                                <Form.Check
+                                    className={`${styles.selection}`}
+                                    type='checkbox'
+                                    id={`state-${state}`}
+                                    value={state}
+                                    name='states'
+                                    defaultChecked={
+                                        filters.states.length !== filterOptions.states.length &&
+                                        filters.states.includes(state)
+                                    }
+                                    label={releaseClearingStates[state]}
+                                    onChange={updateFilters}
+                                />
+                            </span>
+                        ))}
                     </DropdownButton>
-                </>
+                </>,
             ),
-            width: '7%'
+            width: '7%',
         },
         {
             id: 'licenseClearing.releaseMainlineState',
             name: _(
                 <>
                     {t('Release Mainline State')}
-                    <FaSort className='cursor-pointer' onClick={() => sortColumn('releaseMainLineState')} />
-                </>
+                    <FaSort
+                        className='cursor-pointer'
+                        onClick={() => sortColumn('releaseMainLineState')}
+                    />
+                </>,
             ),
             width: '6%',
         },
@@ -472,8 +522,11 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             name: _(
                 <>
                     {t('Project Mainline State')}
-                    <FaSort className='cursor-pointer' onClick={() => sortColumn('mainlineState')} />
-                </>
+                    <FaSort
+                        className='cursor-pointer'
+                        onClick={() => sortColumn('mainlineState')}
+                    />
+                </>,
             ),
             width: '6%',
         },
@@ -489,61 +542,149 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         },
     ]
 
-    const convertClearingStatusDataToTableNode = (item: ClearingState, isRelease: boolean, releaseIndexPath?: Array<number>): DependencyNetworkNodeData => {
+    const convertClearingStatusDataToTableNode = (
+        item: ClearingState,
+        isRelease: boolean,
+        releaseIndexPath?: Array<number>,
+    ): DependencyNetworkNodeData => {
         const rowData = [
-            (isRelease)
-                ? (item.accessible === true)
-                    ?
-                    <Link key={item.id} href={`/components/releases/detail/${item.id}`} style={{ wordBreak: 'break-all' }}>{nameFormatter(`${item.name} ${item.version}`)}</Link>
-                    :
-                    item.longName ?? ''
-                : <Link key={item.id} href={`/projects/detail/${item.id}`} style={{ wordBreak: 'break-all' }}>{nameFormatter(`${item.name} ${item.version}`)}</Link>,
-            (isRelease) ? releaseTypes[item.componentType] : projectTypes[item.projectType],
-            (isRelease) ? <EnumValueWithToolTip value={item.releaseRelationship ?? 'UNKNOWN'} t={t} /> : projectRelations[item.relation ?? 'UNKNOWN'],
-            (item.licenseIds) ? <TogglerLicenseList licenses={item.licenseIds} releaseId={item.id} t={t} /> : '',
-            (item.otherLicenseIds) ? <TogglerLicenseList licenses={item.otherLicenseIds} releaseId={item.id} t={t} /> : '',
-            ((item.accessible === true) || !isRelease) ? <ClearingStateBadge key={item.id} isRelease={isRelease} clearingState={item.clearingState ?? 'OPEN'} projectState={item.state} t={t} /> : '',
-            (isRelease) ? <EnumValueWithToolTip key={item.releaseMainLineState} value={item.releaseMainLineState ?? 'OPEN'} t={t} /> : '',
-            (isRelease) ? <EnumValueWithToolTip key={item.mainlineState} value={item.mainlineState ?? 'OPEN'} t={t} /> : '',
-            CommonUtils.nullToEmptyString(item.comment),
-            ((item.accessible === true) || !isRelease) ? <div key={item.name} style={{ textAlign: 'center' }}>
-                <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+            isRelease ? (
+                item.accessible === true ? (
                     <Link
-                        href={
-                            isRelease === true
-                                ? `/components/editRelease/${item.id}`
-                                : `/projects/edit/${item.id}`
-                        }
-                        className='overlay-trigger'
+                        key={item.id}
+                        href={`/components/releases/detail/${item.id}`}
+                        style={{ wordBreak: 'break-all' }}
                     >
-                        <FaPencilAlt className='btn-icon' />
+                        {nameFormatter(`${item.name} ${item.version}`)}
                     </Link>
-                </OverlayTrigger>
-            </div> : <></>
+                ) : (
+                    item.longName ?? ''
+                )
+            ) : (
+                <Link
+                    key={item.id}
+                    href={`/projects/detail/${item.id}`}
+                    style={{ wordBreak: 'break-all' }}
+                >
+                    {nameFormatter(`${item.name} ${item.version}`)}
+                </Link>
+            ),
+            isRelease ? releaseTypes[item.componentType] : projectTypes[item.projectType],
+            isRelease ? (
+                <EnumValueWithToolTip
+                    value={item.releaseRelationship ?? 'UNKNOWN'}
+                    t={t}
+                />
+            ) : (
+                projectRelations[item.relation ?? 'UNKNOWN']
+            ),
+            item.licenseIds ? (
+                <TogglerLicenseList
+                    licenses={item.licenseIds}
+                    releaseId={item.id}
+                    t={t}
+                />
+            ) : (
+                ''
+            ),
+            item.otherLicenseIds ? (
+                <TogglerLicenseList
+                    licenses={item.otherLicenseIds}
+                    releaseId={item.id}
+                    t={t}
+                />
+            ) : (
+                ''
+            ),
+            item.accessible === true || !isRelease ? (
+                <ClearingStateBadge
+                    key={item.id}
+                    isRelease={isRelease}
+                    clearingState={item.clearingState ?? 'OPEN'}
+                    projectState={item.state}
+                    t={t}
+                />
+            ) : (
+                ''
+            ),
+            isRelease ? (
+                <EnumValueWithToolTip
+                    key={item.releaseMainLineState}
+                    value={item.releaseMainLineState ?? 'OPEN'}
+                    t={t}
+                />
+            ) : (
+                ''
+            ),
+            isRelease ? (
+                <EnumValueWithToolTip
+                    key={item.mainlineState}
+                    value={item.mainlineState ?? 'OPEN'}
+                    t={t}
+                />
+            ) : (
+                ''
+            ),
+            CommonUtils.nullToEmptyString(item.comment),
+            item.accessible === true || !isRelease ? (
+                <div
+                    key={item.name}
+                    style={{ textAlign: 'center' }}
+                >
+                    <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                        <Link
+                            href={
+                                isRelease === true ? `/components/editRelease/${item.id}` : `/projects/edit/${item.id}`
+                            }
+                            className='overlay-trigger'
+                        >
+                            <FaPencilAlt className='btn-icon' />
+                        </Link>
+                    </OverlayTrigger>
+                </div>
+            ) : (
+                <></>
+            ),
         ]
 
         return {
             rowData: rowData,
             children: [
-                ...((item.linkedReleases) ? Object.values(item.linkedReleases).map((subItem) => convertClearingStatusDataToTableNode(subItem as ClearingState, true, [...((releaseIndexPath) ? releaseIndexPath : []), item.index])) : []),
-                ...((item.subprojects) ? Object.values(item.subprojects).map((subItem) => convertClearingStatusDataToTableNode(subItem as ClearingState, false)) : [])
+                ...(item.linkedReleases
+                    ? Object.values(item.linkedReleases).map((subItem) =>
+                          convertClearingStatusDataToTableNode(subItem as ClearingState, true, [
+                              ...(releaseIndexPath ? releaseIndexPath : []),
+                              item.index,
+                          ]),
+                      )
+                    : []),
+                ...(item.subprojects
+                    ? Object.values(item.subprojects).map((subItem) =>
+                          convertClearingStatusDataToTableNode(subItem as ClearingState, false),
+                      )
+                    : []),
             ],
             isExpanded: item.isExpanded,
-            isExpandable: (isRelease) ? item.hasSubreleases : true,
-            isNodeFetched: !CommonUtils.isNullEmptyOrUndefinedArray(item.linkedReleases) || !CommonUtils.isNullEmptyOrUndefinedArray(item.subprojects) || item.isExpanded,
+            isExpandable: isRelease ? item.hasSubreleases : true,
+            isNodeFetched:
+                !CommonUtils.isNullEmptyOrUndefinedArray(item.linkedReleases) ||
+                !CommonUtils.isNullEmptyOrUndefinedArray(item.subprojects) ||
+                item.isExpanded,
             additionalData: {
                 node: item.ref ? item.ref : item,
                 isRelease: isRelease,
-                releaseIndexPath: (releaseIndexPath) ? [...releaseIndexPath, item.index] : [],
-                projectOrigin: item.projectId
-            } as NodeAdditionalData
+                releaseIndexPath: releaseIndexPath ? [...releaseIndexPath, item.index] : [],
+                projectOrigin: item.projectId,
+            } as NodeAdditionalData,
         }
     }
 
     function filterData(data: ProjectClearingState) {
         const filterRelease = (release: ReleaseClearingState): ReleaseClearingState | undefined => {
             if (!CommonUtils.isNullEmptyOrUndefinedArray(release.linkedReleases)) {
-                const subNodes: Array<ReleaseClearingState> = release.linkedReleases.map(subRelease => filterRelease(subRelease)).filter(el => el !== undefined)
+                const subNodes: Array<ReleaseClearingState> = release.linkedReleases
+                    .map((subRelease) => filterRelease(subRelease))
+                    .filter((el): el is ReleaseClearingState => el !== undefined)
                 if (subNodes.length) return { ...release, linkedReleases: subNodes, ref: release }
             }
             if (
@@ -557,20 +698,17 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         }
 
         const filterProject = (project: ProjectClearingState) => {
-            const filteredReleases = (project.linkedReleases) ? project.linkedReleases.map(release => filterRelease(release)).filter(el => el !== undefined) : []
+            const filteredReleases = project.linkedReleases
+                ? project.linkedReleases
+                      .map((release) => filterRelease(release))
+                      .filter((el): el is ReleaseClearingState => el !== undefined)
+                : []
             const filteredProjects: Array<ProjectClearingState> = project.subprojects
                 ? project.subprojects
-                    .map((prj) => {
-                        const filteredProject = filterProject(prj)
-                        if (prj.isExpanded !== true) {
-                            return undefined
-                        }
-                        if (CommonUtils.isNullEmptyOrUndefinedArray(filteredProject.linkedReleases)
-                            && CommonUtils.isNullEmptyOrUndefinedArray(filteredProject.subprojects)
-                        )
-                            return undefined
-                        return filteredProject
-                    }).filter(prj => prj !== undefined)
+                      .map((prj) => {
+                          return filterProject(prj)
+                      })
+                      .filter(Boolean)
                 : []
             return { ...project, subprojects: filteredProjects, linkedReleases: filteredReleases, ref: project }
         }
@@ -583,44 +721,46 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
 
         setNoOfLinkedResources({
             releases: !CommonUtils.isNullEmptyOrUndefinedArray(data.linkedReleases) ? data.linkedReleases.length : 0,
-            projects: !CommonUtils.isNullEmptyOrUndefinedArray(data.subprojects) ? data.subprojects.length : 0
+            projects: !CommonUtils.isNullEmptyOrUndefinedArray(data.subprojects) ? data.subprojects.length : 0,
         })
 
         const sortedData = sortData(data)
         const filteredData =
-            (
-                filters.types.length === filterOptions.types.length &&
-                filters.relations.length === filterOptions.relations.length &&
-                filters.states.length === filterOptions.states.length
-            ) ? sortedData : filterData(sortedData)
+            filters.types.length === filterOptions.types.length &&
+            filters.relations.length === filterOptions.relations.length &&
+            filters.states.length === filterOptions.states.length
+                ? sortedData
+                : filterData(sortedData)
 
         const treeData = [
-            ...(!CommonUtils.isNullEmptyOrUndefinedArray(filteredData.linkedReleases) ? Object.values(filteredData.linkedReleases).map(
-                (item) => convertClearingStatusDataToTableNode(item as ClearingState, true, [])
-            ) : []),
-            ...(!CommonUtils.isNullEmptyOrUndefinedArray(filteredData.subprojects) ? Object.values(filteredData.subprojects).map(
-                (item) => convertClearingStatusDataToTableNode(item as ClearingState, false)
-            ) : [])
+            ...(!CommonUtils.isNullEmptyOrUndefinedArray(filteredData.linkedReleases)
+                ? Object.values(filteredData.linkedReleases).map((item) =>
+                      convertClearingStatusDataToTableNode(item as ClearingState, true, []),
+                  )
+                : []),
+            ...(!CommonUtils.isNullEmptyOrUndefinedArray(filteredData.subprojects)
+                ? Object.values(filteredData.subprojects).map((item) =>
+                      convertClearingStatusDataToTableNode(item as ClearingState, false),
+                  )
+                : []),
         ]
 
         setTreeData(treeData)
     }, [data, filters, sortOption])
 
-    const onLoadFetch = useCallback(
-        async () => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return
-            }
-            const response = await ApiUtils.GET(`projects/network/${projectId}/linkedResources`, session.user.access_token)
-            const responseData = await response.json() as ProjectClearingState
-            setData(responseData)
-        }, [projectId]
-    )
+    const onLoadFetch = useCallback(async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        const response = await ApiUtils.GET(`projects/network/${projectId}/linkedResources`, session.user.access_token)
+        const responseData = (await response.json()) as ProjectClearingState
+        setData(responseData)
+    }, [projectId])
 
     useEffect(() => {
-        onLoadFetch().catch(err => console.error(err))
+        onLoadFetch().catch((err) => console.error(err))
     }, [])
 
     const doSearch = (event: ChangeEvent<HTMLInputElement>) => {
@@ -629,7 +769,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
 
     return (
         <>
-            <div >
+            <div>
                 <Form.Control
                     placeholder={t('Search')}
                     className={`d-inline-block tree-view-search-input float-end ${styles['table-search-box']}`}
@@ -639,16 +779,21 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                 />
             </div>
             <div className='my-1'>
-                {
-                    data
-                        ?
-                            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                            <TreeTable columns={columns} data={treeData} setData={setTreeData} language={language} onExpand={onExpand} search={search} />
-                        :
-                            <div className='col-12 text-center'>
-                                <Spinner className='spinner' />
-                            </div>
-                }
+                {data ? (
+                    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                    <TreeTable
+                        columns={columns}
+                        data={treeData}
+                        setData={setTreeData}
+                        language={language}
+                        onExpand={onExpand}
+                        search={search}
+                    />
+                ) : (
+                    <div className='col-12 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
             </div>
         </>
     )

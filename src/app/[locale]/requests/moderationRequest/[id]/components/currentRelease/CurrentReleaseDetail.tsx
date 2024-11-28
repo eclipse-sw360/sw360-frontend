@@ -36,10 +36,10 @@ import { useCallback, useEffect, useState } from 'react'
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
 interface Props {
-    releaseId: string | undefined
+    releaseId: string
 }
 
-const CurrentReleaseDetail = ({ releaseId }: Props) => {
+const CurrentReleaseDetail = ({ releaseId }: Props): JSX.Element => {
     const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
@@ -93,96 +93,96 @@ const CurrentReleaseDetail = ({ releaseId }: Props) => {
             .catch((err) => console.error(err))
     }, [fetchData, releaseId])
 
-    return (
-        release && (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
-                            eccStatus={release.eccInformation?.eccStatus}
+    return release ? (
+        <div className='container page-content'>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <SideBar
+                        selectedTab={selectedTab}
+                        setSelectedTab={setSelectedTab}
+                        tabList={tabList}
+                        eccStatus={release.eccInformation?.eccStatus}
+                    />
+                </div>
+                <div className='col'>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== CommonTabIds.SUMMARY}
+                    >
+                        <Summary
+                            release={release}
+                            releaseId={releaseId}
                         />
                     </div>
-                    <div className='col'>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                        >
-                            <Summary
-                                release={release}
-                                releaseId={releaseId}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
-                        >
-                            <LinkedReleases releaseId={releaseId} />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}
-                        >
-                            <ClearingDetails
-                                release={release}
-                                releaseId={releaseId}
-                                embeddedAttachments={embeddedAttachments}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}
-                        >
-                            <ECCDetails release={release} />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}
-                        >
-                            <Attachments
-                                documentId={releaseId}
-                                documentType={DocumentTypes.RELEASE}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}
-                        >
-                            <div className='col'>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES}
+                    >
+                        <LinkedReleases releaseId={releaseId} />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS}
+                    >
+                        <ClearingDetails
+                            release={release}
+                            releaseId={releaseId}
+                            embeddedAttachments={embeddedAttachments}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS}
+                    >
+                        <ECCDetails release={release} />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.ATTACHMENTS}
+                    >
+                        <Attachments
+                            documentId={releaseId}
+                            documentType={DocumentTypes.RELEASE}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.CHANGE_LOG}
+                    >
+                        <div className='col'>
+                            <div
+                                className='row'
+                                hidden={changesLogTab != 'list-change'}
+                            >
+                                <ChangeLogList
+                                    setChangeLogIndex={setChangeLogIndex}
+                                    documentId={releaseId}
+                                    setChangesLogTab={setChangesLogTab}
+                                    changeLogList={changeLogList}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={changesLogTab != 'view-log'}
+                            >
+                                <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
                                 <div
-                                    className='row'
-                                    hidden={changesLogTab != 'list-change' ? true : false}
-                                >
-                                    <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
-                                        documentId={releaseId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
-                                    />
-                                </div>
-                                <div
-                                    className='row'
-                                    hidden={changesLogTab != 'view-log' ? true : false}
-                                >
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div
-                                        id='cardScreen'
-                                        style={{ padding: '0px' }}
-                                    ></div>
-                                </div>
+                                    id='cardScreen'
+                                    style={{ padding: '0px' }}
+                                ></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <LinkReleaseToProjectModal
-                    show={linkProjectModalShow}
-                    setShow={setLinkProjectModalShow}
-                    releaseId={releaseId}
-                />
             </div>
-        )
+            <LinkReleaseToProjectModal
+                show={linkProjectModalShow}
+                setShow={setLinkProjectModalShow}
+                releaseId={releaseId}
+            />
+        </div>
+    ) : (
+        <></>
     )
 }
 

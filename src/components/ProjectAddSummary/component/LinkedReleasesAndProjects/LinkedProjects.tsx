@@ -11,26 +11,19 @@
 
 import { Table, _ } from '@/components/sw360'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
-import { ProjectPayload } from '@/object-types'
+import { LinkedProjectData, ProjectPayload } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
-import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-interface LinkedProjectData {
-    enableSvm: boolean
-    name: string
-    projectRelationship: string
-    version: string
-}
+type RowData = (string | boolean | { updatedProjectRelationship: string; key: string })[]
 
-type RowData = (string | boolean | { updatedProjectRelationship: string; key: string; })[]
-
-export default function LinkedProjects({ projectPayload, setProjectPayload }: Props) : JSX.Element {
+export default function LinkedProjects({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
     const [linkedProjectData, setLinkedProjectData] = useState<Map<string, LinkedProjectData>>(new Map())
@@ -39,12 +32,12 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
     const updateProjectData = (
         projectId: string,
         updatedProjectRelationship: string,
-        linkedProjectData: Map<string, LinkedProjectData>
+        linkedProjectData: Map<string, LinkedProjectData>,
     ) => {
         try {
             if (linkedProjectData.has(projectId)) {
                 linkedProjectData.forEach((value, key) => {
-                    if ((key === projectId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedProjects)) {
+                    if (key === projectId && !CommonUtils.isNullOrUndefined(projectPayload.linkedProjects)) {
                         value.projectRelationship = updatedProjectRelationship
                         setLinkedProjectData(linkedProjectData)
                         projectPayload.linkedProjects[projectId].projectRelationship = updatedProjectRelationship
@@ -93,7 +86,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                             <option value='CONTAINED'>{t('Is a subproject')}</option>
                             <option value='DUPLICATE'>{t('Duplicate')}</option>
                         </select>
-                    </div>
+                    </div>,
                 ),
         },
         {
@@ -128,15 +121,28 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
             />
             <div className='row mb-4'>
                 <div className='row header-1'>
-                    <h6 className='fw-medium' style={{ color: '#5D8EA9', paddingLeft: '0px' }}>
+                    <h6
+                        className='fw-medium'
+                        style={{ color: '#5D8EA9', paddingLeft: '0px' }}
+                    >
                         LINKED PROJECTS
-                        <hr className='my-2 mb-2' style={{ color: '#5D8EA9' }} />
+                        <hr
+                            className='my-2 mb-2'
+                            style={{ color: '#5D8EA9' }}
+                        />
                     </h6>
                 </div>
                 <div style={{ paddingLeft: '0px' }}>
-                    <Table columns={columns} data={tableData} sort={false} />
+                    <Table
+                        columns={columns}
+                        data={tableData}
+                        sort={false}
+                    />
                 </div>
-                <div className='row' style={{ paddingLeft: '0px' }}>
+                <div
+                    className='row'
+                    style={{ paddingLeft: '0px' }}
+                >
                     <div className='col-lg-4'>
                         <button
                             type='button'

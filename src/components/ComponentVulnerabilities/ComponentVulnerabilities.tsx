@@ -24,7 +24,7 @@ interface Props {
     vulnerData: Array<LinkedVulnerability>
 }
 
-interface SelectedVulnerability  {
+interface SelectedVulnerability {
     releaseId: string
     vulnerExternalId: string
     index: string
@@ -39,7 +39,7 @@ interface FirstCellData {
     vulnerExternalId: string
 }
 
-const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
+const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [dialogOpen, setDialogOpen] = useState(false)
     const [state, setState] = useState('NOT_CHECKED')
@@ -93,21 +93,27 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
             })
             .filter((element) => element !== undefined)
 
-        setSelectedVulner(selectingVulner)
+        setSelectedVulner(selectingVulner as Array<SelectedVulnerability>)
         setDialogOpen(true)
     }
 
     const columns = [
         {
             id: 'check',
-            name: _(<Form.Check defaultChecked={checkAll} type='checkbox' onClick={handleCheckAll}></Form.Check>),
-            formatter: ({ checked, index } : { checked: boolean, index: string}) =>
+            name: _(
+                <Form.Check
+                    defaultChecked={checkAll}
+                    type='checkbox'
+                    onClick={handleCheckAll}
+                ></Form.Check>,
+            ),
+            formatter: ({ checked, index }: { checked: boolean; index: string }) =>
                 _(
                     <Form.Check
                         defaultChecked={checked}
                         onClick={() => handleCheckBox(index, checked)}
                         type='checkbox'
-                    ></Form.Check>
+                    ></Form.Check>,
                 ),
             sort: false,
         },
@@ -121,9 +127,12 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
             name: t('External Id'),
             formatter: ([externalId, id]: Array<string>) =>
                 _(
-                    <Link href={'/vulnerabilites/detail/' + id} className='link'>
+                    <Link
+                        href={'/vulnerabilites/detail/' + id}
+                        className='link'
+                    >
                         {externalId}
-                    </Link>
+                    </Link>,
                 ),
             sort: true,
         },
@@ -146,11 +155,12 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
             id: 'verification',
             name: t('Verification'),
             formatter: (verificationStateInfos: Array<VerificationStateInfo>) =>
-                (verificationStateInfos.length > 0) && _(
+                verificationStateInfos.length > 0 &&
+                _(
                     <VerificationTooltip verificationStateInfos={verificationStateInfos}>
                         <FaInfoCircle style={{ marginRight: '5px', color: 'gray', width: '15px', height: '15px' }} />
                         {verificationStateInfos.at(-1)?.verificationState}
-                    </VerificationTooltip>
+                    </VerificationTooltip>,
                 ),
             sort: true,
         },
@@ -195,8 +205,15 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
                 >
                     {t('Vulnerabilities')}
                 </h5>
-                <Table columns={columns} data={data} selector={true} />
-                <Form.Group className='mb-3' controlId='createdOn'>
+                <Table
+                    columns={columns}
+                    data={data}
+                    selector={true}
+                />
+                <Form.Group
+                    className='mb-3'
+                    controlId='createdOn'
+                >
                     <Form.Label>
                         <b>{t('Change verification state of selected vulnerabilities to')}</b>
                     </Form.Label>
@@ -214,11 +231,14 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
                     >
                         {Object.values(VulnerabilitiesVerificationState).map(
                             (item): JSX.Element => (
-                                <option key={item} value={item}>
+                                <option
+                                    key={item}
+                                    value={item}
+                                >
                                     {' '}
                                     {t(item)}{' '}
                                 </option>
-                            )
+                            ),
                         )}
                     </Form.Select>
                     <Button onClick={handleClick}>{t('Change State')}</Button>

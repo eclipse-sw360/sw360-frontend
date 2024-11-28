@@ -119,7 +119,7 @@ export default function ProposedChanges({
     )
 
     const convertToReactNode = (
-        value: string | object | Array<object> | boolean | number | Array<string>,
+        value: string | object | Array<object> | boolean | number | Array<string> | undefined,
     ): ReactNode => {
         if (typeof value === 'string' || typeof value === 'number') {
             return value
@@ -156,135 +156,134 @@ export default function ProposedChanges({
                 setDocumentDelete(true)
             } else {
                 // Condition when the existing data is modified
-                for (const key in documentDeletions) {
-                    if (key in documentAdditions) {
-                        if (documentDeletions[key] != documentAdditions[key]) {
-                            if (
-                                typeof documentAdditions[key] === 'object' &&
-                                typeof documentDeletions[key] === 'object' &&
-                                Object.keys(documentAdditions[key]).length !== 0 &&
-                                Object.keys(documentDeletions[key]).length === 0
-                            ) {
-                                isObject = true
-                                for (const k in documentAdditions[key]) {
-                                    const updatedValue: Array<Array<string> | JSX.Element> = []
-                                    const valueFromDB: Array<string> = (
-                                        Object.hasOwn(interimData, key) &&
-                                        interimData[key as keyof typeof propsDataType] !== '' &&
-                                        Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
-                                            ? Object.values(interimData[key as keyof typeof propsDataType][k]).flat()
-                                            : []
-                                    ) as string[]
-                                    updatedValue.push(
-                                        (Object.hasOwn(interimData, key) &&
-                                        interimData[key as keyof typeof propsDataType] !== '' &&
-                                        Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
-                                            ? Object.values(interimData[key as keyof typeof propsDataType][k]).flat()
-                                            : []) as string[],
-                                    )
-                                    updatedValue.push(
-                                        <b
-                                            key={`${key}[${k}]`}
-                                            style={{ color: 'green' }}
-                                        >
-                                            {typeof documentAdditions[key] === 'object' &&
-                                            !Array.isArray(documentAdditions[key])
-                                                ? (
-                                                      documentAdditions[key] as {
-                                                          [key: string]: string | number | boolean | string[]
-                                                      }
-                                                  )[k]
-                                                : ''}
-                                        </b>,
-                                    )
-                                    changedData.push([
-                                        `${key}[${k}]:`,
-                                        [valueFromDB, isObject],
-                                        t('n a modified list'),
-                                        [updatedValue, isObject],
-                                    ])
-                                }
-                            } else if (
-                                typeof documentAdditions[key] === 'object' &&
-                                typeof documentDeletions[key] === 'object' &&
-                                Object.keys(documentDeletions[key]).length !== 0 &&
-                                Object.keys(documentAdditions[key]).length === 0
-                            ) {
-                                isObject = true
-                                for (const k in documentDeletions[key]) {
-                                    const updatedValue: Array<string | Array<string> | JSX.Element> = []
-                                    let filteredDataFromDB: Array<string> = []
-                                    if (
-                                        Object.hasOwn(interimData, key) &&
-                                        Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
-                                    ) {
-                                        filteredDataFromDB = (
-                                            interimData[key as keyof typeof propsDataType][k] as string[]
-                                        ).filter((item: string) => !(documentDeletions[key] as string[]).includes(item))
-                                    }
-                                    const valueFromDB = (
-                                        Object.hasOwn(interimData, key) &&
-                                        interimData[key as keyof typeof propsDataType] !== '' &&
-                                        Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
-                                            ? Object.values(interimData[key as keyof typeof propsDataType][k]).flat()
-                                            : []
-                                    ) as string[]
-                                    updatedValue.push(...filteredDataFromDB)
-                                    updatedValue.push(
-                                        <b
-                                            key={`${key}[${k}]`}
-                                            style={{ color: 'red' }}
-                                        >
-                                            {typeof documentAdditions[key] === 'object' &&
-                                            !Array.isArray(documentAdditions[key])
-                                                ? (
-                                                      documentAdditions[key] as {
-                                                          [key: string]: string | number | boolean | string[]
-                                                      }
-                                                  )[k]
-                                                : ''}
-                                        </b>,
-                                    )
-                                    changedData.push([
-                                        `${key}[${k}]:`,
-                                        [valueFromDB, isObject],
-                                        t('n a modified list'),
-                                        [updatedValue, isObject],
-                                    ])
-                                }
-                            } else {
-                                const updatedValue: Array<JSX.Element> = []
-                                let updatedFormerValue: JSX.Element = <></>
-                                if (documentAdditions[key] !== undefined) {
-                                    updatedValue.push(
-                                        <b
-                                            key={`${key}`}
-                                            style={{ color: 'green' }}
-                                        >
-                                            {convertToReactNode(documentAdditions[key])}
-                                        </b>,
-                                    )
-                                }
-                                if (documentDeletions[key] !== undefined) {
-                                    updatedFormerValue = (
-                                        <b
-                                            key={`${key}`}
-                                            style={{ color: 'red' }}
-                                        >
-                                            {convertToReactNode(documentDeletions[key])}
-                                        </b>
-                                    )
-                                }
-                                changedData.push([
-                                    key,
-                                    [interimData[key as keyof typeof propsDataType], isObject],
-                                    updatedFormerValue,
-                                    [updatedValue, isObject],
-                                ])
-                            }
-                        }
-                    }
-                }
+                // TODO -> Rewrite broken logic
+                // for (const key in documentDeletions) {
+                //     if (key in documentAdditions) {
+                //         if (documentDeletions[key] != documentAdditions[key]) {
+                //             if (
+                //                 typeof documentAdditions[key] === 'object' &&
+                //                 typeof documentDeletions[key] === 'object'
+                //             ) {
+                //                 isObject = true
+                //                 for (const k in documentAdditions[key]) {
+                //                     const updatedValue: Array<Array<string> | JSX.Element> = []
+                //                     const valueFromDB: Array<string> = (
+                //                         Object.hasOwn(interimData, key) &&
+                //                         interimData[key as keyof typeof propsDataType] !== '' &&
+                //                         Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
+                //                             ? Object.values(interimData[key as keyof typeof propsDataType][k]).flat()
+                //                             : []
+                //                     ) as string[]
+                //                     updatedValue.push(
+                //                         (Object.hasOwn(interimData, key) &&
+                //                         interimData[key as keyof typeof propsDataType] !== '' &&
+                //                         Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
+                //                             ? Object.values(interimData[key as keyof typeof propsDataType][k]).flat()
+                //                             : []) as string[],
+                //                     )
+                //                     updatedValue.push(
+                //                         <b
+                //                             key={`${key}[${k}]`}
+                //                             style={{ color: 'green' }}
+                //                         >
+                //                             {typeof documentAdditions[key] === 'object' &&
+                //                             !Array.isArray(documentAdditions[key])
+                //                                 ? (
+                //                                       documentAdditions[key] as {
+                //                                           [key: string]: string | number | boolean | string[]
+                //                                       }
+                //                                   )[k]
+                //                                 : ''}
+                //                         </b>,
+                //                     )
+                //                     changedData.push([
+                //                         `${key}[${k}]:`,
+                //                         [valueFromDB, isObject],
+                //                         t('n a modified list'),
+                //                         [updatedValue, isObject],
+                //                     ])
+                //                 }
+                //             } else if (
+                //                 typeof documentAdditions[key] === 'object' &&
+                //                 typeof documentDeletions[key] === 'object' &&
+                //                 Object.keys(documentDeletions[key]).length !== 0 &&
+                //                 Object.keys(documentAdditions[key]).length === 0
+                //             ) {
+                //                 isObject = true
+                //                 for (const k in documentDeletions[key]) {
+                //                     const updatedValue: Array<string | Array<string> | JSX.Element> = []
+                //                     let filteredDataFromDB: Array<string> = []
+                //                     if (
+                //                         Object.hasOwn(interimData, key) &&
+                //                         Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
+                //                     ) {
+                //                         filteredDataFromDB = (
+                //                             interimData[key as keyof typeof propsDataType][k] as string[]
+                //                         ).filter((item: string) => !(documentDeletions[key] as string[]).includes(item))
+                //                     }
+                //                     const valueFromDB = (
+                //                         Object.hasOwn(interimData, key) &&
+                //                         interimData[key as keyof typeof propsDataType] !== '' &&
+                //                         Object.hasOwn(interimData[key as keyof typeof propsDataType], k)
+                //                             ? Object.values(interimData[key as keyof typeof propsDataType][k]).flat()
+                //                             : []
+                //                     ) as string[]
+                //                     updatedValue.push(...filteredDataFromDB)
+                //                     updatedValue.push(
+                //                         <b
+                //                             key={`${key}[${k}]`}
+                //                             style={{ color: 'red' }}
+                //                         >
+                //                             {typeof documentAdditions[key] === 'object' &&
+                //                             !Array.isArray(documentAdditions[key])
+                //                                 ? (
+                //                                       documentAdditions[key] as {
+                //                                           [key: string]: string | number | boolean | string[]
+                //                                       }
+                //                                   )[k]
+                //                                 : ''}
+                //                         </b>,
+                //                     )
+                //                     changedData.push([
+                //                         `${key}[${k}]:`,
+                //                         [valueFromDB, isObject],
+                //                         t('n a modified list'),
+                //                         [updatedValue, isObject],
+                //                     ])
+                //                 }
+                //             } else {
+                //                 const updatedValue: Array<JSX.Element> = []
+                //                 let updatedFormerValue: JSX.Element = <></>
+                //                 if (documentAdditions[key] !== undefined) {
+                //                     updatedValue.push(
+                //                         <b
+                //                             key={`${key}`}
+                //                             style={{ color: 'green' }}
+                //                         >
+                //                             {convertToReactNode(documentAdditions[key])}
+                //                         </b>,
+                //                     )
+                //                 }
+                //                 if (documentDeletions[key] !== undefined) {
+                //                     updatedFormerValue = (
+                //                         <b
+                //                             key={`${key}`}
+                //                             style={{ color: 'red' }}
+                //                         >
+                //                             {convertToReactNode(documentDeletions[key])}
+                //                         </b>
+                //                     )
+                //                 }
+                //                 changedData.push([
+                //                     key,
+                //                     [interimData[key as keyof typeof propsDataType], isObject],
+                //                     updatedFormerValue,
+                //                     [updatedValue, isObject],
+                //                 ])
+                //             }
+                //         }
+                //     }
+                // }
 
                 // Condition when the new data are added
                 for (const key in documentAdditions) {

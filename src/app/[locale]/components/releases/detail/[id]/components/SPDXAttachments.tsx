@@ -37,7 +37,7 @@ interface CellData {
     addLicensesState?: { [key: string]: string }
 }
 
-const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
+const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<Array<CellData>>>([])
 
@@ -53,7 +53,7 @@ const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
                         </>
                     ) : (
                         <>{fileName}</>
-                    )
+                    ),
                 ),
             sort: false,
         },
@@ -62,19 +62,25 @@ const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
             name: t('Action'),
             formatter: ({ isISR, showLicenseClicked, rowIndex, attachmentId }: CellData) =>
                 _(
-                    (showLicenseClicked === true) ? (
+                    showLicenseClicked === true ? (
                         isISR == false ? (
-                            <Button variant='primary' onClick={() => void handleAddSpdxLicenses(rowIndex)}>
+                            <Button
+                                variant='primary'
+                                onClick={() => void handleAddSpdxLicenses(rowIndex)}
+                            >
                                 {t('Add License To Release')}
                             </Button>
                         ) : (
                             <></>
                         )
                     ) : (
-                        <Button variant='secondary' onClick={() => void handleShowLicenseInfo(rowIndex, attachmentId)}>
+                        <Button
+                            variant='secondary'
+                            onClick={() => void handleShowLicenseInfo(rowIndex, attachmentId)}
+                        >
                             {t('Show License Info')}
                         </Button>
-                    )
+                    ),
                 ),
             sort: false,
         },
@@ -97,7 +103,7 @@ const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
                                 />
                             )}
                         </>
-                    )
+                    ),
                 ),
             sort: false,
         },
@@ -105,23 +111,18 @@ const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
 
     const handleAddSpdxLicenses = async (rowIndex: number) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
 
         const requestBody = {
-            otherLicenseIds: (tableData[rowIndex][2].licenseInfo?.otherLicenseIds !== undefined)
-                ? tableData[rowIndex][2].licenseInfo.otherLicenseIds
-                : [],
-            mainLicenseIds: (tableData[rowIndex][2].licenseInfo?.licenseIds !== undefined)
-                ? tableData[rowIndex][2].licenseInfo.licenseIds
-                : [],
+            otherLicenseIds: tableData[rowIndex]?.[2].licenseInfo?.otherLicenseIds ?? [],
+            mainLicenseIds: tableData[rowIndex]?.[2].licenseInfo?.licenseIds ?? [],
         }
 
         try {
             const response = await ApiUtils.POST(
                 `releases/${releaseId}/spdxLicenses`,
                 requestBody,
-                session.user.access_token
+                session.user.access_token,
             )
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 await signOut()
@@ -157,24 +158,20 @@ const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
         setTableData(newData)
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as { [key: string]: string | Array<string> } & Embedded<
-                    Attachment,
-                    'sw360:attachmentDTOes'
-                >
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            }
-        },
-        []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as { [key: string]: string | Array<string> } & Embedded<
+                Attachment,
+                'sw360:attachmentDTOes'
+            >
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        }
+    }, [])
 
     const handleShowLicenseInfo = async (rowIndex: number, attachmentId: string | undefined) => {
         if (attachmentId === undefined) return
@@ -233,7 +230,7 @@ const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
 
         fetchData(`releases/${releaseId}/attachments`)
             .then((response: Embedded<Attachment, 'sw360:attachmentDTOes'> | undefined) =>
-                (response) ? response._embedded['sw360:attachmentDTOes'] : []
+                response ? response._embedded['sw360:attachmentDTOes'] : [],
             )
             .then((attachments: Array<Attachment>) => {
                 const isrAttachments = filterAttachmentByType(attachments, [AttachmentType.INITIAL_SCAN_REPORT])
@@ -246,7 +243,14 @@ const SPDXAttachments = ({ releaseId }: Props) : ReactNode => {
             .catch((err) => console.error(err))
     }, [releaseId, fetchData])
 
-    return <Table data={tableData} columns={columns} pagination={false} selector={false} />
+    return (
+        <Table
+            data={tableData}
+            columns={columns}
+            pagination={false}
+            selector={false}
+        />
+    )
 }
 
 export default SPDXAttachments

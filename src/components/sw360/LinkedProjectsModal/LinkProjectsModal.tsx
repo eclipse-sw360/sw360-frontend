@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Embedded, HttpStatus, Project, ProjectPayload } from '@/object-types'
+import { Embedded, HttpStatus, LinkedProjectData, Project, ProjectPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
@@ -25,7 +25,7 @@ interface AlertData {
 }
 
 interface Props {
-    setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, ProjectRelationship>>>
+    setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, LinkedProjectData>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
@@ -34,10 +34,14 @@ interface Props {
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
-type RowData = (string | boolean | {
-    state: string
-    clearingState: string
-})[]
+type RowData = (
+    | string
+    | boolean
+    | {
+          state: string
+          clearingState: string
+      }
+)[]
 
 interface ProjectRelationship {
     enableSvm: boolean
@@ -55,7 +59,7 @@ export default function LinkProjectsModal({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [projectData, setProjectData] = useState<RowData[]>([])
-    const [linkProjects, setLinkProjects] = useState<Map<string, ProjectRelationship>>(new Map())
+    const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
     const searchValueRef = useRef<HTMLInputElement>(null)
     const topRef = useRef(null)
@@ -80,7 +84,7 @@ export default function LinkProjectsModal({
                             checked={linkProjects.has(projectId)}
                             onChange={() => handleCheckboxes(projectId)}
                         />
-                    </div>
+                    </div>,
                 ),
         },
         {
@@ -102,11 +106,17 @@ export default function LinkProjectsModal({
                     <>
                         <OverlayTrigger overlay={<Tooltip>{`${t('Project State')}: ${state}`}</Tooltip>}>
                             {state === 'ACTIVE' ? (
-                                <span className='badge bg-success capsule-left' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-success capsule-left'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'PS'}
                                 </span>
                             ) : (
-                                <span className='badge bg-secondary capsule-left' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-secondary capsule-left'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'PS'}
                                 </span>
                             )}
@@ -116,20 +126,29 @@ export default function LinkProjectsModal({
                             overlay={<Tooltip>{`${t('Project Clearing State')}: ${clearingState}`}</Tooltip>}
                         >
                             {clearingState === 'OPEN' ? (
-                                <span className='badge bg-danger capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-danger capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             ) : clearingState === 'IN_PROGRESS' ? (
-                                <span className='badge bg-warning capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-warning capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             ) : (
-                                <span className='badge bg-success capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-success capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             )}
                         </OverlayTrigger>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -152,7 +171,7 @@ export default function LinkProjectsModal({
                     name: projectData[i][1] as string,
                     version: projectData[i][2] as string,
                     projectRelationship: 'CONTAINED',
-                    enableSvm: projectData[i][6] as boolean
+                    enableSvm: projectData[i][6] as boolean,
                 }
             }
         }
@@ -160,7 +179,7 @@ export default function LinkProjectsModal({
     }
 
     const handleExactMatchChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const isExactMatchSelected = event.target.checked;
+        const isExactMatchSelected = event.target.checked
         isExactMatch.current = isExactMatchSelected
     }
 
@@ -180,21 +199,21 @@ export default function LinkProjectsModal({
                 MessageService.error(t('Error while processing'))
                 return
             }
-            const data = await response.json() as EmbeddedProjects
+            const data = (await response.json()) as EmbeddedProjects
 
             const dataTableFormat =
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
                     ? []
                     : data['_embedded']['sw360:projects'].map((project: Project) => [
-                        CommonUtils.getIdFromUrl(project._links?.self.href),
-                        project.name,
-                        project.version ?? '',
-                        { state: project.state ?? 'ACTIVE', clearingState: project.clearingState ?? 'OPEN' },
-                        project.projectResponsible ?? '',
-                        project.description ?? '',
-                        (project.enableSvm === true),
-                    ])
+                          CommonUtils.getIdFromUrl(project._links.self.href),
+                          project.name,
+                          project.version ?? '',
+                          { state: project.state ?? 'ACTIVE', clearingState: project.clearingState ?? 'OPEN' },
+                          project.projectResponsible ?? '',
+                          project.description ?? '',
+                          project.enableSvm === true,
+                      ])
             setProjectData(dataTableFormat)
         } catch (e) {
             console.error(e)
@@ -257,7 +276,10 @@ export default function LinkProjectsModal({
             </Modal.Header>
             <Modal.Body ref={topRef}>
                 {alert && (
-                    <Alert variant={alert.variant} id='linkProjects.alert'>
+                    <Alert
+                        variant={alert.variant}
+                        id='linkProjects.alert'
+                    >
                         {alert.message}
                     </Alert>
                 )}
@@ -274,7 +296,13 @@ export default function LinkProjectsModal({
                             </Col>
                             <Col xs='auto'>
                                 <Form.Group controlId='exact-match-group'>
-                                    <Form.Check inline name='exact-match' type='checkbox' id='exact-match' onChange={handleExactMatchChange} />
+                                    <Form.Check
+                                        inline
+                                        name='exact-match'
+                                        type='checkbox'
+                                        id='exact-match'
+                                        onChange={handleExactMatchChange}
+                                    />
                                     <Form.Label className='pt-2'>
                                         {t('Exact Match')}{' '}
                                         <sup>
@@ -286,13 +314,21 @@ export default function LinkProjectsModal({
                             <Col xs='auto'>
                                 <Button
                                     variant='secondary'
-                                    onClick={() => void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })}
+                                    onClick={() =>
+                                        void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })
+                                    }
                                 >
                                     {t('Search')}
                                 </Button>
                             </Col>
                         </Row>
-                        <Row><Table columns={columns} data={projectData} sort={false} /></Row>
+                        <Row>
+                            <Table
+                                columns={columns}
+                                data={projectData}
+                                sort={false}
+                            />
+                        </Row>
                     </Col>
                 </Form>
             </Modal.Body>
