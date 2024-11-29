@@ -24,6 +24,13 @@
         "tabWidth": 2,
         "semi": true
       }
+    },
+    {
+      "files": "*.yml",
+      "options": {
+        "tabWidth": 2,
+        "semi": true
+      }
     }
   ],
   "organizeImportsSkipDestructiveCodeActions": true
