@@ -39,7 +39,7 @@ header:
         - .dockerignore
         - .gitignore
         - .husky
-        - '.github/CODEOWNERS'
+        - '.github/**'
 
     comment: on-failure
 
