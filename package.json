@@ -69,7 +69,7 @@
     "stylelint": "^16.2.0",
     "stylelint-config-clean-order": "^5.4.0",
     "stylelint-config-standard": "^36.0.0",
-    "stylelint-prettier": "^5.0.0",
+    "stylelint-prettier": "^5.0.2",
     "ts-node": "^10.9.2",
     "tsc-files": "^1.1.4",
     "typescript": "^5.4.4"
