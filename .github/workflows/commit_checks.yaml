@@ -22,9 +22,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: webiny/action-conventional-commits@v1.1.0
-      - uses: apache/skywalking-eyes/header@main
+      - name: Harden Runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: webiny/action-conventional-commits@03a9c76bdb2deeaf23f50e8ea9c6e99417bad467 # v1.1.0
+      - uses: apache/skywalking-eyes/header@3ea9df11bb3a5a85665377d1fd10c02edecf2c40 # main
 
       - name: Check deny listed files
         run: bash .github/deny_list.sh
