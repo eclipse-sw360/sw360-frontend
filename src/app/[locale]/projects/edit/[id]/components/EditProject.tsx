@@ -22,6 +22,7 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import Obligations from '../../../components/Obligations/Obligations'
+import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 
 interface LinkedReleaseProps {
     release?: string
@@ -51,6 +52,12 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
     const TABS = ['summary', 'administration', 'linkedProjectsAndReleases', 'attachments', 'obligations']
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
+
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+    const handleDeleteProject = () => {
+        setDeleteDialogOpen(true)
+    }
 
     useEffect(() => {
         let tab = searchParams.get('tab') 
@@ -346,6 +353,13 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
 
     return (
         <div className='container page-content'>
+            {projectId && (
+                <DeleteProjectDialog
+                    projectId={projectId}
+                    show={deleteDialogOpen}
+                    setShow={setDeleteDialogOpen}
+                />
+            )}
             <form
                 action=''
                 id='form_submit'
@@ -395,7 +409,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                                                 variant='danger'
                                                 type='submit'
                                                 className='me-2 col-auto'
-                                                onClick={handleCancelClick}
+                                                onClick={handleDeleteProject}
                                             >
                                                 {t('Delete Project')}
                                             </Button>

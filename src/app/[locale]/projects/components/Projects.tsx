@@ -22,8 +22,10 @@ import { useEffect, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
+import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import DeleteProjectDialog from './DeleteProjectDialog'
 import ImportSBOMModal from './ImportSBOMModal'
+import MessageService from '@/services/message.service'
 
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
@@ -95,6 +97,9 @@ function Project(): JSX.Element {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({ show: false, importType: 'SPDX' })
 
+    const [showClearingRequestModal, setShowClearingRequestModal] = useState(false)
+    const [clearingRequestProjectId, setClearingRequestProjectId] = useState('')
+
     const handleDeleteProject = (projectId: string) => {
         setDeleteProjectId(projectId)
         setDeleteDialogOpen(true)
@@ -102,6 +107,11 @@ function Project(): JSX.Element {
 
     const handleAddProject = () => {
         router.push('/projects/add')
+    }
+
+    const handleEditProject = (projectId: string) => {
+        router.push(`/projects/edit/${projectId}`)
+        MessageService.success(t('You are editing the original document'))
     }
 
     const columns = [
@@ -185,13 +195,22 @@ function Project(): JSX.Element {
                     <>
                         <span className='d-flex justify-content-evenly'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                                <Link href={`/projects/edit/${id}`} className='overlay-trigger'>
+                                <span
+                                    className='d-inline-block'
+                                    onClick={() => handleEditProject(id)}
+                                >
                                     <FaPencilAlt className='btn-icon' />
-                                </Link>
+                                </span>
                             </OverlayTrigger>
 
-                            <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
-                                <span className='d-inline-block'>
+                            <OverlayTrigger overlay={<Tooltip>{t("Create Clearing Request")}</Tooltip>}>
+                                <span
+                                    className='d-inline-block'
+                                    onClick={() => {
+                                        setClearingRequestProjectId(id)
+                                        setShowClearingRequestModal(true)
+                                    }}
+                                >
                                     <MdOutlineTask className='btn-icon overlay-trigger' />
                                 </span>
                             </OverlayTrigger>
@@ -390,6 +409,11 @@ function Project(): JSX.Element {
                     </div>
                 </div>
             </div>
+            <CreateClearingRequestModal
+                show={showClearingRequestModal}
+                setShow={setShowClearingRequestModal}
+                projectId={clearingRequestProjectId}
+            />
         </>
     )
 }

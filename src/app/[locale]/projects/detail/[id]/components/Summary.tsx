@@ -204,7 +204,11 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
 
                     <tr>
                         <td>{t('Owner Country')}:</td>
-                        <td>{summaryData.ownerCountry !== undefined ? new Intl.DisplayNames(['en'], { type: 'region' }).of(summaryData.ownerCountry) : ''}</td>
+                        <td>
+                            {(summaryData.ownerCountry != null) && /^[A-Z]{2}$/.test(summaryData.ownerCountry)
+                                ? new Intl.DisplayNames(['en'], { type: 'region' }).of(summaryData.ownerCountry)
+                                : ''}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Lead Architect')}:</td>
