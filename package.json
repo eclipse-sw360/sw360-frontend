@@ -53,7 +53,7 @@
     "lint-staged": "^13.3.0",
     "prettier": "^3.4.1",
     "prettier-plugin-organize-imports": "^3.2.4",
-    "react-icons": "^4.12.0",
+    "react-icons": "^5.4.0",
     "stylelint": "^16.2.0",
     "stylelint-config-clean-order": "^5.4.0",
     "stylelint-config-standard": "^36.0.0",
