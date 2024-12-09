@@ -46,3 +46,6 @@ pnpm-lock.yaml
 
 # Miscelanea
 output
+# cypress
+/cypress/screenshots
+/cypress/downloads
