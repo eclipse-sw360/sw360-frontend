@@ -40,6 +40,7 @@ header:
         - .gitignore
         - .husky
         - '.github/**'
+        - 'cypress/fixtures/**'
 
     comment: on-failure
 
