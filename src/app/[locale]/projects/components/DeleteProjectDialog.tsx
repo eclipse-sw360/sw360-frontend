@@ -41,6 +41,8 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
     const [visuallyHideLinkedData, setVisuallyHideLinkedData] = useState(true)
+    // Comment functionality is not implemented yet. This feature should be added in the future.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [comment, setComment] = useState('')
 
     const displayMessage = (variant: string, message: string) => {
@@ -205,7 +207,6 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                 <Button
                     className='login-btn'
                     variant='danger'
-                    disabled={!comment}
                     onClick={() => handleSubmit()}
                     hidden={reloadPage}
                 >

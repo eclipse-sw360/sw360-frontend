@@ -26,6 +26,7 @@ import CreateClearingRequestModal from '../detail/[id]/components/CreateClearing
 import DeleteProjectDialog from './DeleteProjectDialog'
 import ImportSBOMModal from './ImportSBOMModal'
 import MessageService from '@/services/message.service'
+import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
 
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
@@ -97,8 +98,11 @@ function Project(): JSX.Element {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({ show: false, importType: 'SPDX' })
 
-    const [showClearingRequestModal, setShowClearingRequestModal] = useState(false)
-    const [clearingRequestProjectId, setClearingRequestProjectId] = useState('')
+    const [showCreateCRModal, setShowCreateCRModal] = useState(false)
+    const [createCRProjectId, setCreateCRProjectId] = useState('')
+
+    const [showViewCRModal, setShowViewCRModal] = useState(false)
+    const [clearingRequestId, setClearingRequestId] = useState('')
 
     const handleDeleteProject = (projectId: string) => {
         setDeleteProjectId(projectId)
@@ -190,33 +194,47 @@ function Project(): JSX.Element {
             id: 'projects.actions',
             name: t('Actions'),
             width: '13%',
-            formatter: (id: string) =>
+            formatter: ([projectId, clearingRequestId]: [string, string]) =>
                 _(
                     <>
                         <span className='d-flex justify-content-evenly'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <span
                                     className='d-inline-block'
-                                    onClick={() => handleEditProject(id)}
+                                    onClick={() => handleEditProject(projectId)}
                                 >
                                     <FaPencilAlt className='btn-icon' />
                                 </span>
                             </OverlayTrigger>
-
-                            <OverlayTrigger overlay={<Tooltip>{t("Create Clearing Request")}</Tooltip>}>
-                                <span
-                                    className='d-inline-block'
-                                    onClick={() => {
-                                        setClearingRequestProjectId(id)
-                                        setShowClearingRequestModal(true)
-                                    }}
-                                >
-                                    <MdOutlineTask className='btn-icon overlay-trigger' />
-                                </span>
-                            </OverlayTrigger>
-
+                            {   
+                                clearingRequestId !== '' ? (
+                                    <OverlayTrigger overlay={<Tooltip>{t("View Clearing Request")}</Tooltip>}>
+                                        <span
+                                            className='d-inline-block'
+                                            onClick={() => {
+                                                setClearingRequestId(clearingRequestId)
+                                                setShowViewCRModal(true)
+                                            }}
+                                        >
+                                            <MdOutlineTask className='btn-icon overlay-trigger' style={{ fill: 'orange' }}  />
+                                        </span>
+                                    </OverlayTrigger>
+                                ) : (
+                                    <OverlayTrigger overlay={<Tooltip>{t("Create Clearing Request")}</Tooltip>}>
+                                        <span
+                                            className='d-inline-block'
+                                            onClick={() => {
+                                                setCreateCRProjectId(projectId)
+                                                setShowCreateCRModal(true)
+                                            }}
+                                        >
+                                            <MdOutlineTask className='btn-icon overlay-trigger' />
+                                        </span>
+                                    </OverlayTrigger>
+                                )
+                            }
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
-                                <Link href={`/projects/duplicate/${id}`} className='overlay-trigger'>
+                                <Link href={`/projects/duplicate/${projectId}`} className='overlay-trigger'>
                                     <FaClipboard className='btn-icon' />
                                 </Link>
                             </OverlayTrigger>
@@ -225,7 +243,7 @@ function Project(): JSX.Element {
                                 <span className='d-inline-block'>
                                     <FaTrashAlt
                                         className='btn-icon'
-                                        onClick={() => handleDeleteProject(id)}
+                                        onClick={() => handleDeleteProject(projectId)}
                                         style={{ color: 'gray', fontSize: '18px' }}
                                     />
                                 </span>
@@ -239,21 +257,30 @@ function Project(): JSX.Element {
 
     const initServerPaginationConfig = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
+        
+        const searchParams = Object.fromEntries(params)
+        searchParams.allDetails = 'true'
+
         return {
-            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, Object.fromEntries(params)),
+            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/projects`, searchParams),
             then: (data: EmbeddedProjects) => {
-                return data._embedded['sw360:projects'].map((elem: TypeProject) => [
-                    {
-                        id: elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                        name: elem.name,
-                        version: elem.version ?? ''
-                    },
-                    elem.description ?? '',
-                    elem.projectResponsible ?? '',
-                    { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
-                    elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                    elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                ])
+                return data._embedded['sw360:projects'].map((elem: TypeProject) => {
+                    const clearingRequestId = elem.clearingRequestId ?? ''
+                    const projectId = elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1)
+                    
+                    return [
+                        {
+                            id: projectId,
+                            name: elem.name,
+                            version: elem.version ?? ''
+                        },
+                        elem.description ?? '',
+                        elem.projectResponsible ?? '',
+                        { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
+                        projectId,
+                        [projectId, clearingRequestId]
+                    ]
+                })
             },
             total: (data: EmbeddedProjects) => data.page?.totalElements ?? 0,
             headers: { Authorization: `${session.user.access_token}` },
@@ -410,9 +437,14 @@ function Project(): JSX.Element {
                 </div>
             </div>
             <CreateClearingRequestModal
-                show={showClearingRequestModal}
-                setShow={setShowClearingRequestModal}
-                projectId={clearingRequestProjectId}
+                show={showCreateCRModal}
+                setShow={setShowCreateCRModal}
+                projectId={createCRProjectId}
+            />
+            <ViewClearingRequestModal 
+                show={showViewCRModal}
+                setShow={setShowViewCRModal}
+                clearingRequestId={clearingRequestId}
             />
         </>
     )
