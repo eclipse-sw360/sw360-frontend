@@ -1,0 +1,42 @@
+{
+    "TC01_REQUIRED_FIELDS": {
+        "license_tab": {
+            "full_name": "Open Logistics Foundation License v1.3",
+            "short_name": "OLFL-1.3"
+        },
+        "external_link": "https://eclipse.dev/sw360/docs/development/testcases/test-cases-licenses/"
+    },
+    
+    "TC02_ALL_FIELDS": {
+        "license_tab": {
+            "full_name": "JAM License",
+            "short_name": "Jam",
+            "license_type_index": 1,
+            "OSI_Approved": {
+                "name": "Yes",
+                "value": "YES"
+            },
+            "FSF_Free/Libre": {
+                "name": "(n/a)",
+                "value": "NA"
+            },
+            "is_checked": false,
+            "note": "take a note!",
+            "license_text": "Copyright (C) YEAR by AUTHOR EMAIL Permission to use, copy and modify."
+        },
+        "linked_obligations_tab": {
+            "added_obligations": [0, 1]
+        }
+    },
+
+    "TC03_LINKED_OBLIGATION": {
+        "license_tab": {
+            "full_name": "Apache License 2.1",
+            "short_name": "Apache-2.1"
+        },
+        "linked_obligations_tab": {
+            "added_obligations": [0, 1, 3]
+        },
+        "update_white_list": [false, true, true]
+    }
+}

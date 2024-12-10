@@ -232,12 +232,16 @@ Cypress.Commands.add('createLicense', (licenseShortName) => {
   cy.exec('bash cypress/support/common.sh createLicense ' + licenseShortName)
 })
 
+Cypress.Commands.add('createLicenseType', (licenseType) => {
+  cy.exec('bash cypress/support/common.sh createLicenseType ' + licenseType)
+})
+
 Cypress.Commands.add('deleteLicense', (licenseShortName) => {
   cy.exec('bash cypress/support/common.sh deleteLicenseByShortName ' + licenseShortName)
 })
 
 Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
-  return originalFn(element, text, { ...options, delay: 0 } )
+  return originalFn(element, text, { ...options, delay: 0 })
 })
 
 Cypress.Commands.add('selectOneUser', (dialogSelectors, userNo) => {
@@ -264,4 +268,44 @@ Cypress.Commands.add('selectMultiUsers', (dialogSelectors, numUser) => {
 
   cy.get(dialogSelectors.selectUsersBtn)
     .click()
+})
+
+Cypress.Commands.add(
+  'clearAndType',
+  {
+    prevSubject: true,
+  },
+  (subject, text) => cy.wrap(subject).type(`{selectall}{backspace}${text}`),
+)
+
+Cypress.Commands.add('createLicenseByAPI', (fullName, shortName) => {
+  cy.task('generateApiToken').then((token) => {
+    const myHeaders = createRequestHeader(token)
+    const raw = JSON.stringify({
+      "fullName": fullName,
+      "shortName": shortName
+    })
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+    }
+
+    fetch(`${Cypress.env('sw360_api_server')}/resource/api/licenses`, requestOptions)
+  })
+})
+
+Cypress.Commands.add('downloadFile', (downloadButtonSelector) => {
+  cy.get(downloadButtonSelector).click()
+})
+
+Cypress.Commands.add('verifyDownloadedFile', (fileName) => {
+  cy.readFile('cypress/downloads/' + fileName).should('exist')
+})
+
+Cypress.Commands.add('removeDownloadsFolder', () => {
+  cy.task('removeDownloadsFolder').then(() => {
+    cy.log('Downloads folder is removed successfully')
+  })
 })

@@ -144,7 +144,6 @@ export function gotoUpdateReleasePageFromViewComponentPage(releaseVersion) {
   cy.contains(releaseVersion).closest('tr').find('td').last().find('svg').first().click()
 }
 
-
 export function gotoViewReleasePageFromViewComponentPage(releaseVersion) {
   cy.get(viewSelectors.tabReleaseOverview).click()
   cy.get(viewSelectors.tblReleasesList.table).should('be.visible')
