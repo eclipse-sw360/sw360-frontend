@@ -14,7 +14,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -41,7 +41,6 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
     const [visuallyHideLinkedData, setVisuallyHideLinkedData] = useState(true)
-    const [comment, setComment] = useState('')
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -109,7 +108,6 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     const handleCloseDialog = () => {
         setShow(!show)
         setShowMessage(false)
-        setComment('')
         setVisuallyHideLinkedData(!visuallyHideLinkedData)
         if (reloadPage === true) {
             window.location.reload()
@@ -135,10 +133,6 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
             setVisuallyHideLinkedData(false)
         }
         setInternalData(dataCount)
-    }
-
-    const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
-        setComment(e.target.value)
     }
 
     return (
@@ -182,16 +176,6 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                                         </ul>
                                     </Form.Label>
                                 </Form.Group>
-                                <hr />
-                                <Form.Group className='mb-3'>
-                                    <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
-                                    <Form.Control
-                                        as='textarea'
-                                        aria-label='With textarea'
-                                        placeholder='Comment your message...'
-                                        onChange={handleUserComment}
-                                    />
-                                </Form.Group>
                             </Form>
                         </>
                     }
@@ -205,7 +189,6 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                 <Button
                     className='login-btn'
                     variant='danger'
-                    disabled={!comment}
                     onClick={() => handleSubmit()}
                     hidden={reloadPage}
                 >
