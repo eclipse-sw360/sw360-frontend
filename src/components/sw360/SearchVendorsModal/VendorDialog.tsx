@@ -11,8 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useSearchParams } from 'next/navigation'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState, useRef } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, Vendor, VendorType } from '@/object-types'
@@ -35,57 +34,49 @@ type RowData = (string | Vendor)[]
 const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
     const t = useTranslations('default')
     const [ showAddVendor, setShowAddVendor] = useState(false)
-    const params = useSearchParams()
-    const [data, setData] = useState<RowData[]>([])
+    const txtSearch = useRef<HTMLInputElement | null>(null)
     const [vendor, setVendor] = useState<Vendor | undefined>(undefined)
     const [vendors, setVendors] = useState<RowData[]>([])
     const handleCloseDialog = () => {
         setShow(!show)
     }
 
-    const searchVendor = () => {
-        setVendors(data)
-    }
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        void (async () => {
-            try {
-                const queryUrl = CommonUtils.createUrlWithParams(`vendors`, Object.fromEntries(params))
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) {
-                    MessageService.error(t('Session has expired'))
-                    return
-                }
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    MessageService.error(t('Session has expired'))
-                    return
-                } else if (response.status !== HttpStatus.OK) {
-                    return
-                }
-                const vendors = await response.json() as EmbeddedVendors
-                if (
-                    !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
-                ) {
-                    const data = vendors['_embedded']['sw360:vendors'].map((item: Vendor) => [
-                        item,
-                        item.fullName ?? '',
-                        item.shortName ?? '',
-                        item.url ?? '',
-                        '',
-                    ])
-                    setData(data)
-                }
-            } catch (e) {
-                console.error(e)
+    const searchVendor = async () => {
+        if (txtSearch.current === null)
+            return
+        try {
+            // TODO: The search vendors endpoint does not exist. Temporarily search all vendors
+            const queryUrl = CommonUtils.createUrlWithParams('vendors', {})
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                MessageService.error(t('Session has expired'))
+                return
             }
-        })()
-        return () => controller.abort()
-    }, [params])
+            const response = await ApiUtils.GET(queryUrl, session.user.access_token)
+            if (response.status === HttpStatus.UNAUTHORIZED) {
+                MessageService.error(t('Session has expired'))
+                return
+            } else if (response.status !== HttpStatus.OK) {
+                return
+            }
+            const vendors = await response.json() as EmbeddedVendors
+            if (
+                !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
+                !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
+            ) {
+                const data = vendors['_embedded']['sw360:vendors'].map((item: Vendor) => [
+                    item,
+                    item.fullName ?? '',
+                    item.shortName ?? '',
+                    item.url ?? '',
+                    '',
+                ])
+                setVendors(data)
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
     const handleClickSelectVendor = () => {
         if (vendor === undefined) return
@@ -111,6 +102,7 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
                                     className='form-control'
                                     placeholder={t('Enter search text')}
                                     aria-describedby='Search Vendor'
+                                    ref={txtSearch}
                                 />
                             </div>
                             <div className='col-lg-4'>
