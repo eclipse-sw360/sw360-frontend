@@ -180,12 +180,12 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
                         <td>{t('Modified By')}:</td>
                         <td>
                             {
-                                summaryData._embedded?.modifiedBy &&
+                                (summaryData.modifiedBy ?? '') &&
                                 <Link
                                     className={`text-link`}
-                                    href={`mailto:${summaryData._embedded.modifiedBy.email}`}
+                                    href={`mailto:${summaryData.modifiedBy}`}
                                 >
-                                    {summaryData._embedded.modifiedBy.email}
+                                    {summaryData.modifiedBy}
                                 </Link>
                             }
                         </td>
