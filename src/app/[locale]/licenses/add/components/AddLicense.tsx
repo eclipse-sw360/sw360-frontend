@@ -12,7 +12,7 @@
 
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
@@ -33,7 +33,6 @@ export default function AddLicense() : ReactNode {
     const [obligations, setObligations] = useState<Array<Array<string | Obligation>>>([])
     const [addObligationDiaglog, setAddObligationDiaglog] = useState<boolean>(false)
     const params = useSearchParams()
-    const router = useRouter()
     const [errorShortName, setErrorShortName] = useState<boolean>(false)
     const [errorFullName, setErrorFullName] = useState<boolean>(false)
     const [inputValid, setInputValid] = useState<boolean>(false)
@@ -143,7 +142,7 @@ export default function AddLicense() : ReactNode {
         const response = await ApiUtils.POST('licenses', licensePayload, session.user.access_token)
         if (response.status == HttpStatus.CREATED) {
             MessageService.success(t('License added successfully'))
-            router.push('/licenses')
+            window.location.href = `/licenses`
         } else if (response.status == HttpStatus.CONFLICT) {
             MessageService.error(t('License shortname has already taken'))
         } else {

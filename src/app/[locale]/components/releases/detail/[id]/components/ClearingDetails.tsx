@@ -185,7 +185,7 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
                         <td>
                             <ClearingInformationStatus
                                 status={
-                                    release.clearingInformation ? release.clearingInformation.licenseAgreement : false
+                                    release.clearingInformation ? release.clearingInformation.legalEvaluation : false
                                 }
                             />
                         </td>
@@ -196,7 +196,7 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
                             <ClearingInformationStatus
                                 status={
                                     release.clearingInformation
-                                        ? release.clearingInformation.licenseScanReportResult
+                                        ? release.clearingInformation.licenseAgreement
                                         : false
                                 }
                             />
