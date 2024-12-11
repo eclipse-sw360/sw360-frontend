@@ -11,7 +11,7 @@
 
 import { ClearingRequest, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
@@ -42,16 +42,14 @@ interface ProjectData {
 
 function LicenseClearing(licenseClearing: LicenseClearing) {
     const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
-    const { data: session, status } = useSession()
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
         ;(async () => {
             try {
-                if (!session) {
-                    return signOut()
-                }
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const response = await ApiUtils.GET(
                     `projects/${licenseClearing.projectId}/licenseClearingCount`,
@@ -75,30 +73,24 @@ function LicenseClearing(licenseClearing: LicenseClearing) {
         return () => controller.abort()
     }, [licenseClearing.projectId])
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <>
-                {lcData ? (
-                    <>
-                        {(licenseClearing.openReleases ?? false) && lcData['Release Count'] ? (
-                            <div className='text-center'>{`${lcData['Release Count']}`}</div>
-                        ) : null}
-                        {licenseClearing.clearingProgress ?? false ? (
-                            <div className='text-center'>
-                                {`${lcData['Approved Count']}/${lcData['Release Count']}`}
-                            </div>
-                        ) : null}
-                    </>
-                ) : (
-                    <div className='col-12 text-center'>
-                        <Spinner className='spinner' />
-                    </div>
-                )}
-            </>
-        )
-    }
+    return (
+        <>
+            {lcData ? (
+                <>
+                    {(licenseClearing.openReleases ?? false) && lcData['Release Count'] ? (
+                        <div className='text-center'>{`${lcData['Release Count']}`}</div>
+                    ) : null}
+                    {licenseClearing.clearingProgress ?? false ? (
+                        <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
+                    ) : null}
+                </>
+            ) : (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </>
+    )
 }
 
 function OpenClearingRequest() {
@@ -124,6 +116,7 @@ function OpenClearingRequest() {
     }, [])
 
     useEffect(() => {
+        if(status !== 'authenticated') return
         setLoading(true)
         void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest | undefined) => {
             const filteredClearingRequests = clearingRequests?._embedded['sw360:clearingRequests'].filter(
