@@ -12,7 +12,7 @@
 set -e
 
 # Check for files not intented to be present
-declare -a denyfiles=("yarn.lock" "pnpm-lock.yaml")
+declare -a denyfiles=("yarn.lock" "package-lock.json")
 declare -a denyextensions=("png" "jpg" "jpeg" "tiff")
 
 for file in "${denyfiles[@]}"; do
