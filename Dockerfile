@@ -9,23 +9,24 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-ARG VARIANT=22-alpine
+ARG VARIANT=22-slim
 FROM node:${VARIANT} as build
+
+ENV PNPM_HOME="/pnm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
 WORKDIR /frontend
 
 # Prepare the build environment
-COPY package.json .
-RUN npm install
 COPY . .
-RUN npm run build --production
+RUN pnpm install && pnpm build
 
 # Runtime
-ARG VARIANT=20-alpine
+ARG VARIANT=22-slim
 FROM node:${VARIANT}
 WORKDIR /frontend
 
-COPY --from=build /frontend/package.json .
-COPY --from=build /frontend/package-lock.json .
 COPY --from=build /frontend/next.config.js .
 COPY --from=build /frontend/public ./public
 COPY --from=build /frontend/.next/standalone ./

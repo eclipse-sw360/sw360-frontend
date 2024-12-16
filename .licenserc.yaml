@@ -41,6 +41,8 @@ header:
         - .husky
         - '.github/**'
         - 'cypress/fixtures/**'
+        - "pnpm-lock.yaml"
+        - "pnpm-workspace.yaml"
 
     comment: on-failure
 
