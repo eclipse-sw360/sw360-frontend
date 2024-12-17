@@ -55,13 +55,13 @@ function OpenModerationRequest() {
 
     const fetchData = useCallback(
         async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as EmbeddedModerationRequest
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
+                return 
             } else {
                 notFound()
             }
@@ -70,6 +70,7 @@ function OpenModerationRequest() {
     )
 
     useEffect(() => {
+        if (status !== 'authenticated') return
         setLoading(true)
         void fetchData('moderationrequest').then((moderationRequests: EmbeddedModerationRequest | undefined) => {
             const filteredModerationRequests = moderationRequests?._embedded['sw360:moderationRequests'].filter(

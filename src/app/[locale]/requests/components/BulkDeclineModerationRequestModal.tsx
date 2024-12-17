@@ -411,64 +411,66 @@ export default function BulkDeclineModerationRequestModal({
         }
     }
 
-
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <>
-                <Modal
-                    size='lg'
-                    centered
-                    show={show}
-                    onHide={() => {
-                        setShow(false)
-                        setHasComment(false)
-                        setStatusCheck(0)
-                        setDisableAcceptMr(false)
-                        setDisableDeclineMr(false)
-                    }}
-                    aria-labelledby={t('Accept Decline All Selected Moderation Requests')}
-                    scrollable
+    return (
+        <>
+            <Modal
+                size='lg'
+                centered
+                show={show}
+                onHide={() => {
+                    setShow(false)
+                    setHasComment(false)
+                    setStatusCheck(0)
+                    setDisableAcceptMr(false)
+                    setDisableDeclineMr(false)
+                }}
+                aria-labelledby={t('Accept Decline All Selected Moderation Requests')}
+                scrollable
+            >
+                <Modal.Header
+                    style={{ backgroundColor: '#feefef', color: '#da1414' }}
+                    closeButton
                 >
-                    <Modal.Header style={{ backgroundColor: '#feefef',
-                                        color: '#da1414' }}
-                                closeButton>
-                        <Modal.Title id='delete-all-license-info-modal'>
-                            <AiOutlineQuestionCircle />
-                                {t('Accept Decline All Selected Moderation Requests')}
-                        </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p className='my-3'>{t('Accept Decline All MRs')}</p> 
-                        <Form>
+                    <Modal.Title id='delete-all-license-info-modal'>
+                        <AiOutlineQuestionCircle />
+                        {t('Accept Decline All Selected Moderation Requests')}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className='my-3'>{t('Accept Decline All MRs')}</p>
+                    <Form>
                         <Form.Group className='mb-3'>
                             <Form.Label className='mb-1'>
                                 {t.rich('Your selected Moderation requests are')}
                                 <div className='col-12 d-flex justify-content-center align-items-center'>
                                     {loading == false ? (
                                         <div style={{ paddingLeft: '0px' }}>
-                                            <Table columns={columns}
+                                            <Table
+                                                columns={columns}
                                                 data={tableData}
                                                 sort={false}
                                                 selector={true}
                                             />
                                         </div>
-                                        ) : (
-                                                <Spinner className='spinner' />
-                                        )
-                                    }
+                                    ) : (
+                                        <Spinner className='spinner' />
+                                    )}
                                 </div>
                             </Form.Label>
                             <br />
                             <Form.Label style={{ fontWeight: 'bold' }}>
                                 {t('Please provide your comments')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{ color: '#F7941E' }}
+                                >
                                     *
                                 </span>
                             </Form.Label>
-                            <p className='subscriptionBox'
-                                style={{textAlign: 'left'}}>
+                            <p
+                                className='subscriptionBox'
+                                style={{ textAlign: 'left' }}
+                            >
                                 {t('Note for comments')}
                             </p>
                             <Form.Control
@@ -478,51 +480,55 @@ export default function BulkDeclineModerationRequestModal({
                                 placeholder='Comment your message...'
                                 onChange={handleUserComment}
                                 required
-                                />
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <button
-                            className='btn btn-dark'
-                            onClick={() => {
-                                setShow(false)
-                                setHasComment(false)
-                                setStatusCheck(0)
-                                setDisableAcceptMr(false)
-                                setDisableDeclineMr(false)
-                            }}
-                        >
-                            {(disableAcceptMr || disableDeclineMr) ? t('Close') : t('Cancel')}
-                            
-                        </button>
-                        <button
-                            className='btn btn-danger'
-                            onClick={async () => {
-                                await handleBulkDeclineModerationRequests()
-                            }}
-                            disabled={!hasComment || disableDeclineMr}
-                        >
-                            {t('Bulk Decline Moderation Requests')}{' '}
-                            {loading && 
-                                <Spinner size='sm' className='ms-1 spinner' />
-                            }
-                        </button>
-                        <button
-                            className='btn btn-success'
-                            onClick={async () => {
-                                await handleBulkAcceptModerationRequests()
-                            }}
-                            disabled={!hasComment || disableAcceptMr}
-                        >
-                            {t('Bulk Accept Moderation Requests')}{' '}
-                            {loading && 
-                                <Spinner size='sm' className='ms-1 spinner' />
-                            }
-                        </button>
-                    </Modal.Footer>
-                </Modal>
-            </>
-        )
-    }
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <button
+                        className='btn btn-dark'
+                        onClick={() => {
+                            setShow(false)
+                            setHasComment(false)
+                            setStatusCheck(0)
+                            setDisableAcceptMr(false)
+                            setDisableDeclineMr(false)
+                        }}
+                    >
+                        {disableAcceptMr || disableDeclineMr ? t('Close') : t('Cancel')}
+                    </button>
+                    <button
+                        className='btn btn-danger'
+                        onClick={async () => {
+                            await handleBulkDeclineModerationRequests()
+                        }}
+                        disabled={!hasComment || disableDeclineMr}
+                    >
+                        {t('Bulk Decline Moderation Requests')}{' '}
+                        {loading && (
+                            <Spinner
+                                size='sm'
+                                className='ms-1 spinner'
+                            />
+                        )}
+                    </button>
+                    <button
+                        className='btn btn-success'
+                        onClick={async () => {
+                            await handleBulkAcceptModerationRequests()
+                        }}
+                        disabled={!hasComment || disableAcceptMr}
+                    >
+                        {t('Bulk Accept Moderation Requests')}{' '}
+                        {loading && (
+                            <Spinner
+                                size='sm'
+                                className='ms-1 spinner'
+                            />
+                        )}
+                    </button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    )
 }

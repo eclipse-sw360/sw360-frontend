@@ -141,13 +141,13 @@ function Requests() {
     const fetchData = useCallback(
         async (url: string) => {
             if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+                return 
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = await response.json()
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
+                return
             } else {
                 notFound()
             }
@@ -156,7 +156,8 @@ function Requests() {
 
     useEffect(() => {
         void fetchData('moderationrequest')
-            .then((moderationRequests: EmbeddedModerationRequest) => {
+                .then((moderationRequests: EmbeddedModerationRequest | undefined) => {
+                    if(!moderationRequests) return
                     let openMRCount = 0
                     let closedMRCount = 0
                     moderationRequests['_embedded']['sw360:moderationRequests']
@@ -174,7 +175,8 @@ function Requests() {
                 setClosedModerationRequestCount(closedMRCount)
             })
         void fetchData('clearingrequests')
-            .then((clearingRequests: EmbeddedClearingRequest) => {
+            .then((clearingRequests: EmbeddedClearingRequest | undefined) => {
+                if(!clearingRequests) return
                 let openCRCount = 0
                 let closedCRCount = 0
                 clearingRequests['_embedded']['sw360:clearingRequests']
