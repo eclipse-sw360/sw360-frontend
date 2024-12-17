@@ -11,6 +11,9 @@
 
 import ReleaseOverview from '@/app/[locale]/components/detail/[id]/components/ReleaseOverview'
 import Summary from '@/app/[locale]/components/detail/[id]/components/Summary'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState, ReactNode } from 'react'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -26,19 +29,16 @@ import {
     LinkedVulnerability,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
 
 interface Props {
-    componentId: string | undefined
+    componentId: string
 }
 
-const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
+const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -117,7 +117,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                     >
                         <Summary
                             component={component}
-                            componentId={componentId ?? ''}
+                            componentId={componentId}
                         />
                     </div>
                     <div
@@ -125,7 +125,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                         hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW}
                     >
                         <ReleaseOverview
-                            componentId={componentId ?? ''}
+                            componentId={componentId}
                             calledFromModerationRequestDetail={true}
                         />
                     </div>
@@ -134,7 +134,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                         hidden={selectedTab != CommonTabIds.ATTACHMENTS}
                     >
                         <Attachments
-                            documentId={componentId ?? ''}
+                            documentId={componentId}
                             documentType={DocumentTypes.COMPONENT}
                         />
                     </div>
@@ -149,7 +149,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                             >
                                 <ChangeLogList
                                     setChangeLogIndex={setChangeLogIndex}
-                                    documentId={componentId ?? ''}
+                                    documentId={componentId}
                                     setChangesLogTab={setChangesLogTab}
                                     changeLogList={changeLogList}
                                 />

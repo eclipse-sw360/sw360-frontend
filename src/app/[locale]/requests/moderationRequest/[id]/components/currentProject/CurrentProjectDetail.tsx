@@ -18,13 +18,13 @@ import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
 import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, useSession, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 
-export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId: string }>) {
+export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId: string }>): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
@@ -34,8 +34,10 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        void (async () => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
             try {
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
@@ -48,10 +50,10 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
                     return notFound()
                 }
 
-                const data = await response.json()
+                const data = await response.json() as SummaryDataType | AdministrationDataType
 
-                setSummaryData({ id: projectId, ...data })
-                setAdministrationData(data)
+                setSummaryData({ ...data, id: projectId } as SummaryDataType)
+                setAdministrationData(data as AdministrationDataType)
             } catch (e) {
                 console.error(e)
             }

@@ -19,7 +19,7 @@ import { ApiUtils, CommonUtils } from '@/utils/index'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, ReactNode } from 'react'
 import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ModerationDecision from './ModerationDecision'
 import ModerationRequestInfo from './ModerationRequestInfo'
@@ -28,7 +28,7 @@ import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
 
-function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
+function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }): ReactNode | undefined {
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const { data: session, status } = useSession()
@@ -227,7 +227,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     }
 
     if (status === 'unauthenticated') {
-        signOut()
+        return signOut()
     } else {
         return (
             <div className='ms-5 mt-2'>

@@ -13,45 +13,48 @@ import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { ClearingRequestDetails, HttpStatus, UpdateClearingRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
-import ClearingComments from './../../../detail/[id]/components/ClearingComments'
-import EditClearingDecision from './EditClearingDecision'
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { signOut, getSession, useSession } from 'next-auth/react'
+import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
 import EditClearingRequestInfo from './EditClearingRequestInfo'
+import EditClearingDecision from './EditClearingDecision'
+import ClearingComments from './../../../detail/[id]/components/ClearingComments'
 
-function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string }) {
+function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string }): ReactNode {
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const router = useRouter()
     const toastShownRef = useRef(false)
-    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
-        id: '',
-        requestedClearingDate: '',
-        projectId: '',
-        projectName: '',
-        requestingUser: '',
-        projectBU: '',
-        requestingUserComment: '',
-        clearingTeam: '',
-        agreedClearingDate: '',
-        priority: '',
-        clearingType: '',
-        reOpenedOn: undefined,
-        createdOn: '',
-        comments: [{}],
-    })
-    const [updateClearingRequestPayload, setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
-        requestedClearingDate: '',
-        clearingType: '',
-        clearingState: '',
-        priority: '',
-        clearingTeam: '',
-        agreedClearingDate: '',
-        requestingUser: '',
+    const { status } = useSession()
+    const [clearingRequestData,
+           setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
+            id: '',
+            requestedClearingDate: '',
+            projectId: '',
+            projectName: '',
+            requestingUser: '',
+            projectBU: '',
+            requestingUserComment: '',
+            clearingTeam: '',
+            agreedClearingDate: '',
+            priority: '',
+            clearingType: '',
+            reOpenedOn: undefined,
+            createdOn: '',
+            comments: [{}]
+        })
+    const [updateClearingRequestPayload, 
+           setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
+            requestedClearingDate: '',
+            clearingType: '',
+            clearingState: '',
+            priority: '',
+            clearingTeam: '',
+            agreedClearingDate: '',
+            requestingUser: ''
     })
 
     const fetchData = useCallback(async (url: string) => {
@@ -121,7 +124,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     }
 
     if (status === 'unauthenticated') {
-        signOut()
+        void signOut()
     } else {
         return (
             <div className='ms-5 mt-2'>
@@ -142,7 +145,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                         <Button
                                             variant='btn btn-primary'
                                             className='me-2 col-auto'
-                                            onClick={handleUpdateClearingRequest}
+                                            onClick={() => void handleUpdateClearingRequest()}
                                         >
                                             {t('Update Request')}
                                         </Button>
