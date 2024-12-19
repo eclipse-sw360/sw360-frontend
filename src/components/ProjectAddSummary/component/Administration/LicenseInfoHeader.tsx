@@ -11,11 +11,19 @@
 
 import { useTranslations } from 'next-intl'
 
-import { ProjectPayload } from '@/object-types'
+import { HttpStatus, ProjectPayload } from '@/object-types'
+import { getSession, signOut } from 'next-auth/react'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import MessageService from '@/services/message.service'
 
 interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+interface LicenseInfoHeader {
+    licenseInfoHeaderText: string
 }
 
 export default function LicenseInfoHeader({ projectPayload, setProjectPayload }: Props): JSX.Element {
@@ -29,13 +37,37 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
         })
     }
 
+    const getDefaultLicenseInfoHeader = async () => {
+        try {
+            const session = await getSession()
+            if(CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const url = 'projects/licenseInfoHeader'
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                const data = await response.json() as LicenseInfoHeader
+                setProjectPayload({
+                    ...projectPayload,
+                    licenseInfoHeaderText: data.licenseInfoHeaderText
+                })
+            } else {
+                MessageService.error(t('There are some errors while fetching default license info header'))
+            }
+        } catch(e) {
+            console.error(e)
+        }
+    }
+
     return (
         <>
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('License Info Header')}</h6>
                 <div className='row d-flex justify-content-end'>
                     <div className='col-lg-3'>
-                        <button type='button' className='btn btn-light'>
+                        <button className='btn btn-light mb-2'
+                                type='button'
+                                onClick={getDefaultLicenseInfoHeader}
+                                >
                             {t('Set to default text')}
                         </button>
                     </div>
