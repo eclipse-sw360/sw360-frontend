@@ -1046,6 +1046,7 @@
     "The verification of vulnerabilities will be changed to": "<strong>{number}</strong> 个漏洞的验证将更改为",
     "There are internal server error": "服务器内部出现错误",
     "There are some errors while creating project": "创建项目时出现一些错误",
+    "There are some errors while fetching default license info header": "获取默认许可证信息标头时出现一些错误",
     "There are some errors while updating moderation request": "更新审核请求时出现一些错误",
     "There are some errors while updating project": "更新项目时出现一些错误",
     "There are some problem to update your comments": "更新评论有问题！",

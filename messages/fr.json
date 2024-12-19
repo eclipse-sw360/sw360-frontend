@@ -1046,6 +1046,7 @@
     "The verification of vulnerabilities will be changed to": "La vérification <strong>{numéro}</strong> les vulnérabilités seront changées en",
     "There are internal server error": "Il y a une erreur de serveur interne",
     "There are some errors while creating project": "Il y a quelques erreurs lors de la création du projet",
+    "There are some errors while fetching default license info header": "Il y a des erreurs lors de la récupération de l'en-tête des informations de licence par défaut",
     "There are some errors while updating moderation request": "Il y a des erreurs lors de la mise à jour de la demande de modération",
     "There are some errors while updating project": "Il y a des erreurs lors de la mise à jour du projet",
     "There are some problem to update your comments": "Il y a un problème pour mettre à jour vos commentaires !",
