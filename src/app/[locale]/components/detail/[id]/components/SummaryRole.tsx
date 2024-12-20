@@ -33,7 +33,13 @@ const SummaryRole = ({ component }: { component: Component }) : ReactNode => {
             <tbody hidden={toggle}>
                 <tr>
                     <td>{t('Component Owner')}:</td>
-                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component.componentOwner) && <>{component.componentOwner}</>}</td>
+                    <td>{
+                        !CommonUtils.isNullOrUndefined(component._embedded?.componentOwner)
+                        &&
+                        <a href={`mailto:${component._embedded.componentOwner.email}`}>
+                            {component._embedded.componentOwner.fullName}
+                        </a>}
+                    </td>
                 </tr>
                 <tr>
                     <td>{t('Owner Accounting Unit')}:</td>
