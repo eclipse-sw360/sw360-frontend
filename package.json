@@ -45,7 +45,7 @@
     "classnames": "^2.3.2",
     "commitlint": "^17.8.1",
     "country-list": "^2.3.0",
-    "cypress": "^13.6.6",
+    "cypress": "^13.17.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.0.4",
     "eslint-config-prettier": "^9.1.0",
