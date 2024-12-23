@@ -15,6 +15,7 @@ import { ProjectPayload } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
+import { FaTrashAlt } from 'react-icons/fa';
 
 interface Props {
     projectPayload: ProjectPayload
@@ -46,6 +47,30 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
     const [linkedReleaseData, setLinkedReleaseData] = useState<Map<string, LinkedReleaseData>>(new Map())
     const [tableData, setTableData] = useState<Array<RowData>>([])
 
+    const handleClickDelete = (key: string) => {
+        const updatedTableData = tableData.filter(row => {
+            const keyObj = row.find(cell => 
+                typeof cell === 'object' && 
+                'key' in cell && 
+                cell.key === key
+            )
+            return keyObj === undefined
+        })
+        setTableData(updatedTableData)
+    
+        const updatedLinkedReleaseData = new Map(linkedReleaseData)
+        updatedLinkedReleaseData.delete(key)
+        setLinkedReleaseData(updatedLinkedReleaseData)
+    
+        if (projectPayload.linkedReleases) {
+            const updatedPayload = { ...projectPayload }
+            if (updatedPayload.linkedReleases) {
+                delete updatedPayload.linkedReleases[key]
+                setProjectPayload(updatedPayload)
+            }
+        }
+    }
+    
     const updateReleaseRelation = (
         releaseId: string,
         updatedReleaseRelation: string,
@@ -139,7 +164,7 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
             const data = extractDataFromMap(linkedReleaseData)
             setTableData(data)
         }
-    }, [existingReleaseData, linkedReleaseData])
+    }, [existingReleaseData, linkedReleaseData, projectPayload?.linkedReleases])
 
     const columns = [
         {
@@ -220,10 +245,10 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
             sort: true,
             formatter: ({ comments, key }: { comments: string; key: string }) =>
                 _(
-                    <div className='col-lg-9'>
+                    <div className='col-lg-9 d-flex align-items-center'>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control me-2'
                             placeholder='Enter Comments'
                             id='linkedReleaseData.comment'
                             aria-describedby='linkedReleaseData.comment'
@@ -234,6 +259,16 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                                 handleComments(key, updatedComment, linkedReleaseData)
                             }}
                         />
+                        <button
+                            type='button'
+                            style={{ border: 'none' , minWidth: 'fit-content'}}
+                            className={`fw-bold btn btn-secondary ms-auto`}
+                            onClick={() => {
+                                handleClickDelete(key)
+                            }}
+                    >
+                        <FaTrashAlt className='bi bi-trash3-fill' />
+                    </button>
                     </div>,
                 ),
         },
