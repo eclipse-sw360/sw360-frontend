@@ -18,8 +18,8 @@ importers:
         specifier: ^16.4.7
         version: 16.4.7
       flag-icons:
-        specifier: ^6.11.2
-        version: 6.15.0
+        specifier: ^7.2.3
+        version: 7.2.3
       gridjs:
         specifier: ^6.2.0
         version: 6.2.0
@@ -1544,8 +1544,8 @@ packages:
     resolution: {integrity: sha512-YyZM99iHrqLKjmt4LJDj58KI+fYyufRLBSYcqycxf//KpBk9FoewoGX0450m9nB44qrZnovzC2oeP5hUibxc/g==}
     engines: {node: '>=18'}
 
-  flag-icons@6.15.0:
-    resolution: {integrity: sha512-ARo9Q+aATZEjyjveeec9e+orx+xLWUBdOX9baOKoGqDzMbvZ65ghPhaHbVt5T7ZB+Q4OFsB4Hr+eQnpV8Q+dLA==}
+  flag-icons@7.2.3:
+    resolution: {integrity: sha512-X2gUdteNuqdNqob2KKTJTS+ZCvyWeLCtDz9Ty8uJP17Y4o82Y+U/Vd4JNrdwTAjagYsRznOn9DZ+E/Q52qbmqg==}
 
   flat-cache@3.2.0:
     resolution: {integrity: sha512-CYcENa+FtcUKLmhhqyctpclsq7QF38pKjZHsGNiSQF5r4FtoKDWabFDl3hzaEQMvT1LHEysw5twgLvpYYb4vbw==}
@@ -4983,7 +4983,7 @@ snapshots:
       path-exists: 5.0.0
       unicorn-magic: 0.1.0
 
-  flag-icons@6.15.0: {}
+  flag-icons@7.2.3: {}
 
   flat-cache@3.2.0:
     dependencies:
