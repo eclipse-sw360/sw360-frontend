@@ -34,4 +34,5 @@ export interface UserPayload {
     fullName?: string
     password?: string
     department?: string
+    secondaryDepartmentsAndRoles?: { [key: string]: Array<string> }
 }
