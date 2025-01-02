@@ -188,7 +188,7 @@ export default function Administration({ data }: { data: AdministrationDataType 
                                 id='administration.licenseInfoHeader'
                                 aria-describedby={t('License Info Header')}
                                 style={{ height: '600px' }}
-                                value={data.licenseInfoHeader}
+                                value={data.licenseInfoHeaderText}
                                 readOnly
                             />
                         </td>
