@@ -26,7 +26,8 @@ export interface User {
     _links?: Links
 }
 
-export interface CreateUserPayload {
+export interface UserPayload {
+    userGroup?: string
     email: string,
     givenName?: string
     lastName?: string
