@@ -22,7 +22,7 @@ interface AdministrationDataType {
     systemTestEnd?: string
     deliveryStart?: string
     phaseOutSince?: string
-    licenseInfoHeader?: string
+    licenseInfoHeaderText?: string
     _embedded?: {
         clearingTeam?: {
             email: string
