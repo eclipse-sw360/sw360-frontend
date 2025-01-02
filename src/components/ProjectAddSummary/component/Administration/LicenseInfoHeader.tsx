@@ -63,7 +63,7 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('License Info Header')}</h6>
                 <div className='row d-flex justify-content-end'>
-                    <div className='col-lg-3'>
+                    <div className='col-lg-3 d-flex justify-content-end'>
                         <button className='btn btn-light mb-2'
                                 type='button'
                                 onClick={getDefaultLicenseInfoHeader}
