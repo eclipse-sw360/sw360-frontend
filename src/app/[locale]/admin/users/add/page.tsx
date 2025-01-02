@@ -27,7 +27,8 @@ export default function CreateUser(): JSX.Element {
         lastName: '',
         department: '',
         fullName: '',
-        password: ''
+        password: '',
+        secondaryDepartmentsAndRoles: {},
     })
     const router = useRouter()
 
@@ -36,6 +37,7 @@ export default function CreateUser(): JSX.Element {
     }
 
     const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
+        console.log(user)
         event.preventDefault()
         try {
             const session = await getSession()
@@ -78,7 +80,7 @@ export default function CreateUser(): JSX.Element {
                     {t('Cancel')}
                 </button>
             </div>
-            <UserEditForm userPayload={user} handleChange={handleChange} userOperationType={UserOperationType.CREATE} />
+            <UserEditForm userPayload={user} setUserPayload={setUser} handleChange={handleChange} userOperationType={UserOperationType.CREATE} />
         </form>
     )
 }
