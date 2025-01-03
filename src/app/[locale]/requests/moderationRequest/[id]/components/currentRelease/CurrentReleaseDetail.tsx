@@ -30,8 +30,8 @@ import {
     ReleaseTabIds,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { signOut, getSession } from 'next-auth/react'
+import { useEffect, useState, ReactNode } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -39,8 +39,7 @@ interface Props {
     releaseId: string
 }
 
-const CurrentReleaseDetail = ({ releaseId }: Props): JSX.Element => {
-    const { data: session } = useSession()
+const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
@@ -50,27 +49,29 @@ const CurrentReleaseDetail = ({ releaseId }: Props): JSX.Element => {
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
     const [tabList] = useState(ReleaseDetailTabs.MODERATION_REQUEST)
 
-    const fetchData = useCallback(
-        async (url: string) => {
+    const fetchData = async (url: string, signal: AbortSignal) => {
+        try {
+            const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return null
-            }
-        },
-        [session],
-    )
+                const response = await ApiUtils.GET(url, session.user.access_token, signal)
+                if (response.status == HttpStatus.OK) {
+                    const data = await response.json() as ReleaseDetail & EmbeddedChangelogs
+                    return data
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    void signOut()
+                }
+        } catch(e) {
+            console.error(e)
+        }
+    }
 
     useEffect(() => {
-        fetchData(`releases/${releaseId}`)
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        fetchData(`releases/${releaseId}`, signal)
             .then((release: ReleaseDetail | undefined) => {
                 setRelease(release)
-
                 if (
                     !CommonUtils.isNullOrUndefined(release?._embedded) &&
                     !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
@@ -81,7 +82,7 @@ const CurrentReleaseDetail = ({ releaseId }: Props): JSX.Element => {
             })
             .catch((err) => console.error(err))
 
-        fetchData(`changelog/document/${releaseId}`)
+        fetchData(`changelog/document/${releaseId}`, signal)
             .then((changeLogs: EmbeddedChangelogs | undefined) => {
                 changeLogs &&
                     setChangeLogList(
@@ -91,7 +92,9 @@ const CurrentReleaseDetail = ({ releaseId }: Props): JSX.Element => {
                     )
             })
             .catch((err) => console.error(err))
-    }, [fetchData, releaseId])
+
+        return () => controller.abort()
+    }, [releaseId])
 
     return release ? (
         <div className='container page-content'>

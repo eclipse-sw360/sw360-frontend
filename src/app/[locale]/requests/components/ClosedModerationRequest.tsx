@@ -9,14 +9,14 @@
 
 'use client'
 
-import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { signOut, getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
+import { useEffect, useState, ReactNode } from 'react'
+import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { notFound } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 
@@ -25,11 +25,12 @@ interface ModerationRequestMap {
     [key: string]: string
 }
 
-function ClosedModerationRequest() {
+function ClosedModerationRequest(): ReactNode {
+    const { status } = useSession()
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
-    const [tableData, setTableData] = useState<Array<any>>([])
-    const moderationRequestStatus: ModerationRequestMap = {
+    const [tableData, setTableData] = useState<(string | object | string[])[][]>([])
+    const moderationRequestStatus : ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
         PENDING: t('Pending'),
@@ -37,7 +38,7 @@ function ClosedModerationRequest() {
     }
 
     const formatDate = (timestamp: number | undefined): string | null => {
-        if (timestamp == null) {
+        if (timestamp === undefined) {
             return null
         }
         const date = new Date(timestamp)
@@ -47,7 +48,7 @@ function ClosedModerationRequest() {
         return `${year}-${month}-${day}`
     }
 
-    const fetchData = useCallback(async (url: string) => {
+    const fetchData = async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
@@ -59,7 +60,7 @@ function ClosedModerationRequest() {
         } else {
             notFound()
         }
-    }, [])
+    }
 
     useEffect(() => {
         setLoading(true)
@@ -72,20 +73,21 @@ function ClosedModerationRequest() {
             if (filteredModerationRequests !== undefined) {
                 setTableData(
                     filteredModerationRequests.map((item: ModerationRequest) => [
-                        formatDate(item.timestamp),
-                        item.componentType,
-                        _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
-                        item.requestingUser,
-                        item.requestingUserDepartment,
-                        item.moderators,
-                        item.moderationState !== undefined ? moderationRequestStatus[item.moderationState] : undefined,
+                        formatDate(item.timestamp) ?? '',
+                        item.componentType ?? '',
+                        { id: item.id, documentName: item.documentName },
+                        item.requestingUser ?? '',
+                        item.requestingUserDepartment ?? '',
+                        item.moderators ?? [],
+                        item.moderationState !== undefined ?
+                            moderationRequestStatus[item.moderationState]: '',
                         '',
                     ]),
                 )
             }
             setLoading(false)
         })
-    }, [fetchData])
+    }, [])
 
     const columns = [
         {
@@ -101,6 +103,7 @@ function ClosedModerationRequest() {
         {
             id: 'closedModerationRequest.documentName',
             name: t('Document Name'),
+            formatter: ({ id, documentName }: { id: string, documentName: string }) => _(<Link href={'moderationrequest/' + id}>{documentName}</Link>),
             sort: true,
         },
         {
@@ -140,24 +143,28 @@ function ClosedModerationRequest() {
         },
     ]
 
-    return (
-        <div className='row mb-4'>
-            <div className='col-12 d-flex justify-content-center align-items-center'>
-                {loading == false ? (
-                    <div style={{ paddingLeft: '0px' }}>
-                        <Table
-                            columns={columns}
-                            data={tableData}
-                            sort={false}
-                            selector={true}
-                        />
-                    </div>
-                ) : (
-                    <Spinner className='spinner' />
-                )}
+    if (status === 'unauthenticated') {
+        void signOut()
+    } else {
+        return (
+            <div className='row mb-4'>
+                <div className='col-12 d-flex justify-content-center align-items-center'>
+                    {loading == false ? (
+                        <div style={{ paddingLeft: '0px' }}>
+                            <Table
+                                columns={columns}
+                                data={tableData}
+                                sort={false}
+                                selector={true}
+                            />
+                        </div>
+                    ) : (
+                        <Spinner className='spinner' />
+                    )}
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 }
 
 export default ClosedModerationRequest

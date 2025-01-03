@@ -13,18 +13,21 @@ import { HttpStatus, ModerationRequestPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState, ReactNode } from 'react'
 import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
-import { signOut, getSession } from 'next-auth/react'
+import { signOut, getSession, useSession } from 'next-auth/react'
 import { _, Table } from 'next-sw360'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 
-
 interface propType {
     [key: string]: string
+}
+
+interface ModerationRequestRow {
+    moderationRequestId: string, documentName: string
 }
 
 export default function BulkDeclineModerationRequestModal({
@@ -35,14 +38,16 @@ export default function BulkDeclineModerationRequestModal({
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
     mrIdNameMap: propType
-}) {
+}) : ReactNode {
     const t = useTranslations('default')
     const [loading, setLoading] = useState<boolean>(true)
     const [disableAcceptMr, setDisableAcceptMr] = useState<boolean>(false)
     const [disableDeclineMr, setDisableDeclineMr] = useState<boolean>(false)
     const [statusCheck, setStatusCheck] = useState<number>()
-    const [tableData, setTableData] = useState<Array<any>>([])
+    const [tableData, setTableData] = useState<Array<(
+        ModerationRequestRow | { progressStatus: number })[]>>([])
     const [hasComment, setHasComment] = useState<boolean>(false)
+    const { status } = useSession()
     const [moderationRequestPayload, setModerationRequestPayload] =
                     useState<ModerationRequestPayload>({
         action: '',
@@ -221,11 +226,12 @@ export default function BulkDeclineModerationRequestModal({
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            if (row[0].moderationRequestId === singleMrId) {
+                            const r = row[0] as ModerationRequestRow
+                            if (r.moderationRequestId === singleMrId) {
                                 return [
                                     {
-                                        moderationRequestId: row[0].moderationRequestId,
-                                        documentName: row[0].documentName,
+                                        moderationRequestId: r.moderationRequestId,
+                                        documentName: r.documentName,
                                     },
                                     { progressStatus }
                                 ]
@@ -242,11 +248,12 @@ export default function BulkDeclineModerationRequestModal({
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            if (row[0].moderationRequestId === singleMrId) {
+                            const r = row[0] as ModerationRequestRow
+                            if (r.moderationRequestId === singleMrId) {
                                 return [
                                     {
-                                        moderationRequestId: row[0].moderationRequestId,
-                                        documentName: row[0].documentName,
+                                        moderationRequestId: r.moderationRequestId,
+                                        documentName: r.documentName,
                                     },
                                     { progressStatus }
                                 ]
@@ -263,11 +270,12 @@ export default function BulkDeclineModerationRequestModal({
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            if (row[0].moderationRequestId === singleMrId) {
+                            const r = row[0] as ModerationRequestRow
+                            if (r.moderationRequestId === singleMrId) {
                                 return [
                                     {
-                                        moderationRequestId: row[0].moderationRequestId,
-                                        documentName: row[0].documentName,
+                                        moderationRequestId: r.moderationRequestId,
+                                        documentName: r.documentName,
                                     },
                                     { progressStatus }
                                 ]
@@ -313,11 +321,12 @@ export default function BulkDeclineModerationRequestModal({
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            if (row[0].moderationRequestId === singleMrId) {
+                            const r = row[0] as ModerationRequestRow
+                            if (r.moderationRequestId === singleMrId) {
                                 return [
                                     {
-                                        moderationRequestId: row[0].moderationRequestId,
-                                        documentName: row[0].documentName,
+                                        moderationRequestId: r.moderationRequestId,
+                                        documentName: r.documentName,
                                     },
                                     { progressStatus }
                                 ]
@@ -334,11 +343,12 @@ export default function BulkDeclineModerationRequestModal({
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            if (row[0].moderationRequestId === singleMrId) {
+                            const r = row[0] as ModerationRequestRow
+                            if (r.moderationRequestId === singleMrId) {
                                 return [
                                     {
-                                        moderationRequestId: row[0].moderationRequestId,
-                                        documentName: row[0].documentName,
+                                        moderationRequestId: r.moderationRequestId,
+                                        documentName: r.documentName,
                                     },
                                     { progressStatus }
                                 ]
@@ -355,11 +365,12 @@ export default function BulkDeclineModerationRequestModal({
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            if (row[0].moderationRequestId === singleMrId) {
+                            const r = row[0] as ModerationRequestRow
+                            if (r.moderationRequestId === singleMrId) {
                                 return [
                                     {
-                                        moderationRequestId: row[0].moderationRequestId,
-                                        documentName: row[0].documentName,
+                                        moderationRequestId: r.moderationRequestId,
+                                        documentName: r.documentName,
                                     },
                                     { progressStatus }
                                 ]
@@ -411,34 +422,37 @@ export default function BulkDeclineModerationRequestModal({
         }
     }
 
-    return (
-        <>
-            <Modal
-                size='lg'
-                centered
-                show={show}
-                onHide={() => {
-                    setShow(false)
-                    setHasComment(false)
-                    setStatusCheck(0)
-                    setDisableAcceptMr(false)
-                    setDisableDeclineMr(false)
-                }}
-                aria-labelledby={t('Accept Decline All Selected Moderation Requests')}
-                scrollable
-            >
-                <Modal.Header
-                    style={{ backgroundColor: '#feefef', color: '#da1414' }}
-                    closeButton
+
+    if (status === 'unauthenticated') {
+        return signOut()
+    } else {
+        return (
+            <>
+                <Modal
+                    size='lg'
+                    centered
+                    show={show}
+                    onHide={() => {
+                        setShow(false)
+                        setHasComment(false)
+                        setStatusCheck(0)
+                        setDisableAcceptMr(false)
+                        setDisableDeclineMr(false)
+                    }}
+                    aria-labelledby={t('Accept Decline All Selected Moderation Requests')}
+                    scrollable
                 >
-                    <Modal.Title id='delete-all-license-info-modal'>
-                        <AiOutlineQuestionCircle />
-                        {t('Accept Decline All Selected Moderation Requests')}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p className='my-3'>{t('Accept Decline All MRs')}</p>
-                    <Form>
+                    <Modal.Header style={{ backgroundColor: '#feefef',
+                                        color: '#da1414' }}
+                                closeButton>
+                        <Modal.Title id='delete-all-license-info-modal'>
+                            <AiOutlineQuestionCircle />
+                                {t('Accept Decline All Selected Moderation Requests')}
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p className='my-3'>{t('Accept Decline All MRs')}</p> 
+                        <Form>
                         <Form.Group className='mb-3'>
                             <Form.Label className='mb-1'>
                                 {t.rich('Your selected Moderation requests are')}
@@ -483,7 +497,7 @@ export default function BulkDeclineModerationRequestModal({
                             />
                         </Form.Group>
                     </Form>
-                </Modal.Body>
+                    </Modal.Body>
                 <Modal.Footer>
                     <button
                         className='btn btn-dark'
@@ -530,5 +544,5 @@ export default function BulkDeclineModerationRequestModal({
                 </Modal.Footer>
             </Modal>
         </>
-    )
+    )}
 }

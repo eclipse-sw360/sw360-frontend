@@ -11,6 +11,9 @@
 
 import ReleaseOverview from '@/app/[locale]/components/detail/[id]/components/ReleaseOverview'
 import Summary from '@/app/[locale]/components/detail/[id]/components/Summary'
+import { signOut, getSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useEffect, useState, ReactNode } from 'react'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -26,21 +29,17 @@ import {
     LinkedVulnerability,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
 
 interface Props {
-    componentId: string | undefined
+    componentId: string
 }
 
-const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
+const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
@@ -66,21 +65,19 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
         },
     ]
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                await signOut()
-            } else {
-                notFound()
-            }
-        },
-        [session],
-    )
+    const fetchData = async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
+            return data
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            await signOut()
+        } else {
+            notFound()
+        }
+    }
 
     useEffect(() => {
         fetchData(`components/${componentId}`)
@@ -117,7 +114,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                     >
                         <Summary
                             component={component}
-                            componentId={componentId ?? ''}
+                            componentId={componentId}
                         />
                     </div>
                     <div
@@ -125,7 +122,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                         hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW}
                     >
                         <ReleaseOverview
-                            componentId={componentId ?? ''}
+                            componentId={componentId}
                             calledFromModerationRequestDetail={true}
                         />
                     </div>
@@ -134,7 +131,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                         hidden={selectedTab != CommonTabIds.ATTACHMENTS}
                     >
                         <Attachments
-                            documentId={componentId ?? ''}
+                            documentId={componentId}
                             documentType={DocumentTypes.COMPONENT}
                         />
                     </div>
@@ -149,7 +146,7 @@ const CurrentComponentDetail = ({ componentId }: Props): JSX.Element => {
                             >
                                 <ChangeLogList
                                     setChangeLogIndex={setChangeLogIndex}
-                                    documentId={componentId ?? ''}
+                                    documentId={componentId}
                                     setChangesLogTab={setChangesLogTab}
                                     changeLogList={changeLogList}
                                 />
