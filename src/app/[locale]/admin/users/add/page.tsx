@@ -37,7 +37,6 @@ export default function CreateUser(): JSX.Element {
     }
 
     const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
-        console.log(user)
         event.preventDefault()
         try {
             const session = await getSession()
