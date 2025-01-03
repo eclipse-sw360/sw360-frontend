@@ -28,7 +28,7 @@ const UserEditForm = ( { userPayload, handleChange, userOperationType, setUserPa
         <div className='row header mb-2 pb-2 px-2'>
             <h6>{t('General Information')}</h6>
         </div>
-        <div className='row mb-3'>
+        <div className='row with-divider mb-3 pb-3 px-0'>
             <div className='col-lg-6'>
                 <label htmlFor='user.givenName' className='form-label fw-medium'>
                     {t('Given Name')}{' '}
@@ -66,7 +66,7 @@ const UserEditForm = ( { userPayload, handleChange, userOperationType, setUserPa
                 />
             </div>
         </div>
-        <div className='row mb-3'>
+        <div className='row with-divider mb-3 pb-3 px-0'>
             <div className='col-lg-6'>
                 <label htmlFor='user.email' className='form-label fw-medium'>
                     {t('Email')}{' '}
@@ -107,7 +107,7 @@ const UserEditForm = ( { userPayload, handleChange, userOperationType, setUserPa
                 />
             </div>
         </div>
-        <div className='row mb-3'>
+        <div className='row with-divider mb-3 pb-3 px-0'>
             <div className='col-lg-6'>
                 <label htmlFor='user.department' className='form-label fw-medium'>
                     {t('Department')}{' '}
