@@ -25,7 +25,7 @@ import CommonUtils from '@/utils/common.utils'
 export default function UserAdminstration(): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    const [num, setNum]  = useState< null | number >(null)
+    const [num, setNum]  = useState<number >(0)
     const router = useRouter()
 
     const handleAddUsers = () => {
@@ -79,6 +79,16 @@ export default function UserAdminstration(): JSX.Element {
             id: 'users.secondaryDepartmentsAndRoles',
             name: t('Secondary Departments and Roles'),
             sort: true,
+            formatter: (secondaryDepartmentsAndRoles: { [key: string]: Array<string> }) =>
+                _(
+                    <ul className='text-break text-start'>
+                        {Object.entries(secondaryDepartmentsAndRoles).map(([department, roles], index) => (
+                            <li key={index}>
+                                <b>{department}</b>: {roles.map(role => t(role as never)).join(', ')}
+                            </li>
+                        ))}
+                    </ul>
+                ),
         },
         {
             id: 'users.actions',
@@ -102,7 +112,7 @@ export default function UserAdminstration(): JSX.Element {
                     </span>
                 </>
             ),
-            sort: true,
+            sort: false,
         },
     ]
 
@@ -116,10 +126,10 @@ export default function UserAdminstration(): JSX.Element {
                     elem.givenName ?? '',
                     elem.lastName ?? '',
                     elem.email,
-                    (elem.deactivated === undefined || elem.deactivated === false) ? 'Inactive' : 'Active',
+                    (elem.deactivated === undefined || elem.deactivated === false) ? t('Active') : t('Inactive'),
                     elem.department ?? '',
-                    '',
-                    '',
+                    elem.userGroup === undefined ? t('USER') : t(elem.userGroup as never),
+                    elem.secondaryDepartmentsAndRoles ?? {},
                     CommonUtils.getIdFromUrl(elem._links?.self.href),
                 ])
             },
@@ -168,7 +178,7 @@ export default function UserAdminstration(): JSX.Element {
                             <button className='btn btn-primary col-auto' onClick={handleAddUsers}>
                                 {t('Add User')}
                             </button>
-                            <div className='col-auto buttonheader-title'>{`${t('Users')} (${(num === null) ? num : ''})`}</div>
+                            <div className='col-auto buttonheader-title'>{`${t('Users')} (${num})`}</div>
                         </div>
                         <h5 className="mt-3 mb-1 ms-1 header-underlined">
                             {t('Users')}
