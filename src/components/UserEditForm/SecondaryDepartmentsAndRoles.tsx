@@ -132,9 +132,8 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
                                 }
                             </select>
                         </div>
-                        <div className='col-sm-1 cursor-pointer'>
-                            <FaTrashAlt className='icon' onClick={() => onDeleteRow(index)}
-                            />
+                        <div className='col-sm-1 cursor-pointer pt-2 px-4'>
+                            <FaTrashAlt size={21} className='icon action' onClick={() => onDeleteRow(index)} />
                         </div>
                     </div>
 
