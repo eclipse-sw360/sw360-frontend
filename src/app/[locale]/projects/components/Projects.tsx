@@ -96,7 +96,8 @@ function Project(): JSX.Element {
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({ show: false, importType: 'SPDX' })
+    const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>
+                                                            ({ show: false, importType: 'SPDX' })
 
     const [showCreateCRModal, setShowCreateCRModal] = useState(false)
     const [createCRProjectId, setCreateCRProjectId] = useState('')
@@ -287,6 +288,32 @@ function Project(): JSX.Element {
         }
     }
 
+    const exportProjectSpreadsheet = async ({withLinkedRelease} : {withLinkedRelease : boolean}) => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            if (withLinkedRelease === false) {
+                const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
+                if (response.status == HttpStatus.OK) {
+                    MessageService.success(t('Excel report generation has started'))
+                }
+                else if (response.status == HttpStatus.FORBIDDEN) {
+                    MessageService.warn(t('Access Denied'))
+                }
+                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                    MessageService.error(t('Internal server error'))
+                }
+                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    MessageService.error(t('Unauthorized request'))
+                }
+            }
+        }
+        catch(e) {
+            console.log(e)
+        }
+    }
+
     const advancedSearch = [
         {
             fieldName: t('Project Name'),
@@ -418,8 +445,13 @@ function Project(): JSX.Element {
                                     <Dropdown className='col-auto'>
                                         <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                            <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
-                                            <Dropdown.Item>{t('Projects with linked releases')}</Dropdown.Item>
+                                            <Dropdown.Item
+                                                onClick = {() => exportProjectSpreadsheet({ withLinkedRelease: false })}>
+                                                {t('Projects only')}
+                                            </Dropdown.Item>
+                                            <Dropdown.Item>
+                                                {t('Projects with linked releases')}
+                                            </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
