@@ -45,8 +45,8 @@ export default function LicenseClearing({
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
 
-    const generateSourceCodeBundle = () => {
-        router.push(`/projects/generateSourceCode/${projectId}`)
+    const generateSourceCodeBundle = (withSubProjects: boolean) => {
+        router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
     }
 
 
@@ -98,11 +98,13 @@ export default function LicenseClearing({
                                     <Dropdown.Toggle variant='secondary'>{t('Generate Source Code Bundle')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
                                             <Dropdown.Item
-                                                onClick = {() => generateSourceCodeBundle()}
+                                                onClick = {() => generateSourceCodeBundle(false)}
                                             >
                                                 {t('Projects only')}
                                             </Dropdown.Item>
-                                            <Dropdown.Item>
+                                            <Dropdown.Item
+                                                onClick = {() => generateSourceCodeBundle(true)}
+                                            >
                                                 {t('Projects with sub projects')}
                                             </Dropdown.Item>
                                         </Dropdown.Menu>

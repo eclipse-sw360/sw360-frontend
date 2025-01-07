@@ -788,6 +788,18 @@ input::-webkit-datetime-edit {
     padding-left: 10rem;
 }
 
+.gridjs-td:has(.green-cell) {
+    background-color: #edf9f0;
+    border-left: none;
+    border-right: none;
+}
+
+.gridjs-td:has(.orange-cell) {
+    background-color: #fff4ec;
+    border-left: none;
+    border-right: none;
+}
+
 .header-underlined {
     color: #5D8EA9;
     border-bottom: 1px solid #5D8EA9;
