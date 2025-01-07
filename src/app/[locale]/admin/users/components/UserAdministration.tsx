@@ -9,6 +9,7 @@
 
 'use client'
 
+import React from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
@@ -21,15 +22,30 @@ import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CommonUtils from '@/utils/common.utils'
+import dynamic from 'next/dynamic'
+
+const EditSecondaryDepartmentAndRolesModal = dynamic(() => import('./EditSecondaryDepartmentsAndRolesModal'), {
+    ssr: false,
+})
+
+// Prevent re-rendering of the table when the close button of the modal is clicked
+const MemoTable = React.memo(Table, () => true)
 
 export default function UserAdminstration(): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    const [num, setNum]  = useState<number >(0)
+    const [num, setNum]  = useState<number>(0)
     const router = useRouter()
+    const [editingUserId, setEditingUserId] = useState<string | undefined>(undefined)
+    const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] = useState<boolean>(false)
 
     const handleAddUsers = () => {
         router.push('/admin/users/add')
+    }
+
+    const handleEditSecondaryDepartmentAndRoles = (id: string) => {
+        setEditingUserId(id)
+        setOpenEditSecondaryDepartmentAndRolesModal(true)
     }
 
     const columns = [
@@ -104,9 +120,9 @@ export default function UserAdminstration(): JSX.Element {
                             </Link>
                         </OverlayTrigger>
 
-                        <OverlayTrigger overlay={<Tooltip>{t('Edit User Secondary Departments And Role')}</Tooltip>}>
-                            <span className='d-inline-block'>
-                                <TfiFiles className='btn-icon overlay-trigger' />
+                        <OverlayTrigger rootClose={true} overlay={<Tooltip>{t('Edit User Secondary Departments And Role')}</Tooltip>}>
+                            <span className='d-inline-block' onClick={() => handleEditSecondaryDepartmentAndRoles(id)}>
+                                <TfiFiles className='btn-icon overlay-trigger cursor-pointer' />
                             </span>
                         </OverlayTrigger>
                     </span>
@@ -186,7 +202,10 @@ export default function UserAdminstration(): JSX.Element {
                         {
                             status === 'authenticated' ?
                             <div className="ms-1">
-                                <Table columns={columns} server={initServerPaginationConfig()} selector={true} sort={false}/>
+                                <MemoTable
+                                    columns={columns} server={initServerPaginationConfig()}
+                                    selector={true} sort={false}
+                                />
                             </div> :
                             <div className='col-12 mt-1 text-center'>
                                 <Spinner className='spinner' />
@@ -195,6 +214,14 @@ export default function UserAdminstration(): JSX.Element {
                     </div>
                 </div>
             </div>
+            {
+                (editingUserId !== undefined) &&
+                <EditSecondaryDepartmentAndRolesModal
+                    show={openEditSecondaryDepartmentAndRolesModal}
+                    setShow={setOpenEditSecondaryDepartmentAndRolesModal}
+                    editingUserId={editingUserId}
+                />
+            }
         </>
     )
 }

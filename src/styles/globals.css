@@ -237,6 +237,24 @@ body {
     color: var(--sw360-primary-color) !important;
 }
 
+.btn-info {
+    background-color: #2e5aac !important;
+    border-color: #2e5aac !important;
+    color: #fff !important;
+}
+
+.btn-info:hover {
+    background-color: #294f98 !important;
+    border-color: transparent !important;
+    color: #fff !important;
+}
+
+.btn-info:focus, .focus.btn-info {
+    background-color: #294f98 !important;;
+    border-color: transparent !important;;
+    color: #fff !important;
+}
+
 .gridjs-wrapper {
     border-radius: 0px;
 }
@@ -828,6 +846,15 @@ input::-webkit-datetime-edit {
     white-space: nowrap !important;
 }
 
+.modal-info .modal-title {
+    color: #2e5aac !important;
+}
+
+.modal-info .modal-header {
+    background-color: #eef2fa !important;
+    border-color: #89a7e0 !important;
+}
+
 .section-header {
     color: #FFF;
     background-color: #5D8EA9;
@@ -1247,4 +1274,8 @@ hr {
 
 .node-have-diff > td:first-child{
     color: red !important;
+}
+
+svg.action:hover {
+    color: #F7941E;
 }
