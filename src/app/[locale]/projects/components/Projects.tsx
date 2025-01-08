@@ -308,6 +308,22 @@ function Project(): JSX.Element {
                     MessageService.error(t('Unauthorized request'))
                 }
             }
+            else {
+                const response = await ApiUtils.GET('reports?module=PROJECTS&withLinkedRelease=true',
+                                                     session.user.access_token)
+                if (response.status == HttpStatus.OK) {
+                    MessageService.success(t('Excel report generation has started'))
+                }
+                else if (response.status == HttpStatus.FORBIDDEN) {
+                    MessageService.warn(t('Access Denied'))
+                }
+                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                    MessageService.error(t('Internal server error'))
+                }
+                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    MessageService.error(t('Unauthorized request'))
+                }
+            }
         }
         catch(e) {
             console.log(e)
@@ -449,7 +465,8 @@ function Project(): JSX.Element {
                                                 onClick = {() => exportProjectSpreadsheet({ withLinkedRelease: false })}>
                                                 {t('Projects only')}
                                             </Dropdown.Item>
-                                            <Dropdown.Item>
+                                            <Dropdown.Item
+                                                onClick = {() => exportProjectSpreadsheet({ withLinkedRelease: true })}>
                                                 {t('Projects with linked releases')}
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
