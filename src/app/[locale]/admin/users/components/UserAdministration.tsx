@@ -28,7 +28,7 @@ const EditSecondaryDepartmentAndRolesModal = dynamic(() => import('./EditSeconda
     ssr: false,
 })
 
-// Prevent re-rendering of the table when the close button of the modal is clicked
+// Prevent re-rendering of the table when the open/close button of the modal is clicked
 const MemoTable = React.memo(Table, () => true)
 
 export default function UserAdminstration(): JSX.Element {
@@ -63,12 +63,12 @@ export default function UserAdminstration(): JSX.Element {
             id: 'users.email',
             name: t('Email'),
             width: '20%',
-            formatter: (email: string) =>
+            formatter: ({ email, id }: { email: string, id: string }) =>
                 _(
                     <>
                         <Link
                             className={`text-link`}
-                            href={`mailto:${email}`}
+                            href={`/admin/users/details/${id}`}
                         >
                             {email}
                         </Link>
@@ -100,7 +100,7 @@ export default function UserAdminstration(): JSX.Element {
                     <ul className='text-break text-start'>
                         {Object.entries(secondaryDepartmentsAndRoles).map(([department, roles], index) => (
                             <li key={index}>
-                                <b>{department}</b>: {roles.map(role => t(role as never)).join(', ')}
+                                <b>{department}</b> {'->'} {roles.map(role => t(role as never)).join(', ')}
                             </li>
                         ))}
                     </ul>
@@ -141,7 +141,7 @@ export default function UserAdminstration(): JSX.Element {
                 return data._embedded['sw360:users'].map((elem: User) => [
                     elem.givenName ?? '',
                     elem.lastName ?? '',
-                    elem.email,
+                    { email: elem.email, id: CommonUtils.getIdFromUrl(elem._links?.self.href) },
                     (elem.deactivated === undefined || elem.deactivated === false) ? t('Active') : t('Inactive'),
                     elem.department ?? '',
                     elem.userGroup === undefined ? t('USER') : t(elem.userGroup as never),
