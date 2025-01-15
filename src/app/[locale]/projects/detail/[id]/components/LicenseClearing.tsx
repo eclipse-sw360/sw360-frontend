@@ -113,15 +113,14 @@ export default function LicenseClearing({
                                     variant='secondary'
                                     className='me-2 col-auto'
                                     onClick={ clearingState === ClearingRequestStates.OPEN ?
-                                                () => setShowViewClearingRequestModal(true) :
-                                                () => setShowCreateClearingRequestModal(true)}
-                                    disabled={clearingState === ClearingRequestStates.CLOSED}
+                                                () => setShowCreateClearingRequestModal(true) :
+                                                () => setShowViewClearingRequestModal(true)}
                                 >
                                     {
                                         <>
                                             {clearingState === ClearingRequestStates.OPEN
-                                            ? t('View Clearing Request')
-                                            : t('Create Clearing Request')}
+                                            ? t('Create Clearing Request')
+                                            : t('View Clearing Request')}
                                         </>
                                     }
                                 </Button>
