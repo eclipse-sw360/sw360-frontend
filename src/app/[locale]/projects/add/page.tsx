@@ -10,6 +10,7 @@
 'use client'
 
 import Administration from '@/components/ProjectAddSummary/Administration'
+import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
 import { HttpStatus, InputKeyValue, ProjectPayload, Vendor, Project } from '@/object-types'
@@ -221,6 +222,7 @@ function AddProjects(): JSX.Element {
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedPackages'>
+                                            <LinkedPackages/>
                                         </Tab.Pane>
                                     </Tab.Content>
                                 </Row>
