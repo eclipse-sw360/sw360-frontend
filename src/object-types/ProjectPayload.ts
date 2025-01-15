@@ -52,6 +52,7 @@ interface ProjectPayload {
     projectOwner?: string
     securityResponsibles?: string[]
     considerReleasesFromExternalList?: boolean
+    packageIds?: string[]
     linkedProjects?: {
         [key: string]: {
             projectRelationship: string

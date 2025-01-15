@@ -72,6 +72,7 @@ function AddProjects(): JSX.Element {
         securityResponsibles: [],
         linkedProjects: {},
         linkedReleases:{},
+        packageIds: [],
     })
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
@@ -146,6 +147,9 @@ function AddProjects(): JSX.Element {
                                     <ListGroup.Item action eventKey='linkedProjects'>
                                         <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                     </ListGroup.Item>
+                                    <ListGroup.Item action eventKey='linkedPackages'>
+                                        <div className='my-2'>{t('Linked Packages')}</div>
+                                    </ListGroup.Item>
                                 </ListGroup>
                             </Col>
                             <Col className='me-3'>
@@ -215,6 +219,8 @@ function AddProjects(): JSX.Element {
                                                 projectPayload={projectPayload}
                                                 setProjectPayload={setProjectPayload}
                                             />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='linkedPackages'>
                                         </Tab.Pane>
                                     </Tab.Content>
                                 </Row>
