@@ -76,7 +76,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                     <tr>
                         <td>{t('Visibility')}:</td>
-                        <td>{Capitalize(summaryData.visibility) ?? ''}</td>
+                        <td>{Capitalize(summaryData.visibility === 'BUISNESSUNIT_AND_MODERATORS' ? 'GROUP_AND_MODERATORS' : summaryData.visibility) ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
