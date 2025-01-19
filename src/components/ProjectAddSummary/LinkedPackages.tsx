@@ -12,7 +12,7 @@
 import { Table } from '@/components/sw360'
 import { LinkedPackageData, ProjectPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
 
 interface Props {
@@ -20,10 +20,13 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
+type RowData = (string | string[] | undefined)[]
+
 export default function LinkedPackages({ projectPayload,
                                          setProjectPayload }: Props): JSX.Element {
 
     const t = useTranslations('default')
+    const [tableData, setTableData] = useState<Array<RowData>>([])
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
     const [linkedPackageData, setLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
 
@@ -49,9 +52,20 @@ export default function LinkedPackages({ projectPayload,
             sort: true,
         },
     ]
-    const datta: any[] = []
+    
+    const extractDataFromMap = (linkedPackageData: Map<string, LinkedPackageData>) => {
+        const extractedData: Array<RowData> = []
+        linkedPackageData.forEach((value, ) => {
+            extractedData.push([value.name, value.version, value.licenseIds, value.packageManager])
+        })
+        return extractedData
+    }
 
-    console.log('linkedPackageData ----', linkedPackageData)
+    useEffect(() => {
+        const data = extractDataFromMap(linkedPackageData)
+        setTableData(data)
+    }, [linkedPackageData])
+
 
     return (
         <>
@@ -78,7 +92,7 @@ export default function LinkedPackages({ projectPayload,
                 <div style={{ paddingLeft: '0px' }}>
                     <Table
                         columns={columns}
-                        data={datta}
+                        data={tableData}
                         sort={false}
                     />
                 </div>
