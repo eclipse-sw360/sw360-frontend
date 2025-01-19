@@ -9,20 +9,92 @@
 
 'use client'
 
+import { Table } from '@/components/sw360'
+import { LinkedPackageData, ProjectPayload } from '@/object-types'
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
 
-export default function LinkedPackages(): JSX.Element {
+interface Props {
+    projectPayload: ProjectPayload
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+export default function LinkedPackages({ projectPayload,
+                                         setProjectPayload }: Props): JSX.Element {
+
+    const t = useTranslations('default')
+    const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
+    const [linkedPackageData, setLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
+
+    const columns = [
+        {
+            id: 'linkedPackagesData.name',
+            name: t('Package Name'),
+            sort: true,
+        },
+        {
+            id: 'linkedPackagesData.version',
+            name: t('Package Version'),
+            sort: true,
+        },
+        {
+            id: 'linkedPackagesData.licenses',
+            name: t('License'),
+            sort: true,
+        },
+        {
+            id: 'linkedPackagesData.packageManager',
+            name: t('Package Manager'),
+            sort: true,
+        },
+    ]
+    const datta: any[] = []
+
+    console.log('linkedPackageData ----', linkedPackageData)
 
     return (
         <>
+            <LinkPackagesModal
+                        setLinkedPackageData={setLinkedPackageData}
+                        projectPayload={projectPayload}
+                        setProjectPayload={setProjectPayload}
+                        show={showLinkedPackagesModal}
+                        setShow={setShowLinkedPackagesModal}
+            />
             <div className='row mb-4'>
-                <div className='col-lg-4'>
-                    <button
-                        type='button'
-                        className='btn btn-secondary'>
-                        Add Packages
-                    </button>
+                <div className='row header-1'>
+                    <h6
+                        className='fw-medium'
+                        style={{ color: '#5D8EA9', paddingLeft: '0px' }}
+                    >
+                        LINKED PACKAGES
+                        <hr
+                            className='my-2 mb-2'
+                            style={{ color: '#5D8EA9' }}
+                        />
+                    </h6>
                 </div>
                 <div style={{ paddingLeft: '0px' }}>
+                    <Table
+                        columns={columns}
+                        data={datta}
+                        sort={false}
+                    />
+                </div>
+                <div
+                    className='row'
+                    style={{ paddingLeft: '0px' }}
+                >
+                    <div className='col-lg-4'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            onClick={() => setShowLinkedPackagesModal(true)}
+                        >
+                            Add Packages
+                        </button>
+                    </div>
                 </div>
             </div>
         </>

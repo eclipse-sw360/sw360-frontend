@@ -37,6 +37,7 @@ import LicensePayload from './LicensePayload'
 import LicenseType from './LicenseType'
 import LinkedAttachments from './LinkedAttachments'
 import LinkedProjectData from './LinkedProjectData'
+import LinkedPackageData from './LinkedPackageData'
 import LinkedRelease from './LinkedRelease'
 import LinkedReleaseData from './LinkedReleaseData'
 import LinkedVulnerability from './LinkedVulnerability'
@@ -134,6 +135,7 @@ export type {
     LicensePayload,
     LicenseType,
     LinkedAttachments,
+    LinkedPackageData,
     LinkedProjectData,
     LinkedRelease,
     LinkedReleaseData,

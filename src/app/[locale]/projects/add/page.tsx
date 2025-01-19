@@ -222,7 +222,10 @@ function AddProjects(): JSX.Element {
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedPackages'>
-                                            <LinkedPackages/>
+                                            <LinkedPackages 
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
+                                            />
                                         </Tab.Pane>
                                     </Tab.Content>
                                 </Row>
