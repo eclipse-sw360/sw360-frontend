@@ -9,11 +9,12 @@
 
 'use client'
 
-import { Table } from '@/components/sw360'
+import { _, Table } from '@/components/sw360'
 import { LinkedPackageData, ProjectPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
+import Link from 'next/link'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -35,6 +36,12 @@ export default function LinkedPackages({ projectPayload,
             id: 'linkedPackagesData.name',
             name: t('Package Name'),
             sort: true,
+            formatter: ([ name, packageId ]: [ name: string, packageId: string ]) =>
+                _(
+                    <>
+                        <Link href={`/packages/detail/${packageId}`}>{name}</Link>
+                    </>
+                ),
         },
         {
             id: 'linkedPackagesData.version',
@@ -55,8 +62,8 @@ export default function LinkedPackages({ projectPayload,
     
     const extractDataFromMap = (linkedPackageData: Map<string, LinkedPackageData>) => {
         const extractedData: Array<RowData> = []
-        linkedPackageData.forEach((value, ) => {
-            extractedData.push([value.name, value.version, value.licenseIds, value.packageManager])
+        linkedPackageData.forEach((value, key) => {
+            extractedData.push([[value.name, key], value.version, value.licenseIds, value.packageManager])
         })
         return extractedData
     }
