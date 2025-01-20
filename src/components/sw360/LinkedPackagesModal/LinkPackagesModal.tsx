@@ -19,6 +19,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
+import Link from 'next/link'
 import { ChangeEvent, useRef, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
@@ -34,7 +35,7 @@ interface Props {
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
 
-type RowData = (string | string[] | undefined)[]
+type RowData = (string | string[] | string[][] | undefined)[]
 
 export default function LinkPackagesModal({
     setLinkedPackageData,
@@ -77,6 +78,12 @@ export default function LinkPackagesModal({
             name: t('Name'),
             width: 'auto',
             sort: true,
+            formatter: ([ name, packageId ]: [ string, string ]) =>
+                _(
+                    <>
+                        <Link href={`/packages/detail/${packageId}`}>{name}</Link>
+                    </>
+                ),
         },
         {
             id: 'linkPackages.version',
@@ -118,7 +125,8 @@ export default function LinkPackagesModal({
         for (let i = 0; i < packageData.length; i++) {
             if (packageData[i][0] === packageId) {
                 return {
-                    name: packageData[i][1] as string,
+                    packageId: packageData[i][0] as string,
+                    name: packageData[i][1]?.[0] as string,
                     version: packageData[i][2] as string,
                     licenseIds: packageData[i][3] as string[],
                     packageManager: packageData[i][4] as string,
@@ -153,13 +161,15 @@ export default function LinkPackagesModal({
                         ? []
                         : data['_embedded']['sw360:packages'].map((singlePackage: Package) => [
                             CommonUtils.getIdFromUrl(singlePackage._links.self.href),
-                            singlePackage.name,
+                            [
+                                singlePackage.name ?? '',
+                                CommonUtils.getIdFromUrl(singlePackage._links.self.href)
+                            ],
                             singlePackage.version ?? '',
                             singlePackage.licenseIds ?? [''],
                             singlePackage.packageManager ?? '',
                             singlePackage.purl ?? '',
                         ])
-                console.log('interim licenses  data check', dataTableFormat)
                 setPackageData(dataTableFormat)
             }
             else if (response.status == HttpStatus.FORBIDDEN) {

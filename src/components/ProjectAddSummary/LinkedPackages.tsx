@@ -62,8 +62,8 @@ export default function LinkedPackages({ projectPayload,
     
     const extractDataFromMap = (linkedPackageData: Map<string, LinkedPackageData>) => {
         const extractedData: Array<RowData> = []
-        linkedPackageData.forEach((value, key) => {
-            extractedData.push([[value.name, key], value.version, value.licenseIds, value.packageManager])
+        linkedPackageData.forEach((value, ) => {
+            extractedData.push([[value.name, value.packageId], value.version, value.licenseIds, value.packageManager])
         })
         return extractedData
     }
