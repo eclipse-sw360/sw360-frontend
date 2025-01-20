@@ -160,10 +160,10 @@ export default function LinkPackagesModal({
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:packages'])
                         ? []
                         : data['_embedded']['sw360:packages'].map((singlePackage: Package) => [
-                            CommonUtils.getIdFromUrl(singlePackage._links.self.href),
+                            CommonUtils.getIdFromUrl(singlePackage._links?.self.href),
                             [
                                 singlePackage.name ?? '',
-                                CommonUtils.getIdFromUrl(singlePackage._links.self.href)
+                                CommonUtils.getIdFromUrl(singlePackage._links?.self.href)
                             ],
                             singlePackage.version ?? '',
                             singlePackage.licenseIds ?? [''],

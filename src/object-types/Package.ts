@@ -28,7 +28,7 @@ interface Package {
     modifiedBy?: string
     packageManager?: string
     clearingState?: string
-    _links: Links
+    _links?: Links
     _embedded?: {
         createdBy?: {
             email: string
