@@ -6,6 +6,7 @@
 // License-Filename: LICENSE
 
 interface LinkedPackageData {
+    packageId: string
     name: string
     version: string
     licenseIds: Array<string>
