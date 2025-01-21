@@ -195,7 +195,8 @@ export default function LinkPackagesModal({
                 }
                 else {
                     for (const [packageId, ] of linkedPackagePayloadData) {
-                        updatedProjectPayload.packageIds.push(packageId)
+                        if (!updatedProjectPayload.packageIds.includes(packageId))
+                            updatedProjectPayload.packageIds.push(packageId)
                         }
                     }
                 setProjectPayload(updatedProjectPayload)
