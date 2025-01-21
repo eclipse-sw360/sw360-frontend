@@ -15,6 +15,8 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
 import Link from 'next/link'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -58,12 +60,56 @@ export default function LinkedPackages({ projectPayload,
             name: t('Package Manager'),
             sort: true,
         },
+        {
+            id: 'linkedPackagesData.deleteLinkedPackage',
+            name: t('Actions'),
+            sort: true,
+            formatter: (packageId: string) =>
+                _(
+                    <>
+                        <OverlayTrigger overlay={
+                            <Tooltip>
+                                {t('Delete')}
+                            </Tooltip>}
+                        >
+                            <span className='d-inline-block'>
+                                <FaTrashAlt
+                                    className='btn-icon'
+                                    onClick={() => handleDeletePackage(packageId)}
+                                    style={{ color: 'gray', fontSize: '18px' }}
+                                />
+                            </span>
+                        </OverlayTrigger>
+                    </>
+                ),
+        },
     ]
     
+    const handleDeletePackage = (packageId : string) => {
+        const updatedProjectPayload = { ...projectPayload }
+        linkedPackageData.forEach((_, key) => {
+            if (key === packageId){
+                linkedPackageData.delete(key)
+                if (updatedProjectPayload.packageIds &&
+                    updatedProjectPayload.packageIds.includes(key)){
+                        updatedProjectPayload.packageIds.splice(
+                            updatedProjectPayload.packageIds.indexOf(key), 1 )
+                        setProjectPayload(updatedProjectPayload)
+                }
+                const updatedTableData = extractDataFromMap(linkedPackageData)
+                setTableData(updatedTableData)
+            }
+        })
+    }
+
     const extractDataFromMap = (linkedPackageData: Map<string, LinkedPackageData>) => {
         const extractedData: Array<RowData> = []
         linkedPackageData.forEach((value, ) => {
-            extractedData.push([[value.name, value.packageId], value.version, value.licenseIds, value.packageManager])
+            extractedData.push([[value.name, value.packageId],
+                                 value.version,
+                                 value.licenseIds,
+                                 value.packageManager,
+                                 value.packageId])
         })
         return extractedData
     }
