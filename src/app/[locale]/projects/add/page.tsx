@@ -56,7 +56,7 @@ function AddProjects(): JSX.Element {
         moderators: [],
         contributors: [],
         clearingState: 'OPEN',
-        businessUnit: 'CT',
+        businessUnit: '',
         preevaluationDeadline: '',
         clearingSummary: '',
         specialRisksOSS: '',

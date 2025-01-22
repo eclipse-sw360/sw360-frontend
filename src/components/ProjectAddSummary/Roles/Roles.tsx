@@ -191,9 +191,29 @@ export default function Roles({
         })
     }
 
+    const setDepartmentToPayload = (department: string) => {
+        setProjectPayload({
+            ...projectPayload,
+            businessUnit: department,
+        })
+    }
+
+    const handleClearDepartment = () => {
+        setProjectPayload({
+            ...projectPayload,
+            businessUnit: '',
+        })
+    }
+
     return (
         <>
-            <DepartmentModal show={showDepartmentModal} setShow={setShowDepartmentModal} />
+            <DepartmentModal 
+                show={showDepartmentModal} 
+                setShow={setShowDepartmentModal} 
+                department={projectPayload.businessUnit ?? ''} 
+                setDepartment={setDepartmentToPayload} 
+                multiple={false}
+            />
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Roles')}</h6>
                 <div className='row'>
@@ -208,10 +228,11 @@ export default function Roles({
                             aria-label={t('Group')}
                             placeholder={t('Click to edit')}
                             readOnly={true}
+                            value={projectPayload.businessUnit ?? ''}
                             required
                             onClick={() => setShowDepartmentModal(true)}
                         />
-                        <div className='form-text'>
+                        <div className='form-text' onClick={handleClearDepartment}>
                             {' '}
                             <GiCancel />
                         </div>
