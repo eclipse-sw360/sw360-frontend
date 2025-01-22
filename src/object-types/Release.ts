@@ -15,7 +15,7 @@ interface Release {
     name?: string
     cpeid?: string
     version?: string
-    componentId?: string
+    componentId?: string | null
     componentType?: string
     releaseDate?: string
     externalIds?: { [k: string]: string } | null
@@ -41,8 +41,7 @@ interface Release {
     releaseIdToRelationship?: { [k: string]: string } | null
     clearingInformation?: ClearingInformation
     cotsDetails?: COTSDetails | null
-    attachmentDTOs?: Array<Attachment> | null
-    attachments?: Array<Attachment>
+    attachments?: Array<Attachment> | null
     eccInformation?: ECCInformation
     spdxId?: string
     _links?: Links

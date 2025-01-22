@@ -13,41 +13,34 @@
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useRef, useState } from 'react'
-import { Button, Modal } from 'react-bootstrap'
+import { Button, Modal, Spinner } from 'react-bootstrap'
 
-import { Attachment, ComponentPayload, DocumentTypes, Release } from '@/object-types'
-import { SW360_API_URL } from '@/utils/env'
+import { Attachment, HttpStatus, Embedded } from '@/object-types'
 import styles from './SelectAttachment.module.css'
 import CommonUtils from '@/utils/common.utils'
+import AttachmentRowData from '../AttachmentRowData'
+import { ApiUtils } from '@/utils'
+import MessageService from '@/services/message.service'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    attachmentUpload: Array<Attachment>
-    setAttachmentFromUpload: React.Dispatch<React.SetStateAction<Array<Attachment>>>
-    onReRender: () => void
-    componentPayload?: ComponentPayload
-    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    documentType?: string
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+    attachmentsData: Array<AttachmentRowData>
+    setAttachmentsData: React.Dispatch<React.SetStateAction<Array<AttachmentRowData>>>
 }
+
+type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
 function SelectAttachment({
     show,
     setShow,
-    attachmentUpload,
-    setAttachmentFromUpload,
-    onReRender,
-    componentPayload,
-    setComponentPayload,
-    releasePayload,
-    setReleasePayload,
-    documentType,
+    attachmentsData,
+    setAttachmentsData
 }: Props) : JSX.Element {
     const t = useTranslations('default')
     const [files, setFiles] = useState<Array<File>>([])
     const inputRef = useRef<HTMLInputElement>(null)
+    const [uploading, setUploading] = useState(false)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files == null || e.target.files.length === 0) {
@@ -63,46 +56,52 @@ function SelectAttachment({
     }
     const handleCloseDialog = () => {
         setShow(!show)
+        setFiles([])
     }
 
     const handleUploadFiles = async () => {
+        setUploading(true)
         const formData = new FormData()
 
         for (const iterator of files) {
             formData.append('files', iterator)
         }
 
-        const url = SW360_API_URL + '/resource/api/attachments'
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session))
             return signOut()
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                Authorization: `${session.user.access_token}`,
-            },
+        const uploadAttachmentResponse = await ApiUtils.POST('attachments', formData, session.user.access_token)
+        if (uploadAttachmentResponse.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Session has expired'))
+            return signOut()
+        }
+
+        if (uploadAttachmentResponse.status !== HttpStatus.OK) {
+            MessageService.error(t('Something went wrong'))
+            return
+        }
+
+        const uploadedAttachment = await uploadAttachmentResponse.json() as EmbeddedAttachments
+
+        uploadedAttachment._embedded['sw360:attachments'].forEach((attachment) => {
+            attachmentsData.push({
+                attachmentContentId: CommonUtils.getIdFromUrl(attachment._links?.self.href),
+                filename: attachment.filename,
+                attachmentType: 'SOURCE',
+                createdComment: attachment.createdComment,
+                createdTeam: attachment.createdTeam,
+                createdBy: attachment.createdBy,
+                createdOn: attachment.createdOn,
+                checkedComment: '',
+                checkedTeam: '',
+                checkedBy: '',
+                checkedOn: '',
+                isAddedNew: true,
+            })
         })
-            .then((res) => res.json())
-            .then((json: Array<Attachment>) => {
-                json.map((item: Attachment) => attachmentUpload.push(item))
-                setAttachmentFromUpload(attachmentUpload)
-                if (documentType === DocumentTypes.COMPONENT) {
-                    if (setComponentPayload === undefined) return
-                    setComponentPayload({
-                        ...componentPayload,
-                        attachmentDTOs: attachmentUpload,
-                    })
-                } else {
-                    if (setReleasePayload === undefined) return
-                    setReleasePayload({
-                        ...releasePayload,
-                        attachmentDTOs: attachmentUpload,
-                    })
-                }
-                onReRender()
-            }).catch((err) => console.error(err))
-        setShow(!show)
+        setAttachmentsData([...attachmentsData])
+        handleCloseDialog()
+        setUploading(false)
     }
 
     const handleRemoveClick = (index: number) => {
@@ -117,25 +116,23 @@ function SelectAttachment({
                 <Modal.Title>{t('Upload Attachment')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className='modal-body'>
-                    <div className={`${styles['modal-body-first']}`}>
-                        <div className={`${styles['modal-body-second']}`}>
-                            <span>Drop a File Here</span>
-                            <br />
-                            Or
-                            <br />
-                            <input
-                                className={`${styles['input']}`}
-                                ref={inputRef}
-                                type='file'
-                                placeholder={t('Upload Attachment')}
-                                multiple
-                                onChange={handleFileChange}
-                            />
-                            <button className={`${styles['button-browse']}`} onClick={handleButtonClick}>
-                                Browse
-                            </button>
-                        </div>
+                <div className={`${styles['modal-body-first']}`}>
+                    <div className={`${styles['modal-body-second']}`}>
+                        <span>{t('Drop a File Here')}</span>
+                        <br />
+                        {t('Or')}
+                        <br />
+                        <input
+                            className={`${styles['input']}`}
+                            ref={inputRef}
+                            type='file'
+                            placeholder={t('Upload Attachment')}
+                            multiple
+                            onChange={handleFileChange}
+                        />
+                        <button className={`${styles['button-browse']}`} onClick={handleButtonClick}>
+                            {t('Browse')}
+                        </button>
                     </div>
                 </div>
                 <br />
@@ -148,7 +145,7 @@ function SelectAttachment({
                                     {file.name} ({file.size}b)
                                 </div>
                                 <div className={`${styles['button-delete']}`}>
-                                    <Button onClick={() => handleRemoveClick(j)}>Delete</Button>
+                                    <Button variant='danger' size='sm' onClick={() => handleRemoveClick(j)}>Delete</Button>
                                 </div>
                             </div>
                             <br />
@@ -161,17 +158,28 @@ function SelectAttachment({
                 <Button
                     type='button'
                     data-bs-dismiss='modal'
-                    className={`fw-bold btn btn-light button-plain me-2`}
+                    variant='secondary'
+                    className={`fw-bold button-plain me-2`}
                     onClick={handleCloseDialog}
+                    disabled={uploading}
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
+                <Button type='button' className={`fw-bold btn btn-light button-plain me-2`} disabled>
                     {t('Pause')}
                 </Button>
-                <Button type='button' className={`fw-bold btn btn-light button-orange`} onClick={() => void handleUploadFiles()}>
-                    {t('Upload')}
-                </Button>
+                {
+                    (uploading === false)
+                    ?
+                    <Button type='button' variant='primary' disabled={files.length === 0} onClick={() => void handleUploadFiles()}>
+                        {t('Upload')}
+                    </Button>
+                    :
+                    <Button type='button' variant='primary' disabled={true}>
+                        {t('Upload')} <Spinner animation='border' size='sm' />
+                    </Button>
+                }
+
             </Modal.Footer>
         </Modal>
     )

@@ -8,149 +8,187 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { useState } from 'react'
 
 import { useTranslations } from 'next-intl'
 import { FaTrashAlt } from 'react-icons/fa'
 
-import { Attachment, DocumentTypes } from '@/object-types'
-import styles from './TableAttachment.module.css'
+import { AttachmentTypes } from '@/object-types'
+import AttachmentRowData from '../AttachmentRowData'
+import { Modal } from 'react-bootstrap'
+import { FaRegQuestionCircle } from 'react-icons/fa'
+import { IoWarningOutline } from 'react-icons/io5'
 
 interface Props {
-    setAttachmentData: React.Dispatch<React.SetStateAction<Array<Attachment>>>
-    data: Array<Attachment>
-    setAttachmentToComponentData?: void
-    setAttachmentToReleasePayload?: void
-    documentType?: string
+    beforeUpdateAttachmentsCheckStatus: Array<string>
+    setBeforeUpdateAttachmentsCheckStatus: React.Dispatch<React.SetStateAction<Array<string>>>
+    setAttachmentsData: React.Dispatch<React.SetStateAction<Array<AttachmentRowData>>>
+    attachmentsData: Array<AttachmentRowData>
 }
 
 function TableAttachment({
-    data,
-    setAttachmentData,
-    // setAttachmentToComponentData,
-    // setAttachmentToReleasePayload,
-    documentType,
-}: Props) : JSX.Element {
+    beforeUpdateAttachmentsCheckStatus,
+    setBeforeUpdateAttachmentsCheckStatus,
+    attachmentsData,
+    setAttachmentsData,
+}: Props): JSX.Element {
     const t = useTranslations('default')
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [deletingAttachment, setDeletingAttachment] = useState<AttachmentRowData | undefined>(undefined)
+    const [deletingAttachmentIndex, setDeletingAttachmentIndex] = useState<number | undefined>(undefined)
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
-        // TODO: Function is not complete, needs to be fixed
-
         const { name, value } = e.target
-        const list: Array<Attachment> = [...data]
-        // @ts-expect-error: Function is not complete, needs to be fixed
+        const list: Array<AttachmentRowData> = [...attachmentsData]
+        // @ts-expect-error: value is a valid
         list[index][name as keyof Attachment] = value
-
-        setAttachmentData(list)
-        if (documentType === DocumentTypes.COMPONENT) {
-            // setAttachmentToComponentData(list)
-        } else if (documentType === DocumentTypes.RELEASE) {
-            // setAttachmentToReleasePayload(list)
-        }
+        setAttachmentsData(list)
     }
 
-    const handleClickDelete = (index: number) => {
-        const list: Array<Attachment> = [...data]
-        list.splice(index, 1)
-        setAttachmentData(list)
-        if (documentType === DocumentTypes.COMPONENT) {
-            // setAttachmentToComponentData(list)
-        } else if (documentType === DocumentTypes.RELEASE) {
-            // setAttachmentToReleasePayload(list)
+    const handleClickDelete = () => {
+        if (deletingAttachmentIndex === undefined) {
+            closeDeleteModal()
+            return
         }
+
+        const list: Array<AttachmentRowData> = [...attachmentsData]
+        list.splice(deletingAttachmentIndex, 1)
+        setAttachmentsData(list)
+        
+        const statusList = [...beforeUpdateAttachmentsCheckStatus]
+        statusList.splice(deletingAttachmentIndex, 1)
+        setBeforeUpdateAttachmentsCheckStatus(statusList)
+        closeDeleteModal()
+    }
+
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false)
+        setDeletingAttachment(undefined)
+        setDeletingAttachmentIndex(undefined)
+    }
+
+    const openDeleteModal = (attachment: AttachmentRowData, index: number) => {
+        setShowDeleteModal(true)
+        setDeletingAttachment(attachment)
+        setDeletingAttachmentIndex(index)
     }
 
     return (
         <>
-            <div className='row'>
-                {data.map((item: Attachment, index: number) => {
-                    return (
-                        <div key={item.attachmentContentId}>
-                            <div className={`${styles['div-row']}`}>
-                                <label className={`${styles['label-filename']}`}>{item.filename}</label>
-                                <select
-                                    className={`${styles['select-type']}`}
-                                    aria-label='component_type'
-                                    id='component_type'
-                                    name='attachmentType'
-                                    onChange={(e) => handleInputChange(e, index)}
-                                    value={item.attachmentType}
-                                >
-                                    <option value='SOURCE'>{t('Source file')}</option>
-                                    <option value='CLEARING_REPORT'>{t('Clearing Report')}</option>
-                                    <option value='COMPONENT_LICENSE_INFO_XML'>
-                                        {t('Component license information (XML)')}
-                                    </option>
-                                    <option value='COMPONENT_LICENSE_INFO_COMBINED'>
-                                        {t('Component license information (Combined)')}
-                                    </option>
-                                    <option value='DOCUMENT'>{t('Document')}</option>
-                                    <option value='DESIGN'>{t('Design document')}</option>
-                                    <option value='REQUIREMENT'>{t('Requirement document')}</option>
-                                    <option value='SCAN_RESULT_REPORT'>{t('Scan result report')}</option>
-                                    <option value='SCAN_RESULT_REPORT_XML'>{t('Scan result report (XML)')}</option>
-                                    <option value='SOURCE_SELF'>{t('Source file (Self-made)')}</option>
-                                    <option value='BINARY'>{t('Binaries')}</option>
-                                    <option value='BINARY_SELF'>{t('Binaries (Self-made)')}</option>
-                                    <option value='DECISION_REPORT'>{t('Decision report')}</option>
-                                    <option value='LEGAL_EVALUATION'>{t('Legal evaluation report')}</option>
-                                    <option value='LICENSE_AGREEMENT'>{t('License Agreement')}</option>
-                                    <option value='SCREENSHOT'>{t('Screenshot of Website')}</option>
-                                    <option value='OTHER'>{t('Other')}</option>
-                                    <option value='README_OSS'>{t('ReadMe OSS')}</option>
-                                    <option value='SECURITY_ASSESSMENT'>{t('Security Assessment')}</option>
-                                    <option value='INITIAL_SCAN_REPORT'>{t('Initial Scan Report')}</option>
-                                    <option value='SBOM'>{t('SBOM')}</option>
-                                    <option value='INTERNAL_USE_SCAN'>{t('Initial Use Scan')}</option>
-                                </select>
-                                <input
-                                    className={`${styles['input-comment']}`}
-                                    name='createdComment'
-                                    value={item.createdComment ?? ''}
-                                    type='text'
-                                    onChange={(e) => handleInputChange(e, index)}
-                                    placeholder='Enter Comment'
-                                />
-                                <label className={`${styles['label-team']}`}>{item.createdTeam ?? ''}</label>
-                                <label className={`${styles['label-by']}`}>{item.createdBy ?? ''}</label>
-                                <label className={`${styles['label-on']}`}>{item.createdOn ?? ''}</label>
-                                <select
-                                    className={`${styles['select-status']}`}
-                                    aria-label='component_type'
-                                    id='component_type'
-                                    name='checkStatus'
-                                    value={item.checkStatus ?? ''}
-                                    onChange={(e) => handleInputChange(e, index)}
-                                >
-                                    <option value='NOTCHECKED'>{t('NOT_CHECKED')}</option>
-                                    <option value='ACCEPTED'> {t('ACCEPTED')}</option>
-                                    <option value='REJECTED'>{t('REJECTED')}</option>
-                                </select>
-                                <input
-                                    className={`${styles['input-comment']}`}
-                                    type='text'
-                                    value={item.checkedComment ?? ''}
-                                    name='checkedComment'
-                                    onChange={(e) => handleInputChange(e, index)}
-                                    placeholder='Enter Comment'
-                                />
-                                <label className={`${styles['label-team']}`}>{item.checkedTeam ?? ''}</label>
-                                <label className={`${styles['label-by']}`}>{item.checkedBy ?? ''}</label>
-                                <label className={`${styles['label-on']}`}>{item.checkedOn ?? ''}</label>
+            {
+                deletingAttachmentIndex !== undefined &&
+                <Modal show={showDeleteModal} onHide={() => closeDeleteModal()} backdrop='static' centered size='lg' dialogClassName={beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED' ? 'modal-warning' : 'modal-danger'}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            {beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED'
+                                ? <><IoWarningOutline />{t('Warning')}</>
+                                : <><FaRegQuestionCircle /> {' '}{t('Delete Attachment')}?</>
+                            }
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {
+                            (beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED')
+                            ?
+                            <p>
+                                {t('An attachment cannot be deleted while it is approved')}.
+                            </p>
+                            :
+                            <p className='confirm-delete-message'>
+                                {t('Do you really want to delete attachment')} <b>{`${deletingAttachment?.filename} (${deletingAttachment?.attachmentContentId})`}</b>?
+                            </p>
+                        }
+                    </Modal.Body>
+                    <Modal.Footer className='justify-content-end'>
+                        {
+                            (beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED')
+                            ?
+                            <>
                                 <button
                                     type='button'
-                                    onClick={() => handleClickDelete(index)}
-                                    style={{ border: 'none' }}
-                                    className='button-plain'
-                                    title={t('Comment')}
+                                    data-bs-dismiss='modal'
+                                    className='me-2 btn btn-light'
+                                    onClick={() => closeDeleteModal()}
                                 >
-                                    <FaTrashAlt className='bi bi-trash3-fill' />
+                                    OK
                                 </button>
+                            </>
+                            :
+                            <>
+                                <button
+                                    type='button'
+                                    data-bs-dismiss='modal'
+                                    className='me-2 btn btn-light'
+                                    onClick={() => closeDeleteModal()}
+                                >
+                                    {t('Cancel')}
+                                </button>
+                                <button type='submit' className='btn btn-danger' onClick={() => handleClickDelete()}>
+                                    {t('Delete Attachment')}
+                                </button>
+                            </>
+                        }
+                    </Modal.Footer>
+                </Modal>
+            }
+            <tbody>{
+                attachmentsData.map((attachment: AttachmentRowData, index: number) => (
+                    <tr key={attachment.attachmentContentId} id={`att-${attachment.attachmentContentId}`} role='row' className={`attachment-row ${(attachment.isAddedNew === true) ? 'new-added-attachment' : ''}`}>
+                        <td className='align-middle'>{attachment.filename}</td>
+                        <td>
+                            <div className='form-group'>
+                                <select name='attachmentType'
+                                    className='attachmentType toplabelledInput form-control'
+                                    onChange={(e) => handleInputChange(e, index)}
+                                >
+                                    {
+                                        Object.keys(AttachmentTypes).map((type: string) => <option key={type} value={type}>{t(type as never)}</option>)
+                                    }
+                                </select>
                             </div>
-                            <hr className={`${styles['hr']}`} />
-                        </div>
-                    )
-                })}
-            </div>
+                        </td>
+                        <td>
+                            <div className='form-group'>
+                                <input type='text'
+                                    className='toplabelledInput form-control' placeholder='Enter comments'
+                                    name='createdComment'
+                                    onChange={(e) => handleInputChange(e, index)}
+                                    value={attachment.createdComment ?? ''}
+                                />
+                            </div>
+                        </td>
+                        <td className='align-middle'><span className='text-truncate'>{attachment.createdTeam ?? ''}</span></td>
+                        <td className='align-middle'><span className='text-truncate'>{attachment.createdBy ?? ''}</span></td>
+                        <td className='align-middle'>{attachment.createdOn ?? ''}</td>
+                        <td className='checkStatus'>
+                            <div className='form-group'>
+                                <select name='checkStatus' className='toplabelledInput form-control'
+                                    defaultValue={attachment.checkStatus}
+                                    onChange={(e) => handleInputChange(e, index)}
+                                >
+                                    <option className='textlabel' value='NOTCHECKED'>{t('NOT_CHECKED')}</option>
+                                    <option className='textlabel' value='ACCEPTED'>{t('ACCEPTED')}</option>
+                                    <option className='textlabel' value='REJECTED'>{t('REJECTED')}</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td className='checked-comment'>
+                            <div className='form-group'>
+                                <input type='text' name='checkedComment' className='check-comment form-control'
+                                    placeholder='Enter comments'
+                                    onChange={(e) => handleInputChange(e, index)}
+                                    value={attachment.checkedComment}
+                                />
+                            </div>
+                        </td>
+                        <td className='align-middle checked-team'><span className='text-truncate'>{attachment.checkedTeam}</span></td>
+                        <td className='align-middle checked-by'><span className='text-truncate'>{attachment.checkedBy}</span></td>
+                        <td className='align-middle checked-on'>{attachment.checkedOn}</td>
+                        <td className='align-middle action delete cursor-pointer' onClick={() => openDeleteModal(attachment, index)}><FaTrashAlt size={23} /></td>
+                    </tr>
+                )
+                )}
+            </tbody>
         </>
     )
 }

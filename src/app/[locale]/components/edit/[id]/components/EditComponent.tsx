@@ -37,7 +37,7 @@ interface Props {
     componentId: string
 }
 
-type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachmentDTOes'>
+type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
 const tabList = [
     {
@@ -83,7 +83,7 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
         mailinglist: '',
         wiki: '',
         blog: '',
-        attachmentDTOs: null,
+        attachments: null,
     })
 
     useEffect(() => {
@@ -129,7 +129,7 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
                 }
                 const dataAttachments: EmbeddedAttachments = await response.json() as EmbeddedAttachments
                 if (!CommonUtils.isNullOrUndefined(dataAttachments)) {
-                    setAttachmentData(dataAttachments._embedded['sw360:attachmentDTOes'])
+                    setAttachmentData(dataAttachments._embedded['sw360:attachments'])
                 }
             } catch (e) {
                 console.error(e)
@@ -147,8 +147,12 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
         if (response.status === HttpStatus.OK) {
             MessageService.success(`Component ${componentPayload.name}  updated successfully!`)
             router.push('/components/detail/' + componentId)
+        } else if (response.status === HttpStatus.ACCEPTED) {
+            MessageService.success(t('Moderation request is created'))
+            router.push('/components/detail/' + componentId)
         } else {
-            MessageService.error(t('Edit Component Fail'))
+            const data = await response.json()
+            MessageService.error(data.message)
         }
     }
 
@@ -204,8 +208,8 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
                             <EditAttachments
                                 documentId={componentId}
                                 documentType={DocumentTypes.COMPONENT}
-                                componentPayload={componentPayload}
-                                setComponentPayload={setComponentPayload}
+                                documentPayload={componentPayload}
+                                setDocumentPayload={setComponentPayload}
                             />
                         </div>
                     </div>

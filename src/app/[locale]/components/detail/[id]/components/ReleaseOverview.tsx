@@ -125,7 +125,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         },
         {
             id: 'clearingReport',
-            name: t('Clearing Report'),
+            name: t('CLEARING_REPORT'),
             sort: true,
         },
         {
@@ -181,7 +181,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         },
         {
             id: 'clearingReport',
-            name: t('Clearing Report'),
+            name: t('CLEARING_REPORT'),
             sort: true,
         },
         {

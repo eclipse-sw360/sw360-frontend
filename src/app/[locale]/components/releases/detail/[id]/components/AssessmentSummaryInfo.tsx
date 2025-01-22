@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { useState, ReactNode } from 'react'
 import { Button } from 'react-bootstrap'
 
-import { Attachment, AttachmentType, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentTypes, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
@@ -33,7 +33,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : Reac
     const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo | undefined>(undefined)
 
     const cliAttachmentNumber = embeddedAttachments.filter(
-        (attachment) => attachment.attachmentType == AttachmentType.COMPONENT_LICENSE_INFO_XML
+        (attachment) => attachment.attachmentType == AttachmentTypes.COMPONENT_LICENSE_INFO_XML
     ).length
 
     const handleShowAssessmentInfo = async () => {
