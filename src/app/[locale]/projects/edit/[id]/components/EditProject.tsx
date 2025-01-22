@@ -286,7 +286,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                     ownerGroup: project.ownerGroup ?? '',
                     ownerCountry: project.ownerCountry ?? '',
                     clearingState: project.clearingState ?? 'OPEN',
-                    businessUnit: project.businessUnit ?? 'CT',
+                    businessUnit: project.businessUnit ?? '',
                     preevaluationDeadline: project.preevaluationDeadline ?? '',
                     clearingSummary: project.clearingSummary ?? '',
                     specialRisksOSS: project.specialRisksOSS ?? '',
