@@ -1279,3 +1279,7 @@ hr {
 svg.action:hover {
     color: #F7941E;
 }
+
+.new-added-attachment td{
+    background-color: #edf9f0;
+}

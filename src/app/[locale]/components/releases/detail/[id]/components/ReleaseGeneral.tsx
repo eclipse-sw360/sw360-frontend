@@ -147,27 +147,25 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                 <tr>
                     <td>{t('Additional Roles')}:</td>
                     <td>
-                        <td>
-                            {!CommonUtils.isNullOrUndefined(release.roles) &&
-                                Object.keys(release.roles).map((key) => (
-                                    <li key={key}>
-                                        <span className='fw-bold'>
-                                            {key}:{' '}
-                                        </span>
-                                        <span className='mapDisplayChildItemRight'>
-                                            {!CommonUtils.isNullOrUndefined(release.roles) && release.roles[key]
-                                                .map(
-                                                    (email: string): React.ReactNode => (
-                                                        <a key={email} href={`mailto:${email}`}>
-                                                            {email}
-                                                        </a>
-                                                    )
+                        {!CommonUtils.isNullOrUndefined(release.roles) &&
+                            Object.keys(release.roles).map((key) => (
+                                <li key={key}>
+                                    <span className='fw-bold'>
+                                        {key}:{' '}
+                                    </span>
+                                    <span className='mapDisplayChildItemRight'>
+                                        {!CommonUtils.isNullOrUndefined(release.roles) && release.roles[key]
+                                            .map(
+                                                (email: string): React.ReactNode => (
+                                                    <a key={email} href={`mailto:${email}`}>
+                                                        {email}
+                                                    </a>
                                                 )
-                                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
-                                        </span>
-                                    </li>
-                                ))}
-                        </td>
+                                            )
+                                            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                    </span>
+                                </li>
+                            ))}
                     </td>
                 </tr>
                 <tr>

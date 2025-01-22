@@ -206,7 +206,7 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
         name: '',
         cpeid: '',
         version: '',
-        componentId: '',
+        componentId: null,
         releaseDate: '',
         externalIds: null,
         additionalData: null,
@@ -225,7 +225,7 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
         repository: null,
         releaseIdToRelationship: null,
         cotsDetails: null,
-        attachmentDTOs: null,
+        attachments: null,
         spdxId: '',
     })
 
@@ -384,7 +384,8 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
             MessageService.success(t('Moderation request is created'))
             router.push('/components/releases/detail/' + releaseId)
         } else {
-            MessageService.error('Release update failed')
+            const data = await response.json()
+            MessageService.error(data.message)
         }
     }
 
@@ -473,12 +474,15 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
                             <EditECCDetails releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
                         </div>
                         <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <EditAttachments
-                                documentId={releaseId}
-                                documentType={DocumentTypes.RELEASE}
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                            />
+                            {
+                                releasePayload.componentId !== null &&
+                                <EditAttachments
+                                    documentId={releaseId}
+                                    documentType={DocumentTypes.RELEASE}
+                                    documentPayload={releasePayload}
+                                    setDocumentPayload={setReleasePayload}
+                                />
+                            }
                         </div>
                         <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
                             <AddCommercialDetails

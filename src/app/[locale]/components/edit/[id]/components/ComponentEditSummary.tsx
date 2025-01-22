@@ -138,7 +138,7 @@ export default function ComponentEditSummary({
                 mailinglist: component.mailinglist,
                 wiki: component.wiki,
                 blog: component.blog,
-                attachmentDTOs: attachmentData,
+                attachments: attachmentData,
             }
             setComponentPayload(componentPayloadData)
         })

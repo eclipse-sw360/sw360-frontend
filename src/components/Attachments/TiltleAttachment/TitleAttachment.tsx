@@ -10,44 +10,32 @@
 
 import React from 'react'
 import { useTranslations } from 'next-intl'
-import styles from './TitleAttachment.module.css'
 
-export default function TitleAttachment() : JSX.Element{
+export default function TitleAttachment(): JSX.Element {
     const t = useTranslations('default')
     return (
-        <>
-            <div className={`${styles['div-title']}`}>
-                <div className={`${styles['div-title-first']}`}>
-                    <p className={`${styles['p-attachment']}`}>{t('Attachments')}</p>
-                </div>
-                <div className={`${styles['div-title-second']}`}>
-                    <div className={`${styles['div-filename']}`}>
-                        <p className={`${styles['p-filename']}`}>{t('File name')}</p>
-                    </div>
-                    <div className={`${styles['div-type']}`}>
-                        <p className={`${styles['p-type']}`}>{t('Type')}</p>
-                    </div>
-                    <div className={`${styles['div-upload']}`}>
-                        <div className={`${styles['div-upload-first']}`}>{t('Upload')}</div>
-                        <div className={`${styles['div-upload-second']}`}>
-                            <div className={`${styles['div-comment']}`}>{t('Comments')}</div>
-                            <div className={`${styles['div-group']}`}>{t('Group')}</div>
-                            <div className={`${styles['div-name']}`}>{t('Name')}</div>
-                            <div className={`${styles['div-date']}`}>{t('Date')}</div>
-                        </div>
-                    </div>
-                    <div className={`${styles['div-approval']}`}>
-                        <div className={`${styles['div-approval-first']}`}>{t('Approval')}</div>
-                        <div className={`${styles['div-approval-second']}`}>
-                            <div className={`${styles['div-status']}`}>{t('Status')}</div>
-                            <div className={`${styles['div-comment']}`}>{t('Comments')}</div>
-                            <div className={`${styles['div-group']}`}>{t('Group')}</div>
-                            <div className={`${styles['div-name']}`}>{t('Name')}</div>
-                            <div className={`${styles['div-date']}`}>{t('Date')}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
+        <thead>
+            <tr role='row'>
+                <th className='headLabel' colSpan={12} rowSpan={1}>{t('Attachments')}</th>
+            </tr>
+            <tr role='row'>
+                <th className='headlabel content-middle sorting_asc' rowSpan={2} tabIndex={0} aria-controls='attachmentInfo' colSpan={1}>{t('File name')}</th>
+                <th className='headlabel sorting' rowSpan={2} colSpan={1} tabIndex={0} aria-controls='attachmentInfo'>{t('Type')}</th>
+                <th className='headlabel' colSpan={4} rowSpan={1}>{t('Upload')}</th>
+                <th className='headlabel' colSpan={5} rowSpan={1}>{t('Approval')}</th>
+                <th className='headlabel content-middle one' rowSpan={2} colSpan={1}></th>
+            </tr>
+            <tr role='row'>
+                <th className='headlabel sorting' tabIndex={0} aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Comment')}</th>
+                <th className='headlabel content-middle sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Group')}</th>
+                <th className='headlabel content-middle sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Name')}</th>
+                <th className='headlabel content-middle sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Date')}</th>
+                <th className='headlabel checkStatus sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Status')}</th>
+                <th className='headlabel checkedComment sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Comment')}</th>
+                <th className='headlabel content-middle checkedTeam sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Group')}</th>
+                <th className='headlabel content-middle checkedBy sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Name')}</th>
+                <th className='headlabel content-middle checkedOn sorting' aria-controls='attachmentInfo' rowSpan={1} colSpan={1}>{t('Date')}</th>
+            </tr>
+        </thead>
     )
 }

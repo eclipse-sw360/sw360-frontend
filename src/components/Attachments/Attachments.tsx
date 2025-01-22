@@ -14,7 +14,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Alert } from 'react-bootstrap'
 import { FaDownload } from 'react-icons/fa'
 
-import { Attachment, HttpStatus, LinkedAttachments } from '@/object-types'
+import { Attachment, HttpStatus, Embedded, AttachmentTypes } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
@@ -23,6 +23,33 @@ import styles from './Attachment.module.css'
 interface Props {
     documentId: string
     documentType: string
+}
+
+type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
+
+const AttachmentTypeShortName = {
+    [AttachmentTypes.DOCUMENT]: 'DOC',
+    [AttachmentTypes.SOURCE]: 'SRC',
+    [AttachmentTypes.DESIGN]: 'DSN',
+    [AttachmentTypes.REQUIREMENT]: 'RDT',
+    [AttachmentTypes.CLEARING_REPORT]: 'CRT',
+    [AttachmentTypes.COMPONENT_LICENSE_INFO_XML]: 'CLX',
+    [AttachmentTypes.COMPONENT_LICENSE_INFO_COMBINED]: 'CLI',
+    [AttachmentTypes.SCAN_RESULT_REPORT]: 'SRR',
+    [AttachmentTypes.SCAN_RESULT_REPORT_XML]: 'SRX',
+    [AttachmentTypes.SOURCE_SELF]: 'SRS',
+    [AttachmentTypes.BINARY]: 'BIN',
+    [AttachmentTypes.BINARY_SELF]: 'BIS',
+    [AttachmentTypes.DECISION_REPORT]: 'DRT',
+    [AttachmentTypes.LEGAL_EVALUATION]: 'LRT',
+    [AttachmentTypes.LICENSE_AGREEMENT]: 'LAT',
+    [AttachmentTypes.SCREENSHOT]: 'SCR',
+    [AttachmentTypes.OTHER]: 'OTH',
+    [AttachmentTypes.README_OSS]: 'RDM',
+    [AttachmentTypes.SECURITY_ASSESSMENT]: 'SECA',
+    [AttachmentTypes.INITIAL_SCAN_REPORT]: 'ISR',
+    [AttachmentTypes.SBOM]: 'SBOM',
+    [AttachmentTypes.INTERNAL_USE_SCAN]: 'IUS',
 }
 
 const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
@@ -38,8 +65,8 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
             } else {
                 ;(event.target as HTMLElement).className = styles.expand
             }
-
-            const attachmentDetail = document.getElementById(item.attachmentContentId ?? '')
+            const attachmentId = CommonUtils.getIdFromUrl(item._links?.self.href)
+            const attachmentDetail = document.getElementById(attachmentId)
             if (!attachmentDetail) {
                 const parent = (event.target as HTMLElement).parentElement?.parentElement?.parentElement
                 const html = `<td colspan="10">
@@ -67,7 +94,7 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                     </table>
                 </td>`
                 const tr = document.createElement('tr')
-                tr.id = item.attachmentContentId ?? ''
+                tr.id = attachmentId
                 tr.innerHTML = html
 
                 parent?.parentNode?.insertBefore(tr, parent.nextSibling)
@@ -87,12 +114,12 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                 return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as LinkedAttachments
+                const data = (await response.json()) as EmbeddedAttachments
                 return data
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else {
-                return {} as LinkedAttachments
+                return {} as EmbeddedAttachments
             }
         },
         [session]
@@ -108,27 +135,27 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
 
     useEffect(() => {
         fetchData(`${documentType}/${documentId}/attachments`)
-            .then((attachments: LinkedAttachments | undefined) => {
+            .then((attachments: EmbeddedAttachments | undefined) => {
                 if (attachments === undefined) return
                 if (
                     !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
+                    !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachments'])
                 ) {
-                    const attachmentData = attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => [
+                    const attachmentData = attachments['_embedded']['sw360:attachments'].map((item: Attachment) => [
                         item,
                         item.filename,
                         'n/a',
-                        item.attachmentType,
+                        AttachmentTypeShortName[item.attachmentType],
                         item.createdTeam ?? '',
                         item.createdBy ?? '',
                         item.checkedTeam ?? '',
                         item.checkedBy ?? '',
-                        item.usageAttachment?.visible === 0 && item.usageAttachment.restricted === 0 ? (
+                        item.projectAttachmentUsage?.visible === 0 && item.projectAttachmentUsage.restricted === 0 ? (
                             'n/a'
                         ) : (
-                            <a href='javascript:;' title='visible / restricted'>
-                                {item.usageAttachment?.visible ?? 0} / {item.usageAttachment?.restricted ?? 0}
-                            </a>
+                            _(<a href='#' title='visible / restricted' onClick={(e) => {e.preventDefault()}}>
+                                {item.projectAttachmentUsage?.visible ?? 0} / {item.projectAttachmentUsage?.restricted ?? 0}
+                            </a>)
                         ),
                         [item.attachmentContentId ?? '', item.filename],
                     ])
@@ -201,7 +228,7 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                     />
                 ),
             sort: false,
-            width: '60px',
+            width: '90px',
         },
     ]
 

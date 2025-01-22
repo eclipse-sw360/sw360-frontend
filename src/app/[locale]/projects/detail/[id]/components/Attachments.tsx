@@ -230,8 +230,14 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
 						attachment.createdBy ?? '',
 						attachment.checkedTeam ?? '',
 						attachment.checkedBy ?? '',
-						attachment.usageAttachment ?? 'n/a',
-						{ projectId, attachmentId: attachment['_links']['self']['href'].split('/').at(-1), attachmentName: attachment.filename }
+						attachment.projectAttachmentUsage?.visible === 0 && attachment.projectAttachmentUsage.restricted === 0 ? (
+                            'n/a'
+                        ) : (
+                            _(<a href='#' title='visible / restricted' onClick={(e) => {e.preventDefault()}}>
+                                {attachment.projectAttachmentUsage?.visible ?? 0} / {attachment.projectAttachmentUsage?.restricted ?? 0}
+                            </a>)
+                        ),
+						{ projectId, attachmentId: CommonUtils.getIdFromUrl(attachment._links?.self.href), attachmentName: attachment.filename }
                     ])
                 }
                 setData(tableData)
