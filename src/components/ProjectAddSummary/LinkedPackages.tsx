@@ -135,7 +135,7 @@ export default function LinkedPackages({ projectPayload,
                         className='fw-medium'
                         style={{ color: '#5D8EA9', paddingLeft: '0px' }}
                     >
-                        LINKED PACKAGES
+                        {t('LINKED PACKAGES')}
                         <hr
                             className='my-2 mb-2'
                             style={{ color: '#5D8EA9' }}
@@ -159,7 +159,7 @@ export default function LinkedPackages({ projectPayload,
                             className='btn btn-secondary'
                             onClick={() => setShowLinkedPackagesModal(true)}
                         >
-                            Add Packages
+                            {t('Add Packages')}
                         </button>
                     </div>
                 </div>
