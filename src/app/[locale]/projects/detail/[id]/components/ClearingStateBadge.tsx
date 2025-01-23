@@ -11,6 +11,7 @@
 'use client'
 
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
+import { ReleaseClearingStateMapping } from '@/object-types'
 
 interface Props {
     isRelease: boolean
@@ -25,18 +26,6 @@ const capitalize = (text: string) => {
         : ''
 }
 
-const ReleaseClearingStateMapping: {[k: string]: string} = {
-    'NEW_CLEARING': 'NEW_CLEARING',
-    'APPROVED': 'REPORT_APPROVED',
-    'REPORT_AVAILABLE': 'REPORT_AVAILABLE',
-    'SCAN_AVAILABLE': 'SCAN_AVAILABLE',
-    'SENT_TO_CLEARING_TOOL': 'SENT_TO_CLEARING_TOOL',
-    'UNDER_CLEARING': 'UNDER_CLEARING',
-    'INTERNAL_USE_SCAN_AVAILABLE': 'INTERNAL_USE_SCAN_AVAILABLE',
-    'NEW': 'NEW_CLEARING',
-    'REPORT_APPROVED': 'REPORT_APPROVED',
-}
-
 const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props) : JSX.Element => {
 
     return (
@@ -47,7 +36,9 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                     <OverlayTrigger
                         overlay={
                             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                            <Tooltip>{`${t('Release Clearing State')}: ${t(ReleaseClearingStateMapping[clearingState])}`}</Tooltip>
+                            <Tooltip>{`${t('Release Clearing State')}: ${t(ReleaseClearingStateMapping[
+                                clearingState as keyof typeof ReleaseClearingStateMapping])}`}
+                            </Tooltip>
                         }
                     >
                         {(clearingState === 'NEW_CLEARING' || clearingState === 'NEW') ? (
