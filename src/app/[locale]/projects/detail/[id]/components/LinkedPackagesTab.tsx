@@ -38,10 +38,12 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             id: 'linkedPackagesData.vendor',
             name: t('Vendor'),
             sort: true,
-            formatter: ([ vendorName, vendorId ]: [ vendorName: string, vendorId: string ]) =>
+            formatter: ([ vendorId, vendorName ]: Array<string>) =>
                 _(
                     <>
-                        <Link href={`/vendors/${vendorId}`}>{vendorName}</Link>
+                        <Link href={`/vendors/${vendorId}`}>
+                            {vendorName}
+                        </Link>
                     </>
                 ),
         },
@@ -49,10 +51,12 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             id: 'linkedPackagesData.packageName',
             name: t('Package Name Version'),
             sort: true,
-            formatter: ([ packageName, packageId ]: [ packageName: string, packageId: string ]) =>
+            formatter: ([ packageId, packageName, packageVersion ]: Array<string>) =>
                 _(
                     <>
-                        <Link href={`/packages/detail/${packageId}`}>{packageName}</Link>
+                        <Link href={`/packages/detail/${packageId}`}>
+                            {`${packageName} (${packageVersion})`}
+                        </Link>
                     </>
                 ),
         },
@@ -60,10 +64,12 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             id: 'linkedPackagesData.releaseName',
             name: t('Release Name Version'),
             sort: true,
-            formatter: ([ releaseName, releaseId ]: [ releaseName: string, releaseId: string ]) =>
+            formatter: ([ releaseId, releaseName, releaseVersion ]: Array<string>) =>
                 _(
                     <>
-                        <Link href={`/releases/${releaseId}`}>{releaseName}</Link>
+                        <Link href={`/components/releases/detail/${releaseId}`}>
+                            {`${releaseName} (${releaseVersion})`}
+                        </Link>
                     </>
                 ),
         },
