@@ -77,49 +77,50 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             id: 'linkedPackagesData.releaseClearingState',
             name: t('Release Clearing State'),
             sort: true,
-            formatter : ((releaseClearingState: string) => 
+            formatter : (releaseClearingState: string) => 
                 _(
-                    <>
-                        (releaseClearingState === ) ?
-                            {t('Not Applicable')}
-                        :
-                        <OverlayTrigger
-                            overlay={
-                                <Tooltip>{`${t('Release Clearing State')}: ${t(ReleaseClearingStateMapping[
-                                    releaseClearingState as keyof typeof ReleaseClearingStateMapping])}`}
-                                </Tooltip>
-                            }
-                        >
-                            {(releaseClearingState === 'NEW_CLEARING' || releaseClearingState === 'NEW') ? (
-                                <span className='state-box clearingStateOpen capsule-left capsule-right'>
-                                    {'CS'}
-                                </span>
-                            ) : (releaseClearingState === 'REPORT_AVAILABLE') ? (
-                                <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>
-                                    {'CS'}
-                                </span>
-                            ) : (releaseClearingState === 'UNDER_CLEARING') ? (
-                                <span className='state-box clearingStateInProgress capsule-left capsule-right'>
-                                    {'CS'}
-                                </span>
-                            ) : (releaseClearingState === 'INTERNAL_USE_SCAN_AVAILABLE') ? (
-                                <span className='state-box clearingStateUnknown capsule-left capsule-right'>
-                                    {'CS'}
-                                </span>
-                            ) : (releaseClearingState === 'SENT_TO_CLEARING_TOOL' ||
-                                 releaseClearingState === 'SCAN_AVAILABLE') ? (
-                                <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>
-                                    {'CS'}
-                                </span>
-                            ): (
-                                <span className='state-box clearingStateApproved capsule-left capsule-right'>
-                                    {'CS'}
-                                </span>
-                            )}
-                        </OverlayTrigger>
-                    </>
+                    (releaseClearingState === "") ?
+                        (
+                            <>
+                                {t('Not Applicable')}
+                            </>
+                        ) : (
+                            <OverlayTrigger 
+                                overlay={
+                                    <Tooltip>{`${t('Release Clearing State')}: ${t(ReleaseClearingStateMapping[
+                                        releaseClearingState as keyof typeof ReleaseClearingStateMapping])}`}
+                                    </Tooltip>
+                                }
+                            >
+                                {(releaseClearingState === 'NEW_CLEARING' || releaseClearingState === 'NEW') ? (
+                                    <span className='state-box clearingStateOpen capsule-left capsule-right align-center'>
+                                        {'CS'}
+                                    </span>
+                                ) : (releaseClearingState === 'REPORT_AVAILABLE') ? (
+                                    <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>
+                                        {'CS'}
+                                    </span>
+                                ) : (releaseClearingState === 'UNDER_CLEARING') ? (
+                                    <span className='state-box clearingStateInProgress capsule-left capsule-right'>
+                                        {'CS'}
+                                    </span>
+                                ) : (releaseClearingState === 'INTERNAL_USE_SCAN_AVAILABLE') ? (
+                                    <span className='state-box clearingStateUnknown capsule-left capsule-right'>
+                                        {'CS'}
+                                    </span>
+                                ) : (releaseClearingState === 'SENT_TO_CLEARING_TOOL' ||
+                                    releaseClearingState === 'SCAN_AVAILABLE') ? (
+                                    <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>
+                                        {'CS'}
+                                    </span>
+                                ): (
+                                    <span className='state-box clearingStateApproved capsule-left capsule-right'>
+                                        {'CS'}
+                                    </span>
+                                )}
+                            </OverlayTrigger>
+                        )
                 )
-            )
         },
         {
             id: 'linkedPackagesData.licenses',
