@@ -100,7 +100,9 @@ export default function LinkPackagesModal({
                 <div>
                     {licenseIds.map((lincenseId, index) => (
                         <span key={index}>
-                            {lincenseId}
+                            <Link href={`/licenses/detail?id=${lincenseId}`}>
+                                {lincenseId}
+                            </Link>
                             {index !== licenseIds.length - 1 && ', '}
                         </span>
                     ))}
