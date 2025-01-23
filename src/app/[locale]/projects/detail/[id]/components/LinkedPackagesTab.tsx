@@ -123,7 +123,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 <div>
                     {licenseIds.map((lincenseId, index) => (
                         <span key={index}>
-                            <Link href={`/licences/${lincenseId}`}>
+                            <Link href={`/licenses/detail?id=${lincenseId}`}>
                                 {lincenseId}
                             </Link>
                             {index !== licenseIds.length - 1 && ', '}
