@@ -37,6 +37,7 @@ import LicensePayload from './LicensePayload'
 import LicenseType from './LicenseType'
 import LinkedAttachments from './LinkedAttachments'
 import LinkedProjectData from './LinkedProjectData'
+import LinkedPackage from './LinkedPackage'
 import LinkedPackageData from './LinkedPackageData'
 import LinkedRelease from './LinkedRelease'
 import LinkedReleaseData from './LinkedReleaseData'
@@ -135,6 +136,7 @@ export type {
     LicensePayload,
     LicenseType,
     LinkedAttachments,
+    LinkedPackage,
     LinkedPackageData,
     LinkedProjectData,
     LinkedRelease,
@@ -209,6 +211,7 @@ import ActionType from './enums/ActionType'
 import ClearingRequestStates from './enums/ClearingRequestStates'
 import DocumentTypes from './enums/DocumentTypes'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
+import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
@@ -223,6 +226,7 @@ export {
     HttpStatus,
     LicenseTabIds,
     ProjectVulnerabilityTabType,
+    ReleaseClearingStateMapping,
     ReleaseTabIds,
     RequestDocumentTypes,
     UserGroupType,
