@@ -10,11 +10,14 @@
 'use client'
 
 import { _, Table } from '@/components/sw360'
-import { LinkedPackageData, ProjectPayload } from '@/object-types'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
+import { Embedded, HttpStatus, LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 
@@ -22,6 +25,8 @@ interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
+
+type EmbeddedLinkedPackages = Embedded<LinkedPackage, 'sw360:packages'>
 
 type RowData = (string | string[] | undefined)[]
 
@@ -31,7 +36,8 @@ export default function LinkedPackages({ projectPayload,
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
-    const [linkedPackageData, setLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
+    const [newLinkedPackageData, setNewLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
+    const [existingLinkedPackageData, setExistingLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
 
     const columns = [
         {
@@ -87,16 +93,16 @@ export default function LinkedPackages({ projectPayload,
     
     const handleDeletePackage = (packageId : string) => {
         const updatedProjectPayload = { ...projectPayload }
-        linkedPackageData.forEach((_, key) => {
+        newLinkedPackageData.forEach((_, key) => {
             if (key === packageId){
-                linkedPackageData.delete(key)
+                newLinkedPackageData.delete(key)
                 if (updatedProjectPayload.packageIds &&
                     updatedProjectPayload.packageIds.includes(key)){
                         updatedProjectPayload.packageIds.splice(
                             updatedProjectPayload.packageIds.indexOf(key), 1 )
                         setProjectPayload(updatedProjectPayload)
                 }
-                const updatedTableData = extractDataFromMap(linkedPackageData)
+                const updatedTableData = extractDataFromMap(newLinkedPackageData)
                 setTableData(updatedTableData)
             }
         })
@@ -114,20 +120,81 @@ export default function LinkedPackages({ projectPayload,
         return extractedData
     }
 
+    const fetchData = useCallback(
+        async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
+                const data = (await response.json())
+                return data
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                return undefined
+            }
+        },
+        []
+    )
+
     useEffect(() => {
-        const data = extractDataFromMap(linkedPackageData)
-        setTableData(data)
-    }, [linkedPackageData])
+
+        if (projectPayload.packageIds && projectPayload.packageIds.length > 0){
+            fetchData(`projects/${projectPayload.id}/packages`)
+                .then((linkedPackages: EmbeddedLinkedPackages | undefined) => {
+                    if (linkedPackages === undefined) return
+
+                    if (
+                        !CommonUtils.isNullOrUndefined(linkedPackages['_embedded']) &&
+                        !CommonUtils.isNullOrUndefined(linkedPackages['_embedded']['sw360:packages'])
+                    ) {
+                        const m = new Map(newLinkedPackageData)
+                        linkedPackages['_embedded']['sw360:packages'].map((item: LinkedPackage) => 
+                            m.set(item.packageId, {
+                                    packageId: item.packageId as string,
+                                    name: item.packageName as string,
+                                    version: item.packageVersion as string,
+                                    licenseIds: item.licenses as string[],
+                                    packageManager: item.packageManager as string,
+                                }
+                            )
+                        )
+                        setExistingLinkedPackageData(m)
+                        if (newLinkedPackageData.size > 0){
+                            setNewLinkedPackageData((prevMap) => {
+                                  const newMap = new Map(prevMap)
+                                    m.forEach((value, key) => {
+                                        newMap.set(key, value)
+                                    })
+                                    return newMap
+                                })
+                            const interimData = extractDataFromMap(newLinkedPackageData)
+                            setTableData(interimData)
+                            }
+                        else {
+                            const interimData = extractDataFromMap(existingLinkedPackageData)
+                            setTableData(interimData)
+                        }
+                    }
+                })
+                .catch((err) => console.error(err))
+            }
+        else {        
+            const data = extractDataFromMap(newLinkedPackageData)
+            setTableData(data)
+        }
+    }, [newLinkedPackageData])
 
 
     return (
         <>
             <LinkPackagesModal
-                        setLinkedPackageData={setLinkedPackageData}
-                        projectPayload={projectPayload}
-                        setProjectPayload={setProjectPayload}
-                        show={showLinkedPackagesModal}
-                        setShow={setShowLinkedPackagesModal}
+                setLinkedPackageData={setNewLinkedPackageData}
+                projectPayload={projectPayload}
+                setProjectPayload={setProjectPayload}
+                show={showLinkedPackagesModal}
+                setShow={setShowLinkedPackagesModal}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>
