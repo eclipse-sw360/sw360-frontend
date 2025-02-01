@@ -127,7 +127,8 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
         contributors: [],
         projectOwner: '',
         leadArchitect: '',
-        projectManager: ''
+        projectManager: '',
+        packageIds: [],
     })
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
@@ -307,6 +308,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
+                    packageIds: (project._embedded?.['sw360:packages'] ?? []).map(singlePackage => singlePackage.id ?? '')
                 }
                 setProjectPayload(projectPayloadData)
             } catch(e) {
