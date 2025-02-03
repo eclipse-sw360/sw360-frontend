@@ -13,7 +13,7 @@ import AccessToken from './AccessToken'
 import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
-import { AttachmentUsage, AttachmentUsages } from './AttachmentUsages'
+import { AttachmentUsage, AttachmentUsages, SaveUsagesPayload } from './AttachmentUsages'
 import AuthToken from './AuthToken'
 import COTSDetails from './COTSDetails'
 import CVEReference from './CVEReference'
@@ -195,6 +195,7 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
+    SaveUsagesPayload
 }
 
 // Special functions for populate data
