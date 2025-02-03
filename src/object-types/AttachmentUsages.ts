@@ -57,3 +57,10 @@ export interface AttachmentUsage {
         licenseInfo?: object
     }
 }
+
+export interface SaveUsagesPayload {
+    selected: string[]
+    deselected: string[]
+    selectedConcludedUsages: string[]
+    deselectedConcludedUsages: string[]
+}
