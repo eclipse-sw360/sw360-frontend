@@ -790,12 +790,13 @@ input::-webkit-datetime-edit {
 
 .gridjs-td:has(.green-cell) {
     background-color: #edf9f0;
-    border-left: none;
-    border-right: none;
 }
 
 .gridjs-td:has(.orange-cell) {
     background-color: #fff4ec;
+}
+
+.gridjs-td:has(.border-0-cell) {
     border-left: none;
     border-right: none;
 }
