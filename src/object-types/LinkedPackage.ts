@@ -5,18 +5,21 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Release } from '@/object-types'
+
 interface LinkedPackage {
-    packageId: string
-    packageName: string
+    id: string
+    name: string
     packageVersion: string
     vendorId?: string
     vendorName?: string
     releaseId?: string
-    releaseName?: string
-    releaseVersion?: string
-    releaseClearingState?: string
-    licenses?: Array<string>
+    version?: string
+    licenseIds?: Array<string>
     packageManager?: string
+    _embedded?: {
+        'sw360:release'?: Array<Release>
+    }
 }
 
 export default LinkedPackage

@@ -481,6 +481,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedPackages'>
                                             <LinkedPackages
+                                                    projectId={projectId}
                                                     projectPayload={projectPayload}
                                                     setProjectPayload={setProjectPayload}
                                             />
