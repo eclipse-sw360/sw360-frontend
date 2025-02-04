@@ -18,7 +18,7 @@ interface LinkedPackage {
     licenseIds?: Array<string>
     packageManager?: string
     _embedded?: {
-        'sw360:release'?: Array<Release>
+        'sw360:release'?: Release
     }
 }
 
