@@ -11,7 +11,7 @@
 
 import { _, Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { Embedded, HttpStatus, LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
+import { HttpStatus, LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
@@ -22,22 +22,21 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
+    projectId?: string
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-type EmbeddedLinkedPackages = Embedded<LinkedPackage, 'sw360:packages'>
-
 type RowData = (string | string[] | undefined)[]
 
-export default function LinkedPackages({ projectPayload,
+export default function LinkedPackages({ projectId,
+                                         projectPayload,
                                          setProjectPayload }: Props): JSX.Element {
 
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
     const [newLinkedPackageData, setNewLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
-    const [existingLinkedPackageData, setExistingLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
 
     const columns = [
         {
@@ -139,53 +138,38 @@ export default function LinkedPackages({ projectPayload,
     )
 
     useEffect(() => {
-
-        if (projectPayload.packageIds && projectPayload.packageIds.length > 0){
-            fetchData(`projects/${projectPayload.id}/packages`)
-                .then((linkedPackages: EmbeddedLinkedPackages | undefined) => {
-                    if (linkedPackages === undefined) return
-
-                    if (
-                        !CommonUtils.isNullOrUndefined(linkedPackages['_embedded']) &&
-                        !CommonUtils.isNullOrUndefined(linkedPackages['_embedded']['sw360:packages'])
-                    ) {
-                        const m = new Map(newLinkedPackageData)
-                        linkedPackages['_embedded']['sw360:packages'].map((item: LinkedPackage) => 
-                            m.set(item.packageId, {
-                                    packageId: item.packageId as string,
-                                    name: item.packageName as string,
-                                    version: item.packageVersion as string,
-                                    licenseIds: item.licenses as string[],
+        if (projectPayload.packageIds && projectPayload.packageIds.length > 0) {
+            fetchData(`projects/${projectId}/packages`)
+                .then((linkedPackages: LinkedPackage[] | undefined) => {
+                    if (!linkedPackages) return;
+                    setNewLinkedPackageData((prevMap) => {
+                        const updatedMap = new Map(prevMap)
+    
+                        linkedPackages.forEach((item) => {
+                            if (!updatedMap.has(item.id)) {
+                                updatedMap.set(item.id, {
+                                    packageId: item.id as string,
+                                    name: item.name as string,
+                                    version: item.version as string,
+                                    licenseIds: item.licenseIds as string[],
                                     packageManager: item.packageManager as string,
-                                }
-                            )
-                        )
-                        setExistingLinkedPackageData(m)
-                        if (newLinkedPackageData.size > 0){
-                            setNewLinkedPackageData((prevMap) => {
-                                  const newMap = new Map(prevMap)
-                                    m.forEach((value, key) => {
-                                        newMap.set(key, value)
-                                    })
-                                    return newMap
                                 })
-                            const interimData = extractDataFromMap(newLinkedPackageData)
-                            setTableData(interimData)
                             }
-                        else {
-                            const interimData = extractDataFromMap(existingLinkedPackageData)
-                            setTableData(interimData)
-                        }
-                    }
+                        })
+                        return updatedMap
+                    })
+                    setTableData(extractDataFromMap(newLinkedPackageData))
                 })
-                .catch((err) => console.error(err))
-            }
-        else {        
-            const data = extractDataFromMap(newLinkedPackageData)
-            setTableData(data)
+                .catch((err) => console.error(err));
+        } else {
+            setTableData([]);
         }
+    }, [projectId])
+    
+    useEffect(() => {
+        setTableData(extractDataFromMap(newLinkedPackageData))
     }, [newLinkedPackageData])
-
+      
 
     return (
         <>
