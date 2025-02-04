@@ -98,9 +98,11 @@ export default function LinkPackagesModal({
             sort: true,
             formatter: (licenseIds: string[]) => _(
                 <div>
-                    {licenseIds.map((lincenseId, index) => (
+                    {licenseIds.map((licenseId, index) => (
                         <span key={index}>
-                            {lincenseId}
+                            <Link href={`/licenses/detail?id=${licenseId}`}>
+                                {licenseId}
+                            </Link>
                             {index !== licenseIds.length - 1 && ', '}
                         </span>
                     ))}
