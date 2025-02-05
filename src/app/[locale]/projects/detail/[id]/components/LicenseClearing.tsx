@@ -53,7 +53,7 @@ export default function LicenseClearing({
         router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
     }
 
-    const exportProjectSpreadsheet = async ({withLinkedRelease} : {withLinkedRelease : boolean}) => {
+    const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session))
@@ -125,11 +125,11 @@ export default function LicenseClearing({
                                     <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
                                         <Dropdown.Item
-                                                onClick = {() => exportProjectSpreadsheet({ withLinkedRelease: false })}>
+                                                onClick = {() => exportProjectSpreadsheet(false)}>
                                                 {t('Projects only')}
                                             </Dropdown.Item>
                                             <Dropdown.Item
-                                                onClick = {() => exportProjectSpreadsheet({ withLinkedRelease: true })}>
+                                                onClick = {() => exportProjectSpreadsheet(true)}>
                                                 {t('Projects with linked releases')}
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
