@@ -227,6 +227,12 @@ export default function LinkedReleasesModal({
             sort: true,
         },
     ]
+    const closeModal = () => {
+        setShow(false)
+        setReleaseData([])
+        setLinkReleases(new Map())
+        isExactMatch.current = false
+    }
 
     return (
         <Modal
@@ -234,10 +240,7 @@ export default function LinkedReleasesModal({
             centered
             show={show}
             onHide={() => {
-                setShow(false)
-                setReleaseData([])
-                setLinkReleases(new Map())
-                isExactMatch.current = false
+                closeModal()
             }}
             aria-labelledby={t('Link Releases')}
             scrollable
