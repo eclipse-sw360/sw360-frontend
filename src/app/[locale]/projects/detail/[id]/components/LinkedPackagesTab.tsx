@@ -199,16 +199,16 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                             item.vendorId ?? '',
                             item.vendorName ?? ''
                         ],
-                        [ item.packageId, item.packageName, item.packageVersion ],
+                        [ item.id, item.name, item.packageVersion ],
                         [
                             item.releaseId ?? '',
-                            item.releaseName ?? '',
-                            item.releaseVersion ?? ''
+                            item._embedded?.['sw360:release']?.name ?? '',
+                            item._embedded?.['sw360:release']?.version ?? ''
                         ],
-                        item.releaseClearingState ?? '',
-                        item.licenses ?? [],
+                        item._embedded?.['sw360:release']?.clearingState ?? '',
+                        item.licenseIds ?? [],
                         item.packageManager ?? '',
-                        item.packageId,
+                        item.id,
                     ])
                     setTableData(data)
                 }

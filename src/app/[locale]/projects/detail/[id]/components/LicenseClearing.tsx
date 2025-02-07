@@ -18,8 +18,12 @@ import { useRouter } from 'next/navigation'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import dynamic from 'next/dynamic'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
-import { ClearingRequestStates } from '@/object-types'
+import { ClearingRequestStates, HttpStatus } from '@/object-types'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
+import { getSession, signOut } from 'next-auth/react'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import MessageService from '@/services/message.service'
 
 const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
 const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
@@ -49,6 +53,47 @@ export default function LicenseClearing({
         router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
     }
 
+    const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            if (withLinkedRelease === false) {
+                const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
+                if (response.status == HttpStatus.OK) {
+                    MessageService.success(t('Excel report generation has started'))
+                }
+                else if (response.status == HttpStatus.FORBIDDEN) {
+                    MessageService.warn(t('Access Denied'))
+                }
+                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                    MessageService.error(t('Internal server error'))
+                }
+                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    MessageService.error(t('Unauthorized request'))
+                }
+            }
+            else {
+                const response = await ApiUtils.GET('reports?module=PROJECTS&withLinkedRelease=true',
+                                                     session.user.access_token)
+                if (response.status == HttpStatus.OK) {
+                    MessageService.success(t('Excel report generation has started'))
+                }
+                else if (response.status == HttpStatus.FORBIDDEN) {
+                    MessageService.warn(t('Access Denied'))
+                }
+                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                    MessageService.error(t('Internal server error'))
+                }
+                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                    MessageService.error(t('Unauthorized request'))
+                }
+            }
+        }
+        catch(e) {
+            console.error(e)
+        }
+    }
 
     return (
         <>
@@ -79,8 +124,14 @@ export default function LicenseClearing({
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                            <Dropdown.Item>{t('Projects only')}</Dropdown.Item>
-                                            <Dropdown.Item>{t('Projects with sub projects')}</Dropdown.Item>
+                                        <Dropdown.Item
+                                                onClick = {() => exportProjectSpreadsheet(false)}>
+                                                {t('Projects only')}
+                                            </Dropdown.Item>
+                                            <Dropdown.Item
+                                                onClick = {() => exportProjectSpreadsheet(true)}>
+                                                {t('Projects with linked releases')}
+                                            </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
                             </Nav.Item>

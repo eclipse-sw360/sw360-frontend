@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus, NodeData, AttachmentUsages, Project, Release, Embedded, ProjectLinkedRelease, AttachmentUsage } from '@/object-types'
+import { HttpStatus, NodeData, AttachmentUsages, Project, Release, Embedded, ProjectLinkedRelease, AttachmentUsage, SaveUsagesPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -21,13 +21,6 @@ import { Spinner } from 'react-bootstrap'
 import MessageService from '@/services/message.service'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
-
-interface SaveUsagesPayload {
-    selected: string[]
-    deselected: string[]
-    selectedConcludedUsages: string[]
-    deselectedConcludedUsages: string[]
-}
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')

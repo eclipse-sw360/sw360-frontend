@@ -10,28 +10,33 @@
 'use client'
 
 import { _, Table } from '@/components/sw360'
-import { LinkedPackageData, ProjectPayload } from '@/object-types'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
+import { HttpStatus, LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
+    projectId?: string
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
 type RowData = (string | string[] | undefined)[]
 
-export default function LinkedPackages({ projectPayload,
+export default function LinkedPackages({ projectId,
+                                         projectPayload,
                                          setProjectPayload }: Props): JSX.Element {
 
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
-    const [linkedPackageData, setLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
+    const [newLinkedPackageData, setNewLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
 
     const columns = [
         {
@@ -87,16 +92,16 @@ export default function LinkedPackages({ projectPayload,
     
     const handleDeletePackage = (packageId : string) => {
         const updatedProjectPayload = { ...projectPayload }
-        linkedPackageData.forEach((_, key) => {
+        newLinkedPackageData.forEach((_, key) => {
             if (key === packageId){
-                linkedPackageData.delete(key)
+                newLinkedPackageData.delete(key)
                 if (updatedProjectPayload.packageIds &&
                     updatedProjectPayload.packageIds.includes(key)){
                         updatedProjectPayload.packageIds.splice(
                             updatedProjectPayload.packageIds.indexOf(key), 1 )
                         setProjectPayload(updatedProjectPayload)
                 }
-                const updatedTableData = extractDataFromMap(linkedPackageData)
+                const updatedTableData = extractDataFromMap(newLinkedPackageData)
                 setTableData(updatedTableData)
             }
         })
@@ -114,20 +119,66 @@ export default function LinkedPackages({ projectPayload,
         return extractedData
     }
 
-    useEffect(() => {
-        const data = extractDataFromMap(linkedPackageData)
-        setTableData(data)
-    }, [linkedPackageData])
+    const fetchData = useCallback(
+        async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
+                const data = (await response.json())
+                return data
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                return undefined
+            }
+        },
+        []
+    )
 
+    useEffect(() => {
+        if (projectPayload.packageIds && projectPayload.packageIds.length > 0) {
+            fetchData(`projects/${projectId}/packages`)
+                .then((linkedPackages: LinkedPackage[] | undefined) => {
+                    if (!linkedPackages) return;
+                    setNewLinkedPackageData((prevMap) => {
+                        const updatedMap = new Map(prevMap)
+    
+                        linkedPackages.forEach((item) => {
+                            if (!updatedMap.has(item.id)) {
+                                updatedMap.set(item.id, {
+                                    packageId: item.id as string,
+                                    name: item.name as string,
+                                    version: item.version as string,
+                                    licenseIds: item.licenseIds as string[],
+                                    packageManager: item.packageManager as string,
+                                })
+                            }
+                        })
+                        return updatedMap
+                    })
+                    setTableData(extractDataFromMap(newLinkedPackageData))
+                })
+                .catch((err) => console.error(err));
+        } else {
+            setTableData([]);
+        }
+    }, [projectId])
+    
+    useEffect(() => {
+        setTableData(extractDataFromMap(newLinkedPackageData))
+    }, [newLinkedPackageData])
+      
 
     return (
         <>
             <LinkPackagesModal
-                        setLinkedPackageData={setLinkedPackageData}
-                        projectPayload={projectPayload}
-                        setProjectPayload={setProjectPayload}
-                        show={showLinkedPackagesModal}
-                        setShow={setShowLinkedPackagesModal}
+                setLinkedPackageData={setNewLinkedPackageData}
+                projectPayload={projectPayload}
+                setProjectPayload={setProjectPayload}
+                show={showLinkedPackagesModal}
+                setShow={setShowLinkedPackagesModal}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>

@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import Obligations from '../../../components/Obligations/Obligations'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
+import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 
 interface LinkedReleaseProps {
     release?: string
@@ -126,7 +127,8 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
         contributors: [],
         projectOwner: '',
         leadArchitect: '',
-        projectManager: ''
+        projectManager: '',
+        packageIds: [],
     })
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
@@ -306,6 +308,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
+                    packageIds: (project._embedded?.['sw360:packages'] ?? []).map(singlePackage => singlePackage.id ?? '')
                 }
                 setProjectPayload(projectPayloadData)
             } catch(e) {
@@ -475,6 +478,13 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                                                     existingReleaseData={existingReleaseData}
                                                 />
                                             }
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey='linkedPackages'>
+                                            <LinkedPackages
+                                                    projectId={projectId}
+                                                    projectPayload={projectPayload}
+                                                    setProjectPayload={setProjectPayload}
+                                            />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='attachments'></Tab.Pane>
                                         <Tab.Pane eventKey='obligations'>

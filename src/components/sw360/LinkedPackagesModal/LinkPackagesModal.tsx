@@ -304,7 +304,21 @@ export default function LinkPackagesModal({
                 <Button
                     variant='primary'
                     onClick={() => {
-                        setLinkedPackageData(linkPackages)
+                        setLinkedPackageData((prevMap) => {
+                            const updatedMap = new Map(prevMap)
+                            linkPackages.forEach((item, key) => {
+                                if (!updatedMap.has(key)) {
+                                    updatedMap.set(key, {
+                                        packageId: key as string,
+                                        name: item.name as string,
+                                        version: item.version as string,
+                                        licenseIds: item.licenseIds as string[],
+                                        packageManager: item.packageManager as string,
+                                    })
+                                }
+                            })
+                            return updatedMap
+                        })
                         setShow(false)
                         projectPayloadSetter(linkPackages)
                     }}
