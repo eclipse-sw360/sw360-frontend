@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Button, Nav, Tab, Dropdown } from 'react-bootstrap'
 import ObligationView from './ObligationsView/ObligationsView'
+import ReleaseView from './ReleaseView'
 import { ActionType, ProjectObligation } from '@/object-types'
 import CompareObligation from './CompareObligation'
 
@@ -65,7 +66,7 @@ export default function Obligations({ projectId, actionType, payload, setPayload
                         <ObligationView projectId={projectId} actionType={actionType} payload={payload} setPayload={setPayload} selectedProjectId={selectedProjectId} />
                     </Tab.Pane>
                     <Tab.Pane eventKey='release-view'>
-                        
+                        <ReleaseView projectId={projectId} />
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>
