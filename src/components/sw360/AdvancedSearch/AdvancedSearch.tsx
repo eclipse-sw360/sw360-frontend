@@ -125,6 +125,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                             name={field.paramName}
                             value={searchParams[field.paramName]}
                             onChange={handleSearchParam}
+                            onKeyDown={(e) => e.key == "Enter" && submitSearch()}
                         />
                     </Form.Group>
                 )
