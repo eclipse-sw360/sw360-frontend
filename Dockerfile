@@ -12,9 +12,7 @@
 ARG VARIANT=22-slim
 FROM node:${VARIANT} as build
 
-ENV PNPM_HOME="/pnm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN npm install -g pnpm
 
 WORKDIR /frontend
 
