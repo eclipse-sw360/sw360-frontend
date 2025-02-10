@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: webiny/action-conventional-commits@8bc41ff4e7d423d56fa4905f6ff79209a78776c7 # v1.3.0
-      - uses: apache/skywalking-eyes/header@69f34abb75ec4e414b593ac3f34228b60e33f97b # main
+      - uses: apache/skywalking-eyes/header@5c5b974209f0de5d905f37deb69369068ebfc15c # main
 
       - name: Check deny listed files
         run: bash .github/deny_list.sh
