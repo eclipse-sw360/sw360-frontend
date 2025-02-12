@@ -147,7 +147,7 @@ const convertObjectToMapRoles = (data: { [k: string]: Array<string> } | null | u
  */
 const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
     const contributors: string[] = []
-    const commiters: string[] = []
+    const committers: string[] = []
     const expecters: string[] = []
     const stakeholder: string[] = []
     const analyst: string[] = []
@@ -162,7 +162,7 @@ const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
         if (data.key === 'Contributor') {
             contributors.push(data.value)
         } else if (data.key === 'Committer') {
-            commiters.push(data.value)
+            committers.push(data.value)
         } else if (data.key === 'Expert') {
             expecters.push(data.value)
         } else if (data.key === 'Stakeholder') {
@@ -185,7 +185,7 @@ const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
     })
     const roles = {
         Contributor: contributors,
-        Committer: commiters,
+        Committer: committers,
         Expert: expecters,
         Stakeholder: stakeholder,
         Analyst: analyst,

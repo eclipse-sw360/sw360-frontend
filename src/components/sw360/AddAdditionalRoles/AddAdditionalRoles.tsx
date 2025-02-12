@@ -34,7 +34,7 @@ function AddAdditionalRoles({
     useEffect(()=>{
         setInputListData(!CommonUtils.isNullOrUndefined(propInputList) ? propInputList : [
             {
-                key: documentType === DocumentTypes.COMPONENT ? 'Commiter' : 'Stakeholder',
+                key: documentType === DocumentTypes.COMPONENT ? 'Committer' : 'Stakeholder',
                 value: '',
             },
         ]);
@@ -68,7 +68,7 @@ function AddAdditionalRoles({
     }
 
     const defaultValue = () => {
-        return documentType === DocumentTypes.COMPONENT ? 'Commiter' : 'Stakeholder'
+        return documentType === DocumentTypes.COMPONENT ? 'Committer' : 'Stakeholder'
     }
 
     return (
