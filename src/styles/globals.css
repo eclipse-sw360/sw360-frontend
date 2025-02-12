@@ -1467,3 +1467,7 @@ input[checked]+.slider:before {
 .orange {
     background-color: #fff4ec;
 }
+
+.sw360-background {
+    background-color: var(--sw360-primary-background-color) !important;
+}
