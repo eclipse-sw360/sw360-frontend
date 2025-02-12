@@ -63,7 +63,7 @@ const AdminMainPage = (): JSX.Element => {
                             <AiOutlineUnorderedList /> {t('Obligations')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/schedule'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <RxCalendar /> {t('Schedule')}
                         </button>
