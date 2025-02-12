@@ -51,7 +51,6 @@ export default function ComponentEditSummary({
     })
 
     const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
-
     const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
     const fetchData = useCallback(
@@ -187,7 +186,16 @@ export default function ComponentEditSummary({
                             setComponentPayload={setComponentPayload}
                         />
                         <div className='row mb-4'>
-                            <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
+                            <AddAdditionalRoles 
+                                documentType={DocumentTypes.COMPONENT}
+                                inputList={CommonUtils.convertObjectToMapRoles(componentPayload.roles ?? {})}
+                                setInputList={(newList)=>{
+                                    setComponentPayload({
+                                        ...componentPayload,
+                                        roles: CommonUtils.convertRoles(newList)
+                                    })
+                                }}
+                            />
                         </div>
                         <div className='row mb-4'>
                             <AddKeyValue

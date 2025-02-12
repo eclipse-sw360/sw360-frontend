@@ -19,7 +19,7 @@ import { MdDeleteOutline } from 'react-icons/md'
 interface Props {
     documentType?: string
     setDataInputList?: RolesType
-    setInputList?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
+    setInputList?: (list: InputKeyValue[]) => void
     inputList?: InputKeyValue[]
 }
 
