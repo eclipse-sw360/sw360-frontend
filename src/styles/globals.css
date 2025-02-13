@@ -1337,3 +1337,33 @@ svg.action:hover {
     background-color: #5d8ea9 !important;
     color: white !important;
 }
+
+.import-department-success {
+    background-color: #edf9f0 !important;
+    border: 1px solid #5aca75 !important;
+    border-radius: 5px;
+}
+
+.import-department-success > .result-table td {
+    background-color: #edf9f0 !important;
+    border: 1px solid var(--bs-border-color) !important;
+    text-align: right;
+    font-weight: 600;
+}
+
+.import-department-success > .result-table th {
+    background-color: #edf9f0 !important;
+    border: 1px solid var(--bs-border-color) !important;
+}
+
+.import-department-failure {
+    background-color: #feefef !important;
+    border: 1px solid !important;
+    color: #da1414 !important;
+    border-radius: 5px;
+}
+
+.log-content {
+    max-height: 500px;
+    overflow-y: scroll;
+}
