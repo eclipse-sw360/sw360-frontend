@@ -83,6 +83,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
 
     const importFile = async () => {
         try {
+            setImportState(ImportSBOMState.IMPORTING)
             const session = await getSession()
             if(CommonUtils.isNullOrUndefined(session))
                 return signOut()
@@ -254,7 +255,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                         </div>
                     </>
                 )}
-                {importState === ImportSBOMState.IMPORTING && <h4 className="fw-bold">{t('Importing')}...</h4>}
+                {importState === ImportSBOMState.IMPORTING && <h5 className="fw-bold">{t('Importing SBOM file')}...</h5>}
                 {importState === ImportSBOMState.CONFIRM_IMPORT && 
                     <p className='fw-bold'>
                         {
@@ -298,6 +299,15 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                     >
                         {t('Upload and Import')}
                     </button>
+                )}
+                {importState === ImportSBOMState.IMPORTING && (
+                        <button
+                            type='button'
+                            className='fw-bold btn btn-primary'
+                            
+                        >
+                            <span className="spinner-border spinner-border-sm me-2"></span>
+                        </button>
                 )}
             </Modal.Footer>
         </Modal>

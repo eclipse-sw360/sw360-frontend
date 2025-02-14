@@ -188,7 +188,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                         </div>
                     </>
                 )}
-                {importState === ImportSBOMState.IMPORTING && <h4>{t('Importing')}...</h4>}
+                {importState === ImportSBOMState.IMPORTING && <h4>{t('Importing SBOM file')}...</h4>}
                 {importState === ImportSBOMState.PREPARE_IMPORT && prepateImportData &&
                     <>
                         {!CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) ? (
