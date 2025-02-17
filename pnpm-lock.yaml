@@ -39,8 +39,8 @@ importers:
         specifier: ^3.26.3
         version: 3.26.3(next@14.2.23(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       preact:
-        specifier: ^10.25.4
-        version: 10.25.4
+        specifier: ^10.26.0
+        version: 10.26.0
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -2659,8 +2659,8 @@ packages:
     peerDependencies:
       preact: '>=10'
 
-  preact@10.25.4:
-    resolution: {integrity: sha512-jLdZDb+Q+odkHJ+MpW/9U5cODzqnB+fy2EiHSZES7ldV5LK7yjlVzTp7R8Xy6W6y75kfK8iWYtFVH7lvjwrCMA==}
+  preact@10.26.0:
+    resolution: {integrity: sha512-6ugi/Mb7lyV5RA6KlnijFyDLMU253i7L0RRiObIzDoqj59KT9iTeNJbA/YGw6M7jP4vxaab0DOA8DgodTOA6EQ==}
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -5488,7 +5488,7 @@ snapshots:
 
   gridjs@6.2.0:
     dependencies:
-      preact: 10.25.4
+      preact: 10.26.0
 
   hard-rejection@2.1.0: {}
 
@@ -6065,8 +6065,8 @@ snapshots:
       next: 14.2.23(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       oauth: 0.9.15
       openid-client: 5.7.1
-      preact: 10.25.4
-      preact-render-to-string: 5.2.6(preact@10.25.4)
+      preact: 10.26.0
+      preact-render-to-string: 5.2.6(preact@10.26.0)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       uuid: 8.3.2
@@ -6334,12 +6334,12 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  preact-render-to-string@5.2.6(preact@10.25.4):
+  preact-render-to-string@5.2.6(preact@10.26.0):
     dependencies:
-      preact: 10.25.4
+      preact: 10.26.0
       pretty-format: 3.8.0
 
-  preact@10.25.4: {}
+  preact@10.26.0: {}
 
   prelude-ls@1.2.1: {}
 
