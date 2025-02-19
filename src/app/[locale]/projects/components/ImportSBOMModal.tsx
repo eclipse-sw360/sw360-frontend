@@ -100,6 +100,21 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
             )
             if (response.status === HttpStatus.OK) {
                 setImportError({ variant: 'success', message: <p>{t('SBOM imported successfully')}</p> })
+            } else if (response.status === HttpStatus.CONFLICT) {
+                const errorMessage = await response.text();
+
+                const match = errorMessage.match(/The projectId is:\s*(\S+)/);
+                const projectId = match ? match[1].replace(/"/g, '') : 'Unknown';
+                setImportError({
+                    variant: 'danger',
+                    message: (
+                        <div>
+                            <strong>{t('Duplicate SBOM')}:</strong>
+                            <p>{t('A project with the same name and version already exists')}. {t('Please import this SBOM from project details page')}</p>
+                            <p><a href={`/projects/detail/${projectId}`}>{t('Click here to open project details page')}</a></p>
+                        </div>
+                    )
+                });
             } else {
                 setImportError({ variant: 'danger', message: <p>{t('SBOM import failed')}</p> })
             }
