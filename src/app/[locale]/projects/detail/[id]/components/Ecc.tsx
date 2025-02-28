@@ -21,13 +21,16 @@ import { Button, Spinner } from 'react-bootstrap'
 
 type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
 
+interface Props {
+    projectId: string,
+    projectName?: string,
+    projectVersion?: string
+}
+
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function EccDetails({ projectId, projectName, projectVersion}:
-                                   { projectId: string,
-                                     projectName: string,
-                                     projectVersion: string }): JSX.Element {
+export default function EccDetails({ projectId, projectName, projectVersion}: Props): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
