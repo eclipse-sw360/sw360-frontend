@@ -115,7 +115,7 @@ export default function EccDetails({ projectId, projectName, projectVersion}:
         }
     }
 
-    const exportSpreadsheet = async () => {
+    const exportSpreadsheet = () => {
         try {
             if (CommonUtils.isNullOrUndefined(session))
                 return signOut()
