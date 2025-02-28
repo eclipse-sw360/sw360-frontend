@@ -205,7 +205,12 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         <Obligations projectId={projectId} actionType={ActionType.DETAIL}/>
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='ecc'>
-                                        <EccDetails projectId={projectId} />
+                                        { summaryData && (
+                                            <EccDetails projectId={projectId}
+                                                        projectName={summaryData.name}
+                                                        projectVersion={summaryData.version ?? ''}
+                                            />
+                                        )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='vulnerabilityTrackingStatus'>
                                         {
