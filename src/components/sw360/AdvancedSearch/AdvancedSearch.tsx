@@ -64,7 +64,9 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
             }
         })
 
-        const encodedUrl = encodeURI(searchUrl.toString())
+        const encodedUrl = encodeURI(searchUrl.toString().includes('%40') ?
+                                     searchUrl.toString().replace(/%40/g, '@') :
+                                     searchUrl.toString())
         router.push(encodedUrl)
     }
 
