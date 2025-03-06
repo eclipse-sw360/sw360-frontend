@@ -420,7 +420,7 @@ function Project(): JSX.Element {
                     text: t('Closed'),
                 },
             ],
-            paramName: 'clearingState',
+            paramName: 'clearingStatus',
         },
         {
             fieldName: t('Tag'),
