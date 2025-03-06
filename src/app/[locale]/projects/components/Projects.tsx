@@ -394,7 +394,7 @@ function Project(): JSX.Element {
                     text: t('Active'),
                 },
                 {
-                    key: 'PHASEOUT',
+                    key: 'PHASE_OUT',
                     text: t('PhaseOut'),
                 },
                 {
