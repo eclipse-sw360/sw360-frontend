@@ -345,24 +345,28 @@ function Project(): JSX.Element {
             fieldName: t('Project Type'),
             value: [
                 {
-                    key: 'Customer Project',
+                    key: 'CUSTOMER',
                     text: t('Customer Project'),
                 },
                 {
-                    key: 'Internal Project',
+                    key: 'INTERNAL',
                     text: t('Internal Project'),
                 },
                 {
-                    key: 'Product',
+                    key: 'PRODUCT',
                     text: t('Product'),
                 },
                 {
-                    key: 'Service',
+                    key: 'SERVICE',
                     text: t('Service'),
                 },
                 {
-                    key: 'Inner Source',
+                    key: 'INNER_SOURCE',
                     text: t('Inner Source'),
+                },
+                {
+                    key: 'CLOUD_BACKEND',
+                    text: t('Cloud Backend'),
                 },
             ],
             paramName: 'type',
@@ -386,15 +390,15 @@ function Project(): JSX.Element {
             fieldName: t('State'),
             value: [
                 {
-                    key: 'Active',
+                    key: 'ACTIVE',
                     text: t('Active'),
                 },
                 {
-                    key: 'PhaseOut',
+                    key: 'PHASEOUT',
                     text: t('PhaseOut'),
                 },
                 {
-                    key: 'Unknown',
+                    key: 'UNKNOWN',
                     text: t('Unknown'),
                 },
             ],
@@ -404,15 +408,15 @@ function Project(): JSX.Element {
             fieldName: t('Clearing State'),
             value: [
                 {
-                    key: 'Open',
+                    key: 'OPEN',
                     text: t('Open'),
                 },
                 {
-                    key: 'In Progress',
+                    key: 'IN_PROGRESS',
                     text: t('In Progress'),
                 },
                 {
-                    key: 'Closed',
+                    key: 'CLOSED',
                     text: t('Closed'),
                 },
             ],
@@ -440,7 +444,9 @@ function Project(): JSX.Element {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
-                        <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+                        <AdvancedSearch title='Advanced Search'
+                                        fields={advancedSearch}
+                                        />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between'>
