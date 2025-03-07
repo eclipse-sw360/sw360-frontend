@@ -324,10 +324,7 @@ export default function LinkedReleasesModal({
                 <Button
                     variant='dark'
                     onClick={() => {
-                        setShow(false)
-                        setReleaseData([])
-                        setLinkReleases(new Map())
-                        isExactMatch.current = false
+                        closeModal()
                     }}
                 >
                     {t('Close')}
