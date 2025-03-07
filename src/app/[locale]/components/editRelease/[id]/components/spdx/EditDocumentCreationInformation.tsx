@@ -17,7 +17,6 @@ import Created from './DocumentCreationInfo/Created'
 import Creators from './DocumentCreationInfo/Creators'
 
 interface Props {
-    fullnameModifiedBy?: string
     documentCreationInformation: DocumentCreationInformation
     setDocumentCreationInformation: React.Dispatch<React.SetStateAction<DocumentCreationInformation>>
     isModeFull: boolean
@@ -32,7 +31,6 @@ interface Props {
 }
 
 const EditDocumentCreationInformation = ({
-    fullnameModifiedBy,
     documentCreationInformation,
     setDocumentCreationInformation,
     isModeFull,
@@ -52,7 +50,6 @@ const EditDocumentCreationInformation = ({
     const [increIndex, setIncreIndex] = useState(0)
     const [isAdd, setIsAdd] = useState(false)
     const [isAnonymous, setIsAnonymous] = useState(false)
-    const [isDelete, setIsDelete] = useState(false)
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const index: string = e.target.value
@@ -89,6 +86,15 @@ const EditDocumentCreationInformation = ({
     }
 
     useEffect(() => {
+        if (!CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.created)) {
+            setDataCreated(handleCreated(documentCreationInformation.created))
+        } else {
+            setDataCreated(handleCreated(new Date().toISOString()))
+        }
+    }, [documentCreationInformation.created])
+
+
+    useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation.creator)) {
             if (!isAnonymous) {
                 setCreator(
@@ -96,28 +102,7 @@ const EditDocumentCreationInformation = ({
                 )
             }
         }
-
-        if (
-            CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation.creator) &&
-            typeof documentCreationInformation.createdBy !== 'undefined' &&
-            CommonUtils.isNullEmptyOrUndefinedArray(creator) &&
-            !isDelete
-        ) {
-            const creators: InputKeyValue[] = []
-            const creator: InputKeyValue = {
-                key: 'Person',
-                value: fullnameModifiedBy + ' (' + documentCreationInformation.createdBy + ')',
-            }
-            creators.push(creator)
-            setCreator(creators)
-        }
-
-        if (!CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.created)) {
-            setDataCreated(handleCreated(documentCreationInformation.created))
-        } else {
-            setDataCreated(handleCreated(new Date().toISOString()))
-        }
-    }, [documentCreationInformation.created])
+    }, [documentCreationInformation.creator])
 
     const convertCreator = (creators: Creator[]) => {
         const inputs: InputKeyValue[] = []
@@ -663,7 +648,7 @@ const EditDocumentCreationInformation = ({
                                 <label className='lableSPDX' htmlFor='creator'>
                                     6.8 Creators
                                 </label>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }} id='spdx-creator'>
                                     <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
                                         <label className='sub-title lableSPDX' htmlFor='creator-anonymous'>
                                             Anonymous
@@ -682,7 +667,6 @@ const EditDocumentCreationInformation = ({
                                             setInputList={setCreator}
                                             isAnonymous={isAnonymous}
                                             setDataCreators={setDataCreators}
-                                            setIsDelete={setIsDelete}
                                         />
                                     </div>
                                     <input

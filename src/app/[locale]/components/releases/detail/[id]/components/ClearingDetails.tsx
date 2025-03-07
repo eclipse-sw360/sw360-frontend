@@ -225,8 +225,8 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
                     <tr>
                         <td>{t('External URL')}:</td>
                         <td>
-                            {release.clearingInformation && (
-                                <Link href={release.clearingInformation.externalUrl as string}>
+                            {(release.clearingInformation && release.clearingInformation.externalUrl !== undefined) && (
+                                <Link href={release.clearingInformation.externalUrl}>
                                     {release.clearingInformation.externalUrl}
                                 </Link>
                             )}
