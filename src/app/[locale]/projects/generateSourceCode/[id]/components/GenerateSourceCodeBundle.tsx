@@ -1,4 +1,4 @@
-// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -182,7 +182,7 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
                 <div className={`text-center ${row_color_class} border-0-cell`}
                     key={`${release_id}_level`}
                 >1</div>,
-                <Link href={`/component/release/detail/${release_id}`} 
+                <Link href={`/components/releases/detail/${release_id}`} 
                     className={`text-center text-link ${row_color_class} border-0-cell`} key={`${release_id}_release_name`}>
                     {r.name ?? ''}{r.version ?? ` ${r.version}`}
                 </Link>,

@@ -54,7 +54,11 @@ export interface AttachmentUsage {
     usageData?: {
         sourcePackage?: object
         manuallySet?: object
-        licenseInfo?: object
+        licenseInfo?: {
+            excludedLicenseIds: string[]
+            projectPath: string
+            includeConcludedLicense: boolean
+        }
     }
 }
 
