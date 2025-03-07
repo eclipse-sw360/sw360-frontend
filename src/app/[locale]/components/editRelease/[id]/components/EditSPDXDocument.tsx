@@ -62,7 +62,6 @@ const EditSPDXDocument = ({
     setErrorCreator,
 }: Props) : ReactNode => {
     const t = useTranslations('default')
-    const [fullnameModifiedBy, setFullnameModifiedBy] = useState<string>('')
     const [documentCreationInformation, setDocumentCreationInformation] = useState<DocumentCreationInformation>({})
     const [packageInformation, setPackageInformation] = useState<PackageInformation>({})
     const [externalDocumentRefs, setExternalDocumentRefs] = useState<ExternalDocumentReferences[]>([])
@@ -163,18 +162,17 @@ const EditSPDXDocument = ({
 
                 // DocumentCreationInformation
                 if (
-                    !CommonUtils.isNullOrUndefined(release._embedded) &&
-                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:documentCreationInformation'])
+                    !CommonUtils.isNullOrUndefined(SPDXPayload.documentCreationInformation)
                 ) {
-                    setDocumentCreationInformation(release._embedded['sw360:documentCreationInformation'])
+                    setDocumentCreationInformation(SPDXPayload.documentCreationInformation)
                     // ExternalDocumentRefs
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs
+                            SPDXPayload.documentCreationInformation.externalDocumentRefs
                         )
                     ) {
                         setExternalDocumentRefs(
-                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs.toSorted(
+                            SPDXPayload.documentCreationInformation.externalDocumentRefs.toSorted(
                                 (e1, e2) => e1.index - e2.index
                             )
                         )
@@ -238,12 +236,6 @@ const EditSPDXDocument = ({
                         setIsTypeCateGoryEmpty(false)
                     }
                 }
-                if (
-                    !CommonUtils.isNullOrUndefined(release._embedded) &&
-                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:createdBy'])
-                ) {
-                    setFullnameModifiedBy(release._embedded['sw360:createdBy'].fullName ?? '')
-                }
             })
             .catch((err) => console.error(err))
     }, [releaseId])
@@ -280,7 +272,6 @@ const EditSPDXDocument = ({
             {isModeFull ? (
                 <div className='col'>
                     <EditDocumentCreationInformation
-                        fullnameModifiedBy={fullnameModifiedBy}
                         isModeFull={isModeFull}
                         documentCreationInformation={documentCreationInformation}
                         setDocumentCreationInformation={setDocumentCreationInformation}
@@ -356,7 +347,6 @@ const EditSPDXDocument = ({
             ) : (
                 <div className='col'>
                     <EditDocumentCreationInformation
-                        fullnameModifiedBy={fullnameModifiedBy}
                         isModeFull={isModeFull}
                         documentCreationInformation={documentCreationInformation}
                         setDocumentCreationInformation={setDocumentCreationInformation}

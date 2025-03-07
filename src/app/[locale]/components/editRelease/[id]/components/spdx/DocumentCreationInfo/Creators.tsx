@@ -17,10 +17,9 @@ interface Props {
     inputList: InputKeyValue[]
     isAnonymous: boolean
     setDataCreators: (inputs: InputKeyValue[]) => void
-    setIsDelete: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function Creators({ inputList, setInputList, isAnonymous, setDataCreators, setIsDelete }: Props) : ReactNode {
+function Creators({ inputList, setInputList, isAnonymous, setDataCreators }: Props) : ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: InputKeyValue[] = [...inputList]
@@ -34,7 +33,6 @@ function Creators({ inputList, setInputList, isAnonymous, setDataCreators, setIs
         list.splice(index, 1)
         setInputList(list)
         setDataCreators(list)
-        setIsDelete(true)
     }
 
     const handleAddClick = () => {
