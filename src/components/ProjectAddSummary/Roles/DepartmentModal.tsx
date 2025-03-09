@@ -16,7 +16,7 @@ import { getSession } from 'next-auth/react'
 import CommonUtils from '@/utils/common.utils'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils/index'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, type JSX } from 'react';
 import React from 'react'
 import Table, { TableProps } from '@/components/sw360/Table/Table'
 

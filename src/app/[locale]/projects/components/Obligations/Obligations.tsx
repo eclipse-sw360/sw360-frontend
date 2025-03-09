@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Button, Nav, Tab, Dropdown } from 'react-bootstrap'

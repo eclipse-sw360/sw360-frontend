@@ -12,6 +12,8 @@ import { Metadata } from 'next'
 
 import Projects from './components/Projects'
 
+import type { JSX } from "react";
+
 export const metadata: Metadata = {
     title: 'Projects',
 }

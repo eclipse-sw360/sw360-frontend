@@ -15,6 +15,8 @@ import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
+import type { JSX } from "react";
+
 const UserProfile = <Image className={navbarStyles.profileImage} src={sw360ProfileIcon as StaticImport} alt='Profile' />
 
 function ProfileDropdown() : JSX.Element {

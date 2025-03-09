@@ -11,7 +11,7 @@
 
 import { AdministrationDataType } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 
 const Capitalize = (text: string) => {
     return text

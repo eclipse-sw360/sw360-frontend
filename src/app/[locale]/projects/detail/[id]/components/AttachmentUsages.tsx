@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useEffect, useState, SetStateAction, Dispatch } from 'react'
+import { useEffect, useState, SetStateAction, Dispatch, type JSX } from 'react';
 import { Spinner } from 'react-bootstrap'
 import MessageService from '@/services/message.service'
 

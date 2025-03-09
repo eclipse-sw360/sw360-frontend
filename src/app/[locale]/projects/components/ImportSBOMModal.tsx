@@ -11,7 +11,7 @@
 
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, type JSX } from 'react';
 import { Alert, Modal } from 'react-bootstrap'
 
 import { HttpStatus } from '@/object-types'

@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 import { QuickFilter, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { FiEdit2 } from 'react-icons/fi'

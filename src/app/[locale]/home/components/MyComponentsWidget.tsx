@@ -11,7 +11,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
 import { Spinner } from 'react-bootstrap'
 
 import { HttpStatus } from '@/object-types'

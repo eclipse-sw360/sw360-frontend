@@ -7,14 +7,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { useTranslations } from 'next-intl'
 
 import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectPayload, RolesType, Vendor } from '@/object-types'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import Roles from './Roles/Roles'
 import GeneralInformation from './component/Summary/GeneralInformation'
+
+import type { JSX } from "react";
 
 interface Props {
     vendor: Vendor

@@ -14,6 +14,8 @@ import UserOperationType from './UserOperationType'
 import SecondaryDepartmentsAndRoles from './SecondaryDepartmentsAndRoles'
 import { UserGroupType } from '@/object-types'
 
+import type { JSX } from "react";
+
 interface Props {
     userPayload: UserPayload
     handleChange: (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => void

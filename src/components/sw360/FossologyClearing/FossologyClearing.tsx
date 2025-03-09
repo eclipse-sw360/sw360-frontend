@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import { Alert, Button, Modal } from 'react-bootstrap'
 
 import { Attachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus, ReleaseDetail } from '@/object-types'

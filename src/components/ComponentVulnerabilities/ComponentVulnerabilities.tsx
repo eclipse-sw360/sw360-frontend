@@ -10,7 +10,7 @@
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 

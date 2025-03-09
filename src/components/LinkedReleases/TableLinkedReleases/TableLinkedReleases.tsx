@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import React from 'react'
+import React, { type JSX } from 'react';
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { ReleaseLink } from '@/object-types'

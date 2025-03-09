@@ -8,13 +8,14 @@
 // License-Filename: LICENSE
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-'use client'
-
+'use client';
 import Link from 'next/link'
 
 import { useTranslations } from 'next-intl'
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
+
+import type { JSX } from "react";
 
 function PageButtonHeader({
     title,
@@ -41,7 +42,7 @@ function PageButtonHeader({
                         {value.name}
                     </button>
                 </Link>
-            )
+            );
         })
     }
 

@@ -14,7 +14,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
 import { Spinner } from 'react-bootstrap'
 import HomeTableHeader from './HomeTableHeader'
 

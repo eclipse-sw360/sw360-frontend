@@ -10,7 +10,7 @@
 
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type JSX } from 'react';
 
 import { Attachment, Embedded, HttpStatus} from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'

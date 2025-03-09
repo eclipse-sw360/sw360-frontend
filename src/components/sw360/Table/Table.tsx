@@ -50,7 +50,7 @@ const createTableProps = (tableProps: TableProps) => {
 }
 
 class Table extends Component<TableProps, unknown> {
-    private wrapper: RefObject<HTMLDivElement> = createRef()
+    private wrapper: RefObject<HTMLDivElement | null> = createRef()
     // Grid.js instance
     private readonly instance: Grid | null = null
     private tableProps: TableProps = {}
@@ -102,7 +102,7 @@ class Table extends Component<TableProps, unknown> {
             .forceRender()
     }
 
-    render(): React.ReactElement {
+    render(): React.ReactElement<any> {
         return (
             <>
                 {(this.props.selector === true) && (

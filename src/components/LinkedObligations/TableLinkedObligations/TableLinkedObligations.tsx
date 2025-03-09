@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState } from 'react'
+import React, { useState, type JSX } from 'react';
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { useTranslations } from 'next-intl'
@@ -67,7 +67,7 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
                     attachmentDetail.hidden = true
                 }
             }
-        }
+        };
     }
 
     const style = {

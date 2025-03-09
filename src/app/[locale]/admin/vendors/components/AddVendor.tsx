@@ -14,7 +14,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import VendorDetailForm from './VendorDetailForm'
 import MessageService from '@/services/message.service'
 

@@ -12,7 +12,7 @@
 import { getSession, signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { SelectUsersDialog, ShowInfoOnHover } from "next-sw360"
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useCallback, useEffect, useState, type JSX } from "react";
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
 import { BsCheck2Square } from "react-icons/bs"
 import { ClearingRequestDetails,

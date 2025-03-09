@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { FaFileAlt } from 'react-icons/fa'
 
 import { Changelogs } from '@/object-types'

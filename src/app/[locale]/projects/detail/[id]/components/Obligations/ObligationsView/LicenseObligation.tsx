@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type JSX } from 'react';
 import { Table, _ } from '@/components/sw360'
 import { ProjectObligationsList, LicenseObligationRelease } from '@/object-types'
 import { useSession } from 'next-auth/react'

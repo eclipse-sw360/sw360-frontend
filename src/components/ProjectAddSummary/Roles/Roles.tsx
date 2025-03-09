@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { GiCancel } from 'react-icons/gi'
 
 import { SelectUsersDialog, SelectCountry } from 'next-sw360'

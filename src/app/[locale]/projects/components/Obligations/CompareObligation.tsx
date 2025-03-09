@@ -13,7 +13,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
 import { notFound } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useRef, useState, type JSX } from 'react';
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 

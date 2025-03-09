@@ -9,11 +9,14 @@
 
 import EditProject from './components/EditProject'
 
+import type { JSX } from "react";
+
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-const ProjectEditPage = ({ params }: Context): JSX.Element => {
+const ProjectEditPage = async (props: Context): Promise<JSX.Element> => {
+    const params = await props.params;
     const projectId = params.id
 
     return <EditProject projectId={projectId} />

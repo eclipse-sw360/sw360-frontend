@@ -10,7 +10,7 @@
 
 'used-client'
 
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
 
 import { Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'

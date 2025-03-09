@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import CommonUtils from '@/utils/common.utils'
 import PrettyFormatData from '@/components/PrettyFormatData/PrettyFormatData'
 import createChangesCards from '../CreateChangeCard'

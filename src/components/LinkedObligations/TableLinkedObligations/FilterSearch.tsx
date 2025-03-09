@@ -7,8 +7,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
+'use client';
 import styles from './TableLinkedObligations.module.css'
+
+import type { JSX } from "react";
 
 interface Props {
     title?: string

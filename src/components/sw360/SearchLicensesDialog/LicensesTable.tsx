@@ -10,7 +10,7 @@
 
 'use client'
 
-import React from 'react'
+import React, { type JSX } from 'react';
 import { Table } from 'next-sw360'
 import { Form } from 'react-bootstrap'
 

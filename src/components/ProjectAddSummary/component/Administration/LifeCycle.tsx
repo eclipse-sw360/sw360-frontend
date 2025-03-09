@@ -7,12 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { useTranslations } from 'next-intl'
 
 import { ProjectPayload } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
+
+import type { JSX } from "react";
 
 interface Props {
     projectPayload: ProjectPayload

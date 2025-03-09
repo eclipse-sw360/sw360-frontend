@@ -14,7 +14,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState, type JSX } from 'react';
 import { Spinner, Tooltip, OverlayTrigger, ButtonGroup, Dropdown } from 'react-bootstrap'
 import Link from 'next/link'
 import { FaPencilAlt } from 'react-icons/fa'
@@ -52,7 +52,7 @@ type RowData = (string | ListViewData | JSX.Element)[]
 const upperCaseWithUnderscore = (text: string | undefined) => {
     return (text !== undefined)
         ? text.trim().toUpperCase().replace(/ /g, '_')
-        : undefined
+        : undefined;
 }
 
 const nameFormatter = (name: string) => {

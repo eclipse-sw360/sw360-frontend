@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 
 import { DocumentTypes, Resources } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'

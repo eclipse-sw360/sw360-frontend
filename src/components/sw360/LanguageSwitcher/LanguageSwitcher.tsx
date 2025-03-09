@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, type JSX } from 'react';
 import { usePathname, useRouter } from '../../../navigation'
 
 import { LOCALES } from '@/constants'

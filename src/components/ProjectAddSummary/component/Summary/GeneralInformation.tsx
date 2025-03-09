@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useCallback, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useState, type JSX } from 'react';
 import { GiCancel } from 'react-icons/gi'
 
 import { ProjectPayload, Vendor } from '@/object-types'

@@ -9,7 +9,7 @@
 
 'use client'
 
-import React from 'react'
+import React, { type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { AdvancedSearch, Table, _ } from 'next-sw360'

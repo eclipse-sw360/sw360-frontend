@@ -15,7 +15,7 @@
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import ViewFileListIcon from './ViewFileListIcon'
 import CommonUtils from '@/utils/common.utils'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, type JSX } from 'react';
 import { Button, Modal } from 'react-bootstrap'
 import { TiWarningOutline } from 'react-icons/ti'
 import { ApiUtils } from '@/utils/index'
@@ -136,62 +136,58 @@ const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen
         void fetchReleasesToFilesMapping()
     }, [isFileModalOpen, fetchReleasesToFilesMapping])
 
-    return (
-        (licensesToSourceFilesMapping) ?
-        <Modal show={isFileModalOpen} onHide={() => { closeModal() }}
-            backdrop='static'
-            className={`view-file-list ${licensesToSourceFilesMapping.status === 'failure' ? 'modal-warning' : 'modal-info'}`}
-            size='lg'
-            centered
-        >
-            <Modal.Header closeButton>
-                <Modal.Title>
-                    {
-                        licensesToSourceFilesMapping.status === 'failure'
-                            ?
-                            <><TiWarningOutline size={24} /> {t('Warning')}</>
-                            :
-                            <><IoMdInformationCircleOutline size={24} /> {licensesToSourceFilesMapping.releaseName}</>
-                    }
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
+    return (licensesToSourceFilesMapping ? <Modal show={isFileModalOpen} onHide={() => { closeModal() }}
+        backdrop='static'
+        className={`view-file-list ${licensesToSourceFilesMapping.status === 'failure' ? 'modal-warning' : 'modal-info'}`}
+        size='lg'
+        centered
+    >
+        <Modal.Header closeButton>
+            <Modal.Title>
                 {
                     licensesToSourceFilesMapping.status === 'failure'
                         ?
-                        <div className='mapping-data'>
-                            {t('Failed to load source file with error')}: <b>{t(licensesToSourceFilesMapping.message)}!</b>
-                        </div>
+                        <><TiWarningOutline size={24} /> {t('Warning')}</>
                         :
-                        <div className='mapping-data'>
-                            <div className='file-name'>
-                                {t('File name')}: <b>{licensesToSourceFilesMapping.attachmentName}</b>
-                            </div>
-                            <div className='lic-type'>
-                                {t('License type')}: <b>{(licenseMappingData) ? licenseMappingData.licenseType : ''}</b>
-                            </div>
-                            <div className='lic-name'>
-                                {t('License name')}: <b>{license}</b>
-                            </div>
-                            <ul>
-                                {licenseMappingData ?
-                                    Object.values(licenseMappingData.sourcesFiles).map(fileName =>
-                                        <>{fileName.split(/\s+|\n+/).map((name: string) => <li key={name}><b>{name}</b></li>)}</>
-                                    )
-                                    : <li><b>{t('Source file information not found in CLI')}!</b></li>
-                                }
-                            </ul>
-                        </div>
+                        <><IoMdInformationCircleOutline size={24} /> {licensesToSourceFilesMapping.releaseName}</>
                 }
-            </Modal.Body>
-            <Modal.Footer className='justify-content-end'>
-                <Button variant='light' onClick={() => { closeModal() }}>
-                    OK
-                </Button>
-            </Modal.Footer>
-        </Modal>
-        : <></>
-    )
+            </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            {
+                licensesToSourceFilesMapping.status === 'failure'
+                    ?
+                    <div className='mapping-data'>
+                        {t('Failed to load source file with error')}: <b>{t(licensesToSourceFilesMapping.message)}!</b>
+                    </div>
+                    :
+                    <div className='mapping-data'>
+                        <div className='file-name'>
+                            {t('File name')}: <b>{licensesToSourceFilesMapping.attachmentName}</b>
+                        </div>
+                        <div className='lic-type'>
+                            {t('License type')}: <b>{(licenseMappingData) ? licenseMappingData.licenseType : ''}</b>
+                        </div>
+                        <div className='lic-name'>
+                            {t('License name')}: <b>{license}</b>
+                        </div>
+                        <ul>
+                            {licenseMappingData ?
+                                Object.values(licenseMappingData.sourcesFiles).map(fileName =>
+                                    <>{fileName.split(/\s+|\n+/).map((name: string) => <li key={name}><b>{name}</b></li>)}</>
+                                )
+                                : <li><b>{t('Source file information not found in CLI')}!</b></li>
+                            }
+                        </ul>
+                    </div>
+            }
+        </Modal.Body>
+        <Modal.Footer className='justify-content-end'>
+            <Button variant='light' onClick={() => { closeModal() }}>
+                OK
+            </Button>
+        </Modal.Footer>
+    </Modal> : <></>);
 }
 
 export default TogglerLicenseList

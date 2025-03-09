@@ -24,7 +24,7 @@ import { signOut, useSession, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import { notFound } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState, type JSX } from 'react';
 import TableHeader from './TableHeader'
 
 interface interimDataType {

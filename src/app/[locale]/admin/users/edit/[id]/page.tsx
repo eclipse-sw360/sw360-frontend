@@ -10,7 +10,7 @@
 
 'use client'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ApiUtils, CommonUtils } from '@/utils'

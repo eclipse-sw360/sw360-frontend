@@ -12,7 +12,7 @@
 
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, useRef } from 'react'
+import { useState, useRef, type JSX } from 'react';
 import { Button, Modal } from 'react-bootstrap'
 
 import { HttpStatus, User, Embedded } from '@/object-types'

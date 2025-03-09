@@ -12,10 +12,11 @@ import { ReactNode } from 'react'
 import AddRelease from './components/AddRelease'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-const ReleaseAddPage = ({ params }: Context) : ReactNode => {
+const ReleaseAddPage = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params;
     const componentId = params.id
 
     return <AddRelease componentId={componentId} />

@@ -10,7 +10,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import React, { useTransition } from 'react'
+import React, { useTransition, type JSX } from 'react';
 import { NavDropdown } from 'react-bootstrap'
 
 import { LOCALES } from '@/constants'

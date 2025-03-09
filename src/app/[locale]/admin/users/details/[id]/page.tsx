@@ -15,7 +15,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, User } from '@/object-types'
 import { notFound, useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { PageSpinner } from '@/components/sw360'
 import { getSession, signOut } from 'next-auth/react'
 

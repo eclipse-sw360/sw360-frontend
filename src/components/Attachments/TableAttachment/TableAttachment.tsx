@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState } from 'react'
+import React, { useState, type JSX } from 'react';
 
 import { useTranslations } from 'next-intl'
 import { FaTrashAlt } from 'react-icons/fa'

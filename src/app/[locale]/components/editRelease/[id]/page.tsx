@@ -12,10 +12,11 @@ import { ReactNode } from 'react'
 import EditRelease from './components/EditRelease'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-const ReleaseEditPage = ({ params }: Context) : ReactNode => {
+const ReleaseEditPage = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params;
     const releaseId = params.id
 
     return <EditRelease releaseId={releaseId} />

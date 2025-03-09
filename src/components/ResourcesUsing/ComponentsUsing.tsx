@@ -11,7 +11,7 @@
 import { Component } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Table, _ } from '../sw360'
 import styles from './ResourceUsing.module.css'
 

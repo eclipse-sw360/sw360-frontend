@@ -10,15 +10,18 @@
 import { Metadata } from 'next'
 import EditClearingRequest from './components/EditClearingRequest'
 
+import type { JSX } from "react";
+
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export const metadata: Metadata = {
     title: 'Requests',
 }
 
-const EditClearingRequestPage = ({ params }: Context): JSX.Element => {
+const EditClearingRequestPage = async (props: Context): Promise<JSX.Element> => {
+    const params = await props.params;
     return <EditClearingRequest clearingRequestId={params.id} />
 }
 

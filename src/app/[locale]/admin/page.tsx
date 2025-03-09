@@ -10,6 +10,8 @@
 import { Metadata } from 'next'
 import AdminMainPage from './components/Admin'
 
+import type { JSX } from "react";
+
 export const metadata: Metadata = {
     title: 'Admin',
 }

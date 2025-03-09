@@ -19,7 +19,7 @@ import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import Obligations from '../../../components/Obligations/Obligations'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'

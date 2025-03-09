@@ -9,11 +9,14 @@
 
 import DuplicateProject from './components/DuplicateProject'
 
+import type { JSX } from "react";
+
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-const ProjectDuplicatePage = ({ params }: Context): JSX.Element => {
+const ProjectDuplicatePage = async (props: Context): Promise<JSX.Element> => {
+    const params = await props.params;
     const projectId = params.id
 
     return <DuplicateProject projectId={projectId} />

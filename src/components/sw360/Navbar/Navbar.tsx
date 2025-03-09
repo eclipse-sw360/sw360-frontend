@@ -13,7 +13,7 @@
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useRouter, useSelectedLayoutSegment } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
 
 import sw360logo from '@/assets/images/sw360-logo.svg'

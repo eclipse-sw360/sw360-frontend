@@ -13,14 +13,15 @@ import EditPackage from './components/EditPackage'
 import { ReactNode } from 'react'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export const metadata: Metadata = {
     title: 'Packages',
 }
 
-function PackagesList({ params }: Context) : ReactNode {
+async function PackagesList(props: Context): Promise<ReactNode> {
+    const params = await props.params;
     return <EditPackage packageId={params.id} />
 }
 

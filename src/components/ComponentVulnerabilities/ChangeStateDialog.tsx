@@ -12,7 +12,7 @@
 
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, type JSX } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap'
 
 import { ApiUtils, CommonUtils } from '@/utils'

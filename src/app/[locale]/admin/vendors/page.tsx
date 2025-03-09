@@ -11,6 +11,8 @@ import { Metadata } from 'next'
 
 import VendorsList from './components/VendorsList'
 
+import type { JSX } from "react";
+
 export const metadata: Metadata = {
     title: 'Admin - Vendors',
 }

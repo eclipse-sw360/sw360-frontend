@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React from 'react'
+import React, { type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 
 export default function TitleAttachment(): JSX.Element {

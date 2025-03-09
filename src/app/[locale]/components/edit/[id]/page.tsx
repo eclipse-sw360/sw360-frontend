@@ -12,10 +12,11 @@ import { ReactNode } from 'react'
 import EditComponent from './components/EditComponent'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-const ComponentEditPage = ({ params }: Context) : ReactNode => {
+const ComponentEditPage = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params;
     const componentId = params.id
 
     return <EditComponent componentId={componentId} />

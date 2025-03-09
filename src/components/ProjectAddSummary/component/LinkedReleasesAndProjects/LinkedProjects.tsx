@@ -14,7 +14,7 @@ import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjec
 import { LinkedProjectData, ProjectPayload } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 
 interface Props {
     projectPayload: ProjectPayload
