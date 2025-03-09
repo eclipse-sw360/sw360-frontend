@@ -9,21 +9,28 @@
 
 'use client'
 
-import { Embedded, ECC } from '@/object-types'
+import { ECC, Embedded } from '@/object-types'
+import DownloadService from '@/services/download.service'
+import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { Spinner } from 'react-bootstrap'
-import { CommonUtils } from '@/utils'
+import { Button, Spinner } from 'react-bootstrap'
 
 type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
+
+interface Props {
+    projectId: string,
+    projectName?: string,
+    projectVersion?: string
+}
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function EccDetails({ projectId }: { projectId: string }): JSX.Element {
+export default function EccDetails({ projectId, projectName, projectVersion}: Props): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -111,8 +118,28 @@ export default function EccDetails({ projectId }: { projectId: string }): JSX.El
         }
     }
 
+    const exportSpreadsheet = () => {
+        try {
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const currentDate = new Date().toISOString().split('T')[0]
+            const eccSpreadSheetName = `releases-${projectName}-${projectVersion}-${currentDate}.xlsx`
+            const url = `reports?projectId=${projectId}&module=projectReleaseSpreadSheetWithEcc&mimetype=xlsx`
+            DownloadService.download(url, session, eccSpreadSheetName)
+        }
+        catch(e) {
+            console.error(e)
+        }
+    }
+
     return (
         <>
+            <Button variant='secondary'
+                    className='col-auto'
+                    onClick={() => exportSpreadsheet()}
+            >
+                {t('Export Spreadsheet')}
+            </Button>
             {status === 'authenticated' ? (
                 <Table columns={columns} server={initServerPaginationConfig()} selector={true} sort={false} />
             ) : (

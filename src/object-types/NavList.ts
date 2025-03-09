@@ -40,7 +40,7 @@ function NavList(): NavItem[] {
                 { href: '#', name: t('Import Export'), id: 'admin_import_export' },
                 { href: '/admin/databaseSanitation', name: t('Database Sanitation'), id: 'admin_database_sanitation' },
                 { href: '#', name: t('Attachment Cleanup'), id: 'admin_attachment_cleanup' },
-                { href: '#', name: t('OAuth Client'), id: 'admin_oauth_client' },
+                { href: '/admin/oauthclient', name: t('OAuth Client'), id: 'admin_oauth_client' },
                 { href: '#', name: t('License Types'), id: 'admin_license_types' },
                 { href: '#', name: t('Department'), id: 'admin_department' },
             ],
