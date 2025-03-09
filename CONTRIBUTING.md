@@ -18,7 +18,7 @@ It is recommended for easy development start usage of VSCode and Docker. A devel
 If you intend to do in a local environment by yourself, the base requirements are pretty baseic, NodeJS LTS version and an editor of your choice. Then run:
 
 ```bash
-> npm install
+> npm install -G pnpm
 ```
 
 ### Running test environment
@@ -35,7 +35,6 @@ NEXTAUTH_URL = 'http://localhost:3000'
 Then run:
 
 ```bash
-> npm install pnpm
 > pnpm run dev
 ```
 
