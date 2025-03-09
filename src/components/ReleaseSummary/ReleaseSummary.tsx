@@ -548,4 +548,4 @@ const ReleaseSummary = ({
     )
 }
 
-export default React.memo(ReleaseSummary)
+export default ReleaseSummary

@@ -12,7 +12,7 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, Vendor, ProjectPayload, ActionType, ProjectObligation, ReleaseDetail } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, Vendor, ProjectPayload, ActionType, ProjectObligation, ReleaseDetail, DocumentTypes } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
@@ -24,6 +24,7 @@ import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import Obligations from '../../../components/Obligations/Obligations'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
+import EditAttachments from '@/components/Attachments/EditAttachments'
 
 interface LinkedReleaseProps {
     release?: string
@@ -486,7 +487,14 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                                                     setProjectPayload={setProjectPayload}
                                             />
                                         </Tab.Pane>
-                                        <Tab.Pane eventKey='attachments'></Tab.Pane>
+                                        <Tab.Pane eventKey='attachments'>
+                                            <EditAttachments
+                                                documentId={projectId}
+                                                documentType={DocumentTypes.PROJECT}
+                                                documentPayload={projectPayload}
+                                                setDocumentPayload={setProjectPayload}
+                                            />
+                                        </Tab.Pane>
                                         <Tab.Pane eventKey='obligations'>
                                             <Obligations projectId={projectId} actionType={ActionType.EDIT} payload={obligations} setPayload={setObligations}/>
                                         </Tab.Pane>

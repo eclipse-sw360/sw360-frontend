@@ -139,7 +139,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
             <Modal.Body>
                 <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
                     {
-                        t(message as never)
+                        !CommonUtils.isNullEmptyOrUndefinedString(message) && t(message as never)
                     }
                 </Alert>
                 {

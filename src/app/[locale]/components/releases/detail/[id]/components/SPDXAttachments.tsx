@@ -15,7 +15,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
 import { FiAlertTriangle } from 'react-icons/fi'
 
-import { Attachment, AttachmentType, Embedded, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentTypes, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 import SPDXLicenseView from './SPDXLicenseView'
@@ -165,7 +165,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         if (response.status === HttpStatus.OK) {
             const data = (await response.json()) as { [key: string]: string | Array<string> } & Embedded<
                 Attachment,
-                'sw360:attachmentDTOes'
+                'sw360:attachments'
             >
             return data
         } else if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -195,7 +195,8 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         setTableData(newData)
     }
 
-    const filterAttachmentByType = (attachments: Array<Attachment>, types: Array<string>) => {
+    const filterAttachmentByType = (attachments: Array<Attachment> | undefined, types: Array<string>) => {
+        if (!attachments) return []
         return attachments.filter((attachment) => types.includes(attachment.attachmentType))
     }
 
@@ -229,18 +230,15 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         }
 
         fetchData(`releases/${releaseId}/attachments`)
-            .then((response: Embedded<Attachment, 'sw360:attachmentDTOes'> | undefined) =>
-                response ? response._embedded['sw360:attachmentDTOes'] : [],
-            )
-            .then((attachments: Array<Attachment>) => {
-                const isrAttachments = filterAttachmentByType(attachments, [AttachmentType.INITIAL_SCAN_REPORT])
+            .then((response: Embedded<Attachment, 'sw360:attachments'> | undefined) => {
+                const attachments = response ? response._embedded['sw360:attachments'] : []
+                const isrAttachments = filterAttachmentByType(attachments, [AttachmentTypes.INITIAL_SCAN_REPORT])
                 const cliAndClxAttachments = filterAttachmentByType(attachments, [
-                    AttachmentType.COMPONENT_LICENSE_INFO_XML,
-                    AttachmentType.COMPONENT_LICENSE_INFO_COMBINED,
+                    AttachmentTypes.COMPONENT_LICENSE_INFO_XML,
+                    AttachmentTypes.COMPONENT_LICENSE_INFO_COMBINED,
                 ])
                 convertToTableData(isrAttachments, cliAndClxAttachments)
-            })
-            .catch((err) => console.error(err))
+            }).catch((err) => console.error(err))
     }, [releaseId, fetchData])
 
     return (

@@ -83,6 +83,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
 
     const importFile = async () => {
         try {
+            setImportState(ImportSBOMState.IMPORTING)
             const session = await getSession()
             if(CommonUtils.isNullOrUndefined(session))
                 return signOut()
@@ -99,6 +100,21 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
             )
             if (response.status === HttpStatus.OK) {
                 setImportError({ variant: 'success', message: <p>{t('SBOM imported successfully')}</p> })
+            } else if (response.status === HttpStatus.CONFLICT) {
+                const errorMessage = await response.text();
+
+                const match = errorMessage.match(/The projectId is:\s*(\S+)/);
+                const projectId = match ? match[1].replace(/"/g, '') : 'Unknown';
+                setImportError({
+                    variant: 'danger',
+                    message: (
+                        <div>
+                            <strong>{t('Duplicate SBOM')}:</strong>
+                            <p>{t('A project with the same name and version already exists')}. {t('Please import this SBOM from project details page')}</p>
+                            <p><a href={`/projects/detail/${projectId}`}>{t('Click here to open project details page')}</a></p>
+                        </div>
+                    )
+                });
             } else {
                 setImportError({ variant: 'danger', message: <p>{t('SBOM import failed')}</p> })
             }
@@ -254,7 +270,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                         </div>
                     </>
                 )}
-                {importState === ImportSBOMState.IMPORTING && <h4 className="fw-bold">{t('Importing')}...</h4>}
+                {importState === ImportSBOMState.IMPORTING && <h5 className="fw-bold">{t('Importing SBOM file')}...</h5>}
                 {importState === ImportSBOMState.CONFIRM_IMPORT && 
                     <p className='fw-bold'>
                         {
@@ -298,6 +314,15 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                     >
                         {t('Upload and Import')}
                     </button>
+                )}
+                {importState === ImportSBOMState.IMPORTING && (
+                        <button
+                            type='button'
+                            className='fw-bold btn btn-primary'
+                            
+                        >
+                            <span className="spinner-border spinner-border-sm me-2"></span>
+                        </button>
                 )}
             </Modal.Footer>
         </Modal>

@@ -29,5 +29,5 @@ export default interface ComponentPayload {
     mailinglist?: string
     wiki?: string
     blog?: string
-    attachmentDTOs?: Array<Attachment> | null
+    attachments?: Array<Attachment> | null
 }
