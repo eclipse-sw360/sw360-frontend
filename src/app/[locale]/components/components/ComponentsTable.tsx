@@ -68,7 +68,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
                     Object.entries(licenseIds)
                         .map(
                             ([, item]: Array<string>): React.ReactNode => (
-                                <Link key={item} className='link' href={'/licenses/' + item}>
+                                <Link key={item} className='link' href={'/licenses/detail/?id=' + item}>
                                     {' '}
                                     {item}{' '}
                                 </Link>
