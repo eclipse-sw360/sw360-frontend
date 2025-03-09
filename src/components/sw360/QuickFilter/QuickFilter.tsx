@@ -9,7 +9,7 @@
 
 'use client'
 
-import React from 'react'
+import React, { type JSX } from 'react';
 import { Form } from 'react-bootstrap'
 import { QuickFilterProps } from './QuickFilter.types'
 

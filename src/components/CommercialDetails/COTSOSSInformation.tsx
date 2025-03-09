@@ -8,9 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
+'use client';
 import { Release } from '@/object-types'
 import { useTranslations } from 'next-intl'
+
+import type { JSX } from "react";
 
 interface Props {
     releasePayload: Release

@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Dispatch, SetStateAction, useState, useEffect } from 'react'
+import { Dispatch, SetStateAction, useState, useEffect, type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Table, _ } from '@/components/sw360'

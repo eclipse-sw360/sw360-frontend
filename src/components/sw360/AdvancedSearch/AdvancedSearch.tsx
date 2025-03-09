@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useState, type JSX } from 'react';
 import { Button, Form } from 'react-bootstrap'
 
 import CommonUtils from '@/utils/common.utils'

@@ -8,8 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { useTranslations } from 'next-intl'
 
 import { Button, Form, Modal } from 'react-bootstrap'
@@ -17,6 +16,8 @@ import { Button, Form, Modal } from 'react-bootstrap'
 import { Obligation } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { BsQuestionCircle } from 'react-icons/bs'
+
+import type { JSX } from "react";
 
 interface Props {
     data: Array<(string | Obligation)[]>

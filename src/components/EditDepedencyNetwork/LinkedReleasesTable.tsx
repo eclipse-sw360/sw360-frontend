@@ -12,6 +12,8 @@ import { Table } from 'react-bootstrap'
 import { ShowInfoOnHover } from 'next-sw360'
 import { useTranslations } from 'next-intl'
 
+import type { JSX } from "react";
+
 const LinkedReleasesTable = ({ children }: { children: React.ReactNode }) : JSX.Element => {
     return (
         <Table>

@@ -12,10 +12,11 @@ import { ReactNode } from 'react'
 import DetailOverview from './components/DetailOverview'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-const Detail = ({ params }: Context) : ReactNode => {
+const Detail = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params;
     const releaseId = params.id
 
     return <DetailOverview releaseId={releaseId} />

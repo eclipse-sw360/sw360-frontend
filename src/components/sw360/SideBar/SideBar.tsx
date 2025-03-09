@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import styles from './SideBar.module.css'
 
 import { CommonTabIds, LinkedVulnerability, ReleaseTabIds, VulnerabilitiesVerificationState } from '@/object-types'

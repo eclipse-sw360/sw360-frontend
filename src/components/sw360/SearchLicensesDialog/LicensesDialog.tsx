@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useRef, useState } from 'react'
+import { useRef, useState, type JSX } from 'react';
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, LicenseDetail } from '@/object-types'

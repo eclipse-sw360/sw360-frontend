@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, type JSX } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
 import { CommonUtils } from '@/utils'

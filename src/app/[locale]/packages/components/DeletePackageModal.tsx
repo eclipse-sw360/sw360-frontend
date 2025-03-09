@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, type JSX } from 'react';
 import { Dispatch, SetStateAction } from 'react'
 import { HttpStatus } from '@/object-types'
 import { getSession, signOut } from 'next-auth/react'

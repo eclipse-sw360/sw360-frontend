@@ -16,7 +16,7 @@
 
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, type JSX } from 'react';
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 import { NodeData } from '@/object-types'

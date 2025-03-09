@@ -8,8 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { HttpStatus } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -18,6 +17,8 @@ import { useTranslations } from 'next-intl'
 import {  Button, Form, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
+
+import type { JSX } from "react";
 
 interface Props {
     clientId: string

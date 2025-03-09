@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { UserPayload, HttpStatus } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'

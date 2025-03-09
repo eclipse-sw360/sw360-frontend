@@ -13,7 +13,7 @@ import { HttpStatus, ProjectData, ProjectVulnerabilityTabType, Embedded, Project
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Tab, Tabs } from 'react-bootstrap'
 import VulnerabilityTab from './VulnerabilityTab'
 

@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { memo } from 'react'
+import React, { memo, type JSX } from 'react';
 import { Table } from '../sw360'
 
 interface Props {

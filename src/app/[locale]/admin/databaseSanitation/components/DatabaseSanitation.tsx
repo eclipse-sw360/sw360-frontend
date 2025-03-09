@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Table, _ } from 'next-sw360'
 import { getSession, signOut,  } from 'next-auth/react'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { notFound } from 'next/navigation'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { HttpStatus, SearchDuplicatesResponse } from '@/object-types'

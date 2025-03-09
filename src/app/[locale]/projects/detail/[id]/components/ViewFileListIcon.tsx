@@ -9,10 +9,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 import { IoMdInformationCircle } from 'react-icons/io'
+
+import type { JSX } from "react";
 
 interface Props {
     license: string,

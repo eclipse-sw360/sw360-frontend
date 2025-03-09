@@ -14,6 +14,8 @@ import 'bootstrap/dist/css/bootstrap.css'
 import Link from 'next/link'
 import styles from './footer.module.css'
 
+import type { JSX } from "react";
+
 function Footer() : JSX.Element {
     return (
         <>

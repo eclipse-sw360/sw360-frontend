@@ -20,7 +20,7 @@ import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 function AddProjects(): JSX.Element {

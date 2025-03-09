@@ -8,9 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
+'use client';
 import { LicensePayload, Obligation } from '@/object-types'
 import TableLinkedObligations from './TableLinkedObligations/TableLinkedObligations'
+
+import type { JSX } from "react";
 
 interface Props {
     data: Array<(string | Obligation)[]>

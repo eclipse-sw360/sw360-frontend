@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import ListView from './ListView'
 import TreeView from './TreeView'

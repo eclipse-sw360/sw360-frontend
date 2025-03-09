@@ -11,7 +11,7 @@
 'use client'
 
 import { MD5 } from 'crypto-js'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, type JSX } from 'react';
 import { Form, Image } from 'react-bootstrap'
 import { BsArrowCounterclockwise } from 'react-icons/bs'
 

@@ -7,12 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { ProjectPayload } from '@/object-types'
 import Clearing from './component/Administration/Clearing'
 import LicenseInfoHeader from './component/Administration/LicenseInfoHeader'
 import Lifecycle from './component/Administration/LifeCycle'
+
+import type { JSX } from "react";
 
 interface Props {
     projectPayload: ProjectPayload

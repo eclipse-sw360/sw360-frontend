@@ -20,7 +20,7 @@ import MessageService from '@/services/message.service'
 
 export default function LicenseAdministration() : ReactNode {
     const t = useTranslations('default')
-    const file = useRef<File | undefined>()
+    const file = useRef<File | undefined>(undefined)
     const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

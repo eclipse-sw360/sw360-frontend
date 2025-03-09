@@ -14,7 +14,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import LinkProjects from '../../../components/LinkProjects'
 import Administration from './Administration'

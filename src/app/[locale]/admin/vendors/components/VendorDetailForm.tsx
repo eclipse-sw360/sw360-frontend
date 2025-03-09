@@ -11,7 +11,7 @@
 
 import { Vendor } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, type JSX } from 'react';
 
 export default function VendorDetailForm({
     payload,

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type JSX } from 'react';
 import { usePathname } from 'next/navigation'
 import MessageService from '@/services/message.service'
 import { Message } from '@/object-types'

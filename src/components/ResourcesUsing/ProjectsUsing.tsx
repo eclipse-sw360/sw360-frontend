@@ -12,7 +12,7 @@ import { Table, _ } from '@/components/sw360'
 import { Project, RestrictedResource } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Alert } from 'react-bootstrap'
 import { CommonUtils } from '@/utils'
 

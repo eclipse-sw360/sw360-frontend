@@ -7,8 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { AiOutlineTags, AiOutlineUnorderedList } from 'react-icons/ai'
@@ -18,6 +17,8 @@ import { HiOutlineDocumentDuplicate } from 'react-icons/hi'
 import { ImUsers } from 'react-icons/im'
 import { RiArrowUpDownFill, RiOrganizationChart } from 'react-icons/ri'
 import { RxCalendar } from 'react-icons/rx'
+
+import type { JSX } from "react";
 
 const AdminMainPage = (): JSX.Element => {
     const t = useTranslations('default')

@@ -12,14 +12,15 @@ import PackageDetailTab from './components/PackageDetailTab'
 import { ReactNode } from 'react'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export const metadata: Metadata = {
     title: 'Packages',
 }
 
-const Detail = ({ params }: Context) : ReactNode => {
+const Detail = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params;
     return <PackageDetailTab packageId={params.id} />
 }
 

@@ -7,8 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { ECC, Embedded } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { CommonUtils } from '@/utils'
@@ -18,6 +17,8 @@ import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { Button, Spinner } from 'react-bootstrap'
+
+import type { JSX } from "react";
 
 type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
 

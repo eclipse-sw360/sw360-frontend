@@ -12,7 +12,7 @@ import { HttpStatus, User, UserPayload } from '@/object-types'
 import { signOut } from 'next-auth/react'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Modal, Alert } from 'react-bootstrap'
 import { HiUsers } from 'react-icons/hi2';
 import { CommonUtils, ApiUtils } from '@/utils'

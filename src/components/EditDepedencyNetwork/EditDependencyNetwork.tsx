@@ -15,7 +15,7 @@ import { ImSpinner11 } from 'react-icons/im'
 import LinkedReleasesTable from './LinkedReleasesTable'
 import { FaInfoCircle, FaRegTrashAlt, FaRegQuestionCircle } from 'react-icons/fa'
 import { FaPlus } from 'react-icons/fa6'
-import { useState, ReactNode, useEffect, useCallback, useRef } from 'react'
+import { useState, ReactNode, useEffect, useCallback, useRef, type JSX } from 'react';
 import { getSession } from 'next-auth/react'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import React from 'react'

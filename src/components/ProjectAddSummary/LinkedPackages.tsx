@@ -17,7 +17,7 @@ import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type JSX } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 

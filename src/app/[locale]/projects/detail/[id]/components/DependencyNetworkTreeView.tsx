@@ -18,7 +18,7 @@ import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { EnumValueWithToolTip, TreeTable, _ } from 'next-sw360'
 import Link from 'next/link'
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import { ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 import Form from 'react-bootstrap/Form'
@@ -781,14 +781,14 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             <div className='my-1'>
                 {data ? (
                     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                    <TreeTable
+                    (<TreeTable
                         columns={columns}
                         data={treeData}
                         setData={setTreeData}
                         language={language}
                         onExpand={onExpand}
                         search={search}
-                    />
+                    />)
                 ) : (
                     <div className='col-12 text-center'>
                         <Spinner className='spinner' />
@@ -796,7 +796,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                 )}
             </div>
         </>
-    )
+    );
 }
 
 const compare = (preState: { projectId: string }, nextState: { projectId: string }) => {

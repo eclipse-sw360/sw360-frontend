@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react';
 import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'

@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 export default function ExpandableTextList({ list }: { list: string[] }): JSX.Element {

@@ -9,7 +9,7 @@
 
 'use-client'
 
-import React from 'react'
+import React, { type JSX } from 'react';
 import { getData } from 'country-list'
 import { useTranslations } from 'next-intl'
 

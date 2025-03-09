@@ -14,7 +14,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState, type JSX } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 

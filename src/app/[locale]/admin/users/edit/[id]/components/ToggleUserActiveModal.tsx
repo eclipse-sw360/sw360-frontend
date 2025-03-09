@@ -14,7 +14,7 @@ import { ApiUtils } from '@/utils'
 import { HttpStatus } from '@/object-types'
 
 import { useTranslations } from 'next-intl'
-import React from 'react'
+import React, { type JSX } from 'react';
 import MessageService from '@/services/message.service'
 import { Modal } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'

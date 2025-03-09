@@ -12,7 +12,7 @@
 
 import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Image, NavDropdown } from 'react-bootstrap'
 
 import sw360ProfileIcon from '@/assets/images/profile.svg'

@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useState } from 'react'
+import React, { useState, type JSX } from 'react';
 import { Modal } from 'react-bootstrap'
 import { HttpStatus, Vendor } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'

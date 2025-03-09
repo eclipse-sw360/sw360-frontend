@@ -11,6 +11,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 
+import type { JSX } from "react";
+
 const MainlineStates: { [k: string]: string } = {
     'OPEN': 'mainline_state_open_tooltip',
     'MAINLINE': 'mainline_state_mainline_tooltip',

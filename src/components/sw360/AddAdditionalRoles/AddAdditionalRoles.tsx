@@ -12,7 +12,7 @@
 import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type JSX } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
 

@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
 

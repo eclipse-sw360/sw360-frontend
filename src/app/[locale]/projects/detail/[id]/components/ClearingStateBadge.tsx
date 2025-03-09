@@ -8,10 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 import { ReleaseClearingStateMapping } from '@/object-types'
+
+import type { JSX } from "react";
 
 interface Props {
     isRelease: boolean

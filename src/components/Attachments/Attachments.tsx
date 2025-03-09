@@ -10,7 +10,7 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type JSX } from 'react';
 import { Alert } from 'react-bootstrap'
 import { FaDownload } from 'react-icons/fa'
 

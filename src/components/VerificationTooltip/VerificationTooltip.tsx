@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { VerificationStateInfo } from '@/object-types'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, type JSX } from 'react';
 import styles from './VerificationTooltip.module.css'
 
 interface Props {

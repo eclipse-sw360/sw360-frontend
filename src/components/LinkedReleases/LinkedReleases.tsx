@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type JSX } from 'react';
 
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'

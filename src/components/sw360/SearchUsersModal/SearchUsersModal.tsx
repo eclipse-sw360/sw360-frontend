@@ -9,6 +9,8 @@
 
 import { useTranslations } from 'next-intl'
 
+import type { JSX } from "react";
+
 function SearchUsersModal(): JSX.Element {
     const t = useTranslations('default')
     return (

@@ -7,8 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { useTranslations } from 'next-intl'
 
 import { HttpStatus, ProjectPayload } from '@/object-types'
@@ -16,6 +15,8 @@ import { getSession, signOut } from 'next-auth/react'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import MessageService from '@/services/message.service'
+
+import type { JSX } from "react";
 
 interface Props {
     projectPayload: ProjectPayload

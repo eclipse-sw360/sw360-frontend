@@ -12,7 +12,7 @@
 
 import { useTranslations } from 'next-intl'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, type JSX } from 'react';
 
 import { Release } from '@/object-types'
 import { SelectUsersDialog } from 'next-sw360'

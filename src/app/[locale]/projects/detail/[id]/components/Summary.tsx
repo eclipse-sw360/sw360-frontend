@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
@@ -315,5 +315,5 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                 documentName={summaryData.name}
             />
         </>
-    )
+    );
 }

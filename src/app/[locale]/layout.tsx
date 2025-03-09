@@ -18,7 +18,7 @@ import '@/styles/gridjs/sw360.css'
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { ReactNode } from 'react'
+import { ReactNode, type JSX } from 'react';
 
 import { Footer, Navbar, GlobalMessages } from 'next-sw360'
 import { Providers } from '../provider'

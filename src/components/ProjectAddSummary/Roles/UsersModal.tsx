@@ -7,12 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { Table, _ } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
+
+import type { JSX } from "react";
 
 interface UserType {
     userId: string

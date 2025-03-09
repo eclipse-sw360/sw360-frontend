@@ -12,7 +12,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
 import { _ } from '@/components/sw360'

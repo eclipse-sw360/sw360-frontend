@@ -7,13 +7,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client'
-
+'use client';
 import { ProjectPayload } from '@/object-types'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
 import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork'
+
+import type { JSX } from "react";
 
 interface Props {
     projectId?: string

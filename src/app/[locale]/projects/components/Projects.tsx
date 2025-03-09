@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type JSX } from 'react';
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'

@@ -13,7 +13,7 @@
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type JSX } from 'react';
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, Release, ReleaseDetail, ReleaseLink } from '@/object-types'

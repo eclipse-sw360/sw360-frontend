@@ -10,7 +10,7 @@
 
 import { ReleaseDetail } from '@/object-types'
 import { Table } from 'next-sw360'
-import { memo } from 'react'
+import { memo, type JSX } from 'react';
 
 interface Props {
     data: (string | ReleaseDetail)[][]
