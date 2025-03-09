@@ -35,7 +35,8 @@ NEXTAUTH_URL = 'http://localhost:3000'
 Then run:
 
 ```bash
-> npm run dev
+> npm install pnpm
+> pnpm run dev
 ```
 
 If everything went well, the localhost port 3000 will be opened in your host and you will able to access the app at the following address:
