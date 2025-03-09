@@ -16,23 +16,19 @@ import keycloakAuth from './keycloakAuthOption'
 import sw360OauthOption from './sw360OauthOption'
 import sw360OauthPwdGrantTypeOption from './sw360OauthPwdGrantTypeOption'
 
-let provider: NextAuthOptions
-switch (AUTH_PROVIDER) {
-    case 'sw360oauth':
-        provider = sw360OauthOption
-        break
-    case 'keycloak':
-        provider = keycloakAuth
-        break
-    case 'oauth-password-grant':
-        provider = sw360OauthPwdGrantTypeOption
-        break
-    case 'sw360basic':
-    default:
-        provider = basicAuthOption
-        break
-}
-
-const authOptions: NextAuthOptions = provider
+const authOptions: NextAuthOptions = (() => {
+    switch (AUTH_PROVIDER) {
+        case 'sw360oauth':
+            return sw360OauthOption
+        case 'keycloak':
+            return keycloakAuth
+        case 'oauth-password-grant':
+            return sw360OauthPwdGrantTypeOption
+            break
+        case 'sw360basic':
+        default:
+            return basicAuthOption
+    }
+})()
 
 export default authOptions
