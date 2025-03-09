@@ -63,7 +63,7 @@ export default function Search() : ReactNode {
                             } else if (type === 'component') {
                                 return <Link href={`/components/detail/${id}`}>{name}</Link>
                             } else if (type === 'license') {
-                                return <Link href={`/licenses/detail/${id}`}>{name}</Link>
+                                return <Link href={`/licenses/detail/?id=${id}`}>{name}</Link>
                             } else if (type === 'package') {
                                 return <Link href={`/packages/detail/${id}`}>{name}</Link>
                             } else if (type === 'obligation') {
