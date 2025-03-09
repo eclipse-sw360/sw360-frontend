@@ -99,15 +99,18 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
                 if (CommonUtils.isNullEmptyOrUndefinedArray(creators)) {
                     if (
                         !CommonUtils.isNullOrUndefined(release._embedded) &&
-                        !CommonUtils.isNullOrUndefined(release._embedded['sw360:modifiedBy'])
+                        !CommonUtils.isNullOrUndefined(release._embedded['sw360:createdBy'])
                     ) {
                         creators = handleCreators(
-                            release._embedded['sw360:createdBy']?.fullName ?? '',
-                            release._embedded['sw360:documentCreationInformation']?.createdBy ?? ''
+                            release._embedded['sw360:createdBy'].fullName ?? '',
+                            release._embedded['sw360:createdBy'].email
                         )
                     } else {
-                        setAddNewRelease(true)
-                        creators = []
+                        creators = [{
+                            type: 'Person',
+                            value: `${session.user.name} (${session.user.email})`,
+                            index: 0,
+                        }]
                     }
                 }
                 const documentCreationInfomation: DocumentCreationInformation | undefined =
@@ -133,7 +136,10 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
                                 createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
                                 moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
                             }
-                        : undefined
+                        :   {
+                                creator: creators, // 6.8
+                                created: createdDate, // 6.9
+                            }
 
                 const SPDXPayload: SPDX = {
                     spdxDocument: release._embedded['sw360:spdxDocument'],
@@ -294,15 +300,15 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
     const [errorLicenseIdentifier, setErrorLicenseIdentifier] = useState(false)
     const [errorExtractedText, setErrorExtractedText] = useState(false)
     const [errorCreator, setErrorCreator] = useState(false)
-    const [addNewRelease, setAddNewRelease] = useState(false)
     const [inputValid, setInputValid] = useState(false)
 
-    const validateCreator = (SPDXPayload: SPDX): boolean => {
+    const validateCreator = async (SPDXPayload: SPDX) => {
         if (
-            CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.documentCreationInformation?.creator) &&
-            !addNewRelease
+            CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.documentCreationInformation?.creator)
         ) {
             setErrorCreator(true)
+            await setSelectedTab(ReleaseTabIds.SPDX_DOCUMENT)
+            window.location.hash = "#spdx-creator";
             return true
         }
         return false
@@ -355,7 +361,7 @@ const EditRelease = ({ releaseId }: Props) : ReactNode => {
             if (
                 validateLicenseIdentifier(SPDXPayload) ||
                 validateExtractedText(SPDXPayload) ||
-                validateCreator(SPDXPayload)
+                await validateCreator(SPDXPayload)
             ) {
                 return
             } else {

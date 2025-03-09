@@ -39,7 +39,7 @@ const LinkedReleases = ({ releaseId }: Props) : ReactNode => {
                     rowData: [
                         <a
                             key={child.id}
-                            href={`components/releases/details/${child.id}`}
+                            href={`${window.location.origin}/components/releases/detail/${child.id}`}
                         >{`${child.name} ${child.version}`}</a>,
                         t(child.releaseRelationship as never),
                         CommonUtils.isNullEmptyOrUndefinedArray(child.licenseIds) ? '' : child.licenseIds.join(', '),
@@ -61,7 +61,7 @@ const LinkedReleases = ({ releaseId }: Props) : ReactNode => {
                         rowData: [
                             <a
                                 key={node.id}
-                                href={`components/releases/details/${node.id}`}
+                                href={`${window.location.origin}/components/releases/detail/${node.id}`}
                             >{`${node.name} ${node.version}`}</a>,
                             t(node.releaseRelationship as never),
                             CommonUtils.isNullEmptyOrUndefinedArray(node.licenseIds)

@@ -1283,3 +1283,40 @@ svg.action:hover {
 .new-added-attachment td{
     background-color: #edf9f0;
 }
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.oauth-client-table th {
+    background-color: #5d8ea9;
+    border: 1px solid #ffffff;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    text-align: left;
+    font-weight: bold;
+    color: white
+}
+
+.oauth-client-table td {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.details-row p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #000000;
+}
+
+.active-sort {
+    color: #fff;
+    font-size: 18px;
+}
+
+.inactive-sort {
+    color: #ffffff;
+    opacity: 0.5;
+    font-size: 18px;
+}

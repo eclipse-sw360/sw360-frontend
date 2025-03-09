@@ -90,7 +90,7 @@ const AdminMainPage = (): JSX.Element => {
                             <BsFilter /> {t('Attachment Cleanup')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/oauthclient'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <HiOutlineDocumentDuplicate /> {t('OAuth Client')}
                         </button>
