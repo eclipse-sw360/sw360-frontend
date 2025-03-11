@@ -59,12 +59,13 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)
         const searchUrl = new URL(currentUrl.origin + currentUrl.pathname)
+        searchUrl.searchParams.append('allDetails', 'true')
+        searchUrl.searchParams.append('luceneSearch', 'true')
         Object.entries(searchParams).forEach(([key, value]: Array<string>) => {
             if (!CommonUtils.isNullEmptyOrUndefinedString(value)) {
                 searchUrl.searchParams.append(key, value)
             }
         })
-
         const encodedUrl = encodeURI(searchUrl.toString().replace(/%40/g, '@'))
         router.push(encodedUrl)
     }
