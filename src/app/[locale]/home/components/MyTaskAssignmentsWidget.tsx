@@ -27,6 +27,7 @@ function MyTaskAssignmentsWidget(): ReactNode {
     const [taskAssignmentData, setTaskAssignmentData] = useState<Array<(string | JSX.Element)[]>>([])
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
     const taskAssignmentStatus: TaskAssignmentStatusMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
@@ -71,7 +72,7 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 }
             },
         )
-    }, [fetchData])
+    }, [fetchData,reload])
 
     const title = t('My Task Assignments')
     const columns = [t('Document Name'), t('Status')]
@@ -79,7 +80,7 @@ function MyTaskAssignmentsWidget(): ReactNode {
 
     return (
         <div>
-            <HomeTableHeader title={title} />
+            <HomeTableHeader title={title} setReload={setReload} />
             {loading == false ? (
                 <Table
                     columns={columns}
