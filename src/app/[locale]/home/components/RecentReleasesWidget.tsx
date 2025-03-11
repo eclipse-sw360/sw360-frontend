@@ -28,6 +28,7 @@ function RecentReleasesWidget() : ReactNode {
 
     const [recentRelease, setRecentRelease] = useState<Array<JSX.Element[]>>([])
     const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
@@ -73,11 +74,11 @@ function RecentReleasesWidget() : ReactNode {
                 setLoading(false)
             }
         })
-    }, [fetchData])
+    }, [fetchData, reload])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('Recent Releases')} />
+            <HomeTableHeader title={t('Recent Releases')} setReload={setReload} />
             {loading == false ? (
                 <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentRelease}</ul>
             ) : (

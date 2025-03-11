@@ -32,6 +32,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
 
     const [taskSubmissionData, setTaskSubmissionData] = useState<Array<(string | JSX.Element)[]>>([])
     const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
     const taskSubmissionStatus: TaskSubmissionStatusMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
@@ -74,7 +75,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 }
             },
         )
-    }, [fetchData])
+    }, [fetchData,reload])
 
     const handleDeleteProject = (id: string) => {
         console.log(id)
@@ -107,7 +108,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
 
     return (
         <div>
-            <HomeTableHeader title={title} />
+            <HomeTableHeader title={title} setReload={setReload}/>
             {loading === false ? (
                 <Table
                     columns={columns}

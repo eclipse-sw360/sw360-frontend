@@ -27,7 +27,7 @@ function RecentComponentsWidget(): ReactNode {
     const [recentComponent, setRecentComponent] = useState<Array<(string | JSX.Element)[]>>([])
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
-
+    const [reload, setReload] = useState(false)
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -71,11 +71,11 @@ function RecentComponentsWidget(): ReactNode {
                 setRecentComponent([])
             }
         })
-    }, [fetchData])
+    }, [fetchData,reload])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('Recent Components')} />
+            <HomeTableHeader title={t('Recent Components')} setReload={setReload}   />
             {loading == false ? (
                 <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentComponent}</ul>
             ) : (
