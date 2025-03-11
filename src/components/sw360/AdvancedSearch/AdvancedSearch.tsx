@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+
 'use client'
 
 import { useTranslations } from 'next-intl'
