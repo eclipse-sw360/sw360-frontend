@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState, useCallback, useEffect, type JSX } from 'react'
+import { useState, useCallback, useEffect, useRef, type JSX } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut } from 'next-auth/react'
 import { CommonUtils, ApiUtils } from '@/utils'
@@ -32,10 +32,16 @@ const EditDepartmentPage = (): JSX.Element => {
 
     const [memberEmails, setMemberEmails] = useState<string[] | undefined>(undefined)
     const [emailSuggestions, setEmailSuggestions] = useState<string[]>([])
+    const allEmails = useRef<string[]>([])
 
     const handleUpdateDepartmentMembers = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         if (memberEmails === undefined || secondaryDepartmentName === null) {
+            return
+        }
+
+        if (checkNotExistingUserEmails().length > 0) {
+            MessageService.error(`${t('Some emails are not existed')}: ${checkNotExistingUserEmails().join(', ')}`)
             return
         }
         const session = await getSession()
@@ -94,9 +100,10 @@ const EditDepartmentPage = (): JSX.Element => {
             return
         }
         const users = await response.json() as EmbeddedUsers
-        const emailSuggestions : string[] = users._embedded['sw360:users']
+        const emailSuggestionsFromRequest : string[] = users._embedded['sw360:users']
                 .map((user) => user.email)
-        setEmailSuggestions(emailSuggestions)
+        setEmailSuggestions(emailSuggestionsFromRequest)
+        allEmails.current = emailSuggestionsFromRequest
     }, [])
 
     useEffect(() => {
@@ -131,6 +138,13 @@ const EditDepartmentPage = (): JSX.Element => {
         setMemberEmails(newMemberEmails)
     }
 
+    const checkNotExistingUserEmails = () => {
+        if (memberEmails === undefined) {
+            return []
+        }
+        return memberEmails.filter((email) => !allEmails.current.includes(email))
+    }
+
     return (
         <div className = 'container page-content'>
             {
@@ -161,7 +175,7 @@ const EditDepartmentPage = (): JSX.Element => {
                             <tbody className='col-12'>
                                 {
                                     Object.entries(memberEmails).map(([index, email]) => (
-                                        <tr key={email} className='row'>
+                                        <tr key={index} className='row'>
                                             <td className='col-6'>
                                                 <input
                                                     list='available-email'
