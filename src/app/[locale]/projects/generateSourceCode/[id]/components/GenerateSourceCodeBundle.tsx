@@ -112,13 +112,6 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
             row_color_class = 'orange-cell'
         }
         for(const att of r.attachments) {
-            let usedIn = 0
-            for(const usage of attachmentUsage) {
-                if(usage.attachmentContentId === att.attachmentContentId) {
-                    usedIn++
-                }
-            
-            }
             const attNode: NodeData = {
                 rowData: [                    
                     <div className={`form-check text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_select`}>
@@ -149,12 +142,12 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
                     <div className={`${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_name`}>{att.filename}</div>, 
                     <p key={`${att.attachmentContentId ?? ''}_used_by`} className={`${row_color_class} border-0-cell`}>
                         {
-                            usedIn !== 0 ? <>{
-                                t.rich('USED_BY_PROJECTS', {
-                                    count: usedIn,
-                                    strong: (chunks) => <b>{chunks}</b>,
-                                })
-                            }</>: <>{t('not used in any project yet')}</>
+                            (att.attachmentUsageCount === undefined || att.attachmentUsageCount === 0) ?
+                            t('not used in any project yet'):
+                            t.rich('USED_BY ATTACHMENTS', {
+                                num: att.attachmentUsageCount,
+                                strong: (chunks) => <b>{chunks}</b>,
+                            })
                         }
                     </p>,
                     <div className={`text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_name`}>
