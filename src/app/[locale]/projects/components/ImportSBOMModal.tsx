@@ -165,8 +165,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                 const endTime = Date.now()
                 setImportTime(parseFloat(((endTime - start) / 1000).toFixed(2)))
             } else if (response.status === HttpStatus.CONFLICT) {
-                const errorMessage = await response.text()
-                const match = errorMessage.match(/The projectId is:\s*(\S+)/)
+                const match = responseText.match(/The projectId is:\s*(\S+)/)
                 const projectId = match ? match[1].replace(/"/g, '') : 'Unknown'
                 setImportError({
                     variant: 'danger',
@@ -453,7 +452,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                     </li>
                                 </ul>
                             </Alert>
-                            {importSummary.invalidPkg.length > 0 && (
+                            {importSummary.invalidPkg && importSummary.invalidPkg.length > 0 && (
                                 <Alert
                                     variant='danger'
                                     className='border-warning-subtle p-3 position-relative'
@@ -475,7 +474,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                     </ul>
                                 </Alert>
                             )}
-                            {importSummary.invalidComp.length > 0 && (
+                            {importSummary.invalidComp && importSummary.invalidComp.length > 0 && (
                                 <Alert
                                     variant='warning'
                                     className='border-warning-subtle p-3 position-relative'
@@ -498,7 +497,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                     </ul>
                                 </Alert>
                             )}
-                            {importSummary.redirectedVCS.length > 0 && (
+                            {importSummary.redirectedVCS && importSummary.redirectedVCS.length > 0 && (
                                 <Alert
                                     variant='primary'
                                     className='border-warning-subtle p-3 position-relative'
@@ -520,7 +519,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                     </ul>
                                 </Alert>
                             )}
-                            {importSummary.dupPkg.length > 0 && (
+                            {importSummary.dupPkg && importSummary.dupPkg.length > 0 && (
                                 <Alert
                                     variant='danger'
                                     className='border-warning-subtle p-3 position-relative'
@@ -545,7 +544,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                     </ul>
                                 </Alert>
                             )}
-                            {importSummary.dupComp.length > 0 && (
+                            {importSummary.dupComp && importSummary.dupComp.length > 0 && (
                                 <Alert
                                     variant='danger'
                                     className='border-warning-subtle p-3 position-relative'
@@ -570,7 +569,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                     </ul>
                                 </Alert>
                             )}
-                            {importSummary.dupRel.length > 0 && (
+                            {importSummary.dupRel && importSummary.dupRel.length > 0 && (
                                 <Alert
                                     variant='danger'
                                     className='border-warning-subtle p-3 position-relative'
@@ -595,7 +594,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                     </ul>
                                 </Alert>
                             )}
-                            {importSummary.invalidRel.length > 0 && (
+                            {importSummary.invalidRel && importSummary.invalidRel.length > 0 && (
                                 <Alert
                                     variant='danger'
                                     className='border-warning-subtle p-3 position-relative'
