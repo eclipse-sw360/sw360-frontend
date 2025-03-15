@@ -29,6 +29,7 @@ function MyProjectsWidget(): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
     const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
 
     const fetchData = useCallback(async (queryUrl: string, signal: AbortSignal) => {
         const session = await getSession()
@@ -80,7 +81,7 @@ function MyProjectsWidget(): ReactNode {
         return () => {
             controller.abort()
         }
-    }, [fetchData, params])
+    }, [fetchData, params,reload])
 
     const title = t('My Projects')
     const columns = [t('Project Name'), t('Description'), t('Approved Releases')]
@@ -88,7 +89,7 @@ function MyProjectsWidget(): ReactNode {
 
     return (
         <div>
-            <HomeTableHeader title={title} />
+            <HomeTableHeader title={title} setReload={setReload}/>
             {loading == false ? (
                 <Table
                     columns={columns}

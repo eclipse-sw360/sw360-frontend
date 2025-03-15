@@ -13,14 +13,19 @@ import { BsArrowRepeat } from 'react-icons/bs'
 
 interface HomeTableHeaderProps {
     title: string
+    setReload: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function HomeTableHeader({ title = '' }: HomeTableHeaderProps): ReactNode {
+function HomeTableHeader({ title = '',setReload }: HomeTableHeaderProps): ReactNode {
     return (
         <>
             <div className='tableHeader'>
                 <h1 className='tableHeaderTitle'>{title}</h1>
+                <a className="tableReloadButton" onClick={() => {
+                    setReload((prevState) => !prevState)
+                }}>
                 <BsArrowRepeat />
+                </a>
             </div>
             <hr></hr>
         </>
