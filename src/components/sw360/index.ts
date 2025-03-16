@@ -11,8 +11,10 @@ import AddAdditionalRoles from './AddAdditionalRoles/AddAdditionalRoles'
 import AddKeyValue from './AddKeyValue/AddKeyValue'
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
+import EnumValueWithToolTip from './EnumValueWithToolTip/EnumValueWIthToolTip'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
+import GlobalMessages from './GlobalMessages'
 import Gravatar from './Gravatar/Gravatar'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
@@ -21,22 +23,16 @@ import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import PageSpinner from './PageSpinner/PageSpinner'
 import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
+import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
+import Table from './Table/Table'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
-import GlobalMessages from './GlobalMessages'
-import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
-import EnumValueWithToolTip from './EnumValueWithToolTip/EnumValueWIthToolTip'
-
-// Table component
-// Strictly derived from gridjs-react with dedicated changes
-import Table from './Table/Table'
-import { ReactWrapper, _ } from './Table/wrapper'
 import TreeTable from './TreeTable/TreeTable'
 
 export {
@@ -44,8 +40,10 @@ export {
     AddKeyValue,
     AdvancedSearch,
     AuthScreen,
+    EnumValueWithToolTip,
     Footer,
     FossologyClearing,
+    GlobalMessages,
     Gravatar,
     LanguageSwitcher,
     LocaleSwitcher,
@@ -58,6 +56,7 @@ export {
     SearchUsersModal,
     SearchVendorsModal,
     SelectCountry,
+    SelectUsersDialog,
     ShowInfoOnHover,
     SideBar,
     Table,
@@ -65,8 +64,5 @@ export {
     ToastMessage,
     TreeTable,
     VendorDialog,
-    GlobalMessages,
-    SelectUsersDialog,
-    EnumValueWithToolTip,
     _,
 }
