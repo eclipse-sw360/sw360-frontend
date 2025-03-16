@@ -69,7 +69,7 @@ function RecentComponentsWidget(): ReactNode {
                 setRecentComponent([])
             }
         })
-    }, [fetchData])
+    }, [fetchData,reload])
 
     return (
         <div className='content-container'>

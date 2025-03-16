@@ -73,7 +73,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 }
             },
         )
-    }, [fetchData])
+    }, [fetchData,reload])
 
     const handleDeleteProject = (id: string) => {
         console.log(id)

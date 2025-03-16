@@ -70,7 +70,7 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 }
             },
         )
-    }, [fetchData])
+    }, [fetchData,reload])
 
     const title = t('My Task Assignments')
     const columns = [t('Document Name'), t('Status')]

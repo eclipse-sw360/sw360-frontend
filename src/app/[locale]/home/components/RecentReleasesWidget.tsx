@@ -71,7 +71,7 @@ function RecentReleasesWidget() : ReactNode {
                 setRecentRelease([])
             }
         })
-    }, [fetchData])
+    }, [fetchData, reload])
 
     return (
         <div className='content-container'>
