@@ -46,7 +46,6 @@ function RecentComponentsWidget(): ReactNode {
         setLoading(true)
         void fetchData('components/recentComponents').then((components: EmbeddedComponents | undefined) => {
             if (components === undefined) {
-                setLoading(false)
                 return
             }
 
@@ -66,12 +65,11 @@ function RecentComponentsWidget(): ReactNode {
                         </li>,
                     ]),
                 )
-                setLoading(false)
             } else {
                 setRecentComponent([])
             }
         })
-    }, [fetchData,reload])
+    }, [fetchData])
 
     return (
         <div className='content-container'>

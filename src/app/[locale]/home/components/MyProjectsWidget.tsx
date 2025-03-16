@@ -54,7 +54,6 @@ function MyProjectsWidget(): ReactNode {
         fetchData(queryUrl, signal)
             .then((projects: EmbeddedProjects | undefined) => {
                 if (projects === undefined) {
-                    setLoading(false)
                     return
                 }
 
@@ -71,11 +70,12 @@ function MyProjectsWidget(): ReactNode {
                             item.version ?? '',
                         ]),
                     )
-                    setLoading(false)
                 }
             })
             .catch(() => {
                 console.error('False to fetch components')
+            }).finally(()=>{
+                setLoading(false)
             })
 
         return () => {

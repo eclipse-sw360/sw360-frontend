@@ -48,7 +48,6 @@ function RecentReleasesWidget() : ReactNode {
         setLoading(true)
         void fetchData('releases/recentReleases').then((releases: EmbeddedReleases | undefined) => {
             if (releases === undefined) {
-                setLoading(false)
                 return
             }
 
@@ -68,13 +67,11 @@ function RecentReleasesWidget() : ReactNode {
                         </li>,
                     ]),
                 )
-                setLoading(false)
             } else {
                 setRecentRelease([])
-                setLoading(false)
             }
         })
-    }, [fetchData, reload])
+    }, [fetchData])
 
     return (
         <div className='content-container'>
