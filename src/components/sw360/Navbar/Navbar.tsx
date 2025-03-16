@@ -12,7 +12,7 @@
 
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import { useRouter, useSelectedLayoutSegment } from 'next/navigation'
+import { useRouter, useSelectedLayoutSegment ,useParams} from 'next/navigation'
 import { useState, type JSX } from 'react';
 import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
 
@@ -23,6 +23,8 @@ import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
 function Navbar(): JSX.Element {
     const router = useRouter()
+    const param=useParams()
+    const locale=param?.locale as string || 'en';
 
     const { data: session, status } = useSession()
     const [show, setShow] = useState(false)
@@ -31,6 +33,10 @@ function Navbar(): JSX.Element {
 
     const navlist = NavList()
 
+    const getLocalizedPath = (path: string) => {
+        if(path==='#' || path==='/') return path
+        return `/${locale}${path}`
+    }
     // NavItems receives an array of links with possible entries:
     // href: the link (mandatory)
     // name: the name of the link (mandatory)
@@ -46,6 +52,7 @@ function Navbar(): JSX.Element {
                         return
                     }
                 }
+                const localizedHref = getLocalizedPath(item.href)
                 if ('childs' in item) {
                     return (
                         <NavDropdown
@@ -61,12 +68,12 @@ function Navbar(): JSX.Element {
                                 // hack to route to /admin when clicked on dropdown title
                                 if ((e.target as HTMLElement).attributes[0].name === 'id') {
                                     e.preventDefault()
-                                    router.push(item.href)
+                                    router.push(localizedHref)
                                 }
                             }}
                         >
                             {item.childs?.map((child) => (
-                                <NavDropdown.Item href={child.href} key={child.id}>
+                                <NavDropdown.Item href={getLocalizedPath(child.href)} key={child.id}>
                                     {child.name}
                                 </NavDropdown.Item>
                             ))}
@@ -74,7 +81,7 @@ function Navbar(): JSX.Element {
                     )
                 } else {
                     return (
-                        <Nav.Link key={item.name} className={`${pathname == item.href ? 'active' : ''}`} href={item.href}>
+                        <Nav.Link key={item.name} className={`${pathname == item.href ? 'active' : ''}`} href={localizedHref}>
                             {item.name}
                         </Nav.Link>
                     )
