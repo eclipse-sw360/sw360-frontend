@@ -52,7 +52,6 @@ function MyComponentsWidget(): ReactNode {
         fetchData(queryUrl, signal)
             .then((components: EmbeddedComponents | undefined) => {
                 if (components === undefined) {
-                    setLoading(false)
                     return
                 }
 
@@ -66,14 +65,14 @@ function MyComponentsWidget(): ReactNode {
                             CommonUtils.truncateText(item.description ?? '', 40),
                         ]),
                     )
-                    setLoading(false)
                 } else {
                     setData([])
-                    setLoading(false)
                 }
             })
             .catch(() => {
                 console.error('False to fetch components')
+            }).finally(()=>{
+                setLoading(false)
             })
 
         return () => {
