@@ -58,7 +58,6 @@ function MyTaskAssignmentsWidget(): ReactNode {
         void fetchData('moderationrequest/byState?state=open&allDetails=false').then(
             (moderationRequests: EmbeddedTaskAssignments | undefined) => {
                 if (moderationRequests === undefined) {
-                    setLoading(false)
                     return
                 }
                 if (!CommonUtils.isNullOrUndefined(moderationRequests['_embedded']['sw360:moderationRequests'])) {
@@ -68,10 +67,15 @@ function MyTaskAssignmentsWidget(): ReactNode {
                             taskAssignmentStatus[item.moderationState ?? 'INPROGRESS'],
                         ]),
                     )
-                    setLoading(false)
                 }
             },
         )
+        .catch((err:Error) => {
+            console.error('Error',err)
+        })
+        .finally(() => {
+            setLoading(false)
+        })
     }, [fetchData,reload])
 
     const title = t('My Task Assignments')
