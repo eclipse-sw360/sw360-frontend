@@ -23,7 +23,7 @@ import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
-function RecentReleasesWidget() : ReactNode {
+function RecentReleasesWidget(): ReactNode {
     const t = useTranslations('default')
 
     const [recentRelease, setRecentRelease] = useState<Array<JSX.Element[]>>([])
@@ -48,7 +48,6 @@ function RecentReleasesWidget() : ReactNode {
         setLoading(true)
         void fetchData('releases/recentReleases').then((releases: EmbeddedReleases | undefined) => {
             if (releases === undefined) {
-                setLoading(false)
                 return
             }
 
@@ -68,11 +67,15 @@ function RecentReleasesWidget() : ReactNode {
                         </li>,
                     ]),
                 )
-                setLoading(false)
             } else {
                 setRecentRelease([])
-                setLoading(false)
             }
+        })
+        .catch(() => {
+            console.error('False to fetch components')
+        })
+        .finally(() => {
+            setLoading(false)
         })
     }, [fetchData, reload])
 

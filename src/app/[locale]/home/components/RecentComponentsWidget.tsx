@@ -46,7 +46,6 @@ function RecentComponentsWidget(): ReactNode {
         setLoading(true)
         void fetchData('components/recentComponents').then((components: EmbeddedComponents | undefined) => {
             if (components === undefined) {
-                setLoading(false)
                 return
             }
 
@@ -66,16 +65,21 @@ function RecentComponentsWidget(): ReactNode {
                         </li>,
                     ]),
                 )
-                setLoading(false)
             } else {
                 setRecentComponent([])
             }
         })
-    }, [fetchData,reload])
+        .catch(() => {
+            console.error('False to fetch components')
+        })
+        .finally(() => {
+            setLoading(false)
+        })
+    }, [fetchData, reload])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('Recent Components')} setReload={setReload}   />
+            <HomeTableHeader title={t('Recent Components')} setReload={setReload} />
             {loading == false ? (
                 <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentComponent}</ul>
             ) : (
