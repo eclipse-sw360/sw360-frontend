@@ -73,8 +73,8 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 }
             },
         )
-        .catch(() => {
-            console.error('False to fetch components')
+        .catch((e) => {
+            console.error('Error:', e)
         })
         .finally(()=>{
             setLoading(false)

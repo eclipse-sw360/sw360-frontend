@@ -71,8 +71,8 @@ function MySubscriptionsWidget(): ReactNode {
                     setReleaseData([])
                 }
             })
-            .catch(() => {
-                console.error('False to fetch components')
+            .catch((e:Error) => {
+                console.error("Error",e)
             })
             .finally(() => {
                 setLoading(false)
