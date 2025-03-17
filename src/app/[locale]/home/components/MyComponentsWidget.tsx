@@ -70,9 +70,10 @@ function MyComponentsWidget(): ReactNode {
                     setData([])
                 }
             })
-            .catch(() => {
-                console.error('False to fetch components')
-            }).finally(()=>{
+            .catch((err:Error) => {
+                console.error('Error:',err)
+            })
+            .finally(()=>{
                 setLoading(false)
             })
 
