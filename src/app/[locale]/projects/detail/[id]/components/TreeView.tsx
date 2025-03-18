@@ -42,6 +42,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const stateOptions = ['Open', 'In Progress', 'Closed']
     const relationOptions = ['Documented', 'Contains', 'Depends On']
 
+    const [error, setError] = useState<string | null>(null)
+
     const columns = [
         {
             id: 'licenseClearing.treeview.name',
@@ -122,7 +124,6 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     // Handle filter changes
     const handleFilterChange = (filterType: string, value: string) => {
-        console.log(`Filter changed: ${filterType} = ${value}`)
         setFilters((prevFilters) => ({
             ...prevFilters,
             [filterType]: value,
@@ -519,8 +520,9 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
                 setData(allData)
                 setFilteredData(allData)
+                setError(null) // Clear any previous errors
             } catch (e) {
-                console.error(e)
+                setError('An error occurred while fetching data. Please try again later.') // Set error state
                 setData([])
                 setFilteredData([])
             }
@@ -531,6 +533,14 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     return (
         <>
+            {error && (
+                <div
+                    className='alert alert-danger'
+                    role='alert'
+                >
+                    {error}
+                </div>
+            )}
             {data ? (
                 <>
                     <TreeTable
