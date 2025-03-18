@@ -33,7 +33,7 @@ const AdminMainPage = (): JSX.Element => {
                             <ImUsers /> {t('User')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/departments'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <RiOrganizationChart /> {t('Department')}
                         </button>

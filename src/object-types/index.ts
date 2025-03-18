@@ -30,14 +30,15 @@ import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
+import ImportSummary from './ImportSummary'
 import InputKeyValue from './InputKeyValue'
 import LicenseClearing from './LicenseClearing'
 import LicenseDetail from './LicenseDetail'
 import LicensePayload from './LicensePayload'
 import LicenseType from './LicenseType'
-import LinkedProjectData from './LinkedProjectData'
 import LinkedPackage from './LinkedPackage'
 import LinkedPackageData from './LinkedPackageData'
+import LinkedProjectData from './LinkedProjectData'
 import LinkedRelease from './LinkedRelease'
 import LinkedReleaseData from './LinkedReleaseData'
 import LinkedVulnerability from './LinkedVulnerability'
@@ -71,7 +72,7 @@ import Session from './Session'
 import SummaryDataType from './SummaryDataType'
 import ToastData from './ToastData'
 import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
-import { UserPayload, User } from './User'
+import { User, UserPayload } from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
 import VendorAdvisory from './VendorAdvisory'
@@ -106,8 +107,6 @@ export type {
     AttachmentUsage,
     AttachmentUsages,
     AuthToken,
-    COTSDetails,
-    CVEReference,
     Changelogs,
     CheckSum,
     ClearingInformation,
@@ -116,9 +115,10 @@ export type {
     ClearingRequestDetails,
     Component,
     ComponentPayload,
+    COTSDetails,
     CreateClearingRequestPayload,
-    UserPayload,
     Creator,
+    CVEReference,
     DocumentCreationInformation,
     DocumentState,
     ECC,
@@ -128,6 +128,7 @@ export type {
     ExternalReference,
     FossologyProcessInfo,
     FossologyProcessStatus,
+    ImportSummary,
     InputKeyValue,
     LicenseClearing,
     LicenseDetail,
@@ -174,18 +175,20 @@ export type {
     Resources,
     RestrictedResource,
     RolesType,
-    SPDX,
-    SPDXDocument,
+    SaveUsagesPayload,
     SearchDuplicatesResponse,
     SearchResult,
     Session,
     SnippetInformation,
     SnippetRange,
+    SPDX,
+    SPDXDocument,
     SummaryDataType,
     ToastData,
     UpdateClearingRequestPayload,
     User,
     UserCredentialInfo,
+    UserPayload,
     Vendor,
     VendorAdvisory,
     VendorType,
@@ -193,7 +196,6 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
-    SaveUsagesPayload
 }
 
 // Special functions for populate data

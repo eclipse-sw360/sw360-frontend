@@ -28,6 +28,7 @@ function MySubscriptionsWidget(): ReactNode {
     const [releaseData, setReleaseData] = useState<Array<ReleaseDetail>>([])
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
@@ -72,11 +73,11 @@ function MySubscriptionsWidget(): ReactNode {
             })
             .catch((err) => console.error(err))
         setLoading(false)
-    }, [fetchData])
+    }, [fetchData,reload])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('My Subscriptions')} />
+            <HomeTableHeader title={t('My Subscriptions')} setReload={setReload}/>
             {loading === false ? (
                 <>
                     {componentData.length > 0 && (
