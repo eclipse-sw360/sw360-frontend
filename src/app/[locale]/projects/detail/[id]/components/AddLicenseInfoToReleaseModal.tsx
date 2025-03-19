@@ -41,6 +41,9 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <p>
+                    {t(`Do you really want to add license info to all the directly linked release`)}
+                </p>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
