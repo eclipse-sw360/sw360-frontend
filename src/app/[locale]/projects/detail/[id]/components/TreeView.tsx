@@ -20,6 +20,7 @@ import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react';
 import { OverlayTrigger, Tooltip, Spinner, Button } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
+import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -30,6 +31,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [data, setData] = useState<Array<NodeData> | null>(null)
+    const [show, setShow] = useState<boolean>(false)
 
     const columns = [
         {
@@ -439,10 +441,16 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     return (
         <>
+            <AddLicenseInfoToReleaseModal
+                projectId = {projectId}
+                show = {show}
+                setShow= {setShow}
+            />
             <div className='col ps-0'>
                 <Button
                     variant='secondary'
                     className='me-2 col-auto'
+                    onClick={() => setShow(true)}
                 >
                     {t('Add License Info to Release')}
                 </Button>
