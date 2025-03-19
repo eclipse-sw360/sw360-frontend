@@ -17,7 +17,7 @@ import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react';
-import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
+import { OverlayTrigger, Tooltip, Spinner, Button } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 
@@ -439,6 +439,14 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     return (
         <>
+            <div className='col ps-0'>
+                <Button
+                    variant='secondary'
+                    className='me-2 col-auto'
+                >
+                    {t('Add License Info to Release')}
+                </Button>
+            </div>
             {
                 data ?
                 <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />:
