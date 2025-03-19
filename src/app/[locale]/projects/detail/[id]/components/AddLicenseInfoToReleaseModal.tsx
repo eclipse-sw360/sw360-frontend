@@ -9,8 +9,13 @@
 
 'use client'
 
+import { HttpStatus } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX } from 'react'
+import type { JSX } from "react"
 import { Button, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -25,7 +30,20 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
     const t = useTranslations('default')
 
     const handleSubmit = async (projectId : string) => {
-        console.log(projectId)
+        try {
+            const session = await getSession()
+            if(CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const createUrl = `projects/${projectId}/addLinkedRelesesLicenses`
+            const response = await ApiUtils.POST(createUrl, {}, session.user.access_token)
+            if (response.status == HttpStatus.OK) {
+                MessageService.success(t('Success Please reload the page to see the changes'))
+            } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                MessageService.error(t('Error occurred while processing license information for linked releases'))
+            }
+        } catch(e) {
+            console.error(e)
+        }
     }
 
     const handleCloseDialog = () => {
