@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus, NodeData, Embedded, Project, LicenseClearing, Release } from '@/object-types'
+import { HttpStatus, NodeData, Embedded, Project, LicenseClearing, Release, UserGroupType } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -17,9 +17,10 @@ import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react';
-import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
+import { OverlayTrigger, Tooltip, Spinner, Button } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
+import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -30,6 +31,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [data, setData] = useState<Array<NodeData> | null>(null)
+    const [show, setShow] = useState<boolean>(false)
 
     const columns = [
         {
@@ -439,6 +441,25 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     return (
         <>
+            <AddLicenseInfoToReleaseModal
+                projectId = {projectId}
+                show = {show}
+                setShow= {setShow}
+            />
+            <div className='col ps-0'>
+                <Button
+                    variant='secondary'
+                    className='me-2 col-auto'
+                    onClick={() => setShow(true)}
+                    hidden={!(session?.user.userGroup === UserGroupType.ADMIN ||
+                              session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
+                              session?.user.userGroup === UserGroupType.SW360_ADMIN
+                             )
+                            }
+                >
+                    {t('Add License Info to Release')}
+                </Button>
+            </div>
             {
                 data ?
                 <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />:

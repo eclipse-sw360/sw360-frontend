@@ -110,7 +110,7 @@ export default function LicenseClearing({
                                         projectName = {projectName}
                                         clearingRequestId = {clearingRequestId}/>
             <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
-                <div className='row'
+                <div className='row ms-0'
                      hidden={isCalledFromModerationRequestCurrentProject}>
                     <div className='col ps-0'>
                         <Nav variant='pills' className='d-inline-flex'>
