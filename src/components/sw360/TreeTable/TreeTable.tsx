@@ -9,22 +9,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 'use client'
-
-import React, { useEffect, useState, type JSX } from 'react'
-import { Dropdown } from 'react-bootstrap'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 import { NodeData } from '@/object-types'
 import { OneDArray, TColumn } from 'gridjs/dist/src/types'
 import { SearchConfig } from 'gridjs/dist/src/view/plugin/search/search'
-import { Table, _ } from 'next-sw360'
-import { ComponentChild } from 'preact'
+import { CheckboxFilterDropdown, Table, _ } from 'next-sw360'
+import React, { ReactNode, useEffect, useState, type JSX } from 'react'
+import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { Language } from '../Table/Table'
 
 interface Props {
@@ -45,35 +37,43 @@ const PaddedCell: React.FC<Props> = ({
     collapseRow,
 }) => {
     return (
-        <div className='d-flex'>
-            <span
-                className='indenter'
-                style={{ paddingLeft: `${padLength * 1}rem` }} // Fixed this line
-                role='button'
+        <div className='d-flex align-items-center'>
+            {' '}
+            <button
+                className='indenter d-flex align-items-center justify-content-center'
+                style={{
+                    paddingLeft: `${padLength * 1}rem`,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    minWidth: '20px',
+                    minHeight: '20px',
+                }}
+                onClick={needExpand ? collapseRow : expandRow}
             >
                 {parent &&
                     (needExpand ? (
                         <BsCaretDownFill
                             color='gray'
-                            onClick={collapseRow}
+                            size={16}
                         />
                     ) : (
                         <BsCaretRightFill
                             color='gray'
-                            onClick={expandRow}
+                            size={16}
                         />
-                    ))}{' '}
-            </span>
+                    ))}
+            </button>
             {children}
         </div>
     )
 }
 
-// Define the structure for filter props
 interface FilterProps {
     enabled: boolean
     options: string[]
-    onChange: (value: string) => void
+    onChange: (values: string[]) => void
+    fullName?: string
 }
 
 interface ColumnWithFilter extends TColumn {
@@ -83,65 +83,12 @@ interface ColumnWithFilter extends TColumn {
 interface TreeTableProps {
     data: Array<any>
     setData: React.Dispatch<React.SetStateAction<Array<any>>>
-    columns: OneDArray<ColumnWithFilter | string | ComponentChild>
+    columns: OneDArray<ColumnWithFilter | string | ReactNode>
     onExpand?: (item: NodeData) => void
     search?: SearchConfig | boolean
     language?: Language
     selector?: boolean
     sort?: boolean
-}
-
-// Custom header component to include filter dropdown
-const FilterHeader = ({ column, t }: { column: ColumnWithFilter; t?: (key: string) => string }) => {
-    const translate = t || ((key: string) => key)
-
-    if (column.filter?.enabled) {
-        return (
-            <div className='d-flex align-items-center justify-content-between'>
-                <span>{column.name}</span>
-                <Dropdown>
-                    <Dropdown.Toggle
-                        variant='link'
-                        size='sm'
-                        className='p-0 ms-2'
-                    >
-                        <span className='filter-icon'>
-                            {/* Unicode character for filter or checkmark inside a square */}
-                            <svg
-                                xmlns='http://www.w3.org/2000/svg'
-                                width='16'
-                                height='16'
-                                fill='white'
-                                className='bi bi-check-square'
-                                viewBox='0 0 16 16'
-                            >
-                                <path d='M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z' />
-                                <path d='M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z' />
-                            </svg>
-                        </span>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                        <Dropdown.Item
-                            key='all'
-                            onClick={() => column.filter?.onChange('')}
-                        >
-                            {translate('All')}
-                        </Dropdown.Item>
-                        {column.filter.options.map((option) => (
-                            <Dropdown.Item
-                                key={option}
-                                onClick={() => column.filter?.onChange(option)}
-                            >
-                                {option}
-                            </Dropdown.Item>
-                        ))}
-                    </Dropdown.Menu>
-                </Dropdown>
-            </div>
-        )
-    }
-
-    return <>{column.name}</>
 }
 
 const TreeTable = ({
@@ -155,13 +102,40 @@ const TreeTable = ({
     sort,
 }: TreeTableProps): JSX.Element => {
     const [tabledata, setTableData] = useState<any[]>([])
+    const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null)
 
-    // Process columns to add filter headers
-    const processedColumns = columns.map((column: any) => {
+    // Update the FilterHeader component to include the dropdown state
+    const FilterHeader = ({ column, columnIndex }: { column: ColumnWithFilter; columnIndex: number }) => {
+        if (column.filter?.enabled) {
+            return (
+                <div className='d-flex align-items-center justify-content-between'>
+                    <span>{typeof column.name === 'string' ? column.name : ''}</span>
+                    <CheckboxFilterDropdown
+                        options={column.filter.options}
+                        onChange={(selectedOptions) => column.filter?.onChange(selectedOptions)}
+                        title={column.filter.fullName || (typeof column.name === 'string' ? column.name : '')}
+                        isOpen={openDropdownIndex === columnIndex}
+                        onToggle={() => {
+                            setOpenDropdownIndex(openDropdownIndex === columnIndex ? null : columnIndex)
+                        }}
+                    />
+                </div>
+            )
+        }
+
+        return <>{typeof column.name === 'string' ? column.name : ''}</>
+    }
+
+    const processedColumns = columns.map((column: any, index: number) => {
         if (column.filter?.enabled) {
             return {
                 ...column,
-                name: _(<FilterHeader column={column} />),
+                name: _(
+                    <FilterHeader
+                        column={column}
+                        columnIndex={index}
+                    />,
+                ),
             }
         }
         return column

@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
@@ -32,15 +32,36 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const [data, setData] = useState<Array<NodeData> | null>(null)
     const [filteredData, setFilteredData] = useState<Array<NodeData> | null>(null)
     const [filters, setFilters] = useState({
-        type: '',
-        state: '',
-        relation: '',
+        type: [] as string[],
+        state: [] as string[],
+        relation: [] as string[],
     })
 
     // Define filter options
-    const typeOptions = ['Customer Project', 'Internal Project', 'Product', 'Service', 'Inner Source', 'Cloud Backend']
-    const stateOptions = ['Open', 'In Progress', 'Closed']
-    const relationOptions = ['Documented', 'Contains', 'Depends On']
+    const typeOptions = ['OSS', 'COTS', 'Internal', 'Inner Source', 'Service', 'Freeware', 'Code Snippet']
+
+    const relationOptions = [
+        'Unknown',
+        'Contained',
+        'Related',
+        'Dynamically Linked',
+        'Statically Linked',
+        'Side By Side',
+        'Standalone',
+        'Internal Use',
+        'Optional',
+        'To Be Replaced',
+        'Code Snippet',
+    ]
+
+    const stateOptions = [
+        'New',
+        'Report Approved',
+        'Report Available',
+        'Scan Available',
+        'Sent To Clearing Tool',
+        'Under Clearing',
+    ]
 
     const [error, setError] = useState<string | null>(null)
 
@@ -49,117 +70,124 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
             id: 'licenseClearing.treeview.name',
             name: t('Name'),
             width: '20%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
         },
         {
             id: 'licenseClearing.treeview.type',
             name: t('Type'),
             width: '5%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
             filter: {
                 enabled: true,
                 options: typeOptions,
-                onChange: (value: string) => handleFilterChange('type', value),
+                onChange: (values: string[]) => handleFilterChange('type', values),
+                fullName: t('Component Type'),
             },
         },
         {
             id: 'licenseClearing.treeview.relation',
             name: t('Relation'),
             width: '6%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
             filter: {
                 enabled: true,
                 options: relationOptions,
-                onChange: (value: string) => handleFilterChange('relation', value),
+                onChange: (values: string[]) => handleFilterChange('relation', values),
+                fullName: t('Release Relation'),
             },
         },
         {
             id: 'licenseClearing.treeview.mainLicenses',
             name: t('Main Licenses'),
             width: '10%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
         },
         {
             id: 'licenseClearing.treeview.otherLicenses',
             name: t('Other licenses'),
             width: '10%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
         },
         {
             id: 'licenseClearing.treeview.state',
             name: t('State'),
             width: '6%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
             filter: {
                 enabled: true,
                 options: stateOptions,
-                onChange: (value: string) => handleFilterChange('state', value),
+                onChange: (values: string[]) => handleFilterChange('state', values),
+                fullName: t('Release Clearing State'),
             },
         },
         {
             id: 'licenseClearing.treeview.releaseMainlineState',
             name: t('Release Mainline State'),
             width: '6%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
         },
         {
             id: 'licenseClearing.treeview.projectMainlineState',
             name: t('Project Mainline State'),
             width: '6%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
         },
         {
             id: 'licenseClearing.treeview.comment',
             name: t('Comment'),
             width: '8%',
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
         },
         {
             id: 'licenseClearing.treeview.actions',
             name: t('Actions'),
-            sort: true,
+            sort: { enabled: true, compare: (a: any, b: any) => a.localeCompare(b) },
             width: '6%',
         },
     ]
 
-    // Handle filter changes
-    const handleFilterChange = (filterType: string, value: string) => {
+    // Handle filter changes - modified for multiple selections
+    const handleFilterChange = (filterType: string, values: string[]) => {
         setFilters((prevFilters) => ({
             ...prevFilters,
-            [filterType]: value,
+            [filterType]: values,
         }))
     }
 
-    // Apply filters to data - this is the key fix
+    // Apply filters to data - modified for multiple selections
     useEffect(() => {
         if (!data) return
 
-        // Define the filtering function outside of the effect
         const filterNodes = (nodes: NodeData[], currentFilters: typeof filters): NodeData[] => {
             return nodes.filter((node) => {
                 // Check if this node matches filters
                 let match = true
 
                 // Type filter (index 1)
-                if (currentFilters.type && node.rowData[1]) {
+                if (currentFilters.type.length > 0 && node.rowData[1]) {
                     const typeText = (node.rowData[1] as JSX.Element)?.props?.children
-                    match = match && (typeText === currentFilters.type || currentFilters.type === '')
+                    match = match && (currentFilters.type.includes(typeText) || currentFilters.type.length === 0)
                 }
 
                 // Relation filter (index 2)
-                if (currentFilters.relation && node.rowData[2]) {
+                if (currentFilters.relation.length > 0 && node.rowData[2]) {
                     const relationText = (node.rowData[2] as JSX.Element)?.props?.children
-                    match = match && (relationText === currentFilters.relation || currentFilters.relation === '')
+                    match =
+                        match &&
+                        (currentFilters.relation.includes(relationText) || currentFilters.relation.length === 0)
                 }
 
                 // State filter (index 5)
-                if (currentFilters.state && node.rowData[5]) {
+                if (currentFilters.state.length > 0 && node.rowData[5]) {
                     // Extract state information from badges
                     const stateElement = node.rowData[5] as JSX.Element
                     // Check if it contains state information
                     if (stateElement?.props?.children) {
                         const stateTextParts = stateElement.props.children.toString()
-                        match = match && (stateTextParts.includes(currentFilters.state) || currentFilters.state === '')
+                        match =
+                            match &&
+                            (currentFilters.state.some((state) => stateTextParts.includes(state)) ||
+                                currentFilters.state.length === 0)
                     }
                 }
 
@@ -542,15 +570,13 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 </div>
             )}
             {data ? (
-                <>
-                    <TreeTable
-                        columns={columns}
-                        data={filteredData || []}
-                        setData={setFilteredData as Dispatch<SetStateAction<NodeData[]>>}
-                        selector={true}
-                        sort={false}
-                    />
-                </>
+                <TreeTable
+                    columns={columns}
+                    data={filteredData || []}
+                    setData={setFilteredData as React.Dispatch<React.SetStateAction<NodeData[]>>}
+                    selector={true}
+                    sort={false}
+                />
             ) : (
                 <div className='col-12 mt-1 text-center'>
                     <Spinner className='spinner' />
