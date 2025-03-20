@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useState, type JSX } from 'react'
 import { Button, Form } from 'react-bootstrap'
 
-import CommonUtils from '@/utils/common.utils'
+import CommonUtils from '@/utils/common.utils '
 import { ShowInfoOnHover } from 'next-sw360'
 
 interface Option {
