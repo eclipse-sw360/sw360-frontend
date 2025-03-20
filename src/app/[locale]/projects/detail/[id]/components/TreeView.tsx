@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus, NodeData, Embedded, Project, LicenseClearing, Release } from '@/object-types'
+import { HttpStatus, NodeData, Embedded, Project, LicenseClearing, Release, UserGroupType } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -451,6 +451,11 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     variant='secondary'
                     className='me-2 col-auto'
                     onClick={() => setShow(true)}
+                    hidden={!(session?.user.userGroup === UserGroupType.ADMIN ||
+                              session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
+                              session?.user.userGroup === UserGroupType.SW360_ADMIN
+                             )
+                            }
                 >
                     {t('Add License Info to Release')}
                 </Button>
