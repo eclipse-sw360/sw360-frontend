@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 'use client'
 
@@ -40,7 +39,9 @@ interface LicensesToSourcesMapping {
 
 const sortIgnoreCase = (array: Array<string>) => array.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
 
-const TogglerLicenseList = ({ licenses, releaseId, t }: { licenses?: Array<string>, releaseId: string, t: any }) : JSX.Element => {
+import { TFunction } from 'i18next';
+
+const TogglerLicenseList = ({ licenses, releaseId, t }: { licenses?: Array<string>, releaseId: string, t: TFunction }) : JSX.Element => {
     const [toggle, setToggle] = useState(false)
     const [isFileModalOpen, setIsFileModalOpen] = useState(false)
     const [selectedLicense, setSelectedLicense] = useState<string | undefined>(undefined)
@@ -98,7 +99,7 @@ interface FileListModalProps {
     releaseId: string
     isFileModalOpen: boolean
     setIsFileModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-    t: any
+    t: TFunction
 }
 
 const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen, t }: FileListModalProps) => {
@@ -158,7 +159,7 @@ const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen
                 licensesToSourceFilesMapping.status === 'failure'
                     ?
                     <div className='mapping-data'>
-                        {t('Failed to load source file with error')}: <b>{t(licensesToSourceFilesMapping.message)}!</b>
+                        {t('Failed to load source file with error')}: <b>{t(licensesToSourceFilesMapping.message ?? 'Unknown error')}!</b>
                     </div>
                     :
                     <div className='mapping-data'>

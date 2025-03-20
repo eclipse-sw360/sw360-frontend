@@ -102,31 +102,32 @@ class Table extends Component<TableProps, unknown> {
             .forceRender()
     }
 
-    render(): React.ReactElement<any> {
-        return (
-            <>
-                {(this.props.selector === true) && (
-                    <div className='col-11 mt-3 mb-3'>
-                        <div className='dataTables_length'>
-                            <span className='my-2'>Show</span>
-                            <label style={{ marginLeft: '5px', marginRight: '5px' }}>
-                                <Form.Select size='sm' onChange={this.handlePageSizeChange}>
-                                    <option defaultValue={defaultOptions.pagination.limit}>
-                                        {defaultOptions.pagination.limit}
-                                    </option>
-                                    <option value='25'>25</option>
-                                    <option value='50'>50</option>
-                                    <option value='100'>100</option>
-                                </Form.Select>
-                            </label>
-                            <span>entries</span>
-                        </div>
+// On line 105
+render(): React.ReactElement {
+    return (
+        <>
+            {(this.props.selector === true) && (
+                <div className='col-11 mt-3 mb-3'>
+                    <div className='dataTables_length'>
+                        <span className='my-2'>Show</span>
+                        <label style={{ marginLeft: '5px', marginRight: '5px' }}>
+                            <Form.Select size='sm' onChange={this.handlePageSizeChange}>
+                                <option defaultValue={defaultOptions.pagination.limit}>
+                                    {defaultOptions.pagination.limit}
+                                </option>
+                                <option value='25'>25</option>
+                                <option value='50'>50</option>
+                                <option value='100'>100</option>
+                            </Form.Select>
+                        </label>
+                        <span>entries</span>
                     </div>
-                )}
-                <div ref={this.wrapper} />
-            </>
-        )
-    }
+                </div>
+            )}
+            <div ref={this.wrapper} />
+        </>
+    )
+}
 }
 
 export default Table
