@@ -60,7 +60,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
         const currentUrl = new URL(window.location.href)
         const searchUrl = new URL(currentUrl.origin + currentUrl.pathname)
         searchUrl.searchParams.append('allDetails', 'true')
-        searchUrl.searchParams.append('luceneSearch', 'true')
+        searchUrl.searchParams.append('luceneSearch', 'false')
         Object.entries(searchParams).forEach(([key, value]: Array<string>) => {
             if (!CommonUtils.isNullEmptyOrUndefinedString(value)) {
                 searchUrl.searchParams.append(key, value)
