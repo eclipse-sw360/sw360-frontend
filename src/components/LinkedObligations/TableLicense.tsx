@@ -98,7 +98,7 @@ class TableLicense extends Component<TableProps, unknown> {
             .forceRender()
     }
 
-    render(): React.ReactElement<any> {
+    render(): React.ReactElement {
         return (
             <>
                 <div className={styles['div-table-license']}>

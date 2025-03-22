@@ -7,18 +7,19 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import type { JSX } from "react";
 
 interface TableHeaderProps {
     title: string
 }
 
-function TableHeader({ title = '' }: TableHeaderProps) {
+const TableHeader = ({ title = '' }: TableHeaderProps): JSX.Element => {
     return (
         <>
             <div className='tableHeader'>
                 <h1 className='tableHeaderTitle mb-0'>{title}</h1>
             </div>
-            <hr></hr>
+            <hr />
         </>
     )
 }

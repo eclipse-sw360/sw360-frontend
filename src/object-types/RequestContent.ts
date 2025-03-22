@@ -1,3 +1,4 @@
+ts
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
 
@@ -15,8 +16,8 @@ interface RequestContent {
         Authorization?: string
         Accept?: string
     }
-    body: any
-    signal?: any
+    body: string | FormData | URLSearchParams | Blob | ArrayBufferView | ArrayBuffer | ReadableStream<Uint8Array> | null | undefined
+    signal?: AbortSignal
 }
 
 export default RequestContent
