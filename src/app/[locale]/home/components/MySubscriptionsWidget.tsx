@@ -71,13 +71,17 @@ function MySubscriptionsWidget(): ReactNode {
                     setReleaseData([])
                 }
             })
-            .catch((err) => console.error(err))
-        setLoading(false)
-    }, [fetchData,reload])
+            .catch((err: Error) => {
+                console.error('Error',err)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }, [fetchData, reload])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('My Subscriptions')} setReload={setReload}/>
+            <HomeTableHeader title={t('My Subscriptions')} setReload={setReload} />
             {loading === false ? (
                 <>
                     {componentData.length > 0 && (
