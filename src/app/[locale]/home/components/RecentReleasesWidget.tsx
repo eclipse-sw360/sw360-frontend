@@ -72,13 +72,13 @@ function RecentReleasesWidget() : ReactNode {
             }
         })
         .catch((err:Error)=>{
-            console.error('Error',err)
+            throw new Error(err.message)
         })
         .finally(() => {
-            setLoading(false)
+            setLoading(false)   
         })
     }, [fetchData, reload])
-
+    
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('Recent Releases')} setReload={setReload} />

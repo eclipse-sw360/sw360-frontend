@@ -70,7 +70,7 @@ function RecentComponentsWidget(): ReactNode {
             }
         })
         .catch((err:Error)=>{
-            console.error('Error',err)
+            throw new Error(err.message)
         })
         .finally(() => {
             setLoading(false)
