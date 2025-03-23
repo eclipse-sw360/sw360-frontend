@@ -72,10 +72,8 @@ export default function middleware(req: NextRequest): NextResponse | Promise<Nex
     if (isPublicPage) {
         return intlMiddleware(req)
     } else if (isAdminPage) {
-        // Use the defined type instead of 'any'
         return (authAdminMiddleware as AuthMiddleware)(req)
     } else {
-        // Use the defined type instead of 'any'
         return (authMiddleware as AuthMiddleware)(req)
     }
 }

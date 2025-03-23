@@ -9,12 +9,12 @@
 // License-Filename: LICENSE
 
 interface NodeData {
-    rowData: Array<unknown> // Instead of Array<any>
+    rowData: Array<unknown> 
     isExpanded?: boolean
     children?: Array<NodeData>
     isExpandable?: boolean
     isNodeFetched?: boolean
-    additionalData?: Record<string, unknown> // Instead of any
+    additionalData?: Record<string, unknown> 
 }
 
 export default NodeData

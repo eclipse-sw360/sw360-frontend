@@ -101,8 +101,6 @@ class Table extends Component<TableProps, unknown> {
             })
             .forceRender()
     }
-
-// On line 105
 render(): React.ReactElement {
     return (
         <>

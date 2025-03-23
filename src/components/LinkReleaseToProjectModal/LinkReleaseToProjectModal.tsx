@@ -77,7 +77,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
             const data = await response.json() as EmbeddedProjects
             if (!CommonUtils.isNullOrUndefined(data._embedded['sw360:projects'])) {
                 data._embedded['sw360:projects'].forEach((project: Project) => {
-                    // Fix strict boolean expression
                     const projectLinks = project._links;
                     if (projectLinks !== undefined && projectLinks !== null) {
                         const selfHref = projectLinks.self.href;
@@ -107,7 +106,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
             .then((response) => response.json())
             .then((projects : EmbeddedProjects) => {
                 projects._embedded['sw360:projects'].forEach((project: Project) => {
-                    // Fix strict boolean expression
                     const projectLinks = project._links;
                     if (projectLinks !== undefined && projectLinks !== null) {
                         const selfHref = projectLinks.self.href;
@@ -146,7 +144,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
             }).catch((err) => console.error(err))
     }
 
-    // Rest of the component remains unchanged
     useEffect(() => {
         if (session === null) return
         ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)

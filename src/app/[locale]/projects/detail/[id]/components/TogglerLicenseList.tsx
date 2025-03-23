@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 'use client'
 
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
@@ -20,6 +19,7 @@ import { TiWarningOutline } from 'react-icons/ti'
 import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { IoMdInformationCircleOutline } from 'react-icons/io'
+import { useTranslations } from 'next-intl'
 
 interface LicenseData {
     licenseType: string
@@ -39,9 +39,15 @@ interface LicensesToSourcesMapping {
 
 const sortIgnoreCase = (array: Array<string>) => array.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
 
-import { TFunction } from 'i18next';
-
-const TogglerLicenseList = ({ licenses, releaseId, t }: { licenses?: Array<string>, releaseId: string, t: TFunction }) : JSX.Element => {
+const TogglerLicenseList = ({ 
+    licenses, 
+    releaseId, 
+    t 
+}: { 
+    licenses?: Array<string>, 
+    releaseId: string, 
+    t: ReturnType<typeof useTranslations>  
+}): JSX.Element => {
     const [toggle, setToggle] = useState(false)
     const [isFileModalOpen, setIsFileModalOpen] = useState(false)
     const [selectedLicense, setSelectedLicense] = useState<string | undefined>(undefined)
@@ -99,7 +105,7 @@ interface FileListModalProps {
     releaseId: string
     isFileModalOpen: boolean
     setIsFileModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-    t: TFunction
+    t?: ReturnType<typeof useTranslations> 
 }
 
 const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen, t }: FileListModalProps) => {
@@ -147,42 +153,59 @@ const FileListModal = ({ license, releaseId, isFileModalOpen, setIsFileModalOpen
             <Modal.Title>
                 {
                     licensesToSourceFilesMapping.status === 'failure'
-                        ?
-                        <><TiWarningOutline size={24} /> {t('Warning')}</>
-                        :
-                        <><IoMdInformationCircleOutline size={24} /> {licensesToSourceFilesMapping.releaseName}</>
+                        ? <>
+                            <TiWarningOutline size={24} /> {t?.('Warning') ?? 'Warning'}  
+                          </>
+                        : <>
+                            <IoMdInformationCircleOutline size={24} /> {licensesToSourceFilesMapping.releaseName}
+                          </>
                 }
             </Modal.Title>
         </Modal.Header>
+        
         <Modal.Body>
-            {
-                licensesToSourceFilesMapping.status === 'failure'
-                    ?
-                    <div className='mapping-data'>
-                        {t('Failed to load source file with error')}: <b>{t(licensesToSourceFilesMapping.message ?? 'Unknown error')}!</b>
+            {licensesToSourceFilesMapping.status === 'failure' ? (
+                            <div className="mapping-data">
+                {t?.('Failed to load source file with error') ?? 'Failed to load'}: 
+                <b>
+                    {licensesToSourceFilesMapping.message !== undefined && 
+                    licensesToSourceFilesMapping.message !== null && 
+                    licensesToSourceFilesMapping.message !== '' 
+                        ? licensesToSourceFilesMapping.message 
+                        : ((t?.has?.('Unknown error' as Parameters<typeof t>[0]) ?? false) 
+                        ? (t?.('Unknown error' as Parameters<typeof t>[0]) ?? 'Unknown error')
+                        : 'Unknown error')  
+                    }!
+                </b>
+            </div>
+            ) : (
+                <div className="mapping-data">
+                    <div className="file-name">
+                        {t?.('File name') ?? 'File name'}: <b>{licensesToSourceFilesMapping.attachmentName}</b>
                     </div>
-                    :
-                    <div className='mapping-data'>
-                        <div className='file-name'>
-                            {t('File name')}: <b>{licensesToSourceFilesMapping.attachmentName}</b>
-                        </div>
-                        <div className='lic-type'>
-                            {t('License type')}: <b>{(licenseMappingData) ? licenseMappingData.licenseType : ''}</b>
-                        </div>
-                        <div className='lic-name'>
-                            {t('License name')}: <b>{license}</b>
-                        </div>
-                        <ul>
-                            {licenseMappingData ?
-                                Object.values(licenseMappingData.sourcesFiles).map(fileName =>
-                                    <>{fileName.split(/\s+|\n+/).map((name: string) => <li key={name}><b>{name}</b></li>)}</>
-                                )
-                                : <li><b>{t('Source file information not found in CLI')}!</b></li>
-                            }
-                        </ul>
+                    <div className="lic-type">
+                        {t?.('License type') ?? 'License type'}: 
+                        <b>{licenseMappingData ? licenseMappingData.licenseType : ''}</b>
                     </div>
-            }
+                    <div className="lic-name">
+                        {t?.('License name') ?? 'License name'}: <b>{license}</b>
+                    </div>
+                    <ul>
+                        {licenseMappingData
+                            ? Object.values(licenseMappingData.sourcesFiles).map((fileName, index) =>
+                                <React.Fragment key={index}>
+                                    {fileName.split(/\s+|\n+/).map((name: string) => 
+                                        <li key={name}><b>{name}</b></li>
+                                    )}
+                                </React.Fragment>
+                            )
+                            : <li><b>{t?.('Source file information not found in CLI') ?? 'Source file info not found'}!</b></li>
+                        }
+                    </ul>
+                </div>
+            )}
         </Modal.Body>
+
         <Modal.Footer className='justify-content-end'>
             <Button variant='light' onClick={() => { closeModal() }}>
                 OK

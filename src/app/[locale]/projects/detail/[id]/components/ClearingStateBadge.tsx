@@ -11,15 +11,15 @@
 'use client'
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 import { ReleaseClearingStateMapping } from '@/object-types'
+import { useTranslations } from 'next-intl'
 
 import type { JSX } from "react";
-import { TFunction } from 'i18next'   // ✅ Added proper type import
 
 interface Props {
     isRelease: boolean
     clearingState: string
     projectState?: string
-    t?: TFunction        
+    t?: ReturnType<typeof useTranslations>      
 }
 
 const capitalize = (text: string): string => {    
@@ -40,10 +40,10 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                     <OverlayTrigger
                         overlay={
                             <Tooltip>
-                                {`${t?.('Release Clearing State')}: ${
+                                {`${t?.('Release Clearing State') ?? 'Release Clearing State'}: ${
                                     t?.(ReleaseClearingStateMapping[
                                         clearingState as keyof typeof ReleaseClearingStateMapping
-                                    ])}`}
+                                    ]) ?? clearingState}`}
                             </Tooltip>
                         }
                     >
@@ -67,7 +67,7 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                             <OverlayTrigger
                                 overlay={
                                     <Tooltip>
-                                        {`${t?.('Project State')}: ${t?.(capitalize(projectState))}`}
+                                        {`${t?.('Project State') ?? 'Project State'}: ${capitalize(projectState)}`}
                                     </Tooltip>
                                 }
                             >
@@ -81,7 +81,11 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                         <OverlayTrigger
                             overlay={
                                 <Tooltip>
-                                    {`${t?.('Project Clearing State')}: ${t?.(capitalize(clearingState))}`}
+                                    {`${t?.('Project Clearing State') ?? 'Project Clearing State'}: ${
+                                        (t?.has?.(capitalize(clearingState) as Parameters<typeof t>[0]) ?? false)
+                                            ? (t?.(capitalize(clearingState) as Parameters<typeof t>[0]) ?? capitalize(clearingState))
+                                            : capitalize(clearingState)
+                                    }`}                                
                                 </Tooltip>
                             }
                         >

@@ -43,7 +43,6 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
 
     useEffect(() => {
         const data = projectUsings.map((project: Project) => {
-            // Fix strict boolean expression
             const projectLinks = project._links;
             let projectId = '';
             
