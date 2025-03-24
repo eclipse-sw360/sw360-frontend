@@ -171,6 +171,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
             const session = await getSession()
             if(CommonUtils.isNullOrUndefined(session))
                 return signOut()
+            console.log(linkedReleases.length)
             for(const l of linkedReleases) {
                 const releaseId = l['release']?.split('/').pop()
                 if(releaseId === undefined)
