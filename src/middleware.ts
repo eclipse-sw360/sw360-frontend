@@ -16,6 +16,8 @@ import { NextRequest } from 'next/server'
 import { routing } from './i18n/routing'
 import { locales } from './object-types/Constants'
 
+type AuthMiddleware = (req: NextRequest) => NextResponse | Promise<NextResponse>;
+
 const publicPages = ['/']
 
 const adminPages = ['/admin']
@@ -70,11 +72,9 @@ export default function middleware(req: NextRequest): NextResponse | Promise<Nex
     if (isPublicPage) {
         return intlMiddleware(req)
     } else if (isAdminPage) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
-        return (authAdminMiddleware as any)(req)
+        return (authAdminMiddleware as AuthMiddleware)(req)
     } else {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
-        return (authMiddleware as any)(req)
+        return (authMiddleware as AuthMiddleware)(req)
     }
 }
 

@@ -15,8 +15,8 @@ interface RequestContent {
         Authorization?: string
         Accept?: string
     }
-    body: any
-    signal?: any
+    body: string | FormData | URLSearchParams | Blob | ArrayBufferView | ArrayBuffer | ReadableStream<Uint8Array> | null | undefined
+    signal?: AbortSignal
 }
 
 export default RequestContent

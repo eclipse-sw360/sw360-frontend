@@ -77,7 +77,12 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
             const data = await response.json() as EmbeddedProjects
             if (!CommonUtils.isNullOrUndefined(data._embedded['sw360:projects'])) {
                 data._embedded['sw360:projects'].forEach((project: Project) => {
-                    linkedProjectIds.current.push(project._links?.self.href.split('/').at(-1) ?? '')
+                    const projectLinks = project._links;
+                    if (projectLinks !== undefined && projectLinks !== null) {
+                        const selfHref = projectLinks.self.href;
+                        const projectId = selfHref.split('/').at(-1) ?? '';
+                        linkedProjectIds.current.push(projectId);
+                    }
                 })
             }
         }
@@ -101,10 +106,31 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
             .then((response) => response.json())
             .then((projects : EmbeddedProjects) => {
                 projects._embedded['sw360:projects'].forEach((project: Project) => {
-                    if (linkedProjectIds.current.includes(project._links?.self.href.split('/').at(-1) ?? '')) {
-                        if (withLinkedProject === true) {
+                    const projectLinks = project._links;
+                    if (projectLinks !== undefined && projectLinks !== null) {
+                        const selfHref = projectLinks.self.href;
+                        const projectId = selfHref.split('/').at(-1) ?? '';
+                        
+                        if (linkedProjectIds.current.includes(projectId)) {
+                            if (withLinkedProject === true) {
+                                projectsData.push([
+                                    _(<PiCheckBold color='green' />) as JSX.Element,
+                                    project.name,
+                                    project.version ?? '',
+                                    project.state ?? '',
+                                    project.projectResponsible ?? '',
+                                    project.description ?? '',
+                                ])
+                            }
+                        } else {
                             projectsData.push([
-                                _(<PiCheckBold color='green' />) as JSX.Element,
+                                _(
+                                    <Form.Check
+                                        type='radio'
+                                        name='project'
+                                        onClick={() => changeSelection(project.name, projectId)}
+                                    />
+                                ),
                                 project.name,
                                 project.version ?? '',
                                 project.state ?? '',
@@ -112,23 +138,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
                                 project.description ?? '',
                             ])
                         }
-                    } else {
-                        projectsData.push([
-                            _(
-                                <Form.Check
-                                    type='radio'
-                                    name='project'
-                                    onClick={() =>
-                                        changeSelection(project.name, project._links?.self.href.split('/').at(-1) ?? '')
-                                    }
-                                />
-                            ),
-                            project.name,
-                            project.version ?? '',
-                            project.state ?? '',
-                            project.projectResponsible ?? '',
-                            project.description ?? '',
-                        ])
                     }
                 })
                 setTableData(projectsData)

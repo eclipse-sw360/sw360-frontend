@@ -42,18 +42,28 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
     ]
 
     useEffect(() => {
-        const data = projectUsings.map((project: Project) => [
-            _(
-                <Link
-                    key={project._links?.self.href.split('/').at(-1)}
-                    href={`/projects/detail/${project._links?.self.href.split('/').at(-1)}`}
-                >
-                    {CommonUtils.isNullEmptyOrUndefinedString(project.version) ? `${project.name} (${project.version})` : project.name}
-                </Link>
-            ) as JSX.Element,
-            project.businessUnit ?? '',
-            _(<Link href={`mailTo:${project.projectResponsible}}`}>{project.projectResponsible}</Link>) as JSX.Element,
-        ])
+        const data = projectUsings.map((project: Project) => {
+            const projectLinks = project._links;
+            let projectId = '';
+            
+            if (projectLinks !== undefined && projectLinks !== null) {
+                const selfHref = projectLinks.self.href;
+                projectId = selfHref.split('/').at(-1) ?? '';
+            }
+            
+            return [
+                _(
+                    <Link
+                        key={projectId}
+                        href={`/projects/detail/${projectId}`}
+                    >
+                        {CommonUtils.isNullEmptyOrUndefinedString(project.version) ? `${project.name} (${project.version})` : project.name}
+                    </Link>
+                ) as JSX.Element,
+                project.businessUnit ?? '',
+                _(<Link href={`mailTo:${project.projectResponsible}}`}>{project.projectResponsible}</Link>) as JSX.Element,
+            ];
+        });
         setTableData(data)
     }, [projectUsings])
 

@@ -284,13 +284,15 @@ const DependencyNetworkListView = ({
             ),
             width: '7%',
             formatter: (data: ListViewData) => 
-            _(
-                <div className='text-center'>
-                    <ClearingStateBadge key={data.id} isRelease={data.isRelease == 'true'}
-                            clearingState={upperCaseWithUnderscore(data.clearingState) as string}
-                            projectState={upperCaseWithUnderscore(data.projectState)} t={t} />
-                </div>
-            ),
+                _(
+                    <div className='text-center'>
+                        <ClearingStateBadge key={data.id} isRelease={data.isRelease == 'true'}
+                                clearingState={upperCaseWithUnderscore(data.clearingState) as string}
+                                projectState={upperCaseWithUnderscore(data.projectState)} 
+                                t={t as ReturnType<typeof useTranslations>}
+                                />
+                    </div>
+                ),
             sort: {
                 compare: (data1: ListViewData, data2: ListViewData) => data1.clearingState.localeCompare(data2.clearingState)
             }

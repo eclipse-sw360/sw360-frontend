@@ -41,8 +41,8 @@ async function send({
         request_content.headers['Authorization'] = `${token}`
     }
 
-    if (signal !== undefined) {
-        request_content.signal = signal
+    if (signal !== undefined && signal !== null) {
+        request_content.signal = signal as AbortSignal
     }
 
     return fetch(`${base}/${path}`, request_content).then((r) => r)
