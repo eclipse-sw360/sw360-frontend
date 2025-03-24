@@ -25,7 +25,7 @@
     "preact": "^10.26.4",
     "react": "19.0.0",
     "react-bootstrap": "^2.10.9",
-    "react-cookie": "^7.0.1",
+    "react-cookie": "^8.0.1",
     "react-dom": "19.0.0",
     "runtime>=7.26.10": "link:@babel/runtime>=7.26.10",
     "rxjs": "^7.8.1"
