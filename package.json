@@ -21,7 +21,7 @@
     "jwt-decode": "^4.0.0",
     "next": "15.2.3",
     "next-auth": "^4.24.7",
-    "next-intl": "^3.26.3",
+    "next-intl": "^4.0.2",
     "preact": "^10.26.4",
     "react": "19.0.0",
     "react-bootstrap": "^2.10.9",
