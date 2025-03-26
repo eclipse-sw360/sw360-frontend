@@ -89,7 +89,7 @@ const DeleteObligationDialog = ({
                     <Modal.Body>
                         <Form>
                             {t.rich('Do you really want to delete the Obligation?', {
-                                name: obligation.title,
+                                name: obligation.title ?? '',
                                 strong: (chunks) => <b>{chunks}</b>,
                             })}
                         </Form>
