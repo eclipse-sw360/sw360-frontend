@@ -63,7 +63,7 @@ function MyComponentsWidget(): ReactNode {
                 ) {
                     setData(
                         components['_embedded']['sw360:components'].map((item: Component) => [
-                            _(<Link href={'components/detail/' + item.id}>{item.name}</Link>),
+                            `${item.name}|${item.id}`,
                             CommonUtils.truncateText(item.description ?? '', 40),
                         ]),
                     )
@@ -80,15 +80,25 @@ function MyComponentsWidget(): ReactNode {
         return () => {
             controller.abort()
         }
-    }, [fetchData, params,reload])
+    }, [fetchData, params, reload])
 
     const title = t('My Components')
-    const columns = [t('Component Name'), t('Description')]
+    const columns = [{
+        id: 'Component name',
+        name: t('Component Name'),
+        formatter: (cell: string) => {
+            const [name, id] = cell.split('|')
+            return _(
+                <Link href={'components/detail/' + id}>{name}</Link>,
+            )
+        },
+    }, t('Description'),
+    ]
     const language = { noRecordsFound: t('NotOwnComponent') }
 
     return (
         <div>
-            <HomeTableHeader title={title} setReload={setReload}/>
+            <HomeTableHeader title={title} setReload={setReload} />
             {loading === false ? (
                 <Table
                     columns={columns}
