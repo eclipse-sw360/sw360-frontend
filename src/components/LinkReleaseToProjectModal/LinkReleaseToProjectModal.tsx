@@ -77,7 +77,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
             const data = await response.json() as EmbeddedProjects
             if (!CommonUtils.isNullOrUndefined(data._embedded['sw360:projects'])) {
                 data._embedded['sw360:projects'].forEach((project: Project) => {
-                    linkedProjectIds.current.push(project._links?.self.href.split('/').at(-1) ?? '')
+                    linkedProjectIds.current.push(project._links.self.href.split('/').at(-1) ?? '')
                 })
             }
         }
@@ -101,7 +101,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
             .then((response) => response.json())
             .then((projects : EmbeddedProjects) => {
                 projects._embedded['sw360:projects'].forEach((project: Project) => {
-                    if (linkedProjectIds.current.includes(project._links?.self.href.split('/').at(-1) ?? '')) {
+                    if (linkedProjectIds.current.includes(project._links.self.href.split('/').at(-1) ?? '')) {
                         if (withLinkedProject === true) {
                             projectsData.push([
                                 _(<PiCheckBold color='green' />) as JSX.Element,
@@ -119,7 +119,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props) : JSX.El
                                     type='radio'
                                     name='project'
                                     onClick={() =>
-                                        changeSelection(project.name, project._links?.self.href.split('/').at(-1) ?? '')
+                                        changeSelection(project.name, project._links.self.href.split('/').at(-1) ?? '')
                                     }
                                 />
                             ),
