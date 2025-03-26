@@ -14,9 +14,6 @@ const withNextIntl = createNextIntlPlugin()
 const nextConfig = {
     reactStrictMode: true,
     output: 'standalone',
-    experimental: {
-        missingSuspenseWithCSRBailout: false,
-    },
     typescript: {
         ignoreBuildErrors: false,
     },

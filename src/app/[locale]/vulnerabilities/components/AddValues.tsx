@@ -61,7 +61,6 @@ export default function AddValues({
                 <div className='row header mb-2 pb-2 px-2'>
                     <h6>
                         {
-                            // @ts-expect-error: TS2345 invalidate translation even if is valid under
                             t(componentName)
                         }
                     </h6>

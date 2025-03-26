@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, type JSX } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
 import { ActionType, Release, ReleaseDetail, Vendor } from '@/object-types'
@@ -50,7 +50,7 @@ const ReleaseSummary = ({
     moderators,
     setModerators,
     releaseDetail
-}: Props) => {
+}: Props) : JSX.Element => {
     const t = useTranslations('default')
     const [currentDate] = useState(new Date().toLocaleDateString())
     const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
