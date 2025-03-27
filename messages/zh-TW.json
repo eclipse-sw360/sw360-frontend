@@ -128,6 +128,7 @@
     "COTS Clearing Report URL": "科斯 清除報告網址",
     "COTS OSS Information": "COTS OSS信息",
     "COTS Responsible": "科斯 負責性",
+    "COTS Trusted Supplier": "受COTS信任的供應商",
     "CPE ID": "CPE 代碼",
     "CPE_ID": "CPE ID 建立公式為 'cpe:2.3:a:VENDORNAME:COMPONNAME:VERSION ' '",
     "CR Accepted": "CR 已通過健全性檢查並被接受進入清算佇列。",

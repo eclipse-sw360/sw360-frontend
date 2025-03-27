@@ -128,6 +128,7 @@
     "COTS Clearing Report URL": "COTS Clearing Report URL",
     "COTS OSS Information": "COTS OSS Information",
     "COTS Responsible": "COTS Responsable",
+    "COTS Trusted Supplier": "Proveedor de cotilis-confianza",
     "CPE ID": "CPE ID",
     "CPE_ID": "La fórmula para la creación de ID de CPE es 'cpe:2.3:a:VENDORNAME:COMPONENTNAME:VERSION '",
     "CR Accepted": "CR pasó el control de sanidad y es aceptado en la cola de compensación.",
