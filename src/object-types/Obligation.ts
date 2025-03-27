@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -58,6 +59,17 @@ export interface ProjectObligationsList {
     }
 }
 
+export interface ComponentObligation {
+    [k: string]: {
+        text?: string
+        id?: string
+        obligationLevel?: string
+        status?: string
+        comment?: string
+        obligationType?: string
+    }
+}
+
 export interface TreeNode {
     id: string
     type: string
@@ -112,3 +124,4 @@ export const ObligationLevelInfo = {
     'License Obligation': 'License obligation are task to be carried out or risks to be considered from the use of software under a particular license.',
     'Project Obligation': 'Project obligations are specific to the projects or products nature and are also requires steps or tasks to be made sure before conveying the software. An example could be tiny hardware with limited printed documentation. In this case open source license information would required special handling, for example print instructions how to obtain OSS license information on the packaging.',
 }
+
