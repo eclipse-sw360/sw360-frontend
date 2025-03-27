@@ -128,6 +128,7 @@
     "COTS Clearing Report URL": "URL báo cáo xóa COTS",
     "COTS OSS Information": "Thông tin COTS OSS",
     "COTS Responsible": "COTS chịu trách nhiệm",
+    "COTS Trusted Supplier": "Nhà cung cấp COTS-Trust",
     "CPE ID": "Mã CPE",
     "CPE_ID": "Công thức tạo CPE ID là 'cpe:2.3:a:VENDORNAME:COMPONENTNAME:VERSION'",
     "CR Accepted": "CR đã vượt qua Sanity Check và được chấp nhận vào hàng đợi thanh toán bù trừ.",

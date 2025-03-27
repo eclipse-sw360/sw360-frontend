@@ -128,6 +128,7 @@
     "COTS Clearing Report URL": "PRODUITS Effacement de l'URL du rapport",
     "COTS OSS Information": "Informations sur le SSO",
     "COTS Responsible": "PRODUITS Responsable",
+    "COTS Trusted Supplier": "Fournisseur de vitesses",
     "CPE ID": "Numéro CPE",
     "CPE_ID": "La formule pour la création de CPE ID est 'cpe:2.3:a:VENDORNAME:COMPONENTNAME:VERSION '",
     "CR Accepted": "CR a réussi le contrôle d'intégrité et est accepté dans la file d'attente de compensation.",
