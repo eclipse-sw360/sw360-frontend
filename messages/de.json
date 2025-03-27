@@ -128,6 +128,7 @@
     "COTS Clearing Report URL": "COTS Clearing Report URL",
     "COTS OSS Information": "COTS OSS Informationen",
     "COTS Responsible": "COTS Verantwortlich",
+    "COTS Trusted Supplier": "COTS-Trust-Lieferant",
     "CPE ID": "CPE-ID",
     "CPE_ID": "Die Formel für CPE-ID-Erstellung ist 'cpe:2.3:a:VENDORNAME:COMPONENTNAME:VERSION '",
     "CR Accepted": "CR hat den Sanity Check bestanden und wird in die Clearing-Warteschlange aufgenommen.",

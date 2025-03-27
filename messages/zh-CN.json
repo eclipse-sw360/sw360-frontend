@@ -128,6 +128,7 @@
     "COTS Clearing Report URL": "COTS 清算报告 URL",
     "COTS OSS Information": "COTS OSS 信息",
     "COTS Responsible": "COTS 负责",
+    "COTS Trusted Supplier": "受COTS信任的供应商",
     "CPE ID": "CPE ID",
     "CPE_ID": "CPE ID 创建公式为“cpe:2.3:a:VENDORNAME:COMPONENTNAME:VERSION”",
     "CR Accepted": "CR 已通过健全性检查并被接受进入清算队列。",
