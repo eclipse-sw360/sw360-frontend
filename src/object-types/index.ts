@@ -51,7 +51,11 @@ import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import { LicenseObligationRelease, Obligation, ProjectObligation, ProjectObligationsList } from './Obligation'
+import { LicenseObligationRelease,
+         Obligation,
+         ProjectObligation,
+         ProjectObligationsList,
+         ComponentObligation } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
@@ -115,6 +119,7 @@ export type {
     ClearingRequestComments,
     ClearingRequestDetails,
     Component,
+    ComponentObligation,
     ComponentPayload,
     COTSDetails,
     CreateClearingRequestPayload,
