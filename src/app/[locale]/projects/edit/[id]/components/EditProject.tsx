@@ -12,7 +12,10 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, Vendor, ProjectPayload, ActionType, ProjectObligation, ReleaseDetail, DocumentTypes } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project,
+         Vendor, ProjectPayload, ActionType,
+         ProjectObligation, ReleaseDetail,
+         DocumentTypes, ComponentObligation } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
@@ -89,7 +92,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()    
-    const [obligations, setObligations] = useState<ProjectObligation>({})
+    const [obligations, setObligations] = useState<ProjectObligation | ComponentObligation>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -482,9 +485,9 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedPackages'>
                                             <LinkedPackages
-                                                    projectId={projectId}
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
+                                                projectId={projectId}
+                                                projectPayload={projectPayload}
+                                                setProjectPayload={setProjectPayload}
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='attachments'>
@@ -496,7 +499,12 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='obligations'>
-                                            <Obligations projectId={projectId} actionType={ActionType.EDIT} payload={obligations} setPayload={setObligations}/>
+                                            <Obligations
+                                                projectId={projectId}
+                                                actionType={ActionType.EDIT}
+                                                payload={obligations}
+                                                setPayload={setObligations}
+                                            />
                                         </Tab.Pane>
                                     </Tab.Content>
                                 </Row>

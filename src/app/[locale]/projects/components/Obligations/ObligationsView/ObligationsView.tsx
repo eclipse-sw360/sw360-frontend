@@ -13,17 +13,40 @@ import { Dispatch, SetStateAction, type JSX } from 'react';
 import { Tab, Tabs } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import LicenseObligation from './LicenseObligation'
-import { ActionType, ProjectObligation } from '@/object-types'
+import { ActionType, ComponentObligation, ProjectObligation } from '@/object-types'
+import ProjectsComponentObligation from './ComponentObligation';
 
-export default function ObligationView({ projectId, actionType, payload, setPayload, selectedProjectId }:
-    Readonly<{ projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null }>): JSX.Element {
+interface Props {
+    projectId: string,
+    actionType: ActionType,
+    payload?: ProjectObligation | ComponentObligation,
+    setPayload?: Dispatch<SetStateAction<ProjectObligation | ComponentObligation>>,
+    selectedProjectId: string | null
+}
+
+export default function ObligationView({ projectId, actionType,
+                                         payload, setPayload,
+                                         selectedProjectId }: Props): JSX.Element {
     const t = useTranslations('default')
     return (
-        <Tabs defaultActiveKey='license-obligation' className='mb-3' mountOnEnter={true} unmountOnExit={true}>
+        <Tabs defaultActiveKey='license-obligation' className='mb-3'
+              mountOnEnter={true} unmountOnExit={true}
+        >
             <Tab eventKey='license-obligation' title={t('License Obligation')}>
-                <LicenseObligation projectId={projectId} actionType={actionType} payload={payload} setPayload={setPayload} selectedProjectId={selectedProjectId} />
+                <LicenseObligation projectId={projectId}
+                                   actionType={actionType}
+                                   payload={payload}
+                                   setPayload={setPayload}
+                                   selectedProjectId={selectedProjectId}
+                />
             </Tab>
             <Tab eventKey='component-obligation' title={t('Component Obligation')}>
+                <ProjectsComponentObligation
+                                   projectId={projectId}
+                                   actionType={actionType}
+                                   payload={payload}
+                                   setPayload={setPayload}
+                />
             </Tab>
             <Tab eventKey='project-obligation' title={t('Project Obligation')}>
             </Tab>
