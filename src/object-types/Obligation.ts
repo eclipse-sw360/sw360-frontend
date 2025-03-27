@@ -63,7 +63,6 @@ export interface ComponentObligation {
     [k: string]: {
         text?: string
         id?: string
-        obligationLevel?: string
         status?: string
         comment?: string
         obligationType?: string

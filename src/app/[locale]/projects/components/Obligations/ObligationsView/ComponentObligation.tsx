@@ -9,24 +9,33 @@
 
 'use client'
 
-import { Table, _ } from '@/components/sw360';
-import { ActionType, ProjectObligation } from '@/object-types';
-import { useTranslations } from 'next-intl';
-import { Dispatch, SetStateAction, useState, type JSX } from 'react';
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
-import { ShowObligationTextOnExpand } from './ExpandableComponents';
+import { Table, _ } from '@/components/sw360'
+import { ActionType, HttpStatus, ComponentObligation } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ShowObligationTextOnExpand } from './ExpandableComponents'
+import { notFound } from 'next/navigation'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function ComponentObligation({ projectId, actionType, payload,
-                                              setPayload, selectedProjectId }:
-                                            { projectId: string, actionType: ActionType,
-                                              payload?: ProjectObligation,
-                                              setPayload?: Dispatch<SetStateAction<ProjectObligation>>,
-                                              selectedProjectId: string | null}): JSX.Element {
+interface ProjectsComponentObligations {
+    obligations : ComponentObligation
+}
+
+export default function ProjectsComponentObligation(
+                            { projectId, actionType, payload, setPayload }:
+                            { projectId: string, actionType: ActionType,
+                              payload?: ComponentObligation,
+                              setPayload?: Dispatch<SetStateAction<ComponentObligation>>
+                            }): JSX.Element {
     const t = useTranslations('default')
+    const { status } = useSession()
     const [tableData] = useState<(object | string | string[])[][] | null>(null)
+    const [projectsComponentObligations, setProjectsComponentObligations] = useState<null | ProjectsComponentObligations>(null)
     const columns = (actionType === ActionType.DETAIL) ? 
      [
         {
@@ -97,26 +106,19 @@ export default function ComponentObligation({ projectId, actionType, payload,
         },
         {
             id: 'componentObligation.componentObligation',
-            name: t('License Obligation'),
-            formatter: ({ oblTitle, oblStatus, oblComment, match }:
-                        { oblTitle: string, oblStatus: string,
-                          oblComment: string, match: boolean }) =>
+            name: t('Component Obligation'),
+            formatter: ({ oblTitle }: { oblTitle: string }) =>
                 _(
                     <div className='text-center'>
                         <OverlayTrigger
-                            overlay={
-                                selectedProjectId === null ? (
+                            overlay=
+                                {
                                     <Tooltip>
-                                        {`${t('Status')}: ${oblStatus}`}
-                                        <br />
-                                        {`${t('Comment')}: ${oblComment}`}
+                                        t({`${oblTitle}`})
                                     </Tooltip>
-                                ) : <></>
-                            }
+                                }
                         >
-                            <span style={{ color: match ? 'green' : 'inherit' }}>
-                                {oblTitle}
-                            </span>
+                            <span> {oblTitle} </span>
                         </OverlayTrigger>
                     </div>
                 ),
@@ -139,7 +141,7 @@ export default function ComponentObligation({ projectId, actionType, payload,
                             if (setPayload) {
                                 let obligationValue = payload?.[obligation] ?? {}
                                 obligationValue = { ...obligationValue, status: e.target.value }
-                                setPayload((payload: ProjectObligation) =>
+                                setPayload((payload: ComponentObligation) =>
                                     ({ ...payload, [obligation]: obligationValue })
                                 )
                             }
@@ -187,7 +189,34 @@ export default function ComponentObligation({ projectId, actionType, payload,
             sort: true,
         }
     ]
-    console.log('projectId', projectId)
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if(CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+                const url = `projects/${projectId}/obligation?obligationLevel=component`
+                const response = await ApiUtils.GET( url, session.user.access_token, signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const componentObligation = await response.json()
+                setProjectsComponentObligations(componentObligation)
+            } catch (e) {
+                console.error(e)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [projectId, status])
+
+    console.log(projectsComponentObligations)
 
     return (
         <>
