@@ -15,12 +15,19 @@ import { useState } from 'react'
 import { Button, Nav, Tab, Dropdown } from 'react-bootstrap'
 import ObligationView from './ObligationsView/ObligationsView'
 import ReleaseView from './ReleaseView'
-import { ActionType, ProjectObligation } from '@/object-types'
+import { ActionType, ComponentObligation, ProjectObligation } from '@/object-types'
 import CompareObligation from './CompareObligation'
 import { useRouter } from 'next/navigation'
 
-export default function Obligations({ projectId, actionType, payload, setPayload }: 
-    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>> }): JSX.Element {
+interface Props {
+    projectId: string,
+    actionType: ActionType,
+    payload?: ProjectObligation | ComponentObligation,
+    setPayload?: Dispatch<SetStateAction<ProjectObligation | ComponentObligation>>
+}
+
+export default function Obligations({ projectId, actionType, 
+                                      payload, setPayload }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
@@ -36,19 +43,28 @@ export default function Obligations({ projectId, actionType, payload, setPayload
 
     return (
         <>
-            <CompareObligation show={show} setShow={setShow} setSelectedProjectId={setSelectedProjectId} />
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
+            <CompareObligation show={show}
+                               setShow={setShow}
+                               setSelectedProjectId={setSelectedProjectId}/>
+            <Tab.Container id='views-tab'
+                           activeKey={key}
+                           onSelect={(k) => setKey(k as string)}
+            >
                 <div className='row'>
                     <div className='col ps-0'>
                         <Nav variant='pills' className='d-inline-flex'>
                             <Nav.Item>
                                 <Nav.Link eventKey='obligations-view'>
-                                    <span className='fw-medium'>{t('Obligations View')}</span>
+                                    <span className='fw-medium'>
+                                        {t('Obligations View')}
+                                    </span>
                                 </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link eventKey='release-view'>
-                                    <span className='fw-medium'>{t('Release View')}</span>
+                                    <span className='fw-medium'>
+                                        {t('Release View')}
+                                    </span>
                                 </Nav.Link>
                             </Nav.Item>
                         </Nav>
@@ -75,14 +91,22 @@ export default function Obligations({ projectId, actionType, payload, setPayload
                     }
                     {
                         (actionType === ActionType.EDIT) &&
-                        <Button variant='secondary' className='col-auto' onClick={() => setShow(true)}>
+                        <Button variant='secondary'
+                                className='col-auto'
+                                onClick={() => setShow(true)}
+                        >
                             {t('Compare Obligation')}
                         </Button>
                     }
                 </div>
                 <Tab.Content className='mt-4'>
                     <Tab.Pane eventKey='obligations-view'>
-                        <ObligationView projectId={projectId} actionType={actionType} payload={payload} setPayload={setPayload} selectedProjectId={selectedProjectId} />
+                        <ObligationView projectId={projectId}
+                                        actionType={actionType}
+                                        payload={payload}
+                                        setPayload={setPayload}
+                                        selectedProjectId={selectedProjectId}
+                        />
                     </Tab.Pane>
                     <Tab.Pane eventKey='release-view'>
                         <ReleaseView projectId={projectId} />

@@ -26,16 +26,22 @@ interface ProjectsComponentObligations {
     obligations : ComponentObligation
 }
 
+interface Props {
+    projectId: string,
+    actionType: ActionType,
+    payload?: ComponentObligation,
+    setPayload?: Dispatch<SetStateAction<ComponentObligation>>
+}
+
 export default function ProjectsComponentObligation(
-                            { projectId, actionType, payload, setPayload }:
-                            { projectId: string, actionType: ActionType,
-                              payload?: ComponentObligation,
-                              setPayload?: Dispatch<SetStateAction<ComponentObligation>>
-                            }): JSX.Element {
+                            { projectId, actionType,
+                              payload, setPayload
+                            }: Props): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
     const [tableData] = useState<(object | string | string[])[][] | null>(null)
-    const [projectsComponentObligations, setProjectsComponentObligations] = useState<null | ProjectsComponentObligations>(null)
+    const [projectsComponentObligations, setProjectsComponentObligations] =
+                            useState<null | ProjectsComponentObligations>(null)
     const columns = (actionType === ActionType.DETAIL) ? 
      [
         {
@@ -147,13 +153,27 @@ export default function ProjectsComponentObligation(
                             }
                         }}
                     >
-                        <option value='OPEN'>{t('Open')}</option>
-                        <option value='ACKNOWLEDGED_OR_FULFILLED'>{t('Acknowledged or Fulfilled')}</option>
-                        <option value='WILL_BE_FULFILLED_BEFORE_RELEASE'>{t('Will be fulfilled before release')}</option>
-                        <option value='NOT_APPLICABLE'>{t('Not Applicable')}</option>
-                        <option value='DEFERRED_TO_PARENT_PROJECT'>{t('Deferred to parent project')}</option>
-                        <option value='FULFILLED_AND_PARENT_MUST_ALSO_FULFILL'>{t('Fulfilled and parent must also fulfill')}</option>
-                        <option value='ESCALATED'>{t('Escalated')}</option>
+                        <option value='OPEN'>
+                            {t('Open')}
+                        </option>
+                        <option value='ACKNOWLEDGED_OR_FULFILLED'>
+                            {t('Acknowledged or Fulfilled')}
+                        </option>
+                        <option value='WILL_BE_FULFILLED_BEFORE_RELEASE'>
+                            {t('Will be fulfilled before release')}
+                        </option>
+                        <option value='NOT_APPLICABLE'>
+                            {t('Not Applicable')}
+                        </option>
+                        <option value='DEFERRED_TO_PARENT_PROJECT'>
+                            {t('Deferred to parent project')}
+                        </option>
+                        <option value='FULFILLED_AND_PARENT_MUST_ALSO_FULFILL'>
+                            {t('Fulfilled and parent must also fulfill')}
+                        </option>
+                        <option value='ESCALATED'>
+                            {t('Escalated')}
+                        </option>
                     </select>
                 )
             },
@@ -200,7 +220,9 @@ export default function ProjectsComponentObligation(
                 if(CommonUtils.isNullOrUndefined(session))
                     return signOut()
                 const url = `projects/${projectId}/obligation?obligationLevel=component`
-                const response = await ApiUtils.GET( url, session.user.access_token, signal)
+                const response = await ApiUtils.GET( url,
+                                                     session.user.access_token,
+                                                     signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
@@ -212,7 +234,6 @@ export default function ProjectsComponentObligation(
                 console.error(e)
             }
         })()
-
         return () => controller.abort()
     }, [projectId, status])
 
