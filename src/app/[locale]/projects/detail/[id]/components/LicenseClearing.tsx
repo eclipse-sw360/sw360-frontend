@@ -143,7 +143,7 @@ export default function LicenseClearing({
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
-                                        <Dropdown.Item
+                                            <Dropdown.Item
                                                 onClick = {() => generateLicenseInfo(false)}
                                             >
                                                 {t('Projects only')}
