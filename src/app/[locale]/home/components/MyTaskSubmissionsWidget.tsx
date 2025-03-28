@@ -65,7 +65,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 if (!CommonUtils.isNullOrUndefined(moderationRequests['_embedded']['sw360:moderationRequests'])) {
                     setTaskSubmissionData(
                         moderationRequests['_embedded']['sw360:moderationRequests'].map((item: ModerationRequest) => [
-                            _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
+                            `${item.documentName}|${item.id}`,
                             taskSubmissionStatus[item.moderationState ?? 'INPROGRESS'],
                             item.id,
                         ]),
@@ -86,7 +86,16 @@ function MyTaskSubmissionsWidget(): ReactNode {
     }
 
     const columns = [
-        t('Document Name'),
+        {
+            id: 'Document Name',
+            name: t('Document Name'),
+            formatter: (cell: string) => {
+                const [documentName, id] = cell.split('|')
+                return _(
+                    <Link href={'moderationrequest/' + id}>{documentName}</Link>,
+                )
+            },
+        },
         t('Status'),
         {
             id: 'myTaskSubmissions.actions',
@@ -112,7 +121,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
 
     return (
         <div>
-            <HomeTableHeader title={title} setReload={setReload}/>
+            <HomeTableHeader title={title} setReload={setReload} />
             {loading === false ? (
                 <Table
                     columns={columns}

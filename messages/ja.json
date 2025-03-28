@@ -128,6 +128,7 @@
     "COTS Clearing Report URL": "COTSクリアリングレポートURL",
     "COTS OSS Information": "COTS OSS情報",
     "COTS Responsible": "COTS 責任者",
+    "COTS Trusted Supplier": "COTS-TRUSTEDサプライヤー",
     "CPE ID": "CPE ID",
     "CPE_ID": "CPE ID 作成の式は「cpe:2.3:a:VENDORNAME:COMPONENTNAME:VERSION」です。",
     "CR Accepted": "CR は健全性チェックに合格し、クリア キューに受け入れられます。",

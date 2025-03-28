@@ -63,7 +63,7 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 if (!CommonUtils.isNullOrUndefined(moderationRequests['_embedded']['sw360:moderationRequests'])) {
                     setTaskAssignmentData(
                         moderationRequests['_embedded']['sw360:moderationRequests'].map((item: ModerationRequest) => [
-                            _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
+                            `${item.id}|${item.documentName}`,
                             taskAssignmentStatus[item.moderationState ?? 'INPROGRESS'],
                         ]),
                     )
@@ -79,7 +79,19 @@ function MyTaskAssignmentsWidget(): ReactNode {
     }, [fetchData,reload])
 
     const title = t('My Task Assignments')
-    const columns = [t('Document Name'), t('Status')]
+    const columns = [
+        {
+            id: 'Document Name',
+            name: t('Document Name'),
+            formatter: (cell: string) => {
+                const [id, documentName] = cell.split('|')
+                return _(
+                    <Link href={'moderationrequest/' + id}>{documentName}</Link>
+                )
+
+            },
+        }, t('Status'),
+    ]
     const language = { noRecordsFound: t('NoTasksAssigned') }
 
     return (
