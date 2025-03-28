@@ -59,7 +59,6 @@ function MyTaskSubmissionsWidget(): ReactNode {
         void fetchData('moderationrequest/mySubmissions').then(
             (moderationRequests: EmbeddedTaskSubmissions | undefined) => {
                 if (moderationRequests === undefined) {
-                    setLoading(false)
                     return
                 }
 
@@ -71,11 +70,16 @@ function MyTaskSubmissionsWidget(): ReactNode {
                             item.id,
                         ]),
                     )
-                    setLoading(false)
                 }
             },
         )
-    }, [fetchData, reload])
+        .catch((err: Error) => {
+            throw new Error(err.message)
+        })
+        .finally(() => {
+            setLoading(false)
+        })
+    }, [fetchData,reload])
 
     const handleDeleteProject = (id: string) => {
         console.log(id)
