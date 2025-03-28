@@ -43,7 +43,7 @@ export interface ProjectObligation {
         obligationLevel?: string
         status?: string
         comment?: string
-        type?: string
+        obligationType?: string
         releases?: LicenseObligationRelease[]
     }
 }

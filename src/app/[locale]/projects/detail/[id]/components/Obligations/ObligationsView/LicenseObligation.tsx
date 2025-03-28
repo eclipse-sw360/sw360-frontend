@@ -185,7 +185,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                             val.licenseIds ?? [],
                             val.releases ?? [],
                             Capitalize(val.status ?? ''),
-                            val.type ?? '',
+                            Capitalize(val.obligationType ?? ''),
                             val.id ?? '',
                             val.comment ?? ''
                         ]
