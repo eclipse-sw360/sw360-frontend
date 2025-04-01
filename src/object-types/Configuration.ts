@@ -11,7 +11,7 @@
 import ConfigKeys from './enums/ConfigKeys'
 
 type Configuration = {
-    [key in ConfigKeys]: string | boolean
+    [key in ConfigKeys]: string
 }
 
 export default Configuration
