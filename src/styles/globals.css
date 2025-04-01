@@ -1325,6 +1325,11 @@ svg.action:hover {
     font-size: 18px;
 }
 
+.tree-row > .row:hover > .action-buttons {
+    opacity: 1 !important;
+    transition: opacity 0.2s;
+}
+
 .header-underlined {
     color: #5D8EA9;
     border-bottom: 1px solid #5D8EA9;
@@ -1366,4 +1371,13 @@ svg.action:hover {
 .log-content {
     max-height: 500px;
     overflow-y: scroll;
+}
+
+.tree-row .action-buttons {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tree-row:hover .action-buttons {
+    opacity: 1;
 }

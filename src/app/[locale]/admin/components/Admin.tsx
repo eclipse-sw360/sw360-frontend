@@ -58,7 +58,7 @@ const AdminMainPage = (): JSX.Element => {
                             <AiOutlineTags /> {t('License Types')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/obligations'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <AiOutlineUnorderedList /> {t('Obligations')}
                         </button>

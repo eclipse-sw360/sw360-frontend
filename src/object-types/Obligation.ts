@@ -57,3 +57,58 @@ export interface ProjectObligationsList {
         number?: number
     }
 }
+
+export interface TreeNode {
+    id: string
+    type: string
+    text: string
+    children: TreeNode[]
+    parentId?: string
+    languageElement?: string
+    action?: string
+    object?: string
+}
+
+export interface ObligationElement {
+    languageElement: string
+    action: string
+    object: string
+    selected: boolean
+}
+
+export interface ObligationTreeProps {
+    tree: TreeNode[]
+    title: string
+    onAddChild: (parentId?: string) => void
+    onAddSibling: (nodeId: string, parentId?: string) => void
+    onDeleteNode: (nodeId: string, parentId?: string) => void
+    onUpdateNode: (nodeId: string, field: 'type' | 'text' | 'languageElement' | 'action' | 'object', value: string ) => void
+    onUpdateNodeElement: (nodeId: string, element: ObligationElement ) => void
+}
+
+export interface ObligationFormProps {
+    obligation: Obligation
+    setObligation: React.Dispatch<React.SetStateAction<Obligation>>
+}
+
+export const ObligationTypes = {
+    PERMISSION: 'Permission',
+    RISK: 'Risk',
+    EXCEPTION: 'Exception',
+    RESTRICTION: 'Restriction',
+    OBLIGATION: 'Obligation',
+}
+
+export const ObligationLevels = {
+    COMPONENT_OBLIGATION: 'Component Obligation',
+    ORGANISATION_OBLIGATION: 'Organisation Obligation',
+    PROJECT_OBLIGATION: 'Project Obligation',
+    LICENSE_OBLIGATION: 'License Obligation',
+}
+
+export const ObligationLevelInfo = {
+    'Organisation Obligation': 'Organisation Obligations are general rules or mandatory steps to made sure before conveying software. An example would be to add the OSS contact e-mail address in case of questions to the project, software or to the organisation at all instances of conveyed software.',
+    'Component Obligation': 'Component obligations are obligations for a specific component or release only. For example, special measure or actions to be carried out could result from trade compliance or IP issues with the component.',
+    'License Obligation': 'License obligation are task to be carried out or risks to be considered from the use of software under a particular license.',
+    'Project Obligation': 'Project obligations are specific to the projects or products nature and are also requires steps or tasks to be made sure before conveying the software. An example could be tiny hardware with limited printed documentation. In this case open source license information would required special handling, for example print instructions how to obtain OSS license information on the packaging.',
+}
