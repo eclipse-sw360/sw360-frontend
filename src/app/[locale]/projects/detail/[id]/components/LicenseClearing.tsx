@@ -54,6 +54,9 @@ export default function LicenseClearing({
     }
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
+        const isCalledFromProjectLicenseTab = true
+        sessionStorage.setItem("isCalledFromProjectLicenseTab",
+                                JSON.stringify(isCalledFromProjectLicenseTab))
         router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
     }
 
