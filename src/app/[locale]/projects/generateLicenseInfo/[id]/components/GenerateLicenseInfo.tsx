@@ -16,7 +16,15 @@ import Link from "next/link"
 import { useEffect, useState, ReactNode, Dispatch, SetStateAction } from "react"
 import { useSession, getSession, signOut } from "next-auth/react"
 import { ApiUtils, CommonUtils } from "@/utils"
-import { AttachmentUsages, HttpStatus, Project, NodeData, Embedded, ProjectLinkedRelease, Release, AttachmentUsage, SaveUsagesPayload } from "@/object-types"
+import { AttachmentUsages,
+         HttpStatus,
+         Project,
+         NodeData,
+         Embedded,
+         ProjectLinkedRelease,
+         Release,
+         AttachmentUsage,
+         SaveUsagesPayload } from "@/object-types"
 import { notFound, useSearchParams } from "next/navigation"
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
@@ -27,7 +35,8 @@ type LinkedReleases = Embedded<Release, 'sw360:releases'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-const fetchProjectAndReleaseDetails = (linkedProjects: Project[] | undefined, projectId: string, proj: Project[]) => {
+const fetchProjectAndReleaseDetails = (linkedProjects: Project[] | undefined,
+                                       projectId: string, proj: Project[]) => {
     if(!linkedProjects || proj.length !== 0) {
         return
     }
@@ -37,24 +46,34 @@ const fetchProjectAndReleaseDetails = (linkedProjects: Project[] | undefined, pr
             proj[0] = p
             return
         } else {
-            fetchProjectAndReleaseDetails(p["_embedded"]?.["sw360:linkedProjects"], projectId, proj)
+            fetchProjectAndReleaseDetails(
+                p["_embedded"]?.["sw360:linkedProjects"], projectId, proj
+            )
         }
     }
 }
 
-const filterReleasesWithNoAttachments = (linkedReleases: LinkedReleases, attachmentUsages: AttachmentUsages) => {
-    const releases = attachmentUsages._embedded["sw360:release"].map((r) => r._links?.self.href.split('/').at(-1))
-    linkedReleases._embedded["sw360:releases"] = linkedReleases._embedded["sw360:releases"].filter((r) => releases.indexOf(r.id) === -1)
+const filterReleasesWithNoAttachments = (linkedReleases: LinkedReleases,
+                                         attachmentUsages: AttachmentUsages) => {
+    const releases = attachmentUsages._embedded["sw360:release"]
+                        .map((r) => r._links?.self.href.split('/').at(-1))
+    linkedReleases._embedded["sw360:releases"] = linkedReleases._embedded["sw360:releases"]
+                        .filter((r) => releases.indexOf(r.id) === -1)
 }
 
-const filterOnlyApprovedReleases = (attachmentUsages: AttachmentUsages, key: string) => {
-    attachmentUsages['_embedded']['sw360:release'] = attachmentUsages['_embedded']['sw360:release'].filter((r) => 
-        key === 'only_approved'? (r.clearingState !== undefined && r.clearingState === 'APPROVED'): true
+const filterOnlyApprovedReleases = (attachmentUsages: AttachmentUsages,
+                                    key: string) => {
+    attachmentUsages['_embedded']['sw360:release'] = 
+        attachmentUsages['_embedded']['sw360:release'].filter((r) => 
+            key === 'only_approved'? 
+                (r.clearingState !== undefined &&
+                 r.clearingState === 'APPROVED'): true
     )
     for(const r of attachmentUsages['_embedded']['sw360:release']) {
         if(r.attachments === undefined)
             continue
-        r.attachments = (r.attachments ?? []).filter((att) => att.checkStatus === 'ACCEPTED')
+        r.attachments = (r.attachments ?? [])
+            .filter((att) => att.checkStatus === 'ACCEPTED')
     }
 }
 
@@ -73,7 +92,8 @@ const setExpandedFieldsOfNewData = (prevState: NodeData[], newState: NodeData[])
     }
 }
 
-export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: string}>): ReactNode {
+export default function GenerateLicenseInfo({ projectId }: 
+                                              Readonly<{projectId: string}>): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [project, setProject] = useState<Project>()
@@ -91,7 +111,14 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
     })
     const [show, setShow] = useState(false)
     const [key, setKey] = useState('show_all')
+    const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>()
     const [showConfirmation, setShowConfirmation] = useState(false)
+    
+    const sessionStorageData = sessionStorage.getItem('isLicensePage')
+    if (sessionStorageData !== null){
+        setIsCalledFromProjectLicenseTab(JSON.parse(sessionStorageData))
+        console.log(isCalledFromProjectLicenseTab)
+    }
 
     const formatReleaseAndAttachments = (projectPath: string, r: Release, level: number): NodeData | undefined => {
         if (!r.attachments) {
@@ -110,14 +137,21 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
             console.log(att.attachmentUsageCount)
             const attNode: NodeData = {
                 rowData: [                    
-                    <div className={`form-check text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_select`}>
-                        <input className='form-check-input' type='checkbox' value={att.attachmentContentId ?? ''} />
+                    <div className={`form-check text-center ${row_color_class} border-0-cell`}
+                         key={`${att.attachmentContentId ?? ''}_select`}>
+                        <input className='form-check-input'
+                               type='checkbox'
+                               value={att.attachmentContentId ?? ''} />
                         <input
                             type="checkbox"
                             className="form-check-input"
-                            checked={saveUsagesPayload.selected.indexOf(`${projectPath}-${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId}`) !== -1}
+                            checked={saveUsagesPayload.selected.indexOf(
+                                     `${projectPath}-
+                                      ${r._links?.self.href.split('/').at(-1) ?? ''}
+                                      _licenseInfo_${att.attachmentContentId}`) !== -1}
                             onChange={() => {
-                                const val = `${projectPath}-${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId}`
+                                const val = `${projectPath}-${r._links?.self.href.split('/').at(-1) ?? ''}
+                                             _licenseInfo_${att.attachmentContentId}`
                                 if(saveUsagesPayload.selected.indexOf(val) === -1) {
                                     setSaveUsagesPayload({
                                         ...saveUsagesPayload,
@@ -134,11 +168,19 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                             }}
                         />
                     </div>, 
-                    <div className={`text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_level`}>{level}</div>,
-                    <div className={`${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_name`}>{att.filename}</div>, 
-                    <p key={`${att.attachmentContentId ?? ''}_used_by`} className={`${row_color_class} border-0-cell`}>
+                    <div  className={`text-center ${row_color_class} border-0-cell`}
+                          key={`${att.attachmentContentId ?? ''}_level`}>
+                        {level}
+                    </div>,
+                    <div  className={`${row_color_class} border-0-cell`}
+                          key={`${att.attachmentContentId ?? ''}_name`}>
+                        {att.filename}
+                    </div>, 
+                    <p  key={`${att.attachmentContentId ?? ''}_used_by`}
+                        className={`${row_color_class} border-0-cell`}>
                         {
-                            (att.attachmentUsageCount === undefined || att.attachmentUsageCount === 0) ?
+                            (att.attachmentUsageCount === undefined || 
+                                                          att.attachmentUsageCount === 0) ?
                             t('not used in any project yet'):
                             t.rich('USED_BY ATTACHMENTS', {
                                 num: att.attachmentUsageCount,
@@ -146,10 +188,12 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                             })
                         }
                     </p>,
-                    <div className={`text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_name`}>
+                    <div  className={`text-center ${row_color_class} border-0-cell`}
+                          key={`${att.attachmentContentId ?? ''}_name`}>
                         {Capitalize(att.checkStatus ?? '')}
                     </div>,
-                    <div className='text-center' key={`${att.attachmentContentId}_uploaded_by`}>
+                    <div  className='text-center'
+                          key={`${att.attachmentContentId}_uploaded_by`}>
                         <Link
                             className={`text-link ${row_color_class} border-0-cell`}
                             href={`mailto:${att.createdBy}`}
@@ -157,29 +201,42 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                             {att.createdBy}
                         </Link>
                     </div>, 
-                    <div className={`text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_clearing_team`}>{att.checkedTeam ?? ''}</div>
+                    <div  className={`text-center ${row_color_class} border-0-cell`}
+                          key={`${att.attachmentContentId ?? ''}_clearing_team`}>
+                        {att.checkedTeam ?? ''}
+                    </div>
                 ]
             }
             attNodes.push(attNode)
         }
         const relNode: NodeData = {
             rowData: [
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_select`}></div>,
-                <div className={`text-center ${row_color_class} border-0-cell`}
-                    key={`${release_id}_level`}
-                >1</div>,
+                <div  className={`text-center ${row_color_class} border-0-cell`}
+                      key={`${release_id}_select`}>    
+                </div>,
+                <div  className={`text-center ${row_color_class} border-0-cell`}
+                      key={`${release_id}_level`}>
+                        1
+                </div>,
                 <Link href={`/components/releasessF/detail/${release_id}`} 
-                    className={`text-center text-link ${row_color_class} border-0-cell`} key={`${release_id}_release_name`}>
+                      className={`text-center text-link ${row_color_class} border-0-cell`}
+                      key={`${release_id}_release_name`}>
                     {r.name ?? ''}{r.version ?? ` ${r.version}`}
                 </Link>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_component_type`}>
+                <div  className={`text-center ${row_color_class} border-0-cell`}
+                      key={`${release_id}_component_type`}>
                     {r.componentType ?? ''}
                 </div>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_clearing_state`}>
+                <div  className={`text-center ${row_color_class} border-0-cell`}
+                      key={`${release_id}_clearing_state`}>
                     {Capitalize(r.clearingState ?? '')}
                 </div>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_uploaded_by`}></div>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_clearing_team`}></div>
+                <div  className={`text-center ${row_color_class} border-0-cell`}
+                      key={`${release_id}_uploaded_by`}>
+                </div>,
+                <div  className={`text-center ${row_color_class} border-0-cell`}
+                      key={`${release_id}_clearing_team`}>
+                </div>
             ],
             children: attNodes,
             isExpanded: true
@@ -200,21 +257,36 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                 if (CommonUtils.isNullOrUndefined(session))
                     return signOut()
                 const requests = [
-                    ApiUtils.GET(`projects/${projectId}`, session.user.access_token, signal),
-                    ApiUtils.GET(`projects/${projectId}/releases?transitive=false`, session.user.access_token, signal)
+                    ApiUtils.GET(`projects/${projectId}`,
+                                  session.user.access_token, signal),
+                    ApiUtils.GET(`projects/${projectId}/releases?transitive=false`,
+                                  session.user.access_token, signal)
                 ]
                 if(searchParams.withSubProjects === 'true') {
                     requests.push(
-                        ApiUtils.GET(`projects/${projectId}/attachmentUsage?transitive=true&filter=withCliAttachment`, session.user.access_token, signal),
-                        ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, session.user.access_token, signal)
+                        ApiUtils.GET(
+                            `projects/${projectId}/attachmentUsage?transitive=true&filter=withCliAttachment`,
+                             session.user.access_token, signal),
+                        ApiUtils.GET(
+                            `projects/${projectId}/linkedProjects?transitive=true`,
+                             session.user.access_token, signal)
                     )
                 } else {
-                    requests.push(ApiUtils.GET(`projects/${projectId}/attachmentUsage?transitive=false&filter=withCliAttachment`, session.user.access_token, signal))
+                    requests.push(
+                        ApiUtils.GET(
+                            `projects/${projectId}/attachmentUsage?transitive=false&filter=withCliAttachment`,
+                             session.user.access_token, signal))
                 }
                 const responses = await Promise.all(requests)
-                if (responses.filter(response => (response.status === HttpStatus.UNAUTHORIZED)).length !== 0) {
+                if (responses.filter(
+                        response => (
+                            response.status === HttpStatus.UNAUTHORIZED
+                        )).length !== 0) {
                     return signOut()
-                } else if (responses.filter(response => (response.status !== HttpStatus.OK)).length !== 0) {
+                } else if (responses.filter(
+                                response => (
+                                    response.status !== HttpStatus.OK
+                                )).length !== 0) {
                     return notFound()
                 }
     
@@ -228,7 +300,8 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                     ...attachmentUsages['_embedded']['sw360:release'], 
                     ...linkedReleases._embedded["sw360:releases"]
                 ]
-                const linkedProjects = (searchParams.withSubProjects === 'true') ? await responses[3].json() as LinkedProjects: null
+                const linkedProjects = (searchParams.withSubProjects === 'true') ?
+                    await responses[3].json() as LinkedProjects: null
                 setAttachmentUsagesAndLinkedProjects({
                     attachmentUsages: attachmentUsages,
                     linkedProjects: linkedProjects,
@@ -243,11 +316,16 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
 
                 for(const r of attachmentUsages['_embedded']['sw360:release']) {
                     for(const att of r.attachments ?? []) {
-                        const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0].filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
+                        const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0]
+                            .filter((elem: AttachmentUsage) => 
+                                elem.attachmentContentId === att.attachmentContentId)
                         for(const u of usages) {
                             if (u.usageData && u.usageData.licenseInfo) {
                                 saveUsages.selected = [...new Set<string>([
-                                    ...saveUsages.selected, `${u.usageData.licenseInfo.projectPath}-${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId}`
+                                    ...saveUsages.selected,
+                                    `${u.usageData.licenseInfo.projectPath}-
+                                    ${r._links?.self.href.split('/').at(-1) ?? ''}
+                                    _licenseInfo_${att.attachmentContentId}`
                                 ])]
                             }
                         }
@@ -285,22 +363,32 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                 })
                 const projectNode: NodeData = {
                     rowData: [
-                        <div className="text-center border-0-cell" key={`${p}_select`}></div>,
                         <div className="text-center border-0-cell"
-                            key={`${p}_level`}
-                        >1</div>,
+                             key={`${p}_select`}></div>,
+                        <div className="text-center border-0-cell"
+                             key={`${p}_level`}>
+                                1
+                        </div>,
                         <Link href={`/projects/detail/${p}`} 
-                            className="text-center text-link border-0-cell" key={`${p}_release_name`}>
-                            {proj[0].name}{proj[0].version !== undefined && ` ${proj[0].version}`}
+                              className="text-center text-link border-0-cell"
+                              key={`${p}_release_name`}>
+                            {proj[0].name}
+                            {proj[0].version !== undefined && ` ${proj[0].version}`}
                         </Link>,
-                        <div className="text-center border-0-cell" key={`${p}_component_type`}>
+                        <div className="text-center border-0-cell"
+                             key={`${p}_component_type`}>
                             {Capitalize(proj[0].projectType ?? '')}
                         </div>,
-                        <div className="text-center border-0-cell" key={`${p}_clearing_state`}>
+                        <div className="text-center border-0-cell"
+                             key={`${p}_clearing_state`}>
                             {Capitalize(proj[0].clearingState ?? '')}
                         </div>,
-                        <div className="text-center border-0-cell" key={`${p}_uploaded_by`}></div>,
-                        <div className="text-center border-0-cell" key={`${p}_clearing_team`}></div>
+                        <div className="text-center border-0-cell"
+                             key={`${p}_uploaded_by`}>
+                        </div>,
+                        <div className="text-center border-0-cell"
+                             key={`${p}_clearing_team`}>
+                        </div>
                     ],
                     children: [],
                     isExpanded: true
@@ -314,7 +402,9 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                         let projectPath = ''
                         for(const r of attachmentUsages['_embedded']['sw360:release']) {
                             for(const att of r.attachments ?? []) {
-                                const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0].filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
+                                const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0]
+                                               .filter((elem: AttachmentUsage) =>
+                                                elem.attachmentContentId === att.attachmentContentId)
                                 for(const u of usages) {
                                     if (u.usageData?.licenseInfo?.projectPath.split(':').at(-1) === p) {
                                         projectPath = u.usageData.licenseInfo.projectPath
@@ -413,8 +503,13 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
     } else {
         return (
             <>
-                <DownloadLicenseInfoModal show={show} setShow={setShow} saveUsagesPayload={saveUsagesPayload} setShowConfirmation={setShowConfirmation} projectId={projectId}/>
-                <LicenseInfoDownloadConfirmationModal show={showConfirmation} setShow={setShowConfirmation}/>
+                <DownloadLicenseInfoModal show={show}
+                                          setShow={setShow}
+                                          saveUsagesPayload={saveUsagesPayload}
+                                          setShowConfirmation={setShowConfirmation}
+                                          projectId={projectId}/>
+                <LicenseInfoDownloadConfirmationModal show={showConfirmation}
+                                                      setShow={setShowConfirmation}/>
                 <div className='container page-content'>
                     <div className='row'>
                         <div className='row d-flex justify-content-between'>
@@ -422,13 +517,17 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                                 {t('GENERATE LICENSE INFORMATION')}
                             </div>
                             <div className='col-auto text-truncate buttonheader-title'>
-                                {project.name}{' '}{(project.version !== undefined) && `(${project.version})`}
+                                {project.name}
+                                {' '}
+                                {(project.version !== undefined) && `(${project.version})`}
                             </div>
                         </div>
                         <div className='col-lg-12'>
                             {
                                 data
-                                ? <Tab.Container id='show_all' activeKey={key} onSelect={(k) => setKey(k as string)}>
+                                ? <Tab.Container id='show_all' 
+                                                 activeKey={key}
+                                                 onSelect={(k) => setKey(k as string)}>
                                     <div className='col ps-0'>
                                         <Nav variant='pills' className='d-inline-flex'>
                                             <Nav.Item>
@@ -442,27 +541,40 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{projectId: 
                                             </Nav.Item>
                                             <Nav.Item>
                                                 <Nav.Link eventKey='show_all'>
-                                                    <span className='fw-medium'>{t('Show All')}</span>
+                                                    <span className='fw-medium'>
+                                                        {t('Show All')}
+                                                    </span>
                                                 </Nav.Link>
                                             </Nav.Item>
                                             <Nav.Item>
                                                 <Nav.Link eventKey='only_approved'>
-                                                    <span className='fw-medium'>{t('Only Approved')}</span>
+                                                    <span className='fw-medium'>
+                                                        {t('Only Approved')}
+                                                    </span>
                                                 </Nav.Link>
                                             </Nav.Item>
                                         </Nav>
                                     </div>
-                                    <div className='subscriptionBox my-2' style={{ maxWidth: '98vw',
-                                                                           textAlign:'left',
-                                                                           fontSize: '15px'}}>
+                                    <div   className='subscriptionBox my-2'
+                                            style={{ maxWidth: '98vw',
+                                            textAlign:'left',
+                                            fontSize: '15px'}}>
                                         {t('No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading')}
                                     </div>
                                     <Tab.Content className='mt-3'>
                                         <Tab.Pane eventKey='show_all'>
-                                            <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />
+                                            <TreeTable columns={columns}
+                                                       data={data}
+                                                       setData={setData as Dispatch<SetStateAction<NodeData[]>>}
+                                                       selector={true}
+                                                       sort={false} />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='only_approved'>
-                                            <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />
+                                            <TreeTable columns={columns}
+                                                       data={data}
+                                                       setData={setData as Dispatch<SetStateAction<NodeData[]>>}
+                                                       selector={true}
+                                                       sort={false} />
                                         </Tab.Pane>
                                     </Tab.Content>
                                 </Tab.Container>

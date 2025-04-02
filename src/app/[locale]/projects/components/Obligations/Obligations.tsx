@@ -28,6 +28,9 @@ export default function Obligations({ projectId, actionType, payload, setPayload
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
+        const isCalledFromProjectLicenseTab = false
+        sessionStorage.setItem("isCalledFromProjectLicenseTab",
+                                JSON.stringify(isCalledFromProjectLicenseTab))
         router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects}`)
     }
 
