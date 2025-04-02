@@ -45,8 +45,8 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
         const data = projectUsings.map((project: Project) => [
             _(
                 <Link
-                    key={project._links?.self.href.split('/').at(-1)}
-                    href={`/projects/detail/${project._links?.self.href.split('/').at(-1)}`}
+                    key={project._links.self.href.split('/').at(-1)}
+                    href={`/projects/detail/${project._links.self.href.split('/').at(-1)}`}
                 >
                     {CommonUtils.isNullEmptyOrUndefinedString(project.version) ? `${project.name} (${project.version})` : project.name}
                 </Link>
