@@ -24,13 +24,17 @@ export default function DownloadLicenseInfoModal({
     setShow,
     saveUsagesPayload,
     setShowConfirmation,
-    projectId
+    projectId,
+    isCalledFromProjectLicenseTab,
+    withSubProjects
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
     setShowConfirmation: Dispatch<SetStateAction<boolean>>
     saveUsagesPayload: SaveUsagesPayload,
-    projectId: string
+    projectId: string,
+    isCalledFromProjectLicenseTab: boolean
+    withSubProjects: boolean
 }) : ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -46,7 +50,8 @@ export default function DownloadLicenseInfoModal({
             if (CommonUtils.isNullOrUndefined(session)) {
                 return signOut()
             }
-            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload, session.user.access_token)
+            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`,
+                                                  saveUsagesPayload, session.user.access_token)
             if(response.status !== HttpStatus.CREATED) {
                 return notFound()
             }
@@ -81,8 +86,49 @@ export default function DownloadLicenseInfoModal({
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    <h5 className='fw-bold'>{t('Uncheck project release relationships to be excluded')}:</h5>
+                    <div className='form-check'>
+                        <input
+                            id='project_clearing_report_unknown'
+                            type='checkbox'
+                            className='form-check-input'
+                            name='unknown'
+                            checked={true}
+                        />
+                        <label className='form-label fw-bold'
+                                htmlFor='project_clearing_report_unknown'>
+                            {t('Unknown')}
+                        </label>
+                    </div>
+                    <div className='form-check'
+                         hidden={!withSubProjects}>
+                        <input
+                            id='project_clearing_report_contained'
+                            type='checkbox'
+                            className='form-check-input'
+                            name='contained'
+                        />
+                        <label className='form-label fw-bold'
+                                htmlFor='project_clearing_report_contained'>
+                            {t('Contained')}
+                        </label>
+                    </div>
+                    <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
+                    <div className='form-check'
+                         hidden={!withSubProjects}>
+                        <input
+                            id='project_clearing_report_linked_project_relation'
+                            type='checkbox'
+                            className='form-check-input'
+                            name='is_a_subproject'
+                            checked={true}
+                        />
+                        <label className='form-label fw-bold'
+                                htmlFor='project_clearing_report_linked_project_relation'>
+                            {t('Is a subproject')}
+                        </label>
+                    </div>
                     <h5 className='fw-bold'>{t('Select output format')}:</h5>
-
                     <div className="form-check">
                         <input 
                             type="radio" 
@@ -93,10 +139,13 @@ export default function DownloadLicenseInfoModal({
                             onChange={onOptionChange}
                             className="form-check-input"
                         />
-                        <label className="form-check-label" htmlFor="DocxGenerator">{t('License Disclosure as DOCX')}</label>
+                        <label className="form-check-label"
+                               htmlFor="DocxGenerator">
+                            {t('License Disclosure as DOCX')}
+                        </label>
                     </div>
-                        
-                    <div className="form-check">
+                    <div className="form-check"
+                         hidden={!isCalledFromProjectLicenseTab}>
                         <input 
                             type="radio" 
                             name="generatorClassName" 
@@ -106,10 +155,13 @@ export default function DownloadLicenseInfoModal({
                             onChange={onOptionChange}
                             className="form-check-input"
                         />
-                        <label className="form-check-label" htmlFor="XhtmlGenerator">{t('License Disclosure as XHTML')}</label>
+                        <label className="form-check-label"
+                               htmlFor="XhtmlGenerator">
+                            {t('License Disclosure as XHTML')}
+                        </label>
                     </div>
-
-                    <div className="form-check">
+                    <div className="form-check"
+                         hidden={!isCalledFromProjectLicenseTab}>
                         <input 
                             type="radio" 
                             name="generatorClassName" 
@@ -119,7 +171,10 @@ export default function DownloadLicenseInfoModal({
                             onChange={onOptionChange}
                             className="form-check-input"
                         />
-                        <label className="form-check-label" htmlFor="TextGenerator">{t('License Disclosure as TEXT')}</label>
+                        <label className="form-check-label"
+                               htmlFor="TextGenerator">
+                            {t('License Disclosure as TEXT')}
+                        </label>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>

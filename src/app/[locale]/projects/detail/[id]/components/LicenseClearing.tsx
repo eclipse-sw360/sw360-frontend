@@ -54,6 +54,9 @@ export default function LicenseClearing({
     }
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
+        const isCalledFromProjectLicenseTab = true
+        sessionStorage.setItem("isCalledFromProjectLicenseTab",
+                                JSON.stringify(isCalledFromProjectLicenseTab))
         router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
     }
 
@@ -141,20 +144,22 @@ export default function LicenseClearing({
                             </Nav.Item>
                             <Nav.Item>
                                 <Dropdown className='col-auto'>
-                                    <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
-                                        <Dropdown.Menu>
+                                    <Dropdown.Toggle variant='secondary'>
+                                        {t('Generate License Info')}
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
                                         <Dropdown.Item
-                                                onClick = {() => generateLicenseInfo(false)}
-                                            >
-                                                {t('Projects only')}
-                                            </Dropdown.Item>
-                                            <Dropdown.Item
-                                                onClick = {() => generateLicenseInfo(true)}
-                                            >
-                                                {t('Projects with sub projects')}
-                                            </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
+                                            onClick = {() => generateLicenseInfo(false)}
+                                        >
+                                            {t('Projects only')}
+                                        </Dropdown.Item>
+                                        <Dropdown.Item
+                                            onClick = {() => generateLicenseInfo(true)}
+                                        >
+                                            {t('Projects with sub projects')}
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </Nav.Item>
                             <Nav.Item>
                                 <Dropdown className='col-auto'>
