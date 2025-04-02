@@ -1204,6 +1204,8 @@
     "USED_BY_PROJECTS": "Wird in <strong>{count}</strong> Projekten verwendet",
     "USER": "Benutzer",
     "Unauthorized request": "Unbefugte Anfrage!",
+    "Uncheck Linked Project Relationships to be excluded": "Deaktivierte verknüpfte Projektbeziehungen, die ausgeschlossen werden sollen",
+    "Uncheck project release relationships to be excluded": "Deaktivieren Sie die Veröffentlichungsbeziehungen für Projekte, um ausgeschlossen zu werden",
     "Unknown": "Unbekannt",
     "Unsubscribe": "Abbestellen",
     "Update": "Aktualisierung",

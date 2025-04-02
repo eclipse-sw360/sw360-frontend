@@ -1204,6 +1204,8 @@
     "USED_BY_PROJECTS": "用于<strong>{count}</strong>个项目",
     "USER": "用户",
     "Unauthorized request": "未经授权的请求！",
+    "Uncheck Linked Project Relationships to be excluded": "取消选中链接的项目关系将被排除在外",
+    "Uncheck project release relationships to be excluded": "取消选中项目发布关系将被排除在外",
     "Unknown": "未知",
     "Unsubscribe": "退订",
     "Update": "更新",
