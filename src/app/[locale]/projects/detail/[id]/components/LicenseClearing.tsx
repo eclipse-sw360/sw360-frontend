@@ -141,20 +141,22 @@ export default function LicenseClearing({
                             </Nav.Item>
                             <Nav.Item>
                                 <Dropdown className='col-auto'>
-                                    <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item
-                                                onClick = {() => generateLicenseInfo(false)}
-                                            >
-                                                {t('Projects only')}
-                                            </Dropdown.Item>
-                                            <Dropdown.Item
-                                                onClick = {() => generateLicenseInfo(true)}
-                                            >
-                                                {t('Projects with sub projects')}
-                                            </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
+                                    <Dropdown.Toggle variant='secondary'>
+                                        {t('Generate License Info')}
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item
+                                            onClick = {() => generateLicenseInfo(false)}
+                                        >
+                                            {t('Projects only')}
+                                        </Dropdown.Item>
+                                        <Dropdown.Item
+                                            onClick = {() => generateLicenseInfo(true)}
+                                        >
+                                            {t('Projects with sub projects')}
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </Nav.Item>
                             <Nav.Item>
                                 <Dropdown className='col-auto'>
