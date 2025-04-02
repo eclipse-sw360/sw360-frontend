@@ -1187,6 +1187,8 @@
     "USED_BY_PROJECTS": "用於<strong>{count}</strong>個項目",
     "USER": "使用者",
     "Unauthorized request": "未經授權的請求！",
+    "Uncheck Linked Project Relationships to be excluded": "取消選中鏈接的項目關係將被排除在外",
+    "Uncheck project release relationships to be excluded": "取消選中項目發布關係將被排除在外",
     "Unknown": "未知",
     "Unsubscribe": "退訂",
     "Update": "更新",

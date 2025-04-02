@@ -111,13 +111,13 @@ export default function GenerateLicenseInfo({ projectId }:
     })
     const [show, setShow] = useState(false)
     const [key, setKey] = useState('show_all')
-    const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>()
     const [showConfirmation, setShowConfirmation] = useState(false)
+    const [withSubProjects, setWithSubProjects] = useState<boolean>(false)
+    const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
     
-    const sessionStorageData = sessionStorage.getItem('isLicensePage')
+    const sessionStorageData = sessionStorage.getItem('isCalledFromProjectLicenseTab')
     if (sessionStorageData !== null){
         setIsCalledFromProjectLicenseTab(JSON.parse(sessionStorageData))
-        console.log(isCalledFromProjectLicenseTab)
     }
 
     const formatReleaseAndAttachments = (projectPath: string, r: Release, level: number): NodeData | undefined => {
@@ -250,9 +250,7 @@ export default function GenerateLicenseInfo({ projectId }:
         ;(async () => {
             try {
                 const searchParams = Object.fromEntries(params)
-                if(Object.prototype.hasOwnProperty.call(searchParams, "withSubProjects") === false) {
-                    return
-                }
+                setWithSubProjects(Object.prototype.hasOwnProperty.call(searchParams, "withSubProjects"))
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session))
                     return signOut()
@@ -262,7 +260,7 @@ export default function GenerateLicenseInfo({ projectId }:
                     ApiUtils.GET(`projects/${projectId}/releases?transitive=false`,
                                   session.user.access_token, signal)
                 ]
-                if(searchParams.withSubProjects === 'true') {
+                if(withSubProjects) {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=true&filter=withCliAttachment`,
@@ -300,7 +298,7 @@ export default function GenerateLicenseInfo({ projectId }:
                     ...attachmentUsages['_embedded']['sw360:release'], 
                     ...linkedReleases._embedded["sw360:releases"]
                 ]
-                const linkedProjects = (searchParams.withSubProjects === 'true') ?
+                const linkedProjects = withSubProjects ?
                     await responses[3].json() as LinkedProjects: null
                 setAttachmentUsagesAndLinkedProjects({
                     attachmentUsages: attachmentUsages,
@@ -507,7 +505,9 @@ export default function GenerateLicenseInfo({ projectId }:
                                           setShow={setShow}
                                           saveUsagesPayload={saveUsagesPayload}
                                           setShowConfirmation={setShowConfirmation}
-                                          projectId={projectId}/>
+                                          projectId={projectId}
+                                          isCalledFromProjectLicenseTab={isCalledFromProjectLicenseTab}
+                                          withSubProjects={withSubProjects}/>
                 <LicenseInfoDownloadConfirmationModal show={showConfirmation}
                                                       setShow={setShowConfirmation}/>
                 <div className='container page-content'>

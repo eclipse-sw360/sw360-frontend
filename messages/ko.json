@@ -1187,6 +1187,8 @@
     "USED_BY_PROJECTS": "<strong>{count}</strong>개 프로젝트에서 사용됨",
     "USER": "사용자",
     "Unauthorized request": "무단 요청!",
+    "Uncheck Linked Project Relationships to be excluded": "링크 된 프로젝트 관계를 선택 취소하여 제외하십시오",
+    "Uncheck project release relationships to be excluded": "제외 할 프로젝트 릴리스 관계를 선택 취소하십시오",
     "Unknown": "이름 *",
     "Unsubscribe": "구독 취소",
     "Update": "(주)",

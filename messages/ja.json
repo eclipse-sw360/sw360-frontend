@@ -1187,6 +1187,8 @@
     "USED_BY_PROJECTS": "<strong>{count}</strong> 個のプロジェクトで使用されています",
     "USER": "ユーザー",
     "Unauthorized request": "不正なリクエストです！",
+    "Uncheck Linked Project Relationships to be excluded": "リンクされたプロジェクト関係を除外するチェックを解除します",
+    "Uncheck project release relationships to be excluded": "プロジェクトのリリース関係を除外するチェックを解除します",
     "Unknown": "未知",
     "Unsubscribe": "購読を解除する",
     "Update": "アップデート",

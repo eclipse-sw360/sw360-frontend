@@ -1187,6 +1187,8 @@
     "USED_BY_PROJECTS": "được sử dụng trong các dự án <strong>{count</strong>",
     "USER": "Người dùng",
     "Unauthorized request": "Yêu cầu trái phép!",
+    "Uncheck Linked Project Relationships to be excluded": "Bỏ chọn các mối quan hệ dự án được liên kết sẽ bị loại trừ",
+    "Uncheck project release relationships to be excluded": "",
     "Unknown": "không xác định",
     "Unsubscribe": "Hủy đăng ký",
     "Update": "Cập nhật",
