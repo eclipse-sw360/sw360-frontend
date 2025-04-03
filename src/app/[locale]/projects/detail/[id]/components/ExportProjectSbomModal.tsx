@@ -29,14 +29,16 @@ export default function ExportProjectSbomModal({ show,
                                                  projectVersion }: Props) : ReactNode {
     const t = useTranslations('default')
     const [sbomFormat, setSbomFormat] = useState<string>('')
+    const [includeSubProjectReleases, setIncludeSubProjectReleases] = useState<boolean>(false)
     console.log(projectId)
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement >) => {
-        const { name, value} = event.target
-
+        const { name, value, type } = event.target
         if (name === 'sbomFormat') {
             setSbomFormat(value)
-            console.log(sbomFormat)
+        }
+        else if (name === 'includeSubProjectReleases' && type === 'checkbox') {
+            setIncludeSubProjectReleases(event.target.checked)
         }
     }
 
@@ -70,7 +72,7 @@ export default function ExportProjectSbomModal({ show,
                         {t('Currently only CycloneDX SBOM export is supported')}
                     </div>
                     <Form>
-                        <Form.Group className='mb-2'>
+                        <Form.Group className='mb-4'>
                             <Form.Label style={{ fontWeight: 'bold' }}>
                                 {t('Select SBOM format')} :
                                 <span className='text-red'
@@ -82,6 +84,7 @@ export default function ExportProjectSbomModal({ show,
                                 className='w-auto'
                                 id='exportProjectSbom.sbomFormat'
                                 name='sbomFormat'
+                                value={sbomFormat}
                                 onChange={updateInputField}
                                 required
                             >
@@ -89,6 +92,19 @@ export default function ExportProjectSbomModal({ show,
                                 <option value='XML'>{t('XML Format')}</option>
                                 <option value='JSON'>{t('JSON Format')}</option>
                             </Form.Select>
+                        </Form.Group>
+                        <Form.Group className='mb-2' style={{ display: 'flex',
+                                                              alignItems: 'left' }}>
+                            <Form.Check
+                                type='checkbox'
+                                id="exportProjectSbom.includeSubProjectReleases"
+                                name="includeSubProjectReleases"
+                                checked={includeSubProjectReleases}
+                                onChange={updateInputField}
+                            />
+                            <Form.Label style={{ marginLeft: '10px'}}>
+                                {t('Include releases from sub projects')}
+                            </Form.Label>
                         </Form.Group>
                     </Form>
                 </Modal.Body>

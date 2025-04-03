@@ -613,6 +613,7 @@
     "In Queue": "排队中",
     "In order to go ahead, please sign in or create a new account!": "为了继续，请登录或创建一个新帐户！",
     "Inactive": "不活跃",
+    "Include releases from sub projects": "包括来自导出的SBOM中的子项目的发行版？",
     "Info": "信息",
     "Inner Source": "内在源泉",
     "Internal": "内部的",

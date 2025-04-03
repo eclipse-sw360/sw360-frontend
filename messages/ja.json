@@ -613,6 +613,7 @@
     "In Queue": "順番待ち",
     "In order to go ahead, please sign in or create a new account!": "先に進むためには、サインインするか、新しいアカウントを作成してください",
     "Inactive": "非アクティブ",
+    "Include releases from sub projects": "エクスポートされたSBOMにサブプロジェクトからのリリースを含めますか？",
     "Info": "Info",
     "Inner Source": "内部ソース",
     "Internal": "内部",

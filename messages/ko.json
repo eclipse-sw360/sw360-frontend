@@ -613,6 +613,7 @@
     "In Queue": "대기열에 있음",
     "In order to go ahead, please sign in or create a new account!": "앞서 가기 위해서는 로그인하거나 새로운 계정을 만드십시오!",
     "Inactive": "비활성",
+    "Include releases from sub projects": "수출 된 SBOM의 하위 프로젝트에서 릴리스를 포함시킬 수 있습니까?",
     "Info": "- 한국어",
     "Inner Source": "이름 *",
     "Internal": "내 계정",

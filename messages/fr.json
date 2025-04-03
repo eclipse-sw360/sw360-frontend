@@ -613,6 +613,7 @@
     "In Queue": "Dans la queue",
     "In order to go ahead, please sign in or create a new account!": "Pour aller de l'avant, veuillez vous connecter ou créer un nouveau compte!",
     "Inactive": "Inactif",
+    "Include releases from sub projects": "Inclure les versions des sous-projets dans le SBOM exporté?",
     "Info": "Informations",
     "Inner Source": "Source intérieure",
     "Internal": "Interne",
