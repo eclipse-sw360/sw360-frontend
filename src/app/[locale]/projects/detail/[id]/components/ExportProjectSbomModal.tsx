@@ -9,6 +9,9 @@
 
 'use client'
 
+import DownloadService from '@/services/download.service'
+import CommonUtils from '@/utils/common.utils'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Form, Modal } from 'react-bootstrap'
@@ -42,6 +45,21 @@ export default function ExportProjectSbomModal({ show,
         }
     }
 
+    const handleExportSbom = async (projectId : string) =>{
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) {
+                return signOut()
+            }
+            const currentDate = new Date().toISOString().split('T')[0]
+            DownloadService.download(
+                `reports?module=sbom&projectId=${projectId}&withSubProject=${includeSubProjectReleases}
+                 &bomType=${sbomFormat}`, session, `Project-${currentDate}_SBOM`)
+        } catch(e) {
+            console.error(e)
+        }
+    }
+
     return (
         <>
             <Modal
@@ -63,8 +81,8 @@ export default function ExportProjectSbomModal({ show,
                 <Modal.Body>
                     <div className="mb-3">
                         {t.rich('Do you really want to export SBOM', {
-                                projectName: projectName,
-                                projectVersion: projectVersion,
+                                projectName: projectName ?? '',
+                                projectVersion: projectVersion ?? '',
                                 strong: (chunks) => <b>{chunks}</b>
                             })}
                     </div>
@@ -111,8 +129,7 @@ export default function ExportProjectSbomModal({ show,
                 <Modal.Footer>
                     <button
                         className='btn btn-primary'
-                        onClick={() => {}
-                        }
+                        onClick={() => {handleExportSbom(projectId)}}
                     >
                         {t('Export SBOM')}
                     </button>
