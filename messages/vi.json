@@ -609,6 +609,7 @@
     "In Queue": "Đợi",
     "In order to go ahead, please sign in or create a new account!": "Để tiếp tục, vui lòng đăng nhập hoặc tạo tài khoản mới!",
     "Inactive": "Không hoạt động",
+    "Include releases from sub projects": "Bao gồm các bản phát hành từ các dự án phụ trong SBOM đã xuất?",
     "Info": "Thông tin",
     "Inner Source": "Nguồn bên trong",
     "Internal": "Nội bộ",
