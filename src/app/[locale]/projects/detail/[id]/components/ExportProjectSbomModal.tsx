@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Form, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -28,7 +28,17 @@ export default function ExportProjectSbomModal({ show,
                                                  projectName,
                                                  projectVersion }: Props) : ReactNode {
     const t = useTranslations('default')
+    const [sbomFormat, setSbomFormat] = useState<string>('')
     console.log(projectId)
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
+                                     HTMLInputElement >) => {
+        const { name, value} = event.target
+
+        if (name === 'sbomFormat') {
+            setSbomFormat(value)
+            console.log(sbomFormat)
+        }
+    }
 
     return (
         <>
@@ -72,6 +82,7 @@ export default function ExportProjectSbomModal({ show,
                                 className='w-auto'
                                 id='exportProjectSbom.sbomFormat'
                                 name='sbomFormat'
+                                onChange={updateInputField}
                                 required
                             >
                                 <option value='' hidden></option>
