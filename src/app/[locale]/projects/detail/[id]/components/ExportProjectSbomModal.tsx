@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
-import { Modal } from 'react-bootstrap'
+import { Form, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
 interface Props {
@@ -43,7 +43,7 @@ export default function ExportProjectSbomModal({ show,
                     style={{ backgroundColor: '#eef2fa', color: '#2e5aac' }}
                     closeButton
                 >
-                    <Modal.Title id='generate-license-info-modal'>
+                    <Modal.Title id='export-project-sbom-modal'>
                         <AiOutlineQuestionCircle />
                         {t('Export Project SBOM')}
                     </Modal.Title>
@@ -59,6 +59,27 @@ export default function ExportProjectSbomModal({ show,
                     <div className="mb-3">
                         {t('Currently only CycloneDX SBOM export is supported')}
                     </div>
+                    <Form>
+                        <Form.Group className='mb-2'>
+                            <Form.Label style={{ fontWeight: 'bold' }}>
+                                {t('Select SBOM format')} :
+                                <span className='text-red'
+                                        style={{ color: '#F7941E' }}>
+                                    *
+                                </span>
+                            </Form.Label>
+                            <Form.Select
+                                className='w-auto'
+                                id='exportProjectSbom.sbomFormat'
+                                name='sbomFormat'
+                                required
+                            >
+                                <option value='' hidden></option>
+                                <option value='XML'>{t('XML Format')}</option>
+                                <option value='JSON'>{t('JSON Format')}</option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <button
