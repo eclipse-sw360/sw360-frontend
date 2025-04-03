@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl"
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { GrCheckboxSelected } from 'react-icons/gr'
 import { ShowObligationTextOnExpand, ExpandableList } from './ExpandableComponents'
-import { HttpStatus, LicenseObligationRelease, ProjectObligationsList } from '@/object-types'
+import { HttpStatus, LicenseObligationRelease, ProjectObligationsList, ErrorDetails } from '@/object-types'
 import Link from 'next/link'
 import { Table, _ } from '@/components/sw360'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -60,11 +60,16 @@ export default function LicenseDbObligationsModal({
             } else if (response.status === HttpStatus.CREATED) {
                 MessageService.success(t('Added obligations successfully'))
             } else {
-                MessageService.error(t('Something went wrong'))
+                const err = await response.json() as ErrorDetails
+                throw new Error(err.message);
             }
             setLoading(false)
-        } catch(e) {
-            console.error(e)
+        } catch(error: unknown) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error);
+            MessageService.error(message);
         }
     }
 
