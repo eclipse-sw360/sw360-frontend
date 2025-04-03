@@ -29,6 +29,7 @@ import ProjectAttachments from './Attachments'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 import MessageService from '@/services/message.service'
 import LinkedPackagesTab from './LinkedPackagesTab'
+import ExportProjectSbomModal from './ExportProjectSbomModal'
 
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
@@ -40,6 +41,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const searchParams = useSearchParams()
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
+    const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
 
     useEffect(() => {
         const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB 
@@ -98,6 +100,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
     return (
         <>
+            <ExportProjectSbomModal show={showExportProjectSbomModal}
+                                    setShow={setShowExportProjectSbomModal}
+                                    projectId={projectId}
+                                    projectName={summaryData?.name}
+                                    projectVersion={summaryData?.version} />
             <LinkProjects show={show} setShow={setShow} projectId={projectId} />
             <div className='container page-content'>
                 <Tab.Container activeKey={activeKey} onSelect={(k) => handleSelect(k)} mountOnEnter={true} unmountOnExit={true}>
@@ -158,7 +165,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 {t('Export SBOM')}
                                             </Dropdown.Toggle>
                                             <Dropdown.Menu>
-                                                <Dropdown.Item>{t('CycloneDX')}</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => setShowExportProjectSbomModal(true)}>
+                                                    {t('CycloneDX')}
+                                                </Dropdown.Item>
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </Row>
