@@ -13,8 +13,8 @@ import { Dispatch, SetStateAction, useState, useEffect, type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Table, _ } from '@/components/sw360'
-import { LicenseObligationRelease, ActionType, ProjectObligation } from '@/object-types'
-import { useSession, getSession, signOut } from 'next-auth/react'
+import { LicenseObligationRelease, ActionType, ProjectObligation, HttpStatus, ErrorDetails } from '@/object-types'
+import { getSession, signOut } from 'next-auth/react'
 import { Modal } from 'react-bootstrap'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -93,13 +93,14 @@ function UpdateCommentModal({ modalMetaData, setModalMetaData, payload, setPaylo
 export default function LicenseObligation({ projectId, actionType, payload, setPayload, selectedProjectId }: { projectId: string, actionType: ActionType,
      payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null}): JSX.Element {
     const t = useTranslations('default')
-    const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
     const [projectLicenseOligations, setProjectLicenseObligations] = useState<null | LicenseObligations>(null)
     const [selectedProjectLicenseOligations, setSelectedProjectLicenseObligations] = useState<null | LicenseObligations>(null)
     const [showLicenseDbObligationsModal, setShowLicenseDbObligationsModal] = useState(false)
     const [refresh, setRefresh] = useState(false)
+    const [error, setError] = useState<string | null>(null);
+
     const columns = (actionType === ActionType.DETAIL) ? 
      [
         {
@@ -322,28 +323,65 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 const session = await getSession()
                 if(CommonUtils.isNullOrUndefined(session))
                     return signOut()
-                const restProj = ApiUtils.GET(
+                const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseObligations`,
                     session.user.access_token,
-                    signal)
-                const restSelectedProj = selectedProjectId !== null
-                    ? ApiUtils.GET(
-                        `projects/${selectedProjectId}/licenseObligations`,
-                        session.user.access_token,
-                        signal) : Promise.resolve({ json: () => ({ obligations: {} }) });
-    
-                const [data1, data2] = await Promise.all([
-                    restProj, restSelectedProj
-                ]);
-                setProjectLicenseObligations(await data1.json() as LicenseObligations)
-                setSelectedProjectLicenseObligations(await data2.json() as LicenseObligations)
-            } catch (e) {
-                console.error(e)
+                    signal
+                )
+                if(response.status === HttpStatus.OK) {
+                    setProjectLicenseObligations(await response.json() as LicenseObligations)
+                } else if(response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    const err = await response.json() as ErrorDetails
+                    throw new Error(err.message)
+                }
+            } catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }    
+                const message = error instanceof Error ? error.message : String(error);
+                setError(message);
             }
         })()
 
         return () => controller.abort()
-    }, [projectId, status, selectedProjectId, refresh]);
+    }, [projectId, refresh]);
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+        if(selectedProjectId === null) {
+            setSelectedProjectLicenseObligations({ obligations: {} } as LicenseObligations)
+            return
+        }
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if(CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+                const response = await ApiUtils.GET(
+                    `projects/${selectedProjectId}/licenseObligations`,
+                    session.user.access_token,
+                    signal
+                )
+                if(response.status === HttpStatus.OK) {
+                    setProjectLicenseObligations(await response.json() as LicenseObligations)
+                } else if(response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    const err = await response.json() as ErrorDetails
+                    throw new Error(err.message)
+                }
+            } catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error);
+                setError(message);
+            }
+        })()
+    }, [selectedProjectId, refresh]);
 
     useEffect(() => {
         if (!projectLicenseOligations || !selectedProjectLicenseOligations)
@@ -395,6 +433,14 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
         }
         setTableData(tableRows)
     }, [payload, selectedProjectLicenseOligations, projectLicenseOligations])
+
+    if (error !== null) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                {error}
+            </div>
+        )
+    }
 
     return (
         <>
