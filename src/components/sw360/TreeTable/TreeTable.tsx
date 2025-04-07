@@ -9,21 +9,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 'use client'
 
-import React, { useEffect, useState, type JSX } from 'react';
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
-
 import { NodeData } from '@/object-types'
-import { Table, _ } from 'next-sw360'
 import { OneDArray, TColumn } from 'gridjs/dist/src/types'
-import { ComponentChild } from 'preact'
 import { SearchConfig } from 'gridjs/dist/src/view/plugin/search/search'
+import { CheckboxFilterDropdown, Table, _ } from 'next-sw360'
+import React, { ReactNode, useEffect, useState, type JSX } from 'react'
+import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { Language } from '../Table/Table'
 
 interface Props {
@@ -44,24 +37,53 @@ const PaddedCell: React.FC<Props> = ({
     collapseRow,
 }) => {
     return (
-        <div className='d-flex'>
-            <span className='indenter' style={{paddingLeft: `${padLength * 1}rem`}} role='button'>
+        <div className='d-flex align-items-center'>
+            {' '}
+            <button
+                className='indenter d-flex align-items-center justify-content-center'
+                style={{
+                    paddingLeft: `${padLength * 1}rem`,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    minWidth: '20px',
+                    minHeight: '20px',
+                }}
+                onClick={needExpand ? collapseRow : expandRow}
+            >
                 {parent &&
                     (needExpand ? (
-                        <BsCaretDownFill color='gray' onClick={collapseRow} />
+                        <BsCaretDownFill
+                            color='gray'
+                            size={16}
+                        />
                     ) : (
-                        <BsCaretRightFill color='gray' onClick={expandRow} />
-                    ))}{' '}
-            </span>
+                        <BsCaretRightFill
+                            color='gray'
+                            size={16}
+                        />
+                    ))}
+            </button>
             {children}
         </div>
     )
 }
 
+interface FilterProps {
+    enabled: boolean
+    options: string[]
+    onChange: (values: string[]) => void
+    fullName?: string
+}
+
+interface ColumnWithFilter extends TColumn {
+    filter?: FilterProps
+}
+
 interface TreeTableProps {
     data: Array<any>
     setData: React.Dispatch<React.SetStateAction<Array<any>>>
-    columns: OneDArray<TColumn | string | ComponentChild>
+    columns: OneDArray<ColumnWithFilter | string | ReactNode>
     onExpand?: (item: NodeData) => void
     search?: SearchConfig | boolean
     language?: Language
@@ -69,8 +91,56 @@ interface TreeTableProps {
     sort?: boolean
 }
 
-const TreeTable = ({ data, setData, columns, onExpand, search, language, selector, sort }: TreeTableProps): JSX.Element => {
+const TreeTable = ({
+    data,
+    setData,
+    columns,
+    onExpand,
+    search,
+    language,
+    selector,
+    sort,
+}: TreeTableProps): JSX.Element => {
     const [tabledata, setTableData] = useState<any[]>([])
+    const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null)
+
+    // Update the FilterHeader component to include the dropdown state
+    const FilterHeader = ({ column, columnIndex }: { column: ColumnWithFilter; columnIndex: number }) => {
+        if (column.filter?.enabled) {
+            return (
+                <div className='d-flex align-items-center justify-content-between'>
+                    <span>{typeof column.name === 'string' ? column.name : ''}</span>
+                    <CheckboxFilterDropdown
+                        options={column.filter.options}
+                        onChange={(selectedOptions) => column.filter?.onChange(selectedOptions)}
+                        title={column.filter.fullName || (typeof column.name === 'string' ? column.name : '')}
+                        isOpen={openDropdownIndex === columnIndex}
+                        onToggle={() => {
+                            setOpenDropdownIndex(openDropdownIndex === columnIndex ? null : columnIndex)
+                        }}
+                    />
+                </div>
+            )
+        }
+
+        return <>{typeof column.name === 'string' ? column.name : ''}</>
+    }
+
+    const processedColumns = columns.map((column: any, index: number) => {
+        if (column.filter?.enabled) {
+            return {
+                ...column,
+                name: _(
+                    <FilterHeader
+                        column={column}
+                        columnIndex={index}
+                    />,
+                ),
+            }
+        }
+        return column
+    })
+
     useEffect(() => {
         const newData: any[] = []
         data.forEach((item: NodeData) => {
@@ -109,8 +179,8 @@ const TreeTable = ({ data, setData, columns, onExpand, search, language, selecto
                                 collapseRow={() => collapseRow(item)}
                             >
                                 {cell}
-                            </PaddedCell>
-                        )
+                            </PaddedCell>,
+                        ),
                     )
                 } else {
                     parsedRowData.push(_(<PaddedCell padLength={level}>{cell}</PaddedCell>))
@@ -135,6 +205,17 @@ const TreeTable = ({ data, setData, columns, onExpand, search, language, selecto
         }
     }
 
-    return <Table data={tabledata} pagination={false} columns={columns} sort={sort} search={search} language={language} selector={selector}/>
+    return (
+        <Table
+            data={tabledata}
+            pagination={false}
+            columns={processedColumns}
+            sort={sort}
+            search={search}
+            language={language}
+            selector={selector}
+        />
+    )
 }
+
 export default TreeTable
