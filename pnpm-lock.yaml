@@ -98,8 +98,8 @@ importers:
         specifier: ^8.29.0
         version: 8.29.0(typescript@5.7.3)
       bootstrap:
-        specifier: ^5.3.2
-        version: 5.3.3(@popperjs/core@2.11.8)
+        specifier: ^5.3.5
+        version: 5.3.5(@popperjs/core@2.11.8)
       commitlint:
         specifier: ^19.5.0
         version: 19.8.0(@types/node@22.13.14)(typescript@5.7.3)
@@ -988,8 +988,8 @@ packages:
   bluebird@3.7.2:
     resolution: {integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==}
 
-  bootstrap@5.3.3:
-    resolution: {integrity: sha512-8HLCdWgyoMguSO9o+aH+iuZ+aht+mzW0u3HIMzVu7Srrpv7EBBxTnrFlSCskwdY1+EOFQSm7uMJhNQHkdPcmjg==}
+  bootstrap@5.3.5:
+    resolution: {integrity: sha512-ct1CHKtiobRimyGzmsSldEtM03E8fcEX4Tb3dGXz1V8faRwM50+vfHwTzOxB3IlKO7m+9vTH3s/3C6T2EAPeTA==}
     peerDependencies:
       '@popperjs/core': ^2.11.8
 
@@ -4271,7 +4271,7 @@ snapshots:
 
   bluebird@3.7.2: {}
 
-  bootstrap@5.3.3(@popperjs/core@2.11.8):
+  bootstrap@5.3.5(@popperjs/core@2.11.8):
     dependencies:
       '@popperjs/core': 2.11.8
 
