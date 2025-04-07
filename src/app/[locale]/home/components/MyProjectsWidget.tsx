@@ -54,42 +54,54 @@ function MyProjectsWidget(): ReactNode {
         fetchData(queryUrl, signal)
             .then((projects: EmbeddedProjects | undefined) => {
                 if (projects === undefined) {
-                    setLoading(false)
                     return
                 }
 
                 if (!CommonUtils.isNullOrUndefined(projects['_embedded']['sw360:projects'])) {
                     setData(
                         projects['_embedded']['sw360:projects'].map((item: Project) => [
-                            _(
-                                <Link href={'projects/detail/' + CommonUtils.getIdFromUrl(item._links.self.href)}>
-                                    {item.name}{' '}
-                                    {CommonUtils.isNullEmptyOrUndefinedString(item.version) && `(${item.version})`}
-                                </Link>,
-                            ),
+                            `${item.name }|${CommonUtils.getIdFromUrl(item._links.self.href)}|${CommonUtils.isNullEmptyOrUndefinedString(item.version) && `(${item.version})`}`,
                             CommonUtils.truncateText(item.description ?? '', 40),
                             item.version ?? '',
                         ]),
                     )
-                    setLoading(false)
                 }
             })
-            .catch(() => {
-                console.error('False to fetch components')
+            .catch((err:Error) => {
+                throw new Error(err.message)
+            })
+            .finally(()=>{
+                setLoading(false)
             })
 
         return () => {
             controller.abort()
         }
-    }, [fetchData, params,reload])
+    }, [fetchData, params, reload])
 
     const title = t('My Projects')
-    const columns = [t('Project Name'), t('Description'), t('Approved Releases')]
+    const columns = [
+        {
+            id: 'Project Name',
+            name: t('Project Name'),
+            formatter: (cell: string) => {
+                const item = cell.split('|')
+                return _(
+                    <Link href={'projects/detail/' + item[1]}>
+                        {item[0]} {" "}
+                        {item[2]}
+                    </Link>
+                );
+            },
+        },
+        t('Description'),
+        t('Version'),
+    ]
     const language = { noRecordsFound: t('NoProjectsFound') }
 
     return (
         <div>
-            <HomeTableHeader title={title} setReload={setReload}/>
+            <HomeTableHeader title={title} setReload={setReload} />
             {loading == false ? (
                 <Table
                     columns={columns}

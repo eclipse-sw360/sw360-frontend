@@ -97,6 +97,7 @@ import SPDX from './spdx/SPDX'
 import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
+import ErrorDetails from './error'
 
 export type {
     AccessToken,
@@ -124,6 +125,7 @@ export type {
     ECC,
     ECCInformation,
     Embedded,
+    ErrorDetails,
     ExternalDocumentReferences,
     ExternalReference,
     FossologyProcessInfo,

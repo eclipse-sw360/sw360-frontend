@@ -13,86 +13,19 @@ import { Dispatch, SetStateAction, useState, useEffect, type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Table, _ } from '@/components/sw360'
-import { LicenseObligationRelease, ActionType, ProjectObligation } from '@/object-types'
-import { useSession, getSession, signOut } from 'next-auth/react'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
+import { LicenseObligationRelease, ActionType, ProjectObligation, HttpStatus, ErrorDetails } from '@/object-types'
+import { getSession, signOut } from 'next-auth/react'
 import { Modal } from 'react-bootstrap'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import LicenseDbObligationsModal from './LicenseDbObligationsModal'
+import { ShowObligationTextOnExpand, ExpandableList } from './ExpandableComponents'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface LicenseObligations {
     obligations : ProjectObligation
-}
-
-function ExpandableList({ previewString, releases, commonReleases }: { previewString: string, releases: LicenseObligationRelease[], commonReleases: LicenseObligationRelease[] }) {
-    const [isExpanded, setExpanded] = useState(false)
-    return (
-        <>
-            {
-                isExpanded ?
-                    <div>
-                        <span><BsCaretDownFill onClick={() => setExpanded(false)} />{' '}</span>
-                        {releases.map((release: LicenseObligationRelease, index: number) => {
-                            const isCommon = commonReleases.some((commonRelease: LicenseObligationRelease) => commonRelease.name === release.name && commonRelease.version === release.version)
-                            return (
-                                <li key={release.id} style={{ display: 'inline' }}>
-                                    <Link href={`/components/releases/detail/${release.id}`} className='text-link' style={{ color: isCommon ? 'green' : 'neon carrot' }}>
-                                        {`${release.name} ${release.version}`}
-                                    </Link>
-                                    {index >= releases.length - 1 ? '' : ', '}{' '}
-                                </li>
-                            )
-                        })}
-                    </div> :
-                    <div>
-                        {
-                            releases.length !== 0 &&
-                            <div><BsCaretRightFill onClick={() => setExpanded(true)} />{' '}{previewString}</div>
-                        }
-                    </div>
-            }
-        </>
-    )
-}
-
-function ShowObligationTextOnExpand({ id, infoText, colLength }: { id: string, infoText: string, colLength: number }): JSX.Element {
-    const [isExpanded, setIsExpanded] = useState(false)
-    useEffect(() => {
-        if (isExpanded) {
-            const el = document.getElementById(id)
-            const par = el?.parentElement?.parentElement?.parentElement
-            const tr = document.createElement('tr')
-            tr.id = `${id}_text`
-            const td = document.createElement('td')
-            td.colSpan = colLength
-            const licenseObligationText = document.createElement('p')
-            licenseObligationText.style.whiteSpace = 'pre-line'
-            licenseObligationText.textContent = infoText
-            licenseObligationText.className = 'ps-5 pt-2 pe-3'
-            td.appendChild(licenseObligationText)
-            tr.appendChild(td)
-            par?.parentNode?.insertBefore(tr, par.nextSibling)
-        }
-        else {
-            const el = document.getElementById(`${id}_text`)
-            if (el) {
-                el.remove()
-            }
-        }
-    }, [isExpanded])
-
-    return (
-        <>
-            {
-                isExpanded
-                    ? <BsCaretDownFill color='gray' id={id} onClick={() => setIsExpanded(!isExpanded)} />
-                    : <BsCaretRightFill color='gray' id={id} onClick={() => setIsExpanded(!isExpanded)} />
-            }
-        </>
-    )
 }
 
 interface UpdateCommentModalMetadata {
@@ -160,20 +93,21 @@ function UpdateCommentModal({ modalMetaData, setModalMetaData, payload, setPaylo
 export default function LicenseObligation({ projectId, actionType, payload, setPayload, selectedProjectId }: { projectId: string, actionType: ActionType,
      payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null}): JSX.Element {
     const t = useTranslations('default')
-    const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
     const [projectLicenseOligations, setProjectLicenseObligations] = useState<null | LicenseObligations>(null)
     const [selectedProjectLicenseOligations, setSelectedProjectLicenseObligations] = useState<null | LicenseObligations>(null)
+    const [showLicenseDbObligationsModal, setShowLicenseDbObligationsModal] = useState(false)
+    const [refresh, setRefresh] = useState(false)
+    const [error, setError] = useState<string | null>(null);
+
     const columns = (actionType === ActionType.DETAIL) ? 
      [
         {
             id: 'licenseObligation.expand',
             formatter: ({ id, infoText }: { id: string, infoText: string }) =>
                 _(
-                    <>
-                        <ShowObligationTextOnExpand id={id} infoText={infoText} colLength={columns.length} />
-                    </>
+                    <ShowObligationTextOnExpand id={id} infoText={infoText} colLength={columns.length} />
                 ),
             width: '4%'
         },
@@ -182,11 +116,9 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             name: t('License Obligation'),
             formatter: ({ oblTitle }: { oblTitle: string }) =>
                 _(
-                    <>
-                        <div className='text-center'>
-                            <span >{oblTitle}</span>
-                        </div>
-                    </>
+                    <div className='text-center'>
+                        <span >{oblTitle}</span>
+                    </div>
                 ),
             sort: true,
         },
@@ -273,23 +205,21 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             name: t('License Obligation'),
             formatter: ({ oblTitle, oblStatus, oblComment, match }: { oblTitle: string, oblStatus: string, oblComment: string, match: boolean }) =>
                 _(
-                    <>
-                        <div className='text-center'>
-                            <OverlayTrigger
-                                overlay={
-                                    selectedProjectId === null ? (
-                                        <Tooltip>
-                                            {`${t('Status')}: ${oblStatus}`}
-                                            <br />
-                                            {`${t('Comment')}: ${oblComment}`}
-                                        </Tooltip>
-                                    ) : <></>
-                                }
-                            >
-                                <span style={{ color: match ? 'green' : 'inherit' }}>{oblTitle}</span>
-                            </OverlayTrigger>
-                        </div>
-                    </>
+                    <div className='text-center'>
+                        <OverlayTrigger
+                            overlay={
+                                selectedProjectId === null ? (
+                                    <Tooltip>
+                                        {`${t('Status')}: ${oblStatus}`}
+                                        <br />
+                                        {`${t('Comment')}: ${oblComment}`}
+                                    </Tooltip>
+                                ) : <></>
+                            }
+                        >
+                            <span style={{ color: match ? 'green' : 'inherit' }}>{oblTitle}</span>
+                        </OverlayTrigger>
+                    </div>
                 ),
             sort: true,
         },
@@ -302,7 +232,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                         <ul className='px-0'>
                             {licenseIds.map((licenseId: string, index: number) => (
                                 <li key={licenseId} style={{ display: 'inline' }}>
-                                    <Link href={`/licenses/${licenseId}`} className='text-link'>
+                                    <Link href={`/licenses/detail?id=${licenseId}`} className='text-link'>
                                         {licenseId}
                                     </Link>
                                     {index >= licenseIds.length - 1 ? '' : ', '}
@@ -388,36 +318,70 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
         const controller = new AbortController()
         const signal = controller.signal
 
-        const loadData = async () => {
+        ;(async () => {
             try {
                 const session = await getSession()
                 if(CommonUtils.isNullOrUndefined(session))
                     return signOut()
-                const restProj = ApiUtils.GET(
+                const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseObligations`,
                     session.user.access_token,
-                    signal)
-                const restSelectedProj = selectedProjectId !== null
-                    ? ApiUtils.GET(
-                        `projects/${selectedProjectId}/licenseObligations`,
-                        session.user.access_token,
-                        signal) : Promise.resolve({ json: () => ({ obligations: {} }) });
-
-                const [data1, data2] = await Promise.all([
-                    restProj, restSelectedProj
-                ]);
-                setProjectLicenseObligations(await data1.json() as LicenseObligations)
-                setSelectedProjectLicenseObligations(await data2.json() as LicenseObligations)
-            } catch (e) {
-                console.error(e)
+                    signal
+                )
+                if(response.status === HttpStatus.OK) {
+                    setProjectLicenseObligations(await response.json() as LicenseObligations)
+                } else if(response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    const err = await response.json() as ErrorDetails
+                    throw new Error(err.message)
+                }
+            } catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }    
+                const message = error instanceof Error ? error.message : String(error);
+                setError(message);
             }
-        };
+        })()
 
-        void loadData()
-        return () => {
-            controller.abort();
-        };
-    }, [projectId, status, selectedProjectId]);
+        return () => controller.abort()
+    }, [projectId, refresh]);
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+        if(selectedProjectId === null) {
+            setSelectedProjectLicenseObligations({ obligations: {} } as LicenseObligations)
+            return
+        }
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if(CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+                const response = await ApiUtils.GET(
+                    `projects/${selectedProjectId}/licenseObligations`,
+                    session.user.access_token,
+                    signal
+                )
+                if(response.status === HttpStatus.OK) {
+                    setProjectLicenseObligations(await response.json() as LicenseObligations)
+                } else if(response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    const err = await response.json() as ErrorDetails
+                    throw new Error(err.message)
+                }
+            } catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error);
+                setError(message);
+            }
+        })()
+    }, [selectedProjectId, refresh]);
 
     useEffect(() => {
         if (!projectLicenseOligations || !selectedProjectLicenseOligations)
@@ -428,7 +392,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             let isMatchingKey = false, status = '', comment = '', selectedProjOblReleases: LicenseObligationRelease[] = [];
 
             if (selectedProjectId !== null) {
-                console.log(selectedProjectLicenseOligations)
                 isMatchingKey = key in selectedProjectLicenseOligations.obligations
                 status = isMatchingKey ? selectedProjectLicenseOligations.obligations[key].status ?? 'New Obligation' : 'New Obligation'
                 comment = isMatchingKey ? selectedProjectLicenseOligations.obligations[key].comment  ?? 'New Obligation' : 'New Obligation'
@@ -463,23 +426,43 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                     commonReleases: commonReleases,
                 },
                 { status: obl.status ?? '', obligation: key, payload },
-                obl.type ?? '',
-                obl.id ?? '',
+                Capitalize(val.obligationType ?? ''),
+                '',
                 { comment: obl.comment ?? '', obligation: key, payload }
             ])
         }
         setTableData(tableRows)
     }, [payload, selectedProjectLicenseOligations, projectLicenseOligations])
 
+    if (error !== null) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                {error}
+            </div>
+        )
+    }
+
     return (
         <>
             <UpdateCommentModal modalMetaData={updateCommentModalData} setModalMetaData={setUpdateCommentModalData} payload={payload} setPayload={setPayload} />
+            <LicenseDbObligationsModal show={showLicenseDbObligationsModal} setShow={setShowLicenseDbObligationsModal} projectId={projectId} refresh={refresh} setRefresh={setRefresh}/>
+            <div className="d-flex justify-content-end">
+                {
+                    (actionType === ActionType.EDIT) &&
+                    <button 
+                        className="btn btn-primary" 
+                        onClick={() => setShowLicenseDbObligationsModal(true)}
+                    >
+                        {t('Add Obligations from License Database')}
+                    </button>
+                }
+            </div>
             {
                 tableData ?
                     <Table
                         columns={columns}
                         data={tableData}
-                        selector={false}
+                        selector={true}
                     /> :
                     <div className='col-12 d-flex justify-content-center align-items-center'>
                         <Spinner className='spinner' />

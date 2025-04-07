@@ -24,7 +24,7 @@ import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 function Navbar(): JSX.Element {
     const router = useRouter()
     const param=useParams()
-    const locale=param?.locale as string || 'en';
+    const locale=param.locale as string || 'en';
 
     const { data: session, status } = useSession()
     const [show, setShow] = useState(false)

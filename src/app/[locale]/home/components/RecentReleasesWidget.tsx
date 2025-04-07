@@ -48,7 +48,6 @@ function RecentReleasesWidget() : ReactNode {
         setLoading(true)
         void fetchData('releases/recentReleases').then((releases: EmbeddedReleases | undefined) => {
             if (releases === undefined) {
-                setLoading(false)
                 return
             }
 
@@ -68,14 +67,18 @@ function RecentReleasesWidget() : ReactNode {
                         </li>,
                     ]),
                 )
-                setLoading(false)
             } else {
                 setRecentRelease([])
-                setLoading(false)
             }
         })
+        .catch((err:Error)=>{
+            throw new Error(err.message)
+        })
+        .finally(() => {
+            setLoading(false)   
+        })
     }, [fetchData, reload])
-
+    
     return (
         <div className='content-container'>
             <HomeTableHeader title={t('Recent Releases')} setReload={setReload} />

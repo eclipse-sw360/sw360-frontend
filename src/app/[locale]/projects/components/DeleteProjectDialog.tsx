@@ -175,7 +175,6 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                                         {t.rich('This project contains', {
                                             name: project.name,
                                             strong: (data) => <b>{data}</b>,
-                                            visuallyHideLinkedData,
                                         })}
                                         <ul>
                                             {Object.entries(internalData).map(([key, value]) => (
