@@ -83,7 +83,7 @@ export default function ObligationHeader({
                         className='form-label'
                         style={{ fontWeight: 'bold' }}
                     >
-                        {'Obligation Level'}
+                        t{('Obligation Level')}
                     </label>
                     <select
                         className='form-select'
