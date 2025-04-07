@@ -10,11 +10,12 @@
 'use client'
 
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
-import { Form, Modal } from 'react-bootstrap'
+import { Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
 interface Props {
@@ -33,7 +34,8 @@ export default function ExportProjectSbomModal({ show,
     const t = useTranslations('default')
     const [sbomFormat, setSbomFormat] = useState<string>('')
     const [includeSubProjectReleases, setIncludeSubProjectReleases] = useState<boolean>(false)
-    console.log(projectId)
+    const [loading, setLoading] = useState(false) 
+    const [disableExportSbom, setDisableExportSbom] = useState(false) 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
                                      HTMLInputElement >) => {
         const { name, value, type } = event.target
@@ -47,6 +49,8 @@ export default function ExportProjectSbomModal({ show,
 
     const handleExportSbom = async (projectId : string) =>{
         try {
+            setLoading(true)
+            setDisableExportSbom(true)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 return signOut()
@@ -54,9 +58,17 @@ export default function ExportProjectSbomModal({ show,
             const currentDate = new Date().toISOString().split('T')[0]
             DownloadService.download(
                 `reports?module=sbom&projectId=${projectId}&withSubProject=${includeSubProjectReleases}
-                 &bomType=${sbomFormat}`, session, `Project-${currentDate}_SBOM`)
-        } catch(e) {
-            console.error(e)
+                 &bomType=${sbomFormat}`, session, `Project-${currentDate}_SBOM.${sbomFormat.toLowerCase()}`)
+        }
+        catch(error: unknown) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
+        finally {
+            setLoading(false)
         }
     }
 
@@ -130,8 +142,15 @@ export default function ExportProjectSbomModal({ show,
                     <button
                         className='btn btn-primary'
                         onClick={() => {handleExportSbom(projectId)}}
+                        disabled={disableExportSbom}
                     >
                         {t('Export SBOM')}
+                        {loading && (
+                            <Spinner
+                                size='sm'
+                                className='ms-1 spinner'
+                            />
+                        )}
                     </button>
                     <button
                         className='btn btn-dark'
