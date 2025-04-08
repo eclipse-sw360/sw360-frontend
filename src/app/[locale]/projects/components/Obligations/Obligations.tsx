@@ -15,15 +15,15 @@ import { useState } from 'react'
 import { Button, Nav, Tab, Dropdown } from 'react-bootstrap'
 import ObligationView from './ObligationsView/ObligationsView'
 import ReleaseView from './ReleaseView'
-import { ActionType, ComponentObligationData, ProjectObligation } from '@/object-types'
+import { ActionType, ComponentObligationData, LicenseObligationData } from '@/object-types'
 import CompareObligation from './CompareObligation'
 import { useRouter } from 'next/navigation'
 
 interface Props {
     projectId: string,
     actionType: ActionType,
-    payload?: ProjectObligation | ComponentObligationData,
-    setPayload?: Dispatch<SetStateAction<ProjectObligation | ComponentObligationData>>
+    payload?: LicenseObligationData | ComponentObligationData,
+    setPayload?: Dispatch<SetStateAction<LicenseObligationData | ComponentObligationData>>
 }
 
 export default function Obligations({ projectId, actionType, 

@@ -13,14 +13,14 @@ import { Dispatch, SetStateAction, type JSX } from 'react';
 import { Tab, Tabs } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import LicenseObligation from './LicenseObligation'
-import { ActionType, ComponentObligationData, ProjectObligation } from '@/object-types'
+import { ActionType, ComponentObligationData, LicenseObligationData } from '@/object-types'
 import ComponentObligation from './ComponentObligation';
 
 interface Props {
     projectId: string,
     actionType: ActionType,
-    payload?: ProjectObligation | ComponentObligationData,
-    setPayload?: Dispatch<SetStateAction<ProjectObligation | ComponentObligationData>>,
+    payload?: LicenseObligationData | ComponentObligationData,
+    setPayload?: Dispatch<SetStateAction<LicenseObligationData | ComponentObligationData>>,
     selectedProjectId: string | null
 }
 

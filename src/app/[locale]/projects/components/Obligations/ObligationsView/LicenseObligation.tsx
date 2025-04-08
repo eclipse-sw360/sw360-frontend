@@ -13,7 +13,8 @@ import { Dispatch, SetStateAction, useState, useEffect, type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Table, _ } from '@/components/sw360'
-import { LicenseObligationRelease, ActionType, ProjectObligation, HttpStatus, ErrorDetails } from '@/object-types'
+import { LicenseObligationRelease, ActionType,
+         LicenseObligationData, HttpStatus, ErrorDetails } from '@/object-types'
 import { getSession, signOut } from 'next-auth/react'
 import { Modal } from 'react-bootstrap'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -25,7 +26,7 @@ const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface LicenseObligations {
-    obligations : ProjectObligation
+    obligations : LicenseObligationData
 }
 
 interface UpdateCommentModalMetadata {
@@ -33,10 +34,23 @@ interface UpdateCommentModalMetadata {
     comment?: string
 }
 
-function UpdateCommentModal({ modalMetaData, setModalMetaData, payload, setPayload }: {
+interface Props {
+    projectId: string,
+    actionType: ActionType,
+    payload?: LicenseObligationData,
+    setPayload?: Dispatch<SetStateAction<LicenseObligationData>>,
+    selectedProjectId: string | null
+}
+
+interface UpdateCommentModalProps {
     modalMetaData: UpdateCommentModalMetadata | null,
-    setModalMetaData: Dispatch<SetStateAction<UpdateCommentModalMetadata | null>>, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>
-}) {
+    setModalMetaData: Dispatch<SetStateAction<UpdateCommentModalMetadata | null>>,
+    payload?: LicenseObligationData,
+    setPayload?: Dispatch<SetStateAction<LicenseObligationData>>
+}
+
+function UpdateCommentModal({ modalMetaData, setModalMetaData, 
+                              payload, setPayload }: UpdateCommentModalProps) {
     const t = useTranslations('default')
     const [commentText, setCommentText] = useState('')
     useEffect(() => {
@@ -77,7 +91,7 @@ function UpdateCommentModal({ modalMetaData, setModalMetaData, payload, setPaylo
                         if (modalMetaData !== null && payload && setPayload) {
                             let obligationValue = payload[modalMetaData.obligation] ?? {}
                             obligationValue = { ...obligationValue, comment: commentText }
-                            setPayload((payload: ProjectObligation) => ({ ...payload, [modalMetaData.obligation]: obligationValue }))
+                            setPayload((payload: LicenseObligationData) => ({ ...payload, [modalMetaData.obligation]: obligationValue }))
                             setCommentText('')
                             setModalMetaData(null)
                         }
@@ -90,8 +104,9 @@ function UpdateCommentModal({ modalMetaData, setModalMetaData, payload, setPaylo
     )
 }
 
-export default function LicenseObligation({ projectId, actionType, payload, setPayload, selectedProjectId }: { projectId: string, actionType: ActionType,
-     payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null}): JSX.Element {
+export default function LicenseObligation({ projectId, actionType,
+                                            payload, setPayload,
+                                            selectedProjectId }: Props): JSX.Element {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
@@ -268,7 +283,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                             if (setPayload) {
                                 let obligationValue = payload?.[obligation] ?? {}
                                 obligationValue = { ...obligationValue, status: e.target.value }
-                                setPayload((payload: ProjectObligation) => ({ ...payload, [obligation]: obligationValue }))
+                                setPayload((payload: LicenseObligationData) => ({ ...payload, [obligation]: obligationValue }))
                             }
                         }}
                     >

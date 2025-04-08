@@ -36,7 +36,7 @@ export interface LicenseObligationRelease {
     id: string
 }
 
-export interface ProjectObligation {
+export interface LicenseObligationData {
     [k: string]: {
         text?: string
         licenseIds?: string[]
@@ -49,8 +49,8 @@ export interface ProjectObligation {
     }
 }
 
-export interface ProjectObligationsList {
-    obligations: ProjectObligation
+export interface LicenseObligationsList {
+    obligations: LicenseObligationData
     page?: {
         size?: number
         totalElements?: number
@@ -60,6 +60,16 @@ export interface ProjectObligationsList {
 }
 
 export interface ComponentObligationData {
+    [k: string]: {
+        text?: string
+        id?: string
+        status?: string
+        comment?: string
+        obligationType?: string
+    }
+}
+
+export interface ProjectObligationData {
     [k: string]: {
         text?: string
         id?: string
