@@ -18,7 +18,8 @@ import ReleaseView from './ReleaseView'
 import { ActionType,
          ComponentObligationData,
          LicenseObligationData,
-         ProjectObligationData } from '@/object-types'
+         ProjectObligationData,
+         OrganizationObligationData } from '@/object-types'
 import CompareObligation from './CompareObligation'
 import { useRouter } from 'next/navigation'
 
@@ -27,10 +28,12 @@ interface Props {
     actionType: ActionType,
     payload?: LicenseObligationData|
               ComponentObligationData|
-              ProjectObligationData,
+              ProjectObligationData|
+              OrganizationObligationData,
     setPayload?: Dispatch<SetStateAction<LicenseObligationData|
                                          ComponentObligationData|
-                                         ProjectObligationData>>
+                                         ProjectObligationData|
+                                         OrganizationObligationData>>
 }
 
 export default function Obligations({ projectId, actionType, 

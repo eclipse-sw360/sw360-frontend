@@ -79,6 +79,16 @@ export interface ProjectObligationData {
     }
 }
 
+export interface OrganizationObligationData {
+    [k: string]: {
+        text?: string
+        id?: string
+        status?: string
+        comment?: string
+        obligationType?: string
+    }
+}
+
 export interface TreeNode {
     id: string
     type: string
@@ -133,4 +143,3 @@ export const ObligationLevelInfo = {
     'License Obligation': 'License obligation are task to be carried out or risks to be considered from the use of software under a particular license.',
     'Project Obligation': 'Project obligations are specific to the projects or products nature and are also requires steps or tasks to be made sure before conveying the software. An example could be tiny hardware with limited printed documentation. In this case open source license information would required special handling, for example print instructions how to obtain OSS license information on the packaging.',
 }
-

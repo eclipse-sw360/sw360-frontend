@@ -16,7 +16,8 @@ import { HttpStatus, InputKeyValue, Project,
          Vendor, ProjectPayload, ActionType,
          LicenseObligationData, ReleaseDetail,
          DocumentTypes, ComponentObligationData,
-         ProjectObligationData } from '@/object-types'
+         ProjectObligationData,
+         OrganizationObligationData } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, getSession } from 'next-auth/react'
@@ -94,7 +95,8 @@ function EditProject({ projectId, isDependencyNetworkFeatureEnabled }: { project
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()    
     const [obligations, setObligations] = useState<LicenseObligationData|
                                                    ComponentObligationData|
-                                                   ProjectObligationData>({})
+                                                   ProjectObligationData|
+                                                   OrganizationObligationData>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
