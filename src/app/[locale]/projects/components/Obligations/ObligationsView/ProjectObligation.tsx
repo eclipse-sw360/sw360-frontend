@@ -10,17 +10,26 @@
 'use client'
 
 import { Table, _ } from '@/components/sw360'
-import { ActionType, ProjectObligationData } from '@/object-types'
+import { ActionType, HttpStatus, ProjectObligationData } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useState, type JSX } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { ShowObligationTextOnExpand } from './ExpandableComponents'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import { notFound } from 'next/navigation'
+import MessageService from '@/services/message.service'
 
 interface Props {
     projectId: string,
     actionType: ActionType,
     payload?: ProjectObligationData,
     setPayload?: Dispatch<SetStateAction<ProjectObligationData>>
+}
+
+interface ProjectObligations {
+    obligations : ProjectObligationData
 }
 
 const Capitalize = (text: string) =>
@@ -32,7 +41,10 @@ export default function ProjectObligation({
                                             payload, setPayload
                                           }: Props): JSX.Element {
     const t = useTranslations('default')
+    const { status } = useSession()
     const [tableData] = useState<(object | string | string[])[][] | null>(null)
+    const [projectObligations, setProjectObligations] =
+                                 useState<null | ProjectObligations>(null)
     const columns = (actionType === ActionType.DETAIL) ?
     [
         {
@@ -201,7 +213,39 @@ export default function ProjectObligation({
         }
     ]
 
-    console.log(projectId)
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+        
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if(CommonUtils.isNullOrUndefined(session))
+                    return signOut()
+                const url = `projects/${projectId}/obligation?obligationLevel=project`
+                const response = await ApiUtils.GET( url,
+                                                     session.user.access_token,
+                                                     signal)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const projectObligation = await response.json()
+                setProjectObligations(projectObligation)
+            }
+            catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }
+        })()
+        return () => controller.abort()
+    }, [projectId, status])
+
+    console.log(projectObligations)
 
     return (
         <>
