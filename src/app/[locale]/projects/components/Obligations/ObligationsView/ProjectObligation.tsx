@@ -42,7 +42,7 @@ export default function ProjectObligation({
                                           }: Props): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
-    const [tableData] = useState<(object | string | string[])[][] | null>(null)
+    const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [projectObligations, setProjectObligations] =
                                  useState<null | ProjectObligations>(null)
     const columns = (actionType === ActionType.DETAIL) ?
@@ -245,7 +245,27 @@ export default function ProjectObligation({
         return () => controller.abort()
     }, [projectId, status])
 
-    console.log(projectObligations)
+    useEffect(() => {
+        if (!projectObligations)
+            return
+        const tableRows = []
+        for (const [key, val] of Object.entries(projectObligations.obligations)) {
+            tableRows.push([
+                {
+                    id: key.split(' ').join('_'),
+                    infoText: val.text ?? '',
+                },
+                {
+                    oblTitle: key
+                },
+                { status: val.status ?? '' },
+                Capitalize(val.obligationType ?? ''),
+                val.status ?? '',
+                { comment: val.comment ?? '' }
+            ])
+        }
+        setTableData(tableRows)
+    }, [payload, projectObligations])
 
     return (
         <>
