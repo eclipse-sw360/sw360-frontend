@@ -18,6 +18,7 @@ import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { ShowObligationTextOnExpand } from './ExpandableComponents'
 import { notFound } from 'next/navigation'
+import MessageService from '@/services/message.service'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -33,13 +34,13 @@ interface Props {
     setPayload?: Dispatch<SetStateAction<ComponentObligation>>
 }
 
-export default function ProjectsComponentObligation(
-                            { projectId, actionType,
-                              payload, setPayload
-                            }: Props): JSX.Element {
+export default function ProjectsComponentObligation({
+                                                      projectId, actionType,
+                                                      payload, setPayload
+                                                    }: Props): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
-    const [tableData] = useState<(object | string | string[])[][] | null>(null)
+    const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [projectsComponentObligations, setProjectsComponentObligations] =
                             useState<null | ProjectsComponentObligations>(null)
     const columns = (actionType === ActionType.DETAIL) ? 
@@ -213,7 +214,7 @@ export default function ProjectsComponentObligation(
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-
+        
         ;(async () => {
             try {
                 const session = await getSession()
@@ -230,12 +231,39 @@ export default function ProjectsComponentObligation(
                 }
                 const componentObligation = await response.json()
                 setProjectsComponentObligations(componentObligation)
-            } catch (e) {
-                console.error(e)
+            }
+            catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         return () => controller.abort()
     }, [projectId, status])
+
+    useEffect(() => {
+        if (!projectsComponentObligations)
+            return
+        const tableRows = []
+        for (const [key, val] of Object.entries(projectsComponentObligations.obligations)) {
+            tableRows.push([
+                {
+                    id: key.split(' ').join('_'),
+                    infoText: val.text ?? '',
+                },
+                {
+                    oblTitle: key
+                },
+                { status: val.status ?? '' },
+                Capitalize(val.obligationType ?? ''),
+                val.status ?? '',
+                { comment: val.comment ?? '' }
+            ])
+        }
+        setTableData(tableRows)
+    }, [payload, projectsComponentObligations])
 
     console.log(projectsComponentObligations)
 

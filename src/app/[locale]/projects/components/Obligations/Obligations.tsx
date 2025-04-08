@@ -51,7 +51,7 @@ export default function Obligations({ projectId, actionType,
                            onSelect={(k) => setKey(k as string)}
             >
                 <div className='row'>
-                    <div className='col ps-0'>
+                    <div className='col ms-0'>
                         <Nav variant='pills' className='d-inline-flex'>
                             <Nav.Item>
                                 <Nav.Link eventKey='obligations-view'>
