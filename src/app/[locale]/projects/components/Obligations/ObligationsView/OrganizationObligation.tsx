@@ -42,7 +42,7 @@ export default function OrganizationObligation({
                                                }: Props): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
-    const [tableData] = useState<(object | string | string[])[][] | null>(null)
+    const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [organizationObligations, setOrganizationObligations] =
                             useState<null | OrganizationObligations>(null)
     const columns = (actionType === ActionType.DETAIL) ?
@@ -245,7 +245,28 @@ export default function OrganizationObligation({
         return () => controller.abort()
     }, [projectId, status])
 
-    console.log(organizationObligations)
+    useEffect(() => {
+        if (!organizationObligations)
+            return
+        const tableRows = []
+        for (const [key, val] of Object.entries(organizationObligations.obligations)) {
+            tableRows.push([
+                {
+                    id: key.split(' ').join('_'),
+                    infoText: val.text ?? '',
+                },
+                {
+                    oblTitle: key
+                },
+                { status: val.status ?? '' },
+                Capitalize(val.obligationType ?? ''),
+                val.status ?? '',
+                { comment: val.comment ?? '' }
+            ])
+        }
+        setTableData(tableRows)
+    }, [payload, organizationObligations])
+
 
     return (
         <>
