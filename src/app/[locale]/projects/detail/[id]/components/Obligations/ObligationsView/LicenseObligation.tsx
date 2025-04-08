@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState, useEffect, type JSX } from 'react';
 import { Table, _ } from '@/components/sw360'
-import { ProjectObligationsList, LicenseObligationRelease } from '@/object-types'
+import { LicenseObligationsList, LicenseObligationRelease } from '@/object-types'
 import { useSession } from 'next-auth/react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { Spinner } from 'react-bootstrap'
@@ -171,7 +171,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
         if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: `${SW360_API_URL}/resource/api/projects/${projectId}/licenseObligations`,
-            then: (data: ProjectObligationsList) => {
+            then: (data: LicenseObligationsList) => {
                 const tableRows = []
                 for(const [key, val] of Object.entries(data.obligations)) {
                     const row = []
@@ -194,7 +194,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                 }
                 return tableRows
             },
-            total: (data: ProjectObligationsList) => data.page?.totalElements ?? 0,
+            total: (data: LicenseObligationsList) => data.page?.totalElements ?? 0,
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
