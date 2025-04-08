@@ -15,7 +15,7 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import { HttpStatus, InputKeyValue, Project,
          Vendor, ProjectPayload, ActionType,
          ProjectObligation, ReleaseDetail,
-         DocumentTypes, ComponentObligation } from '@/object-types'
+         DocumentTypes, ComponentObligationData } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
@@ -92,7 +92,7 @@ function EditProject({ projectId }: { projectId: string }): JSX.Element {
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()    
-    const [obligations, setObligations] = useState<ProjectObligation | ComponentObligation>({})
+    const [obligations, setObligations] = useState<ProjectObligation | ComponentObligationData>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',

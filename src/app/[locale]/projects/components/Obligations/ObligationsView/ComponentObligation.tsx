@@ -10,7 +10,7 @@
 'use client'
 
 import { Table, _ } from '@/components/sw360'
-import { ActionType, HttpStatus, ComponentObligation } from '@/object-types'
+import { ActionType, HttpStatus, ComponentObligationData } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -23,26 +23,26 @@ import MessageService from '@/services/message.service'
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-interface ProjectsComponentObligations {
-    obligations : ComponentObligation
+interface ComponentObligations {
+    obligations : ComponentObligationData
 }
 
 interface Props {
     projectId: string,
     actionType: ActionType,
-    payload?: ComponentObligation,
-    setPayload?: Dispatch<SetStateAction<ComponentObligation>>
+    payload?: ComponentObligationData,
+    setPayload?: Dispatch<SetStateAction<ComponentObligationData>>
 }
 
-export default function ProjectsComponentObligation({
+export default function ComponentObligation({
                                                       projectId, actionType,
                                                       payload, setPayload
                                                     }: Props): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
-    const [projectsComponentObligations, setProjectsComponentObligations] =
-                            useState<null | ProjectsComponentObligations>(null)
+    const [componentObligations, setComponentObligations] =
+                            useState<null | ComponentObligations>(null)
     const columns = (actionType === ActionType.DETAIL) ? 
      [
         {
@@ -148,7 +148,7 @@ export default function ProjectsComponentObligation({
                             if (setPayload) {
                                 let obligationValue = payload?.[obligation] ?? {}
                                 obligationValue = { ...obligationValue, status: e.target.value }
-                                setPayload((payload: ComponentObligation) =>
+                                setPayload((payload: ComponentObligationData) =>
                                     ({ ...payload, [obligation]: obligationValue })
                                 )
                             }
@@ -230,7 +230,7 @@ export default function ProjectsComponentObligation({
                     return notFound()
                 }
                 const componentObligation = await response.json()
-                setProjectsComponentObligations(componentObligation)
+                setComponentObligations(componentObligation)
             }
             catch(error: unknown) {
                 if (error instanceof DOMException && error.name === "AbortError") {
@@ -244,10 +244,10 @@ export default function ProjectsComponentObligation({
     }, [projectId, status])
 
     useEffect(() => {
-        if (!projectsComponentObligations)
+        if (!componentObligations)
             return
         const tableRows = []
-        for (const [key, val] of Object.entries(projectsComponentObligations.obligations)) {
+        for (const [key, val] of Object.entries(componentObligations.obligations)) {
             tableRows.push([
                 {
                     id: key.split(' ').join('_'),
@@ -263,9 +263,7 @@ export default function ProjectsComponentObligation({
             ])
         }
         setTableData(tableRows)
-    }, [payload, projectsComponentObligations])
-
-    console.log(projectsComponentObligations)
+    }, [payload, componentObligations])
 
     return (
         <>

@@ -59,7 +59,7 @@ export interface ProjectObligationsList {
     }
 }
 
-export interface ComponentObligation {
+export interface ComponentObligationData {
     [k: string]: {
         text?: string
         id?: string

@@ -55,7 +55,7 @@ import { LicenseObligationRelease,
          Obligation,
          ProjectObligation,
          ProjectObligationsList,
-         ComponentObligation } from './Obligation'
+         ComponentObligationData } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
@@ -119,7 +119,7 @@ export type {
     ClearingRequestComments,
     ClearingRequestDetails,
     Component,
-    ComponentObligation,
+    ComponentObligationData,
     ComponentPayload,
     COTSDetails,
     CreateClearingRequestPayload,
