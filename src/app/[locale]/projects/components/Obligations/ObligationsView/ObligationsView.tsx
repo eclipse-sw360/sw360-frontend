@@ -13,14 +13,14 @@ import { Dispatch, SetStateAction, type JSX } from 'react';
 import { Tab, Tabs } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import LicenseObligation from './LicenseObligation'
-import { ActionType, ComponentObligation, ProjectObligation } from '@/object-types'
-import ProjectsComponentObligation from './ComponentObligation';
+import { ActionType, ComponentObligationData, ProjectObligation } from '@/object-types'
+import ComponentObligation from './ComponentObligation';
 
 interface Props {
     projectId: string,
     actionType: ActionType,
-    payload?: ProjectObligation | ComponentObligation,
-    setPayload?: Dispatch<SetStateAction<ProjectObligation | ComponentObligation>>,
+    payload?: ProjectObligation | ComponentObligationData,
+    setPayload?: Dispatch<SetStateAction<ProjectObligation | ComponentObligationData>>,
     selectedProjectId: string | null
 }
 
@@ -41,7 +41,7 @@ export default function ObligationView({ projectId, actionType,
                 />
             </Tab>
             <Tab eventKey='component-obligation' title={t('Component Obligation')}>
-                <ProjectsComponentObligation
+                <ComponentObligation
                                    projectId={projectId}
                                    actionType={actionType}
                                    payload={payload}
