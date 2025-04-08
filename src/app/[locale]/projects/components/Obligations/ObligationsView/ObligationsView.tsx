@@ -14,19 +14,23 @@ import { Tab, Tabs } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import LicenseObligation from './LicenseObligation'
 import { ActionType, ComponentObligationData,
-         LicenseObligationData, ProjectObligationData } from '@/object-types'
+         LicenseObligationData, ProjectObligationData,
+         OrganizationObligationData } from '@/object-types'
 import ComponentObligation from './ComponentObligation';
 import ProjectObligation from './ProjectObligation';
+import OrganizationObligation from './OrganizationObligation';
 
 interface Props {
     projectId: string,
     actionType: ActionType,
     payload?: LicenseObligationData |
               ComponentObligationData |
-              ProjectObligationData,
+              ProjectObligationData|
+              OrganizationObligationData,
     setPayload?: Dispatch<SetStateAction<LicenseObligationData |
                                          ComponentObligationData |
-                                         ProjectObligationData>>,
+                                         ProjectObligationData|
+                                         OrganizationObligationData>>,
     selectedProjectId: string | null
 }
 
@@ -63,6 +67,12 @@ export default function ObligationView({ projectId, actionType,
                 />
             </Tab>
             <Tab eventKey='organisation-obligation' title={t('Organisation Obligation')}>
+                <OrganizationObligation
+                                        projectId={projectId}
+                                        actionType={actionType}
+                                        payload={payload}
+                                        setPayload={setPayload}
+                />
             </Tab>
         </Tabs>
     )
