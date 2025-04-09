@@ -8,9 +8,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, useSession, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX } from 'react'
+import MessageService from '@/services/message.service'
 import { Alert } from 'react-bootstrap'
 import { FaDownload } from 'react-icons/fa'
 
@@ -54,7 +55,7 @@ const AttachmentTypeShortName = {
 
 const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const { status, data: session } = useSession()
+    const { status } = useSession()
     const [attachmentData, setAttachmentData] = useState<(string | Attachment | string[] | JSX.Element)[][]>([])
     const [totalRows, setTotalRows] = useState(0)
 
@@ -110,6 +111,7 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
 
     const fetchData = useCallback(
         async (url: string) => {
+            const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session))
                 return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
@@ -121,16 +123,27 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
             } else {
                 return {} as EmbeddedAttachments
             }
-        },
-        [session]
+        }, []
     )
 
-    const downloadAttachment = (attachmentId: string, attachmentName: string) => {
-        DownloadService.download(`${documentType}/${documentId}/attachments/${attachmentId}`, session, attachmentName)
+    const downloadAttachment = async (attachmentId: string, attachmentName: string) => {
+        try {
+            const session = await getSession()
+            DownloadService.download(`${documentType}/${documentId}/attachments/${attachmentId}`, session, attachmentName)
+        } catch(error) {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
     }
 
-    const downloadBundle = () => {
-        DownloadService.download(`${documentType}/${documentId}/attachments/download`, session, 'AttachmentBundle.zip')
+    const downloadBundle = async () => {
+        try {
+            const session = await getSession()
+            DownloadService.download(`${documentType}/${documentId}/attachments/download`, session, 'AttachmentBundle.zip')
+        } catch(error) {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
     }
 
     useEffect(() => {
@@ -163,8 +176,15 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                     setTotalRows(attachmentData.length)
                 }
             })
-            .catch((err) => console.error(err))
-    }, [documentId, documentType, fetchData, session])
+            .catch((error) => {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }
+        )
+    }, [documentId, documentType, fetchData])
 
     const columns = [
         {
