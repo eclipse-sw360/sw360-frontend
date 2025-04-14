@@ -14,8 +14,10 @@ import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedRele
 import Summary from '@/components/ProjectAddSummary/Summary'
 import { HttpStatus, InputKeyValue, Project,
          Vendor, ProjectPayload, ActionType,
-         ProjectObligation, ReleaseDetail,
-         DocumentTypes, ComponentObligationData } from '@/object-types'
+         LicenseObligationData, ReleaseDetail,
+         DocumentTypes, ComponentObligationData,
+         ProjectObligationData,
+         OrganizationObligationData } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, getSession } from 'next-auth/react'
@@ -91,7 +93,10 @@ function EditProject({ projectId, isDependencyNetworkFeatureEnabled }: { project
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()    
-    const [obligations, setObligations] = useState<ProjectObligation | ComponentObligationData>({})
+    const [obligations, setObligations] = useState<LicenseObligationData|
+                                                   ComponentObligationData|
+                                                   ProjectObligationData|
+                                                   OrganizationObligationData>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',

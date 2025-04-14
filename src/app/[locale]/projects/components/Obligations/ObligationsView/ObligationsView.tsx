@@ -13,14 +13,24 @@ import { Dispatch, SetStateAction, type JSX } from 'react';
 import { Tab, Tabs } from 'react-bootstrap'
 import { useTranslations } from 'next-intl'
 import LicenseObligation from './LicenseObligation'
-import { ActionType, ComponentObligationData, ProjectObligation } from '@/object-types'
+import { ActionType, ComponentObligationData,
+         LicenseObligationData, ProjectObligationData,
+         OrganizationObligationData } from '@/object-types'
 import ComponentObligation from './ComponentObligation';
+import ProjectObligation from './ProjectObligation';
+import OrganizationObligation from './OrganizationObligation';
 
 interface Props {
     projectId: string,
     actionType: ActionType,
-    payload?: ProjectObligation | ComponentObligationData,
-    setPayload?: Dispatch<SetStateAction<ProjectObligation | ComponentObligationData>>,
+    payload?: LicenseObligationData |
+              ComponentObligationData |
+              ProjectObligationData|
+              OrganizationObligationData,
+    setPayload?: Dispatch<SetStateAction<LicenseObligationData |
+                                         ComponentObligationData |
+                                         ProjectObligationData|
+                                         OrganizationObligationData>>,
     selectedProjectId: string | null
 }
 
@@ -49,8 +59,20 @@ export default function ObligationView({ projectId, actionType,
                 />
             </Tab>
             <Tab eventKey='project-obligation' title={t('Project Obligation')}>
+                <ProjectObligation
+                                   projectId={projectId}
+                                   actionType={actionType}
+                                   payload={payload}
+                                   setPayload={setPayload}
+                />
             </Tab>
             <Tab eventKey='organisation-obligation' title={t('Organisation Obligation')}>
+                <OrganizationObligation
+                                        projectId={projectId}
+                                        actionType={actionType}
+                                        payload={payload}
+                                        setPayload={setPayload}
+                />
             </Tab>
         </Tabs>
     )

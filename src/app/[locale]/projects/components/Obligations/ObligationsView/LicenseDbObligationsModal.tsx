@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl"
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { GrCheckboxSelected } from 'react-icons/gr'
 import { ShowObligationTextOnExpand, ExpandableList } from './ExpandableComponents'
-import { HttpStatus, LicenseObligationRelease, ProjectObligationsList, ErrorDetails } from '@/object-types'
+import { HttpStatus, LicenseObligationRelease, LicenseObligationsList, ErrorDetails } from '@/object-types'
 import Link from 'next/link'
 import { Table, _ } from '@/components/sw360'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -180,7 +180,7 @@ export default function LicenseDbObligationsModal({
         if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: `${SW360_API_URL}/resource/api/projects/${projectId}/licenseDbObligations`,
-            then: (data: ProjectObligationsList) => {
+            then: (data: LicenseObligationsList) => {
                 const tableData = []
                 for(const [key, val] of Object.entries(data.obligations)) {
                     tableData.push([
@@ -198,7 +198,7 @@ export default function LicenseDbObligationsModal({
                 }
                 return tableData
             },
-            total: (data: ProjectObligationsList) => data.page?.totalElements ?? 0,
+            total: (data: LicenseObligationsList) => data.page?.totalElements ?? 0,
             headers: { Authorization: session.user.access_token },
         }
     }

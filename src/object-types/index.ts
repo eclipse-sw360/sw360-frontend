@@ -53,9 +53,11 @@ import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
 import { LicenseObligationRelease,
          Obligation,
-         ProjectObligation,
-         ProjectObligationsList,
-         ComponentObligationData } from './Obligation'
+         LicenseObligationData,
+         LicenseObligationsList,
+         ComponentObligationData,
+         ProjectObligationData,
+         OrganizationObligationData } from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
@@ -160,6 +162,7 @@ export type {
     NodeData,
     OAuthClient,
     Obligation,
+    OrganizationObligationData,
     OtherLicensingInformationDetected,
     Package,
     PackageInformation,
@@ -167,8 +170,9 @@ export type {
     Project,
     ProjectData,
     ProjectLinkedRelease,
-    ProjectObligation,
-    ProjectObligationsList,
+    ProjectObligationData,
+    LicenseObligationData,
+    LicenseObligationsList,
     ProjectPayload,
     ProjectVulnerability,
     ProjectVulnerabilityTrackingStatus,
