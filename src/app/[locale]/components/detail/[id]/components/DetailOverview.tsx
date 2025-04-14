@@ -180,7 +180,7 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
 
     const headerButtons = {
         Edit: { link: `/components/edit/${componentId}`, type: 'primary', name: t('Edit component') },
-        Merge: { link: '', type: 'secondary', name: t('Merge') },
+        Merge: { link: `/components/detail/${componentId}/merge`, type: 'secondary', name: t('Merge') },
         Split: { link: '', type: 'secondary', name: t('Split') },
         Subscribe: {
             link: '',

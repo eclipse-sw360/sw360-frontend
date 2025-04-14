@@ -230,6 +230,7 @@ import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 import ConfigKeys from './enums/ConfigKeys'
+import MergeActionType from './enums/MergeActionType'
 
 export {
     ActionType,
@@ -247,4 +248,5 @@ export {
     UserGroupType,
     VulnerabilitiesVerificationState,
     ConfigKeys,
+    MergeActionType
 }
