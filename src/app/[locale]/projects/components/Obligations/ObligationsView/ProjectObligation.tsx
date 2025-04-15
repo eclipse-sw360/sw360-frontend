@@ -103,13 +103,16 @@ export default function ProjectObligation({
             id: 'projectObligation.expand',
             formatter: (param: { id?: string; infoText?: string }) => {
                 const { id, infoText } = param;
-                return _(<>{
-                    id !== undefined && infoText !== undefined ? (
-                        <ShowObligationTextOnExpand id={id}
+                return _(
+                    <>  {
+                            id !== undefined && infoText !== undefined ? (
+                                <ShowObligationTextOnExpand id={id}
                                                     infoText={infoText}
                                                     colLength={columns.length} />
-                    ) : ""
-                }</>)
+                            ) : ""
+                        }
+                    </>
+                )
             },
             width: '4%'
         },

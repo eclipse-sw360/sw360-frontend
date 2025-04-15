@@ -103,7 +103,7 @@ const ComponentIndex = () : ReactNode => {
         {
             fieldName: t('Software Platforms'),
             value: '',
-            paramName: 'softwarePlatform',
+            paramName: 'softwarePlatforms',
         },
         {
             fieldName: t('Vendors'),
@@ -113,7 +113,7 @@ const ComponentIndex = () : ReactNode => {
         {
             fieldName: t('Operating Systems'),
             value: '',
-            paramName: 'operatingSystem',
+            paramName: 'operatingSystems',
         },
         {
             fieldName: t('Main Licenses'),
