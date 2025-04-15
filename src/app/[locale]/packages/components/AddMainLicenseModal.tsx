@@ -9,9 +9,15 @@
 
 'use client'
 
+import { Embedded, HttpStatus, LicenseDetail } from '@/object-types';
+import MessageService from '@/services/message.service';
+import CommonUtils from '@/utils/common.utils';
+import { ApiUtils } from '@/utils/index';
+import { getSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import { _, Table } from 'next-sw360';
 import { useRef, useState, type JSX } from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Form, Modal } from 'react-bootstrap';
 
 interface Props {
     showMainLicenseModal: boolean
@@ -21,9 +27,9 @@ interface Props {
     multiple: boolean
 }
 
-// type EmbeddedLicenses= Embedded<LicenseDetail, 'sw360:licenses'>
+type EmbeddedLicenses= Embedded<LicenseDetail, 'sw360:licenses'>
 
-// type RowData = (string | LicenseDetail)[]
+type RowData = (string | LicenseDetail)[]
 
 export default function AddMainLicenseModal({ showMainLicenseModal,
                                               setShowMainLicenseModal,
@@ -31,7 +37,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                                               exisitngMainLicenses,
                                               multiple }: Props) : JSX.Element {
     const t = useTranslations('default')
-    // const [tableData, setTableData] = useState<Array<RowData>>([])
+    const [tableData, setTableData] = useState<Array<RowData>>([])
     const [newMainLicense, setNewMainLicense] = useState({})
     const searchText = useRef<string>('')
 
@@ -46,9 +52,57 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
         setMainLicensesToPayload(newMainLicense)
     }
 
+    const searchLicenses= async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        const response = await ApiUtils.GET(`licenses`, session.user.access_token)
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+
+        const mainLicenses = await response.json() as EmbeddedLicenses
+        if (
+            !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']) &&
+            !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']['sw360:licenses'])
+        ) {
+            const data = mainLicenses['_embedded']['sw360:licenses'].map((license: LicenseDetail) => [
+                license,
+                license.fullName ?? ''
+            ])
+            setTableData(data)
+        }
+        setNewMainLicense(exisitngMainLicenses)
+    }
+
     const resetSelection = () => {
         // TODO: specifications are unclear
     }
+
+    const columns = [
+            {
+                id: 'license-selection',
+                name: '',
+                formatter: () =>
+                    _(
+                        <Form.Check
+                            name='license-selection'
+                            type= { multiple ? 'checkbox' : 'radio' }
+                        ></Form.Check>
+                    ),
+                width: '7%',
+                sort: false,
+            },
+            {
+                id: 'fullName',
+                name: 'Full Name',
+                width: 'auto',
+                sort: true,
+            },
+    ]
 
     return (
         <Modal show={showMainLicenseModal} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
@@ -69,7 +123,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                     <div className='col-lg-4'>
                         <button type='button'
                                 className='btn btn-secondary me-2'
-                                // onClick={() => void searchLicenses()}
+                                onClick={() => void searchLicenses()}
                         >
                             {t('Search')}
                         </button>
@@ -80,6 +134,9 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                             {t('Reset')}
                         </button>
                     </div>
+                </div>
+                <div className='mt-3'>
+                    <Table columns={columns} data={tableData} />
                 </div>
 
             </Modal.Body>
