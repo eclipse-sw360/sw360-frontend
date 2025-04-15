@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { IoIosClose } from 'react-icons/io'
 import DeletePackageModal from './DeletePackageModal'
+import AddMainLicenseModal from './AddMainLicenseModal'
 import { packageManagers } from './PackageManagers'
 import AddReleaseModal from './AddReleaseModal'
 
@@ -34,21 +35,17 @@ interface Props {
     isEditPage: boolean
 }
 
-export default function CreateOrEditPackage({packagePayload,
-                                             setPackagePayload,
-                                             handleSubmit,
-                                             isPending,
-                                             isEditPage
-                                            }: Props): ReactNode {
-    const t = useTranslations('default')
+export default function CreateOrEditPackage({ packagePayload,
+                                              setPackagePayload,
+                                              handleSubmit,
+                                              isPending,
+                                              isEditPage }: Props): ReactNode {
     const router = useRouter()
-    const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
-
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-    }
+    const t = useTranslations('default')
     const [releaseNameVersion, setReleaseNameVersion] = useState<string>('')
-
+    const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
+    const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
+    const [showMainLicenseModal, setShowMainLicenseModal] = useState<boolean>(false)
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
         show: false,
         packageId: '',
@@ -69,6 +66,17 @@ export default function CreateOrEditPackage({packagePayload,
         else
             return ''
     }
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+        setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    }
+
+    const setMainLicensesToPayload = (mainLicenses:{ [k: string]: string }) => {
+        setMainLicenses(mainLicenses)
+        setPackagePayload({
+            ...packagePayload,
+            licenseIds: Object.keys(mainLicenses),
+        })
+    }
 
     return (
         <>
@@ -82,6 +90,12 @@ export default function CreateOrEditPackage({packagePayload,
                 show={showLinkedReleasesModal}
                 setShow={setShowLinkedReleasesModal}
                 setReleaseNameVersion={setReleaseNameVersion}
+            />
+            <AddMainLicenseModal showMainLicenseModal={showMainLicenseModal}
+                                 setShowMainLicenseModal={setShowMainLicenseModal}
+                                 setMainLicensesToPayload={setMainLicensesToPayload}
+                                 exisitngMainLicenses={mainLicenses}
+                                 multiple={true}
             />
             <form
                 id='add_or_edit_package_form_submit'
@@ -280,6 +294,7 @@ export default function CreateOrEditPackage({packagePayload,
                                 id='createOrEditPackage.licenseIds'
                                 placeholder={t('Click to set Licenses')}
                                 value={packagePayload.licenseIds?.join(', ') ?? ''}
+                                onClick={() => setShowMainLicenseModal(true)}
                                 readOnly
                             />
                         </div>
