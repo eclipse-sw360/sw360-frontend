@@ -26,7 +26,7 @@ function Navbar(): JSX.Element {
     const param=useParams()
     const locale=param.locale as string || 'en';
 
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
     const [show, setShow] = useState(false)
     const selectedLayoutSegment = useSelectedLayoutSegment()
     const pathname = (selectedLayoutSegment !== null) ? `/${selectedLayoutSegment}` : '/'
@@ -48,7 +48,7 @@ function Navbar(): JSX.Element {
         <>
             {navlist.map((item) => {
                 if ('visibility' in item) {
-                    if (status === 'authenticated' && session.user.userGroup !== item.visibility) {
+                    if (session?.user.userGroup !== item.visibility) {
                         return
                     }
                 }
