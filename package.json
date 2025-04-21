@@ -23,10 +23,10 @@
     "next-auth": "^4.24.11",
     "next-intl": "^4.0.2",
     "preact": "^10.26.5",
-    "react": "19.0.0",
+    "react": "19.1.0",
     "react-bootstrap": "^2.10.9",
     "react-cookie": "^8.0.1",
-    "react-dom": "19.0.0",
+    "react-dom": "19.1.0",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
@@ -36,8 +36,8 @@
     "@types/country-list": "^2.1.4",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.14.1",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19.0.4",
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@typescript-eslint/typescript-estree": "^8.30.1",
