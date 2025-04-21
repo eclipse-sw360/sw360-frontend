@@ -32,7 +32,7 @@
   "devDependencies": {
     "@commitlint/cli": "19.8.0",
     "@commitlint/config-conventional": "19.8.0",
-    "@eslint/config-array": "^0.19.2",
+    "@eslint/config-array": "^0.20.0",
     "@types/country-list": "^2.1.4",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.14.1",
