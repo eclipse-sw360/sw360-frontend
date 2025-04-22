@@ -11,11 +11,12 @@ import KeycloakProvider from "next-auth/providers/keycloak"
 import { NextAuthOptions } from 'next-auth'
 import { jwtDecode } from 'jwt-decode'
 import { UserGroupType } from '@/object-types'
+import { SW360_KEYCLOAK_CLIENT_ID, SW360_KEYCLOAK_CLIENT_SECRET, AUTH_ISSUER } from '@/utils/env'
 
 const keycloakProvider = KeycloakProvider({
-    clientId: `${process.env.SW360_KEYCLOAK_CLIENT_ID}`,
-    clientSecret: `${process.env.SW360_KEYCLOAK_CLIENT_SECRET}`,
-    issuer: `${process.env.AUTH_ISSUER}`,
+    clientId: SW360_KEYCLOAK_CLIENT_ID,
+    clientSecret: SW360_KEYCLOAK_CLIENT_SECRET,
+    issuer: AUTH_ISSUER,
     checks: 'state',
     authorization: { params: { scope: "openid READ WRITE" } },
 })

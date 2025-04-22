@@ -9,8 +9,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export const SW360_API_URL: string | undefined  = process.env.NEXT_PUBLIC_SW360_API_URL;
-export const AUTH_TOKEN : string | undefined  = process.env.NEXT_PUBLIC_AUTH_TOKEN;
-export const SW360_REST_CLIENT_ID: string | undefined  = process.env.NEXT_PUBLIC_SW360_REST_CLIENT_ID;
-export const SW360_REST_CLIENT_SECRET: string | undefined  = process.env.NEXT_PUBLIC_SW360_REST_CLIENT_SECRET;
+// Server/Client side env
+export const SW360_API_URL: string | undefined = process.env.NEXT_PUBLIC_SW360_API_URL;
 export const AUTH_PROVIDER: string | undefined = process.env.NEXT_PUBLIC_SW360_AUTH_PROVIDER;
+
+// Server side env
+export const SW360_REST_CLIENT_ID: string | undefined = process.env.SW360_REST_CLIENT_ID;
+export const SW360_REST_CLIENT_SECRET: string | undefined = process.env.SW360_REST_CLIENT_SECRET;
+export const SW360_KEYCLOAK_CLIENT_ID = `${process.env.SW360_KEYCLOAK_CLIENT_ID}`;
+export const SW360_KEYCLOAK_CLIENT_SECRET = `${process.env.SW360_KEYCLOAK_CLIENT_SECRET}`;
+export const AUTH_ISSUER: string | undefined = process.env.AUTH_ISSUER;
