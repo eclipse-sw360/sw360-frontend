@@ -86,18 +86,29 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                 {
                     addLicenseInfoToReleaseData && (
                         <>
-                            <Alert
-                                variant='success'
-                                id='addLicenseInfoToReleaseData.success.alert'
-                            >
-                                {t('Success Please reload the page to see the changes')}:
-                                {addLicenseInfoToReleaseData.UPDATED.length}
-                            </Alert>
+                            { addLicenseInfoToReleaseData.UPDATED.length === 0 ? (
+                                <Alert
+                                    variant='info'
+                                    id='addLicenseInfoToReleaseData.info.alert'
+                                >
+                                    {t('Changes made to the releases')}:{' '}
+                                    {addLicenseInfoToReleaseData.UPDATED.length}
+                                </Alert>
+                            ) : (
+                                <Alert
+                                    variant='success'
+                                    id='addLicenseInfoToReleaseData.success.alert'
+                                >
+                                    {t('Success Please reload the page to see the changes')}:{' '}
+                                    {addLicenseInfoToReleaseData.UPDATED.length}
+                                </Alert>
+                                )
+                            }
                             {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length > 0 && (
                                 <Alert variant='warning'
                                     id='addLicenseInfoToReleaseData-multiple-attachments-alert'
                                 >
-                                    {t('Multiple CLI are found in release')}:
+                                    {t('Multiple CLI are found in release')}:{' '}
                                     {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length}
                                     <ul className="mapDisplayRootItem">
                                         {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.map(
@@ -122,7 +133,7 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                                 <Alert variant='warning'
                                     id='addLicenseInfoToReleaseData-not-updated-alert'
                                 >
-                                    {t('Releases not updated')}:
+                                    {t('Releases not updated')}:{' '}
                                     {addLicenseInfoToReleaseData.NOT_UPDATED.length}
                                     <ul className="mapDisplayRootItem">
                                         {addLicenseInfoToReleaseData.NOT_UPDATED.map(
