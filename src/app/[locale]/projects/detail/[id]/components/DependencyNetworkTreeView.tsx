@@ -781,14 +781,16 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             <div className='my-1'>
                 {data ? (
                     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                    (<TreeTable
-                        columns={columns}
-                        data={treeData}
-                        setData={setTreeData}
-                        language={language}
-                        onExpand={onExpand}
-                        search={search}
-                    />)
+                <TreeTable
+                columns={columns}
+                data={treeData}
+                setData={setTreeData}
+                language={language}
+                onExpand={(item) => {
+                    void onExpand(item as DependencyNetworkNodeData)
+                }}
+                search={search}
+                />
                 ) : (
                     <div className='col-12 text-center'>
                         <Spinner className='spinner' />
