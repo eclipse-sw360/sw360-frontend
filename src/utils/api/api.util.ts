@@ -42,8 +42,10 @@ async function send({
     }
 
     if (signal !== undefined) {
-        request_content.signal = signal
-    }
+        if (signal instanceof AbortSignal) {
+            request_content.signal = signal
+          }    
+        }
 
     return fetch(`${base}/${path}`, request_content).then((r) => r)
 }
