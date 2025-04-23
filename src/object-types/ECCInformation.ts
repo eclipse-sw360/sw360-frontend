@@ -12,6 +12,7 @@ interface ECCInformation {
     eccStatus?: string
     al?: string
     eccn?: string
+    containsCryptography?: boolean
     assessorContactPerson?: string
     assessorDepartment?: string
     eccComment?: string
