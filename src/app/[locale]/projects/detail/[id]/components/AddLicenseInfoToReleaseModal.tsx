@@ -17,7 +17,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState, type JSX } from "react"
-import { Alert, Button, Modal } from 'react-bootstrap'
+import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
 
@@ -33,16 +33,16 @@ interface AddLicenseInfoToReleaseData {
     UPDATED: string[]
     _embedded: {
         'sw360:releases': [{
-            id : string
-            name : string
-            version : string
+            id: string
+            name: string
+            version: string
         }]
     }
 }
 
 function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
-    const [, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     const [addLicenseInfoToReleaseData, setAddLicenseInfoToReleaseData] = useState<AddLicenseInfoToReleaseData | null>(null)
 
     const handleSubmit = async (projectId : string) => {
@@ -59,8 +59,12 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
             } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                 MessageService.error(t('Error occurred while processing license information for linked releases'))
             }
-        } catch(e) {
-            console.error(e)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         } finally {
             setIsLoading(false)
         }
@@ -80,11 +84,16 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p>
-                    {t(`Do you really want to add license info to all the directly linked release`)}
-                </p>
-                {
-                    addLicenseInfoToReleaseData && (
+                {isLoading ? (
+                    <div className='d-flex justify-content-center align-items-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                ) : (
+                <>
+                    <p>
+                        {t(`Do you really want to add license info to all the directly linked release`)}
+                    </p>
+                    {addLicenseInfoToReleaseData && (
                         <>
                             { addLicenseInfoToReleaseData.UPDATED.length === 0 ? (
                                 <Alert
@@ -159,8 +168,9 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                                 )
                             }
                         </>
-                    )
-                }
+                    )}
+                </>
+                )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
