@@ -100,12 +100,40 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                                     {t('Multiple CLI are found in release')}:
                                     {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length}
                                     <ul className="mapDisplayRootItem">
-                                        {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.map((attachmentId) => {
-                                            const releaseInfo = addLicenseInfoToReleaseData._embedded['sw360:releases'].find(
+                                        {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.map(
+                                            (attachmentId) => {
+                                                const releaseInfo = addLicenseInfoToReleaseData.
+                                                                    _embedded['sw360:releases'].find(
                                                 (release) => release.id === attachmentId)
                                         return releaseInfo ? (
                                                 <li key={releaseInfo.id} className="ms-3">
-                                                    <Link href={'/components/releases/detail/' + releaseInfo.id} className='link'>
+                                                    <Link href={'/components/releases/detail/' +
+                                                                releaseInfo.id} className='link'>
+                                                        {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                    </Link>
+                                                </li>
+                                            ) : null
+                                        })}
+                                    </ul>
+                                </Alert>
+                                )
+                            }
+                            {addLicenseInfoToReleaseData.NOT_UPDATED.length > 0 && (
+                                <Alert variant='warning'
+                                    id='addLicenseInfoToReleaseData-not-updated-alert'
+                                >
+                                    {t('Releases not updated')}:
+                                    {addLicenseInfoToReleaseData.NOT_UPDATED.length}
+                                    <ul className="mapDisplayRootItem">
+                                        {addLicenseInfoToReleaseData.NOT_UPDATED.map(
+                                            (attachmentId) => {
+                                                const releaseInfo = addLicenseInfoToReleaseData.
+                                                                    _embedded['sw360:releases'].find(
+                                                (release) => release.id === attachmentId)
+                                        return releaseInfo ? (
+                                                <li key={releaseInfo.id} className="ms-3">
+                                                    <Link href={'/components/releases/detail/' +
+                                                                releaseInfo.id} className='link'>
                                                         {`${releaseInfo.name}(${releaseInfo.version})`}
                                                     </Link>
                                                 </li>
