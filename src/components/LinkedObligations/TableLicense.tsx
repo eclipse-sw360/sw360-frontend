@@ -15,6 +15,8 @@ import * as React from 'react'
 import { Component, RefObject, createRef } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from './TableLinkedObligations/TableLinkedObligations.module.css'
+import type { JSX } from 'react'
+
 
 const defaultOptions = {
     pagination: { limit: 10 },
@@ -97,8 +99,7 @@ class TableLicense extends Component<TableProps, unknown> {
             })
             .forceRender()
     }
-
-    render(): React.ReactElement<any> {
+    render(): JSX.Element{
         return (
             <>
                 <div className={styles['div-table-license']}>

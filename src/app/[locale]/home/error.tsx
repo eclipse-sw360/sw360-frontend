@@ -11,14 +11,15 @@
 
 import { useState } from 'react'
 import { Alert, Button, Container, Row, Col } from 'react-bootstrap'
+import type { JSX } from 'react'
 
-export default function Error({
+export default function ErrorPage({
   error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
-}) {
+}): JSX.Element {
   const [isVisible, setIsVisible] = useState(true)
   
   if (!isVisible) {
@@ -68,9 +69,7 @@ export default function Error({
                   <Button 
                     variant="danger"
                     size="sm"
-                    onClick={() => {
-                      reset()
-                    }}
+                    onClick={reset}
                     aria-label="Try the operation again"
                   >
                     Try again

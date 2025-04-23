@@ -10,18 +10,20 @@
 // License-Filename: LICENSE
 
 'use client';
+
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 import { IoMdInformationCircle } from 'react-icons/io'
 
-import type { JSX } from "react";
+import type { JSX } from "react"
+import type { useTranslations } from 'next-intl'
 
 interface Props {
-    license: string,
-    t: any,
+    license: string
+    t: ReturnType<typeof useTranslations>
     openModal: (license: string) => void
 }
 
-const ViewFileListIcon = ({ license, t, openModal }: Props): JSX.Element => {
+function ViewFileListIcon({ license, t, openModal }: Props): JSX.Element {
     return (
         <OverlayTrigger placement='right-end' overlay={<Tooltip>{t('View file list')}</Tooltip>}>
             <span className='d-inline-block' onClick={() => openModal(license)}>
