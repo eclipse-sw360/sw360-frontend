@@ -775,6 +775,7 @@
     "Modified By": "修改者",
     "Modified On": "修改于",
     "Monotone": "单调",
+    "Multiple CLI are found in release": "在释放中发现了多个CLI",
     "Multiple CLI are found in release!": "发布中发现多个 CLI！",
     "Multiple approved CLI are found in the release": "版本中发现多个经过批准的 CLI",
     "My Components": "我的组件",
