@@ -37,6 +37,7 @@ interface Component {
     blog?: string
     modifiedOn?: string
     modifiedBy?: string
+    createdBy?: string
     roles?: { [k: string]: Array<string> }
     setBusinessUnit?: boolean
     setVisbility?: boolean

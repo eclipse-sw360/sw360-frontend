@@ -9,14 +9,14 @@
 
 'use client'
 
-import { Component } from "@/object-types"
+import { Component, ListFieldMerge } from "@/object-types"
 import { useTranslations } from "next-intl"
-import { ReactNode, SetStateAction, Dispatch, useEffect } from "react"
+import { ReactNode, SetStateAction, Dispatch, useEffect, useState } from "react"
 import styles from '../merge.module.css'
 import { FaLongArrowAltLeft } from "react-icons/fa"
 import { TiTick } from "react-icons/ti"
 import { FaUndo } from "react-icons/fa"
-import { BiInfoCircle } from 'react-icons/bi'
+import GeneralSection from "./GeneralSection"
 
 export default function MergeComponent(
     {
@@ -27,107 +27,223 @@ export default function MergeComponent(
     }): ReactNode {
 
     const t = useTranslations('default')
+    const [externalIdsMergeList, setExternalIdsMergeList] = useState<ListFieldMerge[]>([])
+    const [additionalDataMergeList, setAdditionalDataMergeList] = useState<ListFieldMerge[]>([])
 
     useEffect(() => {
-        setFinalComponentPayload(targetComponent)
-    }, [])
+        setFinalComponentPayload({ ...targetComponent, createdBy: targetComponent?._embedded?.createdBy?.email ?? '' } as Component)
+
+        setExternalIdsMergeList([
+            ...Object.keys(targetComponent?.externalIds ?? {})
+                .filter(targetElem => Object.keys(sourceComponent?.externalIds ?? {}).filter(sourceElem => sourceElem === targetElem).length !== 0)
+                .map(c => ({ value: c, presentInSource: true, presentInTarget: true, overWritten: false })),
+
+            ...Object.keys(targetComponent?.externalIds ?? {})
+                .filter(targetElem => Object.keys(sourceComponent?.externalIds ?? {}).filter(sourceElem => sourceElem === targetElem).length === 0)
+                .map(c => ({ value: c, presentInSource: false, presentInTarget: true, overWritten: false })),
+
+                ...Object.keys(sourceComponent?.externalIds ?? {})
+                .filter(sourceElem => Object.keys(targetComponent?.externalIds ?? {}).filter(targetElem => sourceElem === targetElem).length === 0)
+                .map(c => ({ value: c, presentInSource: true, presentInTarget: false, overWritten: false })),
+        ])
+
+        setAdditionalDataMergeList([
+            ...Object.keys(targetComponent?.additionalData ?? {})
+                .filter(targetElem => Object.keys(sourceComponent?.additionalData ?? {}).filter(sourceElem => sourceElem === targetElem).length !== 0)
+                .map(c => ({ value: c, presentInSource: true, presentInTarget: true, overWritten: false })),
+
+            ...Object.keys(targetComponent?.additionalData ?? {})
+                .filter(targetElem => Object.keys(sourceComponent?.additionalData ?? {}).filter(sourceElem => sourceElem === targetElem).length === 0)
+                .map(c => ({ value: c, presentInSource: false, presentInTarget: true, overWritten: false })),
+
+                ...Object.keys(sourceComponent?.additionalData ?? {})
+                .filter(sourceElem => Object.keys(targetComponent?.additionalData ?? {}).filter(targetElem => sourceElem === targetElem).length === 0)
+                .map(c => ({ value: c, presentInSource: true, presentInTarget: false, overWritten: false })),
+        ])
+    }, [targetComponent, sourceComponent])
 
     return (
         <>
             {
                 (targetComponent && sourceComponent && finalComponentPayload) &&
-                <div className='mb-3'>
-                    <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
-                        {t('General')}
-                    </h6>
-                    <div className={`border ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Name')}</div>
-                        <div className="d-flex row">
-                            <div className="mt-2 col text-end">{finalComponentPayload.name}</div>
-                            <div className="col-12 col-md-2 mx-5 text-center">
-                                {
-                                    (sourceComponent.name === targetComponent.name)
-                                        ? <TiTick size={40} className={styles['green']} />
-                                        : (finalComponentPayload.name === targetComponent.name)
-                                            ? <button className="btn btn-secondary px-2"
-                                                onClick={() => setFinalComponentPayload({ ...finalComponentPayload, name: sourceComponent.name })}
-                                            >
-                                                <FaLongArrowAltLeft />
-                                            </button>
-                                            : <button className="btn btn-secondary px-2"
-                                                onClick={() => setFinalComponentPayload({ ...finalComponentPayload, name: targetComponent.name })}
-                                            >
-                                                <FaUndo />
-                                            </button>
-
-                                }
-                            </div>
-                            <div className="mt-2 col text-start">{sourceComponent.name}</div>
-                        </div>
-                    </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Created on')}</div>
-                        <div className="d-flex row">
-                            <div className="mt-2 col text-end">{finalComponentPayload.createdOn}</div>
-                            <div className="col-12 col-md-2 mx-5 text-center">
-                                {
-                                    (sourceComponent.createdOn === targetComponent.createdOn)
-                                        ? <TiTick size={25} className={styles['green']} />
-                                        : (finalComponentPayload.createdOn === targetComponent.createdOn)
-                                            ? <button className="btn btn-secondary px-2"
-                                                onClick={() => setFinalComponentPayload({ ...finalComponentPayload, createdOn: sourceComponent.createdOn })}
-                                            >
-                                                <FaLongArrowAltLeft />
-                                            </button>
-                                            : <button className="btn btn-secondary px-2"
-                                                onClick={() => setFinalComponentPayload({ ...finalComponentPayload, createdOn: targetComponent.createdOn })}
-                                            >
-                                                <FaUndo />
-                                            </button>
-
-                                }
-                            </div>
-                            <div className="mt-2 col text-start">{sourceComponent.createdOn}</div>
-                        </div>
-                    </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Created by')}</div>
-                        <div className="d-flex row">
-                            <div className="mt-2 col text-end">{finalComponentPayload._embedded?.createdBy?.email}</div>
-                            <div className="col-12 col-md-2 mx-5 text-center">
-                                {
-                                    (sourceComponent._embedded?.createdBy?.email === targetComponent._embedded?.createdBy?.email)
-                                        ? <TiTick size={25} className={styles['green']} />
-                                        : (finalComponentPayload._embedded?.createdBy?.email === targetComponent._embedded?.createdBy?.email)
-                                            ? <button className="btn btn-secondary px-2"
-                                                onClick={() => {
-                                                    if(sourceComponent._embedded?.createdBy?.email === undefined) {
-                                                        return
+                <>
+                    <GeneralSection 
+                        targetComponent={targetComponent} sourceComponent={sourceComponent} 
+                        finalComponentPayload={finalComponentPayload} setFinalComponentPayload={setFinalComponentPayload}
+                    />
+                    <div className='mb-3'>
+                        <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                            {t('External Ids')}
+                        </h6>
+                        {
+                            externalIdsMergeList.map((id, i) =>
+                                <div className={`border ${styles['border-blue']} p-2 ${i !== 0 ? 'border-top-0': ''}`} key={id.value}>
+                                    <div className={`fw-bold ${styles['text-blue']}`}>{id.value}</div>
+                                        {
+                                            (id.presentInSource && id.presentInTarget) &&
+                                            <div className="d-flex row">
+                                                <div className="mt-2 col text-end">{targetComponent.externalIds?.[id.value]}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    <TiTick size={40} className={styles['green']} />
+                                                </div>
+                                                <div className="mt-2 col text-start">{sourceComponent.externalIds?.[id.value]}</div>
+                                            </div>
+                                        }
+                                        {
+                                            (!id.presentInSource && id.presentInTarget) &&
+                                            <div className="d-flex row">
+                                                <div className="mt-2 col text-end">{finalComponentPayload.externalIds?.[id.value]}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    {
+                                                        finalComponentPayload.externalIds?.[id.value] === targetComponent.externalIds?.[id.value]
+                                                        ? <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const externalIds = { ...(finalComponentPayload.externalIds ?? {}) }
+                                                                delete externalIds[id.value]
+                                                                setFinalComponentPayload({ ...finalComponentPayload, externalIds })
+                                                            }}
+                                                        >
+                                                            <FaLongArrowAltLeft />
+                                                        </button> 
+                                                        : <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const externalIds = { 
+                                                                    ...(finalComponentPayload.externalIds ?? {}), 
+                                                                    [id.value]: targetComponent.externalIds?.[id.value] ?? ''
+                                                                }
+                                                                setFinalComponentPayload({ ...finalComponentPayload, externalIds })
+                                                            }}
+                                                        >
+                                                            <FaUndo />
+                                                        </button> 
                                                     }
-                                                    const moderators = finalComponentPayload.moderators ?? []
-                                                    moderators.push(sourceComponent._embedded.createdBy.email)
-                                                    setFinalComponentPayload({ ...finalComponentPayload, moderators })
-                                                }}
-                                            >
-                                                <FaLongArrowAltLeft />
-                                            </button>
-                                            : <button className="btn btn-secondary px-2"
-                                                onClick={() => {
-                                                    setFinalComponentPayload({ ...finalComponentPayload, moderators: targetComponent.moderators })
-                                                }}
-                                            >
-                                                <FaUndo />
-                                            </button>
-                                }
-                            </div>
-                            <div className="mt-2 col text-start">{sourceComponent._embedded?.createdBy?.email}</div>
-                            {
-                                (sourceComponent._embedded?.createdBy?.email !== targetComponent._embedded?.createdBy?.email) &&
-                                <div className='mt-2 text-center fw-medium text-secondary'><BiInfoCircle/> {t.rich('MADE_MODERATOR', {email: sourceComponent._embedded?.createdBy?.email ?? ''})}.</div>
-                            }
-                        </div>
+                                                </div>
+                                                <div className="mt-2 col text-start"></div>
+                                            </div>
+                                        }
+                                        {
+                                            (id.presentInSource && !id.presentInTarget) &&
+                                            <div className="d-flex row">
+                                                <div className="mt-2 col text-end">{finalComponentPayload.externalIds?.[id.value]}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    {
+                                                        finalComponentPayload.externalIds?.[id.value] !== sourceComponent.externalIds?.[id.value]
+                                                        ? <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const externalIds = { 
+                                                                    ...(finalComponentPayload.externalIds ?? {}), 
+                                                                    [id.value]: sourceComponent.externalIds?.[id.value] ?? ''
+                                                                }
+                                                                setFinalComponentPayload({ ...finalComponentPayload, externalIds })
+                                                            }}
+                                                        >
+                                                            <FaLongArrowAltLeft />
+                                                        </button> 
+                                                        : <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const externalIds = { ...(finalComponentPayload.externalIds ?? {}) }
+                                                                delete externalIds[id.value]
+                                                                setFinalComponentPayload({ ...finalComponentPayload, externalIds })
+                                                            }}
+                                                        >
+                                                            <FaUndo />
+                                                        </button> 
+                                                    }
+                                                </div>
+                                                <div className="mt-2 col text-start">{sourceComponent.externalIds?.[id.value]}</div>
+                                            </div>
+                                        }
+                                </div>
+                            )
+                        }
                     </div>
-                </div>
+                    <div className='mb-3'>
+                        <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                            {t('Additional Data')}
+                        </h6>
+                        {
+                            additionalDataMergeList.map((id, i) =>
+                                <div className={`border ${styles['border-blue']} p-2 ${i !== 0 ? 'border-top-0': ''}`} key={id.value}>
+                                    <div className={`fw-bold ${styles['text-blue']}`}>{id.value}</div>
+                                        {
+                                            (id.presentInSource && id.presentInTarget) &&
+                                            <div className="d-flex row">
+                                                <div className="mt-2 col text-end">{targetComponent.additionalData?.[id.value]}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    <TiTick size={40} className={styles['green']} />
+                                                </div>
+                                                <div className="mt-2 col text-start">{sourceComponent.additionalData?.[id.value]}</div>
+                                            </div>
+                                        }
+                                        {
+                                            (!id.presentInSource && id.presentInTarget) &&
+                                            <div className="d-flex row">
+                                                <div className="mt-2 col text-end">{finalComponentPayload.additionalData?.[id.value]}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    {
+                                                        finalComponentPayload.additionalData?.[id.value] === targetComponent.additionalData?.[id.value]
+                                                        ? <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const additionalData = { ...(finalComponentPayload.additionalData ?? {}) }
+                                                                delete additionalData[id.value]
+                                                                setFinalComponentPayload({ ...finalComponentPayload, additionalData })
+                                                            }}
+                                                        >
+                                                            <FaLongArrowAltLeft />
+                                                        </button> 
+                                                        : <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const additionalData = { 
+                                                                    ...(finalComponentPayload.additionalData ?? {}), 
+                                                                    [id.value]: targetComponent.additionalData?.[id.value] ?? ''
+                                                                }
+                                                                setFinalComponentPayload({ ...finalComponentPayload, additionalData })
+                                                            }}
+                                                        >
+                                                            <FaUndo />
+                                                        </button> 
+                                                    }
+                                                </div>
+                                                <div className="mt-2 col text-start"></div>
+                                            </div>
+                                        }
+                                        {
+                                            (id.presentInSource && !id.presentInTarget) &&
+                                            <div className="d-flex row">
+                                                <div className="mt-2 col text-end">{finalComponentPayload.additionalData?.[id.value]}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    {
+                                                        finalComponentPayload.additionalData?.[id.value] !== sourceComponent.additionalData?.[id.value]
+                                                        ? <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const additionalData = { 
+                                                                    ...(finalComponentPayload.additionalData ?? {}), 
+                                                                    [id.value]: sourceComponent.additionalData?.[id.value] ?? ''
+                                                                }
+                                                                setFinalComponentPayload({ ...finalComponentPayload, additionalData })
+                                                            }}
+                                                        >
+                                                            <FaLongArrowAltLeft />
+                                                        </button> 
+                                                        : <button className="btn btn-secondary px-2"
+                                                            onClick={() => {
+                                                                const additionalData = { ...(finalComponentPayload.additionalData ?? {}) }
+                                                                delete additionalData[id.value]
+                                                                setFinalComponentPayload({ ...finalComponentPayload, additionalData })
+                                                            }}
+                                                        >
+                                                            <FaUndo />
+                                                        </button> 
+                                                    }
+                                                </div>
+                                                <div className="mt-2 col text-start">{sourceComponent.additionalData?.[id.value]}</div>
+                                            </div>
+                                        }
+                                </div>
+                            )
+                        }
+                    </div>
+                </>
             }
         </>
     )

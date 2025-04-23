@@ -105,6 +105,7 @@ import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
 import ErrorDetails from './error'
 import Configuration from './Configuration'
+import ListFieldMerge from './ListMergeField'
 
 export type {
     AccessToken,
@@ -152,6 +153,7 @@ export type {
     LinkedReleaseData,
     LinkedVulnerability,
     Links,
+    ListFieldMerge,
     Message,
     MessageOptions,
     ModerationRequest,
