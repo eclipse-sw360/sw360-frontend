@@ -775,6 +775,7 @@
     "Modified By": "変更方法",
     "Modified On": "変更された",
     "Monotone": "単調",
+    "Multiple CLI are found in release": "複数のCLIが放出されています",
     "Multiple CLI are found in release!": "Multiple CLI are found in release!",
     "Multiple approved CLI are found in the release": "リリース内に複数の承認済み CLI が見つかります",
     "My Components": "私のコンポーネント",

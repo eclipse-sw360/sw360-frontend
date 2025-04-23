@@ -15,8 +15,8 @@ import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import type { JSX } from "react"
-import { Button, Modal } from 'react-bootstrap'
+import { useState, type JSX } from "react"
+import { Alert, Button, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
 
@@ -26,28 +26,49 @@ interface Props {
     setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
+interface AddLicenseInfoToReleaseData {
+    MULTIPLE_ATTACHMENTS: string[]
+    NOT_UPDATED: string[]
+    UPDATED: string[]
+    _embedded: {
+        'sw360:releases': [{
+            id : string
+            name : string
+            version : string
+        }]
+    }
+}
+
 function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
+    const [, setIsLoading] = useState(false)
+    const [addLicenseInfoToReleaseData, setAddLicenseInfoToReleaseData] = useState<AddLicenseInfoToReleaseData | null>(null)
 
     const handleSubmit = async (projectId : string) => {
+        setIsLoading(true)
         try {
             const session = await getSession()
             if(CommonUtils.isNullOrUndefined(session))
                 return signOut()
-            const createUrl = `projects/${projectId}/addLinkedRelesesLicenses`
+            const createUrl = `projects/${projectId}/addLinkedReleasesLicenses`
             const response = await ApiUtils.POST(createUrl, {}, session.user.access_token)
             if (response.status == HttpStatus.OK) {
+                const data = await response.json() as AddLicenseInfoToReleaseData
+                setAddLicenseInfoToReleaseData(data)
                 MessageService.success(t('Success Please reload the page to see the changes'))
             } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                 MessageService.error(t('Error occurred while processing license information for linked releases'))
             }
         } catch(e) {
             console.error(e)
+        } finally {
+            setIsLoading(false)
         }
     }
 
     const handleCloseDialog = () => {
         setShow(!show)
+        setAddLicenseInfoToReleaseData(null)
     }
 
     return (
@@ -62,6 +83,19 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                 <p>
                     {t(`Do you really want to add license info to all the directly linked release`)}
                 </p>
+                {
+                    addLicenseInfoToReleaseData && (
+                        <>
+                            <Alert
+                                variant='success'
+                                id='addLicenseInfoToReleaseData.success.alert'
+                            >
+                                {t('Success Please reload the page to see the changes')}:
+                                {addLicenseInfoToReleaseData.UPDATED.length}
+                            </Alert>
+                        </>
+                    )
+                }
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
