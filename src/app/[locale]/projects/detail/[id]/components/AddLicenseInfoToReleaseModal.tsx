@@ -15,6 +15,7 @@ import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { useState, type JSX } from "react"
 import { Alert, Button, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
@@ -55,7 +56,6 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
             if (response.status == HttpStatus.OK) {
                 const data = await response.json() as AddLicenseInfoToReleaseData
                 setAddLicenseInfoToReleaseData(data)
-                MessageService.success(t('Success Please reload the page to see the changes'))
             } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                 MessageService.error(t('Error occurred while processing license information for linked releases'))
             }
@@ -93,6 +93,28 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                                 {t('Success Please reload the page to see the changes')}:
                                 {addLicenseInfoToReleaseData.UPDATED.length}
                             </Alert>
+                            {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length > 0 && (
+                                <Alert variant='warning'
+                                    id='addLicenseInfoToReleaseData-multiple-attachments-alert'
+                                >
+                                    {t('Multiple CLI are found in release')}:
+                                    {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length}
+                                    <ul className="mapDisplayRootItem">
+                                        {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.map((attachmentId) => {
+                                            const releaseInfo = addLicenseInfoToReleaseData._embedded['sw360:releases'].find(
+                                                (release) => release.id === attachmentId)
+                                        return releaseInfo ? (
+                                                <li key={releaseInfo.id} className="ms-3">
+                                                    <Link href={'/components/releases/detail/' + releaseInfo.id} className='link'>
+                                                        {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                    </Link>
+                                                </li>
+                                            ) : null
+                                        })}
+                                    </ul>
+                                </Alert>
+                                )
+                            }
                         </>
                     )
                 }
