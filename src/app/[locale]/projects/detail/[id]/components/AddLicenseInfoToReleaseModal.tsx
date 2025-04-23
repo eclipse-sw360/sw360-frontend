@@ -120,7 +120,9 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                                                 <li key={releaseInfo.id} className="ms-3">
                                                     <Link href={'/components/releases/detail/' +
                                                                 releaseInfo.id} className='link'>
-                                                        {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                        <span className='text-link'>
+                                                            {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                        </span>
                                                     </Link>
                                                 </li>
                                             ) : null
@@ -145,7 +147,9 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                                                 <li key={releaseInfo.id} className="ms-3">
                                                     <Link href={'/components/releases/detail/' +
                                                                 releaseInfo.id} className='link'>
-                                                        {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                        <span className='text-link'>
+                                                            {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                        </span>
                                                     </Link>
                                                 </li>
                                             ) : null
@@ -160,13 +164,17 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
-                    {' '}
-                    {t('Cancel')}{' '}
+                    {
+                        addLicenseInfoToReleaseData === null
+                            ? <>{' '} {t('Cancel')} {' '}</>
+                            : <>{' '} {t('Close')} {' '}</>
+                    }
                 </Button>
                 <Button
                     className='login-btn'
                     variant='info'
                     onClick={() => handleSubmit(projectId)}
+                    disabled={addLicenseInfoToReleaseData !== null}
                 >
                     {t('Add')}
                 </Button>
