@@ -157,9 +157,8 @@ export default function GeneralSection(
                                                     !c.overWritten
                                                         ? <button className="btn btn-secondary px-2"
                                                             onClick={() => {
-                                                                const categories = finalComponentPayload.categories ?? []
-                                                                categories.filter(cat => cat !== c.value)
-                                                                setFinalComponentPayload({ ...finalComponentPayload, categories })
+                                                                const newCategories = (finalComponentPayload.categories ?? []).filter(cat => cat !== c.value)
+                                                                setFinalComponentPayload({ ...finalComponentPayload, categories: newCategories })
 
                                                                 const updatedCategoryMergeList = categoryMergeList.map(cat => {
                                                                     if (cat.value === c.value) {
@@ -210,7 +209,7 @@ export default function GeneralSection(
                                                         ? <button className="btn btn-secondary px-2"
                                                             onClick={() => {
                                                                 const categories = finalComponentPayload.categories ?? []
-                                                                categories.filter(cat => cat !== c.value)
+                                                                categories.push(c.value)
                                                                 setFinalComponentPayload({ ...finalComponentPayload, categories })
 
                                                                 const updatedCategoryMergeList = categoryMergeList.map(cat => {
@@ -229,8 +228,7 @@ export default function GeneralSection(
                                                         </button>
                                                         : <button className="btn btn-secondary px-2"
                                                             onClick={() => {
-                                                                const categories = finalComponentPayload.categories ?? []
-                                                                categories.push(c.value)
+                                                                const categories = (finalComponentPayload.categories ?? []).filter(cat => cat !== c.value)
                                                                 setFinalComponentPayload({ ...finalComponentPayload, categories })
 
                                                                 const updatedCategoryMergeList = categoryMergeList.map(cat => {
@@ -249,7 +247,7 @@ export default function GeneralSection(
                                                         </button>
                                                 }
                                             </div>
-                                            <div className="mt-2 col text-start">{c.overWritten ? '' : c.value}</div>
+                                            <div className="mt-2 col text-start">{c.value}</div>
                                         </div>
                                     )
                                 }
