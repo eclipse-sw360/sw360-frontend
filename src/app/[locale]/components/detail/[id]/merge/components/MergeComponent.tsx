@@ -17,6 +17,7 @@ import { FaLongArrowAltLeft } from "react-icons/fa"
 import { TiTick } from "react-icons/ti"
 import { FaUndo } from "react-icons/fa"
 import GeneralSection from "./GeneralSection"
+import RolesSection from "./RolesSection"
 
 export default function MergeComponent(
     {
@@ -243,6 +244,10 @@ export default function MergeComponent(
                             )
                         }
                     </div>
+                    <RolesSection 
+                        targetComponent={targetComponent} sourceComponent={sourceComponent} 
+                        finalComponentPayload={finalComponentPayload} setFinalComponentPayload={setFinalComponentPayload}
+                    />
                 </>
             }
         </>
