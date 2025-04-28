@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Component, ListFieldMerge } from "@/object-types"
+import { Component, ListFieldMerge, Attachment } from "@/object-types"
 import { useTranslations } from "next-intl"
 import { ReactNode, SetStateAction, Dispatch, useEffect, useState } from "react"
 import styles from '../merge.module.css'
@@ -38,7 +38,11 @@ export default function MergeComponent(
     const [attachmentsMergeList, setAttachmentsMergeList] = useState<ListFieldMerge[]>([])
 
     useEffect(() => {
-        setFinalComponentPayload({ ...targetComponent, createdBy: targetComponent?._embedded?.createdBy?.email ?? '' } as Component)
+        setFinalComponentPayload({ 
+            ...targetComponent, 
+            createdBy: targetComponent?._embedded?.createdBy?.email ?? '',
+            attachments: targetComponent?._embedded?.['sw360:attachments'] ?? [] as Attachment[]
+        } as Component)
 
         setExternalIdsMergeList([
             ...Object.keys(targetComponent?.externalIds ?? {})
@@ -103,8 +107,6 @@ export default function MergeComponent(
 
         setAdditionalRolesMergeLists(mergeLists)
     }, [targetComponent, sourceComponent])
-
-    useEffect(() => console.log(finalComponentPayload), [finalComponentPayload])
 
     return (
         <>
@@ -505,7 +507,7 @@ export default function MergeComponent(
                                                     !c.overWritten
                                                         ? <button className="btn btn-secondary px-2"
                                                             onClick={() => {
-                                                                const attachments = (finalComponentPayload.attachments ?? []).filter(a => a !== c.value)
+                                                                const attachments = (finalComponentPayload.attachments ?? []).filter(a => a.attachmentContentId !== c.value)
                                                                 setFinalComponentPayload({ ...finalComponentPayload, attachments })
 
                                                                 const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
@@ -525,7 +527,9 @@ export default function MergeComponent(
                                                         : <button className="btn btn-secondary px-2"
                                                             onClick={() => {
                                                                 const attachments = finalComponentPayload.attachments ?? []
-                                                                attachments.push(c.value)
+                                                                if(att !== undefined) {
+                                                                    attachments.push(att)
+                                                                }
                                                                 setFinalComponentPayload({ ...finalComponentPayload, attachments })
 
                                                                 const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
@@ -558,7 +562,9 @@ export default function MergeComponent(
                                                         ? <button className="btn btn-secondary px-2"
                                                             onClick={() => {
                                                                 const attachments = finalComponentPayload.attachments ?? []
-                                                                attachments.push(c.value)
+                                                                if(att !== undefined) {
+                                                                    attachments.push(att)
+                                                                }
                                                                 setFinalComponentPayload({ ...finalComponentPayload, attachments })
 
                                                                 const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
@@ -577,7 +583,7 @@ export default function MergeComponent(
                                                         </button>
                                                         : <button className="btn btn-secondary px-2"
                                                             onClick={() => {
-                                                                const attachments = (finalComponentPayload.attachments ?? []).filter(a => a !== c.value)
+                                                                const attachments = (finalComponentPayload.attachments ?? []).filter(a => a.attachmentContentId !== c.value)
                                                                 setFinalComponentPayload({ ...finalComponentPayload, attachments })
 
                                                                 const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
