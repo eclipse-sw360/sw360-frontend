@@ -38,6 +38,7 @@ interface Component {
     modifiedOn?: string
     modifiedBy?: string
     createdBy?: string
+    attachments?: string[]
     roles?: { [k: string]: Array<string> }
     setBusinessUnit?: boolean
     setVisbility?: boolean
