@@ -290,7 +290,11 @@ export default function GeneralSection(
                                         : ((defaultVendor._links?.self.href.split('/').at(-1) ?? undefined) === targetComponent.defaultVendorId)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => {
-                                                    setFinalComponentPayload({ ...finalComponentPayload, defaultVendorId: sourceComponent.defaultVendorId })
+                                                    setFinalComponentPayload({ 
+                                                        ...finalComponentPayload, 
+                                                        defaultVendorId: sourceComponent.defaultVendorId,
+                                                        defaultVendor: sourceComponent._embedded?.defaultVendor
+                                                    })
                                                     setDefaultVendor(sourceComponent._embedded?.defaultVendor ?? {})
                                                 }}
                                             >
@@ -298,7 +302,11 @@ export default function GeneralSection(
                                             </button>
                                             : <button className="btn btn-secondary px-2"
                                                 onClick={() => {
-                                                    setFinalComponentPayload({ ...finalComponentPayload, defaultVendorId: targetComponent.defaultVendorId })
+                                                    setFinalComponentPayload({ 
+                                                        ...finalComponentPayload, 
+                                                        defaultVendorId: targetComponent.defaultVendorId,
+                                                        defaultVendor: targetComponent._embedded?.defaultVendor
+                                                    })
                                                     setDefaultVendor(targetComponent._embedded?.defaultVendor ?? {})
                                                 }}
                                             >
