@@ -12,7 +12,6 @@
 import { Component, ListFieldMerge, Attachment } from "@/object-types"
 import { useTranslations } from "next-intl"
 import { ReactNode, SetStateAction, Dispatch, useEffect, useState } from "react"
-import styles from '../merge.module.css'
 import { FaLongArrowAltLeft } from "react-icons/fa"
 import { TiTick } from "react-icons/ti"
 import { FaUndo } from "react-icons/fa"
@@ -118,19 +117,19 @@ export default function MergeComponent(
                         finalComponentPayload={finalComponentPayload} setFinalComponentPayload={setFinalComponentPayload}
                     />
                     <div className='mb-3'>
-                        <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                        <h6 className="border-bottom fw-bold text-uppercase text-blue border-blue mb-2">
                             {t('External Ids')}
                         </h6>
                         {
                             externalIdsMergeList.map((id, i) =>
-                                <div className={`border ${styles['border-blue']} p-2 ${i !== 0 ? 'border-top-0': ''}`} key={id.value}>
-                                    <div className={`fw-bold ${styles['text-blue']}`}>{id.value}</div>
+                                <div className={`border border-blue p-2 ${i !== 0 ? 'border-top-0': ''}`} key={id.value}>
+                                    <div className="fw-bold text-blue">{id.value}</div>
                                         {
                                             (id.presentInSource && id.presentInTarget) &&
                                             <div className="d-flex row">
                                                 <div className="mt-2 col text-end">{targetComponent.externalIds?.[id.value]}</div>
                                                 <div className="col-12 col-md-2 mx-5 text-center">
-                                                    <TiTick size={40} className={styles['green']} />
+                                                    <TiTick size={40} className="green" />
                                                 </div>
                                                 <div className="mt-2 col text-start">{sourceComponent.externalIds?.[id.value]}</div>
                                             </div>
@@ -204,19 +203,19 @@ export default function MergeComponent(
                         }
                     </div>
                     <div className='mb-3'>
-                        <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                        <h6 className="border-bottom fw-bold text-uppercase text-blue border-blue mb-2">
                             {t('Additional Data')}
                         </h6>
                         {
                             additionalDataMergeList.map((id, i) =>
-                                <div className={`border ${styles['border-blue']} p-2 ${i !== 0 ? 'border-top-0': ''}`} key={id.value}>
-                                    <div className={`fw-bold ${styles['text-blue']}`}>{id.value}</div>
+                                <div className={`border border-blue p-2 ${i !== 0 ? 'border-top-0': ''}`} key={id.value}>
+                                    <div className="fw-bold text-blue">{id.value}</div>
                                         {
                                             (id.presentInSource && id.presentInTarget) &&
                                             <div className="d-flex row">
                                                 <div className="mt-2 col text-end">{targetComponent.additionalData?.[id.value]}</div>
                                                 <div className="col-12 col-md-2 mx-5 text-center">
-                                                    <TiTick size={40} className={styles['green']} />
+                                                    <TiTick size={40} className="green" />
                                                 </div>
                                                 <div className="mt-2 col text-start">{sourceComponent.additionalData?.[id.value]}</div>
                                             </div>
@@ -294,14 +293,14 @@ export default function MergeComponent(
                         finalComponentPayload={finalComponentPayload} setFinalComponentPayload={setFinalComponentPayload}
                     />
                     <div className='mb-3'>
-                        <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                        <h6 className="border-bottom fw-bold text-uppercase text-blue border-blue mb-2">
                             {t('Additional Roles')}
                         </h6>
                         {
                             Object.entries(additionalRolesMergeLists).map(([role, assignees], i) => {
                                 return (
-                                    <div className={`border ${styles['border-blue']} p-2 ${i !== 0 ? 'border-top-0': ''}`} key={role}>
-                                        <div className={`fw-bold ${styles['text-blue']}`}>{role}</div>
+                                    <div className={`border border-blue p-2 ${i !== 0 ? 'border-top-0': ''}`} key={role}>
+                                        <div className="fw-bold text-blue">{role}</div>
                                         {
                                             assignees.map((assignee) => {
                                                 if (assignee.presentInSource && assignee.presentInTarget) {
@@ -309,7 +308,7 @@ export default function MergeComponent(
                                                         <div className="d-flex row mb-1" key={assignee.value}>
                                                             <div className="mt-2 col text-end">{assignee.value}</div>
                                                             <div className="col-12 col-md-2 mx-5 text-center">
-                                                                <TiTick size={25} className={styles['green']} />
+                                                                <TiTick size={25} className="green" />
                                                             </div>
                                                             <div className="mt-2 col text-start">{assignee.value}</div>
                                                         </div>
@@ -457,10 +456,10 @@ export default function MergeComponent(
                         }
                     </div>
                     <div className='mb-3'>
-                        <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                        <h6 className="border-bottom fw-bold text-uppercase text-blue border-blue mb-2">
                             {t('Releases')}
                         </h6>
-                        <div className={`border ${styles['border-blue']} p-2`}>
+                        <div className="border border-blue p-2">
                             {
                                 targetComponent._embedded?.["sw360:releases"]?.map((release) => 
                                     <div className="d-flex row mb-1" key={release.id ?? ''}>
@@ -474,10 +473,10 @@ export default function MergeComponent(
                                     </div>
                                 )
                             }
-                            <div className={`${styles['orange']}`}>
+                            <div className="orange">
                                 {
                                     sourceComponent._embedded?.["sw360:releases"]?.map((release) => 
-                                        <div className={`d-flex row mb-1`} key={release.id ?? ''}>
+                                        <div className="d-flex row mb-1" key={release.id ?? ''}>
                                             <div className="mt-2 col text-end">{release.name}</div>
                                             <div className="col-12 col-md-2 mx-5 text-center">
                                                 <button className="btn btn-secondary px-2" disabled>
@@ -492,117 +491,121 @@ export default function MergeComponent(
                         </div>
                     </div>
                     <div className='mb-3'>
-                        <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                        <h6 className="border-bottom fw-bold text-uppercase text-blue border-blue mb-2">
                             {t('Attachments')}
                         </h6>
                         {
-                            attachmentsMergeList.map(c => {
+                            attachmentsMergeList.map((c, i) => {
                                 if (c.presentInTarget && !c.presentInSource) {
                                     const att = targetComponent._embedded?.["sw360:attachments"]?.filter((a) => a.attachmentContentId === c.value)[0]
                                     return (
-                                        <div className="d-flex row mb-1" key={c.value}>
-                                            <div className="mt-2 col text-end">{c.overWritten ? '' : att?.filename}</div>
-                                            <div className="col-12 col-md-2 mx-5 text-center">
-                                                {
-                                                    !c.overWritten
-                                                        ? <button className="btn btn-secondary px-2"
-                                                            onClick={() => {
-                                                                const attachments = (finalComponentPayload.attachments ?? []).filter(a => a.attachmentContentId !== c.value)
-                                                                setFinalComponentPayload({ ...finalComponentPayload, attachments })
+                                        <div className={`border border-blue p-2 ${i !== 0 ? 'border-top-0': ''}`} key={c.value}>
+                                            <div className="d-flex row mb-1">
+                                                <div className="mt-2 col text-end">{c.overWritten ? '' : att?.filename}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    {
+                                                        !c.overWritten
+                                                            ? <button className="btn btn-secondary px-2"
+                                                                onClick={() => {
+                                                                    const attachments = (finalComponentPayload.attachments ?? []).filter(a => a.attachmentContentId !== c.value)
+                                                                    setFinalComponentPayload({ ...finalComponentPayload, attachments })
 
-                                                                const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
-                                                                    if (a.value === c.value) {
-                                                                        return {
-                                                                            ...a,
-                                                                            overWritten: true
+                                                                    const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
+                                                                        if (a.value === c.value) {
+                                                                            return {
+                                                                                ...a,
+                                                                                overWritten: true
+                                                                            }
                                                                         }
+                                                                        return a
+                                                                    })
+                                                                    setAttachmentsMergeList(updatedAttachmentsMergeList)
+                                                                }}
+                                                            >
+                                                                <FaLongArrowAltLeft />
+                                                            </button>
+                                                            : <button className="btn btn-secondary px-2"
+                                                                onClick={() => {
+                                                                    const attachments = finalComponentPayload.attachments ?? []
+                                                                    if(att !== undefined) {
+                                                                        attachments.push(att)
                                                                     }
-                                                                    return a
-                                                                })
-                                                                setAttachmentsMergeList(updatedAttachmentsMergeList)
-                                                            }}
-                                                        >
-                                                            <FaLongArrowAltLeft />
-                                                        </button>
-                                                        : <button className="btn btn-secondary px-2"
-                                                            onClick={() => {
-                                                                const attachments = finalComponentPayload.attachments ?? []
-                                                                if(att !== undefined) {
-                                                                    attachments.push(att)
-                                                                }
-                                                                setFinalComponentPayload({ ...finalComponentPayload, attachments })
+                                                                    setFinalComponentPayload({ ...finalComponentPayload, attachments })
 
-                                                                const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
-                                                                    if (a.value === c.value) {
-                                                                        return {
-                                                                            ...a,
-                                                                            overWritten: false
+                                                                    const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
+                                                                        if (a.value === c.value) {
+                                                                            return {
+                                                                                ...a,
+                                                                                overWritten: false
+                                                                            }
                                                                         }
-                                                                    }
-                                                                    return a
-                                                                })
-                                                                setAttachmentsMergeList(updatedAttachmentsMergeList)
-                                                            }}
-                                                        >
-                                                            <FaUndo />
-                                                        </button>
-                                                }
+                                                                        return a
+                                                                    })
+                                                                    setAttachmentsMergeList(updatedAttachmentsMergeList)
+                                                                }}
+                                                            >
+                                                                <FaUndo />
+                                                            </button>
+                                                    }
+                                                </div>
+                                                <div className="mt-2 col text-start"></div>
                                             </div>
-                                            <div className="mt-2 col text-start"></div>
                                         </div>
                                     )
                                 } else {
                                     const att = sourceComponent._embedded?.["sw360:attachments"]?.filter((a) => a.attachmentContentId === c.value)[0]
                                     return (
-                                        <div className="d-flex row mb-1" key={c.value}>
-                                            <div className="mt-2 col text-end">{!c.overWritten ? '' : att?.filename}</div>
-                                            <div className="col-12 col-md-2 mx-5 text-center">
-                                                {
-                                                    !c.overWritten
-                                                        ? <button className="btn btn-secondary px-2"
-                                                            onClick={() => {
-                                                                const attachments = finalComponentPayload.attachments ?? []
-                                                                if(att !== undefined) {
-                                                                    attachments.push(att)
-                                                                }
-                                                                setFinalComponentPayload({ ...finalComponentPayload, attachments })
-
-                                                                const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
-                                                                    if (a.value === c.value) {
-                                                                        return {
-                                                                            ...a,
-                                                                            overWritten: true
-                                                                        }
+                                        <div className={`border border-blue p-2 ${i !== 0 ? 'border-top-0': ''}`} key={c.value}>
+                                            <div className="d-flex row mb-1">
+                                                <div className="mt-2 col text-end">{!c.overWritten ? '' : att?.filename}</div>
+                                                <div className="col-12 col-md-2 mx-5 text-center">
+                                                    {
+                                                        !c.overWritten
+                                                            ? <button className="btn btn-secondary px-2"
+                                                                onClick={() => {
+                                                                    const attachments = finalComponentPayload.attachments ?? []
+                                                                    if(att !== undefined) {
+                                                                        attachments.push(att)
                                                                     }
-                                                                    return a
-                                                                })
-                                                                setAttachmentsMergeList(updatedAttachmentsMergeList)
-                                                            }}
-                                                        >
-                                                            <FaLongArrowAltLeft />
-                                                        </button>
-                                                        : <button className="btn btn-secondary px-2"
-                                                            onClick={() => {
-                                                                const attachments = (finalComponentPayload.attachments ?? []).filter(a => a.attachmentContentId !== c.value)
-                                                                setFinalComponentPayload({ ...finalComponentPayload, attachments })
+                                                                    setFinalComponentPayload({ ...finalComponentPayload, attachments })
 
-                                                                const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
-                                                                    if (a.value === c.value) {
-                                                                        return {
-                                                                            ...a,
-                                                                            overWritten: false
+                                                                    const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
+                                                                        if (a.value === c.value) {
+                                                                            return {
+                                                                                ...a,
+                                                                                overWritten: true
+                                                                            }
                                                                         }
-                                                                    }
-                                                                    return a
-                                                                })
-                                                                setAttachmentsMergeList(updatedAttachmentsMergeList)
-                                                            }}
-                                                        >
-                                                            <FaUndo />
-                                                        </button>
-                                                }
+                                                                        return a
+                                                                    })
+                                                                    setAttachmentsMergeList(updatedAttachmentsMergeList)
+                                                                }}
+                                                            >
+                                                                <FaLongArrowAltLeft />
+                                                            </button>
+                                                            : <button className="btn btn-secondary px-2"
+                                                                onClick={() => {
+                                                                    const attachments = (finalComponentPayload.attachments ?? []).filter(a => a.attachmentContentId !== c.value)
+                                                                    setFinalComponentPayload({ ...finalComponentPayload, attachments })
+
+                                                                    const updatedAttachmentsMergeList = attachmentsMergeList.map(a => {
+                                                                        if (a.value === c.value) {
+                                                                            return {
+                                                                                ...a,
+                                                                                overWritten: false
+                                                                            }
+                                                                        }
+                                                                        return a
+                                                                    })
+                                                                    setAttachmentsMergeList(updatedAttachmentsMergeList)
+                                                                }}
+                                                            >
+                                                                <FaUndo />
+                                                            </button>
+                                                    }
+                                                </div>
+                                                <div className="mt-2 col text-start">{att?.filename}</div>
                                             </div>
-                                            <div className="mt-2 col text-start">{att?.filename}</div>
                                         </div>
                                     )
                                 }

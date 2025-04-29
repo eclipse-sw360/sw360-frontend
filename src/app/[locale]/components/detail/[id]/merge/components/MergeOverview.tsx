@@ -17,7 +17,6 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
-import styles from '../merge.module.css'
 import ComponentTable from './ComponentTable'
 import MergeComponent from './MergeComponent'
 import MergeComponentConfirmation from './MergeConfirmation'
@@ -130,15 +129,15 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                             }
                         </div>
                         <div className='d-flex justify-content-between text-center mb-3'>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CHOOSE_SOURCE ? styles['merge-active'] : styles['merge']}`} role="alert">
+                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CHOOSE_SOURCE ? 'merge-active' : 'merge'}`} role="alert">
                                 <h6 className="fw-bold">1. {t('Choose source')}</h6>
                                 <p>{t('Choose a component that should be merged into the current one')}</p>
                             </div>
-                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.MERGE_DATA ? styles['merge-active'] : styles['merge']}`} role="alert">
+                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.MERGE_DATA ? 'merge-active' : 'merge'}`} role="alert">
                                 <h6 className="fw-bold">2. {t('Merge data')}</h6>
                                 <p>{t('Merge data from source into target component')}</p>
                             </div>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CONFIRM ? styles['merge-active'] : styles['merge']}`} role="alert">
+                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CONFIRM ? 'merge-active' : 'merge'}`} role="alert">
                                 <h6 className="fw-bold">3. {t('Confirm')}</h6>
                                 <p>{t('Choose a component that should be merged into the current one')}</p>
                             </div>
