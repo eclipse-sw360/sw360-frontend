@@ -48,10 +48,16 @@ function Navbar(): JSX.Element {
         <>
             {navlist.map((item) => {
                 if ('visibility' in item) {
-                    if (session?.user.userGroup !== item.visibility) {
+                    const userGroupData = session?.user.userGroup
+                    if (
+                        userGroupData === undefined ||
+                        !Array.isArray(item.visibility) ||
+                        !item.visibility.includes(userGroupData)
+                    ) {
                         return
                     }
                 }
+                
                 const localizedHref = getLocalizedPath(item.href)
                 if ('childs' in item) {
                     return (
