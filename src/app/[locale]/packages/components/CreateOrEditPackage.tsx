@@ -17,6 +17,7 @@ import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { IoIosClose } from 'react-icons/io'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
+import AddReleaseModal from './AddReleaseModal'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -25,25 +26,28 @@ interface DeletePackageModalMetData {
     packageVersion: string
 }
 
-export default function CreateOrEditPackage({
-    packagePayload,
-    setPackagePayload,
-    handleSubmit,
-    isPending,
-    isEditPage,
-}: {
+interface Props {
     packagePayload: Package
     setPackagePayload: Dispatch<SetStateAction<Package>>
     handleSubmit: () => void
     isPending: boolean
     isEditPage: boolean
-}): ReactNode {
+}
+
+export default function CreateOrEditPackage({packagePayload,
+                                             setPackagePayload,
+                                             handleSubmit,
+                                             isPending,
+                                             isEditPage
+                                            }: Props): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
+    const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     }
+    const [releaseNameVersion, setReleaseNameVersion] = useState<string>('')
 
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
         show: false,
@@ -52,12 +56,33 @@ export default function CreateOrEditPackage({
         packageVersion: '',
     })
 
+    const handleReleaseName = () => {
+        if (isEditPage){
+            if (releaseNameVersion !== '') {
+                return releaseNameVersion
+            } else {
+                const name = packagePayload._embedded?.['sw360:release']?.name ?? ''
+                const version = packagePayload._embedded?.['sw360:release']?.version ?? ''
+                return name && version ? `${name} (${version})` : ''
+            }
+        }
+        else
+            return ''
+    }
+
     return (
         <>
             <DeletePackageModal
                 modalMetaData={deletePackageModalMetaData}
                 setModalMetaData={setDeletePackageModalMetaData}
                 isEditPage={isEditPage}
+            />
+            <AddReleaseModal
+                packagePayload={packagePayload}
+                setPackagePayload={setPackagePayload}
+                show={showLinkedReleasesModal}
+                setShow={setShowLinkedReleasesModal}
+                setReleaseNameVersion={setReleaseNameVersion}
             />
             <form
                 id='add_or_edit_package_form_submit'
@@ -272,7 +297,8 @@ export default function CreateOrEditPackage({
                                     className='form-control'
                                     placeholder={t('Click to link a Release')}
                                     id='createOrEditPackage.release'
-                                    value={packagePayload.releaseId ?? ''}
+                                    value={handleReleaseName()}
+                                    onClick={() => setShowLinkedReleasesModal(true)}
                                 />
                                 <span className='input-group-text'>
                                     <IoIosClose />
