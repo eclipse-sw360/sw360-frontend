@@ -12,7 +12,6 @@
 import { Component, Vendor, ListFieldMerge } from "@/object-types"
 import { useTranslations } from "next-intl"
 import { ReactNode, SetStateAction, Dispatch, useEffect, useState } from "react"
-import styles from '../merge.module.css'
 import { FaLongArrowAltLeft } from "react-icons/fa"
 import { TiTick } from "react-icons/ti"
 import { FaUndo } from "react-icons/fa"
@@ -53,17 +52,17 @@ export default function GeneralSection(
             {
                 (targetComponent && sourceComponent && finalComponentPayload) &&
                 <div className='mb-3'>
-                    <h6 className={`border-bottom fw-bold text-uppercase ${styles['text-blue']} ${styles['border-blue']} mb-2`}>
+                    <h6 className="border-bottom fw-bold text-uppercase text-blue border-blue mb-2">
                         {t('General')}
                     </h6>
-                    <div className={`border ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Name')}</div>
+                    <div className="border border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Name')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.name}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.name === targetComponent.name)
-                                        ? <TiTick size={40} className={styles['green']} />
+                                        ? <TiTick size={40} className="green" />
                                         : (finalComponentPayload.name === targetComponent.name)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, name: sourceComponent.name })}
@@ -81,14 +80,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent.name}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Created on')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Created on')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.createdOn}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.createdOn === targetComponent.createdOn)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.createdOn === targetComponent.createdOn)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, createdOn: sourceComponent.createdOn })}
@@ -106,14 +105,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent.createdOn}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Created by')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Created by')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.createdBy}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent._embedded?.createdBy?.email === targetComponent._embedded?.createdBy?.email)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.createdBy === targetComponent._embedded?.createdBy?.email)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, createdBy: sourceComponent._embedded?.createdBy?.email })}
@@ -134,8 +133,8 @@ export default function GeneralSection(
                             }
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Categories')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Categories')}</div>
                         {
                             categoryMergeList.map(c => {
                                 if (c.presentInSource && c.presentInTarget) {
@@ -143,7 +142,7 @@ export default function GeneralSection(
                                         <div className="d-flex row mb-1" key={c.value}>
                                             <div className="mt-2 col text-end">{c.value}</div>
                                             <div className="col-12 col-md-2 mx-5 text-center">
-                                                <TiTick size={25} className={styles['green']} />
+                                                <TiTick size={25} className="green" />
                                             </div>
                                             <div className="mt-2 col text-start">{c.value}</div>
                                         </div>
@@ -254,14 +253,14 @@ export default function GeneralSection(
                             })
                         }
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Component Type')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Component Type')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.componentType}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.componentType === targetComponent.componentType)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.componentType === targetComponent.componentType)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, componentType: sourceComponent.componentType })}
@@ -279,14 +278,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent.componentType}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Default vendor')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Default vendor')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{defaultVendor.fullName}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.defaultVendorId === targetComponent.defaultVendorId)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : ((defaultVendor._links?.self.href.split('/').at(-1) ?? undefined) === targetComponent.defaultVendorId)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => {
@@ -317,14 +316,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent._embedded?.defaultVendor?.fullName}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Homepage')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Homepage')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.homepage}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.homepage === targetComponent.homepage)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.homepage === targetComponent.homepage)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, homepage: sourceComponent.homepage })}
@@ -342,14 +341,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent.homepage}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Blog')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Blog')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.blog}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.blog === targetComponent.blog)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.blog === targetComponent.blog)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, blog: sourceComponent.blog })}
@@ -367,14 +366,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent.blog}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Wiki')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Wiki')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.wiki}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.wiki === targetComponent.wiki)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.wiki === targetComponent.wiki)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, wiki: sourceComponent.wiki })}
@@ -392,14 +391,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent.wiki}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Mailing list')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Mailing list')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.mailinglist}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.mailinglist === targetComponent.mailinglist)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.mailinglist === targetComponent.mailinglist)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, mailinglist: sourceComponent.mailinglist })}
@@ -417,14 +416,14 @@ export default function GeneralSection(
                             <div className="mt-2 col text-start">{sourceComponent.mailinglist}</div>
                         </div>
                     </div>
-                    <div className={`border border-top-0 ${styles['border-blue']} p-2`}>
-                        <div className={`fw-bold ${styles['text-blue']}`}>{t('Description')}</div>
+                    <div className="border border-top-0 border-blue p-2">
+                        <div className="fw-bold text-blue">{t('Description')}</div>
                         <div className="d-flex row">
                             <div className="mt-2 col text-end">{finalComponentPayload.description}</div>
                             <div className="col-12 col-md-2 mx-5 text-center">
                                 {
                                     (sourceComponent.description === targetComponent.description)
-                                        ? <TiTick size={25} className={styles['green']} />
+                                        ? <TiTick size={25} className="green" />
                                         : (finalComponentPayload.description === targetComponent.description)
                                             ? <button className="btn btn-secondary px-2"
                                                 onClick={() => setFinalComponentPayload({ ...finalComponentPayload, description: sourceComponent.description })}
