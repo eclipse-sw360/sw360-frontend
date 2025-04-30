@@ -1438,12 +1438,12 @@ input[checked]+.slider:before {
     border-radius: 50%;
 }
 
-.merge-active {
+.componentprocessor-active {
     background-color: var(--sw360-primary-color) !important;
     border-color: var(--sw360-primary-color) !important;
 }
   
-.merge {
+.componentprocessor {
     background-color: #f1f2f5 !important;
     border-color: #cdced9 !important;
 }

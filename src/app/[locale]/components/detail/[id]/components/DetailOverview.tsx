@@ -181,7 +181,7 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
     const headerButtons = {
         Edit: { link: `/components/edit/${componentId}`, type: 'primary', name: t('Edit component') },
         Merge: { link: `/components/detail/${componentId}/merge`, type: 'secondary', name: t('Merge') },
-        Split: { link: '', type: 'secondary', name: t('Split') },
+        Split: { link: `/components/detail/${componentId}/split`, type: 'secondary', name: t('Split') },
         Subscribe: {
             link: '',
             type: isUserSubscribed() ? 'outline-danger' : 'outline-success',
