@@ -359,6 +359,7 @@
     "Delete Package": "删除包",
     "Delete Project": "删除项目",
     "Delete Release": "删除发布",
+    "Delete Vendor": "删除供应商",
     "Delete Vulnerability": "删除漏洞",
     "Delete all License Information": "删除所有许可信息",
     "Delete component success!": "删除组件成功！",

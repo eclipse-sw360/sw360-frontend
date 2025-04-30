@@ -359,6 +359,7 @@
     "Delete Package": "パッケージの削除",
     "Delete Project": "プロジェクトの削除",
     "Delete Release": "リリースの削除",
+    "Delete Vendor": "ベンダーの削除",
     "Delete Vulnerability": "Delete Vulnerability",
     "Delete all License Information": "すべてのライセンス情報を削除します。",
     "Delete component success!": "コンポーネントの削除が成功しました。",
