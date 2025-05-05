@@ -53,8 +53,6 @@ export default function AddReleaseModal({
     const [showMessage, setShowMessage] = useState(false)
     const [releaseData, setReleaseData] = useState<RowData[]>([])
     const isExactMatch = useRef<boolean>(false)
-    console.log('packagePayload', setPackagePayload)
-    console.log('setReleaseNameVersion', setReleaseNameVersion)
     
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
@@ -99,7 +97,11 @@ export default function AddReleaseModal({
                 CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
                     ? []
                     : data['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
-                          release.id ?? '',
+                          {
+                            releaseId: release.id ?? '',
+                            releaseName: release.name,
+                            releaseVersion: release.version,
+                          },
                           release.vendor ? release.vendor.fullName ?? '' : '',
                           {
                               name: release.name,
@@ -130,7 +132,8 @@ export default function AddReleaseModal({
             id: 'linkReleases.selectReleaseCheckbox',
             name: '',
             width: '8%',
-            formatter: (releaseId: string) =>
+            formatter: ({releaseId, releaseName, releaseVersion}:
+                        {releaseId: string, releaseName: string, releaseVersion: string}) =>
                 _(
                     <div className='form-check'>
                         <input
@@ -142,7 +145,7 @@ export default function AddReleaseModal({
                             title=''
                             placeholder='Release Id'
                             checked={packagePayload.releaseId?.includes(releaseId)}
-                            // onChange={() => handleCheckboxes(releaseId)}
+                            onChange={() => handleCheckboxes(releaseId, releaseName, releaseVersion)}
                         />
                     </div>,
                 ),
@@ -186,6 +189,17 @@ export default function AddReleaseModal({
             sort: true,
         },
     ]
+
+    const handleCheckboxes = (releaseId: string,
+                              releaseName: string,
+                              releaseVersion: string) => {
+        setPackagePayload((prevState) => ({
+            ...prevState,
+            releaseId: prevState.releaseId !== releaseId ? releaseId : prevState.releaseId,
+        }));
+        setReleaseNameVersion(`${releaseName} (${releaseVersion})`)
+    }
+
     const closeModal = () => {
         setShow(false)
         setReleaseData([])
@@ -238,9 +252,9 @@ export default function AddReleaseModal({
                         type='checkbox'
                         label={t('Exact Match')}
                         defaultChecked={false}
-                        // onChange={(e) => {
-                        //     isExactMatchSearch.current = e.target.checked
-                        // }}
+                        onChange={(e) => {
+                            isExactMatch.current = e.target.checked
+                        }}
                     />
                         {loading === false ? (
                             <Table
