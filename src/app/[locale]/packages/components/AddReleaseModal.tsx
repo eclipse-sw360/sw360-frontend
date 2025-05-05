@@ -67,7 +67,7 @@ export default function AddReleaseModal({
         setLoading(true)
         try {
             if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
+                displayMessage('danger', <>{t('Session has expired')}</>)
                 setLoading(false)
                 return signOut
             }
@@ -114,8 +114,14 @@ export default function AddReleaseModal({
                       ])
             setReleaseData(tableData)
             setLoading(false)
-        } catch (e) {
-            console.error(e)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setLoading(false)
         }
     }
 
