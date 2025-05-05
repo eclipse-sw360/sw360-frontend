@@ -13,12 +13,12 @@ import { Embedded, HttpStatus, Package, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { SetStateAction, useRef, useState, type JSX } from 'react'
-import { Button, Form, Modal, Spinner } from 'react-bootstrap'
+import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 type RowData = (string | SummaryReleaseInfo)[]
@@ -48,10 +48,19 @@ export default function AddReleaseModal({
     const t = useTranslations('default')
     const [loading, setLoading] = useState(false)
     const searchText = useRef<string>('')
+    const [variant, setVariant] = useState('success')
+    const [message, setMessage] = useState<JSX.Element>()
+    const [showMessage, setShowMessage] = useState(false)
     const [releaseData, setReleaseData] = useState<RowData[]>([])
     const isExactMatch = useRef<boolean>(false)
     console.log('packagePayload', setPackagePayload)
     console.log('setReleaseNameVersion', setReleaseNameVersion)
+    
+    const displayMessage = (variant: string, message: JSX.Element) => {
+        setVariant(variant)
+        setMessage(message)
+        setShowMessage(true)
+    }
     
     const handleSearch = async () => {
         const session = await getSession()
@@ -60,7 +69,7 @@ export default function AddReleaseModal({
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
                 setLoading(false)
-                return
+                return signOut
             }
             const queryUrl = CommonUtils.createUrlWithParams('releases', {
                 name: searchText.current,
@@ -69,13 +78,18 @@ export default function AddReleaseModal({
             })
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
-                MessageService.error(t('Session has expired'))
+                displayMessage('warning', <>{t('Unauthorized request')}</>)
+                setLoading(false)
+                return signOut
+            }
+            if (response.status === HttpStatus.NO_CONTENT) {
+                displayMessage('info', <>{t('No matching data found')}</>)
                 setLoading(false)
                 return
             }
 
             if (response.status !== HttpStatus.OK) {
-                MessageService.error(t('Error while processing'))
+                displayMessage('danger', <>{t('Error while processing')}</>)
                 return
             }
             const data = (await response.json()) as EmbeddedReleases
@@ -169,6 +183,7 @@ export default function AddReleaseModal({
     const closeModal = () => {
         setShow(false)
         setReleaseData([])
+        setShowMessage(false)
         isExactMatch.current = false
     }
 
@@ -187,6 +202,12 @@ export default function AddReleaseModal({
                 <Modal.Title id='linked-projects-modal'>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <Alert variant={variant}
+                        onClose={() => setShowMessage(false)}
+                        show={showMessage}
+                        dismissible>
+                        {message}
+                </Alert>
                 <div className='row'>
                     <div className='col-lg-6'>
                         <input

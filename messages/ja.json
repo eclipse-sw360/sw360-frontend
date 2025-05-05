@@ -810,6 +810,7 @@
     "No changes in attachments": "添付ファイルに変更はありません",
     "No changes in basic details": "基本的な内容に変更はありません",
     "No linked releases or projects": "リンクされたリリースまたはプロジェクトはありません",
+    "No matching data found": "一致するデータは見つかりません！",
     "No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading": "以前の選択が見つかりません。\nこのプロジェクトへの書き込み権限がある場合、選択内容はダウンロード時に自動的に保存されます。",
     "No recent components available": "利用可能な最近のコンポーネントはありません",
     "No recent releases available": "利用可能な最近のリリースはありません",
