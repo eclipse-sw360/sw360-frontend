@@ -10,12 +10,13 @@
 'use client'
 
 import { Embedded, HttpStatus, LicenseDetail } from '@/object-types';
+import MessageService from '@/services/message.service';
 import CommonUtils from '@/utils/common.utils';
 import { ApiUtils } from '@/utils/index';
 import { getSession, signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { _, Table } from 'next-sw360';
-import { useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
 
 interface Props {
@@ -42,6 +43,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState<JSX.Element>()
     const [showMessage, setShowMessage] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
@@ -54,6 +56,57 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
         setNewMainLicense(exisitngMainLicenses)
     }
     console.log(multiple)
+    console.log(loading)
+
+    const fetchData = useCallback(
+        async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
+                const data = (await response.json()) as EmbeddedLicenses
+                return data
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return
+            } else {
+                return undefined
+            }
+        },
+        []
+    )
+
+    useEffect(() => {
+        setLoading(true)
+        try{
+            fetchData('licenses')
+            .then((mainLicenses: EmbeddedLicenses | undefined) => {
+                if (mainLicenses === undefined) return
+                if (
+                    !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']['sw360:licenses'])
+                ) {
+                    const data = mainLicenses['_embedded']['sw360:licenses']
+                                 .map((license: LicenseDetail) => [
+                        license,
+                        license.fullName ?? ''
+                    ])
+                    setTableData(data)
+                } else {
+                    setTableData([])
+                }
+                setNewMainLicense(exisitngMainLicenses)
+            })
+        } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally{
+            setLoading(false)
+            }
+    }, [fetchData, showMainLicenseModal, exisitngMainLicenses])
 
     const handleClickSelectLicenses = () => {
         setShowMainLicenseModal(!showMainLicenseModal)
