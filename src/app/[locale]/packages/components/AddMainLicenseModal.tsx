@@ -10,14 +10,13 @@
 'use client'
 
 import { Embedded, HttpStatus, LicenseDetail } from '@/object-types';
-import MessageService from '@/services/message.service';
 import CommonUtils from '@/utils/common.utils';
 import { ApiUtils } from '@/utils/index';
-import { getSession } from 'next-auth/react';
+import { getSession, signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { _, Table } from 'next-sw360';
 import { useRef, useState, type JSX } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Alert, Button, Form, Modal } from 'react-bootstrap';
 
 interface Props {
     showMainLicenseModal: boolean
@@ -40,6 +39,15 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [newMainLicense, setNewMainLicense] = useState({})
     const searchText = useRef<string>('')
+    const [variant, setVariant] = useState('success')
+    const [message, setMessage] = useState<JSX.Element>()
+    const [showMessage, setShowMessage] = useState(false)
+
+    const displayMessage = (variant: string, message: JSX.Element) => {
+        setVariant(variant)
+        setMessage(message)
+        setShowMessage(true)
+    }
 
     const handleCloseDialog = () => {
         setShowMainLicenseModal(!showMainLicenseModal)
@@ -55,15 +63,18 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
     const searchLicenses= async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return
+            displayMessage('danger', <>{t('Session has expired')}</>)
+            return signOut()
         }
         const response = await ApiUtils.GET(`licenses`, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {
-            MessageService.error(t('Session has expired'))
+            displayMessage('warning', <>{t('Unauthorized request')}</>)
             return
         }
-
+        if (response.status !== HttpStatus.OK) {
+            displayMessage('danger', <>{t('Error while processing')}</>)
+            return
+        }
         const mainLicenses = await response.json() as EmbeddedLicenses
         if (
             !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']) &&
@@ -110,6 +121,12 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                 <Modal.Title>{t('Search Licenses')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <Alert  variant={variant}
+                        onClose={() => setShowMessage(false)}
+                        show={showMessage}
+                        dismissible>
+                        {message}
+                </Alert>
                 <div className='row'>
                     <div className='col-lg-8'>
                         <input
