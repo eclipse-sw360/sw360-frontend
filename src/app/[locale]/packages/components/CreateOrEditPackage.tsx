@@ -299,6 +299,7 @@ export default function CreateOrEditPackage({packagePayload,
                                     id='createOrEditPackage.release'
                                     value={handleReleaseName()}
                                     onClick={() => setShowLinkedReleasesModal(true)}
+                                    readOnly
                                 />
                                 <span className='input-group-text'>
                                     <IoIosClose />
