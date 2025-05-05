@@ -78,7 +78,6 @@ export default function CreateOrEditPackage({packagePayload,
                 isEditPage={isEditPage}
             />
             <AddReleaseModal
-                packagePayload={packagePayload}
                 setPackagePayload={setPackagePayload}
                 show={showLinkedReleasesModal}
                 setShow={setShowLinkedReleasesModal}

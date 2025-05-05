@@ -24,7 +24,6 @@ type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 type RowData = (string | SummaryReleaseInfo)[]
 
 interface Props {
-    packagePayload: Package
     setPackagePayload: React.Dispatch<SetStateAction<Package>>
     show: boolean
     setShow: (show: boolean) => void
@@ -39,20 +38,21 @@ interface SummaryReleaseInfo {
 }
 
 export default function AddReleaseModal({
-    packagePayload,
     setPackagePayload,
     show,
     setShow,
     setReleaseNameVersion
 }: Props): JSX.Element {
     const t = useTranslations('default')
-    const [loading, setLoading] = useState(false)
     const searchText = useRef<string>('')
+    const isExactMatch = useRef<boolean>(false)
+    const [loading, setLoading] = useState(false)
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState<JSX.Element>()
     const [showMessage, setShowMessage] = useState(false)
     const [releaseData, setReleaseData] = useState<RowData[]>([])
-    const isExactMatch = useRef<boolean>(false)
+    const [interimReleaseId, setInterimReleaseId] = useState<string>('')
+    const [interimReleaseNameVersion, setInterimReleaseNameVersion] = useState<string>('')
     
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
@@ -62,6 +62,7 @@ export default function AddReleaseModal({
     
     const handleSearch = async () => {
         const session = await getSession()
+        setShowMessage(false)
         setLoading(true)
         try {
             if (CommonUtils.isNullOrUndefined(session)) {
@@ -144,7 +145,7 @@ export default function AddReleaseModal({
                             id={releaseId}
                             title=''
                             placeholder='Release Id'
-                            checked={packagePayload.releaseId?.includes(releaseId)}
+                            checked={interimReleaseId.includes(releaseId)}
                             onChange={() => handleCheckboxes(releaseId, releaseName, releaseVersion)}
                         />
                     </div>,
@@ -193,17 +194,35 @@ export default function AddReleaseModal({
     const handleCheckboxes = (releaseId: string,
                               releaseName: string,
                               releaseVersion: string) => {
-        setPackagePayload((prevState) => ({
-            ...prevState,
-            releaseId: prevState.releaseId !== releaseId ? releaseId : prevState.releaseId,
-        }));
-        setReleaseNameVersion(`${releaseName} (${releaseVersion})`)
+
+        setInterimReleaseId((prevReleaseId) => 
+            prevReleaseId === releaseId ? '' : releaseId
+        )
+        setInterimReleaseNameVersion(`${releaseName} (${releaseVersion})`)
+    }
+
+    const handleLinkRelease = (interimReleaseId: string,
+                               interimReleaseNameVersion: string) => {
+        if (!CommonUtils.isNullOrUndefined(interimReleaseId)){
+            setPackagePayload((prevState) => ({
+                ...prevState,
+                releaseId: prevState.releaseId !== interimReleaseId ?
+                                                interimReleaseId :
+                                                prevState.releaseId,
+                }
+            ))
+        }
+        if (!CommonUtils.isNullOrUndefined(interimReleaseNameVersion)) {
+                setReleaseNameVersion(interimReleaseNameVersion)
+        }
     }
 
     const closeModal = () => {
         setShow(false)
         setReleaseData([])
         setShowMessage(false)
+        setInterimReleaseId('')
+        setInterimReleaseNameVersion('')
         isExactMatch.current = false
     }
 
@@ -239,7 +258,12 @@ export default function AddReleaseModal({
                         />
                     </div>
                     <div className='col-lg-6'>
-                        <button type='button' className='btn btn-secondary me-2' onClick={() => void handleSearch()}>
+                        <button type='button'
+                                className='btn btn-secondary me-2'
+                                onClick={() => 
+                                            void handleSearch()
+                                        }
+                        >
                             {t('Search')}
                         </button>
                     </div>
@@ -287,6 +311,19 @@ export default function AddReleaseModal({
                 </Button>
                 <Button
                     variant='primary'
+                    disabled={interimReleaseId.length === 0}
+                    onClick={() => {
+                                        handleLinkRelease(interimReleaseId,
+                                                          interimReleaseNameVersion)
+                                        setShow(false)
+                                        setReleaseData([])
+                                        setInterimReleaseId('')
+                                        setInterimReleaseNameVersion('')
+                                        setShowMessage(false)
+                                        isExactMatch.current = false
+
+                                    }
+                            }
                 >
                     {t('Link Releases')}
                 </Button>
