@@ -9,22 +9,21 @@
 
 'use client'
 
-import { Embedded, HttpStatus, LicenseDetail } from '@/object-types';
-import MessageService from '@/services/message.service';
-import CommonUtils from '@/utils/common.utils';
-import { ApiUtils } from '@/utils/index';
-import { getSession, signOut } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
-import { _, Table } from 'next-sw360';
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
-import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import { Embedded, HttpStatus, LicenseDetail, Package } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _, Table } from 'next-sw360'
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
+import { Alert, Button, Modal } from 'react-bootstrap'
 
 interface Props {
+    packagePayload: Package
     showMainLicenseModal: boolean
+    setPackagePayload: React.Dispatch<React.SetStateAction<Package>>
     setShowMainLicenseModal: React.Dispatch<React.SetStateAction<boolean>>
-    setMainLicensesToPayload: (licenseIds: { [k: string]: string }) => void
-    exisitngMainLicenses: { [k: string]: string }
-    multiple: boolean
 }
 
 type EmbeddedLicenses= Embedded<LicenseDetail, 'sw360:licenses'>
@@ -33,18 +32,18 @@ type RowData = (string | LicenseDetail)[]
 
 export default function AddMainLicenseModal({ showMainLicenseModal,
                                               setShowMainLicenseModal,
-                                              setMainLicensesToPayload,
-                                              exisitngMainLicenses,
-                                              multiple }: Props) : JSX.Element {
+                                              setPackagePayload,
+                                              packagePayload}: Props) : JSX.Element {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<Array<RowData>>([])
-    const [newMainLicense, setNewMainLicense] = useState({})
     const searchText = useRef<string>('')
+    const [loading, setLoading] = useState(false)
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState<JSX.Element>()
     const [showMessage, setShowMessage] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [tableData, setTableData] = useState<Array<RowData>>([])
+    const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
     const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
+    const [,setNewMainLicenseFullName] = useState<Array<string>>([])
 
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
@@ -52,11 +51,6 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
         setShowMessage(true)
     }
 
-    const handleCloseDialog = () => {
-        setShowMainLicenseModal(!showMainLicenseModal)
-        setNewMainLicense(exisitngMainLicenses)
-    }
-    console.log(multiple)
     console.log(loading)
 
     const fetchData = useCallback(
@@ -95,7 +89,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                 ) {
                     const data = mainLicenses['_embedded']['sw360:licenses']
                                  .map((license: LicenseDetail) => [
-                        license,
+                        CommonUtils.getIdFromUrl(license._links?.self.href),
                         license.fullName ?? ''
                     ])
                     setTableData(data)
@@ -103,7 +97,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                 } else {
                     setTableData([])
                 }
-                setNewMainLicense(exisitngMainLicenses)
+                setNewMainLicense(packagePayload.licenseIds ?? [])
             })
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
@@ -114,12 +108,12 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
         } finally{
             setLoading(false)
             }
-    }, [fetchData, showMainLicenseModal, exisitngMainLicenses])
+    }, [fetchData, showMainLicenseModal, setFetchedLicenses])
 
-    const handleClickSelectLicenses = () => {
-        setShowMainLicenseModal(!showMainLicenseModal)
-        setMainLicensesToPayload(newMainLicense)
-    }
+    // const handleClickSelectLicenses = () => {
+    //     setShowMainLicenseModal(!showMainLicenseModal)
+    //     setMainLicensesToPayload(newMainLicense)
+    // }
 
     const searchLicenses = (searchText: string,
                             licenses: Array<RowData> ): Array<RowData> => {
@@ -143,20 +137,80 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
         setTableData(filteredResults)
     }
 
+    const handleSelectLicense = () => {
+        if (newMainLicense.length > 0) {
+            setPackagePayload((prevState: Package) => {
+                const existingIds = prevState.licenseIds || [];
+                const newIds = newMainLicense.filter(
+                    id => !existingIds.includes(id)
+                )
+                newIds.forEach((id: string) => {
+                    const license = fetchedLicenses.find((license: RowData) => license[0] === id)
+                    if (license) {
+                        const fullName = license[1] as string
+                        setNewMainLicenseFullName((prevFullNames: string[]) => {
+                            const index = prevFullNames.indexOf(fullName);
+                            if (index === -1) {
+                                return [...prevFullNames, fullName]
+                            }
+                            return prevFullNames
+                        })
+                    }
+                })
+                return {
+                    ...prevState,
+                    licenseIds: [...existingIds, ...newIds]
+                }
+            })
+        }
+    }
+
     const resetSelection = () => {
         setTableData(fetchedLicenses)
+    }
+
+    const handleCloseDialog = () => {
+        setShowMainLicenseModal(!showMainLicenseModal)
+        setNewMainLicense([])
+        setFetchedLicenses([])
+        setLoading(false)
+        setShowMessage(false)
+        setTableData([])
+    }
+
+    const handleCheckboxes = (licenseId: string) => {
+        setNewMainLicense((prevLicenseIds: string[]) => {
+            const index = prevLicenseIds.indexOf(licenseId);
+            if (index !== -1) {
+                const newIds = [...prevLicenseIds];
+                newIds.splice(index, 1);
+                return newIds;
+            } else {
+                return [...prevLicenseIds, licenseId];
+            }
+        })
+        console.log('newMainLicense', newMainLicense)
     }
 
     const columns = [
             {
                 id: 'license-selection',
                 name: '',
-                formatter: () =>
+                formatter: (licenseId: string) =>
                     _(
-                        <Form.Check
-                            name='license-selection'
-                            type= { multiple ? 'checkbox' : 'radio' }
-                        ></Form.Check>
+                        <div className='form-check'>
+                            <input
+                                className='form-check-input'
+                                type='checkbox'
+                                name='licenseId'
+                                value={licenseId}
+                                id={licenseId}
+                                title=''
+                                placeholder='License Id'
+                                checked={newMainLicense.includes(licenseId)}
+                                onChange={() => handleCheckboxes(licenseId)}
+                            />
+                        </div>,
                     ),
                 width: '7%',
                 sort: false,
@@ -213,7 +267,6 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                 <div className='mt-3'>
                     <Table columns={columns} data={tableData} />
                 </div>
-
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
@@ -225,7 +278,20 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className='btn btn-primary' onClick={handleClickSelectLicenses}>
+                <Button type='button'
+                        className='btn btn-primary'
+                        onClick={() => {
+                                    handleSelectLicense
+                                    setFetchedLicenses([])
+                                    setLoading(false)
+                                    setShowMessage(false)
+                                    setTableData([])
+                                    setShowMainLicenseModal(!showMainLicenseModal)
+                                    setNewMainLicense([])
+                                    setNewMainLicenseFullName([])
+                                    }
+                                }
+                >
                     {t('Select Licenses')}
                 </Button>
             </Modal.Footer>
