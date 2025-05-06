@@ -43,7 +43,7 @@ export default function CreateOrEditPackage({ packagePayload,
     const router = useRouter()
     const t = useTranslations('default')
     const [releaseNameVersion, setReleaseNameVersion] = useState<string>('')
-    const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
+    // const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
     const [showMainLicenseModal, setShowMainLicenseModal] = useState<boolean>(false)
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
@@ -66,17 +66,16 @@ export default function CreateOrEditPackage({ packagePayload,
         else
             return ''
     }
+    // const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     }
 
-    const setMainLicensesToPayload = (mainLicenses:{ [k: string]: string }) => {
-        setMainLicenses(mainLicenses)
-        setPackagePayload({
-            ...packagePayload,
-            licenseIds: Object.keys(mainLicenses),
-        })
-    }
+    // const handleMainLicenseNameList = () => {
+    //     if(isEditPage){
+    //         setMainLicenseNameList()
+    //     }
+    // }
 
     return (
         <>
@@ -93,9 +92,9 @@ export default function CreateOrEditPackage({ packagePayload,
             />
             <AddMainLicenseModal showMainLicenseModal={showMainLicenseModal}
                                  setShowMainLicenseModal={setShowMainLicenseModal}
-                                 setMainLicensesToPayload={setMainLicensesToPayload}
-                                 exisitngMainLicenses={mainLicenses}
-                                 multiple={true}
+                                 setPackagePayload={setPackagePayload}
+                                 packagePayload={packagePayload}
+                                //  setMainLicenseNameList={setMainLicenseNameList}
             />
             <form
                 id='add_or_edit_package_form_submit'
