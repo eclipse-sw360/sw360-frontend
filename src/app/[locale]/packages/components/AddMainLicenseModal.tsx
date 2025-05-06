@@ -9,111 +9,39 @@
 
 'use client'
 
-import { Embedded, HttpStatus, LicenseDetail, Package } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { LicenseDetail, Package } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { _, Table } from 'next-sw360'
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
-import { Alert, Button, Modal } from 'react-bootstrap'
+import { useEffect, useRef, useState, type JSX } from 'react'
+import { Button, Modal } from 'react-bootstrap'
 
 interface Props {
-    packagePayload: Package
     showMainLicenseModal: boolean
+    fetchedLicenses: Array<RowData>
+    newMainLicense: Array<string>
+    setNewMainLicense: React.Dispatch<React.SetStateAction<Array<string>>>
     setPackagePayload: React.Dispatch<React.SetStateAction<Package>>
     setShowMainLicenseModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-type EmbeddedLicenses= Embedded<LicenseDetail, 'sw360:licenses'>
-
 type RowData = (string | LicenseDetail)[]
 
-export default function AddMainLicenseModal({ showMainLicenseModal,
-                                              setShowMainLicenseModal,
+export default function AddMainLicenseModal({ newMainLicense,
+                                              fetchedLicenses,
+                                              showMainLicenseModal,
+                                              setNewMainLicense,
                                               setPackagePayload,
-                                              packagePayload}: Props) : JSX.Element {
+                                              setShowMainLicenseModal}: Props) : JSX.Element {
     const t = useTranslations('default')
     const searchText = useRef<string>('')
-    const [loading, setLoading] = useState(false)
-    const [variant, setVariant] = useState('success')
-    const [message, setMessage] = useState<JSX.Element>()
-    const [showMessage, setShowMessage] = useState(false)
     const [tableData, setTableData] = useState<Array<RowData>>([])
-    const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
-    const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
     const [,setNewMainLicenseFullName] = useState<Array<string>>([])
 
-    const displayMessage = (variant: string, message: JSX.Element) => {
-        setVariant(variant)
-        setMessage(message)
-        setShowMessage(true)
-    }
-
-    console.log(loading)
-
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)){
-                displayMessage('danger', <>{t('Session has expired')}</>)
-                setLoading(false)
-                return signOut()
-            }
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                displayMessage('warning', <>{t('Unauthorized request')}</>)
-                setLoading(false)
-                return
-            }
-            else if (response.status === HttpStatus.OK) {
-                const data = await response.json() as EmbeddedLicenses
-                return data
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
-
     useEffect(() => {
-        setLoading(true)
-        try{
-            fetchData('licenses')
-            .then((mainLicenses: EmbeddedLicenses | undefined) => {
-                if (mainLicenses === undefined) return
-                if (
-                    !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']['sw360:licenses'])
-                ) {
-                    const data = mainLicenses['_embedded']['sw360:licenses']
-                                 .map((license: LicenseDetail) => [
-                        CommonUtils.getIdFromUrl(license._links?.self.href),
-                        license.fullName ?? ''
-                    ])
-                    setTableData(data)
-                    setFetchedLicenses(data)
-                } else {
-                    setTableData([])
-                }
-                setNewMainLicense(packagePayload.licenseIds ?? [])
-            })
-        } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        } finally{
-            setLoading(false)
-            }
-    }, [fetchData, showMainLicenseModal, setFetchedLicenses])
-
-    // const handleClickSelectLicenses = () => {
-    //     setShowMainLicenseModal(!showMainLicenseModal)
-    //     setMainLicensesToPayload(newMainLicense)
-    // }
+        if (fetchedLicenses.length > 0) {
+            setTableData(fetchedLicenses)
+        }
+    }, [fetchedLicenses])
 
     const searchLicenses = (searchText: string,
                             licenses: Array<RowData> ): Array<RowData> => {
@@ -171,10 +99,6 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
 
     const handleCloseDialog = () => {
         setShowMainLicenseModal(!showMainLicenseModal)
-        setNewMainLicense([])
-        setFetchedLicenses([])
-        setLoading(false)
-        setShowMessage(false)
         setTableData([])
     }
 
@@ -233,12 +157,6 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                 <Modal.Title>{t('Search Licenses')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Alert  variant={variant}
-                        onClose={() => setShowMessage(false)}
-                        show={showMessage}
-                        dismissible>
-                        {message}
-                </Alert>
                 <div className='row'>
                     <div className='col-lg-8'>
                         <input
@@ -282,12 +200,8 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                         className='btn btn-primary'
                         onClick={() => {
                                     handleSelectLicense
-                                    setFetchedLicenses([])
-                                    setLoading(false)
-                                    setShowMessage(false)
                                     setTableData([])
                                     setShowMainLicenseModal(!showMainLicenseModal)
-                                    setNewMainLicense([])
                                     setNewMainLicenseFullName([])
                                     }
                                 }
