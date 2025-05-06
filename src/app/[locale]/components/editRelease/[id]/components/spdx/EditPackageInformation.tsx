@@ -57,7 +57,7 @@ const EditPackageInformation = ({
     setIsTypeCateGoryEmpty,
     SPDXPayload,
     setSPDXPayload,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [dataPackageSupplier, setDataPackageSupplier] = useState<InputKeyValue>({
         key: '',
@@ -207,7 +207,7 @@ const EditPackageInformation = ({
     }
 
     const handleChangeExternalRefData = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         const externalRefs: ExternalReference[] = externalRefsDatas.map((externalRefData, index) => {
             if (index === indexExternalRefsData) {
@@ -371,12 +371,16 @@ const EditPackageInformation = ({
         }
 
         if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.supplier)) {
-            packageInformation.supplier == 'NOASSERTION' && setIsPackageSupplier(false)
+            if (packageInformation.supplier == 'NOASSERTION') {
+                setIsPackageSupplier(false)
+            }
             setDataPackageSupplier(handlePackageSupplier(packageInformation.supplier))
         }
 
         if (!CommonUtils.isNullEmptyOrUndefinedString(packageInformation.originator)) {
-            packageInformation.originator == 'NOASSERTION' && setIsPackageOriginator(false)
+            if (packageInformation.originator == 'NOASSERTION') {
+                setIsPackageOriginator(false)
+            }
             setDataPackageOriginator(handlePackageOriginator(packageInformation.originator))
         }
 
@@ -525,7 +529,7 @@ const EditPackageInformation = ({
     }
 
     const updateFieldLicenseAllFile = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         setPackageInformation({
             ...packageInformation,
@@ -555,7 +559,7 @@ const EditPackageInformation = ({
     }
 
     const updateFieldAttributionText = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         setPackageInformation({
             ...packageInformation,
@@ -605,7 +609,7 @@ const EditPackageInformation = ({
     }
 
     const updateFieldExcludedFiles = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         setPackageInformation({
             ...packageInformation,
@@ -690,8 +694,8 @@ const EditPackageInformation = ({
 
     const changeFilesAnalyzed = (e: React.ChangeEvent<HTMLInputElement>) => {
         const filesAnalyzed = !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                            ? !packageInformation.filesAnalyzed
-                            : true
+            ? !packageInformation.filesAnalyzed
+            : true
         setPackageInformation({
             ...packageInformation,
             filesAnalyzed: filesAnalyzed,
@@ -904,7 +908,10 @@ const EditPackageInformation = ({
                     <tr>
                         <td>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='packageName'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='packageName'
+                                >
                                     7.1 Package name
                                 </label>
                                 <div style={{ display: 'flex' }}>
@@ -922,7 +929,10 @@ const EditPackageInformation = ({
                         </td>
                         <td>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='packageSPDXId'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='packageSPDXId'
+                                >
                                     7.2 Package SPDX identifier
                                 </label>
                                 <div style={{ display: 'flex' }}>
@@ -939,8 +949,8 @@ const EditPackageInformation = ({
                                             CommonUtils.isNullEmptyOrUndefinedString(packageInformation.SPDXID)
                                                 ? 'Package-'
                                                 : packageInformation.SPDXID.startsWith('SPDXRef-')
-                                                ? packageInformation.SPDXID.substring(8)
-                                                : packageInformation.SPDXID
+                                                  ? packageInformation.SPDXID.substring(8)
+                                                  : packageInformation.SPDXID
                                         }
                                     />
                                 </div>
@@ -951,7 +961,10 @@ const EditPackageInformation = ({
                     <tr>
                         <td>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='versionInfo'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='versionInfo'
+                                >
                                     7.3 Package version
                                 </label>
                                 <div style={{ display: 'flex' }}>
@@ -969,7 +982,10 @@ const EditPackageInformation = ({
                         </td>
                         <td>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='packageFileName'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='packageFileName'
+                                >
                                     7.4 Package file name
                                 </label>
                                 <div style={{ display: 'flex' }}>
@@ -1033,11 +1049,13 @@ const EditPackageInformation = ({
                                             placeholder='Enter package download location'
                                             onChange={updateField}
                                             value={
-                                                (CommonUtils.isNullEmptyOrUndefinedString(packageInformation.downloadLocation))
-                                                ? ''
-                                                : isNotNoneOrNoasserttionString(packageInformation.downloadLocation)
-                                                    ? packageInformation.downloadLocation
-                                                    : ''
+                                                CommonUtils.isNullEmptyOrUndefinedString(
+                                                    packageInformation.downloadLocation,
+                                                )
+                                                    ? ''
+                                                    : isNotNoneOrNoasserttionString(packageInformation.downloadLocation)
+                                                      ? packageInformation.downloadLocation
+                                                      : ''
                                             }
                                             disabled={
                                                 packageDownloadLocationNone || packageDownloadLocationNoasserttion
@@ -1096,8 +1114,8 @@ const EditPackageInformation = ({
                                             onChange={changeFilesAnalyzed}
                                             checked={
                                                 !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                                                ? packageInformation.filesAnalyzed
-                                                : false
+                                                    ? packageInformation.filesAnalyzed
+                                                    : false
                                             }
                                         />
                                         <label
@@ -1116,8 +1134,8 @@ const EditPackageInformation = ({
                                             onChange={changeFilesAnalyzed}
                                             checked={
                                                 !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                                                ? !packageInformation.filesAnalyzed
-                                                : true
+                                                    ? !packageInformation.filesAnalyzed
+                                                    : true
                                             }
                                         />
                                         <label
@@ -1136,7 +1154,10 @@ const EditPackageInformation = ({
                             <tr className='spdx-full'>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='verificationCodeValue'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='verificationCodeValue'
+                                        >
                                             7.9 Package verification code
                                         </label>
                                         <div>
@@ -1148,8 +1169,8 @@ const EditPackageInformation = ({
                                                 placeholder='Enter verification code value'
                                                 disabled={
                                                     !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                                                    ? !packageInformation.filesAnalyzed
-                                                    : true
+                                                        ? !packageInformation.filesAnalyzed
+                                                        : true
                                                 }
                                                 onChange={updateFieldPackageVerificationCode}
                                                 value={packageInformation.packageVerificationCode?.value ?? ''}
@@ -1162,17 +1183,20 @@ const EditPackageInformation = ({
                                                 placeholder='Enter excluded files'
                                                 disabled={
                                                     !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                                                    ? !packageInformation.filesAnalyzed
-                                                    : true
+                                                        ? !packageInformation.filesAnalyzed
+                                                        : true
                                                 }
                                                 onChange={updateFieldExcludedFiles}
                                                 value={
-                                                    !CommonUtils.isNullOrUndefined(packageInformation.packageVerificationCode)
-                                                    && (packageInformation.packageVerificationCode.excludedFiles !== undefined)
-                                                    ? packageInformation.packageVerificationCode.excludedFiles
-                                                        .toString()
-                                                        .replaceAll(',', '\n')
-                                                    :''
+                                                    !CommonUtils.isNullOrUndefined(
+                                                        packageInformation.packageVerificationCode,
+                                                    ) &&
+                                                    packageInformation.packageVerificationCode.excludedFiles !==
+                                                        undefined
+                                                        ? packageInformation.packageVerificationCode.excludedFiles
+                                                              .toString()
+                                                              .replaceAll(',', '\n')
+                                                        : ''
                                                 }
                                             ></textarea>
                                         </div>
@@ -1220,11 +1244,11 @@ const EditPackageInformation = ({
                                             placeholder='Enter package homepage'
                                             onChange={updateField}
                                             value={
-                                                (CommonUtils.isNullEmptyOrUndefinedString(packageInformation.homepage))
-                                                ? ''
-                                                : isNotNoneOrNoasserttionString(packageInformation.homepage)
-                                                    ? packageInformation.homepage
-                                                    : ''
+                                                CommonUtils.isNullEmptyOrUndefinedString(packageInformation.homepage)
+                                                    ? ''
+                                                    : isNotNoneOrNoasserttionString(packageInformation.homepage)
+                                                      ? packageInformation.homepage
+                                                      : ''
                                             }
                                             disabled={packageHomePageNone || packageHomePageNoasserttion}
                                         />
@@ -1270,7 +1294,10 @@ const EditPackageInformation = ({
                         <tr className='spdx-full'>
                             <td colSpan={3}>
                                 <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='sourceInformation'>
+                                    <label
+                                        className='lableSPDX'
+                                        htmlFor='sourceInformation'
+                                    >
                                         7.12 Source information
                                     </label>
                                     <div>
@@ -1312,11 +1339,13 @@ const EditPackageInformation = ({
                                             placeholder='Enter concluded license'
                                             onChange={updateField}
                                             value={
-                                                (CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseConcluded))
-                                                ? ''
-                                                : isNotNoneOrNoasserttionString(packageInformation.licenseConcluded)
-                                                    ? packageInformation.licenseConcluded
-                                                    : ''
+                                                CommonUtils.isNullEmptyOrUndefinedString(
+                                                    packageInformation.licenseConcluded,
+                                                )
+                                                    ? ''
+                                                    : isNotNoneOrNoasserttionString(packageInformation.licenseConcluded)
+                                                      ? packageInformation.licenseConcluded
+                                                      : ''
                                             }
                                             disabled={concludedLicenseNone || concludedLicenseNoasserttion}
                                         />
@@ -1375,8 +1404,8 @@ const EditPackageInformation = ({
                                                 checked={allLicensesInformationExist}
                                                 disabled={
                                                     !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                                                    ? !packageInformation.filesAnalyzed
-                                                    : true
+                                                        ? !packageInformation.filesAnalyzed
+                                                        : true
                                                 }
                                             />
                                             <textarea
@@ -1388,13 +1417,15 @@ const EditPackageInformation = ({
                                                 placeholder='Enter all licenses information from files'
                                                 onChange={updateFieldLicenseAllFile}
                                                 value={
-                                                    (!packageInformation.licenseInfoFromFiles)
-                                                    ? ''
-                                                    : isNotNoneOrNoasserttion(packageInformation.licenseInfoFromFiles)
-                                                        ? packageInformation.licenseInfoFromFiles
+                                                    !packageInformation.licenseInfoFromFiles
+                                                        ? ''
+                                                        : isNotNoneOrNoasserttion(
+                                                                packageInformation.licenseInfoFromFiles,
+                                                            )
+                                                          ? packageInformation.licenseInfoFromFiles
                                                                 .toString()
                                                                 .replaceAll(',', '\n')
-                                                        : ''
+                                                          : ''
                                                 }
                                                 disabled={
                                                     allLicensesInformationNone ||
@@ -1416,8 +1447,8 @@ const EditPackageInformation = ({
                                                 checked={allLicensesInformationNone}
                                                 disabled={
                                                     !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                                                    ? !packageInformation.filesAnalyzed
-                                                    : true
+                                                        ? !packageInformation.filesAnalyzed
+                                                        : true
                                                 }
                                             />
                                             <label
@@ -1437,8 +1468,8 @@ const EditPackageInformation = ({
                                                 checked={allLicensesInformationNoasserttion}
                                                 disabled={
                                                     !CommonUtils.isNullOrUndefined(packageInformation.filesAnalyzed)
-                                                    ? !packageInformation.filesAnalyzed
-                                                    : true
+                                                        ? !packageInformation.filesAnalyzed
+                                                        : true
                                                 }
                                             />
                                             <label
@@ -1477,11 +1508,13 @@ const EditPackageInformation = ({
                                             placeholder='Enter declared license'
                                             onChange={updateField}
                                             value={
-                                                CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseDeclared)
-                                                ? ''
-                                                : isNotNoneOrNoasserttionString(packageInformation.licenseDeclared)
-                                                    ? packageInformation.licenseDeclared
-                                                    : ''
+                                                CommonUtils.isNullEmptyOrUndefinedString(
+                                                    packageInformation.licenseDeclared,
+                                                )
+                                                    ? ''
+                                                    : isNotNoneOrNoasserttionString(packageInformation.licenseDeclared)
+                                                      ? packageInformation.licenseDeclared
+                                                      : ''
                                             }
                                             disabled={declaredLicenseNone || declaredLicenseNoasserttion}
                                         />
@@ -1526,7 +1559,10 @@ const EditPackageInformation = ({
                     <tr className='spdx-full'>
                         <td colSpan={3}>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='commentsOnLicense'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='commentsOnLicense'
+                                >
                                     7.16 Comments on license
                                 </label>
                                 <div>
@@ -1567,11 +1603,13 @@ const EditPackageInformation = ({
                                             placeholder='Enter copyright text'
                                             onChange={updateFieldCopyright}
                                             value={
-                                                CommonUtils.isNullEmptyOrUndefinedString(packageInformation.copyrightText)
-                                                ? ''
-                                                : isNotNoneOrNoasserttionString(packageInformation.copyrightText)
-                                                    ? packageInformation.copyrightText
-                                                    : ''
+                                                CommonUtils.isNullEmptyOrUndefinedString(
+                                                    packageInformation.copyrightText,
+                                                )
+                                                    ? ''
+                                                    : isNotNoneOrNoasserttionString(packageInformation.copyrightText)
+                                                      ? packageInformation.copyrightText
+                                                      : ''
                                             }
                                             disabled={copyrightTextNone || copyrightTextNoasserttion}
                                         ></textarea>
@@ -1619,7 +1657,10 @@ const EditPackageInformation = ({
                             <tr className='spdx-full'>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='packageSummaryDescription'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='packageSummaryDescription'
+                                        >
                                             7.18 Package summary description
                                         </label>
                                         <div>
@@ -1639,7 +1680,10 @@ const EditPackageInformation = ({
                             <tr className='spdx-full'>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='packageDetailedDescription'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='packageDetailedDescription'
+                                        >
                                             7.19 Package detailed description
                                         </label>
                                         <div>
@@ -1661,7 +1705,10 @@ const EditPackageInformation = ({
                     <tr className='spdx-full'>
                         <td colSpan={3}>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='packageComment'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='packageComment'
+                                >
                                     7.20 Package comment
                                 </label>
                                 <div>
@@ -1713,7 +1760,7 @@ const EditPackageInformation = ({
                                                             id='externalReferences'
                                                             onChange={displayIndex}
                                                             disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                externalRefsDatas
+                                                                externalRefsDatas,
                                                             )}
                                                             value={
                                                                 isAdd
@@ -1724,7 +1771,10 @@ const EditPackageInformation = ({
                                                             }
                                                         >
                                                             {externalRefsDatas.map((item) => (
-                                                                <option key={item.index} value={item.index}>
+                                                                <option
+                                                                    key={item.index}
+                                                                    value={item.index}
+                                                                >
                                                                     {item.index + 1}
                                                                 </option>
                                                             ))}
@@ -1756,10 +1806,11 @@ const EditPackageInformation = ({
                                                             name='referenceCategory'
                                                             onChange={handleChangeReferenceCategory}
                                                             value={
-                                                                externalRefsDatas[indexExternalRefsData]?.referenceCategory
+                                                                externalRefsDatas[indexExternalRefsData]
+                                                                    ?.referenceCategory
                                                             }
                                                             disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                externalRefsDatas
+                                                                externalRefsDatas,
                                                             )}
                                                         >
                                                             <option value='SECURITY'>SECURITY</option>
@@ -1789,10 +1840,11 @@ const EditPackageInformation = ({
                                                                 name='referenceType'
                                                                 onChange={handleChangeExternalRefData}
                                                                 value={
-                                                                    externalRefsDatas[indexExternalRefsData]?.referenceType
+                                                                    externalRefsDatas[indexExternalRefsData]
+                                                                        ?.referenceType
                                                                 }
                                                                 disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                    externalRefsDatas
+                                                                    externalRefsDatas,
                                                                 )}
                                                             />
                                                         ) : (
@@ -1803,14 +1855,18 @@ const EditPackageInformation = ({
                                                                 name='referenceType'
                                                                 onChange={handleChangeExternalRefData}
                                                                 value={
-                                                                    externalRefsDatas[indexExternalRefsData]?.referenceType
+                                                                    externalRefsDatas[indexExternalRefsData]
+                                                                        ?.referenceType
                                                                 }
                                                                 disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                    externalRefsDatas
+                                                                    externalRefsDatas,
                                                                 )}
                                                             >
                                                                 {typeCategory.map((item, index) => (
-                                                                    <option key={index} value={item}>
+                                                                    <option
+                                                                        key={index}
+                                                                        value={item}
+                                                                    >
                                                                         {item}
                                                                     </option>
                                                                 ))}
@@ -1834,10 +1890,11 @@ const EditPackageInformation = ({
                                                             name='referenceLocator'
                                                             onChange={handleChangeExternalRefData}
                                                             value={
-                                                                externalRefsDatas[indexExternalRefsData]?.referenceLocator
+                                                                externalRefsDatas[indexExternalRefsData]
+                                                                    ?.referenceLocator
                                                             }
                                                             disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                externalRefsDatas
+                                                                externalRefsDatas,
                                                             )}
                                                         />
                                                     </div>
@@ -1851,11 +1908,9 @@ const EditPackageInformation = ({
                                                             placeholder='Enter comment'
                                                             name='comment'
                                                             onChange={handleChangeExternalRefData}
-                                                            value={
-                                                                externalRefsDatas[indexExternalRefsData]?.comment
-                                                            }
+                                                            value={externalRefsDatas[indexExternalRefsData]?.comment}
                                                             disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                                externalRefsDatas
+                                                                externalRefsDatas,
                                                             )}
                                                         ></textarea>
                                                     </div>
@@ -1873,7 +1928,10 @@ const EditPackageInformation = ({
                             <tr className='spdx-full'>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='packageAttributionText'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='packageAttributionText'
+                                        >
                                             7.23 Package attribution text
                                         </label>
                                         <div>
@@ -1897,7 +1955,10 @@ const EditPackageInformation = ({
                             <tr className='spdx-full'>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='primaryPackagePurpose'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='primaryPackagePurpose'
+                                        >
                                             7.24 Primary Package Purpose
                                         </label>
                                         <div>

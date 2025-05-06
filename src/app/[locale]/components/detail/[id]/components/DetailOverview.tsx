@@ -31,10 +31,10 @@ import {
     User,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
-import MessageService from '@/services/message.service'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -66,7 +66,7 @@ const tabList = [
     },
 ]
 
-const DetailOverview = ({ componentId }: Props) : ReactNode => {
+const DetailOverview = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
@@ -78,39 +78,33 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
     const [subscribers, setSubscribers] = useState<Array<string>>([])
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
+    }, [])
 
     const downloadBundle = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
         DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
             session,
-            'AttachmentBundle.zip'
+            'AttachmentBundle.zip',
         )
     }
 
     const extractUserEmailFromSession = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
         setUserEmail(session.user.email)
     }
 
@@ -136,7 +130,7 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
                         ? []
-                        : changeLogs['_embedded']['sw360:changeLogs']
+                        : changeLogs['_embedded']['sw360:changeLogs'],
                 )
             })
             .catch((err) => console.error(err))
@@ -153,7 +147,7 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
     }, [componentId, fetchData])
 
     const getSubcribersEmail = (component: Component) => {
-        return (component._embedded !== undefined && component._embedded['sw360:subscribers'] !== undefined)
+        return component._embedded !== undefined && component._embedded['sw360:subscribers'] !== undefined
             ? Object.values(component._embedded['sw360:subscribers'].map((user: User) => user.email))
             : []
     }
@@ -175,7 +169,8 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                 if (component === undefined) return
                 setComponent(component)
                 setSubscribers(getSubcribersEmail(component))
-            }).catch((e) => console.error(e))
+            })
+            .catch((e) => console.error(e))
     }
 
     const headerButtons = {
@@ -186,8 +181,8 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
             link: '',
             type: isUserSubscribed() ? 'outline-danger' : 'outline-success',
             name: isUserSubscribed() ? t('Unsubscribe') : t('Subscribe'),
-            onClick: handleSubcriptions
-        }
+            onClick: handleSubcriptions,
+        },
     }
 
     return (
@@ -203,11 +198,23 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                         />
                     </div>
                     <div className='col'>
-                        <div className='row' style={{ marginBottom: '20px' }}>
-                            <PageButtonHeader title={component.name} buttons={headerButtons}>
+                        <div
+                            className='row'
+                            style={{ marginBottom: '20px' }}
+                        >
+                            <PageButtonHeader
+                                title={component.name}
+                                buttons={headerButtons}
+                            >
                                 {selectedTab === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
-                                    <div className='list-group-companion' data-belong-to='tab-Attachments'>
-                                        <div className='btn-group' role='group'>
+                                    <div
+                                        className='list-group-companion'
+                                        data-belong-to='tab-Attachments'
+                                    >
+                                        <div
+                                            className='btn-group'
+                                            role='group'
+                                        >
                                             <button
                                                 id='downloadAttachmentBundle'
                                                 type='button'
@@ -239,7 +246,9 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                                                 changesLogTab == 'view-log' ? 'active' : ''
                                             }`}
                                             onClick={() => {
-                                                changeLogIndex !== -1 && setChangesLogTab('view-log')
+                                                if (changeLogIndex !== -1) {
+                                                    setChangesLogTab('view-log')
+                                                }
                                             }}
                                             style={{ color: '#F7941E', fontWeight: 'bold' }}
                                         >
@@ -249,21 +258,45 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                                 )}
                             </PageButtonHeader>
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary component={component} componentId={componentId} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                        >
+                            <Summary
+                                component={component}
+                                componentId={componentId}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}
+                        >
                             <ReleaseOverview componentId={componentId} />
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments documentId={componentId} documentType={DocumentTypes.COMPONENT} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
+                        >
+                            <Attachments
+                                documentId={componentId}
+                                documentType={DocumentTypes.COMPONENT}
+                            />
                         </div>
-                        <div className='containers' hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}>
+                        <div
+                            className='containers'
+                            hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}
+                        >
                             <ComponentVulnerabilities vulnerData={vulnerData} />
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}
+                        >
                             <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changesLogTab != 'list-change' ? true : false}
+                                >
                                     <ChangeLogList
                                         setChangeLogIndex={setChangeLogIndex}
                                         documentId={componentId}
@@ -271,9 +304,15 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                                         changeLogList={changeLogList}
                                     />
                                 </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changesLogTab != 'view-log' ? true : false}
+                                >
                                     <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
+                                    <div
+                                        id='cardScreen'
+                                        style={{ padding: '0px' }}
+                                    ></div>
                                 </div>
                             </div>
                         </div>

@@ -17,8 +17,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { notFound, useRouter } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
-import React from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import ObligationForm from '../../../components/AddOrEditObligation'
 
 interface props {
@@ -38,24 +37,24 @@ function EditObligation({ obligationId }: props): ReactNode {
     } as Obligation)
 
     useEffect(() => {
-        void(async () => {
+        void (async () => {
             try {
                 setIsLoading(true)
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                
+
                 const response = await ApiUtils.GET(`obligations/${obligationId}`, session.user.access_token)
-                if(response.status === HttpStatus.OK) {
-                    const data = await response.json() as Obligation
+                if (response.status === HttpStatus.OK) {
+                    const data = (await response.json()) as Obligation
                     if (Object.keys(data).length > 0) {
-                        setObligation(prev => ({ id: prev.id, ...data }))
+                        setObligation((prev) => ({ id: prev.id, ...data }))
                     } else {
                         MessageService.error(t('Failed to load obligation data'))
                     }
                 } else {
                     notFound()
                 }
-            } catch(e) {
+            } catch {
                 MessageService.error(t('Failed to load obligation data'))
             } finally {
                 setIsLoading(false)

@@ -12,7 +12,7 @@
 import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
-import { useState, useEffect, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
 
@@ -31,16 +31,19 @@ function AddAdditionalRoles({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputListData, setInputListData] = useState<InputKeyValue[]>([])
-    useEffect(()=>{
-        setInputListData(!CommonUtils.isNullOrUndefined(propInputList) ? propInputList : [
-            {
-                key: documentType === DocumentTypes.COMPONENT ? 'Committer' : 'Stakeholder',
-                value: '',
-            },
-        ]);
-    },[propInputList])
+    useEffect(() => {
+        setInputListData(
+            !CommonUtils.isNullOrUndefined(propInputList)
+                ? propInputList
+                : [
+                      {
+                          key: documentType === DocumentTypes.COMPONENT ? 'Committer' : 'Stakeholder',
+                          value: '',
+                      },
+                  ],
+        )
+    }, [propInputList])
     const setInputData = propSetInputList || setInputListData
-
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
@@ -62,9 +65,11 @@ function AddAdditionalRoles({
     }
 
     const handleAddClick = () => {
-        documentType === DocumentTypes.COMPONENT
-            ? setInputData([...inputListData, { key: 'Committer', value: '' }])
-            : setInputData([...inputListData, { key: 'Stakeholder', value: '' }])
+        if (documentType === DocumentTypes.COMPONENT) {
+            setInputData([...inputListData, { key: 'Committer', value: '' }])
+        } else {
+            setInputData([...inputListData, { key: 'Stakeholder', value: '' }])
+        }
     }
 
     const defaultValue = () => {
@@ -78,66 +83,73 @@ function AddAdditionalRoles({
             </div>
             <div className='row'>
                 {inputListData.map((elem, j) => {
-                        return (
-                            <div className='row mb-2' key={j}>
-                                <div className='col-lg-5'>
-                                    <select
-                                        className='form-select'
-                                        key=''
-                                        name='key'
-                                        value={elem.key}
-                                        aria-label={t('Additional Role')}
-                                        defaultValue={defaultValue()}
-                                        onChange={(e) => handleInputChange(e, j)}
-                                    >
-                                        {documentType === DocumentTypes.COMPONENT ? (
-                                            <>
-                                                <option value='Committer'>{t('Committer')}</option>
-                                                <option value='Contributor'>{t('Contributor')}</option>
-                                                <option value='Expert'>{t('Expert')}</option>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <option value='Stakeholder'>{t('Stakeholder')}</option>
-                                                <option value='Analyst'>{t('Analyst')}</option>
-                                                <option value='Contributor'>{t('Contributor')}</option>
-                                                <option value='Accountant'>{t('Accountant')}</option>
-                                                <option value='EndUser'>{t('End User')}</option>
-                                                <option value='QualityManager'>{t('Quality Manager')}</option>
-                                                <option value='TestManager'>{t('Test Manager')}</option>
-                                                <option value='TechnicalWriter'>{t('Technical Writer')}</option>
-                                                <option value='KeyUser'>{t('Key User')}</option>
-                                            </>
-                                        )}
-                                    </select>
-                                </div>
-                                <div className='col-lg-5'>
-                                    <input
-                                        name='value'
-                                        value={elem.value}
-                                        type='email'
-                                        onChange={(e) => handleInputChange(e, j)}
-                                        className='form-control'
-                                        placeholder={t('Enter email')}
-                                        aria-describedby={t('Email')}
-                                    />
-                                </div>
-                                <div className='col-lg-2'>
-                                    <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                        <span className='d-inline-block'>
-                                            <MdDeleteOutline
-                                                size={25}
-                                                className='ms-2 btn-icon'
-                                                onClick={() => handleRemoveClick(j)}
-                                            />
-                                        </span>
-                                    </OverlayTrigger>
-                                </div>
+                    return (
+                        <div
+                            className='row mb-2'
+                            key={j}
+                        >
+                            <div className='col-lg-5'>
+                                <select
+                                    className='form-select'
+                                    key=''
+                                    name='key'
+                                    value={elem.key}
+                                    aria-label={t('Additional Role')}
+                                    defaultValue={defaultValue()}
+                                    onChange={(e) => handleInputChange(e, j)}
+                                >
+                                    {documentType === DocumentTypes.COMPONENT ? (
+                                        <>
+                                            <option value='Committer'>{t('Committer')}</option>
+                                            <option value='Contributor'>{t('Contributor')}</option>
+                                            <option value='Expert'>{t('Expert')}</option>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <option value='Stakeholder'>{t('Stakeholder')}</option>
+                                            <option value='Analyst'>{t('Analyst')}</option>
+                                            <option value='Contributor'>{t('Contributor')}</option>
+                                            <option value='Accountant'>{t('Accountant')}</option>
+                                            <option value='EndUser'>{t('End User')}</option>
+                                            <option value='QualityManager'>{t('Quality Manager')}</option>
+                                            <option value='TestManager'>{t('Test Manager')}</option>
+                                            <option value='TechnicalWriter'>{t('Technical Writer')}</option>
+                                            <option value='KeyUser'>{t('Key User')}</option>
+                                        </>
+                                    )}
+                                </select>
                             </div>
-                        )
-                    })}
+                            <div className='col-lg-5'>
+                                <input
+                                    name='value'
+                                    value={elem.value}
+                                    type='email'
+                                    onChange={(e) => handleInputChange(e, j)}
+                                    className='form-control'
+                                    placeholder={t('Enter email')}
+                                    aria-describedby={t('Email')}
+                                />
+                            </div>
+                            <div className='col-lg-2'>
+                                <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                    <span className='d-inline-block'>
+                                        <MdDeleteOutline
+                                            size={25}
+                                            className='ms-2 btn-icon'
+                                            onClick={() => handleRemoveClick(j)}
+                                        />
+                                    </span>
+                                </OverlayTrigger>
+                            </div>
+                        </div>
+                    )
+                })}
                 <div className='col-lg-4'>
-                    <button type='button' onClick={() => handleAddClick()} className='btn btn-secondary'>
+                    <button
+                        type='button'
+                        onClick={() => handleAddClick()}
+                        className='btn btn-secondary'
+                    >
                         {t('Click to add row to Additional Roles')}
                     </button>
                 </div>

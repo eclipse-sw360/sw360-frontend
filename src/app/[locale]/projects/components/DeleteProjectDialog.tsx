@@ -11,10 +11,10 @@
 
 import { HttpStatus, Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, useCallback, useEffect, useState, type JSX } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState, type JSX } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -31,7 +31,7 @@ interface Props {
     setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element {
+function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const [project, setProject] = useState<Project>()
@@ -59,8 +59,7 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     const deleteProject = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return
+            if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.DELETE(`projects/${projectId}`, session.user.access_token)
             if (response.status === HttpStatus.OK) {
                 displayMessage('success', t('Delete project successful!'))
@@ -75,7 +74,7 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
             } else {
                 displayMessage('danger', t('Error when processing'))
             }
-        } catch (err) {
+        } catch {
             handleError()
         }
     }
@@ -83,8 +82,7 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     useEffect(() => {
         const fetchData = async (projectId: string) => {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return
+            if (CommonUtils.isNullOrUndefined(session)) return
             const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
             if (projectsResponse.status == HttpStatus.OK) {
                 const projectData = (await projectsResponse.json()) as Project
@@ -144,8 +142,17 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton style={{ color: 'red' }}>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{ color: 'red' }}
+            >
                 <Modal.Title>
                     <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
                     {t('Delete Project')} ?
@@ -153,13 +160,18 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
             </Modal.Header>
             <Modal.Body>
                 <>
-                    {
-                        project === undefined ?
+                    {project === undefined ? (
                         <div className='col-12 mt-1 text-center'>
                             <Spinner className='spinner' />
-                        </div>:
+                        </div>
+                    ) : (
                         <>
-                            <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
+                            <Alert
+                                variant={variant}
+                                onClose={() => setShowMessage(false)}
+                                dismissible
+                                show={showMessage}
+                            >
                                 {message}
                             </Alert>
                             <Form>
@@ -171,7 +183,10 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                                         })}
                                     </Form.Label>
                                     <br />
-                                    <Form.Label className='mb-1' visuallyHidden={visuallyHideLinkedData}>
+                                    <Form.Label
+                                        className='mb-1'
+                                        visuallyHidden={visuallyHideLinkedData}
+                                    >
                                         {t.rich('This project contains', {
                                             name: project.name,
                                             strong: (data) => <b>{data}</b>,
@@ -185,7 +200,9 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                                 </Form.Group>
                                 <hr />
                                 <Form.Group className='mb-3'>
-                                    <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
+                                    <Form.Label style={{ fontWeight: 'bold' }}>
+                                        {t('Please comment your changes')}
+                                    </Form.Label>
                                     <Form.Control
                                         as='textarea'
                                         aria-label='With textarea'
@@ -195,11 +212,15 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                                 </Form.Group>
                             </Form>
                         </>
-                    }
+                    )}
                 </>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {' '}
                     {t('Close')}{' '}
                 </Button>

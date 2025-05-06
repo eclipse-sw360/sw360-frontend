@@ -8,14 +8,14 @@
 // License-Filename: LICENSE
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-'use client';
+'use client'
 import Link from 'next/link'
 
 import { useTranslations } from 'next-intl'
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 function PageButtonHeader({
     title,
@@ -25,14 +25,17 @@ function PageButtonHeader({
     changesLogTab,
     changeLogIndex,
     setChangesLogTab,
-}: PageButtonHeaderProps) : JSX.Element {
+}: PageButtonHeaderProps): JSX.Element {
     let buttonList: JSX.Element[] = []
     if (buttons) {
         buttonList = Object.entries(buttons).map(([key, value]) => {
             return (
                 // Button needs to link to the referenced page from props (value)
                 // and switch to the correct tab (key)
-                <Link href={value['link']} key={key}>
+                <Link
+                    href={value['link']}
+                    key={key}
+                >
                     <button
                         key={key}
                         className={`btn btn-${value['type']}`}
@@ -42,42 +45,48 @@ function PageButtonHeader({
                         {value.name}
                     </button>
                 </Link>
-            );
+            )
         })
     }
 
     const t = useTranslations('default')
     return (
-        <div className={`row ${styles['buttonheader-toolbar']}`} style={{ display: 'flex' }}>
+        <div
+            className={`row ${styles['buttonheader-toolbar']}`}
+            style={{ display: 'flex' }}
+        >
             <div className='col-auto'>
-                <div className='btn-toolbar' role='toolbar'>
-                    <div key='buttongroup' className='btn-group' role='group'>
+                <div
+                    className='btn-toolbar'
+                    role='toolbar'
+                >
+                    <div
+                        key='buttongroup'
+                        className='btn-group'
+                        role='group'
+                    >
                         {buttonList}
                         {children}
                     </div>
                 </div>
             </div>
-            {(title !== undefined) && (
+            {title !== undefined && (
                 <div className={`col text-truncate ${styles['buttonheader-title']}`}>
                     <div>
                         {title}
                         {checked != undefined && (
                             <>
                                 {checked ? (
-                                    <span className={`badge ${styles['checked']}`}>
-                                        CHECKED
-                                    </span>
+                                    <span className={`badge ${styles['checked']}`}>CHECKED</span>
                                 ) : (
-                                    <span className={`badge ${styles['un-checked']}`}>
-                                        UNCHECKED
-                                    </span>
+                                    <span className={`badge ${styles['un-checked']}`}>UNCHECKED</span>
                                 )}
                             </>
                         )}
                     </div>
                 </div>
             )}
-            {(changesLogTab !== undefined) && (
+            {changesLogTab !== undefined && (
                 <div className={`list-group-companion ${styles['div-changelog']}`}>
                     <div
                         className='nav nav-pills justify-content-center bg-light font-weight-bold'
@@ -88,8 +97,7 @@ function PageButtonHeader({
                         <div>
                             <a
                                 className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''} ${styles['a-changelog']}`}
-                                onClick={() => (setChangesLogTab !== undefined) && setChangesLogTab('list-change')}
-                               
+                                onClick={() => setChangesLogTab !== undefined && setChangesLogTab('list-change')}
                             >
                                 {t('Change Log')}
                             </a>
@@ -98,7 +106,9 @@ function PageButtonHeader({
                             <a
                                 className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''} ${styles['a-changes']}`}
                                 onClick={() => {
-                                    changeLogIndex !== -1 && (setChangesLogTab !== undefined) && setChangesLogTab('view-log')
+                                    if (changeLogIndex !== -1 && setChangesLogTab !== undefined) {
+                                        setChangesLogTab('view-log')
+                                    }
                                 }}
                             >
                                 {t('Changes')}

@@ -32,7 +32,7 @@ interface DeleteResponse {
     status: number
 }
 
-const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow }: Props) : ReactNode => {
+const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow }: Props): ReactNode => {
     const t = useTranslations('default')
     const [release, setRelease] = useState<ReleaseDetail | undefined>(undefined)
     const [variant, setVariant] = useState('success')
@@ -53,11 +53,9 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     }, [])
 
     const deleteComponent = async () => {
-        if (CommonUtils.isNullEmptyOrUndefinedString(releaseId))
-            return
+        if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) return
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
         const response = await ApiUtils.DELETE(`releases/${releaseId}`, session.user.access_token)
         try {
             if (response.status === HttpStatus.MULTIPLE_STATUS) {
@@ -69,7 +67,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                 } else if (deleteStatus === HttpStatus.CONFLICT) {
                     displayMessage(
                         'danger',
-                        'I could not delete the release, since it is used by another component (release) or project'
+                        'I could not delete the release, since it is used by another component (release) or project',
                     )
                 } else if (deleteStatus === HttpStatus.ACCEPTED) {
                     displayMessage('success', 'Created moderation request!')
@@ -81,18 +79,16 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
             } else {
                 handleError()
             }
-        } catch (err) {
+        } catch {
             handleError()
         }
     }
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
-            if (CommonUtils.isNullEmptyOrUndefinedString(releaseId))
-                return
+            if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) return
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return
+            if (CommonUtils.isNullOrUndefined(session)) return
             const releaseResponse = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
             if (releaseResponse.status === HttpStatus.OK) {
                 const release = (await releaseResponse.json()) as ReleaseDetail
@@ -104,7 +100,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                 handleError()
             }
         },
-        [releaseId, handleError]
+        [releaseId, handleError],
     )
 
     const handleSubmit = () => {
@@ -132,18 +128,29 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     }, [show, releaseId, fetchData])
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton style={{ color: 'red' }}>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{ color: 'red' }}
+            >
                 <Modal.Title>{t('Delete Release')} ?</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
-                    {
-                        !CommonUtils.isNullEmptyOrUndefinedString(message) && t(message as never)
-                    }
+                <Alert
+                    variant={variant}
+                    onClose={() => setShowMessage(false)}
+                    dismissible
+                    show={showMessage}
+                >
+                    {!CommonUtils.isNullEmptyOrUndefinedString(message) && t(message as never)}
                 </Alert>
-                {
-                    release &&
+                {release && (
                     <Form>
                         {t.rich('Do you really want to delete the release?', {
                             name: release.name + release.version,
@@ -166,17 +173,29 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                         <hr />
                         <Form.Group className='mb-3'>
                             <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
-                            <Form.Control as='textarea' aria-label='With textarea' />
+                            <Form.Control
+                                as='textarea'
+                                aria-label='With textarea'
+                            />
                         </Form.Group>
                     </Form>
-                }
+                )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {' '}
                     {t('Close')}{' '}
                 </Button>
-                <Button className='login-btn' variant='danger' onClick={handleSubmit} hidden={reloadPage}>
+                <Button
+                    className='login-btn'
+                    variant='danger'
+                    onClick={handleSubmit}
+                    hidden={reloadPage}
+                >
                     {t('Delete Release')}
                 </Button>
             </Modal.Footer>

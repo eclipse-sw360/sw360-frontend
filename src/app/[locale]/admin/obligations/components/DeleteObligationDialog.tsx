@@ -11,13 +11,13 @@
 'use client'
 
 import { HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import {  Button, Form, Modal } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
+import { Button, Form, Modal } from 'react-bootstrap'
+import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
 interface Props {
     obligationId: string
@@ -25,14 +25,13 @@ interface Props {
     setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function DeleteObligationDialog ({ obligationId, show, setShow }: Props): ReactNode {
+function DeleteObligationDialog({ obligationId, show, setShow }: Props): ReactNode {
     const t = useTranslations('default')
 
     const deleteObligation = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return
+            if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.DELETE(`obligations/${obligationId}`, session.user.access_token)
             if (response.status === HttpStatus.MULTIPLE_STATUS) {
                 MessageService.success(t('Obligation deleted successfully'))
@@ -42,7 +41,7 @@ function DeleteObligationDialog ({ obligationId, show, setShow }: Props): ReactN
             } else {
                 MessageService.error(t('Error when processing'))
             }
-        } catch (err) {
+        } catch {
             MessageService.error(t('Error when processing'))
         }
     }
@@ -56,8 +55,17 @@ function DeleteObligationDialog ({ obligationId, show, setShow }: Props): ReactN
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton style={{ color: 'red' }}>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{ color: 'red' }}
+            >
                 <Modal.Title>
                     <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
                     {t('Delete Obligation')} ?
@@ -80,7 +88,11 @@ function DeleteObligationDialog ({ obligationId, show, setShow }: Props): ReactN
                 </>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {' '}
                     {t('Close')}{' '}
                 </Button>

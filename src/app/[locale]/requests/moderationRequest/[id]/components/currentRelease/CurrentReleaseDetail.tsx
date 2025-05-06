@@ -30,8 +30,8 @@ import {
     ReleaseTabIds,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
-import { useEffect, useState, ReactNode } from 'react'
+import { getSession, signOut } from 'next-auth/react'
+import { ReactNode, useEffect, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -53,14 +53,14 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(url, session.user.access_token, signal)
-                if (response.status == HttpStatus.OK) {
-                    const data = await response.json() as ReleaseDetail & EmbeddedChangelogs
-                    return data
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                    void signOut()
-                }
-        } catch(e) {
+            const response = await ApiUtils.GET(url, session.user.access_token, signal)
+            if (response.status == HttpStatus.OK) {
+                const data = (await response.json()) as ReleaseDetail & EmbeddedChangelogs
+                return data
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                void signOut()
+            }
+        } catch (e) {
             console.error(e)
         }
     }
@@ -84,12 +84,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
 
         fetchData(`changelog/document/${releaseId}`, signal)
             .then((changeLogs: EmbeddedChangelogs | undefined) => {
-                changeLogs &&
-                    setChangeLogList(
-                        CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
-                            ? []
-                            : changeLogs._embedded['sw360:changeLogs'],
-                    )
+                if (changeLogs && CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])) {
+                    setChangeLogList([])
+                } else {
+                    setChangeLogList(changeLogs?._embedded?.['sw360:changeLogs'] || [])
+                }
             })
             .catch((err) => console.error(err))
 
