@@ -44,6 +44,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
     const [message, setMessage] = useState<JSX.Element>()
     const [showMessage, setShowMessage] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
 
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
@@ -61,14 +62,20 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
     const fetchData = useCallback(
         async (url: string) => {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
+            if (CommonUtils.isNullOrUndefined(session)){
+                displayMessage('danger', <>{t('Session has expired')}</>)
+                setLoading(false)
                 return signOut()
+            }
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as EmbeddedLicenses
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === HttpStatus.UNAUTHORIZED) {
+                displayMessage('warning', <>{t('Unauthorized request')}</>)
+                setLoading(false)
                 return
+            }
+            else if (response.status === HttpStatus.OK) {
+                const data = await response.json() as EmbeddedLicenses
+                return data
             } else {
                 return undefined
             }
@@ -92,6 +99,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                         license.fullName ?? ''
                     ])
                     setTableData(data)
+                    setFetchedLicenses(data)
                 } else {
                     setTableData([])
                 }
@@ -113,33 +121,26 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
         setMainLicensesToPayload(newMainLicense)
     }
 
-    const searchLicenses= async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            displayMessage('danger', <>{t('Session has expired')}</>)
-            return signOut()
+    const searchLicenses = (searchText: string,
+                            licenses: Array<RowData> ): Array<RowData> => {
+        if (!searchText.trim()) {
+            return licenses
         }
-        const response = await ApiUtils.GET(`licenses`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
-            displayMessage('warning', <>{t('Unauthorized request')}</>)
-            return
-        }
-        if (response.status !== HttpStatus.OK) {
-            displayMessage('danger', <>{t('Error while processing')}</>)
-            return
-        }
-        const mainLicenses = await response.json() as EmbeddedLicenses
-        if (
-            !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']) &&
-            !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']['sw360:licenses'])
-        ) {
-            const data = mainLicenses['_embedded']['sw360:licenses'].map((license: LicenseDetail) => [
-                license,
-                license.fullName ?? ''
-            ])
-            setTableData(data)
-        }
-        setNewMainLicense(exisitngMainLicenses)
+        const normalizedSearchText = searchText.toLowerCase().trim();
+        return licenses.filter((row) => {
+            const license = row[0] as LicenseDetail
+            const fullName = (row[1] as string) || ''
+            const licenseId = license.id ?? ''
+            return (
+                (licenseId.toLowerCase().includes(normalizedSearchText)) ||
+                fullName.toLowerCase().includes(normalizedSearchText)
+            )
+        })
+    }
+    
+    const handleSearch = (searchText: string) => {
+        const filteredResults = searchLicenses(searchText, fetchedLicenses)
+        setTableData(filteredResults)
     }
 
     const resetSelection = () => {
@@ -169,7 +170,11 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
     ]
 
     return (
-        <Modal show={showMainLicenseModal} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal show={showMainLicenseModal}
+               onHide={handleCloseDialog}
+               backdrop='static'
+               centered size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Search Licenses')}</Modal.Title>
             </Modal.Header>
@@ -193,7 +198,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
                     <div className='col-lg-4'>
                         <button type='button'
                                 className='btn btn-secondary me-2'
-                                onClick={() => void searchLicenses()}
+                                onClick={() => void handleSearch(searchText.current)}
                         >
                             {t('Search')}
                         </button>
