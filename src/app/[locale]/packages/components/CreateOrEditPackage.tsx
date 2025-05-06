@@ -61,7 +61,9 @@ export default function CreateOrEditPackage({ packagePayload,
         packageVersion: '',
     })
     const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
-    const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
+    // const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
+    const [existingMainLicense, setExistingMainLicense] = useState<Array<string>>([])
+    const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
     // const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
 
     const handleReleaseName = () => {
@@ -104,6 +106,21 @@ export default function CreateOrEditPackage({ packagePayload,
         []
     )
 
+    const handleMainLicenseNameList = () => {
+        if(isEditPage){
+            const existingIds = packagePayload.licenseIds ?? [];
+            if(existingIds.length > 0){
+                const newMainLicenseNameList = fetchedLicenses
+                    .filter((license) => existingIds.includes(license[0] as string))
+                    .map((license) => license[1] as string)
+                setMainLicenseNameList(newMainLicenseNameList)
+            }
+        }
+        else {
+            setMainLicenseNameList([])
+        }
+    }
+
     useEffect(() => {
         try{
             fetchData('licenses')
@@ -122,7 +139,7 @@ export default function CreateOrEditPackage({ packagePayload,
                 } else {
                     setFetchedLicenses([])
                 }
-                setNewMainLicense(packagePayload.licenseIds ?? [])
+                setExistingMainLicense(packagePayload.licenseIds ?? [])
             })
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
@@ -131,13 +148,12 @@ export default function CreateOrEditPackage({ packagePayload,
             const message = error instanceof Error ? error.message : String(error)
             MessageService.error(message)
         }
-    }, [fetchData, showMainLicenseModal, setFetchedLicenses])
+    }, [fetchData])
 
-    // const handleMainLicenseNameList = () => {
-    //     if(isEditPage){
-    //         setMainLicenseNameList()
-    //     }
-    // }
+    useEffect(() => {
+        handleMainLicenseNameList()
+    }, [fetchedLicenses, packagePayload.licenseIds, isEditPage])
+
 
     return (
         <>
@@ -156,9 +172,7 @@ export default function CreateOrEditPackage({ packagePayload,
                                  setShowMainLicenseModal={setShowMainLicenseModal}
                                  setPackagePayload={setPackagePayload}
                                  fetchedLicenses={fetchedLicenses}
-                                 newMainLicense={newMainLicense}
-                                 setNewMainLicense={setNewMainLicense}
-                                //  setMainLicenseNameList={setMainLicenseNameList}
+                                 existingMainLicense={existingMainLicense}
             />
             <form
                 id='add_or_edit_package_form_submit'
@@ -356,7 +370,7 @@ export default function CreateOrEditPackage({ packagePayload,
                                 className='form-control'
                                 id='createOrEditPackage.licenseIds'
                                 placeholder={t('Click to set Licenses')}
-                                value={packagePayload.licenseIds?.join(', ') ?? ''}
+                                value={mainLicenseNameList.length ? mainLicenseNameList.join(', ') : ''}
                                 onClick={() => setShowMainLicenseModal(true)}
                                 readOnly
                             />
