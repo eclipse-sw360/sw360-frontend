@@ -18,30 +18,34 @@ import { Button, Modal } from 'react-bootstrap'
 interface Props {
     showMainLicenseModal: boolean
     fetchedLicenses: Array<RowData>
-    newMainLicense: Array<string>
-    setNewMainLicense: React.Dispatch<React.SetStateAction<Array<string>>>
+    existingMainLicense: Array<string>
     setPackagePayload: React.Dispatch<React.SetStateAction<Package>>
     setShowMainLicenseModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 type RowData = (string | LicenseDetail)[]
 
-export default function AddMainLicenseModal({ newMainLicense,
+export default function AddMainLicenseModal({ existingMainLicense,
                                               fetchedLicenses,
                                               showMainLicenseModal,
-                                              setNewMainLicense,
                                               setPackagePayload,
                                               setShowMainLicenseModal}: Props) : JSX.Element {
     const t = useTranslations('default')
     const searchText = useRef<string>('')
     const [tableData, setTableData] = useState<Array<RowData>>([])
-    const [,setNewMainLicenseFullName] = useState<Array<string>>([])
+    const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
 
     useEffect(() => {
         if (fetchedLicenses.length > 0) {
             setTableData(fetchedLicenses)
         }
     }, [fetchedLicenses])
+
+    useEffect(() => {
+        if (existingMainLicense.length > 0) {
+            setNewMainLicense(existingMainLicense)
+        }
+    }, [existingMainLicense])
 
     const searchLicenses = (searchText: string,
                             licenses: Array<RowData> ): Array<RowData> => {
@@ -65,31 +69,25 @@ export default function AddMainLicenseModal({ newMainLicense,
         setTableData(filteredResults)
     }
 
+    const handleCheckboxes = (licenseId: string) => {
+        setNewMainLicense((prevLicenseIds: string[]) => {
+            const index = prevLicenseIds.indexOf(licenseId)
+            if (index !== -1) {
+                const newIds = [...prevLicenseIds]
+                newIds.splice(index, 1)
+                return newIds
+            } else {
+                return [...prevLicenseIds, licenseId]
+            }
+        })
+    }
+
     const handleSelectLicense = () => {
         if (newMainLicense.length > 0) {
-            setPackagePayload((prevState: Package) => {
-                const existingIds = prevState.licenseIds || [];
-                const newIds = newMainLicense.filter(
-                    id => !existingIds.includes(id)
-                )
-                newIds.forEach((id: string) => {
-                    const license = fetchedLicenses.find((license: RowData) => license[0] === id)
-                    if (license) {
-                        const fullName = license[1] as string
-                        setNewMainLicenseFullName((prevFullNames: string[]) => {
-                            const index = prevFullNames.indexOf(fullName);
-                            if (index === -1) {
-                                return [...prevFullNames, fullName]
-                            }
-                            return prevFullNames
-                        })
-                    }
-                })
-                return {
-                    ...prevState,
-                    licenseIds: [...existingIds, ...newIds]
-                }
-            })
+            setPackagePayload((prevState: Package) => ({
+                ...prevState,
+                licenseIds: newMainLicense
+            }))
         }
     }
 
@@ -98,23 +96,11 @@ export default function AddMainLicenseModal({ newMainLicense,
     }
 
     const handleCloseDialog = () => {
-        setShowMainLicenseModal(!showMainLicenseModal)
-        setTableData([])
+        setShowMainLicenseModal(false)
+        setNewMainLicense(existingMainLicense)
+        setTableData(fetchedLicenses)
     }
 
-    const handleCheckboxes = (licenseId: string) => {
-        setNewMainLicense((prevLicenseIds: string[]) => {
-            const index = prevLicenseIds.indexOf(licenseId);
-            if (index !== -1) {
-                const newIds = [...prevLicenseIds];
-                newIds.splice(index, 1);
-                return newIds;
-            } else {
-                return [...prevLicenseIds, licenseId];
-            }
-        })
-        console.log('newMainLicense', newMainLicense)
-    }
 
     const columns = [
             {
@@ -199,10 +185,9 @@ export default function AddMainLicenseModal({ newMainLicense,
                 <Button type='button'
                         className='btn btn-primary'
                         onClick={() => {
-                                    handleSelectLicense
-                                    setTableData([])
-                                    setShowMainLicenseModal(!showMainLicenseModal)
-                                    setNewMainLicenseFullName([])
+                                    handleSelectLicense()
+                                    handleCloseDialog()
+                                    
                                     }
                                 }
                 >
