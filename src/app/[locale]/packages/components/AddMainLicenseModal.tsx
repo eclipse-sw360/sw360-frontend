@@ -144,7 +144,7 @@ export default function AddMainLicenseModal({ showMainLicenseModal,
     }
 
     const resetSelection = () => {
-        // TODO: specifications are unclear
+        setTableData(fetchedLicenses)
     }
 
     const columns = [
