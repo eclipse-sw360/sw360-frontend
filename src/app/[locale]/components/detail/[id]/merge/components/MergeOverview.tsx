@@ -17,9 +17,10 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
-import styles from '../merge.module.css'
 import ComponentTable from './ComponentTable'
 import MergeComponent from './MergeComponent'
+import MergeComponentConfirmation from './MergeConfirmation'
+import { redirect } from 'next/navigation'
 
 function GetNextState(currentState: MergeActionType): MergeActionType | null {
     if (currentState === MergeActionType.CHOOSE_SOURCE) {
@@ -49,6 +50,40 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
     const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
     const [finalComponentPayload, setFinalComponentPayload] = useState<null | Component>(null)
     const [err, setErr] = useState<null | string>(null)
+    const [loading, setLoading] = useState(false)
+
+    const handleMergeComponent = async () => {
+        try {
+            setLoading(true)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const payload = {
+                ...(finalComponentPayload ?? {})
+            }
+            delete payload['_embedded']
+            delete payload['_links']
+            const response = await ApiUtils.PATCH(
+                `components/mergecomponents?mergeTargetId=${targetComponent?.id}&mergeSourceId=${sourceComponent?.id}`, 
+                payload, 
+                session.user.access_token
+            )
+            if(response.status !== 200) {
+                const err = await response.json() as ErrorDetails
+                throw new Error(err.message)
+            }
+        } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setLoading(false)
+            redirect(`/components/detail/${id}`)
+        }
+    }
+
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
@@ -94,15 +129,15 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                             }
                         </div>
                         <div className='d-flex justify-content-between text-center mb-3'>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CHOOSE_SOURCE ? styles['merge-active'] : styles['merge']}`} role="alert">
+                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CHOOSE_SOURCE ? 'merge-active' : 'merge'}`} role="alert">
                                 <h6 className="fw-bold">1. {t('Choose source')}</h6>
                                 <p>{t('Choose a component that should be merged into the current one')}</p>
                             </div>
-                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.MERGE_DATA ? styles['merge-active'] : styles['merge']}`} role="alert">
+                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.MERGE_DATA ? 'merge-active' : 'merge'}`} role="alert">
                                 <h6 className="fw-bold">2. {t('Merge data')}</h6>
                                 <p>{t('Merge data from source into target component')}</p>
                             </div>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CONFIRM ? styles['merge-active'] : styles['merge']}`} role="alert">
+                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeActionType.CONFIRM ? 'merge-active' : 'merge'}`} role="alert">
                                 <h6 className="fw-bold">3. {t('Confirm')}</h6>
                                 <p>{t('Choose a component that should be merged into the current one')}</p>
                             </div>
@@ -126,7 +161,12 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                             />
                         }
                         {
-                            mergeState === MergeActionType.CONFIRM && <></>
+                            mergeState === MergeActionType.CONFIRM && 
+                            <MergeComponentConfirmation         
+                                targetComponent={targetComponent} 
+                                sourceComponent={sourceComponent}
+                                finalComponentPayload={finalComponentPayload} 
+                            />
                         }
                         <div className='d-flex justify-content-end mb-3'>
                             <div className="mt-3 btn-group col-2" role="group">
@@ -135,16 +175,20 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                                         setMergeState(GetPrevState(mergeState) as MergeActionType)
                                     }
                                 }}>{t('Back')}</button>
-                                <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceComponent === null} onClick={() => {
-                                    if (GetNextState(mergeState) !== null) {
-                                        if(sourceComponent !== null && sourceComponent.id === id) {
-                                            setErr('Please choose exactly one component, which is not the component itself!')
-                                            setTimeout(() => setErr(null), 5000)
-                                        } else {
-                                            setMergeState(GetNextState(mergeState) as MergeActionType)
+                                {
+                                    mergeState === MergeActionType.CONFIRM
+                                    ? <button type="button" className="btn btn-primary" onClick={handleMergeComponent} disabled={loading}>{t('Finish')}</button> 
+                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceComponent === null} onClick={() => {
+                                        if (GetNextState(mergeState) !== null) {
+                                            if(sourceComponent !== null && sourceComponent.id === id) {
+                                                setErr('Please choose exactly one component, which is not the component itself!')
+                                                setTimeout(() => setErr(null), 5000)
+                                            } else {
+                                                setMergeState(GetNextState(mergeState) as MergeActionType)
+                                            }
                                         }
-                                    }
-                                }}>{t('Next')}</button>
+                                    }}>{t('Next')}</button>
+                                }
                             </div>
                         </div>
                     </>

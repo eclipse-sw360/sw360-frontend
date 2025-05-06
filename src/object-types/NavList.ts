@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { NavItem } from '@/object-types'
+import { NavItem, UserGroupType } from '@/object-types'
 import { useTranslations } from 'next-intl'
 
 function NavList(): NavItem[] {
@@ -28,7 +28,7 @@ function NavList(): NavItem[] {
             href: '/admin',
             name: t('Admin'),
             id: 'admin',
-            visibility: 'ADMIN',
+            visibility: [UserGroupType.ADMIN, UserGroupType.SW360_ADMIN],
             childs: [
                 { href: '/admin/users', name: t('User'), id: 'admin_user' },
                 { href: '/admin/vendors', name: t('Vendors'), id: 'admin_vendors' },

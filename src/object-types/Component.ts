@@ -38,15 +38,11 @@ interface Component {
     modifiedOn?: string
     modifiedBy?: string
     createdBy?: string
+    attachments?: Attachment[]
     roles?: { [k: string]: Array<string> }
     setBusinessUnit?: boolean
     setVisbility?: boolean
-    defaultVendor?: {
-        type: string
-        url: string
-        shortName: string
-        fullName: string
-    }
+    defaultVendor?: Vendor
     _links?: Links
     _embedded?: {
         createdBy?: User
