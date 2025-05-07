@@ -51,7 +51,6 @@ export default function CreateOrEditPackage({ packagePayload,
     const router = useRouter()
     const t = useTranslations('default')
     const [releaseNameVersion, setReleaseNameVersion] = useState<string>('')
-    // const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
     const [showMainLicenseModal, setShowMainLicenseModal] = useState<boolean>(false)
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
@@ -61,10 +60,8 @@ export default function CreateOrEditPackage({ packagePayload,
         packageVersion: '',
     })
     const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
-    // const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
     const [existingMainLicense, setExistingMainLicense] = useState<Array<string>>([])
     const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
-    // const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
 
     const handleReleaseName = () => {
         if (isEditPage){
