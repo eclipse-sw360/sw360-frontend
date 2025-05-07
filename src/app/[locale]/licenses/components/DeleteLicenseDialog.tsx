@@ -62,7 +62,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
             } else {
                 displayMessage('danger', t('Error when processing'))
             }
-        } catch (err) {
+        } catch {
             handleError()
         }
     }

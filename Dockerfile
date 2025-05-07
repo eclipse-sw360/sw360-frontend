@@ -10,13 +10,13 @@
 # License-Filename: LICENSE
 
 ARG VARIANT=22-slim
-FROM node:${VARIANT} as build
+FROM node:${VARIANT} AS build
 
 RUN npm install -g pnpm
 
 WORKDIR /frontend
 
-# Prepare the build environment
+# Prepare the build environment 
 COPY . .
 RUN pnpm install && pnpm build
 

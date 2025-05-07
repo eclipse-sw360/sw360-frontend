@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 'use client'
 import { HttpStatus, Obligation } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -38,15 +37,15 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
     const [originalTitle, setOriginalTitle] = useState<string | undefined>('')
 
     useEffect(() => {
-        void(async () => {
+        void (async () => {
             try {
                 setIsLoading(true)
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                
+
                 const response = await ApiUtils.GET(`obligations/${obligationId}`, session.user.access_token)
-                if(response.status === HttpStatus.OK) {
-                    const data = await response.json() as Obligation
+                if (response.status === HttpStatus.OK) {
+                    const data = (await response.json()) as Obligation
                     if (Object.keys(data).length > 0) {
                         setObligation({
                             title: data.title,
@@ -61,7 +60,7 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
                 } else {
                     notFound()
                 }
-            } catch(e) {
+            } catch {
                 MessageService.error(t('Failed to load obligation data'))
             } finally {
                 setIsLoading(false)
@@ -86,7 +85,7 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
             return
         }
 
-        if(obligation.title == originalTitle) {
+        if (obligation.title == originalTitle) {
             MessageService.error(`${t('Obligation text has already taken')}.`)
             return
         }

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -33,7 +33,7 @@ interface DeleteResponse {
     status: number
 }
 
-const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props) : ReactNode => {
+const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props): ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
     const [component, setComponent] = useState<Component>(DEFAULT_COMPONENT_INFO)
@@ -54,11 +54,9 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     }, [t])
 
     const deleteComponent = async () => {
-        if (CommonUtils.isNullEmptyOrUndefinedString(componentId))
-            return
+        if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.DELETE(`components/${componentId}`, session.user.access_token)
         try {
             if (response.status === HttpStatus.MULTIPLE_STATUS) {
@@ -66,14 +64,16 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 const deleteStatus = body[0].status
                 if (deleteStatus === HttpStatus.OK) {
                     displayMessage('success', t('Delete component success!'))
-                    actionType === ActionType.EDIT && router.push('/components')
+                    if (actionType === ActionType.EDIT) {
+                        router.push('/components')
+                    }
                     setReloadPage(true)
                 } else if (deleteStatus === HttpStatus.CONFLICT) {
                     displayMessage(
                         'danger',
                         t(
-                            'The component cannot be deleted, since it contains releases Please delete the releases first'
-                        )
+                            'The component cannot be deleted, since it contains releases Please delete the releases first',
+                        ),
                     )
                 } else if (deleteStatus === HttpStatus.ACCEPTED) {
                     displayMessage('success', t('Created moderation request'))
@@ -85,22 +85,20 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
             } else {
                 handleError()
             }
-        } catch (err) {
+        } catch {
             handleError()
         }
     }
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
-            if (CommonUtils.isNullEmptyOrUndefinedString(componentId))
-                return
+            if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const componentsResponse = await ApiUtils.GET(
                 `components/${componentId}`,
                 session.user.access_token,
-                signal
+                signal,
             )
             if (componentsResponse.status === HttpStatus.OK) {
                 const component = (await componentsResponse.json()) as Component
@@ -112,7 +110,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 handleError()
             }
         },
-        [componentId, handleError]
+        [componentId, handleError],
     )
 
     const handleSubmit = () => {
@@ -142,12 +140,26 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     }, [show, componentId, fetchData])
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton style={{ color: 'red' }}>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{ color: 'red' }}
+            >
                 <Modal.Title>{t('Delete Component')} ?</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
+                <Alert
+                    variant={variant}
+                    onClose={() => setShowMessage(false)}
+                    dismissible
+                    show={showMessage}
+                >
                     {message}
                 </Alert>
                 <Form>
@@ -158,16 +170,28 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                     <hr />
                     <Form.Group className='mb-3'>
                         <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
-                        <Form.Control as='textarea' aria-label='With textarea' />
+                        <Form.Control
+                            as='textarea'
+                            aria-label='With textarea'
+                        />
                     </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {' '}
                     {t('Close')}{' '}
                 </Button>
-                <Button className='login-btn' variant='danger' onClick={() => handleSubmit()} hidden={reloadPage}>
+                <Button
+                    className='login-btn'
+                    variant='danger'
+                    onClick={() => handleSubmit()}
+                    hidden={reloadPage}
+                >
                     {t('Delete Component')}
                 </Button>
             </Modal.Footer>

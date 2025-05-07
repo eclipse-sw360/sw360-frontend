@@ -49,7 +49,7 @@ function GlobalMessages({ id = 'default-message'}: Props): JSX.Element {
                 if (CommonUtils.isNullEmptyOrUndefinedString(message.text)) {
                     setMessages(messages => {
                         // filter out messages without 'keepAfterRouteChange' flag
-                        const filteredMessages = messages.filter(m => m.keepAfterRouteChange);
+                        const filteredMessages = messages.filter(m => m.keepAfterRouteChange === true);
                             
                         // remove 'keepAfterRouteChange' flag on the rest
                         return omit(filteredMessages, 'keepAfterRouteChange')
