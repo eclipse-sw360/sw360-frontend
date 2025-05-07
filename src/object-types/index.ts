@@ -105,6 +105,7 @@ import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
 import ErrorDetails from './error'
 import Configuration from './Configuration'
+import ListFieldMerge from './ListMergeField'
 
 export type {
     AccessToken,
@@ -152,6 +153,7 @@ export type {
     LinkedReleaseData,
     LinkedVulnerability,
     Links,
+    ListFieldMerge,
     Message,
     MessageOptions,
     ModerationRequest,
@@ -230,7 +232,7 @@ import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 import ConfigKeys from './enums/ConfigKeys'
-import MergeActionType from './enums/MergeActionType'
+import ComponentProcessorActionType from './enums/ComponentProcessor'
 
 export {
     ActionType,
@@ -248,5 +250,5 @@ export {
     UserGroupType,
     VulnerabilitiesVerificationState,
     ConfigKeys,
-    MergeActionType
+    ComponentProcessorActionType
 }

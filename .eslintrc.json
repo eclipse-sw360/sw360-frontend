@@ -18,9 +18,7 @@
       "jsx": true
     }
   },
-  "ignorePatterns": [
-    "cypress"
-  ],
+  "ignorePatterns": ["cypress"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",

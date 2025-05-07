@@ -18,9 +18,6 @@ import { getSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
 import ComponentTable from '../../components/ComponentTable'
-import MergeComponent from './MergeComponent'
-import MergeComponentConfirmation from './MergeConfirmation'
-import { redirect } from 'next/navigation'
 
 function GetNextState(currentState: ComponentProcessorActionType): ComponentProcessorActionType | null {
     if (currentState === ComponentProcessorActionType.CHOOSE_SOURCE) {
@@ -42,47 +39,13 @@ function GetPrevState(currentState: ComponentProcessorActionType): ComponentProc
     }
 }
 
-export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNode {
+export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
-    const [mergeState, setMergeState] = useState<ComponentProcessorActionType>(ComponentProcessorActionType.CHOOSE_SOURCE)
+    const [splitState, setSplitState] = useState<ComponentProcessorActionType>(ComponentProcessorActionType.CHOOSE_SOURCE)
     const [targetComponent, setTargetComponent] = useState<null | Component>(null)
     const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
-    const [finalComponentPayload, setFinalComponentPayload] = useState<null | Component>(null)
     const [err, setErr] = useState<null | string>(null)
-    const [loading, setLoading] = useState(false)
-
-    const handleMergeComponent = async () => {
-        try {
-            setLoading(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const payload = {
-                ...(finalComponentPayload ?? {})
-            }
-            delete payload['_embedded']
-            delete payload['_links']
-            const response = await ApiUtils.PATCH(
-                `components/mergecomponents?mergeTargetId=${targetComponent?.id}&mergeSourceId=${sourceComponent?.id}`, 
-                payload, 
-                session.user.access_token
-            )
-            if(response.status !== 200) {
-                const err = await response.json() as ErrorDetails
-                throw new Error(err.message)
-            }
-        } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        } finally {
-            setLoading(false)
-            redirect(`/components/detail/${id}`)
-        }
-    }
 
     useEffect(() => {
         const controller = new AbortController()
@@ -123,23 +86,23 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                     ? <>
                         <div className='col-auto buttonheader-title mb-3'>
                             {
-                                t.rich('MERGE_INTO_COMPONENT', {
+                                t.rich('SPLIT_INTO_COMPONENT', {
                                     name: targetComponent.name,
                                 })
                             }
                         </div>
                         <div className='d-flex justify-content-between text-center mb-3'>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === ComponentProcessorActionType.CHOOSE_SOURCE ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
-                                <h6 className="fw-bold">1. {t('Choose source')}</h6>
-                                <p>{t('Choose a component that should be merged into the current one')}</p>
+                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === ComponentProcessorActionType.CHOOSE_SOURCE ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
+                                <h6 className="fw-bold">1. {t('Choose target')}</h6>
+                                <p>{t('Choose a component into which current one should be split')}</p>
                             </div>
-                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === ComponentProcessorActionType.PROCESS_DATA ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
-                                <h6 className="fw-bold">2. {t('Merge data')}</h6>
-                                <p>{t('Merge data from source into target component')}</p>
+                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${splitState === ComponentProcessorActionType.PROCESS_DATA ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
+                                <h6 className="fw-bold">2. {t('Split data')}</h6>
+                                <p>{t('Split data from current component to target component')}</p>
                             </div>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === ComponentProcessorActionType.CONFIRM ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
+                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === ComponentProcessorActionType.CONFIRM ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
                                 <h6 className="fw-bold">3. {t('Confirm')}</h6>
-                                <p>{t('Choose a component that should be merged into the current one')}</p>
+                                <p>{t('Check the split version and confirm')}</p>
                             </div>
                         </div>
                         {
@@ -149,42 +112,31 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                             </div>
                         }
                         {
-                            mergeState === ComponentProcessorActionType.CHOOSE_SOURCE && <ComponentTable component={sourceComponent} setComponent={setSourceComponent} />
+                            splitState === ComponentProcessorActionType.CHOOSE_SOURCE && <ComponentTable component={sourceComponent} setComponent={setSourceComponent} />
                         }
                         {
-                            mergeState === ComponentProcessorActionType.PROCESS_DATA && 
-                            <MergeComponent 
-                                targetComponent={targetComponent} 
-                                sourceComponent={sourceComponent} 
-                                finalComponentPayload={finalComponentPayload}
-                                setFinalComponentPayload={setFinalComponentPayload} 
-                            />
+                            splitState === ComponentProcessorActionType.PROCESS_DATA && <></>
                         }
                         {
-                            mergeState === ComponentProcessorActionType.CONFIRM && 
-                            <MergeComponentConfirmation         
-                                targetComponent={targetComponent} 
-                                sourceComponent={sourceComponent}
-                                finalComponentPayload={finalComponentPayload} 
-                            />
+                            splitState === ComponentProcessorActionType.CONFIRM && <></>
                         }
                         <div className='d-flex justify-content-end mb-3'>
                             <div className="mt-3 btn-group col-2" role="group">
-                                <button type="button" className="btn btn-secondary" disabled={GetPrevState(mergeState) === null} onClick={() => {
-                                    if (GetPrevState(mergeState) !== null) {
-                                        setMergeState(GetPrevState(mergeState) as ComponentProcessorActionType)
+                                <button type="button" className="btn btn-secondary" disabled={GetPrevState(splitState) === null} onClick={() => {
+                                    if (GetPrevState(splitState) !== null) {
+                                        setSplitState(GetPrevState(splitState) as ComponentProcessorActionType)
                                     }
                                 }}>{t('Back')}</button>
                                 {
-                                    mergeState === ComponentProcessorActionType.CONFIRM
-                                    ? <button type="button" className="btn btn-primary" onClick={handleMergeComponent} disabled={loading}>{t('Finish')}</button> 
-                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceComponent === null} onClick={() => {
-                                        if (GetNextState(mergeState) !== null) {
+                                    splitState === ComponentProcessorActionType.CONFIRM
+                                    ? <button type="button" className="btn btn-primary">{t('Finish')}</button> 
+                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(splitState) === null || sourceComponent === null} onClick={() => {
+                                        if (GetNextState(splitState) !== null) {
                                             if(sourceComponent !== null && sourceComponent.id === id) {
                                                 setErr('Please choose exactly one component, which is not the component itself!')
                                                 setTimeout(() => setErr(null), 5000)
                                             } else {
-                                                setMergeState(GetNextState(mergeState) as ComponentProcessorActionType)
+                                                setSplitState(GetNextState(splitState) as ComponentProcessorActionType)
                                             }
                                         }
                                     }}>{t('Next')}</button>

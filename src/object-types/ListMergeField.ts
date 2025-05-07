@@ -7,10 +7,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum MergeActionType {
-    CHOOSE_SOURCE = 'CHOOSE_SOURCE',
-    MERGE_DATA = 'MERGE_DATA',
-    CONFIRM = 'CONFIRM'
+export default interface ListFieldMerge {
+    value: string
+    presentInSource: boolean
+    presentInTarget: boolean
+    overWritten: boolean
 }
-
-export default MergeActionType

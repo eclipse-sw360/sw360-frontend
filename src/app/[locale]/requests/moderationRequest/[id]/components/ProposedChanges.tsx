@@ -20,11 +20,11 @@ import {
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { TDataArray } from 'gridjs/dist/src/types'
-import { signOut, useSession, getSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import { notFound } from 'next/navigation'
-import { ReactNode, useEffect, useState, type JSX } from 'react';
+import { ReactNode, useEffect, useState, type JSX } from 'react'
 import TableHeader from './TableHeader'
 
 interface interimDataType {
@@ -39,6 +39,8 @@ type ArrayType = Array<
         [Array<string | Array<string> | JSX.Element | Array<JSX.Element> | undefined>, boolean],
     ]
 >
+
+type PropsDataType = Component | Project | ReleaseDetail | undefined
 
 export default function ProposedChanges({
     moderationRequestData,
@@ -103,18 +105,18 @@ export default function ProposedChanges({
     ]
 
     const fetchData = async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == HttpStatus.OK) {
+            const data = await response.json()
+            return data
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            notFound()
         }
+    }
 
     const convertToReactNode = (
         value: string | object | Array<object> | boolean | number | Array<string> | undefined,
@@ -146,7 +148,6 @@ export default function ProposedChanges({
                 requestDeletionType as keyof ModerationRequestDetails
             ] as interimDataType
             const changedData: ArrayType = []
-            let propsDataType: Component | Project | ReleaseDetail | undefined
             let isObject = false
 
             // Check if there is a document delete request raised
@@ -302,8 +303,8 @@ export default function ProposedChanges({
                         )
                         changedData.push([
                             key,
-                            Object.hasOwn(interimData, key) && interimData[key as keyof typeof propsDataType] !== ''
-                                ? [interimData[key as keyof typeof propsDataType], isObject]
+                            Object.hasOwn(interimData, key) && interimData[key as keyof PropsDataType] !== ''
+                                ? [key in interimData ? interimData[key as keyof PropsDataType] : '', isObject]
                                 : ['', isObject],
                             '',
                             [updatedValue, isObject],

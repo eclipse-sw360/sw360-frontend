@@ -9,15 +9,15 @@
 
 'use client'
 
-import { Embedded, Vendor } from '@/object-types'
-import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { Embedded, HttpStatus, Vendor } from '@/object-types'
+import { ApiUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { QuickFilter, Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState, type JSX } from 'react';
-import { Spinner } from 'react-bootstrap'
+import { notFound, useRouter } from 'next/navigation'
+import { useEffect, useState, type JSX } from 'react';
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { FiEdit2 } from 'react-icons/fi'
 import { IoMdGitMerge } from 'react-icons/io'
@@ -27,14 +27,38 @@ type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 export default function VendorsList(): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
-    const { data: session, status } = useSession()
 
     const [numVendors, setNumVendors] = useState<null | number>(null)
-
+    const [VendorData, setVendorData] = useState<Array<(Vendor | JSX.Element)[]>>([])
+    const [delVendor, setDelVendor] = useState<boolean>(true)
+    const [loading, setLoading] = useState<boolean>(true)
     const handleAddVendor = () => {
         router.push('/admin/vendors/add')
     }
 
+    const DeleteVendor = async(vendorId: string) => {
+        try {
+            const session = await getSession()
+            if (!session) {
+                return signOut()
+            }
+            const response = await ApiUtils.DELETE(
+                `vendors/${vendorId}`,
+                session.user.access_token,
+            )
+            if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else if (response.status !== HttpStatus.NO_CONTENT) {
+                return notFound()
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                throw new Error(e.message)
+            }
+        }finally{
+            setDelVendor((prev) => !prev)
+        }
+    }
     const columns = [
         {
             id: 'vendors.fullName',
@@ -63,34 +87,77 @@ export default function VendorsList(): JSX.Element {
             id: 'vendors.actions',
             name: t('Actions'),
             width: '8%',
-            formatter: () =>
-                _(
+            formatter: (cell:string) =>{
+                const VendorId=cell.toString().split('/resource/api/vendors/')[1];
+                return _(
                     <div className='d-flex justify-content-between'>
                         <Link href='#' className='text-link'>
                             <FiEdit2 className='btn-icon' />
                         </Link>
-                        <FaTrashAlt className='btn-icon' />
+                       
+                        <OverlayTrigger overlay={<Tooltip>{t('Delete Vendor')}</Tooltip>}>
+                            <span
+                                className='d-inline-block'
+                                onClick={()=>{DeleteVendor(VendorId)}}
+                            >
+                                <FaTrashAlt className='btn-icon' />
+
+                            </span>
+                        </OverlayTrigger>
                         <IoMdGitMerge className='btn-icon' />
                     </div>
-                ),
+                )
+            },
             sort: true,
         },
     ]
 
-    const server = {
-        url: `${SW360_API_URL}/resource/api/vendors`,
-        then: (data: EmbeddedVendors) => {
-            setNumVendors(data.page?.totalElements ?? 0)
-            return data._embedded['sw360:vendors'].map((elem: Vendor) => [
-                elem.fullName ?? '',
-                elem.shortName ?? '',
-                elem.url ?? '',
-            ])
-        },
-        total: (data: EmbeddedVendors) => data.page?.totalElements ?? 0,
-        headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
-    }
+    useEffect(()=>{
+        void (async() => {
+            setLoading(true)
+            const controller = new AbortController()
+            const signal = controller.signal
+            try {
+                const session = await getSession()
+                if (!session) {
+                    return signOut()
+                }
+                const response = await ApiUtils.GET(
+                    `vendors`,
+                    session.user.access_token,
+                    signal
+                )
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const vendors = (await response.json()) as EmbeddedVendors
 
+                // Set the total number of vendors
+                setNumVendors(vendors.page?.totalElements ?? 0)
+
+                // Set the vendor data with proper type safety
+                setVendorData(
+                    vendors._embedded?.['sw360:vendors']?.map((elem: Vendor) => {
+                        return [
+                            elem.fullName ?? '',
+                            elem.shortName ?? '',
+                            elem.url ?? '',
+                            elem._links?.self?.href ?? '',
+                        ] as (Vendor | JSX.Element)[]
+                    }) ?? []
+                )
+            } catch (e) {
+                if (e instanceof Error) {
+                    throw new Error(e.message)
+                }
+            }finally{
+                setLoading(false)
+                controller.abort();
+            }
+        })()
+    },[delVendor,])
     return (
         <>
             <div className='container page-content'>
@@ -108,8 +175,13 @@ export default function VendorsList(): JSX.Element {
                             </div>
                             <div className='col-auto buttonheader-title'>{`${t('VENDORS')} (${numVendors ?? ''})`}</div>
                         </div>
-                        {status === 'authenticated' ? (
-                            <Table columns={columns} server={server} selector={true} sort={false} />
+                        {!loading ? (
+                            <Table 
+                                columns={columns} 
+                                data={VendorData}
+                                selector={true} 
+                                sort={false} 
+                            />
                         ) : (
                             <div className='col-12 d-flex justify-content-center align-items-center'>
                                 <Spinner className='spinner' />

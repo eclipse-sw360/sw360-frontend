@@ -1437,3 +1437,33 @@ input[checked]+.slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+
+.componentprocessor-active {
+    background-color: var(--sw360-primary-color) !important;
+    border-color: var(--sw360-primary-color) !important;
+}
+  
+.componentprocessor {
+    background-color: #f1f2f5 !important;
+    border-color: #cdced9 !important;
+}
+
+.text-blue {
+    color: #5D8EA9;
+}
+
+.border.border-blue {
+    border-color: #5D8EA9 !important;
+}
+
+.border-bottom.border-blue {
+    border-color: #5D8EA9 !important;
+}
+
+.green {
+    color: green;
+}
+
+.orange {
+    background-color: #fff4ec;
+}

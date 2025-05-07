@@ -9,59 +9,56 @@
 // License-Filename: LICENSE
 
 'use client';
+
 import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 import { ReleaseClearingStateMapping } from '@/object-types'
-
-import type { JSX } from "react";
+import type { JSX } from "react"
+import type { useTranslations } from 'next-intl'
 
 interface Props {
     isRelease: boolean
     clearingState: string
     projectState?: string
-    t?: any
+    t?: ReturnType<typeof useTranslations>  
 }
 
-const capitalize = (text: string) => {
+const capitalize = (text: string): string => {
     return text
         ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '').trim()
         : ''
 }
 
-const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props) : JSX.Element => {
-
+function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props): JSX.Element {
     return (
         <div className='text-center'>
-            {
-                (isRelease === true)
-                    ?
-                    <OverlayTrigger
-                        overlay={
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                            <Tooltip>{`${t('Release Clearing State')}: ${t(ReleaseClearingStateMapping[
-                                clearingState as keyof typeof ReleaseClearingStateMapping])}`}
-                            </Tooltip>
-                        }
-                    >
-                        {(clearingState === 'NEW_CLEARING' || clearingState === 'NEW') ? (
-                            <span className='state-box clearingStateOpen capsule-left capsule-right'>{'CS'}</span>
-                        ) : (clearingState === 'REPORT_AVAILABLE') ? (
-                            <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>{'CS'}</span>
-                        ) : (clearingState === 'UNDER_CLEARING') ? (
-                            <span className='state-box clearingStateInProgress capsule-left capsule-right'>{'CS'}</span>
-                        ) : (clearingState === 'INTERNAL_USE_SCAN_AVAILABLE') ? (
-                            <span className='state-box clearingStateUnknown capsule-left capsule-right'>{'CS'}</span>
-                        ) : (clearingState === 'SENT_TO_CLEARING_TOOL' || clearingState === 'SCAN_AVAILABLE') ? (
-                            <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>{'CS'}</span>
-                        ): (
-                            <span className='state-box clearingStateApproved capsule-left capsule-right'>{'CS'}</span>
-                        )}
-                    </OverlayTrigger>
-                    :
-                    <>
-                        {(projectState !== undefined) && <OverlayTrigger
+            {isRelease ? (
+                <OverlayTrigger
+                    overlay={
+                        <Tooltip>{`${t?.('Release Clearing State')}: ${t?.(
+                            ReleaseClearingStateMapping[clearingState as keyof typeof ReleaseClearingStateMapping]
+                        )}`}</Tooltip>
+                    }
+                >
+                    {(clearingState === 'NEW_CLEARING' || clearingState === 'NEW') ? (
+                        <span className='state-box clearingStateOpen capsule-left capsule-right'>{'CS'}</span>
+                    ) : (clearingState === 'REPORT_AVAILABLE') ? (
+                        <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>{'CS'}</span>
+                    ) : (clearingState === 'UNDER_CLEARING') ? (
+                        <span className='state-box clearingStateInProgress capsule-left capsule-right'>{'CS'}</span>
+                    ) : (clearingState === 'INTERNAL_USE_SCAN_AVAILABLE') ? (
+                        <span className='state-box clearingStateUnknown capsule-left capsule-right'>{'CS'}</span>
+                    ) : (clearingState === 'SENT_TO_CLEARING_TOOL' || clearingState === 'SCAN_AVAILABLE') ? (
+                        <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>{'CS'}</span>
+                    ) : (
+                        <span className='state-box clearingStateApproved capsule-left capsule-right'>{'CS'}</span>
+                    )}
+                </OverlayTrigger>
+            ) : (
+                <>
+                    {projectState !== undefined && (
+                        <OverlayTrigger
                             overlay={
-                                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                                <Tooltip>{`${t('Project State')}: ${t(capitalize(projectState))}`}</Tooltip>
+                                <Tooltip>{`${t?.('Project State')}: ${t?.(capitalize(projectState))}`}</Tooltip>
                             }
                         >
                             {projectState === 'ACTIVE' ? (
@@ -70,23 +67,22 @@ const ClearingStateBadge = ({ isRelease, clearingState, projectState, t }: Props
                                 <span className='state-box projectStateInactive capsule-left'>{'PS'}</span>
                             )}
                         </OverlayTrigger>
+                    )}
+                    <OverlayTrigger
+                        overlay={
+                            <Tooltip>{`${t?.('Project Clearing State')}: ${t?.(capitalize(clearingState))}`}</Tooltip>
                         }
-                        <OverlayTrigger
-                            overlay={
-                                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                                <Tooltip>{`${t('Project Clearing State')}: ${t(capitalize(clearingState))}`}</Tooltip>
-                            }
-                        >
-                            {clearingState === 'OPEN' ? (
-                                <span className='state-box clearingStateOpen capsule-right'>{'CS'}</span>
-                            ) : clearingState === 'IN_PROGRESS' ? (
-                                <span className='state-box clearingStateInProgress capsule-right'>{'CS'}</span>
-                            ) : (
-                                <span className='state-box clearingStateApproved capsule-right'>{'CS'}</span>
-                            )}
-                        </OverlayTrigger>
-                    </>
-            }
+                    >
+                        {clearingState === 'OPEN' ? (
+                            <span className='state-box clearingStateOpen capsule-right'>{'CS'}</span>
+                        ) : clearingState === 'IN_PROGRESS' ? (
+                            <span className='state-box clearingStateInProgress capsule-right'>{'CS'}</span>
+                        ) : (
+                            <span className='state-box clearingStateApproved capsule-right'>{'CS'}</span>
+                        )}
+                    </OverlayTrigger>
+                </>
+            )}
         </div>
     )
 }

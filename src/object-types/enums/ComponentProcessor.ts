@@ -1,4 +1,3 @@
-// Copyright (C) Helio Chissini de Castro, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
@@ -8,14 +7,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import UserGroupType from "./enums/UserGroupType"
-
-type NavItem = {
-    href: string
-    name: string
-    id: string
-    visibility?: UserGroupType[]
-    childs?: Array<NavItem>
+enum ComponentProcessorActionType {
+    CHOOSE_SOURCE = 'CHOOSE_SOURCE',
+    PROCESS_DATA = 'PROCESS_DATA',
+    CONFIRM = 'CONFIRM'
 }
 
-export default NavItem
+export default ComponentProcessorActionType

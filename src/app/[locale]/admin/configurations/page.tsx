@@ -10,12 +10,13 @@
 
 import FeatureConfigurations from './components/FeatureConfigurations'
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 
 export const metadata: Metadata = {
     title: 'Configurations',
 }
 
-const ConfigurationsPage = () => {
+const ConfigurationsPage = (): JSX.Element => {
     return <FeatureConfigurations />
 }
 

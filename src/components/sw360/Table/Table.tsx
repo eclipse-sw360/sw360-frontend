@@ -13,7 +13,7 @@ import { Config, Grid } from 'gridjs'
 import * as React from 'react'
 import { Component, RefObject, createRef } from 'react'
 import { Form } from 'react-bootstrap'
-
+import type { JSX } from 'react'
 const defaultOptions = {
     pagination: { limit: 10 },
     search: false,
@@ -102,7 +102,7 @@ class Table extends Component<TableProps, unknown> {
             .forceRender()
     }
 
-    render(): React.ReactElement<any> {
+    render(): JSX.Element {
         return (
             <>
                 {(this.props.selector === true) && (
