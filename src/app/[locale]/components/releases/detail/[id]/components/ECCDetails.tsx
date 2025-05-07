@@ -60,6 +60,16 @@ const ECCDetails = ({ release }: Props) : ReactNode => {
                         <td>{release.eccInformation?.eccComment}</td>
                     </tr>
                     <tr>
+                        <td>{t('Contains Cryptography')}:</td>
+                        <td>
+                            {release.eccInformation?.containsCryptography === true
+                                ? t('Yes')
+                                : release.eccInformation?.containsCryptography === false
+                                ? t('No')
+                                : t('Not Specified')}
+                        </td>
+                    </tr>
+                    <tr>
                         <td>{t('Assessor Contact Person')}:</td>
                         <td>{release.eccInformation?.assessorContactPerson}</td>
                     </tr>
