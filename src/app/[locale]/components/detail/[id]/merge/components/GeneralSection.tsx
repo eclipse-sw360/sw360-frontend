@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Component, Vendor, ListFieldMerge } from "@/object-types"
+import { Component, Vendor, ListFieldProcessComponent } from "@/object-types"
 import { useTranslations } from "next-intl"
 import { ReactNode, SetStateAction, Dispatch, useEffect, useState } from "react"
 import { FaLongArrowAltLeft } from "react-icons/fa"
@@ -27,7 +27,7 @@ export default function GeneralSection(
 
     const t = useTranslations('default')
     const [defaultVendor, setDefaultVendor] = useState<Vendor>({})
-    const [categoryMergeList, setCategoryMergeList] = useState<ListFieldMerge[]>([])
+    const [categoryMergeList, setCategoryMergeList] = useState<ListFieldProcessComponent[]>([])
 
     useEffect(() => {
         setDefaultVendor(targetComponent?._embedded?.defaultVendor ?? {})

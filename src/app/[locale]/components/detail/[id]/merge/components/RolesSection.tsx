@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Component, ListFieldMerge } from "@/object-types"
+import { Component, ListFieldProcessComponent } from "@/object-types"
 import { useTranslations } from "next-intl"
 import { ReactNode, SetStateAction, Dispatch, useEffect, useState } from "react"
 import { FaLongArrowAltLeft } from "react-icons/fa"
@@ -25,7 +25,7 @@ export default function RolesSection(
     }): ReactNode {
 
     const t = useTranslations('default')
-    const [moderatorsMergeList, setModeratorsMergeList] = useState<ListFieldMerge[]>([])
+    const [moderatorsMergeList, setModeratorsMergeList] = useState<ListFieldProcessComponent[]>([])
 
     useEffect(() => {
         setModeratorsMergeList([

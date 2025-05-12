@@ -24,6 +24,7 @@ interface Component {
     ownerCountry?: string
     visbility?: string
     externalIds?: { [k: string]: string }
+    releaseIds?: string[]
     additionalData?: { [k: string]: string }
     mainLicenseIds?: Array<string>
     defaultVendorId?: string

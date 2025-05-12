@@ -18,6 +18,9 @@ import { getSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
 import ComponentTable from '../../components/ComponentTable'
+import SplitComponent from './SplitData'
+import SplitComponentConfirmation from './ConfirmSplit'
+import { redirect } from 'next/navigation'
 
 function GetNextState(currentState: ComponentProcessorActionType): ComponentProcessorActionType | null {
     if (currentState === ComponentProcessorActionType.CHOOSE_SOURCE) {
@@ -39,6 +42,11 @@ function GetPrevState(currentState: ComponentProcessorActionType): ComponentProc
     }
 }
 
+interface SplitComponentPayload {
+    srcComponent: Component
+    targetComponent: Component
+}
+
 export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
@@ -46,6 +54,52 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
     const [targetComponent, setTargetComponent] = useState<null | Component>(null)
     const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
     const [err, setErr] = useState<null | string>(null)
+    const [loading, setLoading] = useState(false)
+
+    const handleSplitComponent = async () => {
+        try {
+            setLoading(true)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+
+            const srcPayload = {
+                ...(sourceComponent ?? {})
+            } as Component
+            delete srcPayload['_embedded']
+            delete srcPayload['_links']
+
+            const targetPayload = {
+                ...(targetComponent ?? {})
+            } as Component
+            delete targetPayload['_embedded']
+            delete targetPayload['_links']
+
+            const payload: SplitComponentPayload = {
+                srcComponent: srcPayload,
+                targetComponent: targetPayload
+            }
+
+            const response = await ApiUtils.PATCH(
+                'components/splitComponents', 
+                payload, 
+                session.user.access_token
+            )
+            if(response.status !== 200) {
+                const err = await response.json() as ErrorDetails
+                throw new Error(err.message)
+            }
+        } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setLoading(false)
+            redirect(`/components/detail/${id}`)
+        }
+    }
 
     useEffect(() => {
         const controller = new AbortController()
@@ -62,7 +116,7 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
                         return signOut()
                     } else if (response.status === HttpStatus.OK) {
                         const component = await response.json() as Component
-                        setTargetComponent(component)
+                        setSourceComponent(component)
                     } else {
                         const err = await response.json() as ErrorDetails
                         throw new Error(err.message)
@@ -82,12 +136,12 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
     return (
         <div className='mx-5 mt-3'>
             {
-                targetComponent
+                sourceComponent
                     ? <>
                         <div className='col-auto buttonheader-title mb-3'>
                             {
                                 t.rich('SPLIT_INTO_COMPONENT', {
-                                    name: targetComponent.name,
+                                    name: sourceComponent.name,
                                 })
                             }
                         </div>
@@ -112,13 +166,19 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
                             </div>
                         }
                         {
-                            splitState === ComponentProcessorActionType.CHOOSE_SOURCE && <ComponentTable component={sourceComponent} setComponent={setSourceComponent} />
+                            splitState === ComponentProcessorActionType.CHOOSE_SOURCE && <ComponentTable component={targetComponent} setComponent={setTargetComponent} />
                         }
                         {
-                            splitState === ComponentProcessorActionType.PROCESS_DATA && <></>
+                            splitState === ComponentProcessorActionType.PROCESS_DATA &&
+                            <SplitComponent 
+                                sourceComponent={sourceComponent}
+                                targetComponent={targetComponent}
+                                setSourceComponent={setSourceComponent}
+                                setTargetComponent={setTargetComponent}
+                            />
                         }
                         {
-                            splitState === ComponentProcessorActionType.CONFIRM && <></>
+                            splitState === ComponentProcessorActionType.CONFIRM && <SplitComponentConfirmation sourceComponent={sourceComponent} targetComponent={targetComponent} />
                         }
                         <div className='d-flex justify-content-end mb-3'>
                             <div className="mt-3 btn-group col-2" role="group">
@@ -129,10 +189,10 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
                                 }}>{t('Back')}</button>
                                 {
                                     splitState === ComponentProcessorActionType.CONFIRM
-                                    ? <button type="button" className="btn btn-primary">{t('Finish')}</button> 
-                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(splitState) === null || sourceComponent === null} onClick={() => {
+                                    ? <button type="button" className="btn btn-primary" onClick={handleSplitComponent} disabled={loading}>{t('Finish')}</button> 
+                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(splitState) === null || targetComponent === null} onClick={() => {
                                         if (GetNextState(splitState) !== null) {
-                                            if(sourceComponent !== null && sourceComponent.id === id) {
+                                            if(targetComponent !== null && targetComponent.id === id) {
                                                 setErr('Please choose exactly one component, which is not the component itself!')
                                                 setTimeout(() => setErr(null), 5000)
                                             } else {
