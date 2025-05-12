@@ -30,7 +30,7 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "19.8.0",
+    "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.0",
     "@eslint/config-array": "^0.20.0",
     "@types/country-list": "^2.1.4",
