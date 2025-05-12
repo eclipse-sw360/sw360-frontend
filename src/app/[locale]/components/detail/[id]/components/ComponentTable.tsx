@@ -28,7 +28,7 @@ export default function ComponentTable({ component, setComponent }: Readonly<{ c
         {
             id: 'components.merge.select',
             width: '5%',
-            formatter: (comp: Component) => _(<Form.Check type='radio' name='sourceComponent' checked={component !== null && comp.id === component.id} onChange={() => setComponent(comp)}></Form.Check>),
+            formatter: (comp: Component) => _(<Form.Check type='radio' checked={component !== null && comp.id === component.id} onChange={() => setComponent(comp)}></Form.Check>),
         },
         {
             id: 'components.merge.name',

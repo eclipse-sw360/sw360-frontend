@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface ListFieldMerge {
+export default interface ListFieldProcessComponent {
     value: string
     presentInSource: boolean
     presentInTarget: boolean

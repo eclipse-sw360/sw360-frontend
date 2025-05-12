@@ -101,7 +101,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
 
     const initServerPaginationConfig = (session: Session) => {
         return {
-            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, searchParams),
+            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, { ...searchParams, allDetails: 'true' }),
             then: (data: Embedded<Component, 'sw360:components'>) => {
                 setNumberOfComponent(data.page ? data.page.totalElements : 0)
                 return data._embedded['sw360:components'].map((item: Component) => [

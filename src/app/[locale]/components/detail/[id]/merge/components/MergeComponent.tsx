@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Component, ListFieldMerge, Attachment } from "@/object-types"
+import { Component, ListFieldProcessComponent, Attachment } from "@/object-types"
 import { useTranslations } from "next-intl"
 import { ReactNode, SetStateAction, Dispatch, useEffect, useState } from "react"
 import { FaLongArrowAltLeft } from "react-icons/fa"
@@ -19,7 +19,7 @@ import GeneralSection from "./GeneralSection"
 import RolesSection from "./RolesSection"
 
 interface AdditionalRolesMergeLists { 
-    [k: string]: ListFieldMerge[]
+    [k: string]: ListFieldProcessComponent[]
 }
 
 export default function MergeComponent(
@@ -31,10 +31,10 @@ export default function MergeComponent(
     }): ReactNode {
 
     const t = useTranslations('default')
-    const [externalIdsMergeList, setExternalIdsMergeList] = useState<ListFieldMerge[]>([])
-    const [additionalDataMergeList, setAdditionalDataMergeList] = useState<ListFieldMerge[]>([])
+    const [externalIdsMergeList, setExternalIdsMergeList] = useState<ListFieldProcessComponent[]>([])
+    const [additionalDataMergeList, setAdditionalDataMergeList] = useState<ListFieldProcessComponent[]>([])
     const [additionalRolesMergeLists, setAdditionalRolesMergeLists] = useState<AdditionalRolesMergeLists>({})
-    const [attachmentsMergeList, setAttachmentsMergeList] = useState<ListFieldMerge[]>([])
+    const [attachmentsMergeList, setAttachmentsMergeList] = useState<ListFieldProcessComponent[]>([])
 
     useEffect(() => {
         setFinalComponentPayload({ 
