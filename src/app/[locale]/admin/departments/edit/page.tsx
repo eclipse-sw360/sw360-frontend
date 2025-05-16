@@ -18,7 +18,7 @@ import { HttpStatus, User, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { useTranslations } from 'next-intl'
 import SecondaryDepartments from '../components/SecondaryDepartments'
-import { PageSpinner } from 'next-sw360'
+import { PageSpinner } from '@/sw360'
 import { FaTrashAlt } from 'react-icons/fa'
 import { Button } from 'react-bootstrap'
 

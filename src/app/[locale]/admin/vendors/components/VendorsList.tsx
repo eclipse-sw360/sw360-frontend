@@ -15,7 +15,7 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { QuickFilter, Table, _ } from 'next-sw360'
+import { QuickFilter, Table, _ } from '@/sw360'
 import Link from 'next/link'
 import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react';

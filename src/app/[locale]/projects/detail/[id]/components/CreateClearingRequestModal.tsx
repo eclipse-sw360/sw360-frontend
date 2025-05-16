@@ -13,7 +13,7 @@ import { ClearingRequestDetails, CreateClearingRequestPayload, HttpStatus } from
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
+import { SelectUsersDialog, ShowInfoOnHover } from '@/sw360'
 import { Dispatch, SetStateAction, useCallback, useEffect, useState, type JSX } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'

@@ -13,7 +13,7 @@ import { HttpStatus, NodeData, Embedded, Project, LicenseClearing, Release, User
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { TreeTable } from 'next-sw360'
+import { TreeTable } from '@/sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react';

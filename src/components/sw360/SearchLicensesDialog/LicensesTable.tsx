@@ -11,11 +11,11 @@
 'use client'
 
 import React, { type JSX } from 'react';
-import { Table } from 'next-sw360'
+import { Table } from '@/sw360'
 import { Form } from 'react-bootstrap'
 
 import { LicenseDetail } from '@/object-types'
-import { _ } from 'next-sw360'
+import { _ } from '@/sw360'
 
 interface Props {
     licenseDatas: Array<(LicenseDetail | string)[]>

@@ -11,7 +11,7 @@
 
 import { Embedded, HttpStatus, LicenseDetail, Package } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { ShowInfoOnHover } from 'next-sw360'
+import { ShowInfoOnHover } from '@/sw360'
 import { useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { IoIosClose } from 'react-icons/io'

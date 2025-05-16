@@ -14,7 +14,7 @@ import { SW360_API_URL } from '@/utils/env'
 import { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { QuickFilter, Table, _ } from 'next-sw360'
+import { QuickFilter, Table, _ } from '@/sw360'
 import { ReactNode } from 'react'
 import { Spinner } from 'react-bootstrap'
 

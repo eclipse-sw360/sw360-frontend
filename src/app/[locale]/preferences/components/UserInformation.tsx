@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
 import { User } from '@/object-types'
-import { Gravatar } from 'next-sw360'
+import { Gravatar } from '@/sw360'
 
 import styles from '../preferences.module.css'
 import { ReactNode } from 'react'

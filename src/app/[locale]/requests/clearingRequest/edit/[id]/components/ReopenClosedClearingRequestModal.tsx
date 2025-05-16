@@ -15,7 +15,7 @@ import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState }
 import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
 import { CreateClearingRequestPayload } from "@/object-types"
 import { FaRegQuestionCircle } from "react-icons/fa"
-import { ShowInfoOnHover } from "next-sw360"
+import { ShowInfoOnHover } from "@/sw360"
 
 interface Props {
     show: boolean

@@ -16,7 +16,7 @@ import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { EnumValueWithToolTip, TreeTable, _ } from 'next-sw360'
+import { EnumValueWithToolTip, TreeTable, _ } from '@/sw360'
 import Link from 'next/link'
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import { ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'

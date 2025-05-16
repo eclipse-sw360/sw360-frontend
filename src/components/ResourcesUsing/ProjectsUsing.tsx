@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Table, _ } from '@/components/sw360'
+import { Table, _ } from '@/sw360'
 import { Project, RestrictedResource } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'

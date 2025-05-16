@@ -20,7 +20,7 @@ import React, { useEffect, useState, type JSX } from 'react';
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 import { NodeData } from '@/object-types'
-import { Table, _ } from 'next-sw360'
+import { Table } from '@/sw360'
 import { OneDArray, TColumn } from 'gridjs/dist/src/types'
 import { ComponentChild } from 'preact'
 import { SearchConfig } from 'gridjs/dist/src/view/plugin/search/search'

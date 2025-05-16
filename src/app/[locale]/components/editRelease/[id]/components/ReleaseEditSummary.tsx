@@ -26,7 +26,7 @@ import {
     Vendor,
 } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
+import { AddAdditionalRoles, AddKeyValue } from '@/sw360'
 
 interface Props {
     release: ReleaseDetail

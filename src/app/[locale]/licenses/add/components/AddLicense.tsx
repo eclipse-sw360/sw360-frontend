@@ -19,7 +19,7 @@ import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
 import { Embedded, HttpStatus, LicensePayload, LicenseTabIds, Obligation } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
+import { PageButtonHeader, SideBar } from '@/sw360'
 import AddLicenseSummary from './AddLicenseSummary'
 import MessageService from '@/services/message.service'
 

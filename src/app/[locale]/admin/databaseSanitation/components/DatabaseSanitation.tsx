@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import { getSession, signOut,  } from 'next-auth/react'
 import { useState, type JSX } from 'react';
 import { notFound } from 'next/navigation'

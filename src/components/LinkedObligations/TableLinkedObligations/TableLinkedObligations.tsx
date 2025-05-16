@@ -12,7 +12,7 @@ import React, { useState, type JSX } from 'react';
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { useTranslations } from 'next-intl'
-import { _ } from 'next-sw360'
+import { _ } from '@/sw360'
 import { Obligation } from '@/object-types'
 import TableLicense from '../TableLicense'
 import styles from './TableLinkedObligations.module.css'

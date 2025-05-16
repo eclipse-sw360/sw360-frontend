@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { ReleaseDetail } from '@/object-types'
-import { Table } from 'next-sw360'
+import { Table } from '@/sw360'
 import { memo, type JSX } from 'react';
 
 interface Props {

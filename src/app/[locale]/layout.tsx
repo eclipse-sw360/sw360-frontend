@@ -20,7 +20,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { ReactNode, type JSX } from 'react';
 
-import { Footer, Navbar, GlobalMessages } from 'next-sw360'
+import { Footer, Navbar, GlobalMessages } from '@/sw360'
 import { Providers } from '../provider'
 
 export const metadata: Metadata = {

@@ -25,7 +25,7 @@ import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/Li
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 import { Embedded, HttpStatus, LinkedRelease, ReleaseLink } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
 type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>

@@ -18,7 +18,7 @@ import { FaDownload } from 'react-icons/fa'
 import { Attachment, HttpStatus, Embedded, AttachmentTypes } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import styles from './Attachment.module.css'
 
 interface Props {

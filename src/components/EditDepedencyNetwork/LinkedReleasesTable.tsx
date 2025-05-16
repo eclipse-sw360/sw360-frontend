@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { Table } from 'react-bootstrap'
-import { ShowInfoOnHover } from 'next-sw360'
+import { ShowInfoOnHover } from '@/sw360'
 import { useTranslations } from 'next-intl'
 
 import type { JSX } from "react";

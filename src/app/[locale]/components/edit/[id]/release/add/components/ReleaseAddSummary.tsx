@@ -17,7 +17,7 @@ import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import { DocumentTypes, InputKeyValue, Release, Vendor } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
+import { AddAdditionalRoles, AddKeyValue } from '@/sw360'
 
 interface Props {
     releasePayload: Release

@@ -15,7 +15,7 @@ import { Form } from 'react-bootstrap'
 
 import { ReleaseLink, ReleaseDetail } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { _ } from 'next-sw360'
+import { _ } from '@/sw360'
 import LinkedReleasesTable from './LinkedReleasesTable'
 
 interface Props {

@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import React, { type JSX } from 'react';
 
 import { Release } from '@/object-types'
-import { ShowInfoOnHover } from 'next-sw360'
+import { ShowInfoOnHover } from '@/sw360'
 
 interface Props {
     releasePayload: Release

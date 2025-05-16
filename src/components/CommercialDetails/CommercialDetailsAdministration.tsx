@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useState, type JSX } from 'react';
 
 import { Release } from '@/object-types'
-import { SelectUsersDialog } from 'next-sw360'
+import { SelectUsersDialog } from '@/sw360'
 
 interface Props {
     releasePayload: Release

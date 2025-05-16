@@ -17,7 +17,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import UserOperationType from '@/components/UserEditForm/UserOperationType'
 import UserEditForm from '@/components/UserEditForm/UserEditForm'
 import { HttpStatus, UserPayload, User } from '@/object-types'
-import { PageSpinner } from 'next-sw360'
+import { PageSpinner } from '@/sw360'
 import MessageService from '@/services/message.service'
 import ToggleUserActiveModal from './components/ToggleUserActiveModal'
 

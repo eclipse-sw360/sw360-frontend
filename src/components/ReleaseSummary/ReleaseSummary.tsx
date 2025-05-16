@@ -15,7 +15,7 @@ import React, { useCallback, useState, type JSX } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
 import { ActionType, Release, ReleaseDetail, Vendor } from '@/object-types'
-import { ShowInfoOnHover, VendorDialog, SelectUsersDialog } from 'next-sw360'
+import { ShowInfoOnHover, VendorDialog, SelectUsersDialog } from '@/sw360'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {

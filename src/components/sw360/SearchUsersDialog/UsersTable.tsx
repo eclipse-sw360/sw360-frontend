@@ -12,7 +12,6 @@
 
 import React, { useEffect, useRef, type JSX } from 'react';
 import { Form } from 'react-bootstrap'
-import { _ } from 'next-sw360'
 import { User } from '@/object-types'
 import Table, { TableProps } from '../Table/Table'
 
@@ -29,13 +28,13 @@ const compare = (preState: TableProps, nextState: TableProps) => {
     return Object.entries(preState.data ?? {}).sort().toString() === Object.entries(nextState.data ?? {}).sort().toString()
 }
 
-const MemoTable = React.memo(Table, compare) 
+const MemoTable = React.memo(Table, compare)
 
 const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: Props): JSX.Element => {
     const selectedUsersInTable = useRef<{ [k: string]: string }>({})
 
     const handleSelectUser = (user: User) => {
-        const userEmail = user.email 
+        const userEmail = user.email
         if (multiple === true) {
             const copiedSelectingUsers = { ...selectedUsersInTable.current }
             if (Object.keys(copiedSelectingUsers).includes(userEmail)) {

@@ -28,7 +28,7 @@ import {
 } from '@/object-types'
 
 import { ApiUtils, CommonUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
+import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from '@/sw360'
 import MessageService from '@/services/message.service'
 
 export default function AddComponent() : ReactNode {

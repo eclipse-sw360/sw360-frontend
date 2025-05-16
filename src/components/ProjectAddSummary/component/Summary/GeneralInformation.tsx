@@ -14,7 +14,7 @@ import { Dispatch, SetStateAction, useCallback, useState, type JSX } from 'react
 import { GiCancel } from 'react-icons/gi'
 
 import { ProjectPayload, Vendor } from '@/object-types'
-import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import { ShowInfoOnHover, VendorDialog } from '@/sw360'
 
 interface Param {
     vendor: Vendor

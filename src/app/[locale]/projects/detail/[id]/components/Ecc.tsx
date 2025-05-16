@@ -14,7 +14,7 @@ import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import Link from 'next/link'
 import { Button, Spinner } from 'react-bootstrap'
 

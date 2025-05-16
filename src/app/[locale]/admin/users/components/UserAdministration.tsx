@@ -12,7 +12,7 @@
 import React, { type JSX } from 'react';
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { AdvancedSearch, Table, _ } from 'next-sw360'
+import { AdvancedSearch, Table, _ } from '@/sw360'
 import { FaPencilAlt } from 'react-icons/fa'
 import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
 import { TfiFiles } from "react-icons/tfi"

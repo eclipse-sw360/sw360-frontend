@@ -11,7 +11,7 @@
 import { useTranslations } from 'next-intl'
 
 import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectPayload, RolesType, Vendor } from '@/object-types'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
+import { AddAdditionalRoles, AddKeyValue } from '@/sw360'
 import Roles from './Roles/Roles'
 import GeneralInformation from './component/Summary/GeneralInformation'
 
