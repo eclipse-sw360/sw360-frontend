@@ -15,7 +15,7 @@ import { Spinner } from 'react-bootstrap'
 
 import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 
 import Link from 'next/link'
 

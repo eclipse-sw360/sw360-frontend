@@ -14,7 +14,7 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import Link from 'next/link'
 import { ChangeEvent, useRef, useState, type JSX } from 'react';
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'

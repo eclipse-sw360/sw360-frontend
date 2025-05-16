@@ -15,7 +15,7 @@ import { Form } from 'react-bootstrap'
 
 import { Vendor, VendorType } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 
 type RowData = (string | Vendor)[]
 

@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 import { useState, type JSX } from 'react';
 import { GiCancel } from 'react-icons/gi'
 
-import { SelectUsersDialog, SelectCountry } from 'next-sw360'
+import { SelectUsersDialog, SelectCountry } from '@/sw360'
 import DepartmentModal from './DepartmentModal'
 import {ProjectPayload} from '@/object-types'
 

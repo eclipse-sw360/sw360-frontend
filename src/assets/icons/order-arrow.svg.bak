@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1999"
+   sodipodi:docname="order-arrow.svg"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2003" />
+  <sodipodi:namedview
+     id="namedview2001"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1.6640625"
+     inkscape:cx="256"
+     inkscape:cy="255.69953"
+     inkscape:window-width="1390"
+     inkscape:window-height="1205"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1999" />
+  <path
+     class="lexicon-icon-outline order-arrow-arrow-down"
+     d="M307.6,431.5l71.6,71.6c11.9,10.8,32.9,11.2,45.8,0l71.6-71.6c29.8-33.6-15.8-74.9-45.8-45.8l-16.7,16.7V31.6c0-42.5-64-42.5-64,0v370.8l-16.7-16.7C321.6,355.8,277.9,400.6,307.6,431.5z"
+     id="path1995"
+     style="fill:#ffffff" />
+  <path
+     class="lexicon-icon-outline order-arrow-arrow-up"
+     d="M204.4,80.5L132.8,8.9C120.9-1.8,99.9-2.3,87,8.9L15.4,80.5c-29.8,33.6,15.7,74.9,45.8,45.8l16.7-16.7v370.8c0,42.5,64,42.5,64,0V109.6l16.7,16.7C190.4,156.2,234.1,111.4,204.4,80.5z"
+     id="path1997"
+     style="fill:#ffffff" />
+</svg>

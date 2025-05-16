@@ -11,7 +11,7 @@
 
 import Link from 'next/link'
 import { ReactNode, useEffect, useState } from 'react'
-import { Table, _ } from "next-sw360"
+import { Table, _ } from "@/sw360"
 import { useTranslations } from 'next-intl'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { Embedded, HttpStatus, UserGroupType, ClearingRequest } from '@/object-types'

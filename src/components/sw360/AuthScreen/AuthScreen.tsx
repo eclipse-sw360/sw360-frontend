@@ -18,7 +18,7 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { HttpStatus } from '@/object-types'
-import { LanguageSwitcher, PageSpinner } from 'next-sw360'
+import { LanguageSwitcher, PageSpinner } from '@/sw360'
 import { AUTH_PROVIDER } from '@/utils/env';
 
 function AuthScreen() : ReactNode {

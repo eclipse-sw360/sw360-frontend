@@ -15,7 +15,7 @@ import { ClearingRequestDetails,
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState, ReactNode } from 'react'
-import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
+import { SelectUsersDialog, ShowInfoOnHover } from '@/sw360'
 import { CommonUtils } from '@/utils'
 
 interface Props {

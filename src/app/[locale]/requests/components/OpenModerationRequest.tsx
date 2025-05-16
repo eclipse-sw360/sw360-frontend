@@ -12,7 +12,7 @@
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import Link from 'next/link'
 import { useEffect, useState, useCallback, ReactNode } from 'react'
 import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'

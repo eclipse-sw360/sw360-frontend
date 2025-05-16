@@ -18,7 +18,7 @@ import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-boo
 
 import sw360logo from '@/assets/images/sw360-logo.svg'
 import { NavList } from '@/object-types'
-import { LocaleSwitcher, ProfileDropdown } from 'next-sw360'
+import { LocaleSwitcher, ProfileDropdown } from '@/sw360'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
 function Navbar(): JSX.Element {

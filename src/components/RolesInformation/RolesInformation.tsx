@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
 import { ComponentPayload } from '@/object-types'
-import { SelectUsersDialog, SelectCountry } from 'next-sw360'
+import { SelectUsersDialog, SelectCountry } from '@/sw360'
 
 interface Props {
     componentPayload: ComponentPayload

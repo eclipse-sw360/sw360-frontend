@@ -9,124 +9,120 @@
 
 'use client'
 
-import { Config, Grid } from 'gridjs'
-import * as React from 'react'
-import { Component, RefObject, createRef } from 'react'
-import { Form } from 'react-bootstrap'
-import type { JSX } from 'react'
-const defaultOptions = {
-    pagination: { limit: 10 },
-    search: false,
-    selector: true,
-    sort: true,
-}
-type MessageFormat = (...args: []) => string
+import { Button } from '@/components/ui/button'
+import { TableBody, TableCell, TableHead, TableHeader, TableRow, Table as UITable } from '@/components/ui/table'
+import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import React from 'react'
+
+type MessageFormat = (...args: any[]) => string
 type Message = string | MessageFormat
 export type Language = { [key: string]: Message | Language }
 
-export interface TableProps extends Partial<Config> {
+export interface TableProps {
+    columns: any[]
+    data: any[]
+    pagination?: { limit?: number }
     selector?: boolean
-    language?: Language
+    language?: {
+        noRecordsFound?: string
+    }
+    // Add more props as needed from the original TableProps
 }
 
-const createTableProps = (tableProps: TableProps) => {
-    let newTableProps = { ...defaultOptions, ...tableProps }
+function Table({ columns, data, pagination = { limit: 10 }, selector = false, language = {} }: TableProps) {
+    // Convert GridJS-style columns to TanStack format
+    const columnDefs = React.useMemo<ColumnDef<any>[]>(
+        () =>
+            columns.map((col: any) => {
+                if (typeof col === 'string') {
+                    return { accessorKey: col, header: col }
+                } else {
+                    return {
+                        accessorKey: col.id,
+                        header: col.name,
+                        cell: (info) => (col.formatter ? col.formatter(info.getValue()) : info.getValue()),
+                    }
+                }
+            }),
+        [columns],
+    )
 
-    if (newTableProps.server) {
-        newTableProps = {
-            ...newTableProps,
+    const table = useReactTable({
+        data,
+        columns: columnDefs,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        initialState: {
             pagination: {
-                limit: 10,
-                server: {
-                    url: (prev: string, page: number, limit: number) =>
-                        `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                },
+                pageSize: pagination.limit ?? 10,
             },
-            data: undefined,
-        }
-    }
+        },
+    })
 
-    return newTableProps
-}
+    const noRecordsFound = language.noRecordsFound ?? 'No records found'
 
-class Table extends Component<TableProps, unknown> {
-    private wrapper: RefObject<HTMLDivElement | null> = createRef()
-    // Grid.js instance
-    private readonly instance: Grid | null = null
-    private tableProps: TableProps = {}
+    return (
+        <div>
+            <UITable>
+                <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => (
+                                <TableHead key={header.id}>
+                                    {header.isPlaceholder
+                                        ? null
+                                        : flexRender(header.column.columnDef.header, header.getContext())}
+                                </TableHead>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableHeader>
+                <TableBody>
+                    {table.getRowModel().rows.length === 0 ? (
+                        <TableRow>
+                            <TableCell
+                                colSpan={columns.length}
+                                className='text-center'
+                            >
+                                {noRecordsFound}
+                            </TableCell>
+                        </TableRow>
+                    ) : (
+                        table.getRowModel().rows.map((row) => (
+                            <TableRow key={row.id}>
+                                {row.getVisibleCells().map((cell) => (
+                                    <TableCell key={cell.id}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))
+                    )}
+                </TableBody>
+            </UITable>
 
-    constructor(props: TableProps) {
-        super(props)
-        this.tableProps = createTableProps(props)
-
-        this.instance = new Grid(this.tableProps)
-    }
-
-    getInstance(): Grid | null {
-        return this.instance
-    }
-
-    componentDidMount(): void {
-        if (this.wrapper.current === null || this.instance === null) return
-        if (this.wrapper.current.childNodes.length > 0) {
-            this.wrapper.current.innerHTML = ''
-        }
-        this.instance.render(this.wrapper.current)
-    }
-
-    componentDidUpdate(): void {
-        if (this.instance === null) return
-        this.instance.config.plugin.remove('pagination')
-        this.instance.config.plugin.remove('search')
-        this.tableProps = createTableProps(this.props)
-        this.instance.updateConfig(this.tableProps).forceRender()
-    }
-
-    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-        if (this.instance === null) return
-
-        this.instance.config.plugin.remove('pagination')
-        const pageSize = parseInt(event.target.value, 10)
-        this.instance
-            .updateConfig({
-                pagination: {
-                    limit: pageSize,
-                    server: this.tableProps.server
-                        ? {
-                              url: (prev: string, page: number, limit: number) =>
-                                  `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                          }
-                        : undefined,
-                },
-            })
-            .forceRender()
-    }
-
-    render(): JSX.Element {
-        return (
-            <>
-                {(this.props.selector === true) && (
-                    <div className='col-11 mt-3 mb-3'>
-                        <div className='dataTables_length'>
-                            <span className='my-2'>Show</span>
-                            <label style={{ marginLeft: '5px', marginRight: '5px' }}>
-                                <Form.Select size='sm' onChange={this.handlePageSizeChange}>
-                                    <option defaultValue={defaultOptions.pagination.limit}>
-                                        {defaultOptions.pagination.limit}
-                                    </option>
-                                    <option value='25'>25</option>
-                                    <option value='50'>50</option>
-                                    <option value='100'>100</option>
-                                </Form.Select>
-                            </label>
-                            <span>entries</span>
-                        </div>
-                    </div>
-                )}
-                <div ref={this.wrapper} />
-            </>
-        )
-    }
+            {/* Pagination Controls */}
+            <div className='flex justify-between items-center mt-4'>
+                <div>
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                </div>
+                <div className='flex gap-2'>
+                    <Button
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </div>
+        </div>
+    )
 }
 
 export default Table

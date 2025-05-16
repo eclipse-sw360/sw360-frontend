@@ -13,7 +13,7 @@ import { Embedded, HttpStatus, Vendor } from '@/object-types'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { QuickFilter, Table, _ } from 'next-sw360'
+import { QuickFilter, Table, _ } from '@/sw360'
 import Link from 'next/link'
 import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react';

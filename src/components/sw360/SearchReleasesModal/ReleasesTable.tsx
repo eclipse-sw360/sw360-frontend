@@ -12,7 +12,7 @@
 
 import React, { useEffect, useRef, type JSX } from 'react';
 import { Form } from 'react-bootstrap'
-import { _ } from 'next-sw360'
+import { _ } from '@/sw360'
 import Table from '../Table/Table'
 import { ReleaseDetail } from '@/object-types'
 import { TableProps } from '../Table/Table'

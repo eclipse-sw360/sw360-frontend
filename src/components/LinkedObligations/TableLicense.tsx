@@ -10,127 +10,154 @@
 'use client'
 
 import FilterSearch from '@/components/LinkedObligations/TableLinkedObligations/FilterSearch'
-import { Config, Grid } from 'gridjs'
-import * as React from 'react'
-import { Component, RefObject, createRef } from 'react'
-import { Form } from 'react-bootstrap'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import React, { useMemo, useState } from 'react'
 import styles from './TableLinkedObligations/TableLinkedObligations.module.css'
-import type { JSX } from 'react'
 
+export type Language = { [key: string]: string | ((...args: []) => string) | Language }
 
-const defaultOptions = {
-    pagination: { limit: 10 },
-    search: false,
-    selector: true,
-    sort: false,
-}
-type MessageFormat = (...args: []) => string
-type Message = string | MessageFormat
-export type Language = { [key: string]: Message | Language }
-
-interface TableProps extends Partial<Config> {
+interface TableProps {
     title?: string
+    data: any[]
+    columns: any[] // should be tanstack-style or wrapped gridjs-style
     searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
     selector?: boolean
+    pagination?: {
+        limit?: number
+    }
     language?: Language
 }
 
-class TableLicense extends Component<TableProps, unknown> {
-    private wrapper: RefObject<HTMLDivElement | null> = createRef()
-    // Grid.js instance
-    private readonly instance: Grid | null = null
-    private tableProps: TableProps = {}
+export function TableLicense({
+    title,
+    data,
+    columns,
+    searchFunction,
+    selector = true,
+    pagination = { limit: 10 },
+    language = {},
+}: TableProps) {
+    const [pageSize, setPageSize] = useState(pagination.limit ?? 10)
 
-    constructor(props: TableProps) {
-        super(props)
-        this.tableProps = { ...defaultOptions, ...props }
-
-        if (this.tableProps.server) {
-            this.tableProps = {
-                ...this.tableProps,
-                pagination: {
-                    limit: 10,
-                    server: {
-                        url: (prev: string, page: number, limit: number) =>
-                            `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                    },
-                },
-                data: undefined,
+    const columnDefs = useMemo<ColumnDef<any>[]>(() => {
+        return columns.map((col) => {
+            if (typeof col === 'string') {
+                return { accessorKey: col, header: col }
+            } else {
+                return {
+                    accessorKey: col.id,
+                    header: col.name,
+                    cell: (info: any) =>
+                        typeof col.formatter === 'function' ? col.formatter(info.getValue()) : info.getValue(),
+                }
             }
-        }
+        })
+    }, [columns])
 
-        this.instance = new Grid(this.tableProps)
-    }
+    const table = useReactTable({
+        data,
+        columns: columnDefs,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        initialState: {
+            pagination: {
+                pageSize,
+            },
+        },
+        onPaginationChange: (updater) => {
+            const next = typeof updater === 'function' ? updater(table.getState().pagination) : updater
+            setPageSize(next.pageSize)
+        },
+        manualPagination: false, // change to true for server-side pagination
+    })
 
-    getInstance(): Grid | null {
-        return this.instance
-    }
-
-    componentDidMount(): void {
-        if (this.instance === null || this.wrapper.current === null) return
-        if (this.wrapper.current.childNodes.length > 0) {
-            this.wrapper.current.innerHTML = ''
-        }
-        this.instance.render(this.wrapper.current)
-    }
-
-    componentDidUpdate(): void {
-        if (this.instance === null) return
-        this.instance.config.plugin.remove('pagination')
-        this.instance.config.plugin.remove('search')
-        this.instance.updateConfig(this.props).forceRender()
-    }
-
-    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) : void => {
-        if (this.instance === null) return
-        this.instance.config.plugin.remove('pagination')
-        const pageSize = parseInt(event.target.value, 10)
-        this.instance
-            .updateConfig({
-                pagination: {
-                    limit: pageSize,
-                    server: this.tableProps.server
-                        ? {
-                              url: (prev: string, page: number, limit: number) =>
-                                  `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                          }
-                        : undefined,
-                },
-            })
-            .forceRender()
-    }
-    render(): JSX.Element{
-        return (
-            <>
-                <div className={styles['div-table-license']}>
-                    {(this.props.selector === true) && (
-                        <>
-                            <div className='col-auto' style={{ fontSize: '14px' }}>
-                                <div className='dataTables_length' style={{ fontSize: '0.875rem' }}>
-                                    <span className='my-2'>Show</span>
-                                    <label className={styles['lable-table-license']}>
-                                        <Form.Select size='sm' onChange={this.handlePageSizeChange}>
-                                            <option defaultValue={defaultOptions.pagination.limit}>
-                                                {defaultOptions.pagination.limit}
-                                            </option>
-                                            <option value='25'>25</option>
-                                            <option value='50'>50</option>
-                                            <option value='100'>100</option>
-                                        </Form.Select>
-                                    </label>
-                                    <span>entries</span>
-                                </div>
-                            </div>
-                            {(this.props.searchFunction !== undefined) && (
-                                <FilterSearch title={this.props.title} searchFunction={this.props.searchFunction} />
-                            )}
-                        </>
+    return (
+        <div className={styles['div-table-license']}>
+            {selector && (
+                <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4'>
+                    <div className='flex items-center gap-2 text-sm'>
+                        <span>Show</span>
+                        <Label
+                            htmlFor='pageSizeSelect'
+                            className='sr-only'
+                        >
+                            Entries per page
+                        </Label>
+                        <Select
+                            value={String(pageSize)}
+                            onValueChange={(value) => {
+                                const newSize = parseInt(value, 10)
+                                setPageSize(newSize)
+                                table.setPageSize(newSize)
+                            }}
+                        >
+                            <SelectTrigger
+                                className='w-20'
+                                id='pageSizeSelect'
+                            >
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {[10, 25, 50, 100].map((size) => (
+                                    <SelectItem
+                                        key={size}
+                                        value={String(size)}
+                                    >
+                                        {size}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <span>entries</span>
+                    </div>
+                    {searchFunction && (
+                        <FilterSearch
+                            title={title}
+                            searchFunction={searchFunction}
+                        />
                     )}
                 </div>
-                <div ref={this.wrapper} />
-            </>
-        )
-    }
+            )}
+
+            <div className='overflow-auto rounded-md border'>
+                <table className='w-full border-collapse text-sm'>
+                    <thead className='bg-muted'>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <th
+                                        key={header.id}
+                                        className='px-4 py-2 text-left font-medium'
+                                    >
+                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {table.getRowModel().rows.map((row) => (
+                            <tr
+                                key={row.id}
+                                className='border-t'
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td
+                                        key={cell.id}
+                                        className='px-4 py-2'
+                                    >
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    )
 }
 
 export default TableLicense

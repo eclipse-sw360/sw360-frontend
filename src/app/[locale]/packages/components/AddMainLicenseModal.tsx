@@ -11,7 +11,7 @@
 
 import { LicenseDetail, Package } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
+import { _, Table } from '@/sw360'
 import { useEffect, useRef, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 

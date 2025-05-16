@@ -15,7 +15,7 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
 import { Button } from 'react-bootstrap'
 

@@ -13,7 +13,7 @@ import { useEffect, useState, type JSX } from 'react';
 import { FaFileAlt } from 'react-icons/fa'
 
 import { Changelogs } from '@/object-types'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 
 interface Props {
     documentId: string

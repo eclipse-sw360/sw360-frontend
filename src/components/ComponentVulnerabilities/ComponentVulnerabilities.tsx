@@ -16,7 +16,7 @@ import { FaInfoCircle } from 'react-icons/fa'
 
 import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
 import { LinkedVulnerability, VerificationStateInfo, VulnerabilitiesVerificationState } from '@/object-types'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import ChangeStateDialog from './ChangeStateDialog'
 import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
 

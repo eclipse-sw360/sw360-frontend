@@ -14,7 +14,7 @@ import { ClearingRequestDetails, HttpStatus, UpdateClearingRequestPayload } from
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { useTranslations } from 'next-intl'
-import { ShowInfoOnHover } from 'next-sw360'
+import { ShowInfoOnHover } from '@/sw360'
 import { notFound, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { signOut, getSession, useSession } from 'next-auth/react'

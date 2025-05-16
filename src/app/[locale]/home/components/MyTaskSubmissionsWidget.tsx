@@ -12,7 +12,7 @@ import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import Link from 'next/link'
 import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'

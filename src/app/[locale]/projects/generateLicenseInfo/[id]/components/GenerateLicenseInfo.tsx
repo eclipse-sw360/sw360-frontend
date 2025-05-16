@@ -9,7 +9,7 @@
 
 'use client'
 
-import { TreeTable, _ } from 'next-sw360'
+import { TreeTable, _ } from '@/sw360'
 import { useTranslations } from "next-intl"
 import { Button, Form, Nav, Spinner, Tab } from "react-bootstrap"
 import Link from "next/link"

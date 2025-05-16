@@ -11,7 +11,7 @@
 import { useTranslations } from 'next-intl'
 
 import { ProjectPayload } from '@/object-types'
-import { ShowInfoOnHover } from 'next-sw360'
+import { ShowInfoOnHover } from '@/sw360'
 
 import type { JSX } from "react";
 

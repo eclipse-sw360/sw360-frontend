@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react'
 import TableLicense from '@/components/LinkedObligations/TableLicense'
 import { Obligation } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { _ } from 'next-sw360'
+import { _ } from '@/sw360'
 import styles from './LinkedObligations.module.css'
 
 interface Props {

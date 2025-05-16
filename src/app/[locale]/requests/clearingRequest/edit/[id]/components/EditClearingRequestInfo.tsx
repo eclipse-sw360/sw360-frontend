@@ -14,7 +14,7 @@ import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } f
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
-import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
+import { SelectUsersDialog, ShowInfoOnHover } from '@/sw360'
 import { CommonUtils } from '@/utils'
 
 interface Props {

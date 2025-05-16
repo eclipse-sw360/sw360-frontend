@@ -15,7 +15,7 @@ import { Component, Embedded } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { useSession } from 'next-auth/react'
 import { SW360_API_URL } from '@/utils/env'
-import { Table, _ } from 'next-sw360'
+import { Table, _ } from '@/sw360'
 import { Form } from 'react-bootstrap'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>

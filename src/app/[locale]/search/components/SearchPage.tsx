@@ -15,7 +15,7 @@ import { Alert, Spinner } from 'react-bootstrap'
 
 import { SearchResult } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
+import { _, Table } from '@/sw360'
 import KeywordSearch from './KeywordSearch'
 
 export default function Search() : ReactNode {

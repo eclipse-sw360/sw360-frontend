@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
+import { _, Table } from '@/sw360'
 import { useState, useEffect, useCallback, type JSX } from 'react'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -19,7 +19,7 @@ import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { FaPencilAlt } from 'react-icons/fa'
 import Link from 'next/link'
-import { PageSpinner } from 'next-sw360'
+import { PageSpinner } from '@/sw360'
 import SecondaryDepartments from './SecondaryDepartments'
 
 type TableRow = [string, string[], string]

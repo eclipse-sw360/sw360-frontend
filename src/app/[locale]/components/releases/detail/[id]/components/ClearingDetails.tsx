@@ -17,7 +17,7 @@ import { ReactNode, useState } from 'react'
 
 import fossologyIcon from '@/assets/images/fossology.svg'
 import { Attachment, ReleaseDetail } from '@/object-types'
-import { FossologyClearing } from 'next-sw360'
+import { FossologyClearing } from '@/sw360'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 import ClearingInformationStatus from './ClearingInformationStatus'
 import RequestInformation from './RequestInformation'

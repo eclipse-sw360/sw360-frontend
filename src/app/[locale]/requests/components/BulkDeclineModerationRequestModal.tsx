@@ -18,7 +18,7 @@ import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
 import { signOut, getSession, useSession } from 'next-auth/react'
-import { _, Table } from 'next-sw360'
+import { _, Table } from '@/sw360'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 

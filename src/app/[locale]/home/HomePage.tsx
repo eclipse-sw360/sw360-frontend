@@ -14,7 +14,7 @@
 
 import { signOut, useSession } from 'next-auth/react'
 
-import { PageSpinner } from 'next-sw360'
+import { PageSpinner } from '@/sw360'
 
 import MyComponentsWidget from './components/MyComponentsWidget'
 import MyProjectsWidget from './components/MyProjectsWidget'

@@ -10,7 +10,7 @@
 'use client'
 
 import { Modal, Form, Row, Col, Button } from 'react-bootstrap'
-import { _ } from 'next-sw360'
+import { _ } from '@/sw360'
 import { useTranslations } from 'next-intl'
 import { getSession } from 'next-auth/react'
 import CommonUtils from '@/utils/common.utils'
