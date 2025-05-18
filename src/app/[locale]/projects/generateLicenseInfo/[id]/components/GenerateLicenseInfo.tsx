@@ -114,11 +114,6 @@ export default function GenerateLicenseInfo({ projectId }:
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [withSubProjects, setWithSubProjects] = useState<boolean>(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
-    
-    const sessionStorageData = sessionStorage.getItem('isCalledFromProjectLicenseTab')
-    if (sessionStorageData !== null){
-        setIsCalledFromProjectLicenseTab(JSON.parse(sessionStorageData))
-    }
 
     const formatReleaseAndAttachments = (projectPath: string, r: Release, level: number): NodeData | undefined => {
         if (!r.attachments) {
@@ -243,6 +238,13 @@ export default function GenerateLicenseInfo({ projectId }:
         }
         return relNode
     }
+
+    useEffect(() => {
+        const sessionStorageData = sessionStorage.getItem('isCalledFromProjectLicenseTab')
+        if (sessionStorageData !== null) {
+            setIsCalledFromProjectLicenseTab(JSON.parse(sessionStorageData))
+        }
+    }, [])
 
     useEffect(() => {
         const controller = new AbortController()
