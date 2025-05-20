@@ -24,15 +24,16 @@ enum FossologyStatus {
 
 export default function FossologyOverview() : ReactNode {
     const t = useTranslations('default')
-    const [loading, setLoading] = useState(false)
-    const [recheckConnection, setRecheckConnection] = useState(false)
-    const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
+    const [toggle, setToggle] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [recheckConnection, setRecheckConnection] = useState<boolean>(false)
     const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.SUCCESS)
 
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === HttpStatus.OK) {
             return HttpStatus.OK
@@ -83,18 +84,19 @@ export default function FossologyOverview() : ReactNode {
                         {t('Fossology Connection Administration')}
                     </div>
                 </div>
+            
                 <table className='table summary-table mt-4'>
                     <thead
                         title='Click to expand or collapse'
                         onClick={() => {
-                            setToggleGeneralInformation(!toggleGeneralInformation)
+                            setToggle(!toggle)
                         }}
                     >
                         <tr>
                             <th colSpan={3}>{t('Connection Status')}</th>
                         </tr>
                     </thead>
-                    <tbody hidden={toggleGeneralInformation}>
+                    <tbody hidden={toggle}>
                         <tr>
                             <td>{t('Connection to FOSSology is currently in state')}:</td>
                             <td>
@@ -122,6 +124,61 @@ export default function FossologyOverview() : ReactNode {
                         </tr>
                     </tbody>
                 </table>
+                <div className='section-header mb-2'>
+                    <span className='fw-bold'>{t('Connection Configuration')}</span>
+                </div>
+                <div className='row'>
+                    <div className='col-lg-6 mb-3'>
+                        <label className='form-label fw-medium'
+                               htmlFor='fossologyConfig.url'
+                        >
+                            {t('URL')}
+                        </label>
+                        <input
+                            type='text'
+                            className='form-control'
+                            id='fossologyConfig.url'
+                            name='url'
+                            required
+                            // value={fossologyConfigData.url}
+                            // onChange={updateInputField}
+                        />
+                    </div>
+                    <div className='col-lg-6 mb-3'>
+                        <label className='form-label fw-medium'
+                               htmlFor='fossologyConfig.folderId'
+                        >
+                            {t('Folder Id')}
+                        </label>
+                        <input
+                            type='text'
+                            className='form-control'
+                            id='fossologyConfig.folderId'
+                            name='folderId'
+                            required
+                            // value={fossologyConfigData.folderId}
+                            // onChange={updateInputField}
+                        />
+                    </div>
+                </div>
+                <div className='row'>
+                    <div className='col-lg-12 mb-3'>
+                        <label className='form-label fw-medium'
+                               htmlFor='fossologyConfig.accessToken'
+                        >
+                            {t('Access Token')}
+                        </label>
+                        <input
+                            type='text'
+                            className='form-control'
+                            id='fossologyConfig.accessToken'
+                            name='accessToken'
+                            required
+                            // value={fossologyConfigData.accessToken}
+                            // onChange={updateInputField}
+                        />
+                    </div>
+                </div>
             </div>
         </>
     )
