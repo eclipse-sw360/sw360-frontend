@@ -36,7 +36,7 @@ function NavList(): NavItem[] {
                 { href: '/admin/licenses', name: t('Licenses'), id: 'admin_licenses' },
                 { href: '/admin/obligations', name: t('Obligations'), id: 'admin_obligations' },
                 { href: '/admin/schedule', name: t('Schedule'), id: 'admin_schedule' },
-                { href: '#', name: t('Fossology'), id: 'admin_fossology' },
+                { href: '/admin/fossology', name: t('Fossology'), id: 'admin_fossology' },
                 { href: '#', name: t('Import Export'), id: 'admin_import_export' },
                 { href: '/admin/databaseSanitation', name: t('Database Sanitation'), id: 'admin_database_sanitation' },
                 { href: '#', name: t('Attachment Cleanup'), id: 'admin_attachment_cleanup' },
