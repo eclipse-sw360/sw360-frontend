@@ -69,7 +69,7 @@ const AdminMainPage = (): JSX.Element => {
                             <RxCalendar /> {t('Schedule')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/fosssology'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <svg className='fossology_icon mb-1' height={18} width={18}>
                                 <use href='icons.svg#fossology'></use>
