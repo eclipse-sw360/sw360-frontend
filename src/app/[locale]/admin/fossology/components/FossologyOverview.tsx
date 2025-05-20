@@ -21,7 +21,7 @@ import { Spinner } from 'react-bootstrap'
 
 enum FossologyStatus {
     SUCCESS = 'Success',
-    FAILURE = 'Failure',
+    UNKNOWN = 'Unknown',
 }
 
 export default function FossologyOverview() : ReactNode {
@@ -35,7 +35,7 @@ export default function FossologyOverview() : ReactNode {
         folderId: '',
         token: '',
     })
-    const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.SUCCESS)
+    const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.UNKNOWN)
 
 
     const fetchData = useCallback(async (url: string,
@@ -66,12 +66,20 @@ export default function FossologyOverview() : ReactNode {
                     setFossologyStatus(FossologyStatus.SUCCESS)
                 }
                 else {
-                    setFossologyStatus(FossologyStatus.FAILURE)
+                    setFossologyStatus(FossologyStatus.UNKNOWN)
                 }
+        })
+            .catch ((error) => {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+        })
+            .finally(() => {
                 setLoading(false)
                 setRecheckConnection(false)
-            })
-            .catch((err) => console.error(err))
+        })
     }, [fetchData, recheckConnection])
 
     useEffect(() => {
@@ -80,8 +88,14 @@ export default function FossologyOverview() : ReactNode {
                 if (response) {
                     setFossologyConfigData(response)
                 }
-            })
-            .catch((err) => console.error(err))
+        })        
+        .catch ((error) => {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        })
     }, [fetchData])
     
     const updateInputField = (event: React.ChangeEvent<HTMLInputElement |
@@ -102,8 +116,8 @@ export default function FossologyOverview() : ReactNode {
         if (response.status === HttpStatus.OK) {
             MessageService.success(t('Fossology configuration updated successfully'))
         } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
+            MessageService.warn(t('Unauthorized request'))
+            return
         } else {
             MessageService.error(t('Fossology configuration update failed'))
         }
@@ -229,8 +243,8 @@ export default function FossologyOverview() : ReactNode {
                         <input
                             type='text'
                             className='form-control'
-                            id='fossologyConfig.accessToken'
-                            name='accessToken'
+                            id='fossologyConfig.token'
+                            name='token'
                             required
                             value={fossologyConfigData.token}
                             onChange={updateInputField}
