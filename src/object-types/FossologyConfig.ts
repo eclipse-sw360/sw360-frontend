@@ -11,7 +11,7 @@
 interface FossologyConfig {
     url: string
     folderId?: string
-    accessToken?: string
+    token?: string
 }
 
 export default FossologyConfig
