@@ -15,6 +15,7 @@ import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
 
 enum FossologyStatus {
     SUCCESS = 'Success',
@@ -23,8 +24,10 @@ enum FossologyStatus {
 
 export default function FossologyOverview() : ReactNode {
     const t = useTranslations('default')
-    const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.FAILURE)
+    const [loading, setLoading] = useState(false)
+    const [recheckConnection, setRecheckConnection] = useState(false)
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
+    const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.SUCCESS)
 
 
     const fetchData = useCallback(async (url: string) => {
@@ -41,6 +44,7 @@ export default function FossologyOverview() : ReactNode {
     }, [])
 
     useEffect(() => {
+        setLoading(true)
         fetchData('fossology/reServerConnection')
             .then((response: number | undefined) => {
                 if (response === HttpStatus.OK) {
@@ -49,10 +53,12 @@ export default function FossologyOverview() : ReactNode {
                 else {
                     setFossologyStatus(FossologyStatus.FAILURE)
                 }
+                setLoading(false)
+                setRecheckConnection(false)
             })
             .catch((err) => console.error(err))
-        }, [fetchData])
-
+    }, [fetchData, recheckConnection])
+    
 
     return (
         <>
@@ -62,6 +68,7 @@ export default function FossologyOverview() : ReactNode {
                         <button
                             type='button'
                             className='btn btn-primary col-auto me-2'
+                            onClick={() => setRecheckConnection(true)}
                         >
                             {t('Re-Check connection')}
                         </button>
@@ -92,16 +99,21 @@ export default function FossologyOverview() : ReactNode {
                             <td>{t('Connection to FOSSology is currently in state')}:</td>
                             <td>
                                 {
-                                    fossologyStatus === 'Success' ?
-                                        <span className='badge bg-success capsule-right'
-                                            style={{ fontSize: '0.8rem' }}>
-                                            {t(`${fossologyStatus}`)}
-                                        </span>
+                                    loading ?
+                                        <div className='col-12 mt-1 text-center'>
+                                            <Spinner className='spinner' />
+                                        </div> 
                                     :
-                                        <span className='badge bg-danger capsule-right'
-                                            style={{ fontSize: '0.8rem' }}>
-                                            {t(`${fossologyStatus}`)}
-                                        </span>
+                                        fossologyStatus === 'Success' ?
+                                            <span className='badge bg-success capsule-right'
+                                                style={{ fontSize: '0.8rem' }}>
+                                                {t(`${fossologyStatus}`)}
+                                            </span>
+                                        :
+                                            <span className='badge bg-danger capsule-right'
+                                                style={{ fontSize: '0.8rem' }}>
+                                                {t(`${fossologyStatus}`)}
+                                            </span>
                                 }
                             </td>
                             <td>
