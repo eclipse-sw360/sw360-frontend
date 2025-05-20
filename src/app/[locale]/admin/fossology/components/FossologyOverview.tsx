@@ -10,6 +10,7 @@
 'use client'
 
 import { FossologyConfig, HttpStatus } from '@/object-types'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
@@ -30,7 +31,7 @@ export default function FossologyOverview() : ReactNode {
     const [fossologyConfigData, setFossologyConfigData] = useState<FossologyConfig>({
         url: '',
         folderId: '',
-        accessToken: '',
+        token: '',
     })
     const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.SUCCESS)
 
@@ -81,6 +82,30 @@ export default function FossologyOverview() : ReactNode {
             .catch((err) => console.error(err))
     }, [fetchData])
     
+    const updateInputField = (event: React.ChangeEvent<HTMLInputElement |
+                                     HTMLTextAreaElement>) => {
+        setFossologyConfigData({
+            ...fossologyConfigData,
+            [event.target.name]: event.target.value,
+        })
+    }
+
+    const updateFossologyConfig = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session))
+            return signOut()
+        const response = await ApiUtils.POST('/fossology/saveConfig',
+                                             fossologyConfigData,
+                                             session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            MessageService.success(t('Fossology configuration updated successfully'))
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Session has expired'))
+            return signOut()
+        } else {
+            MessageService.error(t('Fossology configuration update failed'))
+        }
+    }
 
     return (
         <>
@@ -94,7 +119,10 @@ export default function FossologyOverview() : ReactNode {
                         >
                             {t('Re-Check connection')}
                         </button>
-                        <button type='button' className='btn btn-primary col-auto me-2'>
+                        <button type='button'
+                                className='btn btn-primary col-auto me-2'
+                                onClick={() => updateFossologyConfig()}
+                        >
                             {t('Save configuration')}
                         </button>
                         <button type='button' className='btn btn-secondary col-auto me-2'>
@@ -162,7 +190,7 @@ export default function FossologyOverview() : ReactNode {
                             name='url'
                             required
                             value={fossologyConfigData.url}
-                            // onChange={updateInputField}
+                            onChange={updateInputField}
                         />
                     </div>
                     <div className='col-lg-6 mb-3'>
@@ -178,7 +206,7 @@ export default function FossologyOverview() : ReactNode {
                             name='folderId'
                             required
                             value={fossologyConfigData.folderId}
-                            // onChange={updateInputField}
+                            onChange={updateInputField}
                         />
                     </div>
                 </div>
@@ -195,8 +223,8 @@ export default function FossologyOverview() : ReactNode {
                             id='fossologyConfig.accessToken'
                             name='accessToken'
                             required
-                            value={fossologyConfigData.accessToken}
-                            // onChange={updateInputField}
+                            value={fossologyConfigData.token}
+                            onChange={updateInputField}
                         />
                     </div>
                 </div>
