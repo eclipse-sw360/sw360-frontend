@@ -28,6 +28,7 @@ import CreateClearingRequestPayload from './CreateClearingRequestPayload'
 import ECC from './ECC'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
+import FossologyConfig from './FossologyConfig'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import ImportSummary from './ImportSummary'
@@ -137,6 +138,7 @@ export type {
     ErrorDetails,
     ExternalDocumentReferences,
     ExternalReference,
+    FossologyConfig,
     FossologyProcessInfo,
     FossologyProcessStatus,
     ImportSummary,
