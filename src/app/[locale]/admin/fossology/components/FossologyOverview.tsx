@@ -15,6 +15,7 @@ import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 
@@ -24,6 +25,7 @@ enum FossologyStatus {
 }
 
 export default function FossologyOverview() : ReactNode {
+    const router = useRouter()
     const t = useTranslations('default')
     const [toggle, setToggle] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
@@ -107,6 +109,10 @@ export default function FossologyOverview() : ReactNode {
         }
     }
 
+    const handleCancel = () => {
+        router.push('/admin')
+    }
+
     return (
         <>
             <div className='mt-4 mx-5'>
@@ -125,7 +131,10 @@ export default function FossologyOverview() : ReactNode {
                         >
                             {t('Save configuration')}
                         </button>
-                        <button type='button' className='btn btn-secondary col-auto me-2'>
+                        <button type='button'
+                                className='btn btn-secondary col-auto me-2'
+                                onClick={() => handleCancel()}
+                        >
                             {t('Cancel')}
                         </button>
                     </div>
