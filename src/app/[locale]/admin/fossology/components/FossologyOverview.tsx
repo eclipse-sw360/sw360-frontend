@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
+import { FossologyConfig, HttpStatus } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
@@ -27,16 +27,27 @@ export default function FossologyOverview() : ReactNode {
     const [toggle, setToggle] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [recheckConnection, setRecheckConnection] = useState<boolean>(false)
+    const [fossologyConfigData, setFossologyConfigData] = useState<FossologyConfig>({
+        url: '',
+        folderId: '',
+        accessToken: '',
+    })
     const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.SUCCESS)
 
 
-    const fetchData = useCallback(async (url: string) => {
+    const fetchData = useCallback(async (url: string,
+                                         serverConfig:boolean) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session))
             return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === HttpStatus.OK) {
-            return HttpStatus.OK
+            if (serverConfig) {
+                const data = await response.json()
+                return data
+            }
+            else 
+                return HttpStatus.OK
         } else if (response.status === HttpStatus.UNAUTHORIZED) {
             return signOut()
         } else {
@@ -46,7 +57,7 @@ export default function FossologyOverview() : ReactNode {
 
     useEffect(() => {
         setLoading(true)
-        fetchData('fossology/reServerConnection')
+        fetchData('fossology/reServerConnection', false)
             .then((response: number | undefined) => {
                 if (response === HttpStatus.OK) {
                     setFossologyStatus(FossologyStatus.SUCCESS)
@@ -59,6 +70,16 @@ export default function FossologyOverview() : ReactNode {
             })
             .catch((err) => console.error(err))
     }, [fetchData, recheckConnection])
+
+    useEffect(() => {
+        fetchData('fossology/getServerConfig', true)
+            .then((response: FossologyConfig | undefined) => {
+                if (response) {
+                    setFossologyConfigData(response)
+                }
+            })
+            .catch((err) => console.error(err))
+    }, [fetchData])
     
 
     return (
@@ -140,7 +161,7 @@ export default function FossologyOverview() : ReactNode {
                             id='fossologyConfig.url'
                             name='url'
                             required
-                            // value={fossologyConfigData.url}
+                            value={fossologyConfigData.url}
                             // onChange={updateInputField}
                         />
                     </div>
@@ -156,7 +177,7 @@ export default function FossologyOverview() : ReactNode {
                             id='fossologyConfig.folderId'
                             name='folderId'
                             required
-                            // value={fossologyConfigData.folderId}
+                            value={fossologyConfigData.folderId}
                             // onChange={updateInputField}
                         />
                     </div>
@@ -174,7 +195,7 @@ export default function FossologyOverview() : ReactNode {
                             id='fossologyConfig.accessToken'
                             name='accessToken'
                             required
-                            // value={fossologyConfigData.accessToken}
+                            value={fossologyConfigData.accessToken}
                             // onChange={updateInputField}
                         />
                     </div>
