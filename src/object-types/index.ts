@@ -232,7 +232,7 @@ import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 import ConfigKeys from './enums/ConfigKeys'
-import ComponentProcessorActionType from './enums/ComponentProcessor'
+import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
 
 export {
     ActionType,
@@ -250,5 +250,5 @@ export {
     UserGroupType,
     VulnerabilitiesVerificationState,
     ConfigKeys,
-    ComponentProcessorActionType
+    MergeOrSplitActionType
 }

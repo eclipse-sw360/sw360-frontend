@@ -11,16 +11,13 @@
 
 import { useTranslations } from 'next-intl'
 import { ReactNode, useState, useEffect } from 'react'
-import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType } from '@/object-types'
+import { ErrorDetails, HttpStatus, MergeOrSplitActionType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
-import ComponentTable from '../../components/ComponentTable'
-import MergeComponent from './MergeComponent'
-import MergeComponentConfirmation from './MergeConfirmation'
-import { redirect } from 'next/navigation'
+import VendorTable from './VendorsTable'
 
 function GetNextState(currentState: MergeOrSplitActionType): MergeOrSplitActionType | null {
     if (currentState === MergeOrSplitActionType.CHOOSE_SOURCE) {
@@ -46,43 +43,9 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
     const router = useRouter()
     const t = useTranslations('default')
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
-    const [targetComponent, setTargetComponent] = useState<null | Component>(null)
-    const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
-    const [finalComponentPayload, setFinalComponentPayload] = useState<null | Component>(null)
+    const [targetVendor, setTargetVendor] = useState<null | Vendor>(null)
+    const [sourceVendor, setSourceVendor] = useState<null | Vendor>(null)
     const [err, setErr] = useState<null | string>(null)
-    const [loading, setLoading] = useState(false)
-
-    const handleMergeComponent = async () => {
-        try {
-            setLoading(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const payload = {
-                ...(finalComponentPayload ?? {})
-            }
-            delete payload['_embedded']
-            delete payload['_links']
-            const response = await ApiUtils.PATCH(
-                `components/mergecomponents?mergeTargetId=${targetComponent?.id}&mergeSourceId=${sourceComponent?.id}`, 
-                payload, 
-                session.user.access_token
-            )
-            if(response.status !== 200) {
-                const err = await response.json() as ErrorDetails
-                throw new Error(err.message)
-            }
-        } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        } finally {
-            setLoading(false)
-            redirect(`/components/detail/${id}`)
-        }
-    }
 
     useEffect(() => {
         const controller = new AbortController()
@@ -93,13 +56,13 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                     const session = await getSession()
                     if (CommonUtils.isNullOrUndefined(session))
                         return signOut()
-                    const response = await ApiUtils.GET(`components/${id}`, session.user.access_token, signal)
+                    const response = await ApiUtils.GET(`vendors/${id}`, session.user.access_token, signal)
 
                     if (response.status === HttpStatus.UNAUTHORIZED) {
                         return signOut()
                     } else if (response.status === HttpStatus.OK) {
-                        const component = await response.json() as Component
-                        setTargetComponent(component)
+                        const vendor = await response.json() as Vendor
+                        setTargetVendor(vendor)
                     } else {
                         const err = await response.json() as ErrorDetails
                         throw new Error(err.message)
@@ -110,7 +73,7 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                     }
                     const message = error instanceof Error ? error.message : String(error)
                     MessageService.error(message)
-                    router.push(`components/${id}`)
+                    router.push(`vendors/${id}`)
                 }
             })()
 
@@ -119,23 +82,23 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
     return (
         <div className='mx-5 mt-3'>
             {
-                targetComponent
+                targetVendor
                     ? <>
                         <div className='col-auto buttonheader-title mb-3'>
                             {
                                 t.rich('MERGE_INTO_TARGET', {
-                                    name: targetComponent.name,
+                                    name: targetVendor.fullName ?? '',
                                 })
                             }
                         </div>
                         <div className='d-flex justify-content-between text-center mb-3'>
                             <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.CHOOSE_SOURCE ? 'merge-split-active' : 'merge-split'}`} role="alert">
                                 <h6 className="fw-bold">1. {t('Choose source')}</h6>
-                                <p>{t('Choose a component that should be merged into the current one')}</p>
+                                <p>{t('Choose a vendor that should be merged into the current one')}</p>
                             </div>
                             <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.PROCESS_DATA ? 'merge-split-active' : 'merge-split'}`} role="alert">
                                 <h6 className="fw-bold">2. {t('Merge data')}</h6>
-                                <p>{t('Merge data from source into target component')}</p>
+                                <p>{t('Merge data from source into target vendor')}</p>
                             </div>
                             <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.CONFIRM ? 'merge-split-active' : 'merge-split'}`} role="alert">
                                 <h6 className="fw-bold">3. {t('Confirm')}</h6>
@@ -149,24 +112,13 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                             </div>
                         }
                         {
-                            mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && <ComponentTable component={sourceComponent} setComponent={setSourceComponent} />
+                            mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && <VendorTable vendor={sourceVendor} setVendor={setSourceVendor}/>
                         }
                         {
-                            mergeState === MergeOrSplitActionType.PROCESS_DATA && 
-                            <MergeComponent 
-                                targetComponent={targetComponent} 
-                                sourceComponent={sourceComponent} 
-                                finalComponentPayload={finalComponentPayload}
-                                setFinalComponentPayload={setFinalComponentPayload} 
-                            />
+                            mergeState === MergeOrSplitActionType.PROCESS_DATA && <></>
                         }
                         {
-                            mergeState === MergeOrSplitActionType.CONFIRM && 
-                            <MergeComponentConfirmation         
-                                targetComponent={targetComponent} 
-                                sourceComponent={sourceComponent}
-                                finalComponentPayload={finalComponentPayload} 
-                            />
+                            mergeState === MergeOrSplitActionType.CONFIRM && <></>
                         }
                         <div className='d-flex justify-content-end mb-3'>
                             <div className="mt-3 btn-group col-2" role="group">
@@ -177,10 +129,10 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                                 }}>{t('Back')}</button>
                                 {
                                     mergeState === MergeOrSplitActionType.CONFIRM
-                                    ? <button type="button" className="btn btn-primary" onClick={handleMergeComponent} disabled={loading}>{t('Finish')}</button> 
-                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceComponent === null} onClick={() => {
+                                    ? <button type="button" className="btn btn-primary">{t('Finish')}</button> 
+                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceVendor === null} onClick={() => {
                                         if (GetNextState(mergeState) !== null) {
-                                            if(sourceComponent !== null && sourceComponent.id === id) {
+                                            if(sourceVendor !== null && sourceVendor._links?.self.href.split('/').at(-1) === id) {
                                                 setErr('Please choose exactly one component, which is not the component itself!')
                                                 setTimeout(() => setErr(null), 5000)
                                             } else {

@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
-import { Component, Embedded } from '@/object-types'
+import { Vendor, Embedded } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { useSession } from 'next-auth/react'
 import { SW360_API_URL } from '@/utils/env'
@@ -19,34 +19,37 @@ import { Table, _ } from 'next-sw360'
 import { Form } from 'react-bootstrap'
 import { Spinner } from 'react-bootstrap'
 
-type EmbeddedComponents = Embedded<Component, 'sw360:components'>
+type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
-export default function ComponentTable({ component, setComponent }: Readonly<{ component: Component | null, setComponent: Dispatch<SetStateAction<null | Component>> }>): ReactNode {
+export default function VendorTable({ vendor, setVendor }: Readonly<{ vendor: Vendor | null, setVendor: Dispatch<SetStateAction<null | Vendor>> }>): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
     const columns = [
         {
-            id: 'components.merge.select',
+            id: 'vendors.merge.select',
             width: '5%',
-            formatter: (comp: Component) => _(<Form.Check type='radio' checked={component !== null && comp.id === component.id} onChange={() => setComponent(comp)}></Form.Check>),
+            formatter: (vend: Vendor) => _(
+                <Form.Check 
+                    type='radio' 
+                    checked={vendor !== null && vend._links?.self.href.split('/').at(-1) === vendor._links?.self.href.split('/').at(-1)} 
+                    onChange={() => setVendor(vend)}
+                ></Form.Check>),
         },
         {
-            id: 'components.merge.name',
-            name: t('Component Name'),
-            width: '40%',
+            id: 'vendors.merge.fullName',
+            name: t('Vendor Full Name'),
             sort: true,
         },
         {
-            id: 'components.merge.createdBy',
-            name: t('Created by'),
-            width: '40%',
+            id: 'vendors.merge.shortName',
+            name: t('Vendor Short Name'),
             sort: true,
         },
         {
-            id: 'components.merge.releases',
-            name: t('Releases'),
-            width: '8%',
+            id: 'vendors.merge.url',
+            name: t('URL'),
+            sort: true,
         }
     ]
 
@@ -54,18 +57,18 @@ export default function ComponentTable({ component, setComponent }: Readonly<{ c
         if (CommonUtils.isNullOrUndefined(session)) return
         
         return {
-            url: `${SW360_API_URL}/resource/api/components?allDetails=true`,
-            then: (data: EmbeddedComponents) => {
-                return data._embedded['sw360:components'].map((elem: Component) => {                    
+            url: `${SW360_API_URL}/resource/api/vendors`,
+            then: (data: EmbeddedVendors) => {
+                return data._embedded['sw360:vendors'].map((elem: Vendor) => {                    
                     return [
                         elem,
-                        elem.name,
-                        elem._embedded?.createdBy?.fullName ?? '',
-                        elem._embedded?.['sw360:releases']?.length ?? 0
+                        elem.fullName ?? '',
+                        elem.shortName ?? '',
+                        elem.url ?? ''
                     ]
                 })
             },
-            total: (data: EmbeddedComponents) => data.page?.totalElements ?? 0,
+            total: (data: EmbeddedVendors) => data.page?.totalElements ?? 0,
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
