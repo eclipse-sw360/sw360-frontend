@@ -12,7 +12,7 @@
 
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -52,7 +52,10 @@ interface Props {
 const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const params = useSearchParams()
+    const tabParam = params.get('tab')
+    const initialTab = !CommonUtils.isNullEmptyOrUndefinedString(tabParam) ? tabParam : CommonTabIds.SUMMARY
+    const [selectedTab, setSelectedTab] = useState<string>(initialTab)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
