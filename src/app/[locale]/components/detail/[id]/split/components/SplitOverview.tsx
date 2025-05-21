@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import { ReactNode, useState, useEffect } from 'react'
-import { Component, ErrorDetails, HttpStatus, ComponentProcessorActionType } from '@/object-types'
+import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -22,23 +22,23 @@ import SplitComponent from './SplitData'
 import SplitComponentConfirmation from './ConfirmSplit'
 import { redirect } from 'next/navigation'
 
-function GetNextState(currentState: ComponentProcessorActionType): ComponentProcessorActionType | null {
-    if (currentState === ComponentProcessorActionType.CHOOSE_SOURCE) {
-        return ComponentProcessorActionType.PROCESS_DATA
-    } else if (currentState === ComponentProcessorActionType.PROCESS_DATA) {
-        return ComponentProcessorActionType.CONFIRM
+function GetNextState(currentState: MergeOrSplitActionType): MergeOrSplitActionType | null {
+    if (currentState === MergeOrSplitActionType.CHOOSE_SOURCE) {
+        return MergeOrSplitActionType.PROCESS_DATA
+    } else if (currentState === MergeOrSplitActionType.PROCESS_DATA) {
+        return MergeOrSplitActionType.CONFIRM
     } else {
         return null
     }
 }
 
-function GetPrevState(currentState: ComponentProcessorActionType): ComponentProcessorActionType | null {
-    if (currentState === ComponentProcessorActionType.CHOOSE_SOURCE) {
+function GetPrevState(currentState: MergeOrSplitActionType): MergeOrSplitActionType | null {
+    if (currentState === MergeOrSplitActionType.CHOOSE_SOURCE) {
         return null
-    } else if (currentState === ComponentProcessorActionType.PROCESS_DATA) {
-        return ComponentProcessorActionType.CHOOSE_SOURCE
+    } else if (currentState === MergeOrSplitActionType.PROCESS_DATA) {
+        return MergeOrSplitActionType.CHOOSE_SOURCE
     } else {
-        return ComponentProcessorActionType.PROCESS_DATA
+        return MergeOrSplitActionType.PROCESS_DATA
     }
 }
 
@@ -50,7 +50,7 @@ interface SplitComponentPayload {
 export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
-    const [splitState, setSplitState] = useState<ComponentProcessorActionType>(ComponentProcessorActionType.CHOOSE_SOURCE)
+    const [splitState, setSplitState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
     const [targetComponent, setTargetComponent] = useState<null | Component>(null)
     const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
     const [err, setErr] = useState<null | string>(null)
@@ -146,15 +146,15 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
                             }
                         </div>
                         <div className='d-flex justify-content-between text-center mb-3'>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === ComponentProcessorActionType.CHOOSE_SOURCE ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
+                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.CHOOSE_SOURCE ? 'merge-split-active' : 'merge-split'}`} role="alert">
                                 <h6 className="fw-bold">1. {t('Choose target')}</h6>
                                 <p>{t('Choose a component into which current one should be split')}</p>
                             </div>
-                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${splitState === ComponentProcessorActionType.PROCESS_DATA ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
+                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.PROCESS_DATA ? 'merge-split-active' : 'merge-split'}`} role="alert">
                                 <h6 className="fw-bold">2. {t('Split data')}</h6>
                                 <p>{t('Split data from current component to target component')}</p>
                             </div>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === ComponentProcessorActionType.CONFIRM ? 'componentprocessor-active' : 'componentprocessor'}`} role="alert">
+                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.CONFIRM ? 'merge-split-active' : 'merge-split'}`} role="alert">
                                 <h6 className="fw-bold">3. {t('Confirm')}</h6>
                                 <p>{t('Check the split version and confirm')}</p>
                             </div>
@@ -166,10 +166,10 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
                             </div>
                         }
                         {
-                            splitState === ComponentProcessorActionType.CHOOSE_SOURCE && <ComponentTable component={targetComponent} setComponent={setTargetComponent} />
+                            splitState === MergeOrSplitActionType.CHOOSE_SOURCE && <ComponentTable component={targetComponent} setComponent={setTargetComponent} />
                         }
                         {
-                            splitState === ComponentProcessorActionType.PROCESS_DATA &&
+                            splitState === MergeOrSplitActionType.PROCESS_DATA &&
                             <SplitComponent 
                                 sourceComponent={sourceComponent}
                                 targetComponent={targetComponent}
@@ -178,17 +178,17 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
                             />
                         }
                         {
-                            splitState === ComponentProcessorActionType.CONFIRM && <SplitComponentConfirmation sourceComponent={sourceComponent} targetComponent={targetComponent} />
+                            splitState === MergeOrSplitActionType.CONFIRM && <SplitComponentConfirmation sourceComponent={sourceComponent} targetComponent={targetComponent} />
                         }
                         <div className='d-flex justify-content-end mb-3'>
                             <div className="mt-3 btn-group col-2" role="group">
                                 <button type="button" className="btn btn-secondary" disabled={GetPrevState(splitState) === null} onClick={() => {
                                     if (GetPrevState(splitState) !== null) {
-                                        setSplitState(GetPrevState(splitState) as ComponentProcessorActionType)
+                                        setSplitState(GetPrevState(splitState) as MergeOrSplitActionType)
                                     }
                                 }}>{t('Back')}</button>
                                 {
-                                    splitState === ComponentProcessorActionType.CONFIRM
+                                    splitState === MergeOrSplitActionType.CONFIRM
                                     ? <button type="button" className="btn btn-primary" onClick={handleSplitComponent} disabled={loading}>{t('Finish')}</button> 
                                     : <button type="button" className="btn btn-primary" disabled={GetNextState(splitState) === null || targetComponent === null} onClick={() => {
                                         if (GetNextState(splitState) !== null) {
@@ -196,7 +196,7 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
                                                 setErr('Please choose exactly one component, which is not the component itself!')
                                                 setTimeout(() => setErr(null), 5000)
                                             } else {
-                                                setSplitState(GetNextState(splitState) as ComponentProcessorActionType)
+                                                setSplitState(GetNextState(splitState) as MergeOrSplitActionType)
                                             }
                                         }
                                     }}>{t('Next')}</button>

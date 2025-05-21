@@ -107,7 +107,9 @@ export default function VendorsList(): JSX.Element {
 
                             </span>
                         </OverlayTrigger>
-                        <IoMdGitMerge className='btn-icon' />
+                        <Link href={`vendors/merge/${VendorId}`} className='text-link'>
+                            <IoMdGitMerge className='btn-icon' />
+                        </Link>
                     </div>
                 )
             },
