@@ -136,11 +136,12 @@ function Obligations(): ReactNode {
                                     />
                                 </span>
                             </OverlayTrigger>
-                            <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
+                            <OverlayTrigger overlay={<Tooltip>{t('Change Log')}</Tooltip>}>
                                 <span
                                     className='d-inline-block btn-overlay cursor-pointer'
-                                    onClick={() => {}}
+                                    onClick={() => router.push(`obligations/changelog/${item._links?.self.href.split('/').at(-1) ?? ''}`)}
                                 >
+                                    {item.id}
                                     <MdOutlineTask className='btn-icon overlay-trigger' />
                                 </span>
                             </OverlayTrigger>
