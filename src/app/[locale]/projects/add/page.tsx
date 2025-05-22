@@ -49,7 +49,7 @@ function AddProjects(): JSX.Element {
         tag: '',
         domain: '',
         leadArchitect: '',
-        defaultVendorId: '',
+        vendorId: '',
         state: 'ACTIVE',
         phaseOutSince: '',
         moderators: [],
