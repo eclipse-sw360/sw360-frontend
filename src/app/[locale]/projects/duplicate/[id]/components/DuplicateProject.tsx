@@ -77,7 +77,7 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
         tag: '',
         description: '',
         domain: '',
-        defaultVendorId: '',
+        vendorId: '',
         modifiedOn: '',
         modifiedBy: '',
         additionalData: {},

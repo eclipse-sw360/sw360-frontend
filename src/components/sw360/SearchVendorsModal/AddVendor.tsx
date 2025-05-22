@@ -22,6 +22,12 @@ interface AlertData {
     message: JSX.Element
 }
 
+enum AddVendorState {
+    ADD_NEW_VENDOR = 'add_new_vendor',
+    VENDOR_ADDED = 'vendor_added',
+    ADD_NEW_VENDOR_REQUEST_PENDING = 'add_new_vendor_request_pending',
+}
+
 const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Dispatch<React.SetStateAction<boolean>> }) : JSX.Element => {
     const t = useTranslations('default')
     const [vendor, setVendor] = useState<Vendor>({
@@ -30,7 +36,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
         url: ''
     })
     const [alert, setAlert] = useState<AlertData | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [state, setState] = useState<AddVendorState>(AddVendorState.ADD_NEW_VENDOR)
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setVendor((prev: Vendor) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -38,11 +44,11 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
 
     const handleSubmit = async () => {
         try {
-            setLoading(true)
+            setState(AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
-                setLoading(false)
+                setState(AddVendorState.ADD_NEW_VENDOR)
                 return
             }
             const payload: Vendor = {
@@ -62,9 +68,10 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                         </>
                     ),
                 })
+                setState(AddVendorState.VENDOR_ADDED)
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
-                setLoading(false)
+                setState(AddVendorState.ADD_NEW_VENDOR)
                 return signOut()
             } else if (response.status === HttpStatus.CONFLICT) {
                 setAlert({
@@ -77,6 +84,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                         </>
                     ),
                 })
+                setState(AddVendorState.ADD_NEW_VENDOR)
             } else {
                 setAlert({
                     variant: 'danger',
@@ -88,10 +96,11 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                         </>
                     ),
                 })
+                setState(AddVendorState.ADD_NEW_VENDOR)
             }
-            setLoading(false)
         } catch (e) {
             console.error(e)
+            setState(AddVendorState.ADD_NEW_VENDOR)
         }
     }
 
@@ -105,7 +114,6 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                     <div className={`alert alert-${alert.variant}`} role="alert">
                         {alert.message}
                     </div>
-                  
                 )}
                 <div className='row mx-1'>
                     <h6 className='header pb-2 px-2'>{t('Add Vendor')}</h6>
@@ -124,6 +132,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                             className='form-control'
                             id='vendor.fullName'
                             placeholder={t('Enter vendor full name')}
+                            disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
                             required
                         />
                     </div>
@@ -142,6 +151,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                             className='form-control'
                             id='vendor.shortName'
                             placeholder={t('Enter vendor short name')}
+                            disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
                             required
                         />
                     </div>
@@ -160,6 +170,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                             className='form-control'
                             id='vendor.url'
                             placeholder={t('Enter vendor url')}
+                            disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
                             required
                         />
                     </div>
@@ -177,12 +188,15 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                             shortName: '',
                             url: ''
                         })
-                        setLoading(false)
+                        setState(AddVendorState.ADD_NEW_VENDOR)
                     }}
                 >
                     {t('Close')}
                 </button>
-                <button type='button' className='fw-bold btn btn-primary me-2' onClick={() => void handleSubmit()} disabled={loading}>
+                <button type='button' className='fw-bold btn btn-primary me-2' 
+                    onClick={() => void handleSubmit()} 
+                    disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
+                >
                     {t('Add Vendor')}
                 </button>
             </Modal.Footer>

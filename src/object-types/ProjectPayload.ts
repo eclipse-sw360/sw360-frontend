@@ -19,7 +19,7 @@ interface ProjectPayload {
     tag?: string
     description?: string
     domain?: string
-    defaultVendorId?: string
+    vendorId?: string
     modifiedOn?: string
     modifiedBy?: string
     roles?: { [k: string]: Array<string> }

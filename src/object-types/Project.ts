@@ -30,7 +30,7 @@ export interface Project {
     clearingSummary?: string
     clearingRequestId? : string
     contributors?: string[]
-    defaultVendorId?: string
+    vendorId?: string
     deliveryChannels?: string
     deliveryStart?: string
     description?: string

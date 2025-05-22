@@ -42,7 +42,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
         setVendor(vendorData)
         setProjectPayload({
             ...projectPayload,
-            defaultVendorId: vendorResponse.id,
+            vendorId: vendorResponse.id,
         })
     }
 
@@ -54,7 +54,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
         setVendor(vendorData)
         setProjectPayload({
             ...projectPayload,
-            defaultVendorId: '',
+            vendorId: '',
         })
     }
 
@@ -216,7 +216,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.vendor'
                             placeholder={t('Click to set vendor')}
                             readOnly={true}
-                            name='defaultVendorId'
+                            name='vendorId'
                             value={vendor.fullName ?? ''}
                             onClick={handleClickSearchVendor}
                         />
