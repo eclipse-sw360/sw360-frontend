@@ -137,10 +137,10 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
             session.user.access_token
         )
         if (response.status == HttpStatus.OK) {
-            MessageService.success(t('License updated successfully!'))
+            MessageService.success(t('License updated successfully'))
             window.location.reload()
         } else {
-            MessageService.error(t('License updated failed!'))
+            MessageService.error(t('License update failed'))
         }
     }
 
@@ -162,7 +162,7 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
     }
 
     const headerButtonsUpdateWhitelist = {
-        'Update Whitelist': { link: '', type: 'primary', onClick: handleUpdateWhitelist, name: t('Update Whitelist') },
+        'Update whitelist': { link: '', type: 'primary', onClick: handleUpdateWhitelist, name: t('Update whitelist') },
         Cancel: { link: '', type: 'light', onClick: handleCancel, name: t('Cancel') },
     }
 

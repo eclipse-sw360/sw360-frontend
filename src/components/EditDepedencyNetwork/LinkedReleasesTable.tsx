@@ -41,7 +41,7 @@ const TableHeader = () => {
                 </th>
                 <th>
                     <div>
-                        <span className='text-capitalize'>{t('Release relation')}{' '}</span>
+                        <span className='text-capitalize'>{t('Release Relation')}{' '}</span>
                         <ShowInfoOnHover text={
                             <>
                                 <b>{t('UNKNOWN')}</b>: {t('release_relation_unknown_tooltip')}

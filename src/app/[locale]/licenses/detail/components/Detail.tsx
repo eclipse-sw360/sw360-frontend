@@ -47,10 +47,10 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
         const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license, session.user.access_token)
         if (response.status === HttpStatus.OK) {
             const data = (await response.json()) as LicenseDetail
-            MessageService.success(t('Update External Link Success!'))
+            MessageService.success(t('Update external link success'))
             router.push('/licenses/detail?id=' + data.shortName)
         } else {
-            MessageService.error(t('Update External Link Failed!'))
+            MessageService.error(t('Update external link failed'))
         }
     }
 
@@ -71,15 +71,15 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{t('Fullname')}:</td>
+                        <td>{t('Full Name')}:</td>
                         <td>{license.fullName ?? ''}</td>
                     </tr>
                     <tr>
-                        <td>{t('Shortname')}:</td>
+                        <td>{t('Short Name')}:</td>
                         <td>{license.shortName ?? ''}</td>
                     </tr>
                     <tr>
-                        <td>{t('Is checked')}:</td>
+                        <td>{t('Is Checked')}:</td>
                         <td>
                             {' '}
                             {(license.checked === true) ? (
@@ -98,7 +98,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                         <td></td>
                     </tr>
                     <tr>
-                        <td>{t('OSI Approved?')}:</td>
+                        <td>{t('OSI Approved')}:</td>
                         <td>
                             {' '}
                             {(license.OSIApproved === 'YES') ? (
@@ -107,13 +107,13 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                                 </span>
                             ) : (
                                 <span style={{ color: 'red' }}>
-                                    <BiXCircle color='red' /> {t('(n/a)')}
+                                    <BiXCircle color='red' /> {t('NA')}
                                 </span>
                             )}
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('FSF Free/Libre?')}:</td>
+                        <td>{t('FSF Free Libre')}:</td>
                         <td>
                             {' '}
                             {(license.FSFLibre === 'YES') ? (
@@ -122,7 +122,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                                 </span>
                             ) : (
                                 <span style={{ color: 'red' }}>
-                                    <BsXCircle color='red' /> {t('(n/a)')}
+                                    <BsXCircle color='red' /> {t('NA')}
                                 </span>
                             )}
                         </td>

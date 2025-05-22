@@ -74,7 +74,7 @@ const NotificationSettingForm = () : ReactNode => {
     }, [])
 
     const buttonHeaders = {
-        'Update Setting': { name: t('Update Setting'), link: '#', type: 'primary', onClick: updateNotificationSetting },
+        'Update settings': { name: t('Update settings'), link: '#', type: 'primary', onClick: updateNotificationSetting },
     }
 
     useEffect(() => {

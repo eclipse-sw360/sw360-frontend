@@ -134,7 +134,7 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('Linked Release')}:</td>
+                        <td>{t('Linked Releases')}:</td>
                         <td>
                             {
                                 summaryData._embedded?.['sw360:release'] &&

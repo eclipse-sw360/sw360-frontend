@@ -62,13 +62,13 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
             if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.DELETE(`projects/${projectId}`, session.user.access_token)
             if (response.status === HttpStatus.OK) {
-                displayMessage('success', t('Delete project successful!'))
+                displayMessage('success', t('Delete project successful'))
                 router.push('/projects')
                 setReloadPage(true)
             } else if (response.status == HttpStatus.ACCEPTED) {
-                displayMessage('info', t('Moderation request is created!'))
+                displayMessage('info', t('Moderation request is created'))
             } else if (response.status == HttpStatus.CONFLICT) {
-                displayMessage('danger', t('The project cannot be deleted, since it is used by another project!'))
+                displayMessage('danger', t('The project cannot be deleted'))
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 await signOut()
             } else {
@@ -177,7 +177,7 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
                             <Form>
                                 <Form.Group>
                                     <Form.Label className='mb-3'>
-                                        {t.rich('Do you really want to delete the project?', {
+                                        {t.rich('Do you really want to delete the project', {
                                             name: project.name,
                                             strong: (data) => <b>{data}</b>,
                                         })}

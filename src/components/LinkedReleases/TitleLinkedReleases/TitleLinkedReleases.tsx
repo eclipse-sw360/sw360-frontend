@@ -26,7 +26,7 @@ export default function TitleLinkedReleases() : JSX.Element {
                     <p className='fw-bold mt-2'>{t('Release version')}</p>
                 </div>
                 <div className={`${styles['div-filename']}`}>
-                    <p className='fw-bold mt-2'>{t('Release relation')}</p>
+                    <p className='fw-bold mt-2'>{t('Release Relation')}</p>
                 </div>
             </div>
         </>

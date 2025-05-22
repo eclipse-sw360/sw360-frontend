@@ -90,7 +90,7 @@ const EditLicenseDetail = ({
                 <div className='row' style={{ paddingBottom: '0.7rem' }}>
                     <div className='col-lg-4'>
                         <label htmlFor='fullName' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('Fullname')}
+                            {t('Full Name')}
                             <span className='text-red' style={{ color: '#F7941E' }}>
                                 *
                             </span>
@@ -112,7 +112,7 @@ const EditLicenseDetail = ({
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='shortName' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('Shortname')}
+                            {t('Short Name')}
                             <span className='text-red' style={{ color: '#F7941E' }}>
                                 *
                             </span>
@@ -161,7 +161,7 @@ const EditLicenseDetail = ({
                 <div className='row' style={{ paddingBottom: '0.7rem' }}>
                     <div className='col-lg-4'>
                         <label htmlFor='OSIApproved' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('OSI Approved?')}{' '}
+                            {t('OSI Approved')}{' '}
                         </label>
                         <select
                             className={`form-control ${inputValid ? 'is-valid' : ''}`}
@@ -172,13 +172,13 @@ const EditLicenseDetail = ({
                             onChange={updateField}
                             value={licensePayload.OSIApproved ?? ''}
                         >
-                            <option value='NA'>{t('(n/a)')}</option>
-                            <option value='YES'>{t('yes')}</option>
+                            <option value='NA'>{t('NA')}</option>
+                            <option value='YES'>{t('Yes')}</option>
                         </select>
                     </div>
                     <div className='col-lg-4'>
                         <label htmlFor='FSFLibre' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('FSF Free/Libre?')}{' '}
+                            {t('FSF Free Libre')}{' '}
                         </label>
                         <select
                             className={`form-control ${inputValid ? 'is-valid' : ''}`}
@@ -189,8 +189,8 @@ const EditLicenseDetail = ({
                             value={licensePayload.FSFLibre ?? ''}
                             onChange={updateField}
                         >
-                            <option value='NA'>{t('(n/a)')}</option>
-                            <option value='YES'>{t('yes')}</option>
+                            <option value='NA'>{t('NA')}</option>
+                            <option value='YES'>{t('Yes')}</option>
                         </select>
                     </div>
                     <div className='col-lg-4'>
@@ -204,7 +204,7 @@ const EditLicenseDetail = ({
                                 onChange={updateFieldChecked}
                             />
                             <label className='form-label fw-bold' htmlFor='isChecked' style={{ cursor: 'pointer' }}>
-                                {t('Is checked')}
+                                {t('Is Checked')}
                             </label>
                         </div>
                     </div>
