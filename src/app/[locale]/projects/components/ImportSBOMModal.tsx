@@ -529,12 +529,12 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                         title='Copy to clipboard'
                                     >
                                         <Clipboard
-                                            text={`${importSummary.dupPkg.split('||').length} ${t('Packages were not imported because multiple duplicate packages are found with exact same name & version or purl')}:\n${importSummary.dupPkg.split('||').join('\n')}`}
+                                            text={`${importSummary.dupPkg.split('||').length} ${t('Packages were not imported')}:\n${importSummary.dupPkg.split('||').join('\n')}`}
                                         />
                                     </button>
                                     <strong>{importSummary.dupPkg.split('||').length} </strong>{' '}
                                     {t(
-                                        'Packages were not imported because multiple duplicate packages are found with exact same name & version or purl',
+                                        'Packages were not imported',
                                     )}
                                     :
                                     <ul className='mb-0'>
@@ -579,12 +579,12 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                         title='Copy to clipboard'
                                     >
                                         <Clipboard
-                                            text={`${importSummary.dupRel.split('||').length} ${t('Releases were not imported because multiple duplicate releases are found with the exact same name & version')}:\n${importSummary.dupRel.split('||').join('\n')}`}
+                                            text={`${importSummary.dupRel.split('||').length} ${t('Releases were not imported')}:\n${importSummary.dupRel.split('||').join('\n')}`}
                                         />
                                     </button>
                                     <strong>{importSummary.dupRel.split('||').length} </strong>{' '}
                                     {t(
-                                        'Releases were not imported because multiple duplicate releases are found with the exact same name & version',
+                                        'Releases were not imported',
                                     )}
                                     :
                                     <ul className='mb-0'>

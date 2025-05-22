@@ -61,7 +61,7 @@ export default function ModerationDecision({ data,
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('Moderator')}:</td>
+                        <td>{t('Moderators')}:</td>
                         <td>
                             {data?.reviewer != null ? (
                                 <Link href={`mailto:${data.reviewer}`}>{data.reviewer}</Link>

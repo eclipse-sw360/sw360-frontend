@@ -33,7 +33,7 @@ function LicensePage() : ReactNode {
 
     useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedString(deleteLicense)) {
-            MessageService.success(t('License removed successfully!'))
+            MessageService.success(t('License removed successfully'))
         }
     }, [params])
 
@@ -82,7 +82,7 @@ function LicensePage() : ReactNode {
             sort: true,
         },
         { name: t('License Fullname'), width: '45%', sort: true },
-        { name: t('Is Checked?'), width: '10%', sort: true },
+        { name: t('Is Checked'), width: '10%', sort: true },
         { name: t('License Type'), width: '15%', sort: true },
     ]
 

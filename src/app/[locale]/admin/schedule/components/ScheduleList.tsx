@@ -57,7 +57,10 @@ export default function VendorsList(): JSX.Element {
 
             let response;
 
-            if(serviceEndpoint==='schedule/unscheduleSvmSync' || serviceEndpoint==='schedule/unscheduleSvmReverseMatch' || serviceEndpoint==='schedule/cancelMonitoringListUpdate' || serviceEndpoint==='schedule/cancelSrcUpload'){
+            if(serviceEndpoint==='schedule/unscheduleSvmSync' ||
+               serviceEndpoint==='schedule/unscheduleSvmReverseMatch'||
+               serviceEndpoint==='schedule/cancelMonitoringListUpdate' ||
+               serviceEndpoint==='schedule/cancelSrcUpload') {
                 
                 response = await ApiUtils.DELETE(serviceEndpoint, session.user.access_token);
             }
@@ -94,7 +97,7 @@ export default function VendorsList(): JSX.Element {
                                 onClick={handleCancelAllTasks}
                                 disabled={status !== 'authenticated'}
                             >
-                                {t('Cancel all Schedule Tasks')}
+                                {t('Cancel all Scheduled Tasks')}
                             </button>
                             <div className='col-auto buttonheader-title'>{t('Schedule Task Administration')}</div>
                         </div>
@@ -105,9 +108,9 @@ export default function VendorsList(): JSX.Element {
                 <div className='row'>
                     <div className="col-lg-8">
 
-                        {/* CVE SEARCH Service */}
+                        {/* CVE Search Service */}
                         <h5 className="mt-3 mb-1 ms-1 header-underlined">
-                                {t('CVE SEARCH')}
+                                {t('CVE Search')}
                         </h5>
                         <ScheduleItem 
                             scheduleUrl="schedule/cveService" 

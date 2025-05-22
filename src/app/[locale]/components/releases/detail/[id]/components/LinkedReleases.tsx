@@ -83,7 +83,7 @@ const LinkedReleases = ({ releaseId }: Props) : ReactNode => {
             name: t('Name'),
         },
         {
-            name: t('Release relation'),
+            name: t('Release Relation'),
         },
         {
             name: t('Licence names'),

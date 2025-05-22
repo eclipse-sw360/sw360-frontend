@@ -258,7 +258,7 @@ export default function CompareObligation({
                         variant='primary'
                         onClick={() => {
                             scrollToTop()
-                            setAlert({ variant: 'success', message: <>{t('comparing')}</> })
+                            setAlert({ variant: 'success', message: <>{t('Comparing')}</> })
                             setSelectedProjectId(pid)
                         }}
                         disabled={compareProject.size === 0}

@@ -164,7 +164,7 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
         },
         {
             id: 'attachments.checkedBy',
-            name: t('Checked by'),
+            name: t('Checked By'),
             formatter: (email: string) =>
             _(
                 <>
