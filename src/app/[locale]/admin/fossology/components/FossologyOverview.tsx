@@ -34,6 +34,7 @@ export default function FossologyOverview() : ReactNode {
         url: '',
         folderId: '',
         token: '',
+        token_set: false,
     })
     const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.UNKNOWN)
 
@@ -246,7 +247,11 @@ export default function FossologyOverview() : ReactNode {
                             id='fossologyConfig.token'
                             name='token'
                             required
-                            value={fossologyConfigData.token}
+                            placeholder={fossologyConfigData.token_set ?? false
+                                            ? t('Token exits')
+                                            : t('No token found')
+                                        }
+                            value={fossologyConfigData.token ?? ''}
                             onChange={updateInputField}
                         />
                     </div>
