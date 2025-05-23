@@ -83,7 +83,7 @@ export default function FossologyOverview() : ReactNode {
     }, [fetchData, recheckConnection])
 
     useEffect(() => {
-        fetchData('fossology/getServerConfig', true)
+        fetchData('fossology/configData', true)
             .then((response: FossologyConfig | undefined) => {
                 if (response) {
                     setFossologyConfigData(response)
@@ -241,7 +241,7 @@ export default function FossologyOverview() : ReactNode {
                             {t('Access Token')}
                         </label>
                         <input
-                            type='text'
+                            type='password'
                             className='form-control'
                             id='fossologyConfig.token'
                             name='token'
