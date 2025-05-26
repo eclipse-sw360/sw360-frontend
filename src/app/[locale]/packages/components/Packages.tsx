@@ -153,18 +153,45 @@ export default function Packages() : ReactNode {
         {
             fieldName: t('Package Manager'),
             value: packageManagers.map((p) => ({key: p, text: p})),
-            paramName: 'type',
+            paramName: 'packageManager',
         },
         {
-            fieldName: t('License'),
+            fieldName: t('Licenses'),
             value: '',
-            paramName: 'license',
+            paramName: 'licenses',
+        },
+        {
+            fieldName: t('purl'),
+            value: '',
+            paramName: 'purl',
         },
         {
             fieldName: `${t('Created By')} (${t('Email')})`,
             value: '',
-            paramName: 'email',
-        }
+            paramName: 'createdBy',
+        },
+        {
+            fieldName: t('Created On'),
+            value: [
+                {
+                    key: 'EQUAL',
+                    text: '=',
+                },
+                {
+                    key: 'LESS_THAN_OR_EQUAL_TO',
+                    text: '<=',
+                },
+                {
+                    key: 'GREATER_THAN_OR_EQUAL_TO',
+                    text: '>=',
+                },
+                {
+                    key: 'BETWEEN',
+                    text: t('Between'),
+                },
+            ],
+            paramName: 'createdOn',
+        },
     ]
 
     if (status === 'unauthenticated') {

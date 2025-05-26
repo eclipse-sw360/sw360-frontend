@@ -1475,6 +1475,7 @@
     "owner_account_unit": "Ingrese la unidad de contabilidad del propietario",
     "package_management_write_access_usergroup_description": "Controle el rol de usuario de acceso de escritura para paquetes",
     "project_cannot_be_created": "El proyecto no puede crearse ni actualizarse",
+    "purl": "puntilla",
     "release_relation_code_snippest_tooltip": "De la publicación de referencias, se utiliza un fragmento.",
     "release_relation_contained_tooltip": "Si simplemente no sabes si está vinculado dinámicamente",
     "release_relation_dynamic_linked_tooltip": "Software vinculado dinámicamente, como su nombre lo indica",

@@ -1475,6 +1475,7 @@
     "owner_account_unit": "Enter owner's accounting unit",
     "package_management_write_access_usergroup_description": "Control the write access user role for packages",
     "project_cannot_be_created": "Project cannot be created/updated",
+    "purl": "pURL",
     "release_relation_code_snippest_tooltip": "From references release, a fragment is used",
     "release_relation_contained_tooltip": "If you just do not know whether it is dynamically linked",
     "release_relation_dynamic_linked_tooltip": "Software dynamically linked - as the name says",
