@@ -1450,6 +1450,7 @@
     "owner_account_unit": "소유자의 회계 단위를 입력하십시오",
     "package_management_write_access_usergroup_description": "패키지의 쓰기 액세스 사용자 역할을 제어하십시오",
     "project_cannot_be_created": "프로젝트는 만들 수 없습니다/업데이트",
+    "purl": "졸졸 흐르다",
     "release_relation_code_snippest_tooltip": "참조 릴리스에서 조각이 사용됩니다.",
     "release_relation_contained_tooltip": "단지 동적으로 연결되어 있는지 알 수 없는 경우",
     "release_relation_dynamic_linked_tooltip": "동적으로 연결된 소프트웨어 - 이름에서 알 수 있듯이",

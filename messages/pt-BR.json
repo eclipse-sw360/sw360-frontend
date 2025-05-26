@@ -1450,6 +1450,7 @@
     "owner_account_unit": "Insira a unidade contábil do proprietário",
     "package_management_write_access_usergroup_description": "Controle a função de usuário do Write Access para pacotes",
     "project_cannot_be_created": "O projeto não pode ser criado/atualizado",
+    "purl": "purl",
     "release_relation_code_snippest_tooltip": "Da liberação de referências, um fragmento é usado",
     "release_relation_contained_tooltip": "Se você simplesmente não sabe se ele está vinculado dinamicamente",
     "release_relation_dynamic_linked_tooltip": "Software vinculado dinamicamente - como o nome diz",

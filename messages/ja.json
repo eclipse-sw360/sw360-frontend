@@ -1450,6 +1450,7 @@
     "owner_account_unit": "所有者の会計単位を入力してください",
     "package_management_write_access_usergroup_description": "パッケージの書き込みアクセスユーザーロールを制御します",
     "project_cannot_be_created": "プロジェクトを作成/更新できない",
+    "purl": "purl",
     "release_relation_code_snippest_tooltip": "リファレンスリリースからはフラグメントが使用されます",
     "release_relation_contained_tooltip": "動的にリンクされているかどうかだけがわからない場合",
     "release_relation_dynamic_linked_tooltip": "ソフトウェアは動的にリンクされます - 名前のとおり",

@@ -1450,6 +1450,7 @@
     "owner_account_unit": "Rechnungseinheit des Eigentümers erfassen",
     "package_management_write_access_usergroup_description": "Steuern Sie die Rolle der Schreibzugriffsbenutzer für Pakete",
     "project_cannot_be_created": "Projekt kann nicht erstellt/updated",
+    "purl": "Purl",
     "release_relation_code_snippest_tooltip": "Aus der Referenzfreigabe wird ein Fragment verwendet",
     "release_relation_contained_tooltip": "Wenn Sie einfach nicht wissen, ob es dynamisch verknüpft ist",
     "release_relation_dynamic_linked_tooltip": "Software dynamisch verknüpft – wie der Name schon sagt",
