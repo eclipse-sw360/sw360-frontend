@@ -15,7 +15,7 @@ export const packageManagers = [
     'Docker', 'Drupal', 'Gem',
     'Generic', 'Github', 'Gitlab',
     'Golang', 'Gradle', 'Hackage',
-    'Hex', 'huggingface', 'MLflow',
+    'Hex', 'huggingface', 'MLflow', 'Maven',
     'Npm', 'NuGet', 'Oci',
     'Pub', 'PyPi', 'Rpm',
     'swid', 'Swift', 'Yarn', 'Yocto'
