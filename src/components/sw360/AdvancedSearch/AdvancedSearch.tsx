@@ -56,6 +56,11 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
         setCreatedOnSearchOption(event.target.value)
     }
 
+    function isPackagesPage() {
+        const currentUrl = new URL(window.location.href);
+        return currentUrl.pathname.includes('/packages');
+    }
+
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)
         const searchUrl = new URL(currentUrl.origin + currentUrl.pathname)
@@ -212,6 +217,27 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                 }}
                             />
                             <ShowInfoOnHover text={t('Exact_Match_Info')} />
+                        </Form.Group>
+                        <Form.Group className='mb-3' hidden={!isPackagesPage()}>
+                            <Form.Check
+                                type='checkbox'
+                                label={t('Orphan Package')}
+                                id='orphanPackage'
+                                checked={searchParams.orphanPackage === 'true'}
+                                onChange={(e) => 
+                                    setSearchParam(prev => ({
+                                        ...prev,
+                                        orphanPackage: e.target.checked ? 'true' : ''
+                                    }))
+                                }
+                                style={{
+                                    fontWeight: 'bold',
+                                    fontSize: '14px',
+                                    display: 'inline-block',
+                                    marginRight: '5px',
+                                }}
+                            />
+                            <ShowInfoOnHover text={t('Orphan package info')} />
                         </Form.Group>
 
                         <Form.Group>
