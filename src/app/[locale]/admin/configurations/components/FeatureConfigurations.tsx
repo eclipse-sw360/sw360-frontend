@@ -246,6 +246,34 @@ const FeatureConfigurations = () : JSX.Element => {
                                 {t('SBOM Import Export Access User Group')}
                             </td>
                         </tr>
+                        <tr id='release-sourcecodeurl-skip-domains'>
+                            <td className='align-middle fw-bold'>
+                                <label htmlFor='release-sourcecodeurl-skip-domains-regex'>
+                                    {t('Skip domains for Release Source URL')}
+                                </label>
+                            </td>
+                            <td>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    id='release-sourcecodeurl-skip-domains-regex'
+                                    name='release-sourcecodeurl-skip-domains'
+                                    placeholder={t('Enter regex for domains to skip')}
+                                    value={currentConfig[ConfigKeys.RELEASE_SOURCECODE_URL_SKIP_DOMAINS]}
+                                    onChange={(event) => {
+                                        setCurrentConfig((prev) => {
+                                            return {
+                                                ...prev,
+                                                [ConfigKeys.RELEASE_SOURCECODE_URL_SKIP_DOMAINS]: event.target.value.toString()
+                                            } as Configuration
+                                        })
+                                    }}
+                                />
+                            </td>
+                            <td className='align-middle'>
+                                {t('Regex for domains to skip URL check in Release\'s Source Download URL')}
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 <AttachmentStorageConfigurations currentConfig={currentConfig} setCurrentConfig={setCurrentConfig} />
