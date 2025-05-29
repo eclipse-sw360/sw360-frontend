@@ -18,6 +18,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Spinner } from 'react-bootstrap'
 import VendorTable from './VendorsTable'
+import MergeVendor from './MergeData'
 
 function GetNextState(currentState: MergeOrSplitActionType): MergeOrSplitActionType | null {
     if (currentState === MergeOrSplitActionType.CHOOSE_SOURCE) {
@@ -45,7 +46,37 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
     const [targetVendor, setTargetVendor] = useState<null | Vendor>(null)
     const [sourceVendor, setSourceVendor] = useState<null | Vendor>(null)
+    const [finalVendorPayload, setFinalVendorPayload] = useState<null | Vendor>(null)
     const [err, setErr] = useState<null | string>(null)
+    const [loading, setLoading] = useState(false)
+
+    const handleMergeVendor = async () => {
+        try {
+            setLoading(true)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const response = await ApiUtils.PATCH(
+                `vendors/mergeVendors?mergeTargetId=${targetVendor?._links?.self.href.split('/').at(-1)
+                    }&mergeSourceId=${sourceVendor?._links?.self.href.split('/').at(-1)}`,
+                finalVendorPayload ?? {},
+                session.user.access_token
+            )
+            if(response.status === HttpStatus.OK) {
+                setLoading(false)
+                router.push(`/admin/vendors`)
+            } else {
+                const err = await response.json() as ErrorDetails
+                throw new Error(err.message)
+            }
+        } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
+    }
 
     useEffect(() => {
         const controller = new AbortController()
@@ -73,7 +104,7 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                     }
                     const message = error instanceof Error ? error.message : String(error)
                     MessageService.error(message)
-                    router.push(`vendors/${id}`)
+                    router.push(`/admin/vendors`)
                 }
             })()
 
@@ -112,13 +143,40 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                             </div>
                         }
                         {
-                            mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && <VendorTable vendor={sourceVendor} setVendor={setSourceVendor}/>
+                            mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && <VendorTable vendor={sourceVendor} setVendor={setSourceVendor} />
                         }
                         {
-                            mergeState === MergeOrSplitActionType.PROCESS_DATA && <></>
+                            mergeState === MergeOrSplitActionType.PROCESS_DATA &&
+                            <MergeVendor
+                                targetVendor={targetVendor}
+                                sourceVendor={sourceVendor}
+                                finalVendorPayload={finalVendorPayload}
+                                setFinalVendorPayload={setFinalVendorPayload}
+                            />
                         }
                         {
-                            mergeState === MergeOrSplitActionType.CONFIRM && <></>
+                            mergeState === MergeOrSplitActionType.CONFIRM && <>
+                                {
+                                    finalVendorPayload &&
+                                    <>
+                                        <h6 className="border-bottom fw-bold text-uppercase text-blue border-blue mb-2">
+                                            {t('Vendor')}
+                                        </h6>
+                                        <div className="border border-blue p-2">
+                                            <div className="fw-bold text-blue">{t('Full Name')}</div>
+                                            <div className="mt-2">{finalVendorPayload.fullName}</div>
+                                        </div>
+                                        <div className="border border-top-0 border-blue p-2">
+                                            <div className="fw-bold text-blue">{t('Short Name')}</div>
+                                            <div className="mt-2">{finalVendorPayload.shortName}</div>
+                                        </div>
+                                        <div className="border border-top-0 border-blue p-2">
+                                            <div className="fw-bold text-blue">{t('URL')}</div>
+                                            <div className="mt-2">{finalVendorPayload.url}</div>
+                                        </div>
+                                    </>
+                                }
+                            </>
                         }
                         <div className='d-flex justify-content-end mb-3'>
                             <div className="mt-3 btn-group col-2" role="group">
@@ -129,17 +187,17 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                                 }}>{t('Back')}</button>
                                 {
                                     mergeState === MergeOrSplitActionType.CONFIRM
-                                    ? <button type="button" className="btn btn-primary">{t('Finish')}</button> 
-                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceVendor === null} onClick={() => {
-                                        if (GetNextState(mergeState) !== null) {
-                                            if(sourceVendor !== null && sourceVendor._links?.self.href.split('/').at(-1) === id) {
-                                                setErr('Please choose exactly one component, which is not the component itself!')
-                                                setTimeout(() => setErr(null), 5000)
-                                            } else {
-                                                setMergeState(GetNextState(mergeState) as MergeOrSplitActionType)
+                                        ? <button type="button" className="btn btn-primary" disabled={loading} onClick={handleMergeVendor}>{t('Finish')}</button>
+                                        : <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceVendor === null} onClick={() => {
+                                            if (GetNextState(mergeState) !== null) {
+                                                if (sourceVendor !== null && sourceVendor._links?.self.href.split('/').at(-1) === id) {
+                                                    setErr('Please choose exactly one vendor, which is not the vendor itself!')
+                                                    setTimeout(() => setErr(null), 5000)
+                                                } else {
+                                                    setMergeState(GetNextState(mergeState) as MergeOrSplitActionType)
+                                                }
                                             }
-                                        }
-                                    }}>{t('Next')}</button>
+                                        }}>{t('Next')}</button>
                                 }
                             </div>
                         </div>
