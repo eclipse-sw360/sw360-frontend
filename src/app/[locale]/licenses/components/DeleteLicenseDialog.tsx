@@ -52,7 +52,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
         const response = await ApiUtils.DELETE(`licenses/${licensePayload.shortName}`, session.user.access_token)
         try {
             if (response.status == HttpStatus.OK) {
-                displayMessage('success', t('Delete License success!'))
+                displayMessage('success', t('Delete license successful'))
                 router.push('/licenses?delete=success')
                 setReloadPage(true)
             } else if (response.status == HttpStatus.ACCEPTED) {
@@ -112,7 +112,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
                     {message}
                 </Alert>
                 <Form>
-                    {t.rich('Do you really want to delete the license?', {
+                    {t.rich('Do you really want to delete the license', {
                         name: `${licensePayload.fullName} (${licensePayload.shortName})`,
                         strong: (chunks) => <b>{chunks}</b>,
                     })}

@@ -10,7 +10,9 @@
 'use client'
 
 import { Embedded, HttpStatus, Vendor } from '@/object-types'
-import { ApiUtils } from '@/utils/index'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { QuickFilter, Table, _ } from 'next-sw360'
@@ -59,6 +61,7 @@ export default function VendorsList(): JSX.Element {
             setDelVendor((prev) => !prev)
         }
     }
+
     const columns = [
         {
             id: 'vendors.fullName',
@@ -104,13 +107,32 @@ export default function VendorsList(): JSX.Element {
 
                             </span>
                         </OverlayTrigger>
-                        <IoMdGitMerge className='btn-icon' />
+                        <Link href={`vendors/merge/${VendorId}`} className='text-link'>
+                            <IoMdGitMerge className='btn-icon' />
+                        </Link>
                     </div>
                 )
             },
             sort: true,
         },
     ]
+
+    const handleExportSpreadsheet = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const url = 'vendors/exportVendorDetails'
+            const currentDate = new Date().toISOString().split('T')[0]
+            DownloadService.download(url, session, `vendors-${currentDate}.xlsx`)
+        }
+        catch(error: unknown) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }    
+            const message = error instanceof Error ? error.message : String(error);
+            MessageService.error(message)
+        }
+    }
 
     useEffect(()=>{
         void (async() => {
@@ -158,6 +180,7 @@ export default function VendorsList(): JSX.Element {
             }
         })()
     },[delVendor,])
+
     return (
         <>
             <div className='container page-content'>
@@ -171,7 +194,11 @@ export default function VendorsList(): JSX.Element {
                                 <button className='btn btn-primary col-auto me-2' onClick={handleAddVendor}>
                                     {t('Add Vendor')}
                                 </button>
-                                <button className='btn btn-secondary col-auto'>{t('Export Spreadsheet')}</button>
+                                <button className='btn btn-secondary col-auto'
+                                        onClick={() => handleExportSpreadsheet()}
+                                >
+                                    {t('Export Spreadsheet')}
+                                </button>
                             </div>
                             <div className='col-auto buttonheader-title'>{`${t('VENDORS')} (${numVendors ?? ''})`}</div>
                         </div>

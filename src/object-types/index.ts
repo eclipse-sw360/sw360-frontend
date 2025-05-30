@@ -28,6 +28,7 @@ import CreateClearingRequestPayload from './CreateClearingRequestPayload'
 import ECC from './ECC'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
+import FossologyConfig from './FossologyConfig'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import ImportSummary from './ImportSummary'
@@ -137,6 +138,7 @@ export type {
     ErrorDetails,
     ExternalDocumentReferences,
     ExternalReference,
+    FossologyConfig,
     FossologyProcessInfo,
     FossologyProcessStatus,
     ImportSummary,
@@ -232,7 +234,7 @@ import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 import ConfigKeys from './enums/ConfigKeys'
-import ComponentProcessorActionType from './enums/ComponentProcessor'
+import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
 
 export {
     ActionType,
@@ -250,5 +252,5 @@ export {
     UserGroupType,
     VulnerabilitiesVerificationState,
     ConfigKeys,
-    ComponentProcessorActionType
+    MergeOrSplitActionType
 }

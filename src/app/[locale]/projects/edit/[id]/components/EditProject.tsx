@@ -107,7 +107,7 @@ function EditProject({ projectId, isDependencyNetworkFeatureEnabled }: { project
         tag: '',
         description: '',
         domain: '',
-        defaultVendorId: '',
+        vendorId: '',
         modifiedOn: '',
         modifiedBy: '',
         additionalData: {},

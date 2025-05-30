@@ -144,6 +144,61 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                         </div>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
+                                <label className='form-label fw-bold'>{t('Contains Cryptography')}</label>
+                                <div>
+                                    <div className='form-check'>
+                                        <input
+                                            className='form-check-input'
+                                            type='radio'
+                                            id='contains_cryptography_yes'
+                                            name='containsCryptography'
+                                            value='true'
+                                            checked={releasePayload.eccInformation?.containsCryptography === true}
+                                            onChange={(e) =>
+                                                setReleasePayload({
+                                                    ...releasePayload,
+                                                    eccInformation: {
+                                                        ...releasePayload.eccInformation,
+                                                        containsCryptography: e.target.value === 'true',
+                                                    },
+                                                })
+                                            }
+                                        />
+                                        <label className='form-check-label' htmlFor='contains_cryptography_yes'>
+                                            {t('Yes')}
+                                        </label>
+                                    </div>
+                                    <div className='form-check'>
+                                        <input
+                                            className='form-check-input'
+                                            type='radio'
+                                            id='contains_cryptography_no'
+                                            name='containsCryptography'
+                                            value='false'
+                                            checked={releasePayload.eccInformation?.containsCryptography === false}
+                                            onChange={(e) =>
+                                                setReleasePayload({
+                                                    ...releasePayload,
+                                                    eccInformation: {
+                                                        ...releasePayload.eccInformation,
+                                                        containsCryptography: e.target.value === 'true',
+                                                    },
+                                                })
+                                            }
+                                        />
+                                        <label className='form-check-label' htmlFor='contains_cryptography_no'>
+                                            {t('No')}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div className='form-text' id='containsCryptography.HelpBlock'>
+                                    <ShowInfoOnHover text={t('Contains Cryptography')} />
+                                    {t('cryptoinfo')}.
+                                </div>
+                            </div>
+                        </div>
+                        <div className='row with-divider pt-2 pb-2'>
+                            <div className='col-lg-4'>
                                 <label htmlFor='assessor_contact_person' className='form-label fw-bold'>
                                     {t('Assessor Contact Person')}
                                 </label>

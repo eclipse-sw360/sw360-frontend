@@ -64,12 +64,12 @@ const AdminMainPage = (): JSX.Element => {
                             <AiOutlineUnorderedList /> {t('Obligations')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/schedule'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <RxCalendar /> {t('Schedule')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/fossology'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <svg className='fossology_icon mb-1' height={18} width={18}>
                                 <use href='icons.svg#fossology'></use>

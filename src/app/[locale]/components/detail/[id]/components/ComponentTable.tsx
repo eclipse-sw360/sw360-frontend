@@ -17,12 +17,13 @@ import { useSession } from 'next-auth/react'
 import { SW360_API_URL } from '@/utils/env'
 import { Table, _ } from 'next-sw360'
 import { Form } from 'react-bootstrap'
+import { Spinner } from 'react-bootstrap'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
 
 export default function ComponentTable({ component, setComponent }: Readonly<{ component: Component | null, setComponent: Dispatch<SetStateAction<null | Component>> }>): ReactNode {
     const t = useTranslations('default')
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
 
     const columns = [
         {
@@ -70,6 +71,14 @@ export default function ComponentTable({ component, setComponent }: Readonly<{ c
     }
 
     return (
-        <Table columns={columns} selector={true} server={initServerPaginationConfig()} />
+        <>
+            {
+                status === 'loading' 
+                ? <div className='col-12 d-flex justify-content-center align-items-center'>
+                    <Spinner className='spinner' />
+                </div>
+                : <Table columns={columns} selector={true} server={initServerPaginationConfig()} />
+            }
+        </>
     )
 }

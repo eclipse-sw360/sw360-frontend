@@ -7,10 +7,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-enum ComponentProcessorActionType {
+enum MergeOrSplitActionType {
     CHOOSE_SOURCE = 'CHOOSE_SOURCE',
     PROCESS_DATA = 'PROCESS_DATA',
     CONFIRM = 'CONFIRM'
 }
 
-export default ComponentProcessorActionType
+export default MergeOrSplitActionType

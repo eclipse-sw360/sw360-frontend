@@ -54,7 +54,7 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
                 </div>
             </div>
             <Alert variant='info'>
-                {t('You will be notified on changes of an item if you have the selected role in the changed item')}.
+                {t('You will be notified on changes')}.
             </Alert>
 
             <NotificationSettings

@@ -1438,12 +1438,12 @@ input[checked]+.slider:before {
     border-radius: 50%;
 }
 
-.componentprocessor-active {
+.merge-split-active {
     background-color: var(--sw360-primary-color) !important;
     border-color: var(--sw360-primary-color) !important;
 }
   
-.componentprocessor {
+.merge-split {
     background-color: #f1f2f5 !important;
     border-color: #cdced9 !important;
 }
@@ -1466,4 +1466,8 @@ input[checked]+.slider:before {
 
 .orange {
     background-color: #fff4ec;
+}
+
+.sw360-background {
+    background-color: var(--sw360-primary-background-color) !important;
 }
