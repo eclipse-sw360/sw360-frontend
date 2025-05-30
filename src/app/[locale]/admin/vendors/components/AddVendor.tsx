@@ -22,7 +22,7 @@ export default function AddVendor(): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
     const router = useRouter()
-    const [vendorData, setVendorData] = useState<Vendor>({
+    const [vendorData, setVendorData] = useState<Vendor | null>({
         fullName: '',
         shortName: '',
         url: '',
@@ -37,12 +37,10 @@ export default function AddVendor(): JSX.Element {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session))
                 return signOut()
-            const payload: Vendor = {
-                fullName: vendorData.fullName,
-                shortName: vendorData.shortName,
-                url: vendorData.url,
-            }
-            const response = await ApiUtils.POST('vendors', payload, session.user.access_token)
+            if(vendorData === null)
+                return 
+            delete vendorData['_links']
+            const response = await ApiUtils.POST('vendors', vendorData, session.user.access_token)
             if (response.status == HttpStatus.CREATED) {
                 MessageService.success(t('Vendor is created'))
                 router.push('/admin/vendors')
@@ -87,7 +85,7 @@ export default function AddVendor(): JSX.Element {
                             {t('Cancel')}
                         </button>
                     </div>
-                    <VendorDetailForm payload={vendorData} setPayload={setVendorData} />
+                    <VendorDetailForm payload={vendorData as Vendor} setPayload={setVendorData} />
                 </form>
             </div>
         </>

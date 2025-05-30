@@ -7,9 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ReactNode } from 'react'
 import { Metadata } from 'next'
-import MergeOverview from './components/MergeOverview'
+
+import EditVendor from './components/EditVendor'
+
+import { ReactNode } from "react"
 
 export const metadata: Metadata = {
     title: 'Admin - Vendors',
@@ -19,11 +21,10 @@ interface Context {
     params: Promise<{ id: string }>
 }
 
-const MergeVendor = async (props: Context): Promise<ReactNode> => {
-    const params = await props.params;
+const EditVendorPage = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params
     const vendorId = params.id
-
-    return <MergeOverview id={vendorId} />
+    return <EditVendor id={vendorId} />
 }
 
-export default MergeVendor
+export default EditVendorPage

@@ -31,7 +31,7 @@ export default function VendorsList(): JSX.Element {
     const router = useRouter()
 
     const [numVendors, setNumVendors] = useState<null | number>(null)
-    const [VendorData, setVendorData] = useState<Array<(Vendor | JSX.Element)[]>>([])
+    const [VendorData, setVendorData] = useState<Array<({ name: string, id: string } | string)[]>>([])
     const [delVendor, setDelVendor] = useState<boolean>(true)
     const [loading, setLoading] = useState<boolean>(true)
     const handleAddVendor = () => {
@@ -66,10 +66,10 @@ export default function VendorsList(): JSX.Element {
         {
             id: 'vendors.fullName',
             name: t('Full Name'),
-            formatter: (name: string) =>
+            formatter: ({ name, id }: { name: string, id: string }) =>
                 _(
                     <>
-                        <Link href='#' className='text-link'>
+                        <Link href={`/admin/vendors/edit/${id}`} className='text-link'>
                             {name}
                         </Link>
                     </>
@@ -90,24 +90,22 @@ export default function VendorsList(): JSX.Element {
             id: 'vendors.actions',
             name: t('Actions'),
             width: '8%',
-            formatter: (cell:string) =>{
-                const VendorId=cell.toString().split('/resource/api/vendors/')[1];
+            formatter: (id:string) =>{
                 return _(
                     <div className='d-flex justify-content-between'>
-                        <Link href='#' className='text-link'>
+                        <Link href={`/admin/vendors/edit/${id}`} className='text-link'>
                             <FiEdit2 className='btn-icon' />
                         </Link>
-                       
                         <OverlayTrigger overlay={<Tooltip>{t('Delete Vendor')}</Tooltip>}>
                             <span
                                 className='d-inline-block'
-                                onClick={()=>{DeleteVendor(VendorId)}}
+                                onClick={()=>{DeleteVendor(id)}}
                             >
                                 <FaTrashAlt className='btn-icon' />
 
                             </span>
                         </OverlayTrigger>
-                        <Link href={`vendors/merge/${VendorId}`} className='text-link'>
+                        <Link href={`vendors/merge/${id}`} className='text-link'>
                             <IoMdGitMerge className='btn-icon' />
                         </Link>
                     </div>
@@ -161,14 +159,14 @@ export default function VendorsList(): JSX.Element {
 
                 // Set the vendor data with proper type safety
                 setVendorData(
-                    vendors._embedded?.['sw360:vendors']?.map((elem: Vendor) => {
+                    vendors._embedded['sw360:vendors'].map((elem: Vendor) => {
                         return [
-                            elem.fullName ?? '',
+                            { name: elem.fullName ?? '', id: elem._links?.self.href.split('/').at(-1) ?? ''},
                             elem.shortName ?? '',
                             elem.url ?? '',
-                            elem._links?.self?.href ?? '',
-                        ] as (Vendor | JSX.Element)[]
-                    }) ?? []
+                            elem._links?.self.href.split('/').at(-1) ?? '',
+                        ]
+                    })
                 )
             } catch (e) {
                 if (e instanceof Error) {
