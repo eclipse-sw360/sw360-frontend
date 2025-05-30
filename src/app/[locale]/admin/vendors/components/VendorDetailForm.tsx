@@ -18,7 +18,7 @@ export default function VendorDetailForm({
     setPayload,
 }: {
     payload: Vendor
-    setPayload: Dispatch<SetStateAction<Vendor>>
+    setPayload: Dispatch<SetStateAction<Vendor | null>>
 }): JSX.Element {
     const t = useTranslations('default')
 
@@ -32,7 +32,7 @@ export default function VendorDetailForm({
                 <div className='row header mb-2 pb-2 px-2'>
                     <h6>{t('Edit Vendor')}</h6>
                 </div>
-                <div className='row'>
+                <div className='row mb-3'>
                     <div className='col-lg-4'>
                         <label htmlFor='vendor.fullName' className='form-label fw-medium'>
                             {t('Full Name')}{' '}
@@ -43,7 +43,7 @@ export default function VendorDetailForm({
                         <input
                             type='text'
                             name='fullName'
-                            value={payload.fullName}
+                            value={payload.fullName ?? ''}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.fullName'
@@ -61,7 +61,7 @@ export default function VendorDetailForm({
                         <input
                             type='text'
                             name='shortName'
-                            value={payload.shortName}
+                            value={payload.shortName ?? ''}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.shortName'
@@ -79,7 +79,7 @@ export default function VendorDetailForm({
                         <input
                             type='url'
                             name='url'
-                            value={payload.url}
+                            value={payload.url ?? ''}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.url'
@@ -87,7 +87,6 @@ export default function VendorDetailForm({
                             required
                         />
                     </div>
-                    <hr className='my-3' />
                 </div>
             </div>
         </>
