@@ -1,5 +1,7 @@
 {
   "default": {
+    "(n/a)": "",
+    "A License Type with same title already exists": "Ya existe un tipo de licencia con el mismo título",
     "A package with the same name and version already exists": "Ya existe un paquete con el mismo nombre y versión.",
     "A project with the same name and version already exists": "Un proyecto con el mismo nombre y versión ya existe",
     "A vendor with same name already exists": "Un vendedor con el mismo nombre ya existe",
@@ -302,6 +304,7 @@
     "Create Clearing Request": "Crear solicitud de limpieza",
     "Create Component": "Crear componente",
     "Create License": "Crear licencia",
+    "Create License Type": "Crear tipo de licencia",
     "Create Package": "Crear paquete",
     "Create Project": "Crear proyecto",
     "Create Project Clearing Report": "Crear informe de compensación del proyecto",
@@ -504,6 +507,7 @@
     "Enter regex for domains to skip": "Ingrese expresiones regulares para los dominios que desea omitir",
     "Enter Search Text": "Introduzca texto de búsqueda",
     "Enter Secondary Department": "Ingresar al Departamento de Secundaria",
+    "Enter Title": "Ingrese el título ...",
     "Enter URL": "Introducir URL",
     "Enter VCS URL": "Ingrese la URL de VCS",
     "Enter Version": "Entrada",
@@ -728,6 +732,7 @@
     "License Shortname": "Licencia Nombre",
     "License Text": "Texto de licencia",
     "License Type": "Tipo de licencia",
+    "License Type is created successfully": "¡El tipo de licencia se crea con éxito!",
     "License Types": "Tipos de licencia",
     "License added successfully": "¡Licencia agregada exitosamente!",
     "License name": "Nombre de la licencia",

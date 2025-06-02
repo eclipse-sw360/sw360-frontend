@@ -1,5 +1,7 @@
 {
   "default": {
+    "(n/a)": "",
+    "A License Type with same title already exists": "具有同一标题的许可类型已经存在",
     "A package with the same name and version already exists": "已存在同名同版本的包",
     "A project with the same name and version already exists": "一个具有相同名称和版本的项目已经存在",
     "A vendor with same name already exists": "A vendor with same name already exists",
@@ -302,6 +304,7 @@
     "Create Clearing Request": "创建清算请求",
     "Create Component": "创建组件",
     "Create License": "创建许可证",
+    "Create License Type": "创建许可证类型",
     "Create Package": "创建包",
     "Create Project": "创建项目",
     "Create Project Clearing Report": "创建项目清算报告",
@@ -504,6 +507,7 @@
     "Enter regex for domains to skip": "输入要跳过的域名的正则表达式",
     "Enter Search Text": "输入搜索文本",
     "Enter Secondary Department": "进入中学部",
+    "Enter Title": "输入标题...",
     "Enter URL": "输入网址",
     "Enter VCS URL": "输入版本控制 URL",
     "Enter Version": "输入版本",
@@ -728,6 +732,7 @@
     "License Shortname": "许可证简称",
     "License Text": "许可文字",
     "License Type": "许可证类型",
+    "License Type is created successfully": "许可类型已成功创建！",
     "License Types": "License Types",
     "License added successfully": "许可证添加成功！",
     "License name": "许可证名称",

@@ -1,5 +1,7 @@
 {
   "default": {
+    "(n/a)": "(n/a)",
+    "A License Type with same title already exists": "A License Type with same title already exists",
     "A package with the same name and version already exists": "A package with the same name and version already exists",
     "A project with the same name and version already exists": "A project with the same name and version already exists",
     "A vendor with same name already exists": "A vendor with same name already exists",
@@ -302,6 +304,7 @@
     "Create Clearing Request": "Create Clearing Request",
     "Create Component": "Create Component",
     "Create License": "Create License",
+    "Create License Type": "Create License Type",
     "Create Package": "Create Package",
     "Create Project": "Create Project",
     "Create Project Clearing Report": "Create Project Clearing Report",
@@ -504,6 +507,7 @@
     "Enter regex for domains to skip": "Enter regex for domains to skip",
     "Enter Search Text": "Enter Search Text",
     "Enter Secondary Department": "Enter Secondary Department",
+    "Enter Title": "Enter Title...",
     "Enter URL": "Enter URL",
     "Enter VCS URL": "Enter VCS URL",
     "Enter Version": "Enter Version",
@@ -728,6 +732,7 @@
     "License Shortname": "License Shortname",
     "License Text": "License Text",
     "License Type": "License Type",
+    "License Type is created successfully": "License Type is created successfully !",
     "License Types": "License Types",
     "License added successfully": "License added successfully!",
     "License name": "License name",

@@ -1,5 +1,7 @@
 {
   "default": {
+    "(n/a)": "",
+    "A License Type with same title already exists": "同じタイトルのライセンスタイプがすでに存在しています",
     "A package with the same name and version already exists": "同じ名前とバージョンのパッケージがすでに存在します",
     "A project with the same name and version already exists": "同じ名前とバージョンのプロジェクトがすでに存在しています",
     "A vendor with same name already exists": "A vendor with same name already exists",
@@ -302,6 +304,7 @@
     "Create Clearing Request": "Create Clearing Request",
     "Create Component": "コンポーネントの作成",
     "Create License": "ライセンスを作成します",
+    "Create License Type": "ライセンスタイプを作成します",
     "Create Package": "パッケージの作成",
     "Create Project": "プロジェクトの作成",
     "Create Project Clearing Report": "プロジェクト清算レポートの作成",
@@ -504,6 +507,7 @@
     "Enter regex for domains to skip": "スキップするドメインの正規表現を入力してください",
     "Enter Search Text": "検索テキストを入力してください",
     "Enter Secondary Department": "中等部門に入る",
+    "Enter Title": "タイトルを入力してください...",
     "Enter URL": "URLを入力",
     "Enter VCS URL": "VCS URLを入力します",
     "Enter Version": "バージョンを入力してください",
@@ -728,6 +732,7 @@
     "License Shortname": "ライセンスの短縮名",
     "License Text": "ライセンステキスト",
     "License Type": "ライセンスの種類",
+    "License Type is created successfully": "ライセンスタイプは正常に作成されます！",
     "License Types": "License Types",
     "License added successfully": "ライセンスが正常に追加されました。",
     "License name": "ライセンス名",
