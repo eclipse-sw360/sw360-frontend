@@ -1,5 +1,7 @@
 {
   "default": {
+    "(n/a)": "",
+    "A License Type with same title already exists": "제목이 같은 라이센스 유형이 이미 존재합니다",
     "A package with the same name and version already exists": "이름과 버전이 같은 패키지가 이미 존재합니다.",
     "A project with the same name and version already exists": "이미 같은 이름과 버전이있는 프로젝트가 이미 존재합니다.",
     "A vendor with same name already exists": "같은 이름을 가진 납품업자는 이미 존재합니다",
@@ -303,6 +305,7 @@
     "Create Component": "구성 요소",
     "Create License": "라이센스를 만듭니다",
     "Create Package": "패키지를 만듭니다",
+    "Create License Type": "라이센스 유형을 만듭니다",
     "Create Project": "프로젝트",
     "Create Project Clearing Report": "프로젝트 청산 보고서 생성",
     "Create Release": "공지사항",
@@ -504,6 +507,7 @@
     "Enter Priority Text": "우선 순위표",
     "Enter Search Text": "본문 바로가기",
     "Enter Secondary Department": "중등학과 입학",
+    "Enter Title": "제목 입력 ...",
     "Enter URL": "URL을 입력",
     "Enter VCS URL": "VCS URL을 입력하세요",
     "Enter Version": "본문 바로가기",
@@ -729,6 +733,7 @@
     "License Shortname": "라이센스 Shortname",
     "License Text": "라이센스 텍스트",
     "License Type": "라이센스 유형",
+    "License Type is created successfully": "라이센스 유형은 성공적으로 생성됩니다!",
     "License Types": "라이센스 유형",
     "License added successfully": "라이센스가 성공적으로 추가되었습니다!",
     "License name": "라이센스 이름",

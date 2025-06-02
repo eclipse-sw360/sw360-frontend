@@ -1,5 +1,7 @@
 {
   "default": {
+    "(n/a)": "",
+    "A License Type with same title already exists": "Một loại giấy phép có cùng tiêu đề đã tồn tại",
     "A package with the same name and version already exists": "Đã tồn tại gói có cùng tên và phiên bản",
     "A project with the same name and version already exists": "Một dự án có cùng tên và phiên bản đã tồn tại",
     "A vendor with same name already exists": "A vendor with same name already exists",
@@ -302,6 +304,7 @@
     "Create Clearing Request": "Tạo yêu cầu thanh toán bù trừ",
     "Create Component": "Tạo thành phần",
     "Create License": "Tạo giấy phép",
+    "Create License Type": "Tạo loại giấy phép",
     "Create Package": "Tạo gói",
     "Create Project": "Tạo dự án",
     "Create Project Clearing Report": "Tạo báo cáo thanh toán dự án",
@@ -504,6 +507,7 @@
     "Enter Priority Text": "Nhập văn bản ưu tiên",
     "Enter Search Text": "Nhập văn bản tìm kiếm",
     "Enter Secondary Department": "Vào khoa Trung học",
+    "Enter Title": "Nhập tiêu đề ...",
     "Enter URL": "Nhập URL",
     "Enter VCS URL": "Nhập URL VCS",
     "Enter Version": "Nhập phiên bản",
@@ -729,6 +733,7 @@
     "License Shortname": "Tên viết tắt giấy phép",
     "License Text": "Giấy phép văn bản",
     "License Type": "Loại giấy phép",
+    "License Type is created successfully": "Loại giấy phép được tạo thành công!",
     "License Types": "Các loại giấy phép",
     "License added successfully": "Đã thêm giấy phép thành công!",
     "License name": "Tên giấy phép",
