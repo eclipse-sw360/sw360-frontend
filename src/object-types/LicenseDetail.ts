@@ -28,7 +28,7 @@ export default interface LicenseDetail {
     checked?: boolean
     issetBitfield?: number
     _links?: Links
-    _embedded: {
+    _embedded?: {
         ['sw360:obligations']?: Array<Obligation>
     }
 }
