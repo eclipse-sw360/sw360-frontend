@@ -15,7 +15,7 @@
     "classnames": "^2.5.1",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.5.0",
-    "flag-icons": "^7.3.2",
+    "flag-icons": "^7.5.0",
     "gridjs": "^6.2.0",
     "html-react-parser": "^5.2.3",
     "jwt-decode": "^4.0.0",
