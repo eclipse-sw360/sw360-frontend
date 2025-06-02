@@ -16,12 +16,12 @@ import { signOut } from 'next-auth/react'
 
 const download = async (url: string,
                         session: Session | null,
-                        fileName: string) : Promise<number | undefined> => {
+                        fileName: string, headers?: {[key: string]: string}) : Promise<number | undefined> => {
     if (CommonUtils.isNullOrUndefined(session)) {
         return signOut()
     }
     try {
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url, session.user.access_token, undefined, headers)
         if (!response.ok) {
           return response.status
         }
