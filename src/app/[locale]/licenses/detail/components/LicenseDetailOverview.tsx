@@ -13,11 +13,11 @@
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { PageButtonHeader, SideBar } from '@/components/sw360'
-import { Changelogs, HttpStatus, LicenseDetail, LicenseTabIds, Embedded } from '@/object-types'
+import { Changelogs, HttpStatus, LicenseDetail, LicenseTabIds, Embedded, ErrorDetails } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import Detail from './Detail'
 import Obligations from './Obligations'
@@ -29,25 +29,6 @@ import React from 'react'
 interface Props {
     licenseId: string
 }
-
-const tabList = [
-    {
-        id: LicenseTabIds.DETAILS,
-        name: 'Details',
-    },
-    {
-        id: LicenseTabIds.TEXT,
-        name: 'Text',
-    },
-    {
-        id: LicenseTabIds.OBLIGATIONS,
-        name: 'Obligations',
-    },
-    {
-        id: LicenseTabIds.CHANGE_LOG,
-        name: 'Change Log',
-    },
-]
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -62,6 +43,25 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
     const [whitelist, setWhitelist] = useState<Map<string, boolean> | undefined>(undefined)
     const params = useSearchParams()
 
+    const tabList = [
+    {
+        id: LicenseTabIds.DETAILS,
+        name: t('Details'),
+    },
+    {
+        id: LicenseTabIds.TEXT,
+        name: t('Text'),
+    },
+    {
+        id: LicenseTabIds.OBLIGATIONS,
+        name: t('Obligations'),
+    },
+    {
+        id: LicenseTabIds.CHANGE_LOG,
+        name: t('Change Log'),
+    },
+]
+
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
@@ -72,16 +72,19 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                 if (CommonUtils.isNullOrUndefined(session))
                     return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                if (response.status !== HttpStatus.OK) {
+                    const err = await response.json() as ErrorDetails
+                    throw new Error(err.message)
                 }
 
                 const licenses = await response.json() as LicenseDetail
                 setLicenseDetail(licenses)
-            } catch (e) {
-                console.error(e)
+            } catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         void (async () => {
@@ -94,10 +97,9 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                     session.user.access_token,
                     signal
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                if (response.status !== HttpStatus.OK) {
+                    const err = await response.json() as ErrorDetails
+                    throw new Error(err.message)
                 }
 
                 const data = await response.json() as EmbeddedChangeLogs
@@ -107,8 +109,12 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                         ? []
                         : data['_embedded']['sw360:changeLogs']
                 )
-            } catch (e) {
-                console.error(e)
+            } catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
 
