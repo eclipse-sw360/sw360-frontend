@@ -19,12 +19,14 @@ async function send({
     data,
     token,
     signal,
+    headers
 }: {
     method: string
     path: string
     data: object | null
     token: string
     signal?: unknown
+    headers?: { [key: string]: string }
 }): Promise<Response> {
     const request_content: RequestContent = { method, headers: { Accept: 'application/*' }, body: null }
 
@@ -37,6 +39,13 @@ async function send({
         }
     }
 
+    if(headers) {
+        request_content.headers = {
+            ...request_content.headers,
+            ...headers  
+        }
+    }
+    
     if (token) {
         request_content.headers['Authorization'] = `${token}`
     }
@@ -50,8 +59,8 @@ async function send({
     return fetch(`${base}/${path}`, request_content).then((r) => r)
 }
 
-function GET(path: string, token: string, signal?: unknown): Promise<Response> {
-    return send({ method: 'GET', path, token, data: null, signal })
+function GET(path: string, token: string, signal?: unknown, headers?: { [key:string]: string }): Promise<Response> {
+    return send({ method: 'GET', path, token, data: null, signal, headers })
 }
 
 function DELETE(path: string, token: string): Promise<Response> {
