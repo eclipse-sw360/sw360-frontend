@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import DeleteLicenseTypesModal from './DeleteLicenseTypesModal'
 
 type EmbeddedLicenseTypes = Embedded<LicenseType, 'sw360:licenseTypes'>
 
@@ -30,8 +31,11 @@ export default function LicenseTypesDetail() : ReactNode {
     const t = useTranslations('default')
     const [quickFilter, setQuickFilter] = useState({})
     const [loading, setLoading] = useState<boolean>(false)
+    const [licenseTypeId, setLicenseTypeId] = useState<string>('')
+    const [licenseTypeName, setLicenseTypeName] = useState<string>('')
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
+    const [licenseTypeData, setLicenseTypeData] = useState<Array<Array<string | string[]>>>([])
     const [licenseTypeCount, setLicenseTypeCount] = useState<null | number>(null)
-    const [licenseTypeData, setLicenseTypeData] = useState<Array<string[]>>([])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
@@ -60,8 +64,8 @@ export default function LicenseTypesDetail() : ReactNode {
                     setLicenseTypeData(licenseTypeDetails._embedded['sw360:licenseTypes'].map(
                         (item: LicenseType) =>
                             [
-                            item.licenseType ?? '',
-                            item.id ?? '',
+                                item.licenseType,
+                                [ item.id, item.licenseType],
                             ]
                         ))
 
@@ -87,6 +91,12 @@ export default function LicenseTypesDetail() : ReactNode {
         router.push('/admin/licenseTypes/add')
     }
 
+    const handleDeleteLicenseType = (id: string, licenseTypeName: string) => {
+        setShowDeleteModal(true)
+        setLicenseTypeId(id)
+        setLicenseTypeName(licenseTypeName)
+    }
+
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
         setQuickFilter({ keyword: event.currentTarget.value })
     }
@@ -102,7 +112,7 @@ export default function LicenseTypesDetail() : ReactNode {
             id: 'licenseType.actions',
             name: t('Actions'),
             width: '20%',
-            formatter: () =>
+            formatter: ([id, licenseTypeName]: Array<string>) =>
                 _(
                     <div className='d-flex justify-content-between'>                       
                         <OverlayTrigger overlay={
@@ -112,7 +122,7 @@ export default function LicenseTypesDetail() : ReactNode {
                         }>
                             <span
                                 className='d-inline-block'
-                                // onClick={()=>{DeleteLicenseType(licenseTypeId)}}
+                                onClick={()=>{handleDeleteLicenseType(id, licenseTypeName)}}
                             >
                                 <FaTrashAlt className='btn-icon' />
 
@@ -127,6 +137,11 @@ export default function LicenseTypesDetail() : ReactNode {
 
     return (
         <>
+            <DeleteLicenseTypesModal licenseTypeId={licenseTypeId}
+                                     licenseTypeName={licenseTypeName}
+                                     show={showDeleteModal}
+                                     setShow={setShowDeleteModal}
+            />
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
