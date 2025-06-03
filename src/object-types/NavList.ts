@@ -37,7 +37,7 @@ function NavList(): NavItem[] {
                 { href: '/admin/obligations', name: t('Obligations'), id: 'admin_obligations' },
                 { href: '/admin/schedule', name: t('Schedule'), id: 'admin_schedule' },
                 { href: '/admin/fossology', name: t('Fossology'), id: 'admin_fossology' },
-                { href: '#', name: t('Import Export'), id: 'admin_import_export' },
+                { href: '/admin/importexport', name: t('Import Export'), id: 'admin_import_export' },
                 { href: '/admin/databaseSanitation', name: t('Database Sanitation'), id: 'admin_database_sanitation' },
                 { href: '#', name: t('Attachment Cleanup'), id: 'admin_attachment_cleanup' },
                 { href: '/admin/oauthclient', name: t('OAuth Client'), id: 'admin_oauth_client' },
