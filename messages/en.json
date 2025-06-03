@@ -407,6 +407,7 @@
     "Do you really want to add license info to all the directly linked release": "Do you really want to add license info to all the directly linked release(s)?",
     "Do you really want to deactivate the user": "Do you really want to deactivate the user",
     "Do you really want to delete attachment": "Do you really want to delete attachment",
+    "Do you really want to delete the License Type": "Do you really want to delete the License Type <strong>{name}</strong>?",
     "Do you really want to delete the Obligation": "Do you really want to delete the Obligation?",
     "Do you really want to delete the attachment?": "Do you really want to delete the attachment?",
     "Do you really want to delete the component?": "Do you really want to delete the component <strong>{name}</strong>?",
