@@ -28,6 +28,7 @@ export default function LicenseTypesDetail() : ReactNode {
 
     const router = useRouter()
     const t = useTranslations('default')
+    const [quickFilter, setQuickFilter] = useState({})
     const [loading, setLoading] = useState<boolean>(false)
     const [licenseTypeCount, setLicenseTypeCount] = useState<null | number>(null)
     const [licenseTypeData, setLicenseTypeData] = useState<Array<string[]>>([])
@@ -86,6 +87,10 @@ export default function LicenseTypesDetail() : ReactNode {
         router.push('/admin/licenseTypes/add')
     }
 
+    const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        setQuickFilter({ keyword: event.currentTarget.value })
+    }
+
     const columns = [
         {
             id: 'licenseType.licenseType',
@@ -125,7 +130,9 @@ export default function LicenseTypesDetail() : ReactNode {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
-                        <QuickFilter id='licenseTypeSearch' />
+                        <QuickFilter id='licenseTypeSearch'
+                                     searchFunction={doSearch}
+                                     title={t('Quick Filter')} />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between'>
@@ -145,7 +152,8 @@ export default function LicenseTypesDetail() : ReactNode {
                                 columns={columns} 
                                 data={licenseTypeData}
                                 selector={true} 
-                                sort={false} 
+                                sort={false}
+                                search={quickFilter}
                             />
                         ) : (
                             <div className='col-12 d-flex justify-content-center align-items-center'>
