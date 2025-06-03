@@ -18,11 +18,13 @@ import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
 import { TfiFiles } from "react-icons/tfi"
 import { SW360_API_URL } from '@/utils/env'
 import { User, Embedded } from '@/object-types'
-import { useSession } from 'next-auth/react'
+import { useSession, getSession } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CommonUtils from '@/utils/common.utils'
 import dynamic from 'next/dynamic'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 
 const EditSecondaryDepartmentAndRolesModal = dynamic(() => import('./EditSecondaryDepartmentsAndRolesModal'), {
     ssr: false,
@@ -41,6 +43,25 @@ export default function UserAdminstration(): JSX.Element {
 
     const handleAddUsers = () => {
         router.push('/admin/users/add')
+    }
+
+    const downloadUsers = () => {
+        getSession()
+            .then(session => {
+                DownloadService.download(
+                    'importExport/downloadUsers',
+                    session,
+                    'users.csv',
+                    { 'Accept': 'text/plain' }
+                );
+            })
+            .catch((error: unknown) => {
+            if (error instanceof DOMException && error.name === "AbortError") {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        })
     }
 
     const handleEditSecondaryDepartmentAndRoles = (id: string) => {
@@ -191,9 +212,14 @@ export default function UserAdminstration(): JSX.Element {
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between ms-1'>
-                            <button className='btn btn-primary col-auto' onClick={handleAddUsers}>
-                                {t('Add User')}
-                            </button>
+                            <div className='col-auto px-0'>
+                                <button className='btn btn-primary me-2' onClick={handleAddUsers}>
+                                    {t('Add User')}
+                                </button>
+                                <button className='btn btn-primary' onClick={downloadUsers}>
+                                    {t('Download Users')}
+                                </button>
+                            </div>
                             <div className='col-auto buttonheader-title'>{`${t('Users')} (${num})`}</div>
                         </div>
                         <h5 className="mt-3 mb-1 ms-1 header-underlined">
