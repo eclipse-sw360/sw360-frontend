@@ -54,7 +54,7 @@ const AdminMainPage = (): JSX.Element => {
                             <BsFileEarmarkText /> {t('Licenses')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/licenseTypes'>
                         <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
                             <AiOutlineTags /> {t('License Types')}
                         </button>

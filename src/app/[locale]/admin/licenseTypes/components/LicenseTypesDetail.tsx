@@ -17,18 +17,25 @@ import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _, QuickFilter, Table } from 'next-sw360'
+import { useRouter } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import DeleteLicenseTypesModal from './DeleteLicenseTypesModal'
 
 type EmbeddedLicenseTypes = Embedded<LicenseType, 'sw360:licenseTypes'>
 
 export default function LicenseTypesDetail() : ReactNode {
 
+    const router = useRouter()
     const t = useTranslations('default')
+    const [quickFilter, setQuickFilter] = useState({})
     const [loading, setLoading] = useState<boolean>(false)
+    const [licenseTypeId, setLicenseTypeId] = useState<string>('')
+    const [licenseTypeName, setLicenseTypeName] = useState<string>('')
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
+    const [licenseTypeData, setLicenseTypeData] = useState<Array<Array<string | string[]>>>([])
     const [licenseTypeCount, setLicenseTypeCount] = useState<null | number>(null)
-    const [licenseTypeData, setLicenseTypeData] = useState<Array<string[]>>([])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
@@ -57,8 +64,8 @@ export default function LicenseTypesDetail() : ReactNode {
                     setLicenseTypeData(licenseTypeDetails._embedded['sw360:licenseTypes'].map(
                         (item: LicenseType) =>
                             [
-                            item.licenseType ?? '',
-                            item.id ?? '',
+                                item.licenseType,
+                                [ item.id, item.licenseType],
                             ]
                         ))
 
@@ -80,6 +87,20 @@ export default function LicenseTypesDetail() : ReactNode {
         })
     }, [fetchData])
 
+    const handleAddLicenseType = () => {
+        router.push('/admin/licenseTypes/add')
+    }
+
+    const handleDeleteLicenseType = (id: string, licenseTypeName: string) => {
+        setShowDeleteModal(true)
+        setLicenseTypeId(id)
+        setLicenseTypeName(licenseTypeName)
+    }
+
+    const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        setQuickFilter({ keyword: event.currentTarget.value })
+    }
+
     const columns = [
         {
             id: 'licenseType.licenseType',
@@ -91,7 +112,7 @@ export default function LicenseTypesDetail() : ReactNode {
             id: 'licenseType.actions',
             name: t('Actions'),
             width: '20%',
-            formatter: () =>
+            formatter: ([id, licenseTypeName]: Array<string>) =>
                 _(
                     <div className='d-flex justify-content-between'>                       
                         <OverlayTrigger overlay={
@@ -101,7 +122,7 @@ export default function LicenseTypesDetail() : ReactNode {
                         }>
                             <span
                                 className='d-inline-block'
-                                // onClick={()=>{DeleteLicenseType(licenseTypeId)}}
+                                onClick={()=>{handleDeleteLicenseType(id, licenseTypeName)}}
                             >
                                 <FaTrashAlt className='btn-icon' />
 
@@ -116,16 +137,23 @@ export default function LicenseTypesDetail() : ReactNode {
 
     return (
         <>
+            <DeleteLicenseTypesModal licenseTypeId={licenseTypeId}
+                                     licenseTypeName={licenseTypeName}
+                                     show={showDeleteModal}
+                                     setShow={setShowDeleteModal}
+            />
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
-                        <QuickFilter id='licenseTypeSearch' />
+                        <QuickFilter id='licenseTypeSearch'
+                                     searchFunction={doSearch}
+                                     title={t('Quick Filter')} />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between'>
                             <div className='col-lg-5'>
                                 <button className='btn btn-primary col-auto me-2'
-                                        // onClick={handleAddLicenseType}
+                                        onClick={() => handleAddLicenseType()}
                                 >
                                     {t('Add License Type')}
                                 </button>
@@ -139,7 +167,8 @@ export default function LicenseTypesDetail() : ReactNode {
                                 columns={columns} 
                                 data={licenseTypeData}
                                 selector={true} 
-                                sort={false} 
+                                sort={false}
+                                search={quickFilter}
                             />
                         ) : (
                             <div className='col-12 d-flex justify-content-center align-items-center'>

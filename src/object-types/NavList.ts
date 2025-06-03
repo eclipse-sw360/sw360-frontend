@@ -41,7 +41,7 @@ function NavList(): NavItem[] {
                 { href: '/admin/databaseSanitation', name: t('Database Sanitation'), id: 'admin_database_sanitation' },
                 { href: '#', name: t('Attachment Cleanup'), id: 'admin_attachment_cleanup' },
                 { href: '/admin/oauthclient', name: t('OAuth Client'), id: 'admin_oauth_client' },
-                { href: '#', name: t('License Types'), id: 'admin_license_types' },
+                { href: '/admin/licenseTypes', name: t('License Types'), id: 'admin_license_types' },
                 { href: '/admin/departments', name: t('Department'), id: 'admin_department' },
                 { href: '/admin/configurations', name: t('Configurations'), id: 'configurations' },
             ],
