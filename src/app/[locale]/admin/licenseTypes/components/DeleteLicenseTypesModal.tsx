@@ -8,16 +8,14 @@
 // License-Filename: LICENSE
 
 'use client';
-import { useTranslations } from 'next-intl';
-
-import { Button, Form, Modal } from 'react-bootstrap';
-
-import { HttpStatus } from '@/object-types';
-import { ApiUtils, CommonUtils } from '@/utils';
-import { BsQuestionCircle } from 'react-icons/bs';
-import MessageService from '@/services/message.service';
-import { getSession, signOut } from 'next-auth/react';
-import { useCallback, useEffect, useState, type JSX } from "react";
+import { useTranslations } from 'next-intl'
+import { HttpStatus } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { BsQuestionCircle } from 'react-icons/bs'
+import { getSession, signOut } from 'next-auth/react'
+import MessageService from '@/services/message.service'
+import { Button, Form, Modal, Spinner } from 'react-bootstrap'
+import { useCallback, useEffect, useState, type JSX } from "react"
 
 interface Props {
     licenseTypeId: string
@@ -58,7 +56,8 @@ export default function DeleteLicenseTypesModal ({ licenseTypeId,
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('licenseTypes').then(
+        // API might be different. As of now, the API is not yet developed.
+        void fetchData('checkLicenseTypeUsage').then(
             (licenseTypeInfo: LicenseTypeInfo ) => {
                 if (licenseTypeInfo === undefined) {
                     return
@@ -81,14 +80,31 @@ export default function DeleteLicenseTypesModal ({ licenseTypeId,
         })
     }, [fetchData])
 
+    const handleDeleteLicenseType = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session))
+                return signOut()
+            const response = await ApiUtils.DELETE(`licenseTypes/${licenseTypeId}`, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
+                MessageService.success(t('Delete License Type successful'))
+                setShow(false)
+                window.location.reload()
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                await signOut()
+            } else {
+                MessageService.error(t('Error when processing'))
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
+    }
+
     const handleCloseDialog = () => {
         setShow(!show)
     }
 
-    console.log('loading', loading)
-    console.log('licenseTypeId', licenseTypeId)
-    console.log('licenseTypeInUse', licenseTypeInUse)
-    console.log('licenseTypeUsageCount', licenseTypeUsageCount)
 
     return (
         <>
@@ -104,23 +120,50 @@ export default function DeleteLicenseTypesModal ({ licenseTypeId,
                     </h5>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
-                        {t.rich('Do you really want to delete the License Type', {
-                            name: licenseTypeName ?? '',
-                            strong: (chunks) => <b>{chunks}</b>,
-                        })}
-                    </Form>
+                    <>
+                        {
+                            loading ? (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            ) : (
+                                <>
+                                    {licenseTypeInUse ? (
+                                        <Form>
+                                            {t.rich('The license type cannot be deleted', {
+                                                name: licenseTypeName ?? '',
+                                                usageCount: licenseTypeUsageCount ?? 0,
+                                                strong: (chunks) => <b>{chunks}</b>,
+                                            })}
+                                        </Form>
+                                    ) : (
+                                            <Form>
+                                                {t.rich('Do you really want to delete the License Type', {
+                                                    name: licenseTypeName ?? '',
+                                                    strong: (chunks) => <b>{chunks}</b>,
+                                                })}
+                                            </Form>
+                                        )
+                                    }
+                                </>
+                            )}
+                    </>
                 </Modal.Body>
                 <Modal.Footer className='justify-content-end'>
                     <Button className='delete-btn'
                             variant='light'
                             onClick={handleCloseDialog}
                     >
-                        {t('Cancel')}
+                        {
+                            licenseTypeInUse
+                                ? t('OK')
+                                : t('Cancel')
+                        }
                     </Button>
                     <Button className='login-btn'
                             variant='danger'
-                            // onClick={() => handleSubmit()}
+                            hidden={licenseTypeInUse}
+                            onClick={() => handleDeleteLicenseType()}
                     >
                         {t('Delete License Type')}
                     </Button>
