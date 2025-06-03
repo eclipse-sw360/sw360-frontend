@@ -17,6 +17,7 @@ import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _, QuickFilter, Table } from 'next-sw360'
+import { useRouter } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
@@ -25,6 +26,7 @@ type EmbeddedLicenseTypes = Embedded<LicenseType, 'sw360:licenseTypes'>
 
 export default function LicenseTypesDetail() : ReactNode {
 
+    const router = useRouter()
     const t = useTranslations('default')
     const [loading, setLoading] = useState<boolean>(false)
     const [licenseTypeCount, setLicenseTypeCount] = useState<null | number>(null)
@@ -80,6 +82,10 @@ export default function LicenseTypesDetail() : ReactNode {
         })
     }, [fetchData])
 
+    const handleAddLicenseType = () => {
+        router.push('/admin/licenseTypes/add')
+    }
+
     const columns = [
         {
             id: 'licenseType.licenseType',
@@ -125,7 +131,7 @@ export default function LicenseTypesDetail() : ReactNode {
                         <div className='row d-flex justify-content-between'>
                             <div className='col-lg-5'>
                                 <button className='btn btn-primary col-auto me-2'
-                                        // onClick={handleAddLicenseType}
+                                        onClick={() => handleAddLicenseType()}
                                 >
                                     {t('Add License Type')}
                                 </button>
