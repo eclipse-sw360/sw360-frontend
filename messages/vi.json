@@ -416,6 +416,7 @@
     "Do you really want to delete the package": "Bạn có thực sự muốn xóa gói",
     "Do you really want to delete the project": "Bạn có thực sự muốn xóa dự án <strong> {name} </strong>?",
     "Do you really want to delete the release?": "Bạn có thực sự muốn xóa bản phát hành: <strong>{name}</strong> không?",
+    "Do you really want to delete the vendor": "Bạn có thực sự muốn xóa nhà cung cấp {name}",
     "Do you really want to delete the vulnerability?": "Bạn có thực sự muốn xóa lỗ hổng <strong>{id}</strong> không?",
     "Do you really want to delete this client": "Bạn có thực sự muốn xóa máy khách này không",
     "Do you really want to delete this obligation": "Bạn có thực sự muốn xóa nghĩa vụ này không",

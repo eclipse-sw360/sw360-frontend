@@ -416,6 +416,7 @@
     "Do you really want to delete the package": "本当にパッケージを削除しますか?",
     "Do you really want to delete the project": "プロジェクトを本当に削除したい<strong> {name} </strong>？",
     "Do you really want to delete the release?": "本当にリリース: <strong>{name}</strong>?",
+    "Do you really want to delete the vendor": "本当にベンダーを削除したいですか{name}",
     "Do you really want to delete the vulnerability?": "Do you really want to delete the vulnerability <strong>{id}</strong>?",
     "Do you really want to delete this client": "本当にこのクライアントを削除したいですか",
     "Do you really want to delete this obligation": "あなたは本当にこの義務を削除したいですか？",

@@ -416,6 +416,7 @@
     "Do you really want to delete the package": "您确实要删除该包吗",
     "Do you really want to delete the project": "您是否真的想删除项目<strong> {name} </strong>？",
     "Do you really want to delete the release?": "您确实要删除版本：<strong>{name}</strong>吗？",
+    "Do you really want to delete the vendor": "您真的想删除供应商{name}",
     "Do you really want to delete the vulnerability?": "您确实要删除漏洞<strong>{id}</strong>吗？",
     "Do you really want to delete this client": "您真的想删除这个客户吗",
     "Do you really want to delete this obligation": "您真的想删除这项义务吗",

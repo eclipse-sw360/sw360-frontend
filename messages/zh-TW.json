@@ -416,6 +416,7 @@
     "Do you really want to delete the package": "您確實要刪除該套件嗎",
     "Do you really want to delete the project": "您是否真的想刪除項目<strong> {name} </strong>？",
     "Do you really want to delete the release?": "您真的要刪除此放行 : <strong>{姓名}</strong>?",
+    "Do you really want to delete the vendor": "您真的想刪除供應商{name}",
     "Do you really want to delete the vulnerability?": "您真的要刪除脆弱度 <strong>{id} 。 。</strong>?",
     "Do you really want to delete this client": "您真的想刪除這個客戶嗎",
     "Do you really want to delete this obligation": "您真的想刪除這項義務嗎",

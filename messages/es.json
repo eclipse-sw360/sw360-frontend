@@ -416,6 +416,7 @@
     "Do you really want to delete the package": "¿Realmente quieres eliminar el paquete?",
     "Do you really want to delete the project": "¿Realmente quieres eliminar el proyecto <strong> {nombre} </strong>?",
     "Do you really want to delete the release?": "¿De verdad quieres eliminar la liberación: <strong>{Nombre}</strong>?",
+    "Do you really want to delete the vendor": "¿Realmente quieres eliminar el proveedor {nombre}",
     "Do you really want to delete the vulnerability?": "¿De verdad quieres eliminar la vulnerabilidad <strong>{id}</strong>?",
     "Do you really want to delete this client": "¿De verdad quieres eliminar este cliente?",
     "Do you really want to delete this obligation": "¿De verdad quieres eliminar esta obligación?",
