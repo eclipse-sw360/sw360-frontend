@@ -111,7 +111,7 @@ export default function FossologyOverview() : ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session))
             return signOut()
-        const response = await ApiUtils.POST('/fossology/saveConfig',
+        const response = await ApiUtils.POST('fossology/saveConfig',
                                              fossologyConfigData,
                                              session.user.access_token)
         if (response.status === HttpStatus.OK) {
