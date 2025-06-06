@@ -11,15 +11,16 @@
 'use client'
 
 import TableLicense from '@/components/LinkedObligations/TableLicense'
-import { HttpStatus, LicenseDetail, Obligation } from '@/object-types'
+import { HttpStatus, LicenseDetail, Obligation, ErrorDetails } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
-import { notFound, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from '../detail.module.css'
+import MessageService from '@/services/message.service'
 
 interface Props {
     licenseId?: string
@@ -83,14 +84,13 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                 if (CommonUtils.isNullOrUndefined(session))
                     return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                if (response.status !== HttpStatus.OK) {
+                                        const err = await response.json() as ErrorDetails
+                                        throw new Error(err.message)
                 }
 
                 const license = await response.json() as LicenseDetail
-                if (CommonUtils.isNullEmptyOrUndefinedArray(license._embedded['sw360:obligations'])) {
+                if (CommonUtils.isNullEmptyOrUndefinedArray(license._embedded?.['sw360:obligations'])) {
                     setData([])
                 } else {
                     const data = license._embedded['sw360:obligations']
@@ -122,8 +122,12 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                     ])
                     setDataEditWhitelist(dataEditWhitelist)
                 }
-            } catch (e) {
-                console.error(e)
+            } catch(error: unknown) {
+                if (error instanceof DOMException && error.name === "AbortError") {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         return () => controller.abort()

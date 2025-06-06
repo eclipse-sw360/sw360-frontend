@@ -19,7 +19,6 @@ import { Button } from 'react-bootstrap'
 import styles from '../detail.module.css'
 import { FiCheckCircle } from 'react-icons/fi'
 import { BiXCircle } from 'react-icons/bi'
-import { BsXCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 
 interface Props {
@@ -56,7 +55,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
 
     return (
         <div className='col'>
-            {(license.checked === true) && (
+            {(license.checked === false) && (
                 <div
                     className={`alert ${styles['isChecked']}`}
                 >
@@ -122,7 +121,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                                 </span>
                             ) : (
                                 <span style={{ color: 'red' }}>
-                                    <BsXCircle color='red' /> {t('NA')}
+                                    <BiXCircle color='red' /> {t('NA')}
                                 </span>
                             )}
                         </td>

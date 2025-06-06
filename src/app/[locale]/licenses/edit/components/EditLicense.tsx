@@ -80,7 +80,7 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                 }
                 const license = await response.json() as LicenseDetail
                 setLicensePayload(license)
-                if (!CommonUtils.isNullOrUndefined(license._embedded['sw360:obligations'])) {
+                if (!CommonUtils.isNullOrUndefined(license._embedded?.['sw360:obligations'])) {
                     const data = license._embedded['sw360:obligations'].map((item: Obligation) => [
                         item,
                         item.title ?? '',
