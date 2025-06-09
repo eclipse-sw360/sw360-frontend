@@ -10,8 +10,8 @@
 
 'use client'
 import { DocumentCreationInformation, ExternalDocumentReferences } from '@/object-types'
-import { ReactNode, useState } from 'react'
 import { CommonUtils } from '@/utils'
+import { ReactNode, useState } from 'react'
 
 interface Props {
     documentCreationInformation?: DocumentCreationInformation
@@ -25,7 +25,7 @@ const DocumentCreationInformationDetail = ({
     externalDocumentRef,
     setExternalDocumentRef,
     isModeFull,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -33,8 +33,8 @@ const DocumentCreationInformationDetail = ({
         const index: string = e.target.value
         setExternalDocumentRef(
             documentCreationInformation.externalDocumentRefs
-            ? documentCreationInformation.externalDocumentRefs[parseInt(index)]
-            : undefined
+                ? documentCreationInformation.externalDocumentRefs[parseInt(index)]
+                : undefined,
         )
     }
 
@@ -77,7 +77,10 @@ const DocumentCreationInformationDetail = ({
                         <tr className='spdx-full'>
                             <td>6.6 External document references</td>
                             <td>
-                                <div className='spdx-col-2 section' data-size='3'>
+                                <div
+                                    className='spdx-col-2 section'
+                                    data-size='3'
+                                >
                                     <div className='spdx-flex-row'>
                                         <div className='spdx-col-1 spdx-label-index'>Index</div>
                                         <select
@@ -86,17 +89,18 @@ const DocumentCreationInformationDetail = ({
                                             onChange={displayIndex}
                                             disabled={documentCreationInformation?.externalDocumentRefs?.length == 0}
                                         >
-                                            {
-                                            (documentCreationInformation && documentCreationInformation.externalDocumentRefs)
-                                            &&
-                                            documentCreationInformation.externalDocumentRefs
-                                                .toSorted((e1, e2) => e1.index - e2.index)
-                                                .map((item) => (
-                                                    <option key={item.index} value={item.index}>
-                                                        {item.index + 1}
-                                                    </option>
-                                                ))
-                                            }
+                                            {documentCreationInformation &&
+                                                documentCreationInformation.externalDocumentRefs &&
+                                                documentCreationInformation.externalDocumentRefs
+                                                    .toSorted((e1, e2) => e1.index - e2.index)
+                                                    .map((item) => (
+                                                        <option
+                                                            key={item.index}
+                                                            value={item.index}
+                                                        >
+                                                            {item.index + 1}
+                                                        </option>
+                                                    ))}
                                         </select>
                                     </div>
                                     {externalDocumentRef && (
@@ -133,10 +137,13 @@ const DocumentCreationInformationDetail = ({
                 <tr>
                     <td>6.8 Creators</td>
                     <td>
-                        <div className='spdx-col-2' id='creators'>
-                            {
-                                (documentCreationInformation && documentCreationInformation.creator)
-                                    && documentCreationInformation.creator
+                        <div
+                            className='spdx-col-2'
+                            id='creators'
+                        >
+                            {documentCreationInformation &&
+                                documentCreationInformation.creator &&
+                                documentCreationInformation.creator
                                     .toSorted((e1, e2) => e1.index - e2.index)
                                     .map((creatorData) => {
                                         return (
@@ -149,8 +156,7 @@ const DocumentCreationInformationDetail = ({
                                                 <div className='spdx-col-3'>{creatorData.value}</div>
                                             </div>
                                         )
-                                    })
-                            }
+                                    })}
                         </div>
                     </td>
                 </tr>
@@ -163,37 +169,41 @@ const DocumentCreationInformationDetail = ({
                         <tr className='spdx-full'>
                             <td>6.10 Creator comment</td>
                             <td>
-                                {(documentCreationInformation&& !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.creatorComment))
-                                && documentCreationInformation.creatorComment
-                                    .trim()
-                                    .split('\n')
-                                    .map((item) => {
-                                        return (
-                                            <>
-                                                {item}
-                                                <br></br>
-                                            </>
-                                        )
-                                    })}
+                                {documentCreationInformation &&
+                                    !CommonUtils.isNullEmptyOrUndefinedString(
+                                        documentCreationInformation.creatorComment,
+                                    ) &&
+                                    documentCreationInformation.creatorComment
+                                        .trim()
+                                        .split('\n')
+                                        .map((item) => {
+                                            return (
+                                                <>
+                                                    {item}
+                                                    <br></br>
+                                                </>
+                                            )
+                                        })}
                             </td>
                         </tr>
                         <tr className='spdx-full'>
                             <td>6.11 Document comment</td>
                             <td>
-                                {
-                                (documentCreationInformation && !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.documentComment))
-                                &&
-                                documentCreationInformation.documentComment
-                                    .trim()
-                                    .split('\n')
-                                    .map((item) => {
-                                        return (
-                                            <>
-                                                {item}
-                                                <br></br>
-                                            </>
-                                        )
-                                    })}
+                                {documentCreationInformation &&
+                                    !CommonUtils.isNullEmptyOrUndefinedString(
+                                        documentCreationInformation.documentComment,
+                                    ) &&
+                                    documentCreationInformation.documentComment
+                                        .trim()
+                                        .split('\n')
+                                        .map((item) => {
+                                            return (
+                                                <>
+                                                    {item}
+                                                    <br></br>
+                                                </>
+                                            )
+                                        })}
                             </td>
                         </tr>
                     </>

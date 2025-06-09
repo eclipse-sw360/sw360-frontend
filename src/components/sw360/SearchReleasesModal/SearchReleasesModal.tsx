@@ -12,14 +12,14 @@
 
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useState, useRef, type JSX } from 'react';
+import React, { useRef, useState, type JSX } from 'react'
 import { Button, Form, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 
-import { HttpStatus, Embedded, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import ReleasesTable from './ReleasesTable'
-import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
+import { Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
+import ReleasesTable from './ReleasesTable'
 
 interface Props {
     projectId?: string | undefined
@@ -43,10 +43,10 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
             MessageService.error(t('Session has expired'))
             return
         }
-        const params: {[k: string]: string} = {
+        const params: { [k: string]: string } = {
             allDetails: 'true',
             name: searchText.current,
-            luceneSearch: (!isExactMatchSearch.current).toString()
+            luceneSearch: (!isExactMatchSearch.current).toString(),
         }
 
         const queryUrl = CommonUtils.createUrlWithParams(`releases`, params)
@@ -60,7 +60,7 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
             return
         }
 
-        const releases = await response.json() as EmbeddedReleases
+        const releases = (await response.json()) as EmbeddedReleases
         convertReleaseDetailToTableData(releases)
     }
 
@@ -79,7 +79,7 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
             setTableData([])
             return
         }
-        const releases = await response.json() as EmbeddedReleases
+        const releases = (await response.json()) as EmbeddedReleases
         convertReleaseDetailToTableData(releases)
     }
 
@@ -91,18 +91,17 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
         ) {
             const data = releases['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
                 release,
-                (release.vendor) ? (release.vendor.fullName ?? '') : '',
+                release.vendor ? (release.vendor.fullName ?? '') : '',
                 release,
                 release,
                 t(release.clearingState as never),
-                (release.mainlineState !== undefined) ? t(release.mainlineState as never) : '',
+                release.mainlineState !== undefined ? t(release.mainlineState as never) : '',
             ])
             setTableData(data)
         } else {
             setTableData([])
         }
     }
-
 
     const handleClickSelectReleases = () => {
         setSelectedReleases(selectingReleaseOnTable)
@@ -117,7 +116,14 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
     }
 
     return (
-        <Modal show={show} onHide={resetStatesAndClose} backdrop='static' centered size='xl' scrollable={true}>
+        <Modal
+            show={show}
+            onHide={resetStatesAndClose}
+            backdrop='static'
+            centered
+            size='xl'
+            scrollable={true}
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
@@ -129,14 +135,24 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
                             className='form-control'
                             placeholder={t('Enter search text')}
                             aria-describedby='Search Users'
-                            onChange={(event) => {searchText.current = event.target.value }}
+                            onChange={(event) => {
+                                searchText.current = event.target.value
+                            }}
                         />
                     </div>
                     <div className='col-lg-6'>
-                        <button type='button' className='btn btn-secondary me-2' onClick={() => void searchReleases()}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary me-2'
+                            onClick={() => void searchReleases()}
+                        >
                             {t('Search')}
                         </button>
-                        <button type='button' className='btn btn-secondary me-2' onClick={() => void getLinkedReleasesOfSubProjects()}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary me-2'
+                            onClick={() => void getLinkedReleasesOfSubProjects()}
+                        >
                             {t('Releases of linked projects')}
                         </button>
                     </div>
@@ -147,14 +163,25 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
                         name='exact-match'
                         className='exact-match'
                         type='checkbox'
-                        label={<>{t('Exact Match')} <ShowInfoOnHover text='The search result will display elements exactly matching the input. Equivalent to using (&quot;) around
-                        the search keyword.'/></>}
+                        label={
+                            <>
+                                {t('Exact Match')}{' '}
+                                <ShowInfoOnHover
+                                    text='The search result will display elements exactly matching the input. Equivalent to using (") around
+                        the search keyword.'
+                                />
+                            </>
+                        }
                         defaultChecked={false}
                         onChange={(e) => {
                             isExactMatchSearch.current = e.target.checked
                         }}
                     />
-                    <ReleasesTable tableData={tableData} selectingReleaseOnTable={selectingReleaseOnTable} setSelectingReleaseOnTable={setSelectingReleaseOnTable}/>
+                    <ReleasesTable
+                        tableData={tableData}
+                        selectingReleaseOnTable={selectingReleaseOnTable}
+                        setSelectingReleaseOnTable={setSelectingReleaseOnTable}
+                    />
                 </div>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
@@ -167,9 +194,17 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
                 >
                     {t('Close')}
                 </Button>
-                <OverlayTrigger overlay={<Tooltip>{t('Link Releases')}</Tooltip>} placement='bottom'>
+                <OverlayTrigger
+                    overlay={<Tooltip>{t('Link Releases')}</Tooltip>}
+                    placement='bottom'
+                >
                     <span className='d-inline-block'>
-                        <Button type='button' variant='primary' onClick={handleClickSelectReleases} disabled={selectingReleaseOnTable.length === 0}>
+                        <Button
+                            type='button'
+                            variant='primary'
+                            onClick={handleClickSelectReleases}
+                            disabled={selectingReleaseOnTable.length === 0}
+                        >
                             {t('Link Releases')}
                         </Button>
                     </span>

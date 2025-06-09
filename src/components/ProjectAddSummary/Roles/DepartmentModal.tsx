@@ -9,16 +9,15 @@
 
 'use client'
 
-import { Modal, Form, Row, Col, Button } from 'react-bootstrap'
-import { _ } from 'next-sw360'
-import { useTranslations } from 'next-intl'
-import { getSession } from 'next-auth/react'
-import CommonUtils from '@/utils/common.utils'
-import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils/index'
-import { useState, useEffect, useMemo, type JSX } from 'react';
-import React from 'react'
 import Table, { TableProps } from '@/components/sw360/Table/Table'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import { getSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _ } from 'next-sw360'
+import React, { useEffect, useMemo, useState, type JSX } from 'react'
+import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
 interface Props {
     show: boolean
@@ -39,23 +38,27 @@ interface Department {
 }
 
 const compare = (preState: TableProps, nextState: TableProps) => {
-    return Object.entries(preState.data ?? {}).sort().toString() === Object.entries(nextState.data ?? {}).sort().toString()
+    return (
+        Object.entries(preState.data ?? {})
+            .sort()
+            .toString() ===
+        Object.entries(nextState.data ?? {})
+            .sort()
+            .toString()
+    )
 }
 
 const MemoTable = React.memo(Table, compare)
 
-export default function DepartmentModal({ show, setShow, department, setDepartment  }: Props) : JSX.Element {
+export default function DepartmentModal({ show, setShow, department, setDepartment }: Props): JSX.Element {
     const t = useTranslations('default')
     const [departments, setDepartments] = useState<Department[]>([])
     const [selectingDepartment, setSelectingDepartment] = useState<string>(department || '')
 
-    const tableData = useMemo(() => 
-        departments.map((dept) => [
-            dept.departmentName,
-            dept.departmentName,
-            dept.priority
-        ])
-    , [departments])
+    const tableData = useMemo(
+        () => departments.map((dept) => [dept.departmentName, dept.departmentName, dept.priority]),
+        [departments],
+    )
 
     const columns = useMemo(() => {
         return [
@@ -65,14 +68,14 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
                 formatter: (departmentName: string) => {
                     return _(
                         <div className='form-check d-flex justify-content-center'>
-                            <input 
-                                className='form-check-input' 
-                                type='radio' 
+                            <input
+                                className='form-check-input'
+                                type='radio'
                                 name='departmentRadioGroup'
                                 defaultChecked={departmentName == selectingDepartment}
                                 onClick={() => handleDepartmentSelect(departmentName)}
                             />
-                        </div>
+                        </div>,
                     )
                 },
                 width: '10%',
@@ -101,19 +104,19 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
             return
         }
         const response = await ApiUtils.GET(`users/groupList`, session.user.access_token)
-        const departmentGroups = await response.json() as DepartmentGroups
-        
+        const departmentGroups = (await response.json()) as DepartmentGroups
+
         const transformedDepartments: Department[] = [
-            ...departmentGroups.primaryGrpList.map(dept => ({
+            ...departmentGroups.primaryGrpList.map((dept) => ({
                 departmentName: dept,
-                priority: 'PRIMARY'
+                priority: 'PRIMARY',
             })),
-            ...departmentGroups.secondaryGrpList.map(dept => ({
+            ...departmentGroups.secondaryGrpList.map((dept) => ({
                 departmentName: dept,
-                priority: 'SECONDARY'
-            }))
+                priority: 'SECONDARY',
+            })),
         ]
-        
+
         setDepartments(transformedDepartments)
     }
 
@@ -150,9 +153,9 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
                         <Col>
                             <Row className='mb-3 d-flex justify-content-end'>
                                 <Col xs={6}>
-                                    <Form.Control 
-                                        type='text' 
-                                        name='department' 
+                                    <Form.Control
+                                        type='text'
+                                        name='department'
                                         value={selectingDepartment}
                                         readOnly
                                     />
@@ -162,7 +165,10 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant='dark' onClick={() => setShow(false)}>
+                    <Button
+                        variant='dark'
+                        onClick={() => setShow(false)}
+                    >
                         {t('Close')}
                     </Button>
                     <Button

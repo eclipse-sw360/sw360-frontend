@@ -11,15 +11,15 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useState, useRef, type JSX } from 'react';
+import React, { useCallback, useRef, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, Vendor, VendorType } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
-import SelectTableVendor from './SelectTableVendor'
 import AddVendorDialog from './AddVendor'
-import MessageService from '@/services/message.service'
+import SelectTableVendor from './SelectTableVendor'
 
 interface Props {
     show: boolean
@@ -31,9 +31,9 @@ type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
 type RowData = (string | Vendor)[]
 
-const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
+const VendorDialog = ({ show, setShow, selectVendor }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [ showAddVendor, setShowAddVendor] = useState(false)
+    const [showAddVendor, setShowAddVendor] = useState(false)
     const txtSearch = useRef<HTMLInputElement | null>(null)
     const [vendor, setVendor] = useState<Vendor | undefined>(undefined)
     const [vendors, setVendors] = useState<RowData[]>([])
@@ -42,8 +42,7 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
     }
 
     const searchVendor = async () => {
-        if (txtSearch.current === null)
-            return
+        if (txtSearch.current === null) return
         try {
             // TODO: The search vendors endpoint does not exist. Temporarily search all vendors
             const queryUrl = CommonUtils.createUrlWithParams('vendors', {})
@@ -59,7 +58,7 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
             } else if (response.status !== HttpStatus.OK) {
                 return
             }
-            const vendors = await response.json() as EmbeddedVendors
+            const vendors = (await response.json()) as EmbeddedVendors
             if (
                 !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
                 !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
@@ -88,8 +87,17 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
 
     return (
         <>
-            <AddVendorDialog show={showAddVendor} setShow={setShowAddVendor} />
-            <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+            <AddVendorDialog
+                show={showAddVendor}
+                setShow={setShowAddVendor}
+            />
+            <Modal
+                show={show}
+                onHide={handleCloseDialog}
+                backdrop='static'
+                centered
+                size='lg'
+            >
                 <Modal.Header closeButton>
                     <Modal.Title>{t('Search Vendor')}</Modal.Title>
                 </Modal.Header>
@@ -106,16 +114,26 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <button type='button' className='btn btn-secondary me-2' onClick={searchVendor}>
+                                <button
+                                    type='button'
+                                    className='btn btn-secondary me-2'
+                                    onClick={searchVendor}
+                                >
                                     {t('Search')}
                                 </button>
-                                <button type='button' className='btn btn-secondary me-2'>
+                                <button
+                                    type='button'
+                                    className='btn btn-secondary me-2'
+                                >
                                     {t('Reset')}
                                 </button>
                             </div>
                         </div>
                         <div className='row mt-3'>
-                            <SelectTableVendor vendors={vendors} setVendor={getVendor} />
+                            <SelectTableVendor
+                                vendors={vendors}
+                                setVendor={getVendor}
+                            />
                         </div>
                     </div>
                 </Modal.Body>
@@ -128,13 +146,21 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props) : JSX.Element => {
                     >
                         {t('Close')}
                     </Button>
-                    <Button type='button' className='fw-bold btn btn-light button-plain me-2' onClick={() => {
-                        setShowAddVendor(!showAddVendor)
-                        setShow(!show)
-                    }}>
+                    <Button
+                        type='button'
+                        className='fw-bold btn btn-light button-plain me-2'
+                        onClick={() => {
+                            setShowAddVendor(!showAddVendor)
+                            setShow(!show)
+                        }}
+                    >
                         {t('Add Vendor')}
                     </Button>
-                    <Button type='button' className='btn btn-primary' onClick={handleClickSelectVendor}>
+                    <Button
+                        type='button'
+                        className='btn btn-primary'
+                        onClick={handleClickSelectVendor}
+                    >
                         {t('Select Vendor')}
                     </Button>
                 </Modal.Footer>

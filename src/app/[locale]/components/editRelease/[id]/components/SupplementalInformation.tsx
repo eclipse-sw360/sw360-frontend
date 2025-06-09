@@ -20,7 +20,7 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props) : ReactNode => {
+const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props): ReactNode => {
     const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,14 +35,20 @@ const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props) :
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{ padding: '0px 12px' }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
                         <span className='fw-bold'>{t('Supplemental Information')}</span>
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='external_supplier_id' className='form-label fw-bold'>
+                            <label
+                                htmlFor='external_supplier_id'
+                                className='form-label fw-bold'
+                            >
                                 {t('External Supplier ID')}
                             </label>
                             <input
@@ -58,7 +64,10 @@ const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props) :
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='count_security_vulnerabilities' className='form-label fw-bold'>
+                            <label
+                                htmlFor='count_security_vulnerabilities'
+                                className='form-label fw-bold'
+                            >
                                 {t('Count of Security Vulnerabilities')}
                             </label>
                             <input

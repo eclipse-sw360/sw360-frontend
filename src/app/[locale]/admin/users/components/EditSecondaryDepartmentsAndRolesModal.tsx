@@ -8,16 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { HttpStatus, User, UserPayload } from '@/object-types'
-import { signOut } from 'next-auth/react'
-import { getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react';
-import { Modal, Alert } from 'react-bootstrap'
-import { HiUsers } from 'react-icons/hi2';
-import { CommonUtils, ApiUtils } from '@/utils'
-import MessageService from '@/services/message.service'
 import SecondaryDepartmentsAndRoles from '@/components/UserEditForm/SecondaryDepartmentsAndRoles'
+import { HttpStatus, User, UserPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useEffect, useState, type JSX } from 'react'
+import { Alert, Modal } from 'react-bootstrap'
+import { HiUsers } from 'react-icons/hi2'
 
 interface Props {
     show: boolean
@@ -29,7 +28,7 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
     const t = useTranslations('default')
     const [editingUser, setEditingUser] = useState<User | undefined>(undefined)
     const [updateUserPayload, setUpdateUserPayload] = useState<UserPayload>({
-        secondaryDepartmentsAndRoles: undefined
+        secondaryDepartmentsAndRoles: undefined,
     })
     const [showSuccess, setShowSuccess] = useState<boolean>(false)
     const [isUpdateSuccess, setIsUpdateSuccess] = useState<boolean>(false)
@@ -52,7 +51,7 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
                 MessageService.error(t('Failed to fetch user data'))
                 return
             }
-            const user = await response.json() as User
+            const user = (await response.json()) as User
             setEditingUser(user)
             setUpdateUserPayload({
                 secondaryDepartmentsAndRoles: user.secondaryDepartmentsAndRoles ?? {},
@@ -69,8 +68,12 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
                 return
             }
 
-            const response = await ApiUtils.PATCH(`users/${editingUserId}`, updateUserPayload, session.user.access_token)
-            
+            const response = await ApiUtils.PATCH(
+                `users/${editingUserId}`,
+                updateUserPayload,
+                session.user.access_token,
+            )
+
             if (response.status === HttpStatus.OK) {
                 setShowSuccess(true)
                 setIsUpdateSuccess(true)
@@ -94,7 +97,7 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
         setShowSuccess(false)
         setIsUpdateSuccess(false)
         setUpdateUserPayload({
-            secondaryDepartmentsAndRoles: undefined
+            secondaryDepartmentsAndRoles: undefined,
         })
         if (withReload) {
             location.reload()
@@ -103,42 +106,51 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
 
     return (
         <>
-            {
-                (editingUser !== undefined) &&
-                <Modal show={show} onHide={() => closeModal(isUpdateSuccess)} backdrop='static' centered size='xl' dialogClassName='modal-info'>
-                    <form onSubmit={(event) => {
-                        handleUpdateUser(event).catch((error) => console.error(error))
-                    }}>
+            {editingUser !== undefined && (
+                <Modal
+                    show={show}
+                    onHide={() => closeModal(isUpdateSuccess)}
+                    backdrop='static'
+                    centered
+                    size='xl'
+                    dialogClassName='modal-info'
+                >
+                    <form
+                        onSubmit={(event) => {
+                            handleUpdateUser(event).catch((error) => console.error(error))
+                        }}
+                    >
                         <Modal.Header closeButton>
                             <Modal.Title>
-                                <HiUsers /> {' '}
-                                {t('Edit User Secondary Departments And Role')}
+                                <HiUsers /> {t('Edit User Secondary Departments And Role')}
                             </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <Alert variant='success' show={showSuccess} onClose={() => setShowSuccess(false)} dismissible>
-                                <b>SUCCESS</b>! Secondary Departments and Roles edited successfully for user : <span>{editingUser.email}</span>
+                            <Alert
+                                variant='success'
+                                show={showSuccess}
+                                onClose={() => setShowSuccess(false)}
+                                dismissible
+                            >
+                                <b>SUCCESS</b>! Secondary Departments and Roles edited successfully for user :{' '}
+                                <span>{editingUser.email}</span>
                             </Alert>
                             <table className='table mb-3'>
                                 <thead>
                                     <tr className='row'>
-                                        <th className='col-lg-6'>
-                                            {t('Secondary Department')}
-                                        </th>
-                                        <th className='col-lg-5'>
-                                            {t('Secondary Department Role')}
-                                        </th>
-                                        <th className='col-sm-1'>
-                                            {t('Action')}
-                                        </th>
+                                        <th className='col-lg-6'>{t('Secondary Department')}</th>
+                                        <th className='col-lg-5'>{t('Secondary Department Role')}</th>
+                                        <th className='col-sm-1'>{t('Action')}</th>
                                     </tr>
                                 </thead>
                             </table>
-                            <SecondaryDepartmentsAndRoles userPayload={updateUserPayload} setUserPayload={setUpdateUserPayload} />
+                            <SecondaryDepartmentsAndRoles
+                                userPayload={updateUserPayload}
+                                setUserPayload={setUpdateUserPayload}
+                            />
                         </Modal.Body>
                         <Modal.Footer className='justify-content-end'>
-                            {!isUpdateSuccess
-                                ?
+                            {!isUpdateSuccess ? (
                                 <>
                                     <button
                                         type='button'
@@ -148,11 +160,14 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
                                     >
                                         {t('Cancel')}
                                     </button>
-                                    <button type='submit' className='btn btn-info'>
+                                    <button
+                                        type='submit'
+                                        className='btn btn-info'
+                                    >
                                         {t('Save')}
                                     </button>
                                 </>
-                                :
+                            ) : (
                                 <button
                                     type='button'
                                     data-bs-dismiss='modal'
@@ -161,11 +176,11 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
                                 >
                                     OK
                                 </button>
-                            }
+                            )}
                         </Modal.Footer>
                     </form>
                 </Modal>
-            }
+            )}
         </>
     )
 }

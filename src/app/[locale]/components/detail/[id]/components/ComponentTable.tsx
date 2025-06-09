@@ -9,19 +9,21 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { Component, Embedded } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { useSession } from 'next-auth/react'
 import { SW360_API_URL } from '@/utils/env'
+import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import { Form } from 'react-bootstrap'
-import { Spinner } from 'react-bootstrap'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { Form, Spinner } from 'react-bootstrap'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
 
-export default function ComponentTable({ component, setComponent }: Readonly<{ component: Component | null, setComponent: Dispatch<SetStateAction<null | Component>> }>): ReactNode {
+export default function ComponentTable({
+    component,
+    setComponent,
+}: Readonly<{ component: Component | null; setComponent: Dispatch<SetStateAction<null | Component>> }>): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -29,7 +31,14 @@ export default function ComponentTable({ component, setComponent }: Readonly<{ c
         {
             id: 'components.merge.select',
             width: '5%',
-            formatter: (comp: Component) => _(<Form.Check type='radio' checked={component !== null && comp.id === component.id} onChange={() => setComponent(comp)}></Form.Check>),
+            formatter: (comp: Component) =>
+                _(
+                    <Form.Check
+                        type='radio'
+                        checked={component !== null && comp.id === component.id}
+                        onChange={() => setComponent(comp)}
+                    ></Form.Check>,
+                ),
         },
         {
             id: 'components.merge.name',
@@ -47,21 +56,21 @@ export default function ComponentTable({ component, setComponent }: Readonly<{ c
             id: 'components.merge.releases',
             name: t('Releases'),
             width: '8%',
-        }
+        },
     ]
 
     const initServerPaginationConfig = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
-        
+
         return {
             url: `${SW360_API_URL}/resource/api/components?allDetails=true`,
             then: (data: EmbeddedComponents) => {
-                return data._embedded['sw360:components'].map((elem: Component) => {                    
+                return data._embedded['sw360:components'].map((elem: Component) => {
                     return [
                         elem,
                         elem.name,
                         elem._embedded?.createdBy?.fullName ?? '',
-                        elem._embedded?.['sw360:releases']?.length ?? 0
+                        elem._embedded?.['sw360:releases']?.length ?? 0,
                     ]
                 })
             },
@@ -72,13 +81,17 @@ export default function ComponentTable({ component, setComponent }: Readonly<{ c
 
     return (
         <>
-            {
-                status === 'loading' 
-                ? <div className='col-12 d-flex justify-content-center align-items-center'>
+            {status === 'loading' ? (
+                <div className='col-12 d-flex justify-content-center align-items-center'>
                     <Spinner className='spinner' />
                 </div>
-                : <Table columns={columns} selector={true} server={initServerPaginationConfig()} />
-            }
+            ) : (
+                <Table
+                    columns={columns}
+                    selector={true}
+                    server={initServerPaginationConfig()}
+                />
+            )}
         </>
     )
 }

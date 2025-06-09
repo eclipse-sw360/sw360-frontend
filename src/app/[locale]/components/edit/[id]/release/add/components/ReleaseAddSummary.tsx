@@ -39,7 +39,7 @@ function ReleaseAddSummary({
     setMainLicenses,
     otherLicenses,
     setOtherLicenses,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
@@ -82,7 +82,10 @@ function ReleaseAddSummary({
                     e.preventDefault()
                 }}
             >
-                <div className='col' style={{ fontSize: '0.875rem' }}>
+                <div
+                    className='col'
+                    style={{ fontSize: '0.875rem' }}
+                >
                     <ReleaseSummary
                         releasePayload={releasePayload}
                         setReleasePayload={setReleasePayload}
@@ -123,7 +126,10 @@ function ReleaseAddSummary({
                             setObject={setDataAddtionalData}
                         />
                     </div>
-                    <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                    <ReleaseRepository
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                    />
                 </div>
             </form>
         </>

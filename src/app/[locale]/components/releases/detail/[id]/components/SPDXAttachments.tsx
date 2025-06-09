@@ -238,7 +238,8 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                     AttachmentTypes.COMPONENT_LICENSE_INFO_COMBINED,
                 ])
                 convertToTableData(isrAttachments, cliAndClxAttachments)
-            }).catch((err) => console.error(err))
+            })
+            .catch((err) => console.error(err))
     }, [releaseId, fetchData])
 
     return (

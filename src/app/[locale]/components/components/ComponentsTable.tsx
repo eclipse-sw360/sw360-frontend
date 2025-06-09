@@ -10,8 +10,8 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { Session } from 'next-auth'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -53,9 +53,12 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
             name: t('Component Name'),
             formatter: ([id, name]: Array<string>) =>
                 _(
-                    <Link href={'/components/detail/' + id} className='link'>
+                    <Link
+                        href={'/components/detail/' + id}
+                        className='link'
+                    >
                         {name}
-                    </Link>
+                    </Link>,
                 ),
             sort: true,
         },
@@ -68,13 +71,17 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
                     Object.entries(licenseIds)
                         .map(
                             ([, item]: Array<string>): React.ReactNode => (
-                                <Link key={item} className='link' href={'/licenses/detail/?id=' + item}>
+                                <Link
+                                    key={item}
+                                    className='link'
+                                    href={'/licenses/detail/?id=' + item}
+                                >
                                     {' '}
                                     {item}{' '}
                                 </Link>
-                            )
+                            ),
                         )
-                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
+                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr]),
                 ),
             sort: true,
         },
@@ -89,19 +96,28 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
             formatter: (id: string) =>
                 _(
                     <span>
-                        <Link href={'/components/edit/' + id} style={{ color: 'gray', fontSize: '14px' }}>
+                        <Link
+                            href={'/components/edit/' + id}
+                            style={{ color: 'gray', fontSize: '14px' }}
+                        >
                             <FaPencilAlt />
                         </Link>{' '}
                         &nbsp;
-                        <FaTrashAlt className={styles['delete-btn']} onClick={() => handleClickDelete(id)} />
-                    </span>
+                        <FaTrashAlt
+                            className={styles['delete-btn']}
+                            onClick={() => handleClickDelete(id)}
+                        />
+                    </span>,
                 ),
         },
     ]
 
     const initServerPaginationConfig = (session: Session) => {
         return {
-            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, { ...searchParams, allDetails: 'true' }),
+            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, {
+                ...searchParams,
+                allDetails: 'true',
+            }),
             then: (data: Embedded<Component, 'sw360:components'>) => {
                 setNumberOfComponent(data.page ? data.page.totalElements : 0)
                 return data._embedded['sw360:components'].map((item: Component) => [
@@ -112,7 +128,7 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
                     item.id,
                 ])
             },
-            total: (data: Embedded<Component, 'sw360:components'>) => data.page ? data.page.totalElements : 0,
+            total: (data: Embedded<Component, 'sw360:components'>) => (data.page ? data.page.totalElements : 0),
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
@@ -120,9 +136,13 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
     return (
         <>
             <div className='col'>
-                {status === 'authenticated' &&
-                    <Table columns={columns} selector={true} server={initServerPaginationConfig(session)} />
-                }
+                {status === 'authenticated' && (
+                    <Table
+                        columns={columns}
+                        selector={true}
+                        server={initServerPaginationConfig(session)}
+                    />
+                )}
             </div>
             <DeleteComponentDialog
                 componentId={deletingComponent}

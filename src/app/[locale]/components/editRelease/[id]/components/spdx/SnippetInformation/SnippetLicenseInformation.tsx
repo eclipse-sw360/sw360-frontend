@@ -30,7 +30,7 @@ function SnippetLicenseInformation({
     setLicenseInfoInSnippetsNone,
     licenseInfoInSnippetsNoasserttion,
     setLicenseInfoInSnippetsNoasserttion,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectLicenseInfoSnippetExist = () => {
         setLicenseInfoInSnippetsExist(true)
         setLicenseInfoInSnippetsNone(false)

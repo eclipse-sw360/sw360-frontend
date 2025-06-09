@@ -23,14 +23,13 @@ interface Props {
     releaseId: string
 }
 
-const LinkedReleases = ({ releaseId }: Props) : ReactNode => {
+const LinkedReleases = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     const [data, setData] = useState<Array<NodeData>>([])
 
     useEffect(() => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
 
         const convertNodeData = (children: Array<ReleaseLink>): Array<NodeData> => {
             const childrenNodeData: Array<NodeData> = []
@@ -64,9 +63,7 @@ const LinkedReleases = ({ releaseId }: Props) : ReactNode => {
                                 href={`${window.location.origin}/components/releases/detail/${node.id}`}
                             >{`${node.name} ${node.version}`}</a>,
                             t(node.releaseRelationship as never),
-                            CommonUtils.isNullEmptyOrUndefinedArray(node.licenseIds)
-                                ? ''
-                                : node.licenseIds.join(', '),
+                            CommonUtils.isNullEmptyOrUndefinedArray(node.licenseIds) ? '' : node.licenseIds.join(', '),
                             t(node.clearingState as never),
                         ],
                         children: node._embedded ? convertNodeData(node._embedded['sw360:releaseLinks']) : [],
@@ -96,7 +93,11 @@ const LinkedReleases = ({ releaseId }: Props) : ReactNode => {
     return (
         <>
             <div className='row'>
-                <TreeTable data={data} setData={setData} columns={columns} />
+                <TreeTable
+                    data={data}
+                    setData={setData}
+                    columns={columns}
+                />
             </div>
         </>
     )

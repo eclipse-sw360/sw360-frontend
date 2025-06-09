@@ -8,14 +8,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { signOut, useSession, getSession } from 'next-auth/react'
+import MessageService from '@/services/message.service'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState, type JSX } from 'react'
-import MessageService from '@/services/message.service'
 import { Alert } from 'react-bootstrap'
 import { FaDownload } from 'react-icons/fa'
 
-import { Attachment, HttpStatus, Embedded, AttachmentTypes } from '@/object-types'
+import { Attachment, AttachmentTypes, Embedded, HttpStatus } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
@@ -109,28 +109,29 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
         }
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as EmbeddedAttachments
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return {} as EmbeddedAttachments
-            }
-        }, []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as EmbeddedAttachments
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return {} as EmbeddedAttachments
+        }
+    }, [])
 
     const downloadAttachment = async (attachmentId: string, attachmentName: string) => {
         try {
             const session = await getSession()
-            DownloadService.download(`${documentType}/${documentId}/attachments/${attachmentId}`, session, attachmentName)
-        } catch(error) {
+            DownloadService.download(
+                `${documentType}/${documentId}/attachments/${attachmentId}`,
+                session,
+                attachmentName,
+            )
+        } catch (error) {
             const message = error instanceof Error ? error.message : String(error)
             MessageService.error(message)
         }
@@ -139,8 +140,12 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
     const downloadBundle = async () => {
         try {
             const session = await getSession()
-            DownloadService.download(`${documentType}/${documentId}/attachments/download`, session, 'AttachmentBundle.zip')
-        } catch(error) {
+            DownloadService.download(
+                `${documentType}/${documentId}/attachments/download`,
+                session,
+                'AttachmentBundle.zip',
+            )
+        } catch (error) {
             const message = error instanceof Error ? error.message : String(error)
             MessageService.error(message)
         }
@@ -163,13 +168,20 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                         item.createdBy ?? '',
                         item.checkedTeam ?? '',
                         item.checkedBy ?? '',
-                        item.projectAttachmentUsage?.visible === 0 && item.projectAttachmentUsage.restricted === 0 ? (
-                            'n/a'
-                        ) : (
-                            _(<a href='#' title='visible / restricted' onClick={(e) => {e.preventDefault()}}>
-                                {item.projectAttachmentUsage?.visible ?? 0} / {item.projectAttachmentUsage?.restricted ?? 0}
-                            </a>)
-                        ),
+                        item.projectAttachmentUsage?.visible === 0 && item.projectAttachmentUsage.restricted === 0
+                            ? 'n/a'
+                            : _(
+                                  <a
+                                      href='#'
+                                      title='visible / restricted'
+                                      onClick={(e) => {
+                                          e.preventDefault()
+                                      }}
+                                  >
+                                      {item.projectAttachmentUsage?.visible ?? 0} /{' '}
+                                      {item.projectAttachmentUsage?.restricted ?? 0}
+                                  </a>,
+                              ),
                         [item.attachmentContentId ?? '', item.filename],
                     ])
                     setAttachmentData(attachmentData)
@@ -177,23 +189,31 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                 }
             })
             .catch((error) => {
-                if (error instanceof DOMException && error.name === "AbortError") {
+                if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
-            }
-        )
+            })
     }, [documentId, documentType, fetchData])
 
     const columns = [
         {
             id: 'check',
             name: _(
-                <FaDownload className={styles['download-btn']} style={{ width: '100%' }} onClick={downloadBundle} />
+                <FaDownload
+                    className={styles['download-btn']}
+                    style={{ width: '100%' }}
+                    onClick={downloadBundle}
+                />,
             ),
             formatter: (item: Attachment) =>
-                _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
+                _(
+                    <i
+                        className={styles.collapse}
+                        onClick={buildAttachmentDetail(item)}
+                    ></i>,
+                ),
             sort: false,
             width: '60px',
         },
@@ -245,7 +265,7 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                         className={styles['download-btn']}
                         style={{ width: '100%' }}
                         onClick={() => downloadAttachment(attachmentId, attachmentName)}
-                    />
+                    />,
                 ),
             sort: false,
             width: '90px',
@@ -254,22 +274,26 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
 
     return (
         <>
-        {
-            (status === 'authenticated') &&
-            <>
-                {totalRows ? (
-                    <>
-                        <div className={`row ${styles['attachment-table']}`}>
-                            <Table data={attachmentData} columns={columns} selector={true} sort={false} />
+            {status === 'authenticated' && (
+                <>
+                    {totalRows ? (
+                        <>
+                            <div className={`row ${styles['attachment-table']}`}>
+                                <Table
+                                    data={attachmentData}
+                                    columns={columns}
+                                    selector={true}
+                                    sort={false}
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div className='col'>
+                            <Alert variant='primary'>{t('No attachments yet')}</Alert>
                         </div>
-                    </>
-                ) : (
-                    <div className='col'>
-                        <Alert variant='primary'>{t('No attachments yet')}</Alert>
-                    </div>
-                )}
-            </>
-        }
+                    )}
+                </>
+            )}
         </>
     )
 }

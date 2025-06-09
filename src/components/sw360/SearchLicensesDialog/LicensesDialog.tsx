@@ -11,14 +11,14 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useRef, useState, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, LicenseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
 import LicensesTable from './LicensesTable'
-import MessageService from '@/services/message.service'
 
 interface Props {
     show: boolean
@@ -55,7 +55,7 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
             MessageService.error(t('Error while processing'))
             return
         }
-        const licenses = await response.json() as EmbeddedLicenses
+        const licenses = (await response.json()) as EmbeddedLicenses
         if (typeof licenses == 'undefined') {
             setLicenseDatas([])
             return
@@ -64,7 +64,10 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
             !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
             !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
         ) {
-            const data = licenses['_embedded']['sw360:licenses'].map((item: LicenseDetail) => [item, item.fullName ?? ''])
+            const data = licenses['_embedded']['sw360:licenses'].map((item: LicenseDetail) => [
+                item,
+                item.fullName ?? '',
+            ])
             setLicenseDatas(data)
         }
     }
@@ -75,7 +78,13 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Search Licenses')}</Modal.Title>
             </Modal.Header>
@@ -88,7 +97,9 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                                 className='form-control'
                                 placeholder={t('Enter search text')}
                                 aria-describedby='Search Licenses'
-                                onChange={(event) => { searchText.current = event.target.value }}
+                                onChange={(event) => {
+                                    searchText.current = event.target.value
+                                }}
                             />
                         </div>
                         <div className='col-lg-4'>
@@ -99,7 +110,10 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                             >
                                 {t('Search')}
                             </button>
-                            <button type='button' className={`fw-bold btn btn-light button-plain me-2`}>
+                            <button
+                                type='button'
+                                className={`fw-bold btn btn-light button-plain me-2`}
+                            >
                                 {t('Reset')}
                             </button>
                         </div>
@@ -122,7 +136,11 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className={`btn btn-primary`} onClick={handleClickSelectLicenses}>
+                <Button
+                    type='button'
+                    className={`btn btn-primary`}
+                    onClick={handleClickSelectLicenses}
+                >
                     {t('Select Licenses')}
                 </Button>
             </Modal.Footer>

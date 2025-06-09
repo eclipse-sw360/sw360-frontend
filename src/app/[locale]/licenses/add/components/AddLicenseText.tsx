@@ -9,10 +9,10 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useTranslations } from 'next-intl'
 import { LicensePayload } from '@/object-types'
-import styles from './LicenseDetails.module.css'
+import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
+import styles from './LicenseDetails.module.css'
 
 interface Props {
     licensePayload: LicensePayload
@@ -20,7 +20,7 @@ interface Props {
     inputValid: boolean
 }
 
-const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props) : ReactNode => {
+const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props): ReactNode => {
     const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -31,14 +31,26 @@ const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props
     }
 
     return (
-        <div className='row mb-4' style={{ padding: '0px 12px' }}>
-            <div className={`${styles['header']} mb-1`} style={{ paddingTop: '0.5rem', height: '45px' }}>
-                <p className='fw-bold mt-1' style={{ fontSize: '0.875rem' }}>
+        <div
+            className='row mb-4'
+            style={{ padding: '0px 12px' }}
+        >
+            <div
+                className={`${styles['header']} mb-1`}
+                style={{ paddingTop: '0.5rem', height: '45px' }}
+            >
+                <p
+                    className='fw-bold mt-1'
+                    style={{ fontSize: '0.875rem' }}
+                >
                     {t('License Text')}
                 </p>
             </div>
             <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
-                <div className='row' style={{ paddingBottom: '0.7rem' }}>
+                <div
+                    className='row'
+                    style={{ paddingBottom: '0.7rem' }}
+                >
                     <div className='col-12'>
                         <textarea
                             style={{ height: '500px' }}

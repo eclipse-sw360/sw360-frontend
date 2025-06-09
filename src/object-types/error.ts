@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-export default interface ErrorDetails{
+export default interface ErrorDetails {
     timestamp: string
     status: number
     error: string

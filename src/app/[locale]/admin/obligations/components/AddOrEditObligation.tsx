@@ -9,13 +9,13 @@
 // License-Filename: LICENSE
 
 'use client'
-import  ObligationHeader  from './ObligationHeader'
-import { ObligationTree } from './ObligationTree'
+import { ReactNode, useEffect, useState } from 'react'
+import { ObligationFormProps, ObligationLevels, ObligationTypes } from '../../../../../object-types/Obligation'
 import { useObligationTree } from '../hook/useObligationTree'
-import { useState, useEffect, ReactNode } from 'react'
-import { ObligationFormProps, ObligationTypes, ObligationLevels } from '../../../../../object-types/Obligation'
+import ObligationHeader from './ObligationHeader'
+import { ObligationTree } from './ObligationTree'
 
-function ObligationForm({ obligation, setObligation }: ObligationFormProps) : ReactNode{
+function ObligationForm({ obligation, setObligation }: ObligationFormProps): ReactNode {
     const [title, setTitle] = useState(obligation.title ?? '')
     const [obligationType, setObligationType] = useState(
         obligation.obligationType !== undefined && obligation.obligationType in ObligationTypes
@@ -28,20 +28,23 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps) : Re
             : '',
     )
 
-    const { tree, treeText, addChild, addSibling, deleteNode, updateNode, updateNodeElement } = 
-        useObligationTree(obligation.text)
+    const { tree, treeText, addChild, addSibling, deleteNode, updateNode, updateNodeElement } = useObligationTree(
+        obligation.text,
+    )
 
     useEffect(() => {
         setObligation((prev) => ({
             ...prev,
             title: title,
             text: treeText,
-            obligationType: Object.keys(ObligationTypes).find(
-                (key) => ObligationTypes[key as keyof typeof ObligationTypes] === obligationType,
-            ) ?? '',
-            obligationLevel: Object.keys(ObligationLevels).find(
-                (key) => ObligationLevels[key as keyof typeof ObligationLevels] === obligationLevel,
-            ) ?? '',
+            obligationType:
+                Object.keys(ObligationTypes).find(
+                    (key) => ObligationTypes[key as keyof typeof ObligationTypes] === obligationType,
+                ) ?? '',
+            obligationLevel:
+                Object.keys(ObligationLevels).find(
+                    (key) => ObligationLevels[key as keyof typeof ObligationLevels] === obligationLevel,
+                ) ?? '',
         }))
     }, [title, treeText, obligationType, obligationLevel, setObligation])
 
@@ -67,9 +70,15 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps) : Re
                     onUpdateNodeElement={updateNodeElement}
                 />
 
-                <div className='row' style={{ marginBottom: '10px' }}>
+                <div
+                    className='row'
+                    style={{ marginBottom: '10px' }}
+                >
                     <div className='col-md-4'>
-                        <label className='form-label' style={{ fontWeight: 'bold' }}>
+                        <label
+                            className='form-label'
+                            style={{ fontWeight: 'bold' }}
+                        >
                             {'Preview'}
                         </label>
                         <div

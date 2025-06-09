@@ -7,16 +7,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import CredentialsProvider from 'next-auth/providers/credentials'
 import { CREDENTIAL_PROVIDER } from '@/constants'
+import { User as AppUser, HttpStatus, UserCredentialInfo } from '@/object-types'
 import AuthService from '@/services/auth.service'
-import { HttpStatus, UserCredentialInfo, User as AppUser } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { NextAuthOptions, User } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
 
 const basicAuthOption: NextAuthOptions = {
     providers: [
-
         CredentialsProvider({
             name: CREDENTIAL_PROVIDER,
             credentials: {},
@@ -24,8 +23,8 @@ const basicAuthOption: NextAuthOptions = {
                 // Add logic here to look up the user from the credentials supplied
                 try {
                     const { username, password } = credentials as {
-                        username: string,
-                        password: string,
+                        username: string
+                        password: string
                     }
                     const userCredential: UserCredentialInfo = {
                         username: username,
@@ -38,14 +37,14 @@ const basicAuthOption: NextAuthOptions = {
                     if (response.status !== HttpStatus.OK) {
                         throw new Error('Error while fetching User Group')
                     }
-                    const data = await response.json() as AppUser
+                    const data = (await response.json()) as AppUser
                     return { access_token: authToken, userGroup: data.userGroup, email: username } as User
                 } catch (e) {
                     console.error(e)
                     return null
                 }
             },
-        })
+        }),
     ],
 
     session: {

@@ -10,19 +10,19 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { HttpStatus, LicensePayload, LicenseTabIds, Obligation, Embedded, LicenseDetail } from '@/object-types'
+import { Embedded, HttpStatus, LicenseDetail, LicensePayload, LicenseTabIds, Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
 import EditLicenseSummary from './EditLicenseSummary'
-import MessageService from '@/services/message.service'
 
 interface Props {
     licenseId: string
@@ -30,7 +30,7 @@ interface Props {
 
 type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
 
-export default function EditLicense({ licenseId }: Props) : ReactNode {
+export default function EditLicense({ licenseId }: Props): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const params = useSearchParams()
@@ -69,8 +69,7 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -78,7 +77,7 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const license = await response.json() as LicenseDetail
+                const license = (await response.json()) as LicenseDetail
                 setLicensePayload(license)
                 if (!CommonUtils.isNullOrUndefined(license._embedded?.['sw360:obligations'])) {
                     const data = license._embedded['sw360:obligations'].map((item: Obligation) => [
@@ -98,12 +97,11 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(
                     'obligations?obligationLevel=LICENSE_OBLIGATION',
                     session.user.access_token,
-                    signal
+                    signal,
                 )
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
@@ -111,7 +109,7 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                     return notFound()
                 }
 
-                const obligations = await response.json() as EmbeddedObligations
+                const obligations = (await response.json()) as EmbeddedObligations
                 if (!CommonUtils.isNullEmptyOrUndefinedArray(obligations._embedded['sw360:obligations'])) {
                     const data = obligations._embedded['sw360:obligations'].map((item: Obligation) => [
                         item,
@@ -188,10 +186,17 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
     }
 
     return (
-        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+        <div
+            className='container'
+            style={{ maxWidth: '98vw', marginTop: '10px' }}
+        >
             <div className='row'>
                 <div className='col-2 sidebar'>
-                    <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                    <SideBar
+                        selectedTab={selectedTab}
+                        setSelectedTab={setSelectedTab}
+                        tabList={tabList}
+                    />
                 </div>
                 <DeleteLicenseDialog
                     licensePayload={licensePayload}
@@ -199,7 +204,10 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                     setShow={setDeleteDialogOpen}
                 />
                 <div className='col'>
-                    <div className='row' style={{ marginBottom: '20px' }}>
+                    <div
+                        className='row'
+                        style={{ marginBottom: '20px' }}
+                    >
                         {selectedTab === LicenseTabIds.OBLIGATIONS ? (
                             <PageButtonHeader
                                 title={`${licensePayload.fullName} (${licensePayload.shortName})`}
@@ -227,7 +235,10 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                             setLicensePayload={setLicensePayload}
                         />
                     </div>
-                    <div className='row' hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}>
+                    <div
+                        className='row'
+                        hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}
+                    >
                         <LinkedObligationsDialog
                             show={addObligationDiaglog}
                             data={data}

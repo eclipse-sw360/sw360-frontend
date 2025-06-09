@@ -10,8 +10,7 @@
 import { Metadata } from 'next'
 import FossologyOverview from './components/FossologyOverview'
 
-
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 export const metadata: Metadata = {
     title: 'Admin - Fossology',

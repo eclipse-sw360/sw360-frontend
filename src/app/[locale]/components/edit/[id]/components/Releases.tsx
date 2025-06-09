@@ -10,11 +10,11 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import { Table, _ } from '@/components/sw360'
 import { Embedded, HttpStatus, LinkedRelease } from '@/object-types'
@@ -26,7 +26,7 @@ interface Props {
 
 type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
 
-const Releases = ({ componentId }: Props) : ReactNode => {
+const Releases = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
     const [linkedReleases, setLinkedReleases] = useState<Array<Array<string | string[]>>>([])
@@ -38,11 +38,10 @@ const Releases = ({ componentId }: Props) : ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
-                    Object.fromEntries(params)
+                    Object.fromEntries(params),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -50,7 +49,7 @@ const Releases = ({ componentId }: Props) : ReactNode => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const releaseLinks = await response.json() as EmbeddedLinkedReleases
+                const releaseLinks = (await response.json()) as EmbeddedLinkedReleases
                 if (
                     !CommonUtils.isNullOrUndefined(releaseLinks._embedded) &&
                     !CommonUtils.isNullOrUndefined(releaseLinks._embedded['sw360:releaseLinks'])
@@ -59,7 +58,7 @@ const Releases = ({ componentId }: Props) : ReactNode => {
                         releaseLinks._embedded['sw360:releaseLinks'].map((item: LinkedRelease) => [
                             item.name,
                             [item.id, item.version],
-                        ])
+                        ]),
                     )
                 }
             } catch (e) {
@@ -81,9 +80,12 @@ const Releases = ({ componentId }: Props) : ReactNode => {
             name: t('Version'),
             formatter: ([id, version]: Array<string>) =>
                 _(
-                    <Link href={'/components/releases/detail/' + id} className='link'>
+                    <Link
+                        href={'/components/releases/detail/' + id}
+                        className='link'
+                    >
                         {version}
-                    </Link>
+                    </Link>,
                 ),
             sort: true,
         },
@@ -95,10 +97,18 @@ const Releases = ({ componentId }: Props) : ReactNode => {
     return (
         <>
             <div className='row'>
-                <Table data={linkedReleases} search={true} columns={columns} />
+                <Table
+                    data={linkedReleases}
+                    search={true}
+                    columns={columns}
+                />
             </div>
             <div>
-                <button type='button' onClick={() => handleAddReleaseClick()} className={`fw-bold btn btn-secondary`}>
+                <button
+                    type='button'
+                    onClick={() => handleAddReleaseClick()}
+                    className={`fw-bold btn btn-secondary`}
+                >
                     {t('Add Release')}
                 </button>
             </div>

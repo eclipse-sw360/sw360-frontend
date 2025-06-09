@@ -7,18 +7,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import {getRequestConfig} from 'next-intl/server';
-import {routing} from './routing';
+import { getRequestConfig } from 'next-intl/server'
+import { routing } from './routing'
 
 export default getRequestConfig(async ({ requestLocale }) => {
     let locale: string | undefined = await requestLocale
 
-    if ((locale == null) || !routing.locales.includes(locale)) {
+    if (locale == null || !routing.locales.includes(locale)) {
         locale = routing.defaultLocale
     }
 
     return {
         locale,
-        messages: (await import(`../../messages/${locale}.json`) as { default: Record<string, string> }).default
+        messages: ((await import(`../../messages/${locale}.json`)) as { default: Record<string, string> }).default,
     }
 })

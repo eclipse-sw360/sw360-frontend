@@ -11,14 +11,14 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useCallback, useState, type JSX } from 'react';
+import { useCallback, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { LicensePayload, Obligation } from '@/object-types'
 import { CommonUtils } from '@/utils'
+import { BsCheck2Square } from 'react-icons/bs'
 import styles from './CssButton.module.css'
 import SelectTableLinkedObligations from './SelectTableLinkedObligations'
-import { BsCheck2Square } from 'react-icons/bs'
 
 interface Props {
     show: boolean
@@ -40,7 +40,7 @@ const LinkedObligationsDialog = ({
     obligations,
     licensePayload,
     setLicensePayload,
-}: Props) : JSX.Element => {
+}: Props): JSX.Element => {
     const t = useTranslations('default')
     const [linkedObligationsResponse, setLinkedObligationsResponse] = useState<Array<Obligation>>([])
 
@@ -52,13 +52,17 @@ const LinkedObligationsDialog = ({
         const linkedObligationsResponseData = linkedObligationsResponse.map((item: Obligation) => [
             item,
             item.title ?? '',
-            !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType) ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase() : '',
+            !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
+                ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
+                : '',
             item,
         ])
         linkedObligationsResponseData.forEach((linkedObligations: (string | Obligation)[]) => {
             data.push(linkedObligations)
         })
-        data = data.filter((v, index, a) => a.findIndex((v2) => (v2[0] as Obligation).title === (v[0] as Obligation).title) === index)
+        data = data.filter(
+            (v, index, a) => a.findIndex((v2) => (v2[0] as Obligation).title === (v[0] as Obligation).title) === index,
+        )
         const obligationIds: string[] = []
         data.forEach((item: (string | Obligation)[]) => {
             if (!CommonUtils.isNullOrUndefined(item[0])) {
@@ -76,11 +80,17 @@ const LinkedObligationsDialog = ({
 
     const getLinkObligations: (obligationsLink: Array<Obligation>) => void = useCallback(
         (obligationsLink: Array<Obligation>) => setLinkedObligationsResponse(obligationsLink),
-        []
+        [],
     )
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header style={{ backgroundColor: '#eef2fa', color: '#2e5aac' }}>
                 <h5>
                     <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
@@ -107,14 +117,26 @@ const LinkedObligationsDialog = ({
             </Modal.Header>
             <Modal.Body>
                 <div className='row'>
-                    <SelectTableLinkedObligations obligations={obligations} setObligations={getLinkObligations} />
+                    <SelectTableLinkedObligations
+                        obligations={obligations}
+                        setObligations={getLinkObligations}
+                    />
                 </div>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button type='button' data-bs-dismiss='modal' className='btn btn-light' onClick={handleCloseDialog}>
+                <Button
+                    type='button'
+                    data-bs-dismiss='modal'
+                    className='btn btn-light'
+                    onClick={handleCloseDialog}
+                >
                     {t('Cancel')}
                 </Button>
-                <Button className={`${styles['btn-info']}`} type='button' onClick={handleClickSelectObligations}>
+                <Button
+                    className={`${styles['btn-info']}`}
+                    type='button'
+                    onClick={handleClickSelectObligations}
+                >
                     {t('Add')}
                 </Button>
             </Modal.Footer>

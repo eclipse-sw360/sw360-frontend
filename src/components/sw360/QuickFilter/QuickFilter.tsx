@@ -9,18 +9,25 @@
 
 'use client'
 
-import React, { type JSX } from 'react';
+import React, { type JSX } from 'react'
 import { Form } from 'react-bootstrap'
 import { QuickFilterProps } from './QuickFilter.types'
 
-function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilterProps) : JSX.Element {
+function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilterProps): JSX.Element {
     return (
         <div className='card-deck'>
-            <div id='component-quickfilter' className='card'>
+            <div
+                id='component-quickfilter'
+                className='card'
+            >
                 <div className='card-header'>{title}</div>
                 <div className='card-body'>
                     <Form>
-                        <Form.Group key={id} className='mb-3' controlId={id}>
+                        <Form.Group
+                            key={id}
+                            className='mb-3'
+                            controlId={id}
+                        >
                             <Form.Control
                                 className='form-control'
                                 type='text'

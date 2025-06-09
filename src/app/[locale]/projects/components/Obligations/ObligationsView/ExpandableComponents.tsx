@@ -9,12 +9,20 @@
 
 'use client'
 
-import { JSX, useEffect, useState } from 'react'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { LicenseObligationRelease } from '@/object-types'
 import Link from 'next/link'
+import { JSX, useEffect, useState } from 'react'
+import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
-export function ShowObligationTextOnExpand({ id, infoText, colLength }: { id: string, infoText: string, colLength: number }): JSX.Element {
+export function ShowObligationTextOnExpand({
+    id,
+    infoText,
+    colLength,
+}: {
+    id: string
+    infoText: string
+    colLength: number
+}): JSX.Element {
     const [isExpanded, setIsExpanded] = useState(false)
     useEffect(() => {
         if (isExpanded) {
@@ -31,8 +39,7 @@ export function ShowObligationTextOnExpand({ id, infoText, colLength }: { id: st
             td.appendChild(licenseObligationText)
             tr.appendChild(td)
             par?.parentNode?.insertBefore(tr, par.nextSibling)
-        }
-        else {
+        } else {
             const el = document.getElementById(`${id}_text`)
             if (el) {
                 el.remove()
@@ -42,42 +49,71 @@ export function ShowObligationTextOnExpand({ id, infoText, colLength }: { id: st
 
     return (
         <>
-            {
-                isExpanded
-                    ? <BsCaretDownFill color='gray' id={id} onClick={() => setIsExpanded(!isExpanded)} />
-                    : <BsCaretRightFill color='gray' id={id} onClick={() => setIsExpanded(!isExpanded)} />
-            }
+            {isExpanded ? (
+                <BsCaretDownFill
+                    color='gray'
+                    id={id}
+                    onClick={() => setIsExpanded(!isExpanded)}
+                />
+            ) : (
+                <BsCaretRightFill
+                    color='gray'
+                    id={id}
+                    onClick={() => setIsExpanded(!isExpanded)}
+                />
+            )}
         </>
     )
 }
 
-export function ExpandableList({ previewString, releases, commonReleases }: { previewString: string, releases: LicenseObligationRelease[], commonReleases: LicenseObligationRelease[] }):JSX.Element {
+export function ExpandableList({
+    previewString,
+    releases,
+    commonReleases,
+}: {
+    previewString: string
+    releases: LicenseObligationRelease[]
+    commonReleases: LicenseObligationRelease[]
+}): JSX.Element {
     const [isExpanded, setExpanded] = useState(false)
     return (
         <>
-            {
-                isExpanded ?
-                    <div>
-                        <span><BsCaretDownFill onClick={() => setExpanded(false)} />{' '}</span>
-                        {releases.map((release: LicenseObligationRelease, index: number) => {
-                            const isCommon = commonReleases.some((commonRelease: LicenseObligationRelease) => commonRelease.name === release.name && commonRelease.version === release.version)
-                            return (
-                                <li key={release.id} style={{ display: 'inline' }}>
-                                    <Link href={`/components/releases/detail/${release.id}`} className='text-link' style={{ color: isCommon ? 'green' : 'neon carrot' }}>
-                                        {`${release.name} ${release.version}`}
-                                    </Link>
-                                    {index >= releases.length - 1 ? '' : ', '}{' '}
-                                </li>
-                            )
-                        })}
-                    </div> :
-                    <div>
-                        {
-                            releases.length !== 0 &&
-                            <div><BsCaretRightFill onClick={() => setExpanded(true)} />{' '}{previewString}</div>
-                        }
-                    </div>
-            }
+            {isExpanded ? (
+                <div>
+                    <span>
+                        <BsCaretDownFill onClick={() => setExpanded(false)} />{' '}
+                    </span>
+                    {releases.map((release: LicenseObligationRelease, index: number) => {
+                        const isCommon = commonReleases.some(
+                            (commonRelease: LicenseObligationRelease) =>
+                                commonRelease.name === release.name && commonRelease.version === release.version,
+                        )
+                        return (
+                            <li
+                                key={release.id}
+                                style={{ display: 'inline' }}
+                            >
+                                <Link
+                                    href={`/components/releases/detail/${release.id}`}
+                                    className='text-link'
+                                    style={{ color: isCommon ? 'green' : 'neon carrot' }}
+                                >
+                                    {`${release.name} ${release.version}`}
+                                </Link>
+                                {index >= releases.length - 1 ? '' : ', '}{' '}
+                            </li>
+                        )
+                    })}
+                </div>
+            ) : (
+                <div>
+                    {releases.length !== 0 && (
+                        <div>
+                            <BsCaretRightFill onClick={() => setExpanded(true)} /> {previewString}
+                        </div>
+                    )}
+                </div>
+            )}
         </>
     )
 }

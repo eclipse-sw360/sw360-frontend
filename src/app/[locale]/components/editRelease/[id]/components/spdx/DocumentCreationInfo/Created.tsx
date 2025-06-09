@@ -17,10 +17,10 @@ interface Props {
     setDataCreated: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function Created({ dataCreated, setDataCreated, setCreated }: Props) : ReactNode {
+function Created({ dataCreated, setDataCreated, setCreated }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataCreated ? dataCreated : {} as InputKeyValue
+        const list: InputKeyValue = dataCreated ? dataCreated : ({} as InputKeyValue)
         list[name as keyof InputKeyValue] = value
         setDataCreated(list)
         setCreated(list)
@@ -28,9 +28,15 @@ function Created({ dataCreated, setDataCreated, setCreated }: Props) : ReactNode
 
     return (
         dataCreated && (
-            <td style={{ flexDirection: 'column' }} colSpan={3}>
+            <td
+                style={{ flexDirection: 'column' }}
+                colSpan={3}
+            >
                 <div className='form-group'>
-                    <label className='lableSPDX' htmlFor='createdDate'>
+                    <label
+                        className='lableSPDX'
+                        htmlFor='createdDate'
+                    >
                         6.9 Created
                     </label>
                     <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>

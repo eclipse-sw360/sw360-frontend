@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import UserGroupType from "./enums/UserGroupType"
+import UserGroupType from './enums/UserGroupType'
 
 type NavItem = {
     href: string

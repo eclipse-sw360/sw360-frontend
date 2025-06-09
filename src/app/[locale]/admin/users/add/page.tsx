@@ -9,17 +9,17 @@
 
 'use client'
 
-import { useState, type JSX } from 'react';
-import { UserPayload, HttpStatus } from '@/object-types'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
-import MessageService from '@/services/message.service'
 import UserEditForm from '@/components/UserEditForm/UserEditForm'
 import UserOperationType from '@/components/UserEditForm/UserOperationType'
+import { HttpStatus, UserPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { useState, type JSX } from 'react'
 
-export default function CreateUser(): JSX.Element { 
+export default function CreateUser(): JSX.Element {
     const t = useTranslations('default')
     const [user, setUser] = useState<UserPayload>({
         email: '',
@@ -65,21 +65,34 @@ export default function CreateUser(): JSX.Element {
     }
 
     return (
-        <form className='mx-5 mt-3'
+        <form
+            className='mx-5 mt-3'
             onSubmit={(event) => {
                 handleCreateUser(event).catch((error) => console.error(error))
             }}
             autoCapitalize='nope'
         >
-            <div className="row mb-4">
-                <button className='btn btn-primary col-auto me-2' type='submit'>
+            <div className='row mb-4'>
+                <button
+                    className='btn btn-primary col-auto me-2'
+                    type='submit'
+                >
                     {t('Create User')}
                 </button>
-                <button className='btn btn-light col-auto' onClick={handleCancel} type='button'>
+                <button
+                    className='btn btn-light col-auto'
+                    onClick={handleCancel}
+                    type='button'
+                >
                     {t('Cancel')}
                 </button>
             </div>
-            <UserEditForm userPayload={user} setUserPayload={setUser} handleChange={handleChange} userOperationType={UserOperationType.CREATE} />
+            <UserEditForm
+                userPayload={user}
+                setUserPayload={setUser}
+                handleChange={handleChange}
+                userOperationType={UserOperationType.CREATE}
+            />
         </form>
     )
 }

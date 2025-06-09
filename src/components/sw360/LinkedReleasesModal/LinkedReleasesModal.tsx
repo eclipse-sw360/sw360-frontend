@@ -16,7 +16,7 @@ import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { ChangeEvent, useRef, useState, type JSX } from 'react';
+import { ChangeEvent, useRef, useState, type JSX } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
@@ -94,7 +94,7 @@ export default function LinkedReleasesModal({
                     ? []
                     : data['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
                           release.id ?? '',
-                          release.vendor ? release.vendor.fullName ?? '' : '',
+                          release.vendor ? (release.vendor.fullName ?? '') : '',
                           {
                               name: release.name,
                               componentId: release['_links']['sw360:component']['href'].split('/').pop() ?? '',

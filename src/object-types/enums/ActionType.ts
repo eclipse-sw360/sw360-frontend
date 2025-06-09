@@ -11,7 +11,7 @@
 enum ActionType {
     ADD = 'add',
     EDIT = 'edit',
-    DETAIL = 'detail'
+    DETAIL = 'detail',
 }
 
 export default ActionType

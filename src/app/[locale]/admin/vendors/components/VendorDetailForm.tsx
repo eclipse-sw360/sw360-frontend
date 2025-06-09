@@ -11,7 +11,7 @@
 
 import { Vendor } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, type JSX } from 'react';
+import { Dispatch, SetStateAction, type JSX } from 'react'
 
 export default function VendorDetailForm({
     payload,
@@ -34,9 +34,15 @@ export default function VendorDetailForm({
                 </div>
                 <div className='row mb-3'>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.fullName' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.fullName'
+                            className='form-label fw-medium'
+                        >
                             {t('Full Name')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>
@@ -52,9 +58,15 @@ export default function VendorDetailForm({
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.shortName' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.shortName'
+                            className='form-label fw-medium'
+                        >
                             {t('Short Name')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>
@@ -70,9 +82,15 @@ export default function VendorDetailForm({
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.url' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.url'
+                            className='form-label fw-medium'
+                        >
                             {t('URL')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>

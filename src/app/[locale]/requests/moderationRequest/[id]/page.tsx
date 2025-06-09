@@ -10,7 +10,7 @@
 import { Metadata } from 'next'
 import ModerationRequestDetail from './components/ModerationRequestDetail'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Context {
     params: Promise<{ id: string }>
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 }
 
 const ModerationRequestDetailsPage = async (props: Context): Promise<JSX.Element> => {
-    const params = await props.params;
+    const params = await props.params
     return <ModerationRequestDetail moderationRequestId={params.id} />
 }
 

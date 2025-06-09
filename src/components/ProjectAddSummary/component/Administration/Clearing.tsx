@@ -7,13 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { useTranslations } from 'next-intl'
 
 import { ProjectPayload } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -24,9 +24,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
     const t = useTranslations('default')
     const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
 
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                                       HTMLInputElement |
-                                                       HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
             [event.target.name]: event.target.value,
@@ -39,7 +37,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                 <h6 className='header pb-2 px-2'>{t('Clearing')}</h6>
                 <div className='row mb-2'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.clearingState' className='form-label fw-bold'>
+                        <label
+                            htmlFor='addProjects.clearingState'
+                            className='form-label fw-bold'
+                        >
                             {t('Clearing State')}
                         </label>
                         <select
@@ -55,13 +56,19 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                             <option value='IN_PROGRESS'>{t('In Progress')}</option>
                             <option value='CLOSED'>{t('Closed')}</option>
                         </select>
-                        <div className='form-text' id='addProjects.clearingState.HelpBlock'>
+                        <div
+                            className='form-text'
+                            id='addProjects.clearingState.HelpBlock'
+                        >
                             <ShowInfoOnHover text={CLEARING_STATE_INFO} />{' '}
                             {t('Learn more about project clearing state')}
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.clearingTeam' className='form-label fw-bold'>
+                        <label
+                            htmlFor='addProjects.clearingTeam'
+                            className='form-label fw-bold'
+                        >
                             {t('Clearing Team')}
                         </label>
                         <select
@@ -85,7 +92,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         </select>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.deadlinePreEvaluation' className='form-label fw-bold'>
+                        <label
+                            htmlFor='addProjects.deadlinePreEvaluation'
+                            className='form-label fw-bold'
+                        >
                             {t('Deadline for pre-evaluation')}
                         </label>
                         <input
@@ -108,7 +118,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                 </div>
                 <hr />
                 <div className='mb-2 row'>
-                    <label htmlFor='addProjects.clearingSummary' className='form-label fw-bold'>
+                    <label
+                        htmlFor='addProjects.clearingSummary'
+                        className='form-label fw-bold'
+                    >
                         {t('Clearing summary')}
                     </label>
                     <textarea
@@ -123,7 +136,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                 </div>
                 <hr />
                 <div className='mb-2 row'>
-                    <label htmlFor='addProjects.specialRiskOpenSourceSoftware' className='form-label fw-bold'>
+                    <label
+                        htmlFor='addProjects.specialRiskOpenSourceSoftware'
+                        className='form-label fw-bold'
+                    >
                         {t('Special risk Open Source Software')}
                     </label>
                     <textarea
@@ -138,7 +154,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                 </div>
                 <hr />
                 <div className='mb-2 row'>
-                    <label htmlFor='addProjects.generalRiskThirdPartySoftware' className='form-label fw-bold'>
+                    <label
+                        htmlFor='addProjects.generalRiskThirdPartySoftware'
+                        className='form-label fw-bold'
+                    >
                         {t('General risk 3rd party software')}
                     </label>
                     <textarea
@@ -153,7 +172,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                 </div>
                 <hr />
                 <div className='mb-2 row'>
-                    <label htmlFor='addProjects.specialRiskThirdPartySoftware' className='form-label fw-bold'>
+                    <label
+                        htmlFor='addProjects.specialRiskThirdPartySoftware'
+                        className='form-label fw-bold'
+                    >
                         {t('Special risks 3rd party software')}
                     </label>
                     <textarea
@@ -168,7 +190,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                 </div>
                 <hr />
                 <div className='mb-2 row'>
-                    <label htmlFor='addProjects.salesAndDeliveryChannels' className='form-label fw-bold'>
+                    <label
+                        htmlFor='addProjects.salesAndDeliveryChannels'
+                        className='form-label fw-bold'
+                    >
                         {t('Sales and delivery channels')}
                     </label>
                     <textarea
@@ -183,7 +208,10 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                 </div>
                 <hr />
                 <div className='mb-2 row'>
-                    <label htmlFor='addProjects.remarksAdditionalRequirements' className='form-label fw-bold'>
+                    <label
+                        htmlFor='addProjects.remarksAdditionalRequirements'
+                        className='form-label fw-bold'
+                    >
                         {t('Remarks additional requirements')}
                     </label>
                     <textarea

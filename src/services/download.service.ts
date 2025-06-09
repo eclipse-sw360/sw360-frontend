@@ -11,19 +11,22 @@
 
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Session } from 'next-auth'
-import MessageService from './message.service'
 import { signOut } from 'next-auth/react'
+import MessageService from './message.service'
 
-const download = async (url: string,
-                        session: Session | null,
-                        fileName: string, headers?: {[key: string]: string}) : Promise<number | undefined> => {
+const download = async (
+    url: string,
+    session: Session | null,
+    fileName: string,
+    headers?: { [key: string]: string },
+): Promise<number | undefined> => {
     if (CommonUtils.isNullOrUndefined(session)) {
         return signOut()
     }
     try {
         const response = await ApiUtils.GET(url, session.user.access_token, undefined, headers)
         if (!response.ok) {
-          return response.status
+            return response.status
         }
         const blob = await response.blob()
         const objectURL = URL.createObjectURL(blob)
@@ -33,14 +36,13 @@ const download = async (url: string,
         link.click()
         setTimeout(() => window.URL.revokeObjectURL(objectURL), 0)
         return response.status
-      }
-      catch(error: unknown) {
-          if (error instanceof DOMException && error.name === "AbortError") {
-              return
-          }
-          const message = error instanceof Error ? error.message : String(error)
-          MessageService.error(message)
-      }
+    } catch (error: unknown) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+            return
+        }
+        const message = error instanceof Error ? error.message : String(error)
+        MessageService.error(message)
+    }
 }
 
 const DownloadService = {

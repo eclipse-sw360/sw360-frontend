@@ -10,23 +10,23 @@
 
 'use client'
 import { HttpStatus, LicenseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { Button } from 'react-bootstrap'
-import styles from '../detail.module.css'
-import { FiCheckCircle } from 'react-icons/fi'
 import { BiXCircle } from 'react-icons/bi'
-import MessageService from '@/services/message.service'
+import { FiCheckCircle } from 'react-icons/fi'
+import styles from '../detail.module.css'
 
 interface Props {
     license: LicenseDetail
     setLicense: Dispatch<SetStateAction<LicenseDetail | undefined>>
 }
 
-const Detail = ({ license, setLicense }: Props) : ReactNode => {
+const Detail = ({ license, setLicense }: Props): ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
 
@@ -55,10 +55,8 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
 
     return (
         <div className='col'>
-            {(license.checked === false) && (
-                <div
-                    className={`alert ${styles['isChecked']}`}
-                >
+            {license.checked === false && (
+                <div className={`alert ${styles['isChecked']}`}>
                     {t('This license is')} <b>UNCHECKED</b>
                 </div>
             )}
@@ -81,7 +79,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                         <td>{t('Is Checked')}:</td>
                         <td>
                             {' '}
-                            {(license.checked === true) ? (
+                            {license.checked === true ? (
                                 <span style={{ color: '#287d3c' }}>
                                     <FiCheckCircle />
                                 </span>
@@ -100,7 +98,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                         <td>{t('OSI Approved')}:</td>
                         <td>
                             {' '}
-                            {(license.OSIApproved === 'YES') ? (
+                            {license.OSIApproved === 'YES' ? (
                                 <span style={{ color: '#287d3c' }}>
                                     <FiCheckCircle /> {t('Yes')}
                                 </span>
@@ -115,7 +113,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                         <td>{t('FSF Free Libre')}:</td>
                         <td>
                             {' '}
-                            {(license.FSFLibre === 'YES') ? (
+                            {license.FSFLibre === 'YES' ? (
                                 <span style={{ color: '#287d3c' }}>
                                     <FiCheckCircle /> {t('Yes')}
                                 </span>

@@ -25,7 +25,7 @@ interface Props {
     releaseId: string
 }
 
-const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
+const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -33,10 +33,14 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
         return Object.entries(users)
             .map(
                 ([index, item]: [string, User]): React.ReactNode => (
-                    <Link key={index} className='link' href={`mailto:${item.email}`}>
+                    <Link
+                        key={index}
+                        className='link'
+                        href={`mailto:${item.email}`}
+                    >
                         {item.fullName}
                     </Link>
-                )
+                ),
             )
             .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
     }
@@ -93,15 +97,14 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                 <tr>
                     <td>{t('Created by')}:</td>
                     <td>
-                        {
-                            release._embedded['sw360:createdBy'] &&
+                        {release._embedded['sw360:createdBy'] && (
                             <Link
                                 className='text-link'
                                 href={`mailto:${release._embedded['sw360:createdBy'].email}`}
                             >
                                 {release._embedded['sw360:createdBy'].fullName}
                             </Link>
-                        } 
+                        )}
                     </td>
                 </tr>
                 <tr>
@@ -111,23 +114,21 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                 <tr>
                     <td>{t('Modified By')}:</td>
                     <td>
-                        {
-                            release._embedded['sw360:modifiedBy'] &&
+                        {release._embedded['sw360:modifiedBy'] && (
                             <Link
                                 className='text-link'
                                 href={`mailto:${release._embedded['sw360:modifiedBy'].email}`}
                             >
                                 {release._embedded['sw360:modifiedBy'].fullName}
                             </Link>
-                        } 
+                        )}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Contributors')}:</td>
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:contributors']) &&
-                            renderArrayOfUsers(release._embedded['sw360:contributors'])
-                        }
+                            renderArrayOfUsers(release._embedded['sw360:contributors'])}
                     </td>
                 </tr>
                 <tr>
@@ -150,19 +151,21 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                         {!CommonUtils.isNullOrUndefined(release.roles) &&
                             Object.keys(release.roles).map((key) => (
                                 <li key={key}>
-                                    <span className='fw-bold'>
-                                        {key}:{' '}
-                                    </span>
+                                    <span className='fw-bold'>{key}: </span>
                                     <span className='mapDisplayChildItemRight'>
-                                        {!CommonUtils.isNullOrUndefined(release.roles) && release.roles[key]
-                                            .map(
-                                                (email: string): React.ReactNode => (
-                                                    <a key={email} href={`mailto:${email}`}>
-                                                        {email}
-                                                    </a>
+                                        {!CommonUtils.isNullOrUndefined(release.roles) &&
+                                            release.roles[key]
+                                                .map(
+                                                    (email: string): React.ReactNode => (
+                                                        <a
+                                                            key={email}
+                                                            href={`mailto:${email}`}
+                                                        >
+                                                            {email}
+                                                        </a>
+                                                    ),
                                                 )
-                                            )
-                                            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
                                     </span>
                                 </li>
                             ))}
@@ -206,7 +209,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                                                 className={styles.info}
                                             />
                                         </span>
-                                    )
+                                    ),
                                 )
                                 .reduce((prev, curr): React.ReactNode[] => [
                                     prev,
@@ -231,7 +234,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                                                 className={styles.info}
                                             />
                                         </span>
-                                    )
+                                    ),
                                 )
                                 .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
                     </td>

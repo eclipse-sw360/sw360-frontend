@@ -30,7 +30,7 @@ function PackageCopyrightText({
     setCopyrightTextNone,
     copyrightTextNoasserttion,
     setCopyrightTextNoasserttion,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectCopyrightTextExist = () => {
         setCopyrightTextExist(true)
         setCopyrightTextNone(false)
@@ -107,7 +107,10 @@ function PackageCopyrightText({
                             onChange={selectCopyrightTextNoasserttion}
                             checked={copyrightTextNoasserttion}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='copyrightTextNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='copyrightTextNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

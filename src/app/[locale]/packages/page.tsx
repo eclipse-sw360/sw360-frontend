@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     title: 'Packages',
 }
 
-function PackagesList() : ReactNode {
+function PackagesList(): ReactNode {
     return <Packages />
 }
 

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -23,33 +23,33 @@ import {
     COTSDetails,
     ClearingInformation,
     CommonTabIds,
+    Creator,
+    DocumentCreationInformation,
     DocumentTypes,
     ECCInformation,
     HttpStatus,
     Release,
     ReleaseDetail,
     ReleaseTabIds,
+    SPDX,
     Vendor,
-    Creator,
-    DocumentCreationInformation,
-    SPDX
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
+import EditSPDXDocument from './EditSPDXDocument'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
-import EditSPDXDocument from './EditSPDXDocument'
-import MessageService from '@/services/message.service'
 
 interface Props {
     releaseId: string
     isSPDXFeatureEnabled: boolean
 }
 
-const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => {
+const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -93,7 +93,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const release: ReleaseDetail = await response.json() as ReleaseDetail
+                const release: ReleaseDetail = (await response.json()) as ReleaseDetail
                 let createdDate = release._embedded['sw360:documentCreationInformation']?.created
                 if (CommonUtils.isNullEmptyOrUndefinedString(createdDate)) {
                     createdDate = new Date().toISOString()
@@ -106,43 +106,46 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
                     ) {
                         creators = handleCreators(
                             release._embedded['sw360:createdBy'].fullName ?? '',
-                            release._embedded['sw360:createdBy'].email
+                            release._embedded['sw360:createdBy'].email,
                         )
                     } else {
-                        creators = [{
-                            type: 'Person',
-                            value: `${session.user.name} (${session.user.email})`,
-                            index: 0,
-                        }]
+                        creators = [
+                            {
+                                type: 'Person',
+                                value: `${session.user.name} (${session.user.email})`,
+                                index: 0,
+                            },
+                        ]
                     }
                 }
-                const documentCreationInfomation: DocumentCreationInformation | undefined =
-                    release._embedded['sw360:documentCreationInformation']
-                        ?
-                            {
-                                id: release._embedded['sw360:documentCreationInformation'].id,
-                                spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
-                                spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
-                                dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
-                                SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
-                                name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
-                                documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
-                                externalDocumentRefs: release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
-                                licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
-                                creator: creators, // 6.8
-                                created: createdDate, // 6.9
-                                creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
-                                documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
-                                // Information for ModerationRequests
-                                documentState: release._embedded['sw360:documentCreationInformation'].documentState,
-                                permissions: release._embedded['sw360:documentCreationInformation'].permissions,
-                                createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
-                                moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
-                            }
-                        :   {
-                                creator: creators, // 6.8
-                                created: createdDate, // 6.9
-                            }
+                const documentCreationInfomation: DocumentCreationInformation | undefined = release._embedded[
+                    'sw360:documentCreationInformation'
+                ]
+                    ? {
+                          id: release._embedded['sw360:documentCreationInformation'].id,
+                          spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
+                          spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
+                          dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
+                          SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
+                          name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
+                          documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
+                          externalDocumentRefs:
+                              release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
+                          licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
+                          creator: creators, // 6.8
+                          created: createdDate, // 6.9
+                          creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
+                          documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
+                          // Information for ModerationRequests
+                          documentState: release._embedded['sw360:documentCreationInformation'].documentState,
+                          permissions: release._embedded['sw360:documentCreationInformation'].permissions,
+                          createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
+                          moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
+                      }
+                    : {
+                          creator: creators, // 6.8
+                          created: createdDate, // 6.9
+                      }
 
                 const SPDXPayload: SPDX = {
                     spdxDocument: release._embedded['sw360:spdxDocument'],
@@ -176,28 +179,33 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
                     setCotsDetails(cotsDetails)
                     if (cotsDetails['_embedded']) {
                         setCotsResponsible({
-                            [cotsDetails._embedded['sw360:cotsResponsible'].email]: cotsDetails._embedded['sw360:cotsResponsible'].fullName ?? ''
+                            [cotsDetails._embedded['sw360:cotsResponsible'].email]:
+                                cotsDetails._embedded['sw360:cotsResponsible'].fullName ?? '',
                         })
                     }
                 }
 
                 if (release['_embedded']['sw360:licenses']) {
-                    const mainLicenses = release['_embedded']['sw360:licenses'].reduce((result, item) => {
-                                                    const licenseId = item._links?.self.href.split('/').at(-1)
-                                                    if (licenseId !== undefined)
-                                                        result[licenseId] = item.fullName ?? ''
-                                                    return result
-                                                }, {} as { [k: string]: string })
+                    const mainLicenses = release['_embedded']['sw360:licenses'].reduce(
+                        (result, item) => {
+                            const licenseId = item._links?.self.href.split('/').at(-1)
+                            if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
+                            return result
+                        },
+                        {} as { [k: string]: string },
+                    )
                     setMainLicenses(mainLicenses)
                 }
 
                 if (release['_embedded']['sw360:otherLicenses']) {
-                    const otherLicenses = release['_embedded']['sw360:otherLicenses'].reduce((result, item) => {
-                                                    const licenseId = item._links?.self.href.split('/').at(-1)
-                                                    if (licenseId !== undefined)
-                                                        result[licenseId] = item.fullName ?? ''
-                                                    return result
-                                                }, {} as { [k: string]: string })
+                    const otherLicenses = release['_embedded']['sw360:otherLicenses'].reduce(
+                        (result, item) => {
+                            const licenseId = item._links?.self.href.split('/').at(-1)
+                            if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
+                            return result
+                        },
+                        {} as { [k: string]: string },
+                    )
                     setOtherLicenses(otherLicenses)
                 }
 
@@ -306,20 +314,17 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
     const [inputValid, setInputValid] = useState(false)
 
     const validateCreator = async (SPDXPayload: SPDX) => {
-        if (
-            CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.documentCreationInformation?.creator)
-        ) {
+        if (CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.documentCreationInformation?.creator)) {
             setErrorCreator(true)
             await setSelectedTab(ReleaseTabIds.SPDX_DOCUMENT)
-            window.location.hash = "#spdx-creator";
+            window.location.hash = '#spdx-creator'
             return true
         }
         return false
     }
 
     const validateLicenseIdentifier = (SPDXPayload: SPDX): boolean => {
-        if (!SPDXPayload.spdxDocument)
-            return false
+        if (!SPDXPayload.spdxDocument) return false
         if (CommonUtils.isNullEmptyOrUndefinedArray(SPDXPayload.spdxDocument.otherLicensingInformationDetecteds)) {
             return false
         }
@@ -364,14 +369,14 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
             if (
                 validateLicenseIdentifier(SPDXPayload) ||
                 validateExtractedText(SPDXPayload) ||
-                await validateCreator(SPDXPayload)
+                (await validateCreator(SPDXPayload))
             ) {
                 return
             } else {
                 const responseUpdateSPDX = await ApiUtils.PATCH(
                     `releases/${releaseId}/spdx`,
                     SPDXPayload,
-                    session.user.access_token
+                    session.user.access_token,
                 )
                 if (responseUpdateSPDX.status === HttpStatus.UNAUTHORIZED) {
                     MessageService.error(t('Session has expired'))
@@ -418,11 +423,21 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-2 sidebar'>
-                        <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                        <SideBar
+                            selectedTab={selectedTab}
+                            setSelectedTab={setSelectedTab}
+                            tabList={tabList}
+                        />
                     </div>
                     <div className='col'>
-                        <div className='row' style={{ marginBottom: '20px' }}>
-                            <PageButtonHeader buttons={headerButtons} title={release.name}></PageButtonHeader>
+                        <div
+                            className='row'
+                            style={{ marginBottom: '20px' }}
+                        >
+                            <PageButtonHeader
+                                buttons={headerButtons}
+                                title={release.name}
+                            ></PageButtonHeader>
                         </div>
                         <DeleteReleaseModal
                             actionType={ActionType.EDIT}
@@ -431,7 +446,10 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
                             show={deleteModalOpen}
                             setShow={setDeleteModalOpen}
                         />
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                        >
                             <ReleaseEditSummary
                                 release={release}
                                 releaseId={releaseId}
@@ -449,7 +467,10 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
                                 clearingInformation={clearingInformation}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
+                        >
                             <LinkedReleases
                                 actionType={ActionType.EDIT}
                                 release={release}
@@ -457,14 +478,20 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
                                 setReleasePayload={setReleasePayload}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}
+                        >
                             <EditClearingDetails
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
                             />
                         </div>
                         {isSPDXFeatureEnabled === true && (
-                            <div className='row' hidden={selectedTab !== ReleaseTabIds.SPDX_DOCUMENT ? true : false}>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ReleaseTabIds.SPDX_DOCUMENT ? true : false}
+                            >
                                 <EditSPDXDocument
                                     releaseId={releaseId}
                                     SPDXPayload={SPDXPayload}
@@ -479,21 +506,32 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props) : ReactNode => 
                                 />
                             </div>
                         )}
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
-                            <EditECCDetails releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}
+                        >
+                            <EditECCDetails
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            {
-                                releasePayload.componentId !== null &&
+                        <div
+                            className='row'
+                            hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}
+                        >
+                            {releasePayload.componentId !== null && (
                                 <EditAttachments
                                     documentId={releaseId}
                                     documentType={DocumentTypes.RELEASE}
                                     documentPayload={releasePayload}
                                     setDocumentPayload={setReleasePayload}
                                 />
-                            }
+                            )}
                         </div>
-                        <div className='row' hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}
+                        >
                             <AddCommercialDetails
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}

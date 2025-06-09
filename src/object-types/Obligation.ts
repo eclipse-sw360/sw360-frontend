@@ -113,8 +113,12 @@ export interface ObligationTreeProps {
     onAddChild: (parentId?: string) => void
     onAddSibling: (nodeId: string, parentId?: string) => void
     onDeleteNode: (nodeId: string, parentId?: string) => void
-    onUpdateNode: (nodeId: string, field: 'type' | 'text' | 'languageElement' | 'action' | 'object', value: string ) => void
-    onUpdateNodeElement: (nodeId: string, element: ObligationElement ) => void
+    onUpdateNode: (
+        nodeId: string,
+        field: 'type' | 'text' | 'languageElement' | 'action' | 'object',
+        value: string,
+    ) => void
+    onUpdateNodeElement: (nodeId: string, element: ObligationElement) => void
 }
 
 export interface ObligationFormProps {
@@ -138,8 +142,12 @@ export const ObligationLevels = {
 }
 
 export const ObligationLevelInfo = {
-    'Organisation Obligation': 'Organisation Obligations are general rules or mandatory steps to made sure before conveying software. An example would be to add the OSS contact e-mail address in case of questions to the project, software or to the organisation at all instances of conveyed software.',
-    'Component Obligation': 'Component obligations are obligations for a specific component or release only. For example, special measure or actions to be carried out could result from trade compliance or IP issues with the component.',
-    'License Obligation': 'License obligation are task to be carried out or risks to be considered from the use of software under a particular license.',
-    'Project Obligation': 'Project obligations are specific to the projects or products nature and are also requires steps or tasks to be made sure before conveying the software. An example could be tiny hardware with limited printed documentation. In this case open source license information would required special handling, for example print instructions how to obtain OSS license information on the packaging.',
+    'Organisation Obligation':
+        'Organisation Obligations are general rules or mandatory steps to made sure before conveying software. An example would be to add the OSS contact e-mail address in case of questions to the project, software or to the organisation at all instances of conveyed software.',
+    'Component Obligation':
+        'Component obligations are obligations for a specific component or release only. For example, special measure or actions to be carried out could result from trade compliance or IP issues with the component.',
+    'License Obligation':
+        'License obligation are task to be carried out or risks to be considered from the use of software under a particular license.',
+    'Project Obligation':
+        'Project obligations are specific to the projects or products nature and are also requires steps or tasks to be made sure before conveying the software. An example could be tiny hardware with limited printed documentation. In this case open source license information would required special handling, for example print instructions how to obtain OSS license information on the packaging.',
 }

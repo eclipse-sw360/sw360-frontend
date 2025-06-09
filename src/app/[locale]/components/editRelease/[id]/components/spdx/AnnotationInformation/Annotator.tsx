@@ -17,10 +17,10 @@ interface Props {
     setAnnotatorToAnnotation: (input: InputKeyValue) => void
 }
 
-function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }: Props) : ReactNode {
+function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataAnnotator ? dataAnnotator : {} as InputKeyValue
+        const list: InputKeyValue = dataAnnotator ? dataAnnotator : ({} as InputKeyValue)
         list[name as keyof InputKeyValue] = value
         setDataAnnotator(list)
         setAnnotatorToAnnotation(list)
@@ -28,8 +28,14 @@ function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }
 
     return (
         dataAnnotator && (
-            <div className='form-group' style={{ flex: 3 }}>
-                <label className='lableSPDX' htmlFor='annotator'>
+            <div
+                className='form-group'
+                style={{ flex: 3 }}
+            >
+                <label
+                    className='lableSPDX'
+                    htmlFor='annotator'
+                >
                     12.1 Annotator
                 </label>
                 <div style={{ display: 'flex' }}>

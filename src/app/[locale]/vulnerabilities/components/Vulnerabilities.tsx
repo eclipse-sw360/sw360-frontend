@@ -9,26 +9,26 @@
 
 'use client'
 
-import { Session } from 'next-auth'
 import { Embedded, Vulnerability } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
+import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
+import { Session } from 'next-auth'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, QuickFilter, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useState, ReactNode } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
-import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
 
 type EmbeddedVulnerabilities = Embedded<Vulnerability, 'sw360:vulnerabilityApiDTOes'>
 
 const VulnerabilitesTable = React.memo(Table, () => true)
 
-function Vulnerabilities() : ReactNode {
+function Vulnerabilities(): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
     const [numVulnerabilities, setNumVulnerabilities] = useState<null | number>(0)
@@ -64,10 +64,13 @@ function Vulnerabilities() : ReactNode {
             formatter: (externalId: string) =>
                 _(
                     <>
-                        <Link href={`/vulnerabilities/detail/${externalId}`} className='text-link'>
+                        <Link
+                            href={`/vulnerabilities/detail/${externalId}`}
+                            className='text-link'
+                        >
                             {externalId}
                         </Link>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -83,7 +86,7 @@ function Vulnerabilities() : ReactNode {
                 _(
                     <>
                         <span style={{ color: 'red' }}>{`${cvss} (as of: ${cvssTime})`}</span>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -104,7 +107,10 @@ function Vulnerabilities() : ReactNode {
                 _(
                     <>
                         <span className='d-flex justify-content-evenly'>
-                            <Link href={`/vulnerabilities/edit/${id}`} style={{ color: 'gray', fontSize: '14px' }}>
+                            <Link
+                                href={`/vulnerabilities/edit/${id}`}
+                                style={{ color: 'gray', fontSize: '14px' }}
+                            >
                                 <FaPencilAlt className='btn-icon' />
                             </Link>
                             <FaTrashAlt
@@ -114,17 +120,17 @@ function Vulnerabilities() : ReactNode {
                                 }}
                             />
                         </span>
-                    </>
+                    </>,
                 ),
         },
     ]
 
     const initServerPaginationConfig = (session: Session) => {
-        if(CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: CommonUtils.createUrlWithParams(
                 `${SW360_API_URL}/resource/api/vulnerabilities`,
-                Object.fromEntries(params)
+                Object.fromEntries(params),
             ),
             then: (data: EmbeddedVulnerabilities) => {
                 setNumVulnerabilities(data.page?.totalElements ?? 0)
@@ -157,14 +163,20 @@ function Vulnerabilities() : ReactNode {
                     <div className='row'>
                         <div className='col-lg-2 sidebar'>
                             <QuickFilter id='vunerabilities.quickSearch' />
-                            <br/>
-                            <AdvancedSearch title='Advanced Filter' fields={advancedSearch} />
+                            <br />
+                            <AdvancedSearch
+                                title='Advanced Filter'
+                                fields={advancedSearch}
+                            />
                         </div>
                         <div className='col-lg-10'>
                             <div className='row d-flex justify-content-between ms-1'>
                                 <div className='col-lg-5'>
                                     <div className='row'>
-                                        <button className='btn btn-primary col-auto' onClick={handleAddVulnerability}>
+                                        <button
+                                            className='btn btn-primary col-auto'
+                                            onClick={handleAddVulnerability}
+                                        >
                                             {t('Add Vulnerability')}
                                         </button>
                                     </div>
@@ -175,7 +187,12 @@ function Vulnerabilities() : ReactNode {
                             </div>
                             <div className='row mt-3'>
                                 {status === 'authenticated' ? (
-                                    <VulnerabilitesTable columns={columns} server={initServerPaginationConfig(session) as ServerStorageOptions} selector={true} sort={false} />
+                                    <VulnerabilitesTable
+                                        columns={columns}
+                                        server={initServerPaginationConfig(session) as ServerStorageOptions}
+                                        selector={true}
+                                        sort={false}
+                                    />
                                 ) : (
                                     <div className='col-12 d-flex justify-content-center align-items-center'>
                                         <Spinner className='spinner' />

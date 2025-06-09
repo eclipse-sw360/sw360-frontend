@@ -10,12 +10,12 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-import { useState, ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 
 import { Component, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
-const ReleaseAgrregate = ({ component }: { component: Component }) : ReactNode => {
+const ReleaseAgrregate = ({ component }: { component: Component }): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const t = useTranslations('default')
 
@@ -42,7 +42,7 @@ const ReleaseAgrregate = ({ component }: { component: Component }) : ReactNode =
                                         .map(
                                             (vendor: Vendor): React.ReactNode => (
                                                 <span key={vendor.fullName}>{vendor.fullName}</span>
-                                            )
+                                            ),
                                         )
                                         .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
                             </>

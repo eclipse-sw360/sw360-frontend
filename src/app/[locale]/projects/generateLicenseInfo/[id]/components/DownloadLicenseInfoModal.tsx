@@ -10,14 +10,14 @@
 'use client'
 
 import { HttpStatus, SaveUsagesPayload } from '@/object-types'
+import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, ChangeEvent, useState } from 'react'
+import { notFound, useSearchParams } from 'next/navigation'
+import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import { notFound, useSearchParams } from "next/navigation"
-import DownloadService from '@/services/download.service'
 
 export default function DownloadLicenseInfoModal({
     show,
@@ -26,16 +26,16 @@ export default function DownloadLicenseInfoModal({
     setShowConfirmation,
     projectId,
     isCalledFromProjectLicenseTab,
-    withSubProjects
+    withSubProjects,
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
     setShowConfirmation: Dispatch<SetStateAction<boolean>>
-    saveUsagesPayload: SaveUsagesPayload,
-    projectId: string,
+    saveUsagesPayload: SaveUsagesPayload
+    projectId: string
     isCalledFromProjectLicenseTab: boolean
     withSubProjects: boolean
-}) : ReactNode {
+}): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
@@ -43,25 +43,30 @@ export default function DownloadLicenseInfoModal({
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
             const searchParams = Object.fromEntries(params)
-            if(Object.prototype.hasOwnProperty.call(searchParams, "withSubProjects") === false) {
+            if (Object.prototype.hasOwnProperty.call(searchParams, 'withSubProjects') === false) {
                 return
             }
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 return signOut()
             }
-            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`,
-                                                  saveUsagesPayload, session.user.access_token)
-            if(response.status !== HttpStatus.CREATED) {
+            const response = await ApiUtils.POST(
+                `projects/${projectId}/saveAttachmentUsages`,
+                saveUsagesPayload,
+                session.user.access_token,
+            )
+            if (response.status !== HttpStatus.CREATED) {
                 return notFound()
             }
             const currentDate = new Date().toISOString().split('T')[0]
             DownloadService.download(
-                `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseInfo&withSubProject=${searchParams.withSubProjects
-                }&generatorClassName=${generatorClassName}&variant=DISCLOSURE`, 
-                session, `LicenseInfo-${currentDate}.zip`
+                `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseInfo&withSubProject=${
+                    searchParams.withSubProjects
+                }&generatorClassName=${generatorClassName}&variant=DISCLOSURE`,
+                session,
+                `LicenseInfo-${currentDate}.zip`,
             )
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -95,27 +100,35 @@ export default function DownloadLicenseInfoModal({
                             name='unknown'
                             checked={true}
                         />
-                        <label className='form-label fw-bold'
-                                htmlFor='project_clearing_report_unknown'>
+                        <label
+                            className='form-label fw-bold'
+                            htmlFor='project_clearing_report_unknown'
+                        >
                             {t('Unknown')}
                         </label>
                     </div>
-                    <div className='form-check'
-                         hidden={!withSubProjects}>
+                    <div
+                        className='form-check'
+                        hidden={!withSubProjects}
+                    >
                         <input
                             id='project_clearing_report_contained'
                             type='checkbox'
                             className='form-check-input'
                             name='contained'
                         />
-                        <label className='form-label fw-bold'
-                                htmlFor='project_clearing_report_contained'>
+                        <label
+                            className='form-label fw-bold'
+                            htmlFor='project_clearing_report_contained'
+                        >
                             {t('Contained')}
                         </label>
                     </div>
                     <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
-                    <div className='form-check'
-                         hidden={!withSubProjects}>
+                    <div
+                        className='form-check'
+                        hidden={!withSubProjects}
+                    >
                         <input
                             id='project_clearing_report_linked_project_relation'
                             type='checkbox'
@@ -123,56 +136,68 @@ export default function DownloadLicenseInfoModal({
                             name='is_a_subproject'
                             checked={true}
                         />
-                        <label className='form-label fw-bold'
-                                htmlFor='project_clearing_report_linked_project_relation'>
+                        <label
+                            className='form-label fw-bold'
+                            htmlFor='project_clearing_report_linked_project_relation'
+                        >
                             {t('Is a subproject')}
                         </label>
                     </div>
                     <h5 className='fw-bold'>{t('Select output format')}:</h5>
-                    <div className="form-check">
-                        <input 
-                            type="radio" 
-                            name="generatorClassName" 
-                            value="DocxGenerator" 
-                            id="DocxGenerator" 
-                            checked={generatorClassName === "DocxGenerator"} 
+                    <div className='form-check'>
+                        <input
+                            type='radio'
+                            name='generatorClassName'
+                            value='DocxGenerator'
+                            id='DocxGenerator'
+                            checked={generatorClassName === 'DocxGenerator'}
                             onChange={onOptionChange}
-                            className="form-check-input"
+                            className='form-check-input'
                         />
-                        <label className="form-check-label"
-                               htmlFor="DocxGenerator">
+                        <label
+                            className='form-check-label'
+                            htmlFor='DocxGenerator'
+                        >
                             {t('License Disclosure as DOCX')}
                         </label>
                     </div>
-                    <div className="form-check"
-                         hidden={!isCalledFromProjectLicenseTab}>
-                        <input 
-                            type="radio" 
-                            name="generatorClassName" 
-                            value="XhtmlGenerator" 
-                            id="XhtmlGenerator" 
-                            checked={generatorClassName === "XhtmlGenerator"} 
+                    <div
+                        className='form-check'
+                        hidden={!isCalledFromProjectLicenseTab}
+                    >
+                        <input
+                            type='radio'
+                            name='generatorClassName'
+                            value='XhtmlGenerator'
+                            id='XhtmlGenerator'
+                            checked={generatorClassName === 'XhtmlGenerator'}
                             onChange={onOptionChange}
-                            className="form-check-input"
+                            className='form-check-input'
                         />
-                        <label className="form-check-label"
-                               htmlFor="XhtmlGenerator">
+                        <label
+                            className='form-check-label'
+                            htmlFor='XhtmlGenerator'
+                        >
                             {t('License Disclosure as XHTML')}
                         </label>
                     </div>
-                    <div className="form-check"
-                         hidden={!isCalledFromProjectLicenseTab}>
-                        <input 
-                            type="radio" 
-                            name="generatorClassName" 
-                            value="TextGenerator" 
-                            id="TextGenerator" 
-                            checked={generatorClassName === "TextGenerator"} 
+                    <div
+                        className='form-check'
+                        hidden={!isCalledFromProjectLicenseTab}
+                    >
+                        <input
+                            type='radio'
+                            name='generatorClassName'
+                            value='TextGenerator'
+                            id='TextGenerator'
+                            checked={generatorClassName === 'TextGenerator'}
                             onChange={onOptionChange}
-                            className="form-check-input"
+                            className='form-check-input'
                         />
-                        <label className="form-check-label"
-                               htmlFor="TextGenerator">
+                        <label
+                            className='form-check-label'
+                            htmlFor='TextGenerator'
+                        >
                             {t('License Disclosure as TEXT')}
                         </label>
                     </div>
@@ -180,12 +205,11 @@ export default function DownloadLicenseInfoModal({
                 <Modal.Footer>
                     <button
                         className='btn btn-primary'
-                        onClick={() => { 
-                                handleLicenseInfoDownload(projectId)
-                                setShowConfirmation(true)
-                                setShow(false)
-                            }
-                        }
+                        onClick={() => {
+                            handleLicenseInfoDownload(projectId)
+                            setShowConfirmation(true)
+                            setShow(false)
+                        }}
                     >
                         {t('Download')}
                     </button>

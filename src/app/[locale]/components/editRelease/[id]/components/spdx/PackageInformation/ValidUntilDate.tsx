@@ -17,10 +17,10 @@ interface Props {
     setDataValidUntilDate: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function ValidUntilDate({ dataValidUntilDate, setDataValidUntilDate, setValidUntilDate }: Props) : ReactNode {
+function ValidUntilDate({ dataValidUntilDate, setDataValidUntilDate, setValidUntilDate }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataValidUntilDate ?? {} as InputKeyValue
+        const list: InputKeyValue = dataValidUntilDate ?? ({} as InputKeyValue)
         list[name as keyof InputKeyValue] = value
         setDataValidUntilDate(list)
         setValidUntilDate(list)
@@ -29,7 +29,10 @@ function ValidUntilDate({ dataValidUntilDate, setDataValidUntilDate, setValidUnt
     return (
         <td colSpan={3}>
             <div className='form-group'>
-                <label className='lableSPDX' htmlFor='createdDate'>
+                <label
+                    className='lableSPDX'
+                    htmlFor='createdDate'
+                >
                     7.27 Valid Until Date
                 </label>
                 <div

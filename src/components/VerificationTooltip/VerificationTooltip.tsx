@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { VerificationStateInfo } from '@/object-types'
-import { ReactNode, useState, type JSX } from 'react';
+import { ReactNode, useState, type JSX } from 'react'
 import styles from './VerificationTooltip.module.css'
 
 interface Props {
@@ -45,12 +45,22 @@ const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationState
 const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.Element => {
     const [show, setShow] = useState(false)
     return (
-        <div className={styles.tooltip} onMouseOver={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+        <div
+            className={styles.tooltip}
+            onMouseOver={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}
+        >
             {show && (
                 <div className={`${styles['tooltip-content']}`}>
-                    <ol className={styles.formatedMessageForVul} reversed>
+                    <ol
+                        className={styles.formatedMessageForVul}
+                        reversed
+                    >
                         {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (
-                            <VerificationStateFormater key={index} stateInfo={info} />
+                            <VerificationStateFormater
+                                key={index}
+                                stateInfo={info}
+                            />
                         ))}
                     </ol>
                 </div>

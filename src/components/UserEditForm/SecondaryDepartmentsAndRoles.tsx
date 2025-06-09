@@ -8,16 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, useCallback, type JSX } from 'react';
 import { HttpStatus, UserGroupType, UserPayload } from '@/object-types'
-import { FaTrashAlt } from 'react-icons/fa'
-import { ApiUtils } from '@/utils'
 import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 import { getSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState, type JSX } from 'react'
+import { FaTrashAlt } from 'react-icons/fa'
 
 interface SecondaryDepartmentAndRole {
-    department: string,
+    department: string
     role: string
 }
 
@@ -31,19 +31,25 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
     const [secondaryDepartmentsAndRoles, setSecondaryDepartmentsAndRoles] = useState<SecondaryDepartmentAndRole[]>([])
     const [availableDepartments, setAvailableDepartments] = useState<string[]>([])
 
-    const onChangeDepartmentAndRole = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
-        const newSecondaryDepartmentsAndRoles = [...secondaryDepartmentsAndRoles]
-        newSecondaryDepartmentsAndRoles[index][e.target.name as keyof SecondaryDepartmentAndRole] = e.target.value
-        setSecondaryDepartmentsAndRoles(newSecondaryDepartmentsAndRoles)
-        updateUserPayload(newSecondaryDepartmentsAndRoles)
-    }, [secondaryDepartmentsAndRoles])
+    const onChangeDepartmentAndRole = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
+            const newSecondaryDepartmentsAndRoles = [...secondaryDepartmentsAndRoles]
+            newSecondaryDepartmentsAndRoles[index][e.target.name as keyof SecondaryDepartmentAndRole] = e.target.value
+            setSecondaryDepartmentsAndRoles(newSecondaryDepartmentsAndRoles)
+            updateUserPayload(newSecondaryDepartmentsAndRoles)
+        },
+        [secondaryDepartmentsAndRoles],
+    )
 
-    const onDeleteRow = useCallback((index: number) => {
-        const newSecondaryDepartmentsAndRoles = [...secondaryDepartmentsAndRoles]
-        newSecondaryDepartmentsAndRoles.splice(index, 1)
-        setSecondaryDepartmentsAndRoles(newSecondaryDepartmentsAndRoles)
-        updateUserPayload(newSecondaryDepartmentsAndRoles)
-    }, [secondaryDepartmentsAndRoles])
+    const onDeleteRow = useCallback(
+        (index: number) => {
+            const newSecondaryDepartmentsAndRoles = [...secondaryDepartmentsAndRoles]
+            newSecondaryDepartmentsAndRoles.splice(index, 1)
+            setSecondaryDepartmentsAndRoles(newSecondaryDepartmentsAndRoles)
+            updateUserPayload(newSecondaryDepartmentsAndRoles)
+        },
+        [secondaryDepartmentsAndRoles],
+    )
 
     /* Convert the secondaryDepartmentsAndRoles from the userPayload into list
      *   E.g:
@@ -53,12 +59,13 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
      *      { department: 'department1', role: 'ADMIN' },
      *      { department: 'department1', role: 'CLEARING_ADMIN' }
      *   ]
-    */
+     */
     const convertSecondaryDeptsAndRolesToList = () => {
         if (userPayload.secondaryDepartmentsAndRoles === undefined) return []
 
-        return Object.entries(userPayload.secondaryDepartmentsAndRoles)
-            .flatMap(([department, roles]) => Array.from(roles).map((role: string) => ({ department, role })))
+        return Object.entries(userPayload.secondaryDepartmentsAndRoles).flatMap(([department, roles]) =>
+            Array.from(roles).map((role: string) => ({ department, role })),
+        )
     }
 
     const fetchAvailableDepartments = async () => {
@@ -77,7 +84,7 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
         if (response.status !== HttpStatus.OK) {
             return
         }
-        const departments = await response.json() as string[]
+        const departments = (await response.json()) as string[]
         setAvailableDepartments(departments)
     }
 
@@ -88,64 +95,85 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
     }, [])
 
     const updateUserPayload = (newSecondaryDepartmentsAndRoles: Array<SecondaryDepartmentAndRole>) => {
-        const secondaryDepartmentsAndRolesMap = newSecondaryDepartmentsAndRoles.reduce((current, { department, role }) => {
-            if (!(department in current)) {
-                current[department] = []
-            }
-            if (!current[department].includes(role)) {
-                current[department].push(role)
-            }
-            return current
-        }, {} as { [key: string]: Array<string> })
+        const secondaryDepartmentsAndRolesMap = newSecondaryDepartmentsAndRoles.reduce(
+            (current, { department, role }) => {
+                if (!(department in current)) {
+                    current[department] = []
+                }
+                if (!current[department].includes(role)) {
+                    current[department].push(role)
+                }
+                return current
+            },
+            {} as { [key: string]: Array<string> },
+        )
 
         setUserPayload((prev) => ({ ...prev, secondaryDepartmentsAndRoles: secondaryDepartmentsAndRolesMap }))
     }
 
     return (
         <>
-            {
-                secondaryDepartmentsAndRoles.map((secondaryDepartmentAndRole, index) => (
-                    <div className='row mb-3 px-0 pb-3 with-divider' key={index}>
-                        <div className='col-lg-6'>
-                            <input
-                                type='text'
-                                list='available-deparments'
-                                name='department'
-                                value={secondaryDepartmentAndRole.department}
-                                onChange={(e) => onChangeDepartmentAndRole(e, index)}
-                                className='form-control'
-                                id={`secondaryDepartmentAndRole.department${index}`}
-                                placeholder={t('Enter Secondary Department')}
-                                required
-                            />
-                        </div>
-                        <div className='col-lg-5'>
-                            <select className='form-control' name='role'
-                                defaultValue={secondaryDepartmentAndRole.role} required
-                                onChange={(e) => onChangeDepartmentAndRole(e, index)}
-                            >
-                                <option value=''>{t('Select secondary department role')}</option>
-                                {
-                                    Object.entries(UserGroupType).map(([key, value]) =>
-                                        <option key={key} value={key}>{t(value as never)}</option>
-                                    )
-                                }
-                            </select>
-                        </div>
-                        <div className='col-sm-1 cursor-pointer pt-2 px-4'>
-                            <FaTrashAlt size={21} className='icon action' onClick={() => onDeleteRow(index)} />
-                        </div>
+            {secondaryDepartmentsAndRoles.map((secondaryDepartmentAndRole, index) => (
+                <div
+                    className='row mb-3 px-0 pb-3 with-divider'
+                    key={index}
+                >
+                    <div className='col-lg-6'>
+                        <input
+                            type='text'
+                            list='available-deparments'
+                            name='department'
+                            value={secondaryDepartmentAndRole.department}
+                            onChange={(e) => onChangeDepartmentAndRole(e, index)}
+                            className='form-control'
+                            id={`secondaryDepartmentAndRole.department${index}`}
+                            placeholder={t('Enter Secondary Department')}
+                            required
+                        />
                     </div>
-
-                ))
-            }
+                    <div className='col-lg-5'>
+                        <select
+                            className='form-control'
+                            name='role'
+                            defaultValue={secondaryDepartmentAndRole.role}
+                            required
+                            onChange={(e) => onChangeDepartmentAndRole(e, index)}
+                        >
+                            <option value=''>{t('Select secondary department role')}</option>
+                            {Object.entries(UserGroupType).map(([key, value]) => (
+                                <option
+                                    key={key}
+                                    value={key}
+                                >
+                                    {t(value as never)}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className='col-sm-1 cursor-pointer pt-2 px-4'>
+                        <FaTrashAlt
+                            size={21}
+                            className='icon action'
+                            onClick={() => onDeleteRow(index)}
+                        />
+                    </div>
+                </div>
+            ))}
             <datalist id='available-deparments'>
-                {
-                    Object.values(availableDepartments)
-                        .map((department) => <option key={department} value={department} />)
-                }
+                {Object.values(availableDepartments).map((department) => (
+                    <option
+                        key={department}
+                        value={department}
+                    />
+                ))}
             </datalist>
-            <button className='btn btn-secondary col-auto row mb-2 pb-2 px-2' type='button' onClick={() => setSecondaryDepartmentsAndRoles([...secondaryDepartmentsAndRoles, { department: '', role: '' }])}>
+            <button
+                className='btn btn-secondary col-auto row mb-2 pb-2 px-2'
+                type='button'
+                onClick={() =>
+                    setSecondaryDepartmentsAndRoles([...secondaryDepartmentsAndRoles, { department: '', role: '' }])
+                }
+            >
                 {t('Click to add Secondary Department and Roles')}
             </button>
         </>

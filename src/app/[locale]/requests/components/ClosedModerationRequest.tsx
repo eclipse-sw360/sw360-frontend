@@ -9,14 +9,14 @@
 
 'use client'
 
+import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, getSession, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { useEffect, useState, ReactNode } from 'react'
-import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { notFound } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 
@@ -30,7 +30,7 @@ function ClosedModerationRequest(): ReactNode {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<(string | object | string[])[][]>([])
-    const moderationRequestStatus : ModerationRequestMap = {
+    const moderationRequestStatus: ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
         PENDING: t('Pending'),
@@ -79,8 +79,7 @@ function ClosedModerationRequest(): ReactNode {
                         item.requestingUser ?? '',
                         item.requestingUserDepartment ?? '',
                         item.moderators ?? [],
-                        item.moderationState !== undefined ?
-                            moderationRequestStatus[item.moderationState]: '',
+                        item.moderationState !== undefined ? moderationRequestStatus[item.moderationState] : '',
                         '',
                     ]),
                 )
@@ -103,7 +102,8 @@ function ClosedModerationRequest(): ReactNode {
         {
             id: 'closedModerationRequest.documentName',
             name: t('Document Name'),
-            formatter: ({ id, documentName }: { id: string, documentName: string }) => _(<Link href={'moderationrequest/' + id}>{documentName}</Link>),
+            formatter: ({ id, documentName }: { id: string; documentName: string }) =>
+                _(<Link href={'moderationrequest/' + id}>{documentName}</Link>),
             sort: true,
         },
         {

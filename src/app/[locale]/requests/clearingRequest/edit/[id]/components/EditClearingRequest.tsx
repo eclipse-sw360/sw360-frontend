@@ -13,16 +13,16 @@ import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { ClearingRequestDetails, HttpStatus, UpdateClearingRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
+import Link from 'next/link'
 import { notFound, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useRef, useState } from 'react'
-import { signOut, getSession, useSession } from 'next-auth/react'
-import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
-import EditClearingRequestInfo from './EditClearingRequestInfo'
-import EditClearingDecision from './EditClearingDecision'
+import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ClearingComments from './../../../detail/[id]/components/ClearingComments'
-import Link from 'next/link'
+import EditClearingDecision from './EditClearingDecision'
+import EditClearingRequestInfo from './EditClearingRequestInfo'
 
 function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string }): ReactNode {
     const t = useTranslations('default')
@@ -30,32 +30,30 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     const router = useRouter()
     const toastShownRef = useRef(false)
     const { status } = useSession()
-    const [clearingRequestData,
-           setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
-            id: '',
-            requestedClearingDate: '',
-            projectId: '',
-            projectName: '',
-            requestingUser: '',
-            projectBU: '',
-            requestingUserComment: '',
-            clearingTeam: '',
-            agreedClearingDate: '',
-            priority: '',
-            clearingType: '',
-            reOpenedOn: undefined,
-            createdOn: '',
-            comments: [{}]
-        })
-    const [updateClearingRequestPayload, 
-           setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
-            requestedClearingDate: '',
-            clearingType: '',
-            clearingState: '',
-            priority: '',
-            clearingTeam: '',
-            agreedClearingDate: '',
-            requestingUser: ''
+    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
+        id: '',
+        requestedClearingDate: '',
+        projectId: '',
+        projectName: '',
+        requestingUser: '',
+        projectBU: '',
+        requestingUserComment: '',
+        clearingTeam: '',
+        agreedClearingDate: '',
+        priority: '',
+        clearingType: '',
+        reOpenedOn: undefined,
+        createdOn: '',
+        comments: [{}],
+    })
+    const [updateClearingRequestPayload, setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
+        requestedClearingDate: '',
+        clearingType: '',
+        clearingState: '',
+        priority: '',
+        clearingTeam: '',
+        agreedClearingDate: '',
+        requestingUser: '',
     })
 
     const fetchData = async (url: string) => {
@@ -185,15 +183,14 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                     <ShowInfoOnHover text={''} />{' '}
                                                     <>
                                                         {t('Clearing Request Information For Project') + ` `}
-                                                        {
-                                                            clearingRequestData?._embedded !== undefined &&
+                                                        {clearingRequestData?._embedded !== undefined && (
                                                             <Link
                                                                 href={`/projects/detail/${clearingRequestData.projectId}`}
                                                                 className='text-link'
                                                             >
                                                                 {`${clearingRequestData._embedded['sw360:project']?.name ?? ''}(${clearingRequestData._embedded['sw360:project']?.version ?? ''})`}
                                                             </Link>
-                                                        }
+                                                        )}
                                                     </>
                                                 </div>
                                             </Button>

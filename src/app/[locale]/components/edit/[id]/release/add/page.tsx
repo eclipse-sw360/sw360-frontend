@@ -16,7 +16,7 @@ interface Context {
 }
 
 const ReleaseAddPage = async (props: Context): Promise<ReactNode> => {
-    const params = await props.params;
+    const params = await props.params
     const componentId = params.id
 
     return <AddRelease componentId={componentId} />

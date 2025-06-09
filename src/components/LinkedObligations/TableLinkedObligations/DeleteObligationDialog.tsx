@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { useTranslations } from 'next-intl'
 
 import { Button, Form, Modal } from 'react-bootstrap'
@@ -17,7 +17,7 @@ import { Obligation } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { BsQuestionCircle } from 'react-icons/bs'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     data: Array<(string | Obligation)[]>
@@ -35,7 +35,7 @@ const DeleteObligationDialog = ({
     setObligationIdToLicensePayLoad,
     show,
     setShow,
-}: Props) : JSX.Element => {
+}: Props): JSX.Element => {
     const t = useTranslations('default')
 
     const handleSubmit = () => {
@@ -59,9 +59,14 @@ const DeleteObligationDialog = ({
 
     return (
         <>
-        {
-            (obligation !== undefined) && (
-                <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+            {obligation !== undefined && (
+                <Modal
+                    show={show}
+                    onHide={handleCloseDialog}
+                    backdrop='static'
+                    centered
+                    size='lg'
+                >
                     <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414', fontWeight: '700' }}>
                         <h5>
                             <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
@@ -95,16 +100,23 @@ const DeleteObligationDialog = ({
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
-                        <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                        <Button
+                            className='delete-btn'
+                            variant='light'
+                            onClick={handleCloseDialog}
+                        >
                             {t('Cancel')}
                         </Button>
-                        <Button className='login-btn' variant='danger' onClick={() => handleSubmit()}>
+                        <Button
+                            className='login-btn'
+                            variant='danger'
+                            onClick={() => handleSubmit()}
+                        >
                             {t('Delete Obligation')}
                         </Button>
                     </Modal.Footer>
                 </Modal>
-            )
-        }
+            )}
         </>
     )
 }

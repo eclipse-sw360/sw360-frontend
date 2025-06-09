@@ -39,7 +39,13 @@ const SelectTableVendor = ({ vendors, setVendor }: Props) => {
             id: 'vendorId',
             name: '',
             formatter: (item: Vendor) =>
-                _(<Form.Check type='radio' name='VendorId' onChange={() => handlerRadioButton(item)}></Form.Check>),
+                _(
+                    <Form.Check
+                        type='radio'
+                        name='VendorId'
+                        onChange={() => handlerRadioButton(item)}
+                    ></Form.Check>,
+                ),
         },
         {
             id: 'fullName',
@@ -61,7 +67,12 @@ const SelectTableVendor = ({ vendors, setVendor }: Props) => {
     return (
         <>
             <div className='row'>
-                <Table data={vendors} columns={columns} sort={true} selector={true} />
+                <Table
+                    data={vendors}
+                    columns={columns}
+                    sort={true}
+                    selector={true}
+                />
             </div>
         </>
     )

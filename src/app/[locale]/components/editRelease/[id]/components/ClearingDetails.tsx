@@ -19,7 +19,7 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNode => {
+const ClearingDetails = ({ releasePayload, setReleasePayload }: Props): ReactNode => {
     const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +44,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{ padding: '0px 12px' }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
                         <span className='fw-bold'>{t('Clearing Details')}</span>
@@ -60,7 +63,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.binariesOriginalFromCommunity ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='binaries_original_from_community'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='binaries_original_from_community'
+                                >
                                     {t('Binaries Original from Community')}
                                 </label>
                             </div>
@@ -75,7 +81,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.binariesSelfMade ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='binaries_self_made'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='binaries_self_made'
+                                >
                                     {t('Binaries Self-Made')}
                                 </label>
                             </div>
@@ -90,7 +99,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.componentLicenseInformation ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='component_license_information'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='component_license_information'
+                                >
                                     {t('Component License Information')}
                                 </label>
                             </div>
@@ -107,7 +119,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.sourceCodeDelivery ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='source_code_delivery'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='source_code_delivery'
+                                >
                                     {t('Source Code Delivery')}
                                 </label>
                             </div>
@@ -124,7 +139,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     }
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='source_code_community'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='source_code_community'
+                                >
                                     {t('Source Code Original from Community')}
                                 </label>
                             </div>
@@ -139,7 +157,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.sourceCodeToolMade ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='source_code_tool_made'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='source_code_tool_made'
+                                >
                                     {t('Source Code Tool-Made')}
                                 </label>
                             </div>
@@ -156,7 +177,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.sourceCodeSelfMade ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='source_code_self_made'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='source_code_self_made'
+                                >
                                     {t('Source Code Self-Made')}
                                 </label>
                             </div>
@@ -171,7 +195,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.screenshotOfWebSite ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='screenshot_website'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='screenshot_website'
+                                >
                                     {t('Screenshot of Website')}
                                 </label>
                             </div>
@@ -186,7 +213,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.finalizedLicenseScanReport ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='finalized_license_scan_report'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='finalized_license_scan_report'
+                                >
                                     {t('Finalized License Scan Report')}
                                 </label>
                             </div>
@@ -203,7 +233,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.licenseScanReportResult ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='license_scan_report_result'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='license_scan_report_result'
+                                >
                                     {t('License Scan Report Result')}
                                 </label>
                             </div>
@@ -218,7 +251,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.legalEvaluation ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='legal_evaluation'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='legal_evaluation'
+                                >
                                     {t('Legal Evaluation')}
                                 </label>
                             </div>
@@ -233,7 +269,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.licenseAgreement ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='license_agreement'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='license_agreement'
+                                >
                                     {t('License Agreement')}
                                 </label>
                             </div>
@@ -241,7 +280,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='scanned' className='form-label fw-bold'>
+                            <label
+                                htmlFor='scanned'
+                                className='form-label fw-bold'
+                            >
                                 {t('Scanned')}
                             </label>
                             <input
@@ -265,13 +307,19 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                                     checked={releasePayload.clearingInformation?.componentClearingReport ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='component_clearing_report'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='component_clearing_report'
+                                >
                                     {t('Component Clearing Report')}
                                 </label>
                             </div>
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='clearing_standard' className='form-label fw-bold'>
+                            <label
+                                htmlFor='clearing_standard'
+                                className='form-label fw-bold'
+                            >
                                 {t('Clearing Standard')}
                             </label>
                             <input
@@ -288,7 +336,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='external_url' className='form-label fw-bold'>
+                            <label
+                                htmlFor='external_url'
+                                className='form-label fw-bold'
+                            >
                                 {t('External URL')}
                             </label>
                             <input
@@ -303,7 +354,10 @@ const ClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNo
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='comment' className='form-label fw-bold'>
+                            <label
+                                htmlFor='comment'
+                                className='form-label fw-bold'
+                            >
                                 {t('Comment')}
                             </label>
                             <input

@@ -32,7 +32,7 @@ function SnippetCopyrightText({
     snippetCopyrightTextNoasserttion,
     setSnippetCopyrightTextNoasserttion,
     updateField,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectSnippetCopyrightTextExist = () => {
         setSnippetCopyrightTextExist(true)
         setSnippetCopyrightTextNone(false)

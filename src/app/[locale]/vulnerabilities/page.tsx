@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: 'Vulnerabilites',
 }
 
-function Vulnerability() : ReactNode {
+function Vulnerability(): ReactNode {
     return <Vulnerabilities />
 }
 

@@ -16,10 +16,9 @@ import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState, type JSX } from "react"
+import { useState, type JSX } from 'react'
 import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
-
 
 interface Props {
     projectId: string
@@ -32,35 +31,38 @@ interface AddLicenseInfoToReleaseData {
     NOT_UPDATED: string[]
     UPDATED: string[]
     _embedded: {
-        'sw360:releases': [{
-            id: string
-            name: string
-            version: string
-        }]
+        'sw360:releases': [
+            {
+                id: string
+                name: string
+                version: string
+            },
+        ]
     }
 }
 
-function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX.Element {
+function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const [isLoading, setIsLoading] = useState(false)
-    const [addLicenseInfoToReleaseData, setAddLicenseInfoToReleaseData] = useState<AddLicenseInfoToReleaseData | null>(null)
+    const [addLicenseInfoToReleaseData, setAddLicenseInfoToReleaseData] = useState<AddLicenseInfoToReleaseData | null>(
+        null,
+    )
 
-    const handleSubmit = async (projectId : string) => {
+    const handleSubmit = async (projectId: string) => {
         setIsLoading(true)
         try {
             const session = await getSession()
-            if(CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const createUrl = `projects/${projectId}/addLinkedReleasesLicenses`
             const response = await ApiUtils.POST(createUrl, {}, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json() as AddLicenseInfoToReleaseData
+                const data = (await response.json()) as AddLicenseInfoToReleaseData
                 setAddLicenseInfoToReleaseData(data)
             } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                 MessageService.error(t('Error occurred while processing license information for linked releases'))
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") {
+            if (error instanceof DOMException && error.name === 'AbortError') {
                 return
             }
             const message = error instanceof Error ? error.message : String(error)
@@ -76,8 +78,17 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton style={{ color: '#2e5aac' }}>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{ color: '#2e5aac' }}
+            >
                 <Modal.Title>
                     <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
                     {t('Add License Info to Release')} ?
@@ -89,96 +100,100 @@ function AddLicenseInfoToReleaseModal ({ projectId, show, setShow }: Props): JSX
                         <Spinner className='spinner' />
                     </div>
                 ) : (
-                <>
-                    <p>
-                        {t(`Do you really want to add license info to all the directly linked release`)}
-                    </p>
-                    {addLicenseInfoToReleaseData && (
-                        <>
-                            { addLicenseInfoToReleaseData.UPDATED.length === 0 ? (
-                                <Alert
-                                    variant='info'
-                                    id='addLicenseInfoToReleaseData.info.alert'
-                                >
-                                    {t('Changes made to the releases')}:{' '}
-                                    {addLicenseInfoToReleaseData.UPDATED.length}
-                                </Alert>
-                            ) : (
-                                <Alert
-                                    variant='success'
-                                    id='addLicenseInfoToReleaseData.success.alert'
-                                >
-                                    {t('Success Please reload the page to see the changes')}:{' '}
-                                    {addLicenseInfoToReleaseData.UPDATED.length}
-                                </Alert>
-                                )
-                            }
-                            {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length > 0 && (
-                                <Alert variant='warning'
-                                    id='addLicenseInfoToReleaseData-multiple-attachments-alert'
-                                >
-                                    {t('Multiple CLI are found in release')}:{' '}
-                                    {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length}
-                                    <ul className="mapDisplayRootItem">
-                                        {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.map(
-                                            (attachmentId) => {
-                                                const releaseInfo = addLicenseInfoToReleaseData.
-                                                                    _embedded['sw360:releases'].find(
-                                                (release) => release.id === attachmentId)
-                                        return releaseInfo ? (
-                                                <li key={releaseInfo.id} className="ms-3">
-                                                    <Link href={'/components/releases/detail/' +
-                                                                releaseInfo.id} className='link'>
-                                                        <span className='text-link'>
-                                                            {`${releaseInfo.name}(${releaseInfo.version})`}
-                                                        </span>
-                                                    </Link>
-                                                </li>
-                                            ) : null
-                                        })}
-                                    </ul>
-                                </Alert>
-                                )
-                            }
-                            {addLicenseInfoToReleaseData.NOT_UPDATED.length > 0 && (
-                                <Alert variant='warning'
-                                    id='addLicenseInfoToReleaseData-not-updated-alert'
-                                >
-                                    {t('Releases not updated')}:{' '}
-                                    {addLicenseInfoToReleaseData.NOT_UPDATED.length}
-                                    <ul className="mapDisplayRootItem">
-                                        {addLicenseInfoToReleaseData.NOT_UPDATED.map(
-                                            (attachmentId) => {
-                                                const releaseInfo = addLicenseInfoToReleaseData.
-                                                                    _embedded['sw360:releases'].find(
-                                                (release) => release.id === attachmentId)
-                                        return releaseInfo ? (
-                                                <li key={releaseInfo.id} className="ms-3">
-                                                    <Link href={'/components/releases/detail/' +
-                                                                releaseInfo.id} className='link'>
-                                                        <span className='text-link'>
-                                                            {`${releaseInfo.name}(${releaseInfo.version})`}
-                                                        </span>
-                                                    </Link>
-                                                </li>
-                                            ) : null
-                                        })}
-                                    </ul>
-                                </Alert>
-                                )
-                            }
-                        </>
-                    )}
-                </>
+                    <>
+                        <p>{t(`Do you really want to add license info to all the directly linked release`)}</p>
+                        {addLicenseInfoToReleaseData && (
+                            <>
+                                {addLicenseInfoToReleaseData.UPDATED.length === 0 ? (
+                                    <Alert
+                                        variant='info'
+                                        id='addLicenseInfoToReleaseData.info.alert'
+                                    >
+                                        {t('Changes made to the releases')}:{' '}
+                                        {addLicenseInfoToReleaseData.UPDATED.length}
+                                    </Alert>
+                                ) : (
+                                    <Alert
+                                        variant='success'
+                                        id='addLicenseInfoToReleaseData.success.alert'
+                                    >
+                                        {t('Success Please reload the page to see the changes')}:{' '}
+                                        {addLicenseInfoToReleaseData.UPDATED.length}
+                                    </Alert>
+                                )}
+                                {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length > 0 && (
+                                    <Alert
+                                        variant='warning'
+                                        id='addLicenseInfoToReleaseData-multiple-attachments-alert'
+                                    >
+                                        {t('Multiple CLI are found in release')}:{' '}
+                                        {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.length}
+                                        <ul className='mapDisplayRootItem'>
+                                            {addLicenseInfoToReleaseData.MULTIPLE_ATTACHMENTS.map((attachmentId) => {
+                                                const releaseInfo = addLicenseInfoToReleaseData._embedded[
+                                                    'sw360:releases'
+                                                ].find((release) => release.id === attachmentId)
+                                                return releaseInfo ? (
+                                                    <li
+                                                        key={releaseInfo.id}
+                                                        className='ms-3'
+                                                    >
+                                                        <Link
+                                                            href={'/components/releases/detail/' + releaseInfo.id}
+                                                            className='link'
+                                                        >
+                                                            <span className='text-link'>
+                                                                {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                            </span>
+                                                        </Link>
+                                                    </li>
+                                                ) : null
+                                            })}
+                                        </ul>
+                                    </Alert>
+                                )}
+                                {addLicenseInfoToReleaseData.NOT_UPDATED.length > 0 && (
+                                    <Alert
+                                        variant='warning'
+                                        id='addLicenseInfoToReleaseData-not-updated-alert'
+                                    >
+                                        {t('Releases not updated')}: {addLicenseInfoToReleaseData.NOT_UPDATED.length}
+                                        <ul className='mapDisplayRootItem'>
+                                            {addLicenseInfoToReleaseData.NOT_UPDATED.map((attachmentId) => {
+                                                const releaseInfo = addLicenseInfoToReleaseData._embedded[
+                                                    'sw360:releases'
+                                                ].find((release) => release.id === attachmentId)
+                                                return releaseInfo ? (
+                                                    <li
+                                                        key={releaseInfo.id}
+                                                        className='ms-3'
+                                                    >
+                                                        <Link
+                                                            href={'/components/releases/detail/' + releaseInfo.id}
+                                                            className='link'
+                                                        >
+                                                            <span className='text-link'>
+                                                                {`${releaseInfo.name}(${releaseInfo.version})`}
+                                                            </span>
+                                                        </Link>
+                                                    </li>
+                                                ) : null
+                                            })}
+                                        </ul>
+                                    </Alert>
+                                )}
+                            </>
+                        )}
+                    </>
                 )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
-                    {
-                        addLicenseInfoToReleaseData === null
-                            ? <>{' '} {t('Cancel')} {' '}</>
-                            : <>{' '} {t('Close')} {' '}</>
-                    }
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
+                    {addLicenseInfoToReleaseData === null ? <> {t('Cancel')} </> : <> {t('Close')} </>}
                 </Button>
                 <Button
                     className='login-btn'

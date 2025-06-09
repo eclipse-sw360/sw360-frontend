@@ -10,25 +10,25 @@
 
 import { useTranslations } from 'next-intl'
 import { ReactNode, useState } from 'react'
+import { ObligationElement, ObligationTreeProps, TreeNode } from '../../../../../object-types/Obligation'
 import ImportElementDialog from './ImportElementDialog'
-import { TreeNode, ObligationTreeProps, ObligationElement } from '../../../../../object-types/Obligation'
 
-export function ObligationTree({ 
-    tree, 
-    title, 
-    onUpdateNode, 
-    onAddChild, 
-    onAddSibling, 
+export function ObligationTree({
+    tree,
+    title,
+    onUpdateNode,
+    onAddChild,
+    onAddSibling,
     onDeleteNode,
-    onUpdateNodeElement
-}: ObligationTreeProps) : ReactNode {
+    onUpdateNodeElement,
+}: ObligationTreeProps): ReactNode {
     const t = useTranslations('default')
     const [showImportElement, setShowImportElement] = useState(false)
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
 
-    const handleImportElement = (element: ObligationElement, nodeId: string) => {       
+    const handleImportElement = (element: ObligationElement, nodeId: string) => {
         onUpdateNodeElement(nodeId, element)
-        setShowImportElement(false);
+        setShowImportElement(false)
     }
 
     const renderTree = (nodes: TreeNode[], parentId?: string, level = 1) => {
@@ -205,46 +205,49 @@ export function ObligationTree({
 
     return (
         <>
-        <ImportElementDialog 
-            show={showImportElement} 
-            setShow={setShowImportElement}
-            onImport={(element) => {
-                if (selectedNodeId != null) {
-                    handleImportElement(element, selectedNodeId)
-                }
-            }}
-        />
-        <div className='col-12'>
-            <label className='form-label' style={{ fontWeight: 'bold' }}>
-                {t('Text')}
-            </label>
-            <div className='row mb-2 align-items-center'>
-                <div className='col-md-4'>
-                    <input
-                        type='text'
-                        className='form-control'
-                        id='textTitle'
-                        placeholder={t('Title')}
-                        disabled
-                        value={title}
-                    />
+            <ImportElementDialog
+                show={showImportElement}
+                setShow={setShowImportElement}
+                onImport={(element) => {
+                    if (selectedNodeId != null) {
+                        handleImportElement(element, selectedNodeId)
+                    }
+                }}
+            />
+            <div className='col-12'>
+                <label
+                    className='form-label'
+                    style={{ fontWeight: 'bold' }}
+                >
+                    {t('Text')}
+                </label>
+                <div className='row mb-2 align-items-center'>
+                    <div className='col-md-4'>
+                        <input
+                            type='text'
+                            className='form-control'
+                            id='textTitle'
+                            placeholder={t('Title')}
+                            disabled
+                            value={title}
+                        />
+                    </div>
+                    <div className='col-md-2'>
+                        <span>» </span>
+                        <a
+                            href='#'
+                            onClick={(e) => {
+                                e.preventDefault()
+                                onAddChild()
+                            }}
+                            style={{ color: 'blue', textDecoration: 'none' }}
+                        >
+                            +Child
+                        </a>
+                    </div>
                 </div>
-                <div className='col-md-2'>
-                    <span>» </span>
-                    <a
-                        href='#'
-                        onClick={(e) => {
-                            e.preventDefault()
-                            onAddChild()
-                        }}
-                        style={{ color: 'blue', textDecoration: 'none' }}
-                    >
-                        +Child
-                    </a>
-                </div>
+                {tree.length > 0 && renderTree(tree)}
             </div>
-            {tree.length > 0 && renderTree(tree)}
-        </div>
         </>
     )
 }

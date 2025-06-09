@@ -65,7 +65,7 @@ export default interface ReleaseDetail {
                 href: string
                 name: string
                 templated: boolean
-            }
+            },
         ]
     }
     _embedded: {

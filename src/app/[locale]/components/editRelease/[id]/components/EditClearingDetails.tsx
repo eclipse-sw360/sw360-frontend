@@ -9,25 +9,37 @@
 // License-Filename: LICENSE
 
 import { Release } from '@/object-types'
+import { ReactNode } from 'react'
 import ClearingDetails from './ClearingDetails'
 import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'
-import { ReactNode } from 'react'
 
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props) : ReactNode => {
+const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props): ReactNode => {
     return (
         <>
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
-                <ClearingDetails releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+            <div
+                className='container'
+                style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}
+            >
+                <ClearingDetails
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
+                />
 
-                <RequestInformation releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                <RequestInformation
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
+                />
 
-                <SupplementalInformation releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                <SupplementalInformation
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
+                />
             </div>
         </>
     )

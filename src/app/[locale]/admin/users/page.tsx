@@ -10,14 +10,14 @@
 import { Metadata } from 'next'
 import UserAdministration from './components/UserAdministration'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 export const metadata: Metadata = {
     title: 'Admin',
 }
 
 function LicenseAdministrationPage(): JSX.Element {
-    return <UserAdministration/>
+    return <UserAdministration />
 }
 
 export default LicenseAdministrationPage

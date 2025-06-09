@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useCallback, useState, type JSX } from 'react';
+import { Dispatch, SetStateAction, useCallback, useState, type JSX } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
 import { ProjectPayload, Vendor } from '@/object-types'
@@ -23,7 +23,12 @@ interface Param {
     setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
 
-export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param): JSX.Element {
+export default function GeneralInformation({
+    vendor,
+    setVendor,
+    projectPayload,
+    setProjectPayload,
+}: Param): JSX.Element {
     const t = useTranslations('default')
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
     const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
@@ -64,7 +69,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                 <h6 className='header pb-2 px-2'>{t('General Information')}</h6>
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.name' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.name'
+                            className='form-label fw-medium'
+                        >
                             {t('Name')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <input
@@ -79,7 +87,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.version' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.version'
+                            className='form-label fw-medium'
+                        >
                             {t('Version')}
                         </label>
                         <input
@@ -93,7 +104,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.visibility' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.visibility'
+                            className='form-label fw-medium'
+                        >
                             {t('Visibility')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <select
@@ -110,7 +124,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             <option value='BUISNESSUNIT_AND_MODERATORS'>{t('Group and Moderators')}</option>
                             <option value='EVERYONE'>{t('Everyone')}</option>
                         </select>
-                        <div className='form-text' id='addProjects.visibility.HelpBlock'>
+                        <div
+                            className='form-text'
+                            id='addProjects.visibility.HelpBlock'
+                        >
                             <ShowInfoOnHover text={t('VISIBILITY_INFO')} />
                             {t('Learn more about project visibilities')}.
                         </div>
@@ -119,7 +136,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                 <hr className='my-2' />
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.createdBy' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.createdBy'
+                            className='form-label fw-medium'
+                        >
                             {t('Created by')}
                         </label>
                         <input
@@ -132,7 +152,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.projectType' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.projectType'
+                            className='form-label fw-medium'
+                        >
                             {t('Project Type')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <select
@@ -151,12 +174,18 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             <option value='INNER_SOURCE'>{t('Inner Source')}</option>
                             <option value='CLOUD_BACKEND'>{t('Cloud Backend')}</option>
                         </select>
-                        <div className='form-text' id='addProjects.projectType.HelpBlock'>
+                        <div
+                            className='form-text'
+                            id='addProjects.projectType.HelpBlock'
+                        >
                             <ShowInfoOnHover text={t('PROJECT_TYPE_INFO')} /> {t('Learn more about project types')}.
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.tag' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.tag'
+                            className='form-label fw-medium'
+                        >
                             {t('Tag')}
                         </label>
                         <input
@@ -173,7 +202,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                 <hr className='my-2' />
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.description' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.description'
+                            className='form-label fw-medium'
+                        >
                             {t('Description')}
                         </label>
                         <textarea
@@ -187,7 +219,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         ></textarea>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.domain' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.domain'
+                            className='form-label fw-medium'
+                        >
                             {t('Domain')}
                         </label>
                         <select
@@ -207,7 +242,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         </select>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.vendor' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.vendor'
+                            className='form-label fw-medium'
+                        >
                             {t('Vendor')}
                         </label>
                         <input
@@ -233,18 +271,25 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                 <hr className='my-2' />
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.modifiedOn' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.modifiedOn'
+                            className='form-label fw-medium'
+                        >
                             {t('Modified On')}
                         </label>
-                        <input type='date'
-                               className='form-control'
-                               id='addProjects.modifiedOn'
-                               readOnly={true}
-                               value={projectPayload.modifiedOn ?? ''}
+                        <input
+                            type='date'
+                            className='form-control'
+                            id='addProjects.modifiedOn'
+                            readOnly={true}
+                            value={projectPayload.modifiedOn ?? ''}
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.modifiedBy' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.modifiedBy'
+                            className='form-label fw-medium'
+                        >
                             {t('Modified By')}
                         </label>
                         <input
@@ -288,7 +333,10 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             value=''
                             id='addProjects.useExternalIdList'
                         />
-                        <label className='form-check-label fw-medium ms-2' htmlFor='addProjects.useExternalIdList'>
+                        <label
+                            className='form-check-label fw-medium ms-2'
+                            htmlFor='addProjects.useExternalIdList'
+                        >
                             {t('Do not create monitoring list, but use list from external id')}
                         </label>
                     </div>

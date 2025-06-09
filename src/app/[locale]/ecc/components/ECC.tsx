@@ -9,7 +9,7 @@
 
 'use client'
 
-import type { Embedded, ECC } from '@/object-types'
+import type { ECC, Embedded } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
@@ -23,7 +23,7 @@ type EmbeddedECC = Embedded<ECC, 'sw360:releases'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function ECC() : ReactNode {
+export default function ECC(): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -37,11 +37,7 @@ export default function ECC() : ReactNode {
             id: 'ecc.releaseName',
             name: t('Release name'),
             formatter: ({ name, version }: { id: string; name: string; version: string }) =>
-            _(
-                <div>
-                        {`${name} (${version})`}
-                </div>
-            ),
+                _(<div>{`${name} (${version})`}</div>),
             sort: true,
         },
         {
@@ -89,7 +85,7 @@ export default function ECC() : ReactNode {
                     elem.eccInformation.eccn,
                 ])
             },
-            total: (data: EmbeddedECC) => data.page ? data.page.totalElements : 0,
+            total: (data: EmbeddedECC) => (data.page ? data.page.totalElements : 0),
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
@@ -103,12 +99,15 @@ export default function ECC() : ReactNode {
                     </div>
                 </div>
                 <div className='col-lg-10'>
-                    <div className='buttonheader-title ms-1'>
-                        {t('ECC Overview')}
-                    </div>
+                    <div className='buttonheader-title ms-1'>{t('ECC Overview')}</div>
                     <div className='row mt-3'>
                         {status === 'authenticated' ? (
-                            <Table columns={columns} server={initServerPaginationConfig(session)} selector={true} sort={false} />
+                            <Table
+                                columns={columns}
+                                server={initServerPaginationConfig(session)}
+                                selector={true}
+                                sort={false}
+                            />
                         ) : (
                             <div className='col-12 d-flex justify-content-center align-items-center'>
                                 <Spinner className='spinner' />

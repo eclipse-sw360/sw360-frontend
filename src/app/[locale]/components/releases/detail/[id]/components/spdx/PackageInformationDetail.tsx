@@ -20,13 +20,20 @@ interface Props {
     isModeFull: boolean
 }
 
-const PackageInformationDetail = ({ packageInformation, externalRefsData, setExternalRefsData, isModeFull }: Props) : ReactNode => {
+const PackageInformationDetail = ({
+    packageInformation,
+    externalRefsData,
+    setExternalRefsData,
+    isModeFull,
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (!packageInformation) return
         const index: string = e.target.value
-        setExternalRefsData(packageInformation.externalRefs ? packageInformation.externalRefs[parseInt(index)] : undefined)
+        setExternalRefsData(
+            packageInformation.externalRefs ? packageInformation.externalRefs[parseInt(index)] : undefined,
+        )
     }
 
     return (
@@ -60,28 +67,43 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                 </tr>
                 {isModeFull && (
                     <>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.5 Package supplier</td>
                             <td>{packageInformation?.supplier}</td>
                         </tr>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.6 Package originator</td>
                             <td>{packageInformation?.originator}</td>
                         </tr>
                     </>
                 )}
 
-                <tr className='spdx-full' data-index={packageInformation?.index}>
+                <tr
+                    className='spdx-full'
+                    data-index={packageInformation?.index}
+                >
                     <td>7.7 Package download location</td>
                     <td>{packageInformation?.downloadLocation}</td>
                 </tr>
-                <tr className='spdx-full' data-index={packageInformation?.index}>
+                <tr
+                    className='spdx-full'
+                    data-index={packageInformation?.index}
+                >
                     <td>7.8 Files analyzed</td>
                     <td className='spdx-col-3 spdx-uppercase'>{packageInformation?.filesAnalyzed?.toString()}</td>
                 </tr>
                 {isModeFull && (
                     <>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.9 Package verification code</td>
                             <td>
                                 <div className='spdx-col-2 spdx-flex-col'>
@@ -93,8 +115,11 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                     </div>
                                     <div className='spdx-flex-row'>
                                         <div className='spdx-col-1 spdx-key'>Excluded files</div>
-                                        <p className='spdx-col-3 ' id='excludedFiles'>
-                                            {(packageInformation?.packageVerificationCode?.excludedFiles !== undefined) &&
+                                        <p
+                                            className='spdx-col-3 '
+                                            id='excludedFiles'
+                                        >
+                                            {packageInformation?.packageVerificationCode?.excludedFiles !== undefined &&
                                                 packageInformation.packageVerificationCode.excludedFiles
                                                     .sort()
                                                     .filter((data) => !CommonUtils.isNullEmptyOrUndefinedString(data))
@@ -105,14 +130,16 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                                                 <br></br>
                                                             </>
                                                         )
-                                                    })
-                                            }
+                                                    })}
                                         </p>
                                     </div>
                                 </div>
                             </td>
                         </tr>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.10 Package checksum</td>
                             <td>
                                 {packageInformation?.checksums?.map((item) => {
@@ -132,45 +159,26 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                     </>
                 )}
 
-                <tr data-index={packageInformation?.index} className='spdx-full'>
+                <tr
+                    data-index={packageInformation?.index}
+                    className='spdx-full'
+                >
                     <td>7.11 Package home page</td>
                     <td>{packageInformation?.homepage}</td>
                 </tr>
 
                 {isModeFull && (
-                    <tr className='spdx-full' data-index={packageInformation?.index}>
+                    <tr
+                        className='spdx-full'
+                        data-index={packageInformation?.index}
+                    >
                         <td>7.12 Source information</td>
                         <td>
-                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.sourceInfo))
-                            && packageInformation.sourceInfo
-                                .trim()
-                                .split('\n')
-                                .map((item) => {
-                                    return (
-                                        <>
-                                            {item}
-                                            <br></br>
-                                        </>
-                                    )
-                                })}
-                        </td>
-                    </tr>
-                )}
-
-                <tr data-index={packageInformation?.index} className='spdx-full'>
-                    <td>7.13 Concluded license</td>
-                    <td>{packageInformation?.licenseConcluded}</td>
-                </tr>
-
-                {isModeFull && (
-                    <tr className='spdx-full' data-index={packageInformation?.index}>
-                        <td>7.14 All licenses information from files</td>
-                        <td>
-                            <p className='spdx-col-2 ' id='licenseInfoFromFile'>
-                                {(packageInformation && packageInformation.licenseInfoFromFiles)
-                                && packageInformation.licenseInfoFromFiles
-                                    .sort()
-                                    .filter((license) => !CommonUtils.isNullEmptyOrUndefinedString(license))
+                            {packageInformation &&
+                                !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.sourceInfo) &&
+                                packageInformation.sourceInfo
+                                    .trim()
+                                    .split('\n')
                                     .map((item) => {
                                         return (
                                             <>
@@ -179,91 +187,158 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                             </>
                                         )
                                     })}
+                        </td>
+                    </tr>
+                )}
+
+                <tr
+                    data-index={packageInformation?.index}
+                    className='spdx-full'
+                >
+                    <td>7.13 Concluded license</td>
+                    <td>{packageInformation?.licenseConcluded}</td>
+                </tr>
+
+                {isModeFull && (
+                    <tr
+                        className='spdx-full'
+                        data-index={packageInformation?.index}
+                    >
+                        <td>7.14 All licenses information from files</td>
+                        <td>
+                            <p
+                                className='spdx-col-2 '
+                                id='licenseInfoFromFile'
+                            >
+                                {packageInformation &&
+                                    packageInformation.licenseInfoFromFiles &&
+                                    packageInformation.licenseInfoFromFiles
+                                        .sort()
+                                        .filter((license) => !CommonUtils.isNullEmptyOrUndefinedString(license))
+                                        .map((item) => {
+                                            return (
+                                                <>
+                                                    {item}
+                                                    <br></br>
+                                                </>
+                                            )
+                                        })}
                             </p>
                         </td>
                     </tr>
                 )}
 
-                <tr data-index={packageInformation?.index} className='spdx-full'>
+                <tr
+                    data-index={packageInformation?.index}
+                    className='spdx-full'
+                >
                     <td>7.15 Declared license</td>
                     <td>{packageInformation?.licenseDeclared}</td>
                 </tr>
-                <tr data-index={packageInformation?.index} className='spdx-full'>
+                <tr
+                    data-index={packageInformation?.index}
+                    className='spdx-full'
+                >
                     <td>7.16 Comments on license</td>
                     <td>
-                        <p className='spdx-col-2 ' id='licenseComments'>
-                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseComments))
-                            && packageInformation.licenseComments
-                                .trim()
-                                .split('\n')
-                                .map((item) => {
-                                    return (
-                                        <>
-                                            {item}
-                                            <br></br>
-                                        </>
-                                    )
-                                })}
+                        <p
+                            className='spdx-col-2 '
+                            id='licenseComments'
+                        >
+                            {packageInformation &&
+                                !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.licenseComments) &&
+                                packageInformation.licenseComments
+                                    .trim()
+                                    .split('\n')
+                                    .map((item) => {
+                                        return (
+                                            <>
+                                                {item}
+                                                <br></br>
+                                            </>
+                                        )
+                                    })}
                         </p>
                     </td>
                 </tr>
-                <tr data-index={packageInformation?.index} className='spdx-full'>
+                <tr
+                    data-index={packageInformation?.index}
+                    className='spdx-full'
+                >
                     <td>7.17 Copyright text</td>
                     <td>
-                        <p className='spdx-col-2 ' id='copyrightText'>
-                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.copyrightText))
-                            && packageInformation.copyrightText
-                                .trim()
-                                .split('\n')
-                                .map((item) => {
-                                    return (
-                                        <>
-                                            {item}
-                                            <br></br>
-                                        </>
-                                    )
-                                })}
+                        <p
+                            className='spdx-col-2 '
+                            id='copyrightText'
+                        >
+                            {packageInformation &&
+                                !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.copyrightText) &&
+                                packageInformation.copyrightText
+                                    .trim()
+                                    .split('\n')
+                                    .map((item) => {
+                                        return (
+                                            <>
+                                                {item}
+                                                <br></br>
+                                            </>
+                                        )
+                                    })}
                         </p>
                     </td>
                 </tr>
 
                 {isModeFull && (
                     <>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.18 Package summary description</td>
                             <td>
-                                <p className='spdx-col-2 ' id='summary'>
-                                    {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.summary))
-                                    && packageInformation.summary
-                                        .trim()
-                                        .split('\n')
-                                        .map((item) => {
-                                            return (
-                                                <>
-                                                    {item}
-                                                    <br></br>
-                                                </>
-                                            )
-                                        })}
+                                <p
+                                    className='spdx-col-2 '
+                                    id='summary'
+                                >
+                                    {packageInformation &&
+                                        !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.summary) &&
+                                        packageInformation.summary
+                                            .trim()
+                                            .split('\n')
+                                            .map((item) => {
+                                                return (
+                                                    <>
+                                                        {item}
+                                                        <br></br>
+                                                    </>
+                                                )
+                                            })}
                                 </p>
                             </td>
                         </tr>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.19 Package detailed description</td>
                             <td>
-                                <p className='spdx-col-2 ' id='description'>
-                                    {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.description))
-                                    && packageInformation.description
-                                        .trim()
-                                        .split('\n')
-                                        .map((item) => {
-                                            return (
-                                                <>
-                                                    {item}
-                                                    <br></br>
-                                                </>
-                                            )
-                                        })}
+                                <p
+                                    className='spdx-col-2 '
+                                    id='description'
+                                >
+                                    {packageInformation &&
+                                        !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.description) &&
+                                        packageInformation.description
+                                            .trim()
+                                            .split('\n')
+                                            .map((item) => {
+                                                return (
+                                                    <>
+                                                        {item}
+                                                        <br></br>
+                                                    </>
+                                                )
+                                            })}
                                 </p>
                             </td>
                         </tr>
@@ -273,28 +348,38 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                 <tr data-index={packageInformation?.index}>
                     <td>7.20 Package comment</td>
                     <td>
-                        <p className='spdx-col-2 ' id='packageComment'>
-                            {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.packageComment))
-                            && packageInformation.packageComment
-                                .trim()
-                                .split('\n')
-                                .map((item) => {
-                                    return (
-                                        <>
-                                            {item}
-                                            <br></br>
-                                        </>
-                                    )
-                                })}
+                        <p
+                            className='spdx-col-2 '
+                            id='packageComment'
+                        >
+                            {packageInformation &&
+                                !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.packageComment) &&
+                                packageInformation.packageComment
+                                    .trim()
+                                    .split('\n')
+                                    .map((item) => {
+                                        return (
+                                            <>
+                                                {item}
+                                                <br></br>
+                                            </>
+                                        )
+                                    })}
                         </p>
                     </td>
                 </tr>
                 {isModeFull && (
                     <>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.21 External references </td>
                             <td>
-                                <div className='spdx-col-2 section' data-size='4'>
+                                <div
+                                    className='spdx-col-2 section'
+                                    data-size='4'
+                                >
                                     <div className='spdx-flex-row'>
                                         <div className='spdx-col-1 spdx-label-index'>Index</div>
                                         <select
@@ -303,33 +388,49 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                                             onChange={displayIndex}
                                             disabled={packageInformation?.externalRefs?.length == 0}
                                         >
-                                            {(packageInformation && packageInformation.externalRefs)
-                                            && packageInformation.externalRefs
-                                                .toSorted((e1, e2) => e1.index - e2.index)
-                                                .map((item) => (
-                                                    <option key={item.index} value={item.index}>
-                                                        {item.index + 1}
-                                                    </option>
-                                                ))}
+                                            {packageInformation &&
+                                                packageInformation.externalRefs &&
+                                                packageInformation.externalRefs
+                                                    .toSorted((e1, e2) => e1.index - e2.index)
+                                                    .map((item) => (
+                                                        <option
+                                                            key={item.index}
+                                                            value={item.index}
+                                                        >
+                                                            {item.index + 1}
+                                                        </option>
+                                                    ))}
                                         </select>
                                     </div>
                                     {externalRefsData && (
                                         <>
-                                            <div className='spdx-flex-row' data-index={externalRefsData.index}>
+                                            <div
+                                                className='spdx-flex-row'
+                                                data-index={externalRefsData.index}
+                                            >
                                                 <div className='spdx-col-1 spdx-key'>Category</div>
                                                 <div className='spdx-col-3 spdx-uppercase'>
                                                     {externalRefsData.referenceCategory}
                                                 </div>
                                             </div>
-                                            <div className='spdx-flex-row' data-index={externalRefsData.index}>
+                                            <div
+                                                className='spdx-flex-row'
+                                                data-index={externalRefsData.index}
+                                            >
                                                 <div className='spdx-col-1 spdx-key'>Type</div>
                                                 <div className='spdx-col-3'>{externalRefsData.referenceType}</div>
                                             </div>
-                                            <div className='spdx-flex-row' data-index={externalRefsData.index}>
+                                            <div
+                                                className='spdx-flex-row'
+                                                data-index={externalRefsData.index}
+                                            >
                                                 <div className='spdx-col-1 spdx-key'>Locator</div>
                                                 <div className='spdx-col-3'>{externalRefsData.referenceLocator}</div>
                                             </div>
-                                            <div className='spdx-flex-row' data-index={externalRefsData.index}>
+                                            <div
+                                                className='spdx-flex-row'
+                                                data-index={externalRefsData.index}
+                                            >
                                                 <div className='spdx-col-1 spdx-key'>7.22 Comment</div>
                                                 <p
                                                     className='spdx-col-3'
@@ -354,63 +455,97 @@ const PackageInformationDetail = ({ packageInformation, externalRefsData, setExt
                             </td>
                         </tr>
 
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.23 Package attribution text</td>
                             <td>
-                                <p className='spdx-col-2 ' id='attributionText'>
-                                    {(packageInformation && packageInformation.attributionText)
-                                    && packageInformation.attributionText
-                                        .sort()
-                                        .filter((license) => !CommonUtils.isNullEmptyOrUndefinedString(license))
-                                        .map((item) => {
-                                            return (
-                                                <>
-                                                    {item} <br></br>
-                                                </>
-                                            )
-                                        })}
+                                <p
+                                    className='spdx-col-2 '
+                                    id='attributionText'
+                                >
+                                    {packageInformation &&
+                                        packageInformation.attributionText &&
+                                        packageInformation.attributionText
+                                            .sort()
+                                            .filter((license) => !CommonUtils.isNullEmptyOrUndefinedString(license))
+                                            .map((item) => {
+                                                return (
+                                                    <>
+                                                        {item} <br></br>
+                                                    </>
+                                                )
+                                            })}
                                 </p>
                             </td>
                         </tr>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.24 Primary Package Purpose </td>
                             <td>
-                                <div className='spdx-col-2 ' id='primaryPackagePurpose'>
-                                    {(packageInformation && !CommonUtils.isNullEmptyOrUndefinedString(packageInformation.primaryPackagePurpose))
-                                    && packageInformation.primaryPackagePurpose
-                                        .trim()
-                                        .split('\n')
-                                        .map((item) => {
-                                            return (
-                                                <>
-                                                    {item}
-                                                    <br></br>
-                                                </>
-                                            )
-                                        })}
+                                <div
+                                    className='spdx-col-2 '
+                                    id='primaryPackagePurpose'
+                                >
+                                    {packageInformation &&
+                                        !CommonUtils.isNullEmptyOrUndefinedString(
+                                            packageInformation.primaryPackagePurpose,
+                                        ) &&
+                                        packageInformation.primaryPackagePurpose
+                                            .trim()
+                                            .split('\n')
+                                            .map((item) => {
+                                                return (
+                                                    <>
+                                                        {item}
+                                                        <br></br>
+                                                    </>
+                                                )
+                                            })}
                                 </div>
                             </td>
                         </tr>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.25 Release Date</td>
                             <td>
-                                <p className='spdx-col-2 ' id='release-date-${loop.count}'>
+                                <p
+                                    className='spdx-col-2 '
+                                    id='release-date-${loop.count}'
+                                >
                                     {packageInformation?.releaseDate}
                                 </p>
                             </td>
                         </tr>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.26 Built Date</td>
                             <td>
-                                <p className='spdx-col-2 ' id='built-date-${loop.count}'>
+                                <p
+                                    className='spdx-col-2 '
+                                    id='built-date-${loop.count}'
+                                >
                                     {packageInformation?.builtDate}
                                 </p>
                             </td>
                         </tr>
-                        <tr className='spdx-full' data-index={packageInformation?.index}>
+                        <tr
+                            className='spdx-full'
+                            data-index={packageInformation?.index}
+                        >
                             <td>7.27 Valid Until Date</td>
                             <td>
-                                <p className='spdx-col-2 ' id='validUntil-date-${loop.count}'>
+                                <p
+                                    className='spdx-col-2 '
+                                    id='validUntil-date-${loop.count}'
+                                >
                                     {packageInformation?.validUntilDate}
                                 </p>
                             </td>

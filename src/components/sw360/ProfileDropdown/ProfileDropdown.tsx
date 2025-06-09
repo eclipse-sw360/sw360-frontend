@@ -12,13 +12,13 @@
 
 import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { Image, NavDropdown } from 'react-bootstrap'
 
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 import { useLocalStorage } from '@/hooks'
 
-function ProfileDropdown() : JSX.Element {
+function ProfileDropdown(): JSX.Element {
     const t = useTranslations('default')
     const [profileImage, setProfileImage] = useState<string>(sw360ProfileIcon.src as string)
     const [useGravatar] = useLocalStorage<boolean>('useGravatar', false)
@@ -26,7 +26,7 @@ function ProfileDropdown() : JSX.Element {
 
     useEffect(() => {
         if (useGravatar) {
-            setProfileImage((gravatarImage !== null) ? gravatarImage : sw360ProfileIcon?.src as string)
+            setProfileImage(gravatarImage !== null ? gravatarImage : (sw360ProfileIcon?.src as string))
         } else {
             setProfileImage(sw360ProfileIcon?.src as string)
         }
@@ -36,12 +36,22 @@ function ProfileDropdown() : JSX.Element {
         <NavDropdown
             id='profileDropdown'
             align='end'
-            title={<Image className='profile-image' src={profileImage} alt='UserProfile' roundedCircle={true} />}
+            title={
+                <Image
+                    className='profile-image'
+                    src={profileImage}
+                    alt='UserProfile'
+                    roundedCircle={true}
+                />
+            }
             className='no-border'
         >
             <NavDropdown.Item href='/preferences'>{t('Preferences')}</NavDropdown.Item>
             <NavDropdown.Divider />
-            <NavDropdown.Item href='' onClick={() => void signOut({ callbackUrl: '/' })}>
+            <NavDropdown.Item
+                href=''
+                onClick={() => void signOut({ callbackUrl: '/' })}
+            >
                 {t('Logout')}
             </NavDropdown.Item>
         </NavDropdown>

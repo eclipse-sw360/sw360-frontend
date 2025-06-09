@@ -9,22 +9,21 @@
 
 'use client'
 
-import React, { type JSX } from 'react';
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { AdvancedSearch, Table, _ } from 'next-sw360'
-import { FaPencilAlt } from 'react-icons/fa'
-import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
-import { TfiFiles } from "react-icons/tfi"
-import { SW360_API_URL } from '@/utils/env'
-import { User, Embedded } from '@/object-types'
-import { useSession, getSession } from 'next-auth/react'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import CommonUtils from '@/utils/common.utils'
-import dynamic from 'next/dynamic'
+import { Embedded, User } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { SW360_API_URL } from '@/utils/env'
+import { getSession, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { AdvancedSearch, Table, _ } from 'next-sw360'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import React, { useState, type JSX } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
+import { TfiFiles } from 'react-icons/tfi'
 
 const EditSecondaryDepartmentAndRolesModal = dynamic(() => import('./EditSecondaryDepartmentsAndRolesModal'), {
     ssr: false,
@@ -36,10 +35,11 @@ const MemoTable = React.memo(Table, () => true)
 export default function UserAdminstration(): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    const [num, setNum]  = useState<number>(0)
+    const [num, setNum] = useState<number>(0)
     const router = useRouter()
     const [editingUserId, setEditingUserId] = useState<string | undefined>(undefined)
-    const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] = useState<boolean>(false)
+    const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] =
+        useState<boolean>(false)
 
     const handleAddUsers = () => {
         router.push('/admin/users/add')
@@ -47,21 +47,16 @@ export default function UserAdminstration(): JSX.Element {
 
     const downloadUsers = () => {
         getSession()
-            .then(session => {
-                DownloadService.download(
-                    'importExport/downloadUsers',
-                    session,
-                    'users.csv',
-                    { 'Accept': 'text/plain' }
-                );
+            .then((session) => {
+                DownloadService.download('importExport/downloadUsers', session, 'users.csv', { Accept: 'text/plain' })
             })
             .catch((error: unknown) => {
-            if (error instanceof DOMException && error.name === "AbortError") {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        })
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            })
     }
 
     const handleEditSecondaryDepartmentAndRoles = (id: string) => {
@@ -84,7 +79,7 @@ export default function UserAdminstration(): JSX.Element {
             id: 'users.email',
             name: t('Email'),
             width: '20%',
-            formatter: ({ email, id }: { email: string, id: string }) =>
+            formatter: ({ email, id }: { email: string; id: string }) =>
                 _(
                     <>
                         <Link
@@ -93,7 +88,7 @@ export default function UserAdminstration(): JSX.Element {
                         >
                             {email}
                         </Link>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -121,10 +116,10 @@ export default function UserAdminstration(): JSX.Element {
                     <ul className='text-break text-start'>
                         {Object.entries(secondaryDepartmentsAndRoles).map(([department, roles], index) => (
                             <li key={index}>
-                                <b>{department}</b> {'->'} {roles.map(role => t(role as never)).join(', ')}
+                                <b>{department}</b> {'->'} {roles.map((role) => t(role as never)).join(', ')}
                             </li>
                         ))}
-                    </ul>
+                    </ul>,
                 ),
         },
         {
@@ -132,23 +127,32 @@ export default function UserAdminstration(): JSX.Element {
             name: t('Actions'),
             width: '9%',
             formatter: (id: string) =>
-            _(
-                <>
-                    <span className='d-flex justify-content-evenly'>
-                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                            <Link href={`/admin/users/edit/${id}`} className='overlay-trigger'>
-                                <FaPencilAlt className='btn-icon' />
-                            </Link>
-                        </OverlayTrigger>
+                _(
+                    <>
+                        <span className='d-flex justify-content-evenly'>
+                            <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                <Link
+                                    href={`/admin/users/edit/${id}`}
+                                    className='overlay-trigger'
+                                >
+                                    <FaPencilAlt className='btn-icon' />
+                                </Link>
+                            </OverlayTrigger>
 
-                        <OverlayTrigger rootClose={true} overlay={<Tooltip>{t('Edit User Secondary Departments And Role')}</Tooltip>}>
-                            <span className='d-inline-block' onClick={() => handleEditSecondaryDepartmentAndRoles(id)}>
-                                <TfiFiles className='btn-icon overlay-trigger cursor-pointer' />
-                            </span>
-                        </OverlayTrigger>
-                    </span>
-                </>
-            ),
+                            <OverlayTrigger
+                                rootClose={true}
+                                overlay={<Tooltip>{t('Edit User Secondary Departments And Role')}</Tooltip>}
+                            >
+                                <span
+                                    className='d-inline-block'
+                                    onClick={() => handleEditSecondaryDepartmentAndRoles(id)}
+                                >
+                                    <TfiFiles className='btn-icon overlay-trigger cursor-pointer' />
+                                </span>
+                            </OverlayTrigger>
+                        </span>
+                    </>,
+                ),
             sort: false,
         },
     ]
@@ -163,14 +167,14 @@ export default function UserAdminstration(): JSX.Element {
                     elem.givenName ?? '',
                     elem.lastName ?? '',
                     { email: elem.email, id: CommonUtils.getIdFromUrl(elem._links?.self.href) },
-                    (elem.deactivated === undefined || elem.deactivated === false) ? t('Active') : t('Inactive'),
+                    elem.deactivated === undefined || elem.deactivated === false ? t('Active') : t('Inactive'),
                     elem.department ?? '',
                     elem.userGroup === undefined ? t('USER') : t(elem.userGroup as never),
                     elem.secondaryDepartmentsAndRoles ?? {},
                     CommonUtils.getIdFromUrl(elem._links?.self.href),
                 ])
             },
-            total: (data: Embedded<User, 'sw360:users'>) => data.page ? data.page.totalElements : 0,
+            total: (data: Embedded<User, 'sw360:users'>) => (data.page ? data.page.totalElements : 0),
             headers: { Authorization: `${session.user.access_token}` },
         }
     }
@@ -200,7 +204,7 @@ export default function UserAdminstration(): JSX.Element {
             fieldName: t('Primary Department Role'),
             value: '',
             paramName: 'departmentRole',
-        }
+        },
     ]
 
     return (
@@ -208,46 +212,54 @@ export default function UserAdminstration(): JSX.Element {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
-                        <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+                        <AdvancedSearch
+                            title='Advanced Search'
+                            fields={advancedSearch}
+                        />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between ms-1'>
                             <div className='col-auto px-0'>
-                                <button className='btn btn-primary me-2' onClick={handleAddUsers}>
+                                <button
+                                    className='btn btn-primary me-2'
+                                    onClick={handleAddUsers}
+                                >
                                     {t('Add User')}
                                 </button>
-                                <button className='btn btn-primary' onClick={downloadUsers}>
+                                <button
+                                    className='btn btn-primary'
+                                    onClick={downloadUsers}
+                                >
                                     {t('Download Users')}
                                 </button>
                             </div>
                             <div className='col-auto buttonheader-title'>{`${t('Users')} (${num})`}</div>
                         </div>
-                        <h5 className="mt-3 mb-1 ms-1 header-underlined">
-                            {t('Users')}
-                        </h5>
-                        {
-                            status === 'authenticated' ?
-                            <div className="ms-1">
+                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('Users')}</h5>
+                        {status === 'authenticated' ? (
+                            <div className='ms-1'>
                                 <MemoTable
-                                    columns={columns} server={initServerPaginationConfig()}
-                                    selector={true} sort={false}
+                                    columns={columns}
+                                    server={initServerPaginationConfig()}
+                                    selector={true}
+                                    sort={false}
                                 />
-                            </div> :
+                            </div>
+                        ) : (
                             <div className='col-12 mt-1 text-center'>
                                 <Spinner className='spinner' />
                             </div>
-                        }
+                        )}
                     </div>
                 </div>
             </div>
-            {
-                (editingUserId !== undefined) &&
+            {editingUserId !== undefined && (
                 <EditSecondaryDepartmentAndRolesModal
                     show={openEditSecondaryDepartmentAndRolesModal}
                     setShow={setOpenEditSecondaryDepartmentAndRolesModal}
                     editingUserId={editingUserId}
                 />
-            }
+            )}
         </>
     )
 }

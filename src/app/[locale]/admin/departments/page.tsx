@@ -11,8 +11,8 @@
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { type JSX } from 'react'
-import SecondaryDepartmentsTable from './components/SecondaryDepartmentsTable'
 import ImportSecondaryDepartmentsSection from './components/ImportSecondaryDepartmentsSection'
+import SecondaryDepartmentsTable from './components/SecondaryDepartmentsTable'
 
 export const metadata: Metadata = {
     title: 'Departments',
@@ -21,17 +21,19 @@ export const metadata: Metadata = {
 const DepartmentAdministrationPage = async (): Promise<JSX.Element> => {
     const t = await getTranslations('default')
 
-    return <div className='container page-content'>
-        <ImportSecondaryDepartmentsSection />
-        <div className='row'>
-            <div className='col-12'>
-                <h5 className='header-underlined'>{t('Department')}</h5>
+    return (
+        <div className='container page-content'>
+            <ImportSecondaryDepartmentsSection />
+            <div className='row'>
+                <div className='col-12'>
+                    <h5 className='header-underlined'>{t('Department')}</h5>
+                </div>
+            </div>
+            <div className='row'>
+                <SecondaryDepartmentsTable />
             </div>
         </div>
-        <div className='row'>
-            <SecondaryDepartmentsTable />
-        </div>
-    </div>
+    )
 }
 
 export default DepartmentAdministrationPage

@@ -12,15 +12,15 @@
 
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useRef, useState, type JSX } from 'react';
+import React, { useRef, useState, type JSX } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 
-import { Attachment, HttpStatus, Embedded } from '@/object-types'
-import styles from './SelectAttachment.module.css'
+import { Attachment, Embedded, HttpStatus } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 import CommonUtils from '@/utils/common.utils'
 import AttachmentRowData from '../AttachmentRowData'
-import { ApiUtils } from '@/utils'
-import MessageService from '@/services/message.service'
+import styles from './SelectAttachment.module.css'
 
 interface Props {
     show: boolean
@@ -31,12 +31,7 @@ interface Props {
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
-function SelectAttachment({
-    show,
-    setShow,
-    attachmentsData,
-    setAttachmentsData
-}: Props) : JSX.Element {
+function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }: Props): JSX.Element {
     const t = useTranslations('default')
     const [files, setFiles] = useState<Array<File>>([])
     const inputRef = useRef<HTMLInputElement>(null)
@@ -68,8 +63,7 @@ function SelectAttachment({
         }
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const uploadAttachmentResponse = await ApiUtils.POST('attachments', formData, session.user.access_token)
         if (uploadAttachmentResponse.status === HttpStatus.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
@@ -81,7 +75,7 @@ function SelectAttachment({
             return
         }
 
-        const uploadedAttachment = await uploadAttachmentResponse.json() as EmbeddedAttachments
+        const uploadedAttachment = (await uploadAttachmentResponse.json()) as EmbeddedAttachments
 
         uploadedAttachment._embedded['sw360:attachments'].forEach((attachment) => {
             attachmentsData.push({
@@ -111,7 +105,13 @@ function SelectAttachment({
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Upload Attachment')}</Modal.Title>
             </Modal.Header>
@@ -130,7 +130,10 @@ function SelectAttachment({
                             multiple
                             onChange={handleFileChange}
                         />
-                        <button className={`${styles['button-browse']}`} onClick={handleButtonClick}>
+                        <button
+                            className={`${styles['button-browse']}`}
+                            onClick={handleButtonClick}
+                        >
                             {t('Browse')}
                         </button>
                     </div>
@@ -140,12 +143,21 @@ function SelectAttachment({
                 <div style={{}}>
                     {files.map((file, j) => (
                         <>
-                            <div key={file.name} className={`${styles['div-list-file']}`}>
+                            <div
+                                key={file.name}
+                                className={`${styles['div-list-file']}`}
+                            >
                                 <div className={`${styles['div-filename']}`}>
                                     {file.name} ({file.size}b)
                                 </div>
                                 <div className={`${styles['button-delete']}`}>
-                                    <Button variant='danger' size='sm' onClick={() => handleRemoveClick(j)}>Delete</Button>
+                                    <Button
+                                        variant='danger'
+                                        size='sm'
+                                        onClick={() => handleRemoveClick(j)}
+                                    >
+                                        Delete
+                                    </Button>
                                 </div>
                             </div>
                             <br />
@@ -165,21 +177,35 @@ function SelectAttachment({
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className={`fw-bold btn btn-light button-plain me-2`} disabled>
+                <Button
+                    type='button'
+                    className={`fw-bold btn btn-light button-plain me-2`}
+                    disabled
+                >
                     {t('Pause')}
                 </Button>
-                {
-                    (uploading === false)
-                    ?
-                    <Button type='button' variant='primary' disabled={files.length === 0} onClick={() => void handleUploadFiles()}>
+                {uploading === false ? (
+                    <Button
+                        type='button'
+                        variant='primary'
+                        disabled={files.length === 0}
+                        onClick={() => void handleUploadFiles()}
+                    >
                         {t('Upload')}
                     </Button>
-                    :
-                    <Button type='button' variant='primary' disabled={true}>
-                        {t('Upload')} <Spinner animation='border' size='sm' />
+                ) : (
+                    <Button
+                        type='button'
+                        variant='primary'
+                        disabled={true}
+                    >
+                        {t('Upload')}{' '}
+                        <Spinner
+                            animation='border'
+                            size='sm'
+                        />
                     </Button>
-                }
-
+                )}
             </Modal.Footer>
         </Modal>
     )

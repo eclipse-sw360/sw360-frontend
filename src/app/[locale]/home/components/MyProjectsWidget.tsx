@@ -9,8 +9,8 @@
 
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useSearchParams, notFound } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
+import { notFound, useSearchParams } from 'next/navigation'
+import { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 import { Spinner } from 'react-bootstrap'
 
 import { HttpStatus } from '@/object-types'
@@ -44,7 +44,7 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearingCount`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
@@ -52,7 +52,7 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                     return notFound()
                 }
 
-                const data = await response.json() as LicenseClearingData
+                const data = (await response.json()) as LicenseClearingData
 
                 setLcData(data)
             } catch (e) {
@@ -72,7 +72,10 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                 <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
             ) : (
                 <div className='col-12 text-center'>
-                    <Spinner className='spinner' size='sm' />
+                    <Spinner
+                        className='spinner'
+                        size='sm'
+                    />
                 </div>
             )}
         </>
@@ -143,10 +146,9 @@ function MyProjectsWidget(): ReactNode {
                 const item = cell.split('|')
                 return _(
                     <Link href={'projects/detail/' + item[1]}>
-                        {item[0]} {" "}
-                        {item[2]}
-                    </Link>
-                );
+                        {item[0]} {item[2]}
+                    </Link>,
+                )
             },
         },
         t('Description'),
@@ -154,17 +156,18 @@ function MyProjectsWidget(): ReactNode {
             id: 'License Clearing',
             name: t('License Clearing'),
             formatter: (cell: string) => {
-                return _(
-                    <LicenseClearing projectId={cell} />
-                );
-            }
-        }
+                return _(<LicenseClearing projectId={cell} />)
+            },
+        },
     ]
     const language = { noRecordsFound: t('NoProjectsFound') }
 
     return (
         <div>
-            <HomeTableHeader title={title} setReload={setReload} />
+            <HomeTableHeader
+                title={title}
+                setReload={setReload}
+            />
             {loading == false ? (
                 <Table
                     columns={columns}

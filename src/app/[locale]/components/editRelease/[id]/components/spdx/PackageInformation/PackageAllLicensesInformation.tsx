@@ -34,7 +34,7 @@ function PackageAllLicensesInformation({
     setAllLicensesInformationNone,
     allLicensesInformationNoasserttion,
     setAllLicensesInformationNoasserttion,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectAllLicensesInformationExist = () => {
         setAllLicensesInformationExist(true)
         setAllLicensesInformationNone(false)

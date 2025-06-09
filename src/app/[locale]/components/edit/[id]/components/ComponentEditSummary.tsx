@@ -41,7 +41,7 @@ export default function ComponentEditSummary({
     componentPayload,
     setComponentPayload,
     attachmentData,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
@@ -53,24 +53,20 @@ export default function ComponentEditSummary({
     const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
     const [moderators, setModerators] = useState<{ [k: string]: string }>({})
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as Component
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return notFound()
-            }
-        },
-        []
-    )
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as Component
+            return data
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return notFound()
+        }
+    }, [])
 
     useEffect(() => {
         void fetchData(`components/${componentId}`).then((component: Component | undefined) => {
@@ -106,13 +102,15 @@ export default function ComponentEditSummary({
             if (component._embedded && component._embedded.componentOwner) {
                 componentOwnerEmail = component._embedded.componentOwner.email
                 setComponentOwner({
-                    [componentOwnerEmail]: component._embedded.componentOwner.fullName ?? ''
+                    [componentOwnerEmail]: component._embedded.componentOwner.fullName ?? '',
                 })
             }
 
             let moderatorsFromComponent = {}
             if (component._embedded && component._embedded['sw360:moderators']) {
-                moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(component._embedded['sw360:moderators'])
+                moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(
+                    component._embedded['sw360:moderators'],
+                )
                 setModerators(moderatorsFromComponent)
             }
 
@@ -186,13 +184,13 @@ export default function ComponentEditSummary({
                             setComponentPayload={setComponentPayload}
                         />
                         <div className='row mb-4'>
-                            <AddAdditionalRoles 
+                            <AddAdditionalRoles
                                 documentType={DocumentTypes.COMPONENT}
                                 inputList={CommonUtils.convertObjectToMapRoles(componentPayload.roles ?? {})}
-                                setInputList={(newList)=>{
+                                setInputList={(newList) => {
                                     setComponentPayload({
                                         ...componentPayload,
-                                        roles: CommonUtils.convertRoles(newList)
+                                        roles: CommonUtils.convertRoles(newList),
                                     })
                                 }}
                             />

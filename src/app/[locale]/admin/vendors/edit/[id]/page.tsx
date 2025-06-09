@@ -11,7 +11,7 @@ import { Metadata } from 'next'
 
 import EditVendor from './components/EditVendor'
 
-import { ReactNode } from "react"
+import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Admin - Vendors',

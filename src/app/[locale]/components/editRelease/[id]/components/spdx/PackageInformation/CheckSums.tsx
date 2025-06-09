@@ -18,7 +18,7 @@ interface Props {
     setDataCheckSums: (inputs: InputKeyValue[]) => void
 }
 
-function CheckSums({ inputList, setInputList, setDataCheckSums }: Props) : ReactNode {
+function CheckSums({ inputList, setInputList, setDataCheckSums }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: InputKeyValue[] = [...inputList]
@@ -42,7 +42,10 @@ function CheckSums({ inputList, setInputList, setDataCheckSums }: Props) : React
         <div style={{ display: 'flex', flexDirection: 'column', flex: 7 }}>
             {inputList.map((elem, j) => {
                 return (
-                    <div key={j} style={{ display: 'flex', marginBottom: '0.75rem' }}>
+                    <div
+                        key={j}
+                        style={{ display: 'flex', marginBottom: '0.75rem' }}
+                    >
                         <input
                             style={{ flex: 2, marginRight: '1rem' }}
                             type='text'
@@ -61,7 +64,10 @@ function CheckSums({ inputList, setInputList, setDataCheckSums }: Props) : React
                             placeholder='Enter value'
                             onChange={(e) => handleInputChange(e, j)}
                         />
-                        <FaTrashAlt className='spdx-delete-icon-main' onClick={() => handleRemoveClick(j)} />
+                        <FaTrashAlt
+                            className='spdx-delete-icon-main'
+                            onClick={() => handleRemoveClick(j)}
+                        />
                     </div>
                 )
             })}

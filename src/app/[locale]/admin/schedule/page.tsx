@@ -7,8 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { JSX } from 'react'
 import { Metadata } from 'next'
+import { JSX } from 'react'
 
 import ScheduleList from './components/ScheduleList'
 
@@ -20,4 +20,4 @@ const Schedule = (): JSX.Element => {
     return <ScheduleList />
 }
 
-export default Schedule;
+export default Schedule

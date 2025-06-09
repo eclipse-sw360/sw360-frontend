@@ -8,8 +8,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import PackageDetailTab from './components/PackageDetailTab'
 import { ReactNode } from 'react'
+import PackageDetailTab from './components/PackageDetailTab'
 
 interface Context {
     params: Promise<{ id: string }>
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 }
 
 const Detail = async (props: Context): Promise<ReactNode> => {
-    const params = await props.params;
+    const params = await props.params
     return <PackageDetailTab packageId={params.id} />
 }
 

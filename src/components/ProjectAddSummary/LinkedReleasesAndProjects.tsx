@@ -7,13 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { ProjectPayload } from '@/object-types'
+import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
-import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     projectId?: string
@@ -31,20 +31,33 @@ interface LinkedReleaseData {
     version: string
 }
 
-export default function LinkedReleasesAndProjects({ projectId, projectPayload, setProjectPayload, existingReleaseData, isDependencyNetworkFeatureEnabled }: Props): JSX.Element {
+export default function LinkedReleasesAndProjects({
+    projectId,
+    projectPayload,
+    setProjectPayload,
+    existingReleaseData,
+    isDependencyNetworkFeatureEnabled,
+}: Props): JSX.Element {
     return (
         <>
             <div className='ms-1'>
-                <LinkedProjects projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
-                {
-                    isDependencyNetworkFeatureEnabled === true
-                    ?
-                    <EditDependencyNetwork projectId={projectId} projectPayload={projectPayload} setProjectPayload={setProjectPayload}/>
-                    :
-                    <LinkedReleases projectPayload = {projectPayload}
-                                setProjectPayload = {setProjectPayload}
-                                existingReleaseData = {existingReleaseData}/>
-                }
+                <LinkedProjects
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
+                {isDependencyNetworkFeatureEnabled === true ? (
+                    <EditDependencyNetwork
+                        projectId={projectId}
+                        projectPayload={projectPayload}
+                        setProjectPayload={setProjectPayload}
+                    />
+                ) : (
+                    <LinkedReleases
+                        projectPayload={projectPayload}
+                        setProjectPayload={setProjectPayload}
+                        existingReleaseData={existingReleaseData}
+                    />
+                )}
             </div>
         </>
     )

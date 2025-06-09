@@ -9,22 +9,20 @@
 
 'use client'
 
-import { signOut, useSession } from "next-auth/react"
-import { useTranslations } from "next-intl"
-import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from "react"
-import { Alert, Button, Col, Form, Modal, Row } from "react-bootstrap"
-import { CreateClearingRequestPayload } from "@/object-types"
-import { FaRegQuestionCircle } from "react-icons/fa"
-import { ShowInfoOnHover } from "next-sw360"
+import { CreateClearingRequestPayload } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ShowInfoOnHover } from 'next-sw360'
+import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
+import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
+import { FaRegQuestionCircle } from 'react-icons/fa'
 
 interface Props {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
 }
 
-export default function ReopenClosedClearingRequestModal({ show,
-                                                           setShow
-                                                         }: Props): ReactNode {
+export default function ReopenClosedClearingRequestModal({ show, setShow }: Props): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [message, setMessage] = useState('')
@@ -129,20 +127,22 @@ export default function ReopenClosedClearingRequestModal({ show,
                     aria-labelledby={t('Reopen Clearing Request')}
                     scrollable
                 >
-                    <Modal.Header closeButton style={{ color: '#2E5AAC' }}>
+                    <Modal.Header
+                        closeButton
+                        style={{ color: '#2E5AAC' }}
+                    >
                         <Modal.Title id='reopen-clearing-request-modal'>
-                            <FaRegQuestionCircle style={{ marginBottom: '5px',
-                                                     color: '#2E5AAC',
-                                                     fontSize: '19px'}} />
-                                {' '}
-                                { t('reopen clearing request')}
+                            <FaRegQuestionCircle style={{ marginBottom: '5px', color: '#2E5AAC', fontSize: '19px' }} />{' '}
+                            {t('reopen clearing request')}
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <Alert variant={variant}
+                        <Alert
+                            variant={variant}
                             onClose={() => setShowMessage(false)}
                             show={showMessage}
-                            dismissible>
+                            dismissible
+                        >
                             {message}
                         </Alert>
                         <Form>
@@ -153,13 +153,15 @@ export default function ReopenClosedClearingRequestModal({ show,
                                 <br />
                             </Form.Group>
                             <hr />
-                            <Row className='mb-3'>                                
+                            <Row className='mb-3'>
                                 <Col md={6}>
                                     <Form.Group className='mb-2'>
                                         <Form.Label style={{ fontWeight: 'bold' }}>
                                             {t('Preferred Clearing Date')} :
-                                            <span className='text-red'
-                                                  style={{ color: '#F7941E' }}>
+                                            <span
+                                                className='text-red'
+                                                style={{ color: '#F7941E' }}
+                                            >
                                                 *
                                             </span>
                                         </Form.Label>
@@ -173,10 +175,12 @@ export default function ReopenClosedClearingRequestModal({ show,
                                             min={minDate}
                                             required
                                         />
-                                        <div className='form-text'
-                                             id='createClearingRequest.requestedClearingDate.HelpBlock'>
-                                            <ShowInfoOnHover text={t('Requested Clearing Date Info')}/>
-                                                {' '}{t('Learn more about preferred clearing date')}.
+                                        <div
+                                            className='form-text'
+                                            id='createClearingRequest.requestedClearingDate.HelpBlock'
+                                        >
+                                            <ShowInfoOnHover text={t('Requested Clearing Date Info')} />{' '}
+                                            {t('Learn more about preferred clearing date')}.
                                         </div>
                                     </Form.Group>
                                 </Col>
@@ -184,8 +188,10 @@ export default function ReopenClosedClearingRequestModal({ show,
                                     <Form.Group className='mb-2'>
                                         <Form.Label style={{ fontWeight: 'bold' }}>
                                             {t('Clearing Type')} :
-                                            <span className='text-red'
-                                                  style={{ color: '#F7941E' }}>
+                                            <span
+                                                className='text-red'
+                                                style={{ color: '#F7941E' }}
+                                            >
                                                 *
                                             </span>
                                         </Form.Label>
@@ -197,42 +203,48 @@ export default function ReopenClosedClearingRequestModal({ show,
                                             disabled={isDisabled}
                                             required
                                         >
-                                            <option value='' hidden></option>
+                                            <option
+                                                value=''
+                                                hidden
+                                            ></option>
                                             <option value='DEEP'>{t('Deep Level CLX')}</option>
                                             <option value='HIGH'>{t('High Level ISR')}</option>
                                         </Form.Select>
-                                        <div className='form-text'
-                                             id='createClearingRequest.clearingType.HelpBlock'>
-                                            <ShowInfoOnHover text={t('Clearing Type Info')}/>
-                                                {' '}{t('Learn more about clearing request type')}.
+                                        <div
+                                            className='form-text'
+                                            id='createClearingRequest.clearingType.HelpBlock'
+                                        >
+                                            <ShowInfoOnHover text={t('Clearing Type Info')} />{' '}
+                                            {t('Learn more about clearing request type')}.
                                         </div>
                                     </Form.Group>
                                 </Col>
                             </Row>
-                            <Form.Group className='mb-1' style={{ display: 'flex',
-                                                                  alignItems: 'left' }}>
+                            <Form.Group
+                                className='mb-1'
+                                style={{ display: 'flex', alignItems: 'left' }}
+                            >
                                 <Form.Check
                                     type='checkbox'
                                     id='createClearingRequest.priority'
                                     name='priority'
                                     checked={isCritical}
-                                    style={{marginTop: '1px'}}
+                                    style={{ marginTop: '1px' }}
                                     onChange={setClearingPriority}
                                     disabled={isDisabled}
                                 />
-                                <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px'}}>
+                                <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px' }}>
                                     {t('Critical')}
                                 </Form.Label>
                             </Form.Group>
-                            <div className='subscriptionBox'
-                                 style={{ textAlign: 'left',
-                                          marginBottom: '20px' }}>
+                            <div
+                                className='subscriptionBox'
+                                style={{ textAlign: 'left', marginBottom: '20px' }}
+                            >
                                 {t('Criticality selection info')}
                             </div>
                             <Form.Group className='mb-2'>
-                                <Form.Label style={{ fontWeight: 'bold' }}>
-                                    {t('Comments')} :
-                                </Form.Label>
+                                <Form.Label style={{ fontWeight: 'bold' }}>{t('Comments')} :</Form.Label>
                                 <Form.Control
                                     id='createClearingRequest.requestingUserComment'
                                     type='text'
@@ -240,24 +252,28 @@ export default function ReopenClosedClearingRequestModal({ show,
                                     name='requestingUserComment'
                                     value={createClearingRequestPayload.requestingUserComment}
                                     onChange={updateInputField}
-                                    style={{height: 'auto', textAlign: 'left'}}
+                                    style={{ height: 'auto', textAlign: 'left' }}
                                     disabled={isDisabled}
                                 />
                             </Form.Group>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
-                        <Button className='btn-secondary'
-                                variant='light'
-                                onClick={handleCloseDialog} >
+                        <Button
+                            className='btn-secondary'
+                            variant='light'
+                            onClick={handleCloseDialog}
+                        >
                             {' '}
                             {t('Close')}{' '}
                         </Button>
                         <Button
                             className='login-btn'
                             variant='primary'
-                            disabled={createClearingRequestPayload.clearingType !== undefined ||
-                                      createClearingRequestPayload.requestedClearingDate !== undefined}
+                            disabled={
+                                createClearingRequestPayload.clearingType !== undefined ||
+                                createClearingRequestPayload.requestedClearingDate !== undefined
+                            }
                             onClick={() => handleSubmit()}
                             hidden={reloadPage}
                         >
@@ -266,5 +282,6 @@ export default function ReopenClosedClearingRequestModal({ show,
                     </Modal.Footer>
                 </Modal>
             </>
-        )}
+        )
+    }
 }

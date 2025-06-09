@@ -10,7 +10,7 @@
 
 'use-client'
 
-import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 
 import { Component, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -44,42 +44,46 @@ function RecentComponentsWidget(): ReactNode {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('components/recentComponents').then((components: EmbeddedComponents | undefined) => {
-            if (components === undefined) {
-                return
-            }
+        void fetchData('components/recentComponents')
+            .then((components: EmbeddedComponents | undefined) => {
+                if (components === undefined) {
+                    return
+                }
 
-            if (
-                !CommonUtils.isNullOrUndefined(components['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
-            ) {
-                setRecentComponent(
-                    components['_embedded']['sw360:components'].map((item: Component) => [
-                        <li key={item.name}>
-                            <Link
-                                href={'components/detail/' + item.id}
-                                style={{ color: 'orange', textDecoration: 'none' }}
-                            >
-                                {item.name}
-                            </Link>
-                        </li>,
-                    ]),
-                )
-            } else {
-                setRecentComponent([])
-            }
-        })
-        .catch((err:Error)=>{
-            throw new Error(err.message)
-        })
-        .finally(() => {
-            setLoading(false)
-        })
-    }, [fetchData,reload])
+                if (
+                    !CommonUtils.isNullOrUndefined(components['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
+                ) {
+                    setRecentComponent(
+                        components['_embedded']['sw360:components'].map((item: Component) => [
+                            <li key={item.name}>
+                                <Link
+                                    href={'components/detail/' + item.id}
+                                    style={{ color: 'orange', textDecoration: 'none' }}
+                                >
+                                    {item.name}
+                                </Link>
+                            </li>,
+                        ]),
+                    )
+                } else {
+                    setRecentComponent([])
+                }
+            })
+            .catch((err: Error) => {
+                throw new Error(err.message)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }, [fetchData, reload])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('Recent Components')} setReload={setReload}   />
+            <HomeTableHeader
+                title={t('Recent Components')}
+                setReload={setReload}
+            />
             {loading == false ? (
                 <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentComponent}</ul>
             ) : (

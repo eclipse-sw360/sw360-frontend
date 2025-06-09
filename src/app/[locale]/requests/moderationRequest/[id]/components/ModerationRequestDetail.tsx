@@ -7,19 +7,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-
 'use client'
 
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, getSession, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, ReactNode } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ModerationDecision from './ModerationDecision'
 import ModerationRequestInfo from './ModerationRequestInfo'
@@ -130,7 +127,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             } else {
                 MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -164,7 +161,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             } else {
                 MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -198,7 +195,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             } else {
                 MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -231,7 +228,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 MessageService.error(t('There are some errors while updating moderation request'))
                 router.push(`/requests/moderationRequest/${moderationRequestId}`)
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }

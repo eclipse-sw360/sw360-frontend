@@ -100,7 +100,9 @@ function CVEReferences({
                                         e.preventDefault()
                                     }
                                 }}
-                                onChange={(e) => {handleYearChange(e, i)}}
+                                onChange={(e) => {
+                                    handleYearChange(e, i)
+                                }}
                                 className='form-control'
                                 id='vulnerabilityDetail.cveReferences.year'
                                 placeholder={t('Enter CVE Year')}
@@ -131,7 +133,9 @@ function CVEReferences({
                                         e.preventDefault()
                                     }
                                 }}
-                                onChange={(e) => {handleNumberChange(e, i)}}
+                                onChange={(e) => {
+                                    handleNumberChange(e, i)
+                                }}
                                 className='form-control'
                                 id='vulnerabilityDetail.cveReferences.number'
                                 placeholder={t('Enter CVE Number')}

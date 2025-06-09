@@ -8,15 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState, type JSX } from 'react';
+import React, { useState, type JSX } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
+import { Obligation } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
-import { Obligation } from '@/object-types'
 import TableLicense from '../TableLicense'
-import styles from './TableLinkedObligations.module.css'
 import DeleteObligationDialog from './DeleteObligationDialog'
+import styles from './TableLinkedObligations.module.css'
 
 interface Props {
     data: Array<(string | Obligation)[]>
@@ -67,7 +67,7 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
                     attachmentDetail.hidden = true
                 }
             }
-        };
+        }
     }
 
     const style = {
@@ -88,7 +88,12 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
             id: 'check',
             name: _(<i className={styles.collapse}></i>),
             formatter: (item: Obligation) =>
-                _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
+                _(
+                    <i
+                        className={styles.collapse}
+                        onClick={buildAttachmentDetail(item)}
+                    ></i>,
+                ),
             sort: false,
         },
         {
@@ -108,11 +113,14 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
                 _(
                     <div style={{ textAlign: 'center' }}>
                         <span>
-                            <FaTrashAlt className={styles['delete-btn']} onClick={() => deleteObligation(item)} />
+                            <FaTrashAlt
+                                className={styles['delete-btn']}
+                                onClick={() => deleteObligation(item)}
+                            />
                         </span>
-                    </div>
+                    </div>,
                 ),
-            width: '7%'
+            width: '7%',
         },
     ]
     const [search, setSearch] = useState({})

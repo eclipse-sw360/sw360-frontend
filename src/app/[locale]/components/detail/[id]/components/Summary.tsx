@@ -10,24 +10,27 @@
 
 import ResourcesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { Component, DocumentTypes } from '@/object-types'
+import { ReactNode } from 'react'
 import ComponentGeneral from './ComponentGeneral'
 import ReleaseAgrregateData from './ReleaseAggregate'
 import SummaryRole from './SummaryRole'
-import { ReactNode } from 'react'
 
 interface Props {
     component: Component
     componentId: string
 }
 
-const Summary = ({ component, componentId }: Props) : ReactNode => {
+const Summary = ({ component, componentId }: Props): ReactNode => {
     return (
         <div className='col'>
             <div>
                 <p id='up_Summary'>{component.description}</p>
             </div>
             <div>
-                <ComponentGeneral component={component} componentId={componentId} />
+                <ComponentGeneral
+                    component={component}
+                    componentId={componentId}
+                />
             </div>
             <div>
                 <ReleaseAgrregateData component={component} />

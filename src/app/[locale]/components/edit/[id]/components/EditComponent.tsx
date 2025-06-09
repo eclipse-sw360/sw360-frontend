@@ -26,12 +26,12 @@ import {
     Embedded,
     HttpStatus,
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
-import MessageService from '@/services/message.service'
 
 interface Props {
     componentId: string
@@ -54,7 +54,7 @@ const tabList = [
     },
 ]
 
-const EditComponent = ({ componentId }: Props) : ReactNode => {
+const EditComponent = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
     const router = useRouter()
@@ -92,12 +92,11 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}`,
-                    Object.fromEntries(params)
+                    Object.fromEntries(params),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -105,7 +104,7 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const component = await response.json() as Component
+                const component = (await response.json()) as Component
                 setComponent(component)
             } catch (e) {
                 console.error(e)
@@ -114,12 +113,11 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/attachments`,
-                    Object.fromEntries(params)
+                    Object.fromEntries(params),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -127,7 +125,7 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const dataAttachments: EmbeddedAttachments = await response.json() as EmbeddedAttachments
+                const dataAttachments: EmbeddedAttachments = (await response.json()) as EmbeddedAttachments
                 if (!CommonUtils.isNullOrUndefined(dataAttachments)) {
                     setAttachmentData(dataAttachments._embedded['sw360:attachments'])
                 }
@@ -141,8 +139,7 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
 
     const submit = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
         if (response.status === HttpStatus.OK) {
             MessageService.success(`Component ${componentPayload.name}  updated successfully!`)
@@ -187,13 +184,26 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
                         actionType={ActionType.EDIT}
                     />
                     <div className='col-2 sidebar'>
-                        <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                        <SideBar
+                            selectedTab={selectedTab}
+                            setSelectedTab={setSelectedTab}
+                            tabList={tabList}
+                        />
                     </div>
                     <div className='col'>
-                        <div className='row' style={{ marginBottom: '20px' }}>
-                            <PageButtonHeader title={component.name} buttons={headerButtons}></PageButtonHeader>
+                        <div
+                            className='row'
+                            style={{ marginBottom: '20px' }}
+                        >
+                            <PageButtonHeader
+                                title={component.name}
+                                buttons={headerButtons}
+                            ></PageButtonHeader>
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                        >
                             <ComponentEditSummary
                                 attachmentData={attachmentData}
                                 componentId={componentId}
@@ -201,10 +211,16 @@ const EditComponent = ({ componentId }: Props) : ReactNode => {
                                 setComponentPayload={setComponentPayload}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}
+                        >
                             <Releases componentId={componentId} />
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
+                        >
                             <EditAttachments
                                 documentId={componentId}
                                 documentType={DocumentTypes.COMPONENT}

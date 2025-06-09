@@ -10,11 +10,11 @@
 
 import { Table, _ } from '@/components/sw360'
 import { Project, RestrictedResource } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { Alert } from 'react-bootstrap'
-import { CommonUtils } from '@/utils'
 
 interface Props {
     projectUsings: Array<Project>
@@ -48,8 +48,10 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
                     key={project._links.self.href.split('/').at(-1)}
                     href={`/projects/detail/${project._links.self.href.split('/').at(-1)}`}
                 >
-                    {CommonUtils.isNullEmptyOrUndefinedString(project.version) ? `${project.name} (${project.version})` : project.name}
-                </Link>
+                    {CommonUtils.isNullEmptyOrUndefinedString(project.version)
+                        ? `${project.name} (${project.version})`
+                        : project.name}
+                </Link>,
             ) as JSX.Element,
             project.businessUnit ?? '',
             _(<Link href={`mailTo:${project.projectResponsible}}`}>{project.projectResponsible}</Link>) as JSX.Element,
@@ -64,7 +66,10 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
                     projectUsings.length
                 } visible / ${restrictedResource?.projects ?? 0} restricted) projects.`}
             </Alert>
-            <Table data={tableData} columns={columns} />
+            <Table
+                data={tableData}
+                columns={columns}
+            />
         </>
     )
 }

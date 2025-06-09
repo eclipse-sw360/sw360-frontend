@@ -10,107 +10,102 @@
 
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX } from 'react'
 
-import { Attachment, Embedded, HttpStatus} from '@/object-types'
+import { Attachment, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import AttachmentRowData from './AttachmentRowData'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
 import TableAttachment from './TableAttachment/TableAttachment'
 import TitleAttachment from './TiltleAttachment/TitleAttachment'
-import AttachmentRowData from './AttachmentRowData'
 
 interface Props<T> {
     documentId: string
     documentType: string
-    documentPayload: T,
+    documentPayload: T
     setDocumentPayload: React.Dispatch<React.SetStateAction<T>>
 }
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
-function EditAttachments<T>({
-    documentId,
-    documentType,
-    documentPayload,
-    setDocumentPayload
-}: Props<T>) : JSX.Element {
+function EditAttachments<T>({ documentId, documentType, documentPayload, setDocumentPayload }: Props<T>): JSX.Element {
     const t = useTranslations('default')
     const [attachmentsData, setAttachmentsData] = useState<Array<AttachmentRowData>>([])
     const [beforeUpdateAttachmentsCheckStatus, setBeforeUpdateAttachmentsCheckStatus] = useState<Array<string>>([])
     const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = await response.json() as EmbeddedAttachments
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
-
-    useEffect(() => {
-        fetchData(`${documentType}/${documentId}/attachments`).then((attachments: EmbeddedAttachments | undefined) => {
-            if (attachments === undefined) return
-            if (
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachments'])
-            ) {
-                const attachmentDetails: Array<Attachment> = []
-                attachments['_embedded']['sw360:attachments'].map((item: Attachment) => {
-                    attachmentDetails.push(item)
-                })
-                const existingAttachmentsRowData: Array<AttachmentRowData> = attachmentDetails.map((attachment) => ({
-                        attachmentContentId: CommonUtils.getIdFromUrl(attachment._links?.self.href),
-                        filename: attachment.filename,
-                        attachmentType: attachment.attachmentType,
-                        createdBy: attachment.createdBy,
-                        createdTeam: attachment.createdTeam,
-                        createdComment: attachment.createdComment,
-                        createdOn: attachment.createdOn,
-                        checkedTeam: attachment.checkedTeam,
-                        checkedComment: attachment.checkedComment,
-                        checkedOn: attachment.checkedOn,
-                        checkStatus: attachment.checkStatus,
-                        checkedBy: attachment.checkedBy,
-                        isAddedNew: false,
-                }))
-                const beforeUpdateAttachmentsCheckStatus = attachmentDetails.map((attachment) => attachment.checkStatus ?? 'NOTCHECKED')
-                setBeforeUpdateAttachmentsCheckStatus(beforeUpdateAttachmentsCheckStatus)
-                setAttachmentsData(existingAttachmentsRowData)
-            }
-        }).catch((err) => console.error(err))
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as EmbeddedAttachments
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
     }, [])
 
     useEffect(() => {
-        const attachmentsToSave: Array<Attachment> = attachmentsData.map((attachment) => (
-            {
-                attachmentContentId: attachment.attachmentContentId,
-                filename: attachment.filename,
-                attachmentType: attachment.attachmentType,
-                createdBy: attachment.createdBy,
-                createdTeam: attachment.createdTeam,
-                createdComment: attachment.createdComment,
-                createdOn: attachment.createdOn,
-                checkedTeam: attachment.checkedTeam,
-                checkedComment: attachment.checkedComment,
-                checkedOn: attachment.checkedOn,
-                checkStatus: attachment.checkStatus,
-                checkedBy: attachment.checkedBy
-            }
-        ))
+        fetchData(`${documentType}/${documentId}/attachments`)
+            .then((attachments: EmbeddedAttachments | undefined) => {
+                if (attachments === undefined) return
+                if (
+                    !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachments'])
+                ) {
+                    const attachmentDetails: Array<Attachment> = []
+                    attachments['_embedded']['sw360:attachments'].map((item: Attachment) => {
+                        attachmentDetails.push(item)
+                    })
+                    const existingAttachmentsRowData: Array<AttachmentRowData> = attachmentDetails.map(
+                        (attachment) => ({
+                            attachmentContentId: CommonUtils.getIdFromUrl(attachment._links?.self.href),
+                            filename: attachment.filename,
+                            attachmentType: attachment.attachmentType,
+                            createdBy: attachment.createdBy,
+                            createdTeam: attachment.createdTeam,
+                            createdComment: attachment.createdComment,
+                            createdOn: attachment.createdOn,
+                            checkedTeam: attachment.checkedTeam,
+                            checkedComment: attachment.checkedComment,
+                            checkedOn: attachment.checkedOn,
+                            checkStatus: attachment.checkStatus,
+                            checkedBy: attachment.checkedBy,
+                            isAddedNew: false,
+                        }),
+                    )
+                    const beforeUpdateAttachmentsCheckStatus = attachmentDetails.map(
+                        (attachment) => attachment.checkStatus ?? 'NOTCHECKED',
+                    )
+                    setBeforeUpdateAttachmentsCheckStatus(beforeUpdateAttachmentsCheckStatus)
+                    setAttachmentsData(existingAttachmentsRowData)
+                }
+            })
+            .catch((err) => console.error(err))
+    }, [])
+
+    useEffect(() => {
+        const attachmentsToSave: Array<Attachment> = attachmentsData.map((attachment) => ({
+            attachmentContentId: attachment.attachmentContentId,
+            filename: attachment.filename,
+            attachmentType: attachment.attachmentType,
+            createdBy: attachment.createdBy,
+            createdTeam: attachment.createdTeam,
+            createdComment: attachment.createdComment,
+            createdOn: attachment.createdOn,
+            checkedTeam: attachment.checkedTeam,
+            checkedComment: attachment.checkedComment,
+            checkedOn: attachment.checkedOn,
+            checkStatus: attachment.checkStatus,
+            checkedBy: attachment.checkedBy,
+        }))
         setDocumentPayload({
             ...documentPayload,
-            attachments: attachmentsToSave
+            attachments: attachmentsToSave,
         })
     }, [attachmentsData])
 
@@ -134,7 +129,11 @@ function EditAttachments<T>({
                 </table>
             </div>
             <div className='mb-3'>
-                <button type='button' onClick={handleClickSelectAttachment} className={`fw-bold btn btn-secondary`}>
+                <button
+                    type='button'
+                    onClick={handleClickSelectAttachment}
+                    className={`fw-bold btn btn-secondary`}
+                >
                     {t('Add Attachment')}
                 </button>
             </div>

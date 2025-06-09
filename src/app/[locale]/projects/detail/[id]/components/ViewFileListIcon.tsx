@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
 
@@ -9,13 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 
-import { Tooltip, OverlayTrigger } from 'react-bootstrap'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { IoMdInformationCircle } from 'react-icons/io'
 
-import type { JSX } from "react"
 import type { useTranslations } from 'next-intl'
+import type { JSX } from 'react'
 
 interface Props {
     license: string
@@ -25,9 +24,19 @@ interface Props {
 
 function ViewFileListIcon({ license, t, openModal }: Props): JSX.Element {
     return (
-        <OverlayTrigger placement='right-end' overlay={<Tooltip>{t('View file list')}</Tooltip>}>
-            <span className='d-inline-block' onClick={() => openModal(license)}>
-                <IoMdInformationCircle className='cursor' color='gray' size='18' />
+        <OverlayTrigger
+            placement='right-end'
+            overlay={<Tooltip>{t('View file list')}</Tooltip>}
+        >
+            <span
+                className='d-inline-block'
+                onClick={() => openModal(license)}
+            >
+                <IoMdInformationCircle
+                    className='cursor'
+                    color='gray'
+                    size='18'
+                />
             </span>
         </OverlayTrigger>
     )

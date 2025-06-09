@@ -9,13 +9,13 @@
 
 'use client'
 
+import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
+import { DocumentTypes, SummaryDataType } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState, type JSX } from 'react';
+import { useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
-import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
-import { SummaryDataType, DocumentTypes } from '@/object-types'
 
 const Capitalize = (text: string) => {
     return text
@@ -76,7 +76,13 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                     <tr>
                         <td>{t('Visibility')}:</td>
-                        <td>{Capitalize(summaryData.visibility === 'BUISNESSUNIT_AND_MODERATORS' ? 'GROUP_AND_MODERATORS' : summaryData.visibility) ?? ''}</td>
+                        <td>
+                            {Capitalize(
+                                summaryData.visibility === 'BUISNESSUNIT_AND_MODERATORS'
+                                    ? 'GROUP_AND_MODERATORS'
+                                    : summaryData.visibility,
+                            ) ?? ''}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
@@ -146,7 +152,10 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                             {Object.entries(summaryData.externalUrls ?? {}).map(([name, value]) => (
                                 <li key={name}>
                                     <span className='fw-bold'>{name}</span>{' '}
-                                    <Link className='text-link' href={`mailto:${value}`}>
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${value}`}
+                                    >
                                         {value}
                                     </Link>
                                 </li>
@@ -205,7 +214,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     <tr>
                         <td>{t('Owner Country')}:</td>
                         <td>
-                            {(summaryData.ownerCountry != null) && /^[A-Z]{2}$/.test(summaryData.ownerCountry)
+                            {summaryData.ownerCountry != null && /^[A-Z]{2}$/.test(summaryData.ownerCountry)
                                 ? new Intl.DisplayNames(['en'], { type: 'region' }).of(summaryData.ownerCountry)
                                 : ''}
                         </td>
@@ -225,12 +234,21 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>{t('Moderators')}:</td>
                         <td>
                             {summaryData._embedded?.['sw360:moderators']?.map((elem, i) => (
-                                <li key={elem.email} style={{ display: 'inline' }}>
-                                    <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
+                                <li
+                                    key={elem.email}
+                                    style={{ display: 'inline' }}
+                                >
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${elem.email}`}
+                                        key={elem.email}
+                                    >
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:moderators']?.length !== undefined &&
-                                        i === summaryData._embedded['sw360:moderators'].length - 1 ? '' : ','}{' '}
+                                    i === summaryData._embedded['sw360:moderators'].length - 1
+                                        ? ''
+                                        : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -239,12 +257,21 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>{t('Contributors')}:</td>
                         <td>
                             {summaryData._embedded?.['sw360:contributors']?.map((elem, i) => (
-                                <li key={elem.email} style={{ display: 'inline' }}>
-                                    <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
+                                <li
+                                    key={elem.email}
+                                    style={{ display: 'inline' }}
+                                >
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${elem.email}`}
+                                        key={elem.email}
+                                    >
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:contributors']?.length !== undefined &&
-                                        i === summaryData._embedded['sw360:contributors'].length - 1 ? '' : ','}{' '}
+                                    i === summaryData._embedded['sw360:contributors'].length - 1
+                                        ? ''
+                                        : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -253,12 +280,21 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>{t('Security Responsibles')}:</td>
                         <td>
                             {summaryData._embedded?.securityResponsibles?.map((elem, i) => (
-                                <li key={elem.email} style={{ display: 'inline' }}>
-                                    <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
+                                <li
+                                    key={elem.email}
+                                    style={{ display: 'inline' }}
+                                >
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${elem.email}`}
+                                        key={elem.email}
+                                    >
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.securityResponsibles?.length !== undefined &&
-                                        i === summaryData._embedded.securityResponsibles.length - 1 ? '' : ','}{' '}
+                                    i === summaryData._embedded.securityResponsibles.length - 1
+                                        ? ''
+                                        : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -271,7 +307,10 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                     <span className='fw-bold'>{name}</span>{' '}
                                     {value.map((v: string, i: number) => (
                                         <span key={v}>
-                                            <Link className='text-link' href={`mailto:${v}`}>
+                                            <Link
+                                                className='text-link'
+                                                href={`mailto:${v}`}
+                                            >
                                                 {v}
                                             </Link>
                                             {i === value.length - 1 ? '' : ','}{' '}
@@ -315,5 +354,5 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                 documentName={summaryData.name}
             />
         </>
-    );
+    )
 }

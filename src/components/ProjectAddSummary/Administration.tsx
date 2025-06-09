@@ -7,13 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { ProjectPayload } from '@/object-types'
 import Clearing from './component/Administration/Clearing'
 import LicenseInfoHeader from './component/Administration/LicenseInfoHeader'
 import Lifecycle from './component/Administration/LifeCycle'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -24,9 +24,18 @@ export default function Administration({ projectPayload, setProjectPayload }: Pr
     return (
         <>
             <div className='ms-1'>
-                <Clearing projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
-                <Lifecycle projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
-                <LicenseInfoHeader projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
+                <Clearing
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
+                <Lifecycle
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
+                <LicenseInfoHeader
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
             </div>
         </>
     )

@@ -10,10 +10,10 @@
 
 'use client'
 
-import React, { useEffect, useRef, type JSX } from 'react';
-import { Form } from 'react-bootstrap'
-import { _ } from 'next-sw360'
 import { User } from '@/object-types'
+import { _ } from 'next-sw360'
+import React, { useEffect, useRef, type JSX } from 'react'
+import { Form } from 'react-bootstrap'
 import Table, { TableProps } from '../Table/Table'
 
 type RowData = (string | User)[]
@@ -26,16 +26,23 @@ interface Props {
 }
 
 const compare = (preState: TableProps, nextState: TableProps) => {
-    return Object.entries(preState.data ?? {}).sort().toString() === Object.entries(nextState.data ?? {}).sort().toString()
+    return (
+        Object.entries(preState.data ?? {})
+            .sort()
+            .toString() ===
+        Object.entries(nextState.data ?? {})
+            .sort()
+            .toString()
+    )
 }
 
-const MemoTable = React.memo(Table, compare) 
+const MemoTable = React.memo(Table, compare)
 
 const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: Props): JSX.Element => {
     const selectedUsersInTable = useRef<{ [k: string]: string }>({})
 
     const handleSelectUser = (user: User) => {
-        const userEmail = user.email 
+        const userEmail = user.email
         if (multiple === true) {
             const copiedSelectingUsers = { ...selectedUsersInTable.current }
             if (Object.keys(copiedSelectingUsers).includes(userEmail)) {
@@ -59,12 +66,12 @@ const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: 
                 _(
                     <Form.Check
                         name='user-selection'
-                        type= { multiple ? 'checkbox' : 'radio' }
+                        type={multiple ? 'checkbox' : 'radio'}
                         defaultChecked={Object.keys(selectedUsersInTable.current).includes(user.email)}
                         onClick={() => {
                             handleSelectUser(user)
                         }}
-                    ></Form.Check>
+                    ></Form.Check>,
                 ),
             width: '7%',
             sort: false,
@@ -84,10 +91,9 @@ const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: 
         {
             id: 'email',
             name: 'Email',
-            formatter: (email: string) =>
-                _(<a href={`mailto:${email}`}>{email}</a>),
+            formatter: (email: string) => _(<a href={`mailto:${email}`}>{email}</a>),
             sort: true,
-            width: '30%'
+            width: '30%',
         },
         {
             id: 'department',
@@ -103,7 +109,11 @@ const UsersTable = ({ tableData, selectingUsers, setSelectingUsers, multiple }: 
 
     return (
         <div className='row'>
-            <MemoTable data={tableData} columns={columns} sort={false}/>
+            <MemoTable
+                data={tableData}
+                columns={columns}
+                sort={false}
+            />
         </div>
     )
 }

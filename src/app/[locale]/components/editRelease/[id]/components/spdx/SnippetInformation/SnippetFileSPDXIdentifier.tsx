@@ -21,7 +21,7 @@ function SnippetFileSPDXIdentifier({
     dataSnippetFromFile,
     setDataSnippetFromFile,
     setSnippetFromFileToSnippet,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataSnippetFromFile
@@ -32,8 +32,14 @@ function SnippetFileSPDXIdentifier({
 
     return (
         <td>
-            <div className='form-group' style={{ flex: 1 }}>
-                <label className='lableSPDX' htmlFor='snippetFromFile'>
+            <div
+                className='form-group'
+                style={{ flex: 1 }}
+            >
+                <label
+                    className='lableSPDX'
+                    htmlFor='snippetFromFile'
+                >
                     9.2 Snippet from file SPDX identifier
                 </label>
                 <div style={{ display: 'flex' }}>

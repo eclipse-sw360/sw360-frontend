@@ -11,9 +11,9 @@
 
 import { ClearingRequestDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
-import { ReactNode } from 'react'
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { ReactNode } from 'react'
 
 export default function ClearingRequestInfo({
     data,
@@ -35,9 +35,11 @@ export default function ClearingRequestInfo({
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data?.requestingUser !== undefined && data.requestingUserName !== undefined
-                                ? <Link href={`mailto:${data.requestingUser}`}>{data.requestingUserName}</Link>
-                                : ''}
+                            {data?.requestingUser !== undefined && data.requestingUserName !== undefined ? (
+                                <Link href={`mailto:${data.requestingUser}`}>{data.requestingUserName}</Link>
+                            ) : (
+                                ''
+                            )}
                         </td>
                     </tr>
                     <tr>

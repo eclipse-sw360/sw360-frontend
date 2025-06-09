@@ -9,20 +9,20 @@
 
 'use client'
 
-import { useEffect, useState, ReactNode } from 'react'
 import { Embedded, Package } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession, signOut } from 'next-auth/react'
+import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { useRouter, useSearchParams, redirect } from 'next/navigation'
+import { redirect, useRouter, useSearchParams } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import DeletePackageModal from './DeletePackageModal'
-import { packageManagers } from "./PackageManagers"
-import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
+import { packageManagers } from './PackageManagers'
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
 
@@ -33,12 +33,17 @@ interface DeletePackageModalMetData {
     packageVersion: string
 }
 
-export default function Packages() : ReactNode {
+export default function Packages(): ReactNode {
     const { data: session, status } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
     const router = useRouter()
-    const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({ show: false, packageId: '', packageName: '', packageVersion: '' })
+    const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
+        show: false,
+        packageId: '',
+        packageName: '',
+        packageVersion: '',
+    })
 
     const handleCreatePackage = () => {
         router.push('/packages/add')
@@ -54,13 +59,16 @@ export default function Packages() : ReactNode {
         {
             id: 'packages.name',
             name: `${t('Package Name')} (${t('Version')})`,
-            formatter: ({ id, name, version }: { id: string; name: string; version: string; }) =>
+            formatter: ({ id, name, version }: { id: string; name: string; version: string }) =>
                 _(
                     <>
-                        <Link href={`/packages/detail/${id}`} className='text-link'>
-                            {name}{' '}{(version !== "") && `(${version})`}
+                        <Link
+                            href={`/packages/detail/${id}`}
+                            className='text-link'
+                        >
+                            {name} {version !== '' && `(${version})`}
                         </Link>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -89,11 +97,14 @@ export default function Packages() : ReactNode {
             id: 'packages.actions',
             name: t('Actions'),
             width: '13%',
-            formatter: ({ id, name, version }: { id: string, name: string, version: string }) =>
+            formatter: ({ id, name, version }: { id: string; name: string; version: string }) =>
                 _(
                     <span className='d-flex justify-content-evenly'>
                         <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                            <Link href={`/packages/edit/${id}`} className='overlay-trigger'>
+                            <Link
+                                href={`/packages/edit/${id}`}
+                                className='overlay-trigger'
+                            >
                                 <FaPencilAlt className='btn-icon' />
                             </Link>
                         </OverlayTrigger>
@@ -101,12 +112,19 @@ export default function Packages() : ReactNode {
                             <span className='d-inline-block'>
                                 <FaTrashAlt
                                     className='btn-icon'
-                                    onClick={() => setDeletePackageModalMetaData({ show: true, packageId: id, packageName: name, packageVersion: version })}
+                                    onClick={() =>
+                                        setDeletePackageModalMetaData({
+                                            show: true,
+                                            packageId: id,
+                                            packageName: name,
+                                            packageVersion: version,
+                                        })
+                                    }
                                     style={{ color: 'gray', fontSize: '18px' }}
                                 />
                             </span>
                         </OverlayTrigger>
-                    </span>
+                    </span>,
                 ),
             sort: true,
         },
@@ -121,7 +139,7 @@ export default function Packages() : ReactNode {
                     {
                         id: elem._links?.self.href.split('/').at(-1) ?? '',
                         name: elem.name ?? '',
-                        version: elem.version ?? ''
+                        version: elem.version ?? '',
                     },
                     '',
                     '',
@@ -130,7 +148,7 @@ export default function Packages() : ReactNode {
                     {
                         id: elem._links?.self.href.split('/').at(-1) ?? '',
                         name: elem.name ?? '',
-                        version: elem.version ?? ''
+                        version: elem.version ?? '',
                     },
                 ])
             },
@@ -152,7 +170,7 @@ export default function Packages() : ReactNode {
         },
         {
             fieldName: t('Package Manager'),
-            value: packageManagers.map((p) => ({key: p, text: p})),
+            value: packageManagers.map((p) => ({ key: p, text: p })),
             paramName: 'packageManager',
         },
         {
@@ -199,28 +217,43 @@ export default function Packages() : ReactNode {
     } else {
         return (
             <>
-                <DeletePackageModal modalMetaData={deletePackageModalMetaData} setModalMetaData={setDeletePackageModalMetaData} isEditPage={false}/>
+                <DeletePackageModal
+                    modalMetaData={deletePackageModalMetaData}
+                    setModalMetaData={setDeletePackageModalMetaData}
+                    isEditPage={false}
+                />
                 <div className='container page-content'>
                     <div className='row'>
                         <div className='col-2'>
-                            <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+                            <AdvancedSearch
+                                title='Advanced Search'
+                                fields={advancedSearch}
+                            />
                         </div>
                         <div className='col-10'>
                             <div className='row'>
                                 <div className='col d-flex justify-content-between'>
-                                    <button className='btn btn-primary col-auto' onClick={handleCreatePackage}>
+                                    <button
+                                        className='btn btn-primary col-auto'
+                                        onClick={handleCreatePackage}
+                                    >
                                         {t('Add Package')}
                                     </button>
                                     <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
                                 </div>
                             </div>
-                            {
-                                status === 'authenticated' ? 
-                                <Table columns={columns} server={initServerPaginationConfig() as ServerStorageOptions} selector={true} sort={false} /> :
+                            {status === 'authenticated' ? (
+                                <Table
+                                    columns={columns}
+                                    server={initServerPaginationConfig() as ServerStorageOptions}
+                                    selector={true}
+                                    sort={false}
+                                />
+                            ) : (
                                 <div className='col-12 d-flex justify-content-center align-items-center'>
                                     <Spinner className='spinner' />
                                 </div>
-                            }
+                            )}
                         </div>
                     </div>
                 </div>

@@ -7,16 +7,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { useTranslations } from 'next-intl'
 
 import { HttpStatus, ProjectPayload } from '@/object-types'
-import { getSession, signOut } from 'next-auth/react'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import MessageService from '@/services/message.service'
+import { getSession, signOut } from 'next-auth/react'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -29,9 +29,7 @@ interface LicenseInfoHeader {
 
 export default function LicenseInfoHeader({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                                       HTMLInputElement |
-                                                       HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
             [event.target.name]: event.target.value,
@@ -41,20 +39,19 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
     const getDefaultLicenseInfoHeader = async () => {
         try {
             const session = await getSession()
-            if(CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const url = 'projects/licenseInfoHeader'
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
-                const data = await response.json() as LicenseInfoHeader
+                const data = (await response.json()) as LicenseInfoHeader
                 setProjectPayload({
                     ...projectPayload,
-                    licenseInfoHeaderText: data.licenseInfoHeaderText
+                    licenseInfoHeaderText: data.licenseInfoHeaderText,
                 })
             } else {
                 MessageService.error(t('There are some errors while fetching default license info header'))
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -65,10 +62,11 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
                 <h6 className='header pb-2 px-2'>{t('License Info Header')}</h6>
                 <div className='row d-flex justify-content-end'>
                     <div className='col-lg-3 d-flex justify-content-end'>
-                        <button className='btn btn-light mb-2'
-                                type='button'
-                                onClick={getDefaultLicenseInfoHeader}
-                                >
+                        <button
+                            className='btn btn-light mb-2'
+                            type='button'
+                            onClick={getDefaultLicenseInfoHeader}
+                        >
                             {t('Set to default text')}
                         </button>
                     </div>

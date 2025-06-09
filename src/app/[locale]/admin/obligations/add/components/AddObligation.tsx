@@ -35,7 +35,7 @@ function AddObligation(): ReactNode {
     const submitObligation = async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return
-        
+
         if (
             !isFieldValid(obligation.title) ||
             !isFieldValid(obligation.text) ||

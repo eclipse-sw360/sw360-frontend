@@ -14,8 +14,8 @@ import { useTranslations } from 'next-intl'
 import { Alert } from 'react-bootstrap'
 import styles from '../preferences.module.css'
 
-import NotificationSettings from './NotificationSettings'
 import { ReactNode } from 'react'
+import NotificationSettings from './NotificationSettings'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
@@ -27,7 +27,7 @@ interface Props {
     setNotificationSetting: React.Dispatch<React.SetStateAction<NotificationSetting>>
 }
 
-const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props) : ReactNode => {
+const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props): ReactNode => {
     const t = useTranslations('default')
 
     return (
@@ -48,14 +48,15 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
                             })
                         }
                     />
-                    <label className={`form-check-label ${styles.label}`} htmlFor='wants_mail_notification'>
+                    <label
+                        className={`form-check-label ${styles.label}`}
+                        htmlFor='wants_mail_notification'
+                    >
                         {t('Enable E-Mail Notifications')}
                     </label>
                 </div>
             </div>
-            <Alert variant='info'>
-                {t('You will be notified on changes')}.
-            </Alert>
+            <Alert variant='info'>{t('You will be notified on changes')}.</Alert>
 
             <NotificationSettings
                 notificationSetting={notificationSetting}

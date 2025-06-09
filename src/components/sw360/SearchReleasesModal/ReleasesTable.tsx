@@ -10,32 +10,38 @@
 
 'use client'
 
-import React, { useEffect, useRef, type JSX } from 'react';
-import { Form } from 'react-bootstrap'
-import { _ } from 'next-sw360'
-import Table from '../Table/Table'
 import { ReleaseDetail } from '@/object-types'
-import { TableProps } from '../Table/Table'
+import { _ } from 'next-sw360'
+import React, { useEffect, useRef, type JSX } from 'react'
+import { Form } from 'react-bootstrap'
+import Table, { TableProps } from '../Table/Table'
 
 interface Props {
-    tableData: (string | ReleaseDetail)[][],
+    tableData: (string | ReleaseDetail)[][]
     selectingReleaseOnTable: Array<ReleaseDetail>
     setSelectingReleaseOnTable: React.Dispatch<React.SetStateAction<Array<ReleaseDetail>>>
 }
 
 const compare = (preState: TableProps, nextState: TableProps) => {
-    return Object.entries(preState.data ?? {}).sort().toString() === Object.entries(nextState.data ?? {}).sort().toString()
+    return (
+        Object.entries(preState.data ?? {})
+            .sort()
+            .toString() ===
+        Object.entries(nextState.data ?? {})
+            .sort()
+            .toString()
+    )
 }
 
 const MemoTable = React.memo(Table, compare)
 
-const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingReleaseOnTable }: Props) : JSX.Element => {
+const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingReleaseOnTable }: Props): JSX.Element => {
     const releases = useRef<Array<ReleaseDetail>>([])
     const noRecordsFoundString = { noRecordsFound: 'No releases found.' }
     const handleSelectRelease = (relDetail: ReleaseDetail) => {
-        const selectingReleaseIds = releases.current.map(rel => rel.id)
+        const selectingReleaseIds = releases.current.map((rel) => rel.id)
         if (selectingReleaseIds.includes(relDetail.id)) {
-            setSelectingReleaseOnTable(releases.current.filter(release => release.id !== relDetail.id))
+            setSelectingReleaseOnTable(releases.current.filter((release) => release.id !== relDetail.id))
             return
         }
 
@@ -52,11 +58,11 @@ const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingRelease
                     <Form.Check
                         name='release-selection'
                         className='release-selection'
-                        type= 'checkbox'
+                        type='checkbox'
                         onClick={() => {
                             handleSelectRelease(release)
                         }}
-                    ></Form.Check>
+                    ></Form.Check>,
                 ),
             width: '6%',
             sort: false,
@@ -70,9 +76,14 @@ const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingRelease
             id: 'componentName',
             name: 'Component Name',
             formatter: (release: ReleaseDetail) =>
-                _(<a href={`/components/detail/${release._links['sw360:component'].href.split('/').at(-1)}`}>{release.name}</a>),
+                _(
+                    <a href={`/components/detail/${release._links['sw360:component'].href.split('/').at(-1)}`}>
+                        {release.name}
+                    </a>,
+                ),
             sort: {
-                compare: (release1: ReleaseDetail, release2: ReleaseDetail) => release1.name.localeCompare(release2.name)
+                compare: (release1: ReleaseDetail, release2: ReleaseDetail) =>
+                    release1.name.localeCompare(release2.name),
             },
         },
         {
@@ -81,7 +92,8 @@ const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingRelease
             formatter: (release: ReleaseDetail) =>
                 _(<a href={`/components/releases/detail/${release.id}`}>{release.version}</a>),
             sort: {
-                compare: (release1: ReleaseDetail, release2: ReleaseDetail) => release1.version.localeCompare(release2.version)
+                compare: (release1: ReleaseDetail, release2: ReleaseDetail) =>
+                    release1.version.localeCompare(release2.version),
             },
         },
         {
@@ -102,7 +114,13 @@ const ReleasesTable = ({ tableData, selectingReleaseOnTable, setSelectingRelease
 
     return (
         <div className='row'>
-            <MemoTable data={tableData} columns={columns} sort={false} pagination={false} language={noRecordsFoundString} />
+            <MemoTable
+                data={tableData}
+                columns={columns}
+                sort={false}
+                pagination={false}
+                language={noRecordsFoundString}
+            />
         </div>
     )
 }

@@ -9,17 +9,27 @@
 
 'use client'
 
-import { TreeTable, _ } from 'next-sw360'
-import { useTranslations } from "next-intl"
-import { Button, Form, Spinner } from "react-bootstrap"
-import Link from "next/link"
-import { useEffect, useState, ReactNode, Dispatch, SetStateAction } from "react"
-import { useSession, getSession, signOut } from "next-auth/react"
-import { ApiUtils, CommonUtils } from "@/utils"
-import { AttachmentUsages, HttpStatus, Project, NodeData, Embedded, ProjectLinkedRelease, Release, AttachmentUsage, SaveUsagesPayload } from "@/object-types"
-import { notFound, useSearchParams } from "next/navigation"
-import MessageService from '@/services/message.service'
+import {
+    AttachmentUsage,
+    AttachmentUsages,
+    Embedded,
+    HttpStatus,
+    NodeData,
+    Project,
+    ProjectLinkedRelease,
+    Release,
+    SaveUsagesPayload,
+} from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { TreeTable, _ } from 'next-sw360'
+import Link from 'next/link'
+import { notFound, useSearchParams } from 'next/navigation'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Button, Form, Spinner } from 'react-bootstrap'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -27,34 +37,32 @@ const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 const fetchProjectAndReleaseDetails = (linkedProjects: Project[] | undefined, projectId: string, proj: Project[]) => {
-    if(!linkedProjects || proj.length !== 0) {
+    if (!linkedProjects || proj.length !== 0) {
         return
     }
-    for(const p of linkedProjects) {
-        if(p['_links']['self']['href'].split('/').at(-1) === projectId
-        ) {
+    for (const p of linkedProjects) {
+        if (p['_links']['self']['href'].split('/').at(-1) === projectId) {
             proj[0] = p
             return
         } else {
-            fetchProjectAndReleaseDetails(p["_embedded"]?.["sw360:linkedProjects"], projectId, proj)
+            fetchProjectAndReleaseDetails(p['_embedded']?.['sw360:linkedProjects'], projectId, proj)
         }
     }
 }
 
 const setExpandedFieldsOfNewData = (prevState: NodeData[], newState: NodeData[]) => {
-    for(let i = 0; i < prevState.length ; ++i) {
-        if(prevState[i].isExpanded !== undefined)
-            newState[i].isExpanded = prevState[i].isExpanded
+    for (let i = 0; i < prevState.length; ++i) {
+        if (prevState[i].isExpanded !== undefined) newState[i].isExpanded = prevState[i].isExpanded
 
-        const prevChildren = prevState[i].children;
-        const newChildren = newState[i].children;
+        const prevChildren = prevState[i].children
+        const newChildren = newState[i].children
         if (prevChildren && prevChildren.length > 0 && newChildren && newChildren.length > 0) {
             setExpandedFieldsOfNewData(prevChildren, newChildren)
         }
     }
 }
 
-export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projectId: string}>): ReactNode {
+export default function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [project, setProject] = useState<Project>()
@@ -68,15 +76,15 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
         selected: [],
         deselected: [],
         selectedConcludedUsages: [],
-        deselectedConcludedUsages: []
+        deselectedConcludedUsages: [],
     })
     const [loading, setLoading] = useState(false)
-    
+
     const handleDownloadSourceCodeBundle = async (projectId: string) => {
         try {
             setLoading(true)
             const searchParams = Object.fromEntries(params)
-            if(Object.prototype.hasOwnProperty.call(searchParams, "withSubProjects") === false) {
+            if (Object.prototype.hasOwnProperty.call(searchParams, 'withSubProjects') === false) {
                 return
             }
             const session = await getSession()
@@ -84,24 +92,33 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
                 MessageService.error(t('Something went wrong'))
                 return signOut()
             }
-            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload, session.user.access_token)
-            if(response.status !== HttpStatus.CREATED) {
+            const response = await ApiUtils.POST(
+                `projects/${projectId}/saveAttachmentUsages`,
+                saveUsagesPayload,
+                session.user.access_token,
+            )
+            if (response.status !== HttpStatus.CREATED) {
                 MessageService.error(t('Something went wrong'))
                 return notFound()
             }
             const currentDate = new Date().toISOString().split('T')[0]
             DownloadService.download(
-                `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`, 
-                session, `SourceCodeBundle-${currentDate}.zip`
+                `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`,
+                session,
+                `SourceCodeBundle-${currentDate}.zip`,
             )
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         } finally {
             setLoading(false)
         }
     }
 
-    const formatReleaseAndAttachments = (attachmentUsage: AttachmentUsage[], r: Release, level: number): NodeData | undefined => {
+    const formatReleaseAndAttachments = (
+        attachmentUsage: AttachmentUsage[],
+        r: Release,
+        level: number,
+    ): NodeData | undefined => {
         if (!r.attachments) {
             r.attachments = []
         }
@@ -111,85 +128,140 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
         if (r.attachments.length > 1) {
             row_color_class = 'orange-cell'
         }
-        for(const att of r.attachments) {
+        for (const att of r.attachments) {
             const attNode: NodeData = {
-                rowData: [                    
-                    <div className={`form-check text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_select`}>
-                        <input className='form-check-input' type='checkbox' value={att.attachmentContentId ?? ''} />
+                rowData: [
+                    <div
+                        className={`form-check text-center ${row_color_class} border-0-cell`}
+                        key={`${att.attachmentContentId ?? ''}_select`}
+                    >
                         <input
-                            type="checkbox"
-                            className="form-check-input"
-                            checked={saveUsagesPayload.selected.indexOf(`${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`) !== -1}
+                            className='form-check-input'
+                            type='checkbox'
+                            value={att.attachmentContentId ?? ''}
+                        />
+                        <input
+                            type='checkbox'
+                            className='form-check-input'
+                            checked={
+                                saveUsagesPayload.selected.indexOf(
+                                    `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`,
+                                ) !== -1
+                            }
                             onChange={() => {
                                 const val = `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`
-                                if(saveUsagesPayload.selected.indexOf(val) === -1) {
+                                if (saveUsagesPayload.selected.indexOf(val) === -1) {
                                     setSaveUsagesPayload({
                                         ...saveUsagesPayload,
                                         selected: [...saveUsagesPayload.selected, val],
-                                        deselected: saveUsagesPayload.deselected.filter(item => item !== val)
+                                        deselected: saveUsagesPayload.deselected.filter((item) => item !== val),
                                     })
                                 } else {
                                     setSaveUsagesPayload({
                                         ...saveUsagesPayload,
-                                        selected: saveUsagesPayload.selected.filter(item => item !== val),
-                                        deselected: [...saveUsagesPayload.deselected, val]
+                                        selected: saveUsagesPayload.selected.filter((item) => item !== val),
+                                        deselected: [...saveUsagesPayload.deselected, val],
                                     })
                                 }
                             }}
                         />
-                    </div>, 
-                    <div className={`text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_level`}>{level}</div>,
-                    <div className={`${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_name`}>{att.filename}</div>, 
-                    <p key={`${att.attachmentContentId ?? ''}_used_by`} className={`${row_color_class} border-0-cell`}>
-                        {
-                            (att.attachmentUsageCount === undefined || att.attachmentUsageCount === 0) ?
-                            t('not used in any project yet'):
-                            t.rich('USED_BY ATTACHMENTS', {
-                                num: att.attachmentUsageCount,
-                                strong: (chunks) => <b>{chunks}</b>,
-                            })
-                        }
+                    </div>,
+                    <div
+                        className={`text-center ${row_color_class} border-0-cell`}
+                        key={`${att.attachmentContentId ?? ''}_level`}
+                    >
+                        {level}
+                    </div>,
+                    <div
+                        className={`${row_color_class} border-0-cell`}
+                        key={`${att.attachmentContentId ?? ''}_name`}
+                    >
+                        {att.filename}
+                    </div>,
+                    <p
+                        key={`${att.attachmentContentId ?? ''}_used_by`}
+                        className={`${row_color_class} border-0-cell`}
+                    >
+                        {att.attachmentUsageCount === undefined || att.attachmentUsageCount === 0
+                            ? t('not used in any project yet')
+                            : t.rich('USED_BY ATTACHMENTS', {
+                                  num: att.attachmentUsageCount,
+                                  strong: (chunks) => <b>{chunks}</b>,
+                              })}
                     </p>,
-                    <div className={`text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_name`}>
+                    <div
+                        className={`text-center ${row_color_class} border-0-cell`}
+                        key={`${att.attachmentContentId ?? ''}_name`}
+                    >
                         {Capitalize(r.clearingState ?? '')}
                     </div>,
-                    <div className='text-center' key={`${att.attachmentContentId}_uploaded_by`}>
+                    <div
+                        className='text-center'
+                        key={`${att.attachmentContentId}_uploaded_by`}
+                    >
                         <Link
                             className={`text-link ${row_color_class} border-0-cell`}
                             href={`mailto:${att.createdBy}`}
                         >
                             {att.createdBy}
                         </Link>
-                    </div>, 
-                    <div className={`text-center ${row_color_class} border-0-cell`} key={`${att.attachmentContentId ?? ''}_clearing_team`}>{att.checkedTeam ?? ''}</div>
-                ]
+                    </div>,
+                    <div
+                        className={`text-center ${row_color_class} border-0-cell`}
+                        key={`${att.attachmentContentId ?? ''}_clearing_team`}
+                    >
+                        {att.checkedTeam ?? ''}
+                    </div>,
+                ],
             }
             attNodes.push(attNode)
         }
-        if(attNodes.length === 0) {
+        if (attNodes.length === 0) {
             return
         }
         const relNode: NodeData = {
             rowData: [
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_select`}></div>,
-                <div className={`text-center ${row_color_class} border-0-cell`}
+                <div
+                    className={`text-center ${row_color_class} border-0-cell`}
+                    key={`${release_id}_select`}
+                ></div>,
+                <div
+                    className={`text-center ${row_color_class} border-0-cell`}
                     key={`${release_id}_level`}
-                >1</div>,
-                <Link href={`/components/releases/detail/${release_id}`} 
-                    className={`text-center text-link ${row_color_class} border-0-cell`} key={`${release_id}_release_name`}>
-                    {r.name ?? ''}{r.version ?? ` ${r.version}`}
+                >
+                    1
+                </div>,
+                <Link
+                    href={`/components/releases/detail/${release_id}`}
+                    className={`text-center text-link ${row_color_class} border-0-cell`}
+                    key={`${release_id}_release_name`}
+                >
+                    {r.name ?? ''}
+                    {r.version ?? ` ${r.version}`}
                 </Link>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_component_type`}>
+                <div
+                    className={`text-center ${row_color_class} border-0-cell`}
+                    key={`${release_id}_component_type`}
+                >
                     {r.componentType ?? ''}
                 </div>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_clearing_state`}>
+                <div
+                    className={`text-center ${row_color_class} border-0-cell`}
+                    key={`${release_id}_clearing_state`}
+                >
                     {Capitalize(r.clearingState ?? '')}
                 </div>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_uploaded_by`}></div>,
-                <div className={`text-center ${row_color_class} border-0-cell`} key={`${release_id}_clearing_team`}></div>
+                <div
+                    className={`text-center ${row_color_class} border-0-cell`}
+                    key={`${release_id}_uploaded_by`}
+                ></div>,
+                <div
+                    className={`text-center ${row_color_class} border-0-cell`}
+                    key={`${release_id}_clearing_team`}
+                ></div>,
             ],
             children: attNodes,
-            isExpanded: true
+            isExpanded: true,
         }
         return relNode
     }
@@ -200,80 +272,97 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
         ;(async () => {
             try {
                 const searchParams = Object.fromEntries(params)
-                if(Object.prototype.hasOwnProperty.call(searchParams, "withSubProjects") === false) {
+                if (Object.prototype.hasOwnProperty.call(searchParams, 'withSubProjects') === false) {
                     return
                 }
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const requests = [ApiUtils.GET(`projects/${projectId}`, session.user.access_token, signal)]
-                if(searchParams.withSubProjects === 'true') {
+                if (searchParams.withSubProjects === 'true') {
                     requests.push(
-                        ApiUtils.GET(`projects/${projectId}/attachmentUsage?transitive=true&filter=withSourceAttachment`, session.user.access_token, signal),
-                        ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, session.user.access_token, signal)
+                        ApiUtils.GET(
+                            `projects/${projectId}/attachmentUsage?transitive=true&filter=withSourceAttachment`,
+                            session.user.access_token,
+                            signal,
+                        ),
+                        ApiUtils.GET(
+                            `projects/${projectId}/linkedProjects?transitive=true`,
+                            session.user.access_token,
+                            signal,
+                        ),
                     )
                 } else {
-                    requests.push(ApiUtils.GET(`projects/${projectId}/attachmentUsage?transitive=false&filter=withSourceAttachment`, session.user.access_token, signal))
+                    requests.push(
+                        ApiUtils.GET(
+                            `projects/${projectId}/attachmentUsage?transitive=false&filter=withSourceAttachment`,
+                            session.user.access_token,
+                            signal,
+                        ),
+                    )
                 }
                 const responses = await Promise.all(requests)
-                if (responses.filter(response => (response.status === HttpStatus.UNAUTHORIZED)).length !== 0) {
+                if (responses.filter((response) => response.status === HttpStatus.UNAUTHORIZED).length !== 0) {
                     return signOut()
-                } else if (responses.filter(response => (response.status !== HttpStatus.OK)).length !== 0) {
+                } else if (responses.filter((response) => response.status !== HttpStatus.OK).length !== 0) {
                     return notFound()
                 }
-    
-                const proj = await responses[0].json() as Project
+
+                const proj = (await responses[0].json()) as Project
                 setProject(proj)
 
-                const attachmentUsages = await responses[1].json() as AttachmentUsages
-                const linkedProjects = (searchParams.withSubProjects === 'true') ? await responses[2].json() as LinkedProjects: null
+                const attachmentUsages = (await responses[1].json()) as AttachmentUsages
+                const linkedProjects =
+                    searchParams.withSubProjects === 'true' ? ((await responses[2].json()) as LinkedProjects) : null
                 setAttachmentUsagesAndLinkedProjects({
                     attachmentUsages: attachmentUsages,
-                    linkedProjects: linkedProjects
+                    linkedProjects: linkedProjects,
                 })
 
                 const saveUsages: SaveUsagesPayload = {
                     selected: [],
                     deselected: [],
                     selectedConcludedUsages: [],
-                    deselectedConcludedUsages: []
+                    deselectedConcludedUsages: [],
                 }
 
-                for(const r of attachmentUsages['_embedded']['sw360:release']) {
-                    for(const att of r.attachments ?? []) {
-                        const usages = attachmentUsages["_embedded"]["sw360:attachmentUsages"][0].filter((elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId)
-                        for(const u of usages) {
+                for (const r of attachmentUsages['_embedded']['sw360:release']) {
+                    for (const att of r.attachments ?? []) {
+                        const usages = attachmentUsages['_embedded']['sw360:attachmentUsages'][0].filter(
+                            (elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId,
+                        )
+                        for (const u of usages) {
                             if (u.usageData && u.usageData.sourcePackage) {
-                                saveUsages.selected = [...new Set<string>([
-                                    ...saveUsages.selected, `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`
-                                ])]
+                                saveUsages.selected = [
+                                    ...new Set<string>([
+                                        ...saveUsages.selected,
+                                        `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`,
+                                    ]),
+                                ]
                             }
                         }
                     }
                 }
                 setSaveUsagesPayload(saveUsages)
-            } catch(e) {
+            } catch (e) {
                 console.error(e)
             }
         })()
         return () => controller.abort()
     }, [projectId, params])
 
-    
     useEffect(() => {
-        if(attachmentUsagesAndLinkedProjects === undefined)
-            return
+        if (attachmentUsagesAndLinkedProjects === undefined) return
 
         const attachmentUsages = structuredClone(attachmentUsagesAndLinkedProjects.attachmentUsages)
 
         const tableData: NodeData[] = []
 
-        if(attachmentUsagesAndLinkedProjects.linkedProjects !== null) {
+        if (attachmentUsagesAndLinkedProjects.linkedProjects !== null) {
             const linkedProjects = structuredClone(attachmentUsagesAndLinkedProjects.linkedProjects)
             for (const p in attachmentUsages['linkedProjects'] ?? {}) {
                 const proj: Project[] = []
                 fetchProjectAndReleaseDetails(linkedProjects['_embedded']['sw360:projects'], p, proj)
-                if(proj.length === 0) {
+                if (proj.length === 0) {
                     continue
                 }
                 const releases = new Set<string>()
@@ -282,56 +371,77 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
                 })
                 const projectNode: NodeData = {
                     rowData: [
-                        <div className="text-center border-0-cell" key={`${p}_select`}></div>,
-                        <div className="text-center border-0-cell"
+                        <div
+                            className='text-center border-0-cell'
+                            key={`${p}_select`}
+                        ></div>,
+                        <div
+                            className='text-center border-0-cell'
                             key={`${p}_level`}
-                        >1</div>,
-                        <Link href={`/projects/detail/${p}`} 
-                            className="text-center text-link border-0-cell" key={`${p}_release_name`}>
-                            {proj[0].name}{proj[0].version !== undefined && ` ${proj[0].version}`}
+                        >
+                            1
+                        </div>,
+                        <Link
+                            href={`/projects/detail/${p}`}
+                            className='text-center text-link border-0-cell'
+                            key={`${p}_release_name`}
+                        >
+                            {proj[0].name}
+                            {proj[0].version !== undefined && ` ${proj[0].version}`}
                         </Link>,
-                        <div className="text-center border-0-cell" key={`${p}_component_type`}>
+                        <div
+                            className='text-center border-0-cell'
+                            key={`${p}_component_type`}
+                        >
                             {Capitalize(proj[0].projectType ?? '')}
                         </div>,
-                        <div className="text-center border-0-cell" key={`${p}_clearing_state`}>
+                        <div
+                            className='text-center border-0-cell'
+                            key={`${p}_clearing_state`}
+                        >
                             {Capitalize(proj[0].clearingState ?? '')}
                         </div>,
-                        <div className="text-center border-0-cell" key={`${p}_uploaded_by`}></div>,
-                        <div className="text-center border-0-cell" key={`${p}_clearing_team`}></div>
+                        <div
+                            className='text-center border-0-cell'
+                            key={`${p}_uploaded_by`}
+                        ></div>,
+                        <div
+                            className='text-center border-0-cell'
+                            key={`${p}_clearing_team`}
+                        ></div>,
                     ],
                     children: [],
-                    isExpanded: true
+                    isExpanded: true,
                 }
-                for(const r of attachmentUsages['_embedded']['sw360:release']) {
-                    if(!r.attachments)
-                        continue
+                for (const r of attachmentUsages['_embedded']['sw360:release']) {
+                    if (!r.attachments) continue
                     const release_id = r._links?.self.href.split('/').at(-1)
-                    if(release_id !== undefined && releases.has(release_id)) {
-                        const relNode = formatReleaseAndAttachments(attachmentUsages._embedded["sw360:attachmentUsages"][0], r, 2)
-                        if(!relNode)
-                            continue
+                    if (release_id !== undefined && releases.has(release_id)) {
+                        const relNode = formatReleaseAndAttachments(
+                            attachmentUsages._embedded['sw360:attachmentUsages'][0],
+                            r,
+                            2,
+                        )
+                        if (!relNode) continue
                         projectNode.children?.push(relNode)
                     }
                 }
-                attachmentUsages['_embedded']['sw360:release'] = 
-                attachmentUsages['_embedded']['sw360:release'].filter((r: Release) => 
-                    !releases.has(r['_links']?.['self']['href'].split('/').at(-1) ?? '')
+                attachmentUsages['_embedded']['sw360:release'] = attachmentUsages['_embedded']['sw360:release'].filter(
+                    (r: Release) => !releases.has(r['_links']?.['self']['href'].split('/').at(-1) ?? ''),
                 )
-                if(projectNode.children && projectNode.children.length !== 0) {
+                if (projectNode.children && projectNode.children.length !== 0) {
                     tableData.push(projectNode)
                 }
             }
         }
 
-        for (const r of attachmentUsages._embedded["sw360:release"]) {
-            const relNode = formatReleaseAndAttachments(attachmentUsages._embedded["sw360:attachmentUsages"][0], r, 1)
-            if(!relNode)
-                continue
+        for (const r of attachmentUsages._embedded['sw360:release']) {
+            const relNode = formatReleaseAndAttachments(attachmentUsages._embedded['sw360:attachmentUsages'][0], r, 1)
+            if (!relNode) continue
             tableData.push(relNode)
         }
         setData((prevState) => {
-            if(prevState !== undefined)
-                setExpandedFieldsOfNewData(prevState, tableData)
+            if (prevState !== undefined) setExpandedFieldsOfNewData(prevState, tableData)
             return tableData
         })
     }, [attachmentUsagesAndLinkedProjects, saveUsagesPayload])
@@ -383,7 +493,7 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
 
     if (status === 'unauthenticated') {
         return signOut()
-    } else if(project === undefined) {
+    } else if (project === undefined) {
         return (
             <div className='col-12 mt-3 text-center'>
                 <Spinner className='spinner' />
@@ -395,11 +505,9 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
                 <div className='container page-content'>
                     <div className='row'>
                         <div className='row d-flex justify-content-between'>
-                            <div className='col-auto buttonheader-title'>
-                                {t('GENERATE SOURCE CODE BUNDLE')}
-                            </div>
+                            <div className='col-auto buttonheader-title'>{t('GENERATE SOURCE CODE BUNDLE')}</div>
                             <div className='col-auto text-truncate buttonheader-title'>
-                                {project.name}{' '}{(project.version !== undefined) && `(${project.version})`}
+                                {project.name} {project.version !== undefined && `(${project.version})`}
                             </div>
                         </div>
                         <div className='col-lg-12'>
@@ -411,18 +519,27 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{projec
                             >
                                 {t('Download File')}{' '}
                             </Button>
-                            <div className='subscriptionBox my-2' style={{ maxWidth: '98vw',
-                                                                           textAlign:'left',
-                                                                           fontSize: '15px'}}>
-                                {t('No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading')}
+                            <div
+                                className='subscriptionBox my-2'
+                                style={{ maxWidth: '98vw', textAlign: 'left', fontSize: '15px' }}
+                            >
+                                {t(
+                                    'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
+                                )}
                             </div>
-                            {
-                                data
-                                ? <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />
-                                : <div className='col-12 text-center'>
+                            {data ? (
+                                <TreeTable
+                                    columns={columns}
+                                    data={data}
+                                    setData={setData as Dispatch<SetStateAction<NodeData[]>>}
+                                    selector={true}
+                                    sort={false}
+                                />
+                            ) : (
+                                <div className='col-12 text-center'>
                                     <Spinner className='spinner' />
                                 </div>
-                            }
+                            )}
                         </div>
                     </div>
                 </div>

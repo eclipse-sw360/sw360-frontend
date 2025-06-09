@@ -9,14 +9,14 @@
 
 'use client'
 
-import Link from 'next/link'
-import { ReactNode, useEffect, useState } from 'react'
-import { Table, _ } from "next-sw360"
-import { useTranslations } from 'next-intl'
+import { ClearingRequest, Embedded, HttpStatus, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { Embedded, HttpStatus, UserGroupType, ClearingRequest } from '@/object-types'
 import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Table, _ } from 'next-sw360'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
@@ -49,8 +49,7 @@ function LicenseClearing(licenseClearing: LicenseClearing): ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if(CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const response = await ApiUtils.GET(
                     `projects/${licenseClearing.projectId}/licenseClearingCount`,
@@ -63,7 +62,7 @@ function LicenseClearing(licenseClearing: LicenseClearing): ReactNode {
                     return notFound()
                 }
 
-                    const data = await response.json() as LicenseClearingData
+                const data = (await response.json()) as LicenseClearingData
 
                 setLcData(data)
             } catch (e) {
@@ -76,34 +75,25 @@ function LicenseClearing(licenseClearing: LicenseClearing): ReactNode {
 
     return (
         <>
-            { lcData ? (
-                <> 
-                    {
-                        licenseClearing.openReleases !== undefined && lcData['Release Count']? (
-                            <div className='text-center'>
-                                {`${lcData['Release Count']}`}
-                            </div>
-                        ) : null
-                    }
-                    {
-                        licenseClearing.clearingProgress !== undefined ? (
-                            <div className='text-center'>
-                                {`${lcData['Approved Count']}/${lcData['Release Count']}`}
-                            </div>
-                        ) : null}
-                    </>
-                ) : (
-                    <div className='col-12 text-center'>
-                        <Spinner className='spinner' />
-                    </div>
-                )
-            }
+            {lcData ? (
+                <>
+                    {licenseClearing.openReleases !== undefined && lcData['Release Count'] ? (
+                        <div className='text-center'>{`${lcData['Release Count']}`}</div>
+                    ) : null}
+                    {licenseClearing.clearingProgress !== undefined ? (
+                        <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
+                    ) : null}
+                </>
+            ) : (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
         </>
     )
 }
 
 function OpenClearingRequest(): ReactNode | undefined {
-
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [loading, setLoading] = useState<boolean>(true)
@@ -112,12 +102,12 @@ function OpenClearingRequest(): ReactNode | undefined {
 
     const fetchData = async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)){
+        if (CommonUtils.isNullOrUndefined(session)) {
             return signOut()
         }
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            const data = await response.json() as EmbeddedClearingRequest
+            const data = (await response.json()) as EmbeddedClearingRequest
             return data
         } else if (response.status == HttpStatus.UNAUTHORIZED) {
             return signOut()
@@ -127,7 +117,7 @@ function OpenClearingRequest(): ReactNode | undefined {
     }
 
     useEffect(() => {
-        if(status !== 'authenticated') return
+        if (status !== 'authenticated') return
         setLoading(true)
         void fetchData('clearingrequests').then((clearingRequests: EmbeddedClearingRequest | undefined) => {
             const filteredClearingRequests = clearingRequests?._embedded['sw360:clearingRequests'].filter(
@@ -218,25 +208,34 @@ function OpenClearingRequest(): ReactNode | undefined {
             sort: true,
             formatter: (projectData: ProjectData) =>
                 _(
-                    (projectData.isProjectDeleted !== undefined && projectData.isProjectDeleted) ? t('Project Deleted') :
-                    <>
-                        <Link href={`/projects/detail/${projectData.projectId}`}
-                              className='text-link'>
-                            {projectData.projectName}
-                        </Link>
-                    </>,
+                    projectData.isProjectDeleted !== undefined && projectData.isProjectDeleted ? (
+                        t('Project Deleted')
+                    ) : (
+                        <>
+                            <Link
+                                href={`/projects/detail/${projectData.projectId}`}
+                                className='text-link'
+                            >
+                                {projectData.projectName}
+                            </Link>
+                        </>
+                    ),
                 ),
         },
         {
             id: 'openClearingRequest.openReleases',
             name: t('Open Releases'),
             sort: true,
-            formatter: (licenseClearing: LicenseClearing) => 
-                _(  
-                    (licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted) ? t('Not Available') :
-                    <LicenseClearing projectId={licenseClearing.projectId}
-                                     openReleases={licenseClearing.openReleases}
-                    />
+            formatter: (licenseClearing: LicenseClearing) =>
+                _(
+                    licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted ? (
+                        t('Not Available')
+                    ) : (
+                        <LicenseClearing
+                            projectId={licenseClearing.projectId}
+                            openReleases={licenseClearing.openReleases}
+                        />
+                    ),
                 ),
         },
         {
@@ -344,12 +343,16 @@ function OpenClearingRequest(): ReactNode | undefined {
             id: 'openClearingRequest.clearingProgress',
             name: t('Clearing Progress'),
             sort: true,
-            formatter: (licenseClearing: LicenseClearing) => 
-                _(  
-                    (licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted) ? t('Not Available') :
-                    <LicenseClearing projectId={licenseClearing.projectId}
-                                     clearingProgress={licenseClearing.clearingProgress}
-                    />
+            formatter: (licenseClearing: LicenseClearing) =>
+                _(
+                    licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted ? (
+                        t('Not Available')
+                    ) : (
+                        <LicenseClearing
+                            projectId={licenseClearing.projectId}
+                            clearingProgress={licenseClearing.clearingProgress}
+                        />
+                    ),
                 ),
         },
         {
@@ -394,23 +397,27 @@ function OpenClearingRequest(): ReactNode | undefined {
             formatter: ({ requestId, requestingUser }: { requestId: string; requestingUser: string }) =>
                 _(
                     <>
-                        <OverlayTrigger overlay={
-                            <Tooltip>
-                                {t('Edit')}
-                            </Tooltip>}>
-                            <Button className='btn-transparent'
-                                    hidden={isProjectDeleted  || (session !== null && session.user.userGroup === UserGroupType.USER &&
-                                                                  session.user.email !== requestingUser)}>
-                                <Link href={`/requests/clearingRequest/edit/${requestId}`}
-                                    className='overlay-trigger'>
-                                    <FaPencilAlt className='btn-icon'/>
+                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                            <Button
+                                className='btn-transparent'
+                                hidden={
+                                    isProjectDeleted ||
+                                    (session !== null &&
+                                        session.user.userGroup === UserGroupType.USER &&
+                                        session.user.email !== requestingUser)
+                                }
+                            >
+                                <Link
+                                    href={`/requests/clearingRequest/edit/${requestId}`}
+                                    className='overlay-trigger'
+                                >
+                                    <FaPencilAlt className='btn-icon' />
                                 </Link>
                             </Button>
                         </OverlayTrigger>
-                        
-                    </>
-                )
-        }
+                    </>,
+                ),
+        },
     ]
 
     if (status === 'unauthenticated') {

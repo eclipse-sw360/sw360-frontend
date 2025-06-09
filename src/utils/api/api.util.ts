@@ -19,7 +19,7 @@ async function send({
     data,
     token,
     signal,
-    headers
+    headers,
 }: {
     method: string
     path: string
@@ -39,13 +39,13 @@ async function send({
         }
     }
 
-    if(headers) {
+    if (headers) {
         request_content.headers = {
             ...request_content.headers,
-            ...headers  
+            ...headers,
         }
     }
-    
+
     if (token) {
         request_content.headers['Authorization'] = `${token}`
     }
@@ -53,13 +53,13 @@ async function send({
     if (signal !== undefined) {
         if (signal instanceof AbortSignal) {
             request_content.signal = signal
-          }    
         }
+    }
 
     return fetch(`${base}/${path}`, request_content).then((r) => r)
 }
 
-function GET(path: string, token: string, signal?: unknown, headers?: { [key:string]: string }): Promise<Response> {
+function GET(path: string, token: string, signal?: unknown, headers?: { [key: string]: string }): Promise<Response> {
     return send({ method: 'GET', path, token, data: null, signal, headers })
 }
 

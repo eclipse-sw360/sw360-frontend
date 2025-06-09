@@ -8,33 +8,43 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Dispatch, type JSX, SetStateAction } from 'react'
-import { ConfigKeys, Configuration, UserGroupType} from '@/object-types'
+import { ConfigKeys, Configuration, UserGroupType } from '@/object-types'
 import { useTranslations } from 'next-intl'
+import { Dispatch, type JSX, SetStateAction } from 'react'
 
 interface Props {
     configKey: ConfigKeys
     currentConfig: Configuration
-    setCurrentConfig: Dispatch<SetStateAction<Configuration | undefined>>,
+    setCurrentConfig: Dispatch<SetStateAction<Configuration | undefined>>
     disabled?: boolean
 }
 
-const SelectUserGroup = ({currentConfig, configKey, setCurrentConfig, disabled = false} : Props) : JSX.Element => {
+const SelectUserGroup = ({ currentConfig, configKey, setCurrentConfig, disabled = false }: Props): JSX.Element => {
     const t = useTranslations('default')
     return (
-        <select className='form-control form-control-sm' name='userGroup' defaultValue={currentConfig[configKey]} required disabled={disabled}
+        <select
+            className='form-control form-control-sm'
+            name='userGroup'
+            defaultValue={currentConfig[configKey]}
+            required
+            disabled={disabled}
             onChange={(e) => {
                 setCurrentConfig((prev) => {
                     return {
                         ...prev,
-                        [configKey]: e.target.value
+                        [configKey]: e.target.value,
                     } as Configuration
                 })
             }}
-            >
-            {
-                Object.entries(UserGroupType).map(([key, value]) => <option key={key} value={key}>{t(value as never)}</option>)
-            }
+        >
+            {Object.entries(UserGroupType).map(([key, value]) => (
+                <option
+                    key={key}
+                    value={key}
+                >
+                    {t(value as never)}
+                </option>
+            ))}
         </select>
     )
 }

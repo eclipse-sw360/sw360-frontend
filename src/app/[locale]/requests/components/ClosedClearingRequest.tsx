@@ -9,14 +9,14 @@
 
 'use client'
 
-import Link from 'next/link'
-import { ReactNode, useEffect, useState } from 'react'
-import { Table, _ } from "next-sw360"
-import { useTranslations } from 'next-intl'
+import { ClearingRequest, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { Embedded, HttpStatus, ClearingRequest } from '@/object-types'
-import { signOut, getSession, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Table, _ } from 'next-sw360'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
@@ -29,7 +29,6 @@ interface ProjectData {
 }
 
 function ClosedClearingRequest(): ReactNode {
-
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const [tableData, setTableData] = useState<Array<(object | string)[]>>([])
@@ -62,13 +61,18 @@ function ClosedClearingRequest(): ReactNode {
             sort: true,
             formatter: (projectData: ProjectData) =>
                 _(
-                    (projectData.isProjectDeleted !== undefined && projectData.isProjectDeleted === true) ? t('Project Deleted') :
-                    <>
-                        <Link href={`/projects/detail/${projectData.projectId}`}
-                              className='text-link'>
-                            {projectData.projectName}
-                        </Link>
-                    </>,
+                    projectData.isProjectDeleted !== undefined && projectData.isProjectDeleted === true ? (
+                        t('Project Deleted')
+                    ) : (
+                        <>
+                            <Link
+                                href={`/projects/detail/${projectData.projectId}`}
+                                className='text-link'
+                            >
+                                {projectData.projectName}
+                            </Link>
+                        </>
+                    ),
                 ),
         },
         {

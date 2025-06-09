@@ -9,21 +9,21 @@
 // License-Filename: LICENSE
 
 'use client'
-import { notFound, useParams, useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react';
+import UserEditForm from '@/components/UserEditForm/UserEditForm'
+import UserOperationType from '@/components/UserEditForm/UserOperationType'
+import { HttpStatus, User, UserPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ApiUtils, CommonUtils } from '@/utils'
-import UserOperationType from '@/components/UserEditForm/UserOperationType'
-import UserEditForm from '@/components/UserEditForm/UserEditForm'
-import { HttpStatus, UserPayload, User } from '@/object-types'
 import { PageSpinner } from 'next-sw360'
-import MessageService from '@/services/message.service'
+import { notFound, useParams, useRouter } from 'next/navigation'
+import { useEffect, useState, type JSX } from 'react'
 import ToggleUserActiveModal from './components/ToggleUserActiveModal'
 
 const AdminEditUserPage = (): JSX.Element => {
     const router = useRouter()
-    const params = useParams<{ id: string}>()
+    const params = useParams<{ id: string }>()
     const t = useTranslations('default')
     const [userPayload, setUserPayload] = useState<UserPayload>({
         email: '',
@@ -43,8 +43,7 @@ const AdminEditUserPage = (): JSX.Element => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const queryUrl = `users/byid/${params.id}`
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token)
@@ -53,7 +52,7 @@ const AdminEditUserPage = (): JSX.Element => {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const user = await response.json() as User
+                const user = (await response.json()) as User
                 setUserPayload({
                     email: user.email,
                     givenName: user.givenName,
@@ -107,37 +106,54 @@ const AdminEditUserPage = (): JSX.Element => {
         router.push(`/admin/users/details/${params.id}`)
     }
 
-    return (
-        (!CommonUtils.isNullEmptyOrUndefinedString(userPayload.email))
-            ?
-                <>
-                    <form className='mx-5 mt-3'
-                        onSubmit={(event) => {
-                            handleUpdateUser(event).catch((error) => console.error(error))
-                        }}
-                        autoCapitalize='nope'
+    return !CommonUtils.isNullEmptyOrUndefinedString(userPayload.email) ? (
+        <>
+            <form
+                className='mx-5 mt-3'
+                onSubmit={(event) => {
+                    handleUpdateUser(event).catch((error) => console.error(error))
+                }}
+                autoCapitalize='nope'
+            >
+                <div className='row mb-4'>
+                    <button
+                        className='btn btn-primary col-auto me-2'
+                        type='submit'
                     >
-                        <div className='row mb-4'>
-                            <button className='btn btn-primary col-auto me-2' type='submit'>
-                                {t('Update User')}
-                            </button>
-                            <button className='btn btn-danger col-auto me-2' onClick={() => setShowToggleActiveModal(true)} type='button'>
-                                {isUserDeactived ? t('Active User') : t('Deactive User')}
-                            </button>
-                            <button className='btn btn-light col-auto' onClick={handleCancel} type='button'>
-                                {t('Cancel')}
-                            </button>
-                        </div>
-                        <UserEditForm userPayload={userPayload} setUserPayload={setUserPayload} handleChange={handleChange} userOperationType={UserOperationType.EDIT} />
-                    </form>
-                    <ToggleUserActiveModal userId={params.id}
-                        isUserDeactived={isUserDeactived}
-                        showToggleActiveModal={showToggleActiveModal}
-                        setShowToggleActiveModal={setShowToggleActiveModal}
-                        userEmail={userPayload.email}
-                        />
-                </>
-            : <PageSpinner />
+                        {t('Update User')}
+                    </button>
+                    <button
+                        className='btn btn-danger col-auto me-2'
+                        onClick={() => setShowToggleActiveModal(true)}
+                        type='button'
+                    >
+                        {isUserDeactived ? t('Active User') : t('Deactive User')}
+                    </button>
+                    <button
+                        className='btn btn-light col-auto'
+                        onClick={handleCancel}
+                        type='button'
+                    >
+                        {t('Cancel')}
+                    </button>
+                </div>
+                <UserEditForm
+                    userPayload={userPayload}
+                    setUserPayload={setUserPayload}
+                    handleChange={handleChange}
+                    userOperationType={UserOperationType.EDIT}
+                />
+            </form>
+            <ToggleUserActiveModal
+                userId={params.id}
+                isUserDeactived={isUserDeactived}
+                showToggleActiveModal={showToggleActiveModal}
+                setShowToggleActiveModal={setShowToggleActiveModal}
+                userEmail={userPayload.email}
+            />
+        </>
+    ) : (
+        <PageSpinner />
     )
 }
 

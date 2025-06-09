@@ -20,7 +20,7 @@ import DownloadService from '@/services/download.service'
 import ComponentsTable from './ComponentsTable'
 import ImportSBOMModal from './ImportSBOMModal'
 
-const ComponentIndex = () : ReactNode => {
+const ComponentIndex = (): ReactNode => {
     const t = useTranslations('default')
     const [numberOfComponent, setNumberOfComponent] = useState(0)
     const [importModalOpen, setImportModalOpen] = useState(false)
@@ -154,7 +154,7 @@ const ComponentIndex = () : ReactNode => {
         DownloadService.download(
             `reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=false&module=components`,
             session,
-            `components-${currentDate}.xlsx`
+            `components-${currentDate}.xlsx`,
         )
     }
 
@@ -165,13 +165,26 @@ const ComponentIndex = () : ReactNode => {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-2 sidebar'>
-                        <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+                        <AdvancedSearch
+                            title='Advanced Search'
+                            fields={advancedSearch}
+                        />
                     </div>
                     <div className='col'>
-                        <PageButtonHeader title={`${t('Components')} (${numberOfComponent})`} buttons={headerbuttons}>
-                            <div style={{ marginLeft: '5px' }} className='btn-group' role='group'>
+                        <PageButtonHeader
+                            title={`${t('Components')} (${numberOfComponent})`}
+                            buttons={headerbuttons}
+                        >
+                            <div
+                                style={{ marginLeft: '5px' }}
+                                className='btn-group'
+                                role='group'
+                            >
                                 <Dropdown>
-                                    <Dropdown.Toggle variant='secondary' id='project-export'>
+                                    <Dropdown.Toggle
+                                        variant='secondary'
+                                        id='project-export'
+                                    >
                                         {t('Export Spreadsheet')}
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu>
@@ -185,10 +198,16 @@ const ComponentIndex = () : ReactNode => {
                                 </Dropdown>
                             </div>
                         </PageButtonHeader>
-                        <div className='row' style={{ marginBottom: '20px' }}>
+                        <div
+                            className='row'
+                            style={{ marginBottom: '20px' }}
+                        >
                             <ComponentsTable setNumberOfComponent={setNumberOfComponent} />
                         </div>
-                        <ImportSBOMModal show={importModalOpen} setShow={setImportModalOpen} />
+                        <ImportSBOMModal
+                            show={importModalOpen}
+                            setShow={setImportModalOpen}
+                        />
                     </div>
                 </div>
             </div>

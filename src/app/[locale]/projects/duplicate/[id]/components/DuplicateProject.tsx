@@ -12,16 +12,16 @@
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor, ReleaseDetail } from '@/object-types'
+import { HttpStatus, InputKeyValue, Project, ProjectPayload, ReleaseDetail, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
-interface Props{
+interface Props {
     projectId: string
     isDependencyNetworkFeatureEnabled: boolean
 }
@@ -42,8 +42,7 @@ interface LinkedReleaseData {
     version: string
 }
 
-function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props): JSX.Element {
-
+function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
     const [vendor, setVendor] = useState<Vendor>({
@@ -84,28 +83,28 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
         ownerAccountingUnit: '',
         ownerGroup: '',
         ownerCountry: '',
-        clearingState : '',
-        businessUnit : '',
-        preevaluationDeadline : '',
-        clearingSummary : '',
-        specialRisksOSS : '',
-        generalRisks3rdParty : '',
-        specialRisks3rdParty : '',
-        deliveryChannels : '',
-        remarksAdditionalRequirements : '',
-        state : '',
-        systemTestStart : '',
-        systemTestEnd : '',
-        deliveryStart : '',
-        phaseOutSince : '',
-        licenseInfoHeaderText : '',
+        clearingState: '',
+        businessUnit: '',
+        preevaluationDeadline: '',
+        clearingSummary: '',
+        specialRisksOSS: '',
+        generalRisks3rdParty: '',
+        specialRisks3rdParty: '',
+        deliveryChannels: '',
+        remarksAdditionalRequirements: '',
+        state: '',
+        systemTestStart: '',
+        systemTestEnd: '',
+        deliveryStart: '',
+        phaseOutSince: '',
+        licenseInfoHeaderText: '',
         linkedReleases: {},
         securityResponsibles: [],
         moderators: [],
         contributors: [],
         projectOwner: '',
         leadArchitect: '',
-        projectManager: ''
+        projectManager: '',
     })
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
@@ -142,36 +141,34 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
 
     const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
         try {
-            const map = new Map<string, LinkedReleaseData>();
+            const map = new Map<string, LinkedReleaseData>()
             const linkedReleasesObject: { [key: string]: LinkedReleaseProps } = {}
             const session = await getSession()
-            if(CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            for(const l of linkedReleases) {
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            for (const l of linkedReleases) {
                 const releaseId = l['release']?.split('/').pop()
-                if(releaseId === undefined)
-                    continue
+                if (releaseId === undefined) continue
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
-                const releaseData = await response.json() as ReleaseDetail
+                const releaseData = (await response.json()) as ReleaseDetail
                 map.set(releaseId, {
-                    'name': releaseData.name,
-                    'version': releaseData.version,
-                    'releaseRelation': l.relation ?? '',
-                    'mainlineState': l.mainlineState ?? '',
-                    'comment': l.comment ?? '',
+                    name: releaseData.name,
+                    version: releaseData.version,
+                    releaseRelation: l.relation ?? '',
+                    mainlineState: l.mainlineState ?? '',
+                    comment: l.comment ?? '',
                 })
                 setExistingReleaseData(map)
                 linkedReleasesObject[releaseId] = {
-                    'releaseRelation': l.relation,
-                    'mainlineState': l.mainlineState,
-                    'comment': l.comment,
+                    releaseRelation: l.relation,
+                    mainlineState: l.mainlineState,
+                    comment: l.comment,
                 }
             }
             setProjectPayload((prevProjectPayload) => ({
                 ...prevProjectPayload,
                 linkedReleases: linkedReleasesObject,
             }))
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -180,72 +177,77 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
         void (async () => {
             try {
                 const session = await getSession()
-                if(CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
                 if (response.status !== HttpStatus.OK) {
-                   return notFound()
+                    return notFound()
                 }
-                const project = await response.json() as Project
+                const project = (await response.json()) as Project
                 if (project.externalIds !== undefined) {
                     setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
                 }
-    
+
                 if (project.externalUrls !== undefined) {
                     setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
                 }
-    
+
                 if (project.additionalData !== undefined) {
                     setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
                 }
-    
+
                 if (project.roles !== undefined) {
                     setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
                 }
-    
+
                 if (project.linkedReleases !== undefined) {
                     void setObjectToMap(project.linkedReleases)
                 }
-    
-                if (project["_embedded"]?.["leadArchitect"] !== undefined) {
-                    setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]:
-                                        project["_embedded"]["leadArchitect"].fullName ?? '' })
+
+                if (project['_embedded']?.['leadArchitect'] !== undefined) {
+                    setLeadArchitect({
+                        [project['_embedded']['leadArchitect'].email]:
+                            project['_embedded']['leadArchitect'].fullName ?? '',
+                    })
                 }
-    
-                if (project["_embedded"]?.["projectOwner"] !== undefined) {
-                    setProjectOwner({ [project["_embedded"]["projectOwner"].email]:
-                                       project["_embedded"]["projectOwner"].fullName ?? '' })
+
+                if (project['_embedded']?.['projectOwner'] !== undefined) {
+                    setProjectOwner({
+                        [project['_embedded']['projectOwner'].email]:
+                            project['_embedded']['projectOwner'].fullName ?? '',
+                    })
                 }
-    
-                if (project["_embedded"]?.["projectManager"] !== undefined) {
-                    setProjectManager({ [project["_embedded"]["projectManager"].email]:
-                                         project["_embedded"]["projectManager"].fullName ?? '' })
+
+                if (project['_embedded']?.['projectManager'] !== undefined) {
+                    setProjectManager({
+                        [project['_embedded']['projectManager'].email]:
+                            project['_embedded']['projectManager'].fullName ?? '',
+                    })
                 }
-    
-                if (project["_embedded"]?.["sw360:moderators"] !== undefined) {
+
+                if (project['_embedded']?.['sw360:moderators'] !== undefined) {
                     const moderatorMap = new Map<string, string>()
-                    project["_embedded"]["sw360:moderators"].map((moderator) => {
+                    project['_embedded']['sw360:moderators'].map((moderator) => {
                         moderatorMap.set(moderator.email, moderator.fullName ?? '')
                     })
                     setModerators(Object.fromEntries(moderatorMap))
                 }
-    
-                if (project["_embedded"]?.["sw360:contributors"] !== undefined) {
+
+                if (project['_embedded']?.['sw360:contributors'] !== undefined) {
                     const contributorMap = new Map<string, string>()
-                    project["_embedded"]["sw360:contributors"].map((contributor) => {
+                    project['_embedded']['sw360:contributors'].map((contributor) => {
                         contributorMap.set(contributor.email, contributor.fullName ?? '')
                     })
                     setContributors(Object.fromEntries(contributorMap))
                 }
-    
-                if (project["_embedded"]?.["sw360:securityResponsibles"] !== undefined) {
+
+                if (project['_embedded']?.['sw360:securityResponsibles'] !== undefined) {
                     const securityResponsiblesMap = new Map<string, string>()
-                    project["_embedded"]["sw360:securityResponsibles"].map((securityResponsible) => {
+                    project['_embedded']['sw360:securityResponsibles'].map((securityResponsible) => {
                         securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName ?? '')
                     })
                     setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
                 }
-    
+
                 const projectPayloadData: ProjectPayload = {
                     name: project.name,
                     version: project.version ?? '',
@@ -258,7 +260,7 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
                     modifiedOn: project.modifiedOn ?? '',
                     modifiedBy: project.modifiedBy ?? '',
                     externalIds: project.externalIds ?? {},
-                    externalUrls:project.externalUrls ?? {},
+                    externalUrls: project.externalUrls ?? {},
                     additionalData: project.additionalData ?? {},
                     roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)),
                     ownerAccountingUnit: project.ownerAccountingUnit ?? '',
@@ -280,15 +282,15 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
                     phaseOutSince: project.phaseOutSince ?? '',
                     licenseInfoHeaderText: project.licenseInfoHeaderText ?? '',
                     securityResponsibles: project.securityResponsibles ?? [],
-                    contributors: (project._embedded?.['sw360:contributors'] ?? []).map(user => user.email),
-                    moderators: (project._embedded?.['sw360:moderators'] ?? []).map(user => user.email),
+                    contributors: (project._embedded?.['sw360:contributors'] ?? []).map((user) => user.email),
+                    moderators: (project._embedded?.['sw360:moderators'] ?? []).map((user) => user.email),
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
                 }
                 setProjectPayload(projectPayloadData)
                 setIsDuplicateProjectFetched(true)
-            } catch(e) {
+            } catch (e) {
                 console.error(e)
             }
         })()
@@ -296,13 +298,15 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
 
     const createProject = async () => {
         const session = await getSession()
-        if(CommonUtils.isNullOrUndefined(session))
-            return signOut()
-        const createProjectUrl = (isDependencyNetworkFeatureEnabled === true) ? `projects/network/duplicate/${projectId}` : `projects/duplicate/${projectId}`
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const createProjectUrl =
+            isDependencyNetworkFeatureEnabled === true
+                ? `projects/network/duplicate/${projectId}`
+                : `projects/duplicate/${projectId}`
         const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
 
         if (response.status == HttpStatus.CREATED) {
-            const data = await response.json() as Project
+            const data = (await response.json()) as Project
             MessageService.success(t('Your project is created'))
             router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
         } else {
@@ -327,15 +331,27 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
                 <div>
                     <Tab.Container defaultActiveKey='summary'>
                         <Row>
-                            <Col sm='auto' className='me-3'>
+                            <Col
+                                sm='auto'
+                                className='me-3'
+                            >
                                 <ListGroup>
-                                    <ListGroup.Item action eventKey='summary'>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='summary'
+                                    >
                                         <div className='my-2'>{t('Summary')}</div>
                                     </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='administration'>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='administration'
+                                    >
                                         <div className='my-2'>{t('Administration')}</div>
                                     </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='linkedProjects'>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='linkedProjects'
+                                    >
                                         <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                     </ListGroup.Item>
                                 </ListGroup>
@@ -361,7 +377,10 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
                                             </Button>
                                         </Row>
                                     </Col>
-                                    <Col lg={4} className='text-truncate buttonheader-title'>
+                                    <Col
+                                        lg={4}
+                                        className='text-truncate buttonheader-title'
+                                    >
                                         {`${projectPayload.name} (${projectPayload.version})`}
                                     </Col>
                                 </Row>
@@ -406,16 +425,17 @@ function DuplicateProject({projectId, isDependencyNetworkFeatureEnabled}:Props):
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedProjects'>
-                                            {
-                                                isDuplicateProjectFetched &&
+                                            {isDuplicateProjectFetched && (
                                                 <LinkedReleasesAndProjects
                                                     projectId={projectId}
                                                     projectPayload={projectPayload}
                                                     setProjectPayload={setProjectPayload}
                                                     existingReleaseData={existingReleaseData}
-                                                    isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}
+                                                    isDependencyNetworkFeatureEnabled={
+                                                        isDependencyNetworkFeatureEnabled
+                                                    }
                                                 />
-                                            }
+                                            )}
                                         </Tab.Pane>
                                     </Tab.Content>
                                 </Row>

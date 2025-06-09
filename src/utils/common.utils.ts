@@ -30,8 +30,7 @@ const isNullOrUndefined = (obj: unknown): obj is null | undefined => {
  * @returns True if the string is null, empty or undefined, false otherwise.
  */
 const isNullEmptyOrUndefinedString = (str: string | undefined | null): str is null | undefined | '' => {
-    if (isNullOrUndefined(str))
-        return true
+    if (isNullOrUndefined(str)) return true
     if (str.length === 0) {
         return true
     }
@@ -65,8 +64,7 @@ const createUrlWithParams = (url: string, params: UrlWithParams): string => {
  * @returns True if the array is null, empty or undefined, false otherwise.
  */
 const isNullEmptyOrUndefinedArray = (arr: Array<unknown> | undefined | null): arr is null | undefined => {
-    if (isNullOrUndefined(arr))
-        return true
+    if (isNullOrUndefined(arr)) return true
     if (arr.length === 0) {
         return true
     }
@@ -124,8 +122,7 @@ const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
  * @returns An array of key-value pairs.
  */
 const convertObjectToMapRoles = (data: { [k: string]: Array<string> } | null | undefined): InputKeyValue[] => {
-    if (isNullOrUndefined(data))
-        return []
+    if (isNullOrUndefined(data)) return []
     const inputRoles: InputKeyValue[] = []
     const mapRoles = new Map(Object.entries(data))
     mapRoles.forEach((value, key) => {

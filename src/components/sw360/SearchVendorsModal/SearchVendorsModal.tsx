@@ -9,7 +9,7 @@
 
 'use client'
 
-import React, { useState, type JSX } from 'react';
+import React, { useState, type JSX } from 'react'
 import { Vendor } from './Vendor'
 
 interface Props {
@@ -31,7 +31,10 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                 <div className='modal-dialog modal-lg modal-dialog-centered'>
                     <div className='modal-content'>
                         <div className='modal-header'>
-                            <h5 className='modal-title fw-bold' id='search_users_modal_label'>
+                            <h5
+                                className='modal-title fw-bold'
+                                id='search_users_modal_label'
+                            >
                                 Search Vendor
                             </h5>
                             <button
@@ -52,7 +55,10 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                                     />
                                 </div>
                                 <div className='col-lg-4'>
-                                    <button type='button' className='btn btn-secondary me-2'>
+                                    <button
+                                        type='button'
+                                        className='btn btn-secondary me-2'
+                                    >
                                         Search
                                     </button>
                                 </div>
@@ -62,13 +68,24 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                             </div>
                         </div>
                         <div className='modal-footer'>
-                            <button type='button' data-bs-dismiss='modal' className='btn btn-secondary me-2'>
+                            <button
+                                type='button'
+                                data-bs-dismiss='modal'
+                                className='btn btn-secondary me-2'
+                            >
                                 Close
                             </button>
-                            <button type='button' className='btn btn-secondary'>
+                            <button
+                                type='button'
+                                className='btn btn-secondary'
+                            >
                                 Add Vendor
                             </button>
-                            <button type='button' className='btn btn-primary' onClick={() => chooseVendor(vendor)}>
+                            <button
+                                type='button'
+                                className='btn btn-primary'
+                                onClick={() => chooseVendor(vendor)}
+                            >
                                 Select Vendor
                             </button>
                         </div>

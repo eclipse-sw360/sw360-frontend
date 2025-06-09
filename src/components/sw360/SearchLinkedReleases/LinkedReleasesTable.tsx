@@ -10,7 +10,7 @@
 
 import { ReleaseDetail } from '@/object-types'
 import { Table } from 'next-sw360'
-import { memo, type JSX } from 'react';
+import { memo, type JSX } from 'react'
 
 interface Props {
     data: (string | ReleaseDetail)[][]
@@ -28,7 +28,12 @@ const compare = (preState: Props, nextState: Props) => {
 }
 
 const LinkedReleasesTable = memo(function ModeratorsTable({ columns, data }: Props) {
-    return <Table columns={columns} data={data} />
+    return (
+        <Table
+            columns={columns}
+            data={data}
+        />
+    )
 }, compare)
 
 export default LinkedReleasesTable

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     title: 'Welcome - SW360',
 }
 
-function AuthPage() : ReactNode {
+function AuthPage(): ReactNode {
     return <AuthScreen />
 }
 

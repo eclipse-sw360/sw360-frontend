@@ -165,7 +165,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
 
         const response = await sendOAuthClientRequest(requestBody, session.user.access_token)
         if (response.status === HttpStatus.OK) {
-            MessageService.success(client === null ? t('OAuth client created successfully') : t('OAuth client updated successfully'))
+            MessageService.success(
+                client === null ? t('OAuth client created successfully') : t('OAuth client updated successfully'),
+            )
             setShow(false)
         } else {
             MessageService.error(t('Failed to create OAuth client'))

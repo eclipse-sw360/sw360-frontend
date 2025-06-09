@@ -14,7 +14,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 import { Spinner } from 'react-bootstrap'
 import HomeTableHeader from './HomeTableHeader'
 
@@ -55,8 +55,8 @@ function MyTaskAssignmentsWidget(): ReactNode {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest/byState?state=open&allDetails=false').then(
-            (moderationRequests: EmbeddedTaskAssignments | undefined) => {
+        void fetchData('moderationrequest/byState?state=open&allDetails=false')
+            .then((moderationRequests: EmbeddedTaskAssignments | undefined) => {
                 if (moderationRequests === undefined) {
                     return
                 }
@@ -68,15 +68,14 @@ function MyTaskAssignmentsWidget(): ReactNode {
                         ]),
                     )
                 }
-            },
-        )
-        .catch((err:Error) => {
-            throw new Error(err.message)
-        })
-        .finally(() => {
-            setLoading(false)
-        })
-    }, [fetchData,reload])
+            })
+            .catch((err: Error) => {
+                throw new Error(err.message)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }, [fetchData, reload])
 
     const title = t('My Task Assignments')
     const columns = [
@@ -85,18 +84,19 @@ function MyTaskAssignmentsWidget(): ReactNode {
             name: t('Document Name'),
             formatter: (cell: string) => {
                 const [id, documentName] = cell.split('|')
-                return _(
-                    <Link href={'moderationrequest/' + id}>{documentName}</Link>
-                )
-
+                return _(<Link href={'moderationrequest/' + id}>{documentName}</Link>)
             },
-        }, t('Status'),
+        },
+        t('Status'),
     ]
     const language = { noRecordsFound: t('NoTasksAssigned') }
 
     return (
         <div>
-            <HomeTableHeader title={title} setReload={setReload} />
+            <HomeTableHeader
+                title={title}
+                setReload={setReload}
+            />
             {loading == false ? (
                 <Table
                     columns={columns}

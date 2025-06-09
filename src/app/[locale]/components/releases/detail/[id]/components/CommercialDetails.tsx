@@ -9,11 +9,11 @@
 // License-Filename: LICENSE
 
 import { COTSDetails } from '@/object-types'
+import { ReactNode } from 'react'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 import CotsOssInformation from './CotsOssInformation'
-import { ReactNode } from 'react'
 
-const CommercialDetails = ({ costDetails }: { costDetails: COTSDetails | undefined }) : ReactNode => {
+const CommercialDetails = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
     return (
         <div className='col'>
             <CommercialDetailsAdministration costDetails={costDetails} />

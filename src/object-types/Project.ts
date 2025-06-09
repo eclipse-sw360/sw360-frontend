@@ -28,7 +28,7 @@ export interface Project {
     businessUnit?: string
     clearingState?: string
     clearingSummary?: string
-    clearingRequestId? : string
+    clearingRequestId?: string
     contributors?: string[]
     vendorId?: string
     deliveryChannels?: string

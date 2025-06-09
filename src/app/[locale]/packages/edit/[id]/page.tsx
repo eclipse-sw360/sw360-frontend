@@ -9,8 +9,8 @@
 
 import { Metadata } from 'next'
 
-import EditPackage from './components/EditPackage'
 import { ReactNode } from 'react'
+import EditPackage from './components/EditPackage'
 
 interface Context {
     params: Promise<{ id: string }>
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 }
 
 async function PackagesList(props: Context): Promise<ReactNode> {
-    const params = await props.params;
+    const params = await props.params
     return <EditPackage packageId={params.id} />
 }
 

@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX } from 'react'
 
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
@@ -27,7 +27,7 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) : JSX.Element => {
+const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<ReleaseLink[]>([])
@@ -60,7 +60,10 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
 
     return (
         <>
-            <div className='col' style={{ fontSize: '0.875rem' }}>
+            <div
+                className='col'
+                style={{ fontSize: '0.875rem' }}
+            >
                 <LinkedReleasesDialog
                     show={linkedReleasesDiaglog}
                     releaseLinks={releaseLinks}

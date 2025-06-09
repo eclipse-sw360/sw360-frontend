@@ -8,16 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState, type JSX } from 'react';
+import React, { useState, type JSX } from 'react'
 
 import { useTranslations } from 'next-intl'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { AttachmentTypes } from '@/object-types'
-import AttachmentRowData from '../AttachmentRowData'
 import { Modal } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
 import { IoWarningOutline } from 'react-icons/io5'
+import AttachmentRowData from '../AttachmentRowData'
 
 interface Props {
     beforeUpdateAttachmentsCheckStatus: Array<string>
@@ -54,7 +54,7 @@ function TableAttachment({
         const list: Array<AttachmentRowData> = [...attachmentsData]
         list.splice(deletingAttachmentIndex, 1)
         setAttachmentsData(list)
-        
+
         const statusList = [...beforeUpdateAttachmentsCheckStatus]
         statusList.splice(deletingAttachmentIndex, 1)
         setBeforeUpdateAttachmentsCheckStatus(statusList)
@@ -75,34 +75,45 @@ function TableAttachment({
 
     return (
         <>
-            {
-                deletingAttachmentIndex !== undefined &&
-                <Modal show={showDeleteModal} onHide={() => closeDeleteModal()} backdrop='static' centered size='lg' dialogClassName={beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED' ? 'modal-warning' : 'modal-danger'}>
+            {deletingAttachmentIndex !== undefined && (
+                <Modal
+                    show={showDeleteModal}
+                    onHide={() => closeDeleteModal()}
+                    backdrop='static'
+                    centered
+                    size='lg'
+                    dialogClassName={
+                        beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED'
+                            ? 'modal-warning'
+                            : 'modal-danger'
+                    }
+                >
                     <Modal.Header closeButton>
                         <Modal.Title>
-                            {beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED'
-                                ? <><IoWarningOutline />{t('Warning')}</>
-                                : <><FaRegQuestionCircle /> {' '}{t('Delete Attachment')}?</>
-                            }
+                            {beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED' ? (
+                                <>
+                                    <IoWarningOutline />
+                                    {t('Warning')}
+                                </>
+                            ) : (
+                                <>
+                                    <FaRegQuestionCircle /> {t('Delete Attachment')}?
+                                </>
+                            )}
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        {
-                            (beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED')
-                            ?
-                            <p>
-                                {t('An attachment cannot be deleted while it is approved')}.
-                            </p>
-                            :
+                        {beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED' ? (
+                            <p>{t('An attachment cannot be deleted while it is approved')}.</p>
+                        ) : (
                             <p className='confirm-delete-message'>
-                                {t('Do you really want to delete attachment')} <b>{`${deletingAttachment?.filename} (${deletingAttachment?.attachmentContentId})`}</b>?
+                                {t('Do you really want to delete attachment')}{' '}
+                                <b>{`${deletingAttachment?.filename} (${deletingAttachment?.attachmentContentId})`}</b>?
                             </p>
-                        }
+                        )}
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
-                        {
-                            (beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED')
-                            ?
+                        {beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED' ? (
                             <>
                                 <button
                                     type='button'
@@ -113,7 +124,7 @@ function TableAttachment({
                                     OK
                                 </button>
                             </>
-                            :
+                        ) : (
                             <>
                                 <button
                                     type='button'
@@ -123,71 +134,120 @@ function TableAttachment({
                                 >
                                     {t('Cancel')}
                                 </button>
-                                <button type='submit' className='btn btn-danger' onClick={() => handleClickDelete()}>
+                                <button
+                                    type='submit'
+                                    className='btn btn-danger'
+                                    onClick={() => handleClickDelete()}
+                                >
                                     {t('Delete Attachment')}
                                 </button>
                             </>
-                        }
+                        )}
                     </Modal.Footer>
                 </Modal>
-            }
-            <tbody>{
-                attachmentsData.map((attachment: AttachmentRowData, index: number) => (
-                    <tr key={attachment.attachmentContentId} id={`att-${attachment.attachmentContentId}`} role='row' className={`attachment-row ${(attachment.isAddedNew === true) ? 'new-added-attachment' : ''}`}>
+            )}
+            <tbody>
+                {attachmentsData.map((attachment: AttachmentRowData, index: number) => (
+                    <tr
+                        key={attachment.attachmentContentId}
+                        id={`att-${attachment.attachmentContentId}`}
+                        role='row'
+                        className={`attachment-row ${attachment.isAddedNew === true ? 'new-added-attachment' : ''}`}
+                    >
                         <td className='align-middle'>{attachment.filename}</td>
                         <td>
                             <div className='form-group'>
-                                <select name='attachmentType'
+                                <select
+                                    name='attachmentType'
                                     className='attachmentType toplabelledInput form-control'
                                     onChange={(e) => handleInputChange(e, index)}
                                 >
-                                    {
-                                        Object.keys(AttachmentTypes).map((type: string) => <option key={type} value={type}>{t(type as never)}</option>)
-                                    }
+                                    {Object.keys(AttachmentTypes).map((type: string) => (
+                                        <option
+                                            key={type}
+                                            value={type}
+                                        >
+                                            {t(type as never)}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </td>
                         <td>
                             <div className='form-group'>
-                                <input type='text'
-                                    className='toplabelledInput form-control' placeholder='Enter comments'
+                                <input
+                                    type='text'
+                                    className='toplabelledInput form-control'
+                                    placeholder='Enter comments'
                                     name='createdComment'
                                     onChange={(e) => handleInputChange(e, index)}
                                     value={attachment.createdComment ?? ''}
                                 />
                             </div>
                         </td>
-                        <td className='align-middle'><span className='text-truncate'>{attachment.createdTeam ?? ''}</span></td>
-                        <td className='align-middle'><span className='text-truncate'>{attachment.createdBy ?? ''}</span></td>
+                        <td className='align-middle'>
+                            <span className='text-truncate'>{attachment.createdTeam ?? ''}</span>
+                        </td>
+                        <td className='align-middle'>
+                            <span className='text-truncate'>{attachment.createdBy ?? ''}</span>
+                        </td>
                         <td className='align-middle'>{attachment.createdOn ?? ''}</td>
                         <td className='checkStatus'>
                             <div className='form-group'>
-                                <select name='checkStatus' className='toplabelledInput form-control'
+                                <select
+                                    name='checkStatus'
+                                    className='toplabelledInput form-control'
                                     defaultValue={attachment.checkStatus}
                                     onChange={(e) => handleInputChange(e, index)}
                                 >
-                                    <option className='textlabel' value='NOTCHECKED'>{t('NOT_CHECKED')}</option>
-                                    <option className='textlabel' value='ACCEPTED'>{t('ACCEPTED')}</option>
-                                    <option className='textlabel' value='REJECTED'>{t('REJECTED')}</option>
+                                    <option
+                                        className='textlabel'
+                                        value='NOTCHECKED'
+                                    >
+                                        {t('NOT_CHECKED')}
+                                    </option>
+                                    <option
+                                        className='textlabel'
+                                        value='ACCEPTED'
+                                    >
+                                        {t('ACCEPTED')}
+                                    </option>
+                                    <option
+                                        className='textlabel'
+                                        value='REJECTED'
+                                    >
+                                        {t('REJECTED')}
+                                    </option>
                                 </select>
                             </div>
                         </td>
                         <td className='checked-comment'>
                             <div className='form-group'>
-                                <input type='text' name='checkedComment' className='check-comment form-control'
+                                <input
+                                    type='text'
+                                    name='checkedComment'
+                                    className='check-comment form-control'
                                     placeholder='Enter comments'
                                     onChange={(e) => handleInputChange(e, index)}
                                     value={attachment.checkedComment}
                                 />
                             </div>
                         </td>
-                        <td className='align-middle checked-team'><span className='text-truncate'>{attachment.checkedTeam}</span></td>
-                        <td className='align-middle checked-by'><span className='text-truncate'>{attachment.checkedBy}</span></td>
+                        <td className='align-middle checked-team'>
+                            <span className='text-truncate'>{attachment.checkedTeam}</span>
+                        </td>
+                        <td className='align-middle checked-by'>
+                            <span className='text-truncate'>{attachment.checkedBy}</span>
+                        </td>
                         <td className='align-middle checked-on'>{attachment.checkedOn}</td>
-                        <td className='align-middle action delete cursor-pointer' onClick={() => openDeleteModal(attachment, index)}><FaTrashAlt size={23} /></td>
+                        <td
+                            className='align-middle action delete cursor-pointer'
+                            onClick={() => openDeleteModal(attachment, index)}
+                        >
+                            <FaTrashAlt size={23} />
+                        </td>
                     </tr>
-                )
-                )}
+                ))}
             </tbody>
         </>
     )

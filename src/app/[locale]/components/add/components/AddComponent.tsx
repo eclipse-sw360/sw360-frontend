@@ -27,11 +27,11 @@ import {
     Vendor,
 } from '@/object-types'
 
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
-import MessageService from '@/services/message.service'
 
-export default function AddComponent() : ReactNode {
+export default function AddComponent(): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const { data: session, status } = useSession()
@@ -98,8 +98,7 @@ export default function AddComponent() : ReactNode {
     }
 
     const submit = async () => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.POST('components', componentPayload, session.user.access_token)
 
         if (response.status === HttpStatus.CREATED) {
@@ -129,19 +128,38 @@ export default function AddComponent() : ReactNode {
                     <div className='container page-content'>
                         <div className='row'>
                             <div className='col-2 sidebar'>
-                                <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                                <SideBar
+                                    selectedTab={selectedTab}
+                                    setSelectedTab={setSelectedTab}
+                                    tabList={tabList}
+                                />
                             </div>
 
                             <div className='col'>
-                                <div className='row' style={{ marginBottom: '20px' }}>
+                                <div
+                                    className='row'
+                                    style={{ marginBottom: '20px' }}
+                                >
                                     <div className='col-auto'>
-                                        <div className='btn-toolbar' role='toolbar'>
-                                            <div className='btn-group' role='group'>
-                                                <button type='submit' className='btn btn-primary'>
+                                        <div
+                                            className='btn-toolbar'
+                                            role='toolbar'
+                                        >
+                                            <div
+                                                className='btn-group'
+                                                role='group'
+                                            >
+                                                <button
+                                                    type='submit'
+                                                    className='btn btn-primary'
+                                                >
                                                     {t('Create Component')}
                                                 </button>
                                             </div>
-                                            <div className='btn-group' role='group'>
+                                            <div
+                                                className='btn-group'
+                                                role='group'
+                                            >
                                                 <button
                                                     type='button'
                                                     id='mergeButton'

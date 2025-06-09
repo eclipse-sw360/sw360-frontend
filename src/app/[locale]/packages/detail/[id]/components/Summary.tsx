@@ -9,12 +9,12 @@
 
 'use client'
 
+import { Package } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ReactNode, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
-import { Package } from '@/object-types'
 
 const Capitalize = (text: string) => {
     return text
@@ -22,7 +22,7 @@ const Capitalize = (text: string) => {
         : undefined
 }
 
-export default function Summary({ summaryData }: { summaryData: Package }) : ReactNode {
+export default function Summary({ summaryData }: { summaryData: Package }): ReactNode {
     const t = useTranslations('default')
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
 
@@ -44,7 +44,7 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
 
     return (
         <>
-            <table className="table summary-table">
+            <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
                     onClick={() => {
@@ -77,15 +77,14 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
                     <tr>
                         <td>{`PURL (${t('Package URL')})`}:</td>
                         <td>
-                            {
-                                (summaryData.purl ?? '') &&
+                            {(summaryData.purl ?? '') && (
                                 <Link
                                     className={`text-link`}
                                     href={summaryData.purl ?? ''}
                                 >
                                     {summaryData.purl}
                                 </Link>
-                            }
+                            )}
                         </td>
                     </tr>
                     <tr>
@@ -95,37 +94,42 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
                     <tr>
                         <td>{`VCS (${t('Version Control System')})`}:</td>
                         <td>
-                            {
-                                (summaryData.vcs ?? '') &&
+                            {(summaryData.vcs ?? '') && (
                                 <Link
                                     className={`text-link`}
                                     href={summaryData.vcs ?? ''}
                                 >
                                     {summaryData.vcs}
                                 </Link>
-                            }
+                            )}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Homepage URL')}:</td>
                         <td>
-                            {
-                                (summaryData.homepageUrl ?? '') &&
+                            {(summaryData.homepageUrl ?? '') && (
                                 <Link
                                     className={`text-link`}
                                     href={summaryData.homepageUrl ?? ''}
                                 >
                                     {summaryData.homepageUrl}
                                 </Link>
-                            }
+                            )}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Licenses')}:</td>
                         <td>
                             {summaryData.licenseIds?.map((elem, i) => (
-                                <li key={elem} style={{ display: 'inline' }}>
-                                    <Link className='text-link' href={`/licenses/${elem}`} key={elem}>
+                                <li
+                                    key={elem}
+                                    style={{ display: 'inline' }}
+                                >
+                                    <Link
+                                        className='text-link'
+                                        href={`/licenses/${elem}`}
+                                        key={elem}
+                                    >
                                         {elem}
                                     </Link>
                                     {i < (summaryData.licenseIds?.length ?? 0) - 1 && ', '}
@@ -136,18 +140,18 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
                     <tr>
                         <td>{t('Linked Releases')}:</td>
                         <td>
-                            {
-                                summaryData._embedded?.['sw360:release'] &&
+                            {summaryData._embedded?.['sw360:release'] && (
                                 <Link
                                     className={`text-link`}
                                     href={`/components/releases/detail/${summaryData._embedded['sw360:release'].id}`}
                                 >
-                                    {
-                                        `${summaryData._embedded['sw360:release'].name}${
-                                            summaryData._embedded['sw360:release'].version ? ` (${summaryData._embedded['sw360:release'].version})` : ''}`
-                                    }
+                                    {`${summaryData._embedded['sw360:release'].name}${
+                                        summaryData._embedded['sw360:release'].version
+                                            ? ` (${summaryData._embedded['sw360:release'].version})`
+                                            : ''
+                                    }`}
                                 </Link>
-                            }
+                            )}
                         </td>
                     </tr>
                     <tr>
@@ -161,15 +165,14 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
                     <tr>
                         <td>{t('Created By')}:</td>
                         <td>
-                            {
-                                summaryData._embedded?.createdBy &&
+                            {summaryData._embedded?.createdBy && (
                                 <Link
                                     className={`text-link`}
                                     href={`mailto:${summaryData._embedded.createdBy.email}`}
                                 >
                                     {summaryData._embedded.createdBy.email}
                                 </Link>
-                            }
+                            )}
                         </td>
                     </tr>
                     <tr>
@@ -179,15 +182,14 @@ export default function Summary({ summaryData }: { summaryData: Package }) : Rea
                     <tr>
                         <td>{t('Modified By')}:</td>
                         <td>
-                            {
-                                summaryData._embedded?.modifiedBy &&
+                            {summaryData._embedded?.modifiedBy && (
                                 <Link
                                     className={`text-link`}
                                     href={`mailto:${summaryData._embedded.modifiedBy.email}`}
                                 >
                                     {summaryData._embedded.modifiedBy.email}
                                 </Link>
-                            }
+                            )}
                         </td>
                     </tr>
                 </tbody>

@@ -11,7 +11,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
+import { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 import { Spinner } from 'react-bootstrap'
 
 import { HttpStatus } from '@/object-types'
@@ -70,10 +70,10 @@ function MyComponentsWidget(): ReactNode {
                     setData([])
                 }
             })
-            .catch((err:Error) => {
+            .catch((err: Error) => {
                 throw new Error(err.message)
             })
-            .finally(()=>{
+            .finally(() => {
                 setLoading(false)
             })
 
@@ -83,22 +83,25 @@ function MyComponentsWidget(): ReactNode {
     }, [fetchData, params, reload])
 
     const title = t('My Components')
-    const columns = [{
-        id: 'Component name',
-        name: t('Component Name'),
-        formatter: (cell: string) => {
-            const [name, id] = cell.split('|')
-            return _(
-                <Link href={'components/detail/' + id}>{name}</Link>,
-            )
+    const columns = [
+        {
+            id: 'Component name',
+            name: t('Component Name'),
+            formatter: (cell: string) => {
+                const [name, id] = cell.split('|')
+                return _(<Link href={'components/detail/' + id}>{name}</Link>)
+            },
         },
-    }, t('Description'),
+        t('Description'),
     ]
     const language = { noRecordsFound: t('NotOwnComponent') }
 
     return (
         <div>
-            <HomeTableHeader title={title} setReload={setReload} />
+            <HomeTableHeader
+                title={title}
+                setReload={setReload}
+            />
             {loading === false ? (
                 <Table
                     columns={columns}

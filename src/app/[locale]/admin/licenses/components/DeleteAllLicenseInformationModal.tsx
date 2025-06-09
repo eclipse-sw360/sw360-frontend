@@ -28,7 +28,7 @@ export default function DeleteAllLicenseInformationModal({
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
-}) : ReactNode {
+}): ReactNode {
     const t = useTranslations('default')
     const [deleting, setDeleting] = useState<boolean>(false)
     const [message, setMessage] = useState<undefined | Message>(undefined)

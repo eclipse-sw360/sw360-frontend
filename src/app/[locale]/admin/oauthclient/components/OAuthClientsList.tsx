@@ -11,16 +11,16 @@
 'use client'
 
 import { HttpStatus, OAuthClient } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
 import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import React, { ReactNode, useState, useEffect } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import AddClientDialog from './AddClientDialog'
 import DeleteClientDialog from './DeleteClientDialog'
 import OAuthClientTable from './OAuthClientTable'
-import CommonUtils from '@/utils/common.utils'
-import MessageService from '@/services/message.service'
 
 function OAuthClientsList(): ReactNode {
     const t = useTranslations('default')
@@ -88,7 +88,7 @@ function OAuthClientsList(): ReactNode {
             const response = await sendOAuthClientRequest(session.user.access_token)
             console.log('Response:', response)
             if (response.status === HttpStatus.OK) {
-                const data = await response.json() as OAuthClient[]
+                const data = (await response.json()) as OAuthClient[]
                 setClients(data)
                 setNumberClient(data.length)
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -112,8 +112,12 @@ function OAuthClientsList(): ReactNode {
         return signOut()
     } else {
         return (
-            <div className="container page-content">
-                <AddClientDialog show={openAddClientDialog} setShow={handleDialogClose} client={selectedClient} />
+            <div className='container page-content'>
+                <AddClientDialog
+                    show={openAddClientDialog}
+                    setShow={handleDialogClose}
+                    client={selectedClient}
+                />
                 {selectedClient && (
                     <DeleteClientDialog
                         show={openDeleteClientDialog}
@@ -121,20 +125,24 @@ function OAuthClientsList(): ReactNode {
                         clientId={selectedClient.client_id}
                     />
                 )}
-                <div className="row">
-                    <div className="col col-12">
-                        <div className="col">
-                            <div className="row">
+                <div className='row'>
+                    <div className='col col-12'>
+                        <div className='col'>
+                            <div className='row'>
                                 <PageButtonHeader
                                     buttons={headerButtons}
                                     title={`${t('OAuth Client')} (${numberClient})`}
                                 />
 
-                                <div className="row mt-3">
+                                <div className='row mt-3'>
                                     {loading ? (
                                         <p>Loading clients...</p>
                                     ) : (
-                                        <OAuthClientTable updateClient={updateClient} deleteClient={deleteClient} clients={clients} />
+                                        <OAuthClientTable
+                                            updateClient={updateClient}
+                                            deleteClient={deleteClient}
+                                            clients={clients}
+                                        />
                                     )}
                                 </div>
                             </div>

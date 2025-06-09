@@ -13,18 +13,17 @@
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { PageButtonHeader, SideBar } from '@/components/sw360'
-import { Changelogs, HttpStatus, LicenseDetail, LicenseTabIds, Embedded, ErrorDetails } from '@/object-types'
+import { Changelogs, Embedded, ErrorDetails, HttpStatus, LicenseDetail, LicenseTabIds } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
+import styles from '../detail.module.css'
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
-import styles from '../detail.module.css'
-import MessageService from '@/services/message.service'
-import React from 'react'
 
 interface Props {
     licenseId: string
@@ -32,7 +31,7 @@ interface Props {
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
-const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
+const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
     const [changesLogTab, setChangesLogTab] = useState('list-change')
@@ -44,23 +43,23 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
     const params = useSearchParams()
 
     const tabList = [
-    {
-        id: LicenseTabIds.DETAILS,
-        name: t('Details'),
-    },
-    {
-        id: LicenseTabIds.TEXT,
-        name: t('Text'),
-    },
-    {
-        id: LicenseTabIds.OBLIGATIONS,
-        name: t('Obligations'),
-    },
-    {
-        id: LicenseTabIds.CHANGE_LOG,
-        name: t('Change Log'),
-    },
-]
+        {
+            id: LicenseTabIds.DETAILS,
+            name: t('Details'),
+        },
+        {
+            id: LicenseTabIds.TEXT,
+            name: t('Text'),
+        },
+        {
+            id: LicenseTabIds.OBLIGATIONS,
+            name: t('Obligations'),
+        },
+        {
+            id: LicenseTabIds.CHANGE_LOG,
+            name: t('Change Log'),
+        },
+    ]
 
     useEffect(() => {
         const controller = new AbortController()
@@ -69,18 +68,17 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
                 if (response.status !== HttpStatus.OK) {
-                    const err = await response.json() as ErrorDetails
+                    const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
 
-                const licenses = await response.json() as LicenseDetail
+                const licenses = (await response.json()) as LicenseDetail
                 setLicenseDetail(licenses)
-            } catch(error: unknown) {
-                if (error instanceof DOMException && error.name === "AbortError") {
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
@@ -90,27 +88,26 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(
                     `changelog/document/${licenseId}`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
                 if (response.status !== HttpStatus.OK) {
-                    const err = await response.json() as ErrorDetails
+                    const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
 
-                const data = await response.json() as EmbeddedChangeLogs
+                const data = (await response.json()) as EmbeddedChangeLogs
 
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
                         ? []
-                        : data['_embedded']['sw360:changeLogs']
+                        : data['_embedded']['sw360:changeLogs'],
                 )
-            } catch(error: unknown) {
-                if (error instanceof DOMException && error.name === "AbortError") {
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
@@ -134,13 +131,12 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
             MessageService.error(t('Session has expired'))
             return
         }
-        if (CommonUtils.isNullOrUndefined(whitelist))
-            return
+        if (CommonUtils.isNullOrUndefined(whitelist)) return
         const whitelistObj = Object.fromEntries(whitelist)
         const response = await ApiUtils.PATCH(
             `licenses/${licenseId}/whitelist`,
             whitelistObj,
-            session.user.access_token
+            session.user.access_token,
         )
         if (response.status == HttpStatus.OK) {
             MessageService.success(t('License updated successfully'))
@@ -172,13 +168,16 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
         Cancel: { link: '', type: 'light', onClick: handleCancel, name: t('Cancel') },
     }
 
-
     return (
         license && (
             <div className={`container ${styles['row-license-detail']}`}>
                 <div className='row'>
                     <div className='col-2 sidebar'>
-                        <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                        <SideBar
+                            selectedTab={selectedTab}
+                            setSelectedTab={setSelectedTab}
+                            tabList={tabList}
+                        />
                     </div>
                     <div className='col'>
                         <div className='row'>
@@ -239,13 +238,25 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                                 </>
                             )}
                         </div>
-                        <div className='row' hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}>
-                            <Detail license={license} setLicense={setLicenseDetail} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}
+                        >
+                            <Detail
+                                license={license}
+                                setLicense={setLicenseDetail}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab !== LicenseTabIds.TEXT ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== LicenseTabIds.TEXT ? true : false}
+                        >
                             <Text license={license} />
                         </div>
-                        <div className='row' hidden={selectedTab !== LicenseTabIds.OBLIGATIONS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== LicenseTabIds.OBLIGATIONS ? true : false}
+                        >
                             <Obligations
                                 licenseId={licenseId}
                                 isEditWhitelist={isEditWhitelist}
@@ -253,9 +264,15 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                                 setWhitelist={setWhitelist}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab != LicenseTabIds.CHANGE_LOG ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab != LicenseTabIds.CHANGE_LOG ? true : false}
+                        >
                             <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changesLogTab != 'list-change' ? true : false}
+                                >
                                     <ChangeLogList
                                         setChangeLogIndex={setChangeLogIndex}
                                         documentId={licenseId}
@@ -263,9 +280,15 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                                         changeLogList={changeLogList}
                                     />
                                 </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changesLogTab != 'view-log' ? true : false}
+                                >
                                     <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
+                                    <div
+                                        id='cardScreen'
+                                        style={{ padding: '0px' }}
+                                    ></div>
                                 </div>
                             </div>
                         </div>

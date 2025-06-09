@@ -28,7 +28,7 @@ const SnippetInformationDetail = ({
     snippetInformations,
     setSnippetRanges,
     snippetRanges,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -92,9 +92,16 @@ const SnippetInformationDetail = ({
                             >
                                 {snippetRanges.map((snippetRangeData, index) => {
                                     return (
-                                        <div key={index} className='spdx-flex-row' data-index={index}>
+                                        <div
+                                            key={index}
+                                            className='spdx-flex-row'
+                                            data-index={index}
+                                        >
                                             <div className='spdx-col-1 spdx-key'>{snippetRangeData.rangeType}</div>
-                                            <div className='spdx-col-1' style={{ display: 'flex' }}>
+                                            <div
+                                                className='spdx-col-1'
+                                                style={{ display: 'flex' }}
+                                            >
                                                 <div className='spdx-col-1'>{snippetRangeData.startPointer}</div>
                                                 <div className='spdx-col-1'>~</div>
                                                 <div className='spdx-col-1'>{snippetRangeData.endPointer}</div>
@@ -122,7 +129,7 @@ const SnippetInformationDetail = ({
                                                 <br></br>
                                             </>
                                         )
-                                    }
+                                    },
                                 )}
                             </p>
                         </td>

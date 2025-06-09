@@ -13,7 +13,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
 import { notFound } from 'next/navigation'
-import { useRef, useState, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
@@ -47,7 +47,7 @@ export default function CompareObligation({
     const [pid, setPid] = useState('')
 
     const scrollToTop = () => {
-        (topRef.current as HTMLDivElement | null)?.scrollTo({ top: 0, left: 0 })
+        ;(topRef.current as HTMLDivElement | null)?.scrollTo({ top: 0, left: 0 })
     }
 
     const columns = [
@@ -68,7 +68,7 @@ export default function CompareObligation({
                             onChange={() => handleCheckboxes(projectId)}
                             disabled={compareProject.size > 0 && !compareProject.has(projectId)}
                         />
-                    </div>
+                    </div>,
                 ),
         },
         {
@@ -90,11 +90,17 @@ export default function CompareObligation({
                     <>
                         <OverlayTrigger overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}>
                             {state === 'ACTIVE' ? (
-                                <span className='badge bg-success capsule-left' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-success capsule-left'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'PS'}
                                 </span>
                             ) : (
-                                <span className='badge bg-secondary capsule-left' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-secondary capsule-left'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'PS'}
                                 </span>
                             )}
@@ -106,20 +112,29 @@ export default function CompareObligation({
                             }
                         >
                             {clearingState === 'OPEN' ? (
-                                <span className='badge bg-danger capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-danger capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             ) : clearingState === 'IN_PROGRESS' ? (
-                                <span className='badge bg-warning capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-warning capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             ) : (
-                                <span className='badge bg-success capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-success capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             )}
                         </OverlayTrigger>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -138,31 +153,31 @@ export default function CompareObligation({
     const handleSearch = async ({ searchValue }: { searchValue: string }) => {
         try {
             const session = await getSession()
-            if(CommonUtils.isNullOrUndefined(session))
-                return
+            if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.GET(
                 `projects?name=${searchValue}&luceneSearch=false`,
-                session.user.access_token
+                session.user.access_token,
             )
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else if (response.status !== HttpStatus.OK) {
                 return notFound()
             }
-            const data = await response.json() as Project
-            const dataTableFormat: (object | string)[][] =
-                CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:projects'])
+            const data = (await response.json()) as Project
+            const dataTableFormat: (object | string)[][] = CommonUtils.isNullOrUndefined(
+                data['_embedded']?.['sw360:projects'],
+            )
                 ? []
                 : data['_embedded']['sw360:projects'].map((elem: Project) => {
-                    return [
-                        elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                        elem.name,
-                        elem.version ?? '',
-                        { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
-                        elem.projectResponsible ?? '',
-                        elem.description ?? '',
-                    ];
-                })
+                      return [
+                          elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
+                          elem.name,
+                          elem.version ?? '',
+                          { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
+                          elem.projectResponsible ?? '',
+                          elem.description ?? '',
+                      ]
+                  })
             setProjectData(dataTableFormat)
         } catch (e) {
             console.error(e)
@@ -201,7 +216,10 @@ export default function CompareObligation({
                 </Modal.Header>
                 <Modal.Body ref={topRef}>
                     {alert && (
-                        <Alert variant={alert.variant} id='compareProject.alert'>
+                        <Alert
+                            variant={alert.variant}
+                            id='compareProject.alert'
+                        >
                             {alert.message}
                         </Alert>
                     )}
@@ -218,7 +236,12 @@ export default function CompareObligation({
                                 </Col>
                                 <Col xs='auto'>
                                     <Form.Group controlId='exact-match-group'>
-                                        <Form.Check inline name='exact-match' type='checkbox' id='exact-match' />
+                                        <Form.Check
+                                            inline
+                                            name='exact-match'
+                                            type='checkbox'
+                                            id='exact-match'
+                                        />
                                         <Form.Label className='pt-2'>
                                             {t('Exact Match')}{' '}
                                             <sup>
@@ -238,7 +261,15 @@ export default function CompareObligation({
                                     </Button>
                                 </Col>
                             </Row>
-                            <Row>{projectData && <Table columns={columns} data={projectData} sort={false} />}</Row>
+                            <Row>
+                                {projectData && (
+                                    <Table
+                                        columns={columns}
+                                        data={projectData}
+                                        sort={false}
+                                    />
+                                )}
+                            </Row>
                         </Col>
                     </Form>
                 </Modal.Body>

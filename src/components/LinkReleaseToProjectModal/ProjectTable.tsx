@@ -8,15 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { memo, type JSX } from 'react';
+import React, { memo, type JSX } from 'react'
 import { Table } from '../sw360'
 
 interface Props {
     data: Array<(string | JSX.Element)[]>
     columns: {
-        id: string;
-        name: string;
-        sort?: boolean;
+        id: string
+        name: string
+        sort?: boolean
     }[]
 }
 
@@ -25,7 +25,12 @@ const compare = (preState: Props, nextState: Props) => {
 }
 
 const ProjectTable = memo(function ProjectTable({ columns, data }: Props) {
-    return <Table columns={columns} data={data} />
+    return (
+        <Table
+            columns={columns}
+            data={data}
+        />
+    )
 }, compare)
 
 export default ProjectTable

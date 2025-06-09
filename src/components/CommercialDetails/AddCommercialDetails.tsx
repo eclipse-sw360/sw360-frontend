@@ -8,12 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { Release } from '@/object-types'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     releasePayload: Release
@@ -22,10 +22,18 @@ interface Props {
     setCotsResponsible: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
 }
 
-function AddCommercialDetails({ releasePayload, setReleasePayload, cotsResponsible, setCotsResponsible }: Props) : JSX.Element {
+function AddCommercialDetails({
+    releasePayload,
+    setReleasePayload,
+    cotsResponsible,
+    setCotsResponsible,
+}: Props): JSX.Element {
     return (
         <>
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
+            <div
+                className='container'
+                style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}
+            >
                 <CommercialDetailsAdministration
                     releasePayload={releasePayload}
                     setReleasePayload={setReleasePayload}
@@ -33,7 +41,10 @@ function AddCommercialDetails({ releasePayload, setReleasePayload, cotsResponsib
                     setCotsResponsible={setCotsResponsible}
                 />
 
-                <COTSOSSInformation releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                <COTSOSSInformation
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
+                />
             </div>
         </>
     )

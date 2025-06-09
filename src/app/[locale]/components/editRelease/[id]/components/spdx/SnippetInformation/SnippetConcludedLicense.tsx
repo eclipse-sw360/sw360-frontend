@@ -32,7 +32,7 @@ function SnippetConcludedLicense({
     snippetConcludedLicenseNoasserttion,
     setSnippetConcludedLicenseNoasserttion,
     updateField,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectSnippetConcludedLicenseExist = () => {
         setSnippetConcludedLicenseExist(true)
         setSnippetConcludedLicenseNone(false)

@@ -11,11 +11,11 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
-import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { HiOutlineLink } from 'react-icons/hi'
@@ -35,7 +35,7 @@ interface Props {
     calledFromModerationRequestDetail?: boolean
 }
 
-const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props) : ReactNode => {
+const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props): ReactNode => {
     const t = useTranslations('default')
     const [data, setData] = useState<Array<Array<string | string[]>>>([])
     const [deletingRelease, setDeletingRelease] = useState('')
@@ -60,23 +60,19 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         setLinkingReleaseId(releaseId)
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as EmbeddedLinkedReleases
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as EmbeddedLinkedReleases
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
+    }, [])
 
     useEffect(() => {
         fetchData(`components/${componentId}/releases`)
@@ -112,9 +108,12 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
             name: t('Version'),
             formatter: ([id, version]: Array<string>) =>
                 _(
-                    <Link href={'/components/releases/detail/' + id} className='link'>
+                    <Link
+                        href={'/components/releases/detail/' + id}
+                        className='link'
+                    >
                         {version}
-                    </Link>
+                    </Link>,
                 ),
             sort: true,
         },
@@ -150,9 +149,15 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                         <Link href={`/components/editRelease/${id}`}>
                             <FaPencilAlt className='btn-icon' />
                         </Link>
-                        <HiOutlineLink className='btn-icon' onClick={() => handleLinkToProject(id)} />
-                        <FaTrashAlt className='btn-icon' onClick={() => handleClickDelete(id)} />
-                    </span>
+                        <HiOutlineLink
+                            className='btn-icon'
+                            onClick={() => handleLinkToProject(id)}
+                        />
+                        <FaTrashAlt
+                            className='btn-icon'
+                            onClick={() => handleClickDelete(id)}
+                        />
+                    </span>,
                 ),
         },
     ]
@@ -168,9 +173,12 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
             name: t('Version'),
             formatter: ([id, version]: Array<string>) =>
                 _(
-                    <Link href={'/components/releases/detail/' + id} className='link'>
+                    <Link
+                        href={'/components/releases/detail/' + id}
+                        className='link'
+                    >
                         {version}
-                    </Link>
+                    </Link>,
                 ),
             sort: true,
         },
@@ -197,13 +205,19 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 <Table
                     data={data}
                     search={true}
-                    columns={(calledFromModerationRequestDetail !== undefined && calledFromModerationRequestDetail) ? 
-                                moderationRequestCurrentComponentReleaseColumns :
-                                columns}
+                    columns={
+                        calledFromModerationRequestDetail !== undefined && calledFromModerationRequestDetail
+                            ? moderationRequestCurrentComponentReleaseColumns
+                            : columns
+                    }
                     selector={true}
                 />
             </div>
-            <DeleteReleaseModal releaseId={deletingRelease} show={deleteModalOpen} setShow={setDeleteModalOpen} />
+            <DeleteReleaseModal
+                releaseId={deletingRelease}
+                show={deleteModalOpen}
+                setShow={setDeleteModalOpen}
+            />
             {!CommonUtils.isNullOrUndefined(clearingReleaseId) && (
                 <FossologyClearing
                     show={fossologyClearingModelOpen}

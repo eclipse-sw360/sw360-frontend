@@ -9,12 +9,12 @@
 
 'use client'
 
+import { AddtionalDataType } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
-import React, { useEffect, useState, type JSX } from 'react';
+import React, { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
-import { CommonUtils } from '@/utils'
-import { AddtionalDataType } from '@/object-types'
 
 interface Props {
     header: string
@@ -32,9 +32,9 @@ interface Input {
 function AddKeyValue(props: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
-    useEffect(()=>{
-        setInputList(!CommonUtils.isNullOrUndefined(props.data) ? props.data : []);
-    },[props.data])
+    useEffect(() => {
+        setInputList(!CommonUtils.isNullOrUndefined(props.data) ? props.data : [])
+    }, [props.data])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target
@@ -68,7 +68,10 @@ function AddKeyValue(props: Props): JSX.Element {
             <div className='row'>
                 {inputList.map((elem, j) => {
                     return (
-                        <div className='row mb-2' key={j}>
+                        <div
+                            className='row mb-2'
+                            key={j}
+                        >
                             <div className='col-lg-6'>
                                 <input
                                     name='key'
@@ -108,7 +111,11 @@ function AddKeyValue(props: Props): JSX.Element {
                     )
                 })}
                 <div className='col-lg-4'>
-                    <button type='button' onClick={() => handleAddClick()} className='btn btn-secondary'>
+                    <button
+                        type='button'
+                        onClick={() => handleAddClick()}
+                        className='btn btn-secondary'
+                    >
                         {t('Click to add row to', {
                             named_value: props.keyName
                                 .split(' ')

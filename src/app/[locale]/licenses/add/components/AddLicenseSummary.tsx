@@ -11,9 +11,9 @@
 'use client'
 
 import { LicensePayload } from '@/object-types'
+import { ReactNode } from 'react'
 import AddLicenseDetail from './AddLicenseDetail'
 import AddLicenseText from './AddLicenseText'
-import { ReactNode } from 'react'
 
 interface Props {
     licensePayload: LicensePayload
@@ -33,7 +33,7 @@ export default function AddLicenseSummary({
     inputValid,
     setErrorShortName,
     setErrorFullName,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     return (
         <div className='col'>
             <AddLicenseDetail

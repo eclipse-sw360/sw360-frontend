@@ -17,7 +17,7 @@ import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 
@@ -29,10 +29,7 @@ interface Props {
 
 type RowData = (string | string[] | undefined)[]
 
-export default function LinkedPackages({ projectId,
-                                         projectPayload,
-                                         setProjectPayload }: Props): JSX.Element {
-
+export default function LinkedPackages({ projectId, projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
@@ -43,11 +40,11 @@ export default function LinkedPackages({ projectId,
             id: 'linkedPackagesData.name',
             name: t('Package Name'),
             sort: true,
-            formatter: ([ name, packageId ]: [ name: string, packageId: string ]) =>
+            formatter: ([name, packageId]: [name: string, packageId: string]) =>
                 _(
                     <>
                         <Link href={`/packages/detail/${packageId}`}>{name}</Link>
-                    </>
+                    </>,
                 ),
         },
         {
@@ -72,11 +69,7 @@ export default function LinkedPackages({ projectId,
             formatter: (packageId: string) =>
                 _(
                     <>
-                        <OverlayTrigger overlay={
-                            <Tooltip>
-                                {t('Delete')}
-                            </Tooltip>}
-                        >
+                        <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                             <span className='d-inline-block'>
                                 <FaTrashAlt
                                     className='btn-icon'
@@ -85,21 +78,19 @@ export default function LinkedPackages({ projectId,
                                 />
                             </span>
                         </OverlayTrigger>
-                    </>
+                    </>,
                 ),
         },
     ]
-    
-    const handleDeletePackage = (packageId : string) => {
+
+    const handleDeletePackage = (packageId: string) => {
         const updatedProjectPayload = { ...projectPayload }
         newLinkedPackageData.forEach((_, key) => {
-            if (key === packageId){
+            if (key === packageId) {
                 newLinkedPackageData.delete(key)
-                if (updatedProjectPayload.packageIds &&
-                    updatedProjectPayload.packageIds.includes(key)){
-                        updatedProjectPayload.packageIds.splice(
-                            updatedProjectPayload.packageIds.indexOf(key), 1 )
-                        setProjectPayload(updatedProjectPayload)
+                if (updatedProjectPayload.packageIds && updatedProjectPayload.packageIds.includes(key)) {
+                    updatedProjectPayload.packageIds.splice(updatedProjectPayload.packageIds.indexOf(key), 1)
+                    setProjectPayload(updatedProjectPayload)
                 }
                 const updatedTableData = extractDataFromMap(newLinkedPackageData)
                 setTableData(updatedTableData)
@@ -109,47 +100,45 @@ export default function LinkedPackages({ projectId,
 
     const extractDataFromMap = (linkedPackageData: Map<string, LinkedPackageData>) => {
         const extractedData: Array<RowData> = []
-        linkedPackageData.forEach((value, ) => {
-            extractedData.push([[value.name, value.packageId],
-                                 value.version,
-                                 value.licenseIds,
-                                 value.packageManager,
-                                 value.packageId])
+        linkedPackageData.forEach((value) => {
+            extractedData.push([
+                [value.name, value.packageId],
+                value.version,
+                value.licenseIds,
+                value.packageManager,
+                value.packageId,
+            ])
         })
         return extractedData
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json())
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = await response.json()
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
+    }, [])
 
     useEffect(() => {
         if (projectPayload.packageIds && projectPayload.packageIds.length > 0) {
             fetchData(`projects/${projectId}/packages`)
                 .then((linkedPackages: LinkedPackage[] | undefined) => {
-                    if (!linkedPackages) return;
+                    if (!linkedPackages) return
                     setNewLinkedPackageData((prevMap) => {
                         const updatedMap = new Map(prevMap)
-    
+
                         linkedPackages.forEach((item) => {
                             if (!updatedMap.has(item.id)) {
                                 updatedMap.set(item.id, {
-                                    packageId: item.id as string,
-                                    name: item.name as string,
+                                    packageId: item.id,
+                                    name: item.name,
                                     version: item.version as string,
                                     licenseIds: item.licenseIds as string[],
                                     packageManager: item.packageManager as string,
@@ -160,16 +149,15 @@ export default function LinkedPackages({ projectId,
                     })
                     setTableData(extractDataFromMap(newLinkedPackageData))
                 })
-                .catch((err) => console.error(err));
+                .catch((err) => console.error(err))
         } else {
-            setTableData([]);
+            setTableData([])
         }
     }, [projectId])
-    
+
     useEffect(() => {
         setTableData(extractDataFromMap(newLinkedPackageData))
     }, [newLinkedPackageData])
-      
 
     return (
         <>

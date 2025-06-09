@@ -12,13 +12,13 @@
 
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, useRef, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { HttpStatus, User, Embedded } from '@/object-types'
+import { Embedded, HttpStatus, User } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import UsersTable from './UsersTable'
-import MessageService from '@/services/message.service'
 
 interface Props {
     show: boolean
@@ -32,7 +32,13 @@ type EmbeddedUsers = Embedded<User, 'sw360:users'>
 
 type RowData = (string | User)[]
 
-const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, multiple = false}: Props) : JSX.Element => {
+const SelectUsersDialog = ({
+    show,
+    setShow,
+    setSelectedUsers,
+    selectedUsers,
+    multiple = false,
+}: Props): JSX.Element => {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [selectingUsers, setSelectingUsers] = useState({})
@@ -43,7 +49,7 @@ const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, mul
         setSelectingUsers(selectedUsers)
     }
 
-    const searchUsers= async () => {
+    const searchUsers = async () => {
         const session = await getSession()
         const queryUrl = CommonUtils.createUrlWithParams(`users`, { email: searchText.current })
         if (CommonUtils.isNullOrUndefined(session)) {
@@ -56,7 +62,7 @@ const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, mul
             return
         }
 
-        const users = await response.json() as EmbeddedUsers
+        const users = (await response.json()) as EmbeddedUsers
         if (
             !CommonUtils.isNullOrUndefined(users['_embedded']) &&
             !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])
@@ -83,7 +89,13 @@ const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, mul
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Search Users')}</Modal.Title>
             </Modal.Header>
@@ -95,20 +107,35 @@ const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, mul
                             className='form-control'
                             placeholder={t('Enter search text')}
                             aria-describedby='Search Users'
-                            onChange={(event) => {searchText.current = event.target.value }}
+                            onChange={(event) => {
+                                searchText.current = event.target.value
+                            }}
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <button type='button' className='btn btn-secondary me-2' onClick={() => void searchUsers()}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary me-2'
+                            onClick={() => void searchUsers()}
+                        >
                             {t('Search')}
                         </button>
-                        <button type='button' className='btn btn-secondary me-2' onClick={resetSelection}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary me-2'
+                            onClick={resetSelection}
+                        >
                             {t('Reset')}
                         </button>
                     </div>
                 </div>
                 <div className='mt-3'>
-                    <UsersTable tableData={tableData} setSelectingUsers={setSelectingUsers} selectingUsers={selectingUsers} multiple={multiple}/>
+                    <UsersTable
+                        tableData={tableData}
+                        setSelectingUsers={setSelectingUsers}
+                        selectingUsers={selectingUsers}
+                        multiple={multiple}
+                    />
                 </div>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
@@ -121,7 +148,11 @@ const SelectUsersDialog = ({ show, setShow, setSelectedUsers, selectedUsers, mul
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className='btn btn-primary' onClick={handleClickSelectUsers}>
+                <Button
+                    type='button'
+                    className='btn btn-primary'
+                    onClick={handleClickSelectUsers}
+                >
                     {t('Select User')}
                 </Button>
             </Modal.Footer>

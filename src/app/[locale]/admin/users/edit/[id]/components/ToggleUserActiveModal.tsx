@@ -8,17 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { HttpStatus } from '@/object-types'
+import { ApiUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { ApiUtils } from '@/utils'
-import { HttpStatus } from '@/object-types'
 
-import { useTranslations } from 'next-intl'
-import React, { type JSX } from 'react';
 import MessageService from '@/services/message.service'
+import { useTranslations } from 'next-intl'
+import React, { type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
-
 
 interface Props {
     userId: string
@@ -28,7 +27,13 @@ interface Props {
     userEmail: string
 }
 
-const ToggleUserActiveModal = ({ userId, isUserDeactived, showToggleActiveModal, setShowToggleActiveModal, userEmail }: Props) : JSX.Element => {
+const ToggleUserActiveModal = ({
+    userId,
+    isUserDeactived,
+    showToggleActiveModal,
+    setShowToggleActiveModal,
+    userEmail,
+}: Props): JSX.Element => {
     const t = useTranslations('default')
     const router = useRouter()
 
@@ -38,7 +43,11 @@ const ToggleUserActiveModal = ({ userId, isUserDeactived, showToggleActiveModal,
             if (!session) {
                 return signOut()
             }
-            const response = await ApiUtils.PATCH(`users/${userId}`, { deactivated: !isUserDeactived }, session.user.access_token)
+            const response = await ApiUtils.PATCH(
+                `users/${userId}`,
+                { deactivated: !isUserDeactived },
+                session.user.access_token,
+            )
             if (response.status === HttpStatus.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 router.push('/admin/users')
@@ -54,26 +63,44 @@ const ToggleUserActiveModal = ({ userId, isUserDeactived, showToggleActiveModal,
     }
 
     return (
-        <Modal show={showToggleActiveModal} onHide={() => setShowToggleActiveModal(false)} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton style={{ color: 'red' }}>
-                <Modal.Title><FaRegQuestionCircle /> {isUserDeactived === true ? t('Activate User') : t('Deactivate User')} ?</Modal.Title>
+        <Modal
+            show={showToggleActiveModal}
+            onHide={() => setShowToggleActiveModal(false)}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{ color: 'red' }}
+            >
+                <Modal.Title>
+                    <FaRegQuestionCircle /> {isUserDeactived === true ? t('Activate User') : t('Deactivate User')} ?
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <p>
-                    {t(`Do you really want to ${isUserDeactived ? 'activate' : 'deactivate'} the user`)} <b>{userEmail}</b>?
+                    {t(`Do you really want to ${isUserDeactived ? 'activate' : 'deactivate'} the user`)}{' '}
+                    <b>{userEmail}</b>?
                 </p>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <button className='btn close-btn btn-light' onClick={() => setShowToggleActiveModal(false)}>
+                <button
+                    className='btn close-btn btn-light'
+                    onClick={() => setShowToggleActiveModal(false)}
+                >
                     {t('Close')}
                 </button>
-                <button className='btn btn-danger' id='submit' onClick={() => toggleUserAccount()}>
+                <button
+                    className='btn btn-danger'
+                    id='submit'
+                    onClick={() => toggleUserAccount()}
+                >
                     {isUserDeactived === true ? t('Activate User') : t('Deactivate User')}
                 </button>
             </Modal.Footer>
         </Modal>
     )
-
 }
 
 export default ToggleUserActiveModal

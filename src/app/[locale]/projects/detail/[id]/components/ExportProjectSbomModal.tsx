@@ -29,36 +29,36 @@ interface Props {
 enum DownloadState {
     INIT,
     SUCCESS,
-    FAILED
+    FAILED,
 }
 
-export default function ExportProjectSbomModal({ show,
-                                                 setShow,
-                                                 projectId,
-                                                 projectName,
-                                                 projectVersion }: Props) : ReactNode {
+export default function ExportProjectSbomModal({
+    show,
+    setShow,
+    projectId,
+    projectName,
+    projectVersion,
+}: Props): ReactNode {
     const t = useTranslations('default')
     const [sbomFormat, setSbomFormat] = useState<string>('')
     const [includeSubProjectReleases, setIncludeSubProjectReleases] = useState<boolean>(false)
-    const [loading, setLoading] = useState<boolean>(false) 
+    const [loading, setLoading] = useState<boolean>(false)
     const [disableExportSbom, setDisableExportSbom] = useState<boolean>(true)
     const [exportTime, setExportTime] = useState<number | null>(null)
     const [downloadState, setDownloadState] = useState<DownloadState>(DownloadState.INIT)
 
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                     HTMLInputElement >) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value, type } = event.target
         if (name === 'sbomFormat') {
             setSbomFormat(value)
             setDisableExportSbom(false)
-        }
-        else if (name === 'includeSubProjectReleases' && type === 'checkbox') {
+        } else if (name === 'includeSubProjectReleases' && type === 'checkbox') {
             setIncludeSubProjectReleases(event.target.checked)
             setDisableExportSbom(false)
         }
     }
 
-    const handleExportSbom = async (projectId : string) =>{
+    const handleExportSbom = async (projectId: string) => {
         try {
             const start = Date.now()
             setLoading(true)
@@ -70,23 +70,22 @@ export default function ExportProjectSbomModal({ show,
             const currentDate = new Date().toISOString().split('T')[0]
             const downloadStatusCode = await DownloadService.download(
                 `reports?module=sbom&projectId=${projectId}&withSubProject=${includeSubProjectReleases}
-                 &bomType=${sbomFormat}`, session, `Project-${currentDate}_SBOM.${sbomFormat.toLowerCase()}`)
-            if (downloadStatusCode !== undefined && downloadStatusCode === 200){
+                 &bomType=${sbomFormat}`,
+                session,
+                `Project-${currentDate}_SBOM.${sbomFormat.toLowerCase()}`,
+            )
+            if (downloadStatusCode !== undefined && downloadStatusCode === 200) {
                 setDownloadState(DownloadState.SUCCESS)
-            }
-            else
-                setDownloadState(DownloadState.FAILED)
+            } else setDownloadState(DownloadState.FAILED)
             const endTime = Date.now()
             setExportTime(parseFloat(((endTime - start) / 1000).toFixed(2)))
-        }
-        catch(error: unknown) {
-            if (error instanceof DOMException && error.name === "AbortError") {
+        } catch (error: unknown) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
                 return
             }
             const message = error instanceof Error ? error.message : String(error)
             MessageService.error(message)
-        }
-        finally {
+        } finally {
             setLoading(false)
         }
     }
@@ -118,52 +117,44 @@ export default function ExportProjectSbomModal({ show,
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {
-                        downloadState === DownloadState.SUCCESS && (
-                            <Alert
-                                variant='success'
-                                className='border-success-subtle p-3'
-                            >
-                                <p className='mb-1'>
-                                    {t('SBOM exported successfully')}
-                                </p>
-                                <p className='mb-0'>
-                                    {t.rich('Time taken for export', {
-                                        exportTime: exportTime ?? '',
-                                        strong : (chunks) => <b>{chunks}</b>
-                                    })}
-                                </p>
-                            </Alert>
-                        )
-                    }
-                    {
-                        downloadState === DownloadState.FAILED && (
-                            <Alert
-                                variant='danger'
-                                className='border-danger-subtle p-3'
-                            >
-                                <p className='mb-1'>
-                                    {t('There are some error while exporting SBOM')}
-                                </p>
-                            </Alert>
-                        )
-                    }
-                    <div className="mb-3">
+                    {downloadState === DownloadState.SUCCESS && (
+                        <Alert
+                            variant='success'
+                            className='border-success-subtle p-3'
+                        >
+                            <p className='mb-1'>{t('SBOM exported successfully')}</p>
+                            <p className='mb-0'>
+                                {t.rich('Time taken for export', {
+                                    exportTime: exportTime ?? '',
+                                    strong: (chunks) => <b>{chunks}</b>,
+                                })}
+                            </p>
+                        </Alert>
+                    )}
+                    {downloadState === DownloadState.FAILED && (
+                        <Alert
+                            variant='danger'
+                            className='border-danger-subtle p-3'
+                        >
+                            <p className='mb-1'>{t('There are some error while exporting SBOM')}</p>
+                        </Alert>
+                    )}
+                    <div className='mb-3'>
                         {t.rich('Do you really want to export SBOM', {
-                                projectName: projectName ?? '',
-                                projectVersion: projectVersion ?? '',
-                                strong: (chunks) => <b>{chunks}</b>
-                            })}
+                            projectName: projectName ?? '',
+                            projectVersion: projectVersion ?? '',
+                            strong: (chunks) => <b>{chunks}</b>,
+                        })}
                     </div>
-                    <div className="mb-3">
-                        {t('Currently only CycloneDX SBOM export is supported')}
-                    </div>
+                    <div className='mb-3'>{t('Currently only CycloneDX SBOM export is supported')}</div>
                     <Form>
                         <Form.Group className='mb-4'>
                             <Form.Label style={{ fontWeight: 'bold' }}>
                                 {t('Select SBOM format')} :
-                                <span className='text-red'
-                                        style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{ color: '#F7941E' }}
+                                >
                                     *
                                 </span>
                             </Form.Label>
@@ -175,21 +166,26 @@ export default function ExportProjectSbomModal({ show,
                                 onChange={updateInputField}
                                 required
                             >
-                                <option value='' hidden></option>
+                                <option
+                                    value=''
+                                    hidden
+                                ></option>
                                 <option value='XML'>{t('XML Format')}</option>
                                 <option value='JSON'>{t('JSON Format')}</option>
                             </Form.Select>
                         </Form.Group>
-                        <Form.Group className='mb-2' style={{ display: 'flex',
-                                                              alignItems: 'left' }}>
+                        <Form.Group
+                            className='mb-2'
+                            style={{ display: 'flex', alignItems: 'left' }}
+                        >
                             <Form.Check
                                 type='checkbox'
-                                id="exportProjectSbom.includeSubProjectReleases"
-                                name="includeSubProjectReleases"
+                                id='exportProjectSbom.includeSubProjectReleases'
+                                name='includeSubProjectReleases'
                                 checked={includeSubProjectReleases}
                                 onChange={updateInputField}
                             />
-                            <Form.Label style={{ marginLeft: '10px'}}>
+                            <Form.Label style={{ marginLeft: '10px' }}>
                                 {t('Include releases from sub projects')}
                             </Form.Label>
                         </Form.Group>
@@ -198,7 +194,9 @@ export default function ExportProjectSbomModal({ show,
                 <Modal.Footer>
                     <button
                         className='btn btn-primary'
-                        onClick={() => {handleExportSbom(projectId)}}
+                        onClick={() => {
+                            handleExportSbom(projectId)
+                        }}
                         disabled={disableExportSbom}
                     >
                         {t('Export SBOM')}

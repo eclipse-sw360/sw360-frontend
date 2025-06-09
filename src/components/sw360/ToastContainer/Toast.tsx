@@ -9,7 +9,7 @@
 
 'use client'
 
-import React, { SetStateAction, type JSX } from 'react';
+import React, { SetStateAction, type JSX } from 'react'
 import Toast from 'react-bootstrap/Toast'
 
 import { ToastData } from '@/object-types'
@@ -35,7 +35,13 @@ const ToastMessage = ({ show, type, message, contextual, onClose, setShowToast }
     }
 
     return (
-        <Toast show={show} onClose={handleClose} delay={4000} bg={contextual} autohide>
+        <Toast
+            show={show}
+            onClose={handleClose}
+            delay={4000}
+            bg={contextual}
+            autohide
+        >
             <Toast.Header>
                 <strong className='me-auto'>{type}</strong>
             </Toast.Header>

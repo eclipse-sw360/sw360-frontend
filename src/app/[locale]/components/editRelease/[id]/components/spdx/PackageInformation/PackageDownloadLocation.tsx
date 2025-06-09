@@ -30,7 +30,7 @@ function PackageDownloadLocation({
     packageDownloadLocationNoasserttion,
     setPackageDownloadLocationNoasserttion,
     packageDownloadLocation,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectPackageDownloadLocationExist = () => {
         setPackageDownloadLocationExist(true)
         setPackageDownloadLocationNone(false)
@@ -107,7 +107,10 @@ function PackageDownloadLocation({
                             onChange={selectPackageDownloadLocationNoasserttion}
                             checked={packageDownloadLocationNoasserttion}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='downloadLocationNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='downloadLocationNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

@@ -7,14 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 export default interface ClearingRequest {
     id: string
-    requestedClearingDate?: string,
+    requestedClearingDate?: string
     projectId?: string
     clearingState?: string
     requestingUser?: string
-    requestingUserName?: string,
+    requestingUserName?: string
     projectBU?: string
     clearingTeam?: string
     clearingTeamName?: string

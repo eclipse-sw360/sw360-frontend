@@ -11,7 +11,7 @@ import { Metadata } from 'next'
 
 import ImportExportComponent from './components/ImportExport'
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Admin - Import-Export',

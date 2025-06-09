@@ -10,10 +10,10 @@
 'use client'
 
 import { Config, Grid } from 'gridjs'
+import type { JSX } from 'react'
 import * as React from 'react'
 import { Component, RefObject, createRef } from 'react'
 import { Form } from 'react-bootstrap'
-import type { JSX } from 'react'
 const defaultOptions = {
     pagination: { limit: 10 },
     search: false,
@@ -105,12 +105,15 @@ class Table extends Component<TableProps, unknown> {
     render(): JSX.Element {
         return (
             <>
-                {(this.props.selector === true) && (
+                {this.props.selector === true && (
                     <div className='col-11 mt-3 mb-3'>
                         <div className='dataTables_length'>
                             <span className='my-2'>Show</span>
                             <label style={{ marginLeft: '5px', marginRight: '5px' }}>
-                                <Form.Select size='sm' onChange={this.handlePageSizeChange}>
+                                <Form.Select
+                                    size='sm'
+                                    onChange={this.handlePageSizeChange}
+                                >
                                     <option defaultValue={defaultOptions.pagination.limit}>
                                         {defaultOptions.pagination.limit}
                                     </option>

@@ -10,14 +10,14 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState, type JSX } from 'react';
+import { useState, type JSX } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
-import { SelectUsersDialog, SelectCountry } from 'next-sw360'
+import { ProjectPayload } from '@/object-types'
+import { SelectCountry, SelectUsersDialog } from 'next-sw360'
 import DepartmentModal from './DepartmentModal'
-import {ProjectPayload} from '@/object-types'
 
-interface Props{
+interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     moderators: { [k: string]: string }
@@ -35,22 +35,21 @@ interface Props{
 }
 
 export default function Roles({
-        projectPayload, 
-        setProjectPayload, 
-        moderators,
-        setModerators,
-        contributors, 
-        setContributors,
-        projectOwner,
-        setProjectOwner,
-        projectManager,
-        setProjectManager,
-        leadArchitect,
-        setLeadArchitect,
-        securityResponsibles,
-        setSecurityResponsibles
-    } : Props
-) : JSX.Element {
+    projectPayload,
+    setProjectPayload,
+    moderators,
+    setModerators,
+    contributors,
+    setContributors,
+    projectOwner,
+    setProjectOwner,
+    projectManager,
+    setProjectManager,
+    leadArchitect,
+    setLeadArchitect,
+    securityResponsibles,
+    setSecurityResponsibles,
+}: Props): JSX.Element {
     const t = useTranslations('default')
 
     const [showDepartmentModal, setShowDepartmentModal] = useState<boolean>(false)
@@ -207,18 +206,21 @@ export default function Roles({
 
     return (
         <>
-            <DepartmentModal 
-                show={showDepartmentModal} 
-                setShow={setShowDepartmentModal} 
-                department={projectPayload.businessUnit ?? ''} 
-                setDepartment={setDepartmentToPayload} 
+            <DepartmentModal
+                show={showDepartmentModal}
+                setShow={setShowDepartmentModal}
+                department={projectPayload.businessUnit ?? ''}
+                setDepartment={setDepartmentToPayload}
                 multiple={false}
             />
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Roles')}</h6>
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.group' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.group'
+                            className='form-label fw-medium'
+                        >
                             {t('Group')} <span style={{ color: 'red' }}>*</span>
                         </label>
                         <input
@@ -232,13 +234,19 @@ export default function Roles({
                             required
                             onClick={() => setShowDepartmentModal(true)}
                         />
-                        <div className='form-text' onClick={handleClearDepartment}>
+                        <div
+                            className='form-text'
+                            onClick={handleClearDepartment}
+                        >
                             {' '}
                             <GiCancel />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.projectManager' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.projectManager'
+                            className='form-label fw-medium'
+                        >
                             {t('Project Manager')}
                         </label>
                         <input
@@ -250,7 +258,7 @@ export default function Roles({
                             readOnly={true}
                             name='projectManager'
                             onClick={() => setDialogOpenProjectManager(true)}
-                            value={(Object.values(projectManager).length === 0) ? '' : Object.values(projectManager)[0]}
+                            value={Object.values(projectManager).length === 0 ? '' : Object.values(projectManager)[0]}
                         />
                         <SelectUsersDialog
                             show={dialogOpenProjectManager}
@@ -259,13 +267,19 @@ export default function Roles({
                             selectedUsers={projectManager}
                             multiple={false}
                         />
-                        <div className='form-text' onClick={handleClearProjectManager}>
+                        <div
+                            className='form-text'
+                            onClick={handleClearProjectManager}
+                        >
                             {' '}
                             <GiCancel />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.projectOwner' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.projectOwner'
+                            className='form-label fw-medium'
+                        >
                             {t('Project Owner')}
                         </label>
                         <input
@@ -277,7 +291,7 @@ export default function Roles({
                             readOnly={true}
                             name='projectOwner'
                             onClick={() => setDialogOpenProjectOwner(true)}
-                            value={(Object.values(projectOwner).length === 0) ? '' : Object.values(projectOwner)[0]}
+                            value={Object.values(projectOwner).length === 0 ? '' : Object.values(projectOwner)[0]}
                         />
                         <SelectUsersDialog
                             show={dialogOpenProjectOwner}
@@ -286,7 +300,10 @@ export default function Roles({
                             selectedUsers={projectOwner}
                             multiple={false}
                         />
-                        <div className='form-text' onClick={handleClearProjectOwner}>
+                        <div
+                            className='form-text'
+                            onClick={handleClearProjectOwner}
+                        >
                             {' '}
                             <GiCancel />
                         </div>
@@ -295,7 +312,10 @@ export default function Roles({
                 <hr className='my-2' />
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.ownerAccountingUnit' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.ownerAccountingUnit'
+                            className='form-label fw-medium'
+                        >
                             {t('Owner Accounting Unit')}
                         </label>
                         <input
@@ -310,7 +330,10 @@ export default function Roles({
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.ownerBillingGroup' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.ownerBillingGroup'
+                            className='form-label fw-medium'
+                        >
                             {t('Owner Billing Group')}
                         </label>
                         <input
@@ -325,13 +348,19 @@ export default function Roles({
                         />
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <SelectCountry selectCountry={updateField} value={projectPayload.ownerCountry ?? ''} />
+                        <SelectCountry
+                            selectCountry={updateField}
+                            value={projectPayload.ownerCountry ?? ''}
+                        />
                     </div>
                 </div>
                 <hr className='my-2' />
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.leadArchitect' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.leadArchitect'
+                            className='form-label fw-medium'
+                        >
                             {t('Lead Architect')}
                         </label>
                         <input
@@ -343,7 +372,7 @@ export default function Roles({
                             readOnly={true}
                             name='leadArchitect'
                             onClick={() => setDialogOpenLeadArchitect(true)}
-                            value={(Object.values(leadArchitect).length === 0) ? '' : Object.values(leadArchitect)[0]}
+                            value={Object.values(leadArchitect).length === 0 ? '' : Object.values(leadArchitect)[0]}
                         />
                         <SelectUsersDialog
                             show={dialogOpenLeadArchitect}
@@ -352,13 +381,19 @@ export default function Roles({
                             selectedUsers={leadArchitect}
                             multiple={false}
                         />
-                        <div className='form-text' onClick={handleClearLeadArchitect}>
+                        <div
+                            className='form-text'
+                            onClick={handleClearLeadArchitect}
+                        >
                             {' '}
                             <GiCancel />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.moderators' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.moderators'
+                            className='form-label fw-medium'
+                        >
                             {t('Moderators')}
                         </label>
                         <input
@@ -379,13 +414,19 @@ export default function Roles({
                             selectedUsers={moderators}
                             multiple={true}
                         />
-                        <div className='form-text' onClick={handleClearModerators}>
+                        <div
+                            className='form-text'
+                            onClick={handleClearModerators}
+                        >
                             {' '}
                             <GiCancel />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.contributors' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.contributors'
+                            className='form-label fw-medium'
+                        >
                             {t('Contributors')}
                         </label>
                         <input
@@ -406,7 +447,10 @@ export default function Roles({
                             selectedUsers={contributors}
                             multiple={true}
                         />
-                        <div className='form-text' onClick={handleClearContributors}>
+                        <div
+                            className='form-text'
+                            onClick={handleClearContributors}
+                        >
                             {' '}
                             <GiCancel />
                         </div>
@@ -415,7 +459,10 @@ export default function Roles({
                 <hr className='my-2' />
                 <div className='row'>
                     <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.securityResponsibles' className='form-label fw-medium'>
+                        <label
+                            htmlFor='addProjects.securityResponsibles'
+                            className='form-label fw-medium'
+                        >
                             {t('Security Responsibles')}
                         </label>
                         <input
@@ -436,7 +483,10 @@ export default function Roles({
                             selectedUsers={securityResponsibles}
                             multiple={true}
                         />
-                        <div className='form-text' onClick={handleClearSecurityResponsibles}>
+                        <div
+                            className='form-text'
+                            onClick={handleClearSecurityResponsibles}
+                        >
                             {' '}
                             <GiCancel />
                         </div>

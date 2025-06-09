@@ -10,8 +10,8 @@
 
 'use client'
 
-import React, { type JSX } from 'react';
 import { Table } from 'next-sw360'
+import React, { type JSX } from 'react'
 import { Form } from 'react-bootstrap'
 
 import { LicenseDetail } from '@/object-types'
@@ -24,10 +24,9 @@ interface Props {
 }
 
 const LicensesTable = ({ licenseDatas, setLicenses, selectedLicenses }: Props): JSX.Element => {
-
     const handleCheckbox = (item: LicenseDetail) => {
         const copiedLicenses = { ...selectedLicenses }
-        const licenseId = item._links?.self.href.split('/').at(-1) 
+        const licenseId = item._links?.self.href.split('/').at(-1)
         if (licenseId === undefined) return
         if (Object.keys(copiedLicenses).includes(licenseId)) {
             delete copiedLicenses[licenseId]
@@ -46,11 +45,13 @@ const LicensesTable = ({ licenseDatas, setLicenses, selectedLicenses }: Props): 
                     <Form.Check
                         name='licenseId'
                         type='checkbox'
-                        defaultChecked={Object.keys(selectedLicenses).includes(item._links?.self.href.split('/').at(-1) ?? '')}
+                        defaultChecked={Object.keys(selectedLicenses).includes(
+                            item._links?.self.href.split('/').at(-1) ?? '',
+                        )}
                         onClick={() => {
                             handleCheckbox(item)
                         }}
-                    ></Form.Check>
+                    ></Form.Check>,
                 ),
             width: '8%',
             sort: false,
@@ -64,7 +65,11 @@ const LicensesTable = ({ licenseDatas, setLicenses, selectedLicenses }: Props): 
 
     return (
         <div className='row'>
-            <Table data={licenseDatas} columns={columns} sort={false}/>
+            <Table
+                data={licenseDatas}
+                columns={columns}
+                sort={false}
+            />
         </div>
     )
 }

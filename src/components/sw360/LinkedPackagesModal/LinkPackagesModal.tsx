@@ -9,21 +9,16 @@
 
 'use client'
 
-import { Embedded,
-         HttpStatus,
-         LinkedPackageData,
-         Package,
-         ProjectPayload } from '@/object-types'
+import { Embedded, HttpStatus, LinkedPackageData, Package, ProjectPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { ChangeEvent, useRef, useState, type JSX } from 'react';
+import { ChangeEvent, useRef, useState, type JSX } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
-
 
 interface Props {
     setLinkedPackageData: React.Dispatch<React.SetStateAction<Map<string, LinkedPackageData>>>
@@ -78,11 +73,11 @@ export default function LinkPackagesModal({
             name: t('Name'),
             width: 'auto',
             sort: true,
-            formatter: ([ name, packageId ]: [ string, string ]) =>
+            formatter: ([name, packageId]: [string, string]) =>
                 _(
                     <>
                         <Link href={`/packages/detail/${packageId}`}>{name}</Link>
-                    </>
+                    </>,
                 ),
         },
         {
@@ -96,18 +91,17 @@ export default function LinkPackagesModal({
             name: t('License'),
             width: 'auto',
             sort: true,
-            formatter: (licenseIds: string[]) => _(
-                <div>
-                    {licenseIds.map((licenseId, index) => (
-                        <span key={index}>
-                            <Link href={`/licenses/detail?id=${licenseId}`}>
-                                {licenseId}
-                            </Link>
-                            {index !== licenseIds.length - 1 && ', '}
-                        </span>
-                    ))}
-                </div>
-            )
+            formatter: (licenseIds: string[]) =>
+                _(
+                    <div>
+                        {licenseIds.map((licenseId, index) => (
+                            <span key={index}>
+                                <Link href={`/licenses/detail?id=${licenseId}`}>{licenseId}</Link>
+                                {index !== licenseIds.length - 1 && ', '}
+                            </span>
+                        ))}
+                    </div>,
+                ),
         },
         {
             id: 'linkPackages.packageManager',
@@ -162,25 +156,19 @@ export default function LinkPackagesModal({
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:packages'])
                         ? []
                         : data['_embedded']['sw360:packages'].map((singlePackage: Package) => [
-                            CommonUtils.getIdFromUrl(singlePackage._links?.self.href),
-                            [
-                                singlePackage.name ?? '',
-                                CommonUtils.getIdFromUrl(singlePackage._links?.self.href)
-                            ],
-                            singlePackage.version ?? '',
-                            singlePackage.licenseIds ?? [''],
-                            singlePackage.packageManager ?? '',
-                            singlePackage.purl ?? '',
-                        ])
+                              CommonUtils.getIdFromUrl(singlePackage._links?.self.href),
+                              [singlePackage.name ?? '', CommonUtils.getIdFromUrl(singlePackage._links?.self.href)],
+                              singlePackage.version ?? '',
+                              singlePackage.licenseIds ?? [''],
+                              singlePackage.packageManager ?? '',
+                              singlePackage.purl ?? '',
+                          ])
                 setPackageData(dataTableFormat)
-            }
-            else if (response.status == HttpStatus.FORBIDDEN) {
+            } else if (response.status == HttpStatus.FORBIDDEN) {
                 MessageService.warn(t('Access Denied'))
-            }
-            else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+            } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                 MessageService.error(t('Internal server error'))
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 MessageService.error(t('Unauthorized request'))
             }
         } catch (e) {
@@ -194,17 +182,15 @@ export default function LinkPackagesModal({
                 const updatedProjectPayload = { ...projectPayload }
                 if (updatedProjectPayload.packageIds === undefined) {
                     updatedProjectPayload.packageIds = []
-                }
-                else {
-                    for (const [packageId, ] of linkedPackagePayloadData) {
+                } else {
+                    for (const [packageId] of linkedPackagePayloadData) {
                         if (!updatedProjectPayload.packageIds.includes(packageId))
                             updatedProjectPayload.packageIds.push(packageId)
-                        }
                     }
+                }
                 setProjectPayload(updatedProjectPayload)
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -309,11 +295,11 @@ export default function LinkPackagesModal({
                             linkPackages.forEach((item, key) => {
                                 if (!updatedMap.has(key)) {
                                     updatedMap.set(key, {
-                                        packageId: key as string,
-                                        name: item.name as string,
-                                        version: item.version as string,
-                                        licenseIds: item.licenseIds as string[],
-                                        packageManager: item.packageManager as string,
+                                        packageId: key,
+                                        name: item.name,
+                                        version: item.version,
+                                        licenseIds: item.licenseIds,
+                                        packageManager: item.packageManager,
                                     })
                                 }
                             })

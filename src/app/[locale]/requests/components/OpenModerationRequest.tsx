@@ -9,14 +9,14 @@
 
 'use client'
 
+import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { useEffect, useState, useCallback, ReactNode } from 'react'
-import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
 import { notFound } from 'next/navigation'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
@@ -43,7 +43,7 @@ function OpenModerationRequest(): ReactNode {
     }
 
     const formatDate = (timestamp: number | undefined): string | null => {
-        if(timestamp === undefined){
+        if (timestamp === undefined) {
             return null
         }
         const date = new Date(timestamp)
@@ -56,14 +56,13 @@ function OpenModerationRequest(): ReactNode {
     const fetchData = useCallback(
         async (url: string) => {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status == HttpStatus.OK) {
                 const data = (await response.json()) as EmbeddedModerationRequest
                 return data
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return 
+                return
             } else {
                 notFound()
             }
@@ -93,8 +92,7 @@ function OpenModerationRequest(): ReactNode {
                             item.requestingUser ?? '',
                             item.requestingUserDepartment ?? '',
                             item.moderators ?? [],
-                            item.moderationState !== undefined ?
-                                moderationRequestStatus[item.moderationState] : '',
+                            item.moderationState !== undefined ? moderationRequestStatus[item.moderationState] : '',
                             {
                                 moderationRequestId: item.id,
                                 documentName: item.documentName,

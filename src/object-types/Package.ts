@@ -44,7 +44,7 @@ interface Package {
             fullName: string
             _links?: Links
         }
-        "sw360:release"?: {
+        'sw360:release'?: {
             id: string
             name: string
             version: string

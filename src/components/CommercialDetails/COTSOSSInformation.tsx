@@ -8,11 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { Release } from '@/object-types'
 import { useTranslations } from 'next-intl'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     releasePayload: Release
@@ -44,14 +44,20 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props): JSX.E
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{ padding: '0px 12px' }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
                         <span className='fw-bold'>{t('COTS OSS Information')}</span>
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='used_license' className='form-label fw-bold'>
+                            <label
+                                htmlFor='used_license'
+                                className='form-label fw-bold'
+                            >
                                 {t('Used License')}
                             </label>
                             <input
@@ -75,7 +81,10 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props): JSX.E
                                     checked={releasePayload.cotsDetails?.containsOSS ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='contains_OSS'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='contains_OSS'
+                                >
                                     {t('Contains OSS')}
                                 </label>
                             </div>
@@ -90,7 +99,10 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props): JSX.E
                                     checked={releasePayload.cotsDetails?.ossContractSigned ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='OSS_contract_signed'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='OSS_contract_signed'
+                                >
                                     {t('OSS Contract Signed')}
                                 </label>
                             </div>
@@ -98,7 +110,10 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props): JSX.E
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='ossInformationURL' className='form-label fw-bold'>
+                            <label
+                                htmlFor='ossInformationURL'
+                                className='form-label fw-bold'
+                            >
                                 {t('OSS Information URL')}
                             </label>
                             <input
@@ -122,7 +137,10 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props): JSX.E
                                     checked={releasePayload.cotsDetails?.sourceCodeAvailable ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='sourceCodeAvailable'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='sourceCodeAvailable'
+                                >
                                     {t('Source Code Available')}
                                 </label>
                             </div>

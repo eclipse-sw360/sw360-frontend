@@ -10,7 +10,7 @@
 
 'used-client'
 
-import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 
 import { Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -23,7 +23,7 @@ import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
-function RecentReleasesWidget() : ReactNode {
+function RecentReleasesWidget(): ReactNode {
     const t = useTranslations('default')
 
     const [recentRelease, setRecentRelease] = useState<Array<JSX.Element[]>>([])
@@ -46,42 +46,46 @@ function RecentReleasesWidget() : ReactNode {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('releases/recentReleases').then((releases: EmbeddedReleases | undefined) => {
-            if (releases === undefined) {
-                return
-            }
+        void fetchData('releases/recentReleases')
+            .then((releases: EmbeddedReleases | undefined) => {
+                if (releases === undefined) {
+                    return
+                }
 
-            if (
-                !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
-            ) {
-                setRecentRelease(
-                    releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
-                        <li key={item.name}>
-                            <Link
-                                href={'components/releases/detail/' + item.id}
-                                style={{ color: 'orange', textDecoration: 'none' }}
-                            >
-                                {item.name}
-                            </Link>
-                        </li>,
-                    ]),
-                )
-            } else {
-                setRecentRelease([])
-            }
-        })
-        .catch((err:Error)=>{
-            throw new Error(err.message)
-        })
-        .finally(() => {
-            setLoading(false)   
-        })
+                if (
+                    !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
+                ) {
+                    setRecentRelease(
+                        releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
+                            <li key={item.name}>
+                                <Link
+                                    href={'components/releases/detail/' + item.id}
+                                    style={{ color: 'orange', textDecoration: 'none' }}
+                                >
+                                    {item.name}
+                                </Link>
+                            </li>,
+                        ]),
+                    )
+                } else {
+                    setRecentRelease([])
+                }
+            })
+            .catch((err: Error) => {
+                throw new Error(err.message)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
     }, [fetchData, reload])
-    
+
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('Recent Releases')} setReload={setReload} />
+            <HomeTableHeader
+                title={t('Recent Releases')}
+                setReload={setReload}
+            />
             {loading == false ? (
                 <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentRelease}</ul>
             ) : (

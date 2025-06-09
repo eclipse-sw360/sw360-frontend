@@ -10,9 +10,9 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { Button } from 'react-bootstrap'
 
 import { Attachment, AttachmentTypes, HttpStatus } from '@/object-types'
@@ -27,19 +27,18 @@ interface AssessmentSummaryInfo {
     [key: string]: string
 }
 
-const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : ReactNode => {
+const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo | undefined>(undefined)
 
     const cliAttachmentNumber = embeddedAttachments.filter(
-        (attachment) => attachment.attachmentType == AttachmentTypes.COMPONENT_LICENSE_INFO_XML
+        (attachment) => attachment.attachmentType == AttachmentTypes.COMPONENT_LICENSE_INFO_XML,
     ).length
 
     const handleShowAssessmentInfo = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`, session.user.access_token)
         if (response.status === HttpStatus.OK) {
@@ -57,11 +56,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : Reac
             if (key !== '#text') {
                 return (
                     <tr key={key}>
-                        <td>
-                            {
-                                t(key as never)
-                            }
-                        </td>
+                        <td>{t(key as never)}</td>
                         <td>{assessmentSummaryInfo[key]}</td>
                     </tr>
                 )
@@ -97,7 +92,10 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : Reac
                         ) : (
                             <tr>
                                 <td colSpan={2}>
-                                    <Button variant='secondary' onClick={() => void handleShowAssessmentInfo()}>
+                                    <Button
+                                        variant='secondary'
+                                        onClick={() => void handleShowAssessmentInfo()}
+                                    >
                                         {t('Show Assessment Summary Info')}
                                     </Button>
                                 </td>

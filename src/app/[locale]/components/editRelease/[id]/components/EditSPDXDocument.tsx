@@ -12,7 +12,7 @@
 import { HttpStatus, ReleaseDetail } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
@@ -60,7 +60,7 @@ const EditSPDXDocument = ({
     inputValid,
     errorCreator,
     setErrorCreator,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const t = useTranslations('default')
     const [documentCreationInformation, setDocumentCreationInformation] = useState<DocumentCreationInformation>({})
     const [packageInformation, setPackageInformation] = useState<PackageInformation>({})
@@ -90,23 +90,19 @@ const EditSPDXDocument = ({
     const [isModeFull, setIsModeFull] = useState(true)
     const [toggleOther, setToggleOther] = useState(false)
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as ReleaseDetail
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as ReleaseDetail
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
+    }, [])
     const [typeCategory, setTypeCategory] = useState<Array<string>>([])
     const [isTypeCateGoryEmpty, setIsTypeCateGoryEmpty] = useState(true)
     useEffect(() => {
@@ -121,20 +117,20 @@ const EditSPDXDocument = ({
                     //SnippetInformation
                     if (!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:spdxDocument'].snippets)) {
                         setSnippetInformations(
-                            release._embedded['sw360:spdxDocument'].snippets.toSorted((e1, e2) => e1.index - e2.index)
+                            release._embedded['sw360:spdxDocument'].snippets.toSorted((e1, e2) => e1.index - e2.index),
                         )
                         setIndexSnippetInformation(0)
                     }
                     //OtherLicensingInformationDetected
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:spdxDocument'].otherLicensingInformationDetecteds
+                            release._embedded['sw360:spdxDocument'].otherLicensingInformationDetecteds,
                         )
                     ) {
                         setOtherLicensingInformationDetecteds(
                             release._embedded['sw360:spdxDocument'].otherLicensingInformationDetecteds.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                         setIndexOtherLicense(0)
                     }
@@ -144,8 +140,8 @@ const EditSPDXDocument = ({
                     ) {
                         setRelationshipsBetweenSPDXElementSPDXs(
                             release._embedded['sw360:spdxDocument'].relationships.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                         setIndexRelation(0)
                     }
@@ -154,27 +150,25 @@ const EditSPDXDocument = ({
                         setIndexAnnotations(0)
                         setAnnotationsSPDXs(
                             release._embedded['sw360:spdxDocument'].annotations.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                     }
                 }
 
                 // DocumentCreationInformation
-                if (
-                    !CommonUtils.isNullOrUndefined(SPDXPayload.documentCreationInformation)
-                ) {
+                if (!CommonUtils.isNullOrUndefined(SPDXPayload.documentCreationInformation)) {
                     setDocumentCreationInformation(SPDXPayload.documentCreationInformation)
                     // ExternalDocumentRefs
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            SPDXPayload.documentCreationInformation.externalDocumentRefs
+                            SPDXPayload.documentCreationInformation.externalDocumentRefs,
                         )
                     ) {
                         setExternalDocumentRefs(
                             SPDXPayload.documentCreationInformation.externalDocumentRefs.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                         setIndexExternalDocumentRef(0)
                     }
@@ -188,37 +182,37 @@ const EditSPDXDocument = ({
                     setPackageInformation(release._embedded['sw360:packageInformation'])
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:packageInformation'].relationships
+                            release._embedded['sw360:packageInformation'].relationships,
                         )
                     ) {
                         setIndexRelation(0)
                         setRelationshipsBetweenSPDXElementPackages(
                             release._embedded['sw360:packageInformation'].relationships.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                     }
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:packageInformation'].annotations
+                            release._embedded['sw360:packageInformation'].annotations,
                         )
                     ) {
                         setIndexAnnotations(0)
                         setAnnotationsPackages(
                             release._embedded['sw360:packageInformation'].annotations.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                     }
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:packageInformation'].externalRefs
+                            release._embedded['sw360:packageInformation'].externalRefs,
                         )
                     ) {
                         setExternalRefsDatas(
                             release._embedded['sw360:packageInformation'].externalRefs.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                         if (externalRefsDatas[0].referenceCategory === 'SECURITY') {
                             setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
@@ -250,7 +244,10 @@ const EditSPDXDocument = ({
 
     return (
         <>
-            <div className='list-group-companion' data-belong-to='tab-Attachments'>
+            <div
+                className='list-group-companion'
+                data-belong-to='tab-Attachments'
+            >
                 <div className='btn-group'>
                     <button
                         className={`btn ${isModeFull ? styles['btn-full'] : styles['btn-lite']}`}

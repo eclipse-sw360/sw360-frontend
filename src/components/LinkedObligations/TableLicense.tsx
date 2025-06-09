@@ -11,12 +11,11 @@
 
 import FilterSearch from '@/components/LinkedObligations/TableLinkedObligations/FilterSearch'
 import { Config, Grid } from 'gridjs'
+import type { JSX } from 'react'
 import * as React from 'react'
 import { Component, RefObject, createRef } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from './TableLinkedObligations/TableLinkedObligations.module.css'
-import type { JSX } from 'react'
-
 
 const defaultOptions = {
     pagination: { limit: 10 },
@@ -81,7 +80,7 @@ class TableLicense extends Component<TableProps, unknown> {
         this.instance.updateConfig(this.props).forceRender()
     }
 
-    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) : void => {
+    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
         if (this.instance === null) return
         this.instance.config.plugin.remove('pagination')
         const pageSize = parseInt(event.target.value, 10)
@@ -99,17 +98,26 @@ class TableLicense extends Component<TableProps, unknown> {
             })
             .forceRender()
     }
-    render(): JSX.Element{
+    render(): JSX.Element {
         return (
             <>
                 <div className={styles['div-table-license']}>
-                    {(this.props.selector === true) && (
+                    {this.props.selector === true && (
                         <>
-                            <div className='col-auto' style={{ fontSize: '14px' }}>
-                                <div className='dataTables_length' style={{ fontSize: '0.875rem' }}>
+                            <div
+                                className='col-auto'
+                                style={{ fontSize: '14px' }}
+                            >
+                                <div
+                                    className='dataTables_length'
+                                    style={{ fontSize: '0.875rem' }}
+                                >
                                     <span className='my-2'>Show</span>
                                     <label className={styles['lable-table-license']}>
-                                        <Form.Select size='sm' onChange={this.handlePageSizeChange}>
+                                        <Form.Select
+                                            size='sm'
+                                            onChange={this.handlePageSizeChange}
+                                        >
                                             <option defaultValue={defaultOptions.pagination.limit}>
                                                 {defaultOptions.pagination.limit}
                                             </option>
@@ -121,8 +129,11 @@ class TableLicense extends Component<TableProps, unknown> {
                                     <span>entries</span>
                                 </div>
                             </div>
-                            {(this.props.searchFunction !== undefined) && (
-                                <FilterSearch title={this.props.title} searchFunction={this.props.searchFunction} />
+                            {this.props.searchFunction !== undefined && (
+                                <FilterSearch
+                                    title={this.props.title}
+                                    searchFunction={this.props.searchFunction}
+                                />
                             )}
                         </>
                     )}

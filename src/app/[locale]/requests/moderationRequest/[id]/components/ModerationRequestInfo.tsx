@@ -9,21 +9,20 @@
 
 'use client'
 
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
 import { ModerationRequestDetails } from '@/object-types'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { ReactNode } from 'react'
-
 
 export default function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | undefined }): ReactNode {
     const t = useTranslations('default')
 
     const formatDate = (timestamp: number | undefined): string | null => {
-        if(timestamp == undefined){
+        if (timestamp == undefined) {
             return null
         }
-        const date = new Date(timestamp);
-        const year = date.getFullYear();
+        const date = new Date(timestamp)
+        const year = date.getFullYear()
         const month = String(date.getMonth() + 1).padStart(2, '0')
         const day = String(date.getDate()).padStart(2, '0')
         return `${year}-${month}-${day}`
@@ -41,9 +40,11 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {((data?.requestingUser) != null)
-                                ? <Link href={`mailto:${data.requestingUser}`}>{data.requestingUser}</Link>
-                                : ''}
+                            {data?.requestingUser != null ? (
+                                <Link href={`mailto:${data.requestingUser}`}>{data.requestingUser}</Link>
+                            ) : (
+                                ''
+                            )}
                         </td>
                     </tr>
                     <tr>

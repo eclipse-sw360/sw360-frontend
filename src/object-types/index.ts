@@ -24,6 +24,7 @@ import ClearingRequestComments from './ClearingRequestComments'
 import ClearingRequestDetails from './ClearingRequestDetails'
 import Component from './Component'
 import ComponentPayload from './ComponentPayLoad'
+import Configuration from './Configuration'
 import CreateClearingRequestPayload from './CreateClearingRequestPayload'
 import ECC from './ECC'
 import ECCInformation from './ECCInformation'
@@ -44,6 +45,7 @@ import LinkedRelease from './LinkedRelease'
 import LinkedReleaseData from './LinkedReleaseData'
 import LinkedVulnerability from './LinkedVulnerability'
 import Links from './Links'
+import ListFieldProcessComponent from './ListFieldProcessComponent'
 import { Message, MessageOptions } from './Message'
 import ModerationRequest from './ModerationRequest'
 import ModerationRequestDetails from './ModerationRequestDetails'
@@ -52,13 +54,15 @@ import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import { LicenseObligationRelease,
-         Obligation,
-         LicenseObligationData,
-         LicenseObligationsList,
-         ComponentObligationData,
-         ProjectObligationData,
-         OrganizationObligationData } from './Obligation'
+import {
+    ComponentObligationData,
+    LicenseObligationData,
+    LicenseObligationRelease,
+    LicenseObligationsList,
+    Obligation,
+    OrganizationObligationData,
+    ProjectObligationData,
+} from './Obligation'
 import Package from './Package'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
@@ -87,6 +91,7 @@ import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
 import { ProjectVulnerabilityTrackingStatus, VulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
+import ErrorDetails from './error'
 import Annotations from './spdx/Annotations'
 import CheckSum from './spdx/CheckSum'
 import Creator from './spdx/Creator'
@@ -104,9 +109,6 @@ import SPDX from './spdx/SPDX'
 import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
-import ErrorDetails from './error'
-import Configuration from './Configuration'
-import ListFieldProcessComponent from './ListFieldProcessComponent'
 
 export type {
     AccessToken,
@@ -126,6 +128,7 @@ export type {
     Component,
     ComponentObligationData,
     ComponentPayload,
+    Configuration,
     COTSDetails,
     CreateClearingRequestPayload,
     Creator,
@@ -145,7 +148,9 @@ export type {
     InputKeyValue,
     LicenseClearing,
     LicenseDetail,
+    LicenseObligationData,
     LicenseObligationRelease,
+    LicenseObligationsList,
     LicensePayload,
     LicenseType,
     LinkedPackage,
@@ -175,8 +180,6 @@ export type {
     ProjectData,
     ProjectLinkedRelease,
     ProjectObligationData,
-    LicenseObligationData,
-    LicenseObligationsList,
     ProjectPayload,
     ProjectVulnerability,
     ProjectVulnerabilityTrackingStatus,
@@ -212,7 +215,6 @@ export type {
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
-    Configuration,
 }
 
 // Special functions for populate data
@@ -227,14 +229,14 @@ import LicenseTabIds from './constants/LicenseTabIds'
 import ReleaseTabIds from './constants/ReleaseTabIds'
 import ActionType from './enums/ActionType'
 import ClearingRequestStates from './enums/ClearingRequestStates'
+import ConfigKeys from './enums/ConfigKeys'
 import DocumentTypes from './enums/DocumentTypes'
+import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
-import ConfigKeys from './enums/ConfigKeys'
-import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
 
 export {
     ActionType,
@@ -242,15 +244,15 @@ export {
     ClearingRequestStates,
     CommonTabIds,
     ComponentTabIds,
+    ConfigKeys,
     DocumentTypes,
     HttpStatus,
     LicenseTabIds,
+    MergeOrSplitActionType,
     ProjectVulnerabilityTabType,
     ReleaseClearingStateMapping,
     ReleaseTabIds,
     RequestDocumentTypes,
     UserGroupType,
     VulnerabilitiesVerificationState,
-    ConfigKeys,
-    MergeOrSplitActionType
 }
