@@ -44,7 +44,7 @@ const authAdminMiddleware = withAuth(
     (req) => intlMiddleware(req),
     {
         callbacks: {
-            authorized: ({ token }) => token !== null && (token.userGroup as UserGroupType) === UserGroupType.ADMIN,
+            authorized: ({ token }) => token !== null && token.userGroup === UserGroupType.ADMIN,
         },
         pages: {
             signIn: '/',
@@ -52,7 +52,7 @@ const authAdminMiddleware = withAuth(
     },
 )
 
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
 export default function middleware(req: NextRequest): NextResponse | Promise<NextResponse> {
     const publicPathnameRegex = RegExp(
@@ -70,10 +70,8 @@ export default function middleware(req: NextRequest): NextResponse | Promise<Nex
     if (isPublicPage) {
         return intlMiddleware(req)
     } else if (isAdminPage) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return (authAdminMiddleware as (req: NextRequest) => ReturnType<typeof intlMiddleware>)(req)
     } else {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return (authMiddleware as (req: NextRequest) => ReturnType<typeof intlMiddleware>)(req)
     }
 }
