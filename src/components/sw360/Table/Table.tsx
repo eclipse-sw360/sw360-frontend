@@ -9,124 +9,151 @@
 
 'use client'
 
-import { Config, Grid } from 'gridjs'
+import {
+    ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
 import * as React from 'react'
-import { Component, RefObject, createRef } from 'react'
-import { Form } from 'react-bootstrap'
-import type { JSX } from 'react'
-const defaultOptions = {
-    pagination: { limit: 10 },
-    search: false,
-    selector: true,
-    sort: true,
-}
+import { useState } from 'react'
+import { Form, Pagination } from 'react-bootstrap'
+
 type MessageFormat = (...args: []) => string
 type Message = string | MessageFormat
 export type Language = { [key: string]: Message | Language }
 
-export interface TableProps extends Partial<Config> {
+export interface TableProps<T extends object = any> {
+    columns: ColumnDef<T, any>[]
+    data: T[]
     selector?: boolean
     language?: Language
 }
 
-const createTableProps = (tableProps: TableProps) => {
-    let newTableProps = { ...defaultOptions, ...tableProps }
+const PAGE_SIZES = [10, 25, 50, 100]
 
-    if (newTableProps.server) {
-        newTableProps = {
-            ...newTableProps,
-            pagination: {
-                limit: 10,
-                server: {
-                    url: (prev: string, page: number, limit: number) =>
-                        `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                },
-            },
-            data: undefined,
-        }
-    }
+function Table<T extends object>({ columns, data, selector = true }: TableProps<T>): React.JSX.Element {
+    const [pageSize, setPageSize] = useState<number>(PAGE_SIZES[0])
+    const [pageIndex, setPageIndex] = useState<number>(0)
+    const [sorting, setSorting] = useState<SortingState>([])
 
-    return newTableProps
-}
+    const table = useReactTable<T>({
+        data,
+        columns,
+        state: { pagination: { pageIndex, pageSize }, sorting },
+        onPaginationChange: (updater) => {
+            if (typeof updater === 'function') {
+                const { pageIndex: newPageIndex, pageSize: newPageSize } = updater({ pageIndex, pageSize })
+                setPageIndex(newPageIndex)
+                setPageSize(newPageSize)
+            } else {
+                setPageIndex(updater.pageIndex)
+                setPageSize(updater.pageSize)
+            }
+        },
+        onSortingChange: setSorting,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: false,
+        manualSorting: false,
+        pageCount: Math.ceil(data.length / pageSize),
+    })
 
-class Table extends Component<TableProps, unknown> {
-    private wrapper: RefObject<HTMLDivElement | null> = createRef()
-    // Grid.js instance
-    private readonly instance: Grid | null = null
-    private tableProps: TableProps = {}
-
-    constructor(props: TableProps) {
-        super(props)
-        this.tableProps = createTableProps(props)
-
-        this.instance = new Grid(this.tableProps)
-    }
-
-    getInstance(): Grid | null {
-        return this.instance
-    }
-
-    componentDidMount(): void {
-        if (this.wrapper.current === null || this.instance === null) return
-        if (this.wrapper.current.childNodes.length > 0) {
-            this.wrapper.current.innerHTML = ''
-        }
-        this.instance.render(this.wrapper.current)
-    }
-
-    componentDidUpdate(): void {
-        if (this.instance === null) return
-        this.instance.config.plugin.remove('pagination')
-        this.instance.config.plugin.remove('search')
-        this.tableProps = createTableProps(this.props)
-        this.instance.updateConfig(this.tableProps).forceRender()
-    }
-
-    handlePageSizeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-        if (this.instance === null) return
-
-        this.instance.config.plugin.remove('pagination')
-        const pageSize = parseInt(event.target.value, 10)
-        this.instance
-            .updateConfig({
-                pagination: {
-                    limit: pageSize,
-                    server: this.tableProps.server
-                        ? {
-                              url: (prev: string, page: number, limit: number) =>
-                                  `${prev}${prev.includes('?') ? '&' : '?'}page=${page}&page_entries=${limit}`,
-                          }
-                        : undefined,
-                },
-            })
-            .forceRender()
-    }
-
-    render(): JSX.Element {
-        return (
-            <>
-                {(this.props.selector === true) && (
-                    <div className='col-11 mt-3 mb-3'>
-                        <div className='dataTables_length'>
-                            <span className='my-2'>Show</span>
-                            <label style={{ marginLeft: '5px', marginRight: '5px' }}>
-                                <Form.Select size='sm' onChange={this.handlePageSizeChange}>
-                                    <option defaultValue={defaultOptions.pagination.limit}>
-                                        {defaultOptions.pagination.limit}
+    return (
+        <>
+            {selector && (
+                <div className='col-11 mt-3 mb-3'>
+                    <div className='dataTables_length'>
+                        <span className='my-2'>Show</span>
+                        <label style={{ marginLeft: '5px', marginRight: '5px' }}>
+                            <Form.Select
+                                size='sm'
+                                value={pageSize}
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                    setPageSize(Number(e.target.value))
+                                    setPageIndex(0)
+                                }}
+                            >
+                                {PAGE_SIZES.map((size) => (
+                                    <option
+                                        key={size}
+                                        value={size}
+                                    >
+                                        {size}
                                     </option>
-                                    <option value='25'>25</option>
-                                    <option value='50'>50</option>
-                                    <option value='100'>100</option>
-                                </Form.Select>
-                            </label>
-                            <span>entries</span>
-                        </div>
+                                ))}
+                            </Form.Select>
+                        </label>
+                        <span>entries</span>
                     </div>
-                )}
-                <div ref={this.wrapper} />
-            </>
-        )
-    }
+                </div>
+            )}
+            <div className='table-responsive'>
+                <table className='table table-striped table-bordered table-hover table-sm'>
+                    <thead>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <th
+                                        key={header.id}
+                                        onClick={header.column.getToggleSortingHandler()}
+                                        style={{ cursor: header.column.getCanSort() ? 'pointer' : undefined }}
+                                    >
+                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                        {header.column.getIsSorted()
+                                            ? header.column.getIsSorted() === 'asc'
+                                                ? ' 🔼'
+                                                : ' 🔽'
+                                            : ''}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {table.getRowModel().rows.map((row) => (
+                            <tr key={row.id}>
+                                {row.getVisibleCells().map((cell) => (
+                                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <Pagination className='justify-content-end'>
+                <Pagination.First
+                    onClick={() => table.setPageIndex(0)}
+                    disabled={!table.getCanPreviousPage()}
+                />
+                <Pagination.Prev
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                />
+                {Array.from({ length: table.getPageCount() }, (_, i) => (
+                    <Pagination.Item
+                        key={i}
+                        active={i === table.getState().pagination.pageIndex}
+                        onClick={() => table.setPageIndex(i)}
+                    >
+                        {i + 1}
+                    </Pagination.Item>
+                ))}
+                <Pagination.Next
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                />
+                <Pagination.Last
+                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                    disabled={!table.getCanNextPage()}
+                />
+            </Pagination>
+        </>
+    )
 }
 
 export default Table
