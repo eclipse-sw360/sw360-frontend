@@ -25,22 +25,23 @@ header:
         - '**'
 
     paths-ignore:
-        - 'node_modulesw'
-        - '**/*.md'
-        - '**/testdata/**'
-        - 'LICENSE'
-        - 'NOTICE'
-        - '*.code-workspace'
-        - '**/*.diff'
-        - '**/*.svg'
-        - .prettierrc
-        - '**/*.json'
-        - '**/*.css'
         - .dockerignore
         - .gitignore
         - .husky
+        - .prettierrc
         - '.github/**'
+        - '*.code-workspace'
+        - '**/*.css'
+        - '**/*.diff'
+        - '**/*.json'
+        - '**/*.md'
+        - '**/*.svg'
+        - '**/testdata/**'
         - 'cypress/fixtures/**'
+        - 'LICENSE'
+        - 'node_modulesw'
+        - 'NOTICE'
+        - "eslint.config.mjs"
         - "pnpm-lock.yaml"
         - "pnpm-workspace.yaml"
 

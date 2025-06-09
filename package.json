@@ -3,13 +3,14 @@
   "version": "0.1.1",
   "private": true,
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
+    "preinstall": "pnpx only-allow pnpm",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "prepare": "husky install",
-    "test": "cypress open"
+    "lint": "eslint",
+    "prettier:check": "eslint --plugin prettier",
+    "test": "cypress open",
+    "prepare": "husky"
   },
   "dependencies": {
     "classnames": "^2.5.1",
@@ -32,7 +33,10 @@
   "devDependencies": {
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.0",
+    "@eslint/compat": "^1.2.9",
     "@eslint/config-array": "^0.20.0",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.28.0",
     "@types/country-list": "^2.1.4",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.15.30",
@@ -46,9 +50,8 @@
     "commitlint": "^19.8.0",
     "country-list": "^2.3.0",
     "cypress": "^14.4.1",
-    "eslint": "^9.27.0",
+    "eslint": "^9.28.0",
     "eslint-config-next": "15.3.3",
-    "eslint-config-prettier": "^10.1.2",
     "eslint-import-resolver-typescript": "^4.4.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.4.0",
@@ -65,16 +68,37 @@
     "stylelint-prettier": "^5.0.3",
     "ts-node": "^10.9.2",
     "tsc-files": "^1.1.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "pnpx --no -- commitlint --edit $1"
+    }
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --config ./.prettierrc.js --write"
+      "eslint"
     ],
     "**/*.{css,scss,md,html,json}": [
-      "prettier --config ./.prettierrc.js --write"
+      "prettier --write"
     ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "subject-case": [
+        2,
+        "always",
+        [
+          "sentence-case",
+          "upper-case"
+        ]
+      ]
+    }
   },
   "pnpm": {
     "overrides": {
@@ -85,5 +109,44 @@
       "cypress",
       "sharp"
     ]
+  },
+  "prettier": {
+    "semi": false,
+    "tabWidth": 4,
+    "printWidth": 120,
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "trailingComma": "all",
+    "arrowParens": "always",
+    "endOfLine": "auto",
+    "bracketSpacing": true,
+    "bracketSameLine": false,
+    "singleAttributePerLine": true,
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ],
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "babel"
+        }
+      },
+      {
+        "files": "*.json",
+        "options": {
+          "tabWidth": 2,
+          "semi": true
+        }
+      },
+      {
+        "files": "*.yml",
+        "options": {
+          "tabWidth": 2,
+          "semi": true
+        }
+      }
+    ],
+    "organizeImportsSkipDestructiveCodeActions": true
   }
 }
