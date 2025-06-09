@@ -10,36 +10,38 @@
 import { Project } from './Project'
 import { User } from './User'
 
-export default interface ClearingRequestDetails{
-    id: string,
-    requestedClearingDate?: string,
-    projectId?: string,
-    projectName?: string,
-    requestingUser?: string,
-    requestingUserName?: string,
-    projectBU?: string,
-    requestingUserComment?: string,
-    clearingTeam?: string,
-    clearingTeamName?: string,
-    agreedClearingDate?: string,
-    priority?: string,
-    clearingType?: string,
-    clearingState?: string,
-    reOpenedOn?: number,
-    createdOn?: string,
-    lastUpdatedOn?: string,
-    comments?: [{
-        text?: string,
-        commentedBy?: string
-    }]
+export default interface ClearingRequestDetails {
+    id: string
+    requestedClearingDate?: string
+    projectId?: string
+    projectName?: string
+    requestingUser?: string
+    requestingUserName?: string
+    projectBU?: string
+    requestingUserComment?: string
+    clearingTeam?: string
+    clearingTeamName?: string
+    agreedClearingDate?: string
+    priority?: string
+    clearingType?: string
+    clearingState?: string
+    reOpenedOn?: number
+    createdOn?: string
+    lastUpdatedOn?: string
+    comments?: [
+        {
+            text?: string
+            commentedBy?: string
+        },
+    ]
     links?: {
         self: {
             href: string
         }
-    },
+    }
     _embedded?: {
-        'clearingTeam'?: User
-        'requestingUser'?: User
+        clearingTeam?: User
+        requestingUser?: User
         'sw360:project'?: Project
         requestClosedOn?: string
     }

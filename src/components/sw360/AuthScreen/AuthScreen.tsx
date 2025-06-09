@@ -18,10 +18,10 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { HttpStatus } from '@/object-types'
+import { AUTH_PROVIDER } from '@/utils/env'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
-import { AUTH_PROVIDER } from '@/utils/env';
 
-function AuthScreen() : ReactNode {
+function AuthScreen(): ReactNode {
     const router = useRouter()
     const locale = useLocale()
     const t = useTranslations('default')
@@ -33,7 +33,7 @@ function AuthScreen() : ReactNode {
 
     const handleClose = () => setDialogShow(false)
     const handleShow = () => {
-        const authProvider = AUTH_PROVIDER;
+        const authProvider = AUTH_PROVIDER
         if (authProvider === 'keycloak') {
             void signIn(KEYCLOAK_PROVIDER)
         } else if (authProvider === 'sw360oauth') {
@@ -64,7 +64,10 @@ function AuthScreen() : ReactNode {
 
     return (
         <>
-            <section className='portlet' id='portlet_sw360_portlet_welcome'>
+            <section
+                className='portlet'
+                id='portlet_sw360_portlet_welcome'
+            >
                 <div>
                     {status == 'loading' ? (
                         <PageSpinner />
@@ -80,16 +83,28 @@ function AuthScreen() : ReactNode {
                                     <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
                                     {status === 'unauthenticated' ? (
                                         <>
-                                            <Button className='me-3' variant='primary' size='lg' onClick={handleShow}>
+                                            <Button
+                                                className='me-3'
+                                                variant='primary'
+                                                size='lg'
+                                                onClick={handleShow}
+                                            >
                                                 {t('Sign In')}
                                             </Button>
-                                            <Button variant='outline-primary' size='lg'>
+                                            <Button
+                                                variant='outline-primary'
+                                                size='lg'
+                                            >
                                                 {t('Create Account')}
                                             </Button>
                                         </>
                                     ) : (
                                         <>
-                                            <Button variant='primary' size='lg' href='/home'>
+                                            <Button
+                                                variant='primary'
+                                                size='lg'
+                                                href='/home'
+                                            >
                                                 {t('Start')}
                                             </Button>
                                         </>
@@ -101,12 +116,23 @@ function AuthScreen() : ReactNode {
                 </div>
             </section>
 
-            <Modal show={dialogShow} onHide={() => handleClose()} backdrop='static' className='login-modal' centered>
+            <Modal
+                show={dialogShow}
+                onHide={() => handleClose()}
+                backdrop='static'
+                className='login-modal'
+                centered
+            >
                 <Modal.Header closeButton>
                     <Modal.Title>{t('Sign In')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Alert variant='danger' onClose={() => setMessageShow(false)} dismissible show={messageShow}>
+                    <Alert
+                        variant='danger'
+                        onClose={() => setMessageShow(false)}
+                        dismissible
+                        show={messageShow}
+                    >
                         {t('Authentication failed Please try again')}
                     </Alert>
                     <Form>
@@ -132,7 +158,11 @@ function AuthScreen() : ReactNode {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer className='justify-content-start'>
-                    <Button className='login-btn' variant='primary' onClick={() => void handleLogin()}>
+                    <Button
+                        className='login-btn'
+                        variant='primary'
+                        onClick={() => void handleLogin()}
+                    >
                         {' '}
                         {t('Sign In')}{' '}
                     </Button>

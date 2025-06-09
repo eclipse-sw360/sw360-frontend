@@ -11,13 +11,12 @@
 interface RequestContent {
     method: string
     headers: {
-      'Content-Type'?: string
-      Authorization?: string
-      Accept?: string
+        'Content-Type'?: string
+        Authorization?: string
+        Accept?: string
     }
     body: BodyInit | null
     signal?: AbortSignal
-  }
-  
+}
 
 export default RequestContent

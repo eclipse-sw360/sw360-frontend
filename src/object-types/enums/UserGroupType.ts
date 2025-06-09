@@ -7,7 +7,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 enum UserGroupType {
     USER = 'USER',
     ADMIN = 'ADMIN',

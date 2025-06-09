@@ -9,12 +9,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import CredentialsProvider from 'next-auth/providers/credentials'
 import { CREDENTIAL_PROVIDER } from '@/constants'
+import { User as AppUser, HttpStatus, UserCredentialInfo } from '@/object-types'
 import AuthService from '@/services/auth.service'
-import { HttpStatus, UserCredentialInfo, User as AppUser } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { NextAuthOptions, User } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
 
 const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
     providers: [
@@ -41,7 +41,7 @@ const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
                         throw new Error('Error while fetching User Group')
                     }
 
-                    const data = await response.json() as AppUser
+                    const data = (await response.json()) as AppUser
                     return { ...authToken, userGroup: data.userGroup, email: username } as User
                 } catch (e) {
                     console.error(e)

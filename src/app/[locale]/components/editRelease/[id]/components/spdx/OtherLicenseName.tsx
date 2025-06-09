@@ -24,7 +24,7 @@ function OtherLicenseName({
     isLicenseName,
     setIsLicenseName,
     updateField,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectLicenseNameNoasserttion = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsLicenseName(false)
         setLicenseNameToOtherLicense(e.target.value)
@@ -72,7 +72,10 @@ function OtherLicenseName({
                             onChange={selectLicenseNameNoasserttion}
                             checked={!isLicenseName}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='licenseNameNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='licenseNameNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

@@ -9,19 +9,19 @@
 
 'use client'
 
+import { ClearingRequestStates, ConfigKeys, HttpStatus } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX  } from 'react'
+import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState, type JSX } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
+import CreateClearingRequestModal from './CreateClearingRequestModal'
 import ListView from './ListView'
 import TreeView from './TreeView'
-import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
-import CreateClearingRequestModal from './CreateClearingRequestModal'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import MessageService from '@/services/message.service'
-import { ClearingRequestStates, ConfigKeys, HttpStatus } from '@/object-types'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
-import { getSession, signOut } from 'next-auth/react'
 
 const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
 const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
@@ -64,7 +64,9 @@ export default function LicenseClearing({
                     return
                 }
                 const config = await response.json()
-                setDependencyNetworkFeatureEnabled(config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true')
+                setDependencyNetworkFeatureEnabled(
+                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true',
+                )
             } catch {
                 setDependencyNetworkFeatureEnabled(false)
             }
@@ -72,73 +74,78 @@ export default function LicenseClearing({
     }, [])
 
     const generateSourceCodeBundle = (withSubProjects: boolean) => {
-        router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
+        router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`)
     }
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
         const isCalledFromProjectLicenseTab = true
-        sessionStorage.setItem("isCalledFromProjectLicenseTab",
-                                JSON.stringify(isCalledFromProjectLicenseTab))
-        router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? "true" : "false"}`)
+        sessionStorage.setItem('isCalledFromProjectLicenseTab', JSON.stringify(isCalledFromProjectLicenseTab))
+        router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`)
     }
 
     const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             if (withLinkedRelease === false) {
                 const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
                 if (response.status == HttpStatus.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                }
-                else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == HttpStatus.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                }
-                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                }
-                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
-            }
-            else {
-                const response = await ApiUtils.GET('reports?module=PROJECTS&withLinkedRelease=true',
-                                                     session.user.access_token)
+            } else {
+                const response = await ApiUtils.GET(
+                    'reports?module=PROJECTS&withLinkedRelease=true',
+                    session.user.access_token,
+                )
                 if (response.status == HttpStatus.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                }
-                else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == HttpStatus.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                }
-                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                }
-                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             }
-        }
-        catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
 
     return (
         <>
-            <CreateClearingRequestModal show = {showCreateClearingRequestModal}
-                                        setShow = {setShowCreateClearingRequestModal}
-                                        projectId = {projectId}
-                                        projectName = {projectName}/>
-            <ViewClearingRequestModal   show = {showViewClearingRequestModal}
-                                        setShow = {setShowViewClearingRequestModal}
-                                        projectName = {projectName}
-                                        clearingRequestId = {clearingRequestId}/>
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
-                <div className='row ms-0'
-                     hidden={isCalledFromModerationRequestCurrentProject}>
+            <CreateClearingRequestModal
+                show={showCreateClearingRequestModal}
+                setShow={setShowCreateClearingRequestModal}
+                projectId={projectId}
+                projectName={projectName}
+            />
+            <ViewClearingRequestModal
+                show={showViewClearingRequestModal}
+                setShow={setShowViewClearingRequestModal}
+                projectName={projectName}
+                clearingRequestId={clearingRequestId}
+            />
+            <Tab.Container
+                id='views-tab'
+                activeKey={key}
+                onSelect={(k) => setKey(k as string)}
+            >
+                <div
+                    className='row ms-0'
+                    hidden={isCalledFromModerationRequestCurrentProject}
+                >
                     <div className='col ps-0'>
-                        <Nav variant='pills' className='d-inline-flex'>
+                        <Nav
+                            variant='pills'
+                            className='d-inline-flex'
+                        >
                             <Nav.Item>
                                 <Nav.Link eventKey='tree-view'>
                                     <span className='fw-medium'>{t('Tree View')}</span>
@@ -152,32 +159,24 @@ export default function LicenseClearing({
                             <Nav.Item className='px-2'>
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                        <Dropdown.Item
-                                                onClick = {() => exportProjectSpreadsheet(false)}>
-                                                {t('Projects only')}
-                                            </Dropdown.Item>
-                                            <Dropdown.Item
-                                                onClick = {() => exportProjectSpreadsheet(true)}>
-                                                {t('Projects with linked releases')}
-                                            </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item onClick={() => exportProjectSpreadsheet(false)}>
+                                            {t('Projects only')}
+                                        </Dropdown.Item>
+                                        <Dropdown.Item onClick={() => exportProjectSpreadsheet(true)}>
+                                            {t('Projects with linked releases')}
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </Nav.Item>
                             <Nav.Item>
                                 <Dropdown className='col-auto'>
-                                    <Dropdown.Toggle variant='secondary'>
-                                        {t('Generate License Info')}
-                                    </Dropdown.Toggle>
+                                    <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
-                                        <Dropdown.Item
-                                            onClick = {() => generateLicenseInfo(false)}
-                                        >
+                                        <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
                                             {t('Projects only')}
                                         </Dropdown.Item>
-                                        <Dropdown.Item
-                                            onClick = {() => generateLicenseInfo(true)}
-                                        >
+                                        <Dropdown.Item onClick={() => generateLicenseInfo(true)}>
                                             {t('Projects with sub projects')}
                                         </Dropdown.Item>
                                     </Dropdown.Menu>
@@ -185,34 +184,34 @@ export default function LicenseClearing({
                             </Nav.Item>
                             <Nav.Item>
                                 <Dropdown className='col-auto'>
-                                    <Dropdown.Toggle variant='secondary'>{t('Generate Source Code Bundle')}</Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item
-                                                onClick = {() => generateSourceCodeBundle(false)}
-                                            >
-                                                {t('Projects only')}
-                                            </Dropdown.Item>
-                                            <Dropdown.Item
-                                                onClick = {() => generateSourceCodeBundle(true)}
-                                            >
-                                                {t('Projects with sub projects')}
-                                            </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
+                                    <Dropdown.Toggle variant='secondary'>
+                                        {t('Generate Source Code Bundle')}
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item onClick={() => generateSourceCodeBundle(false)}>
+                                            {t('Projects only')}
+                                        </Dropdown.Item>
+                                        <Dropdown.Item onClick={() => generateSourceCodeBundle(true)}>
+                                            {t('Projects with sub projects')}
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </Nav.Item>
                             <Nav.Item className='px-2'>
                                 <Button
                                     variant='secondary'
                                     className='me-2 col-auto'
-                                    onClick={ clearingState === ClearingRequestStates.OPEN ?
-                                                () => setShowCreateClearingRequestModal(true) :
-                                                () => setShowViewClearingRequestModal(true)}
+                                    onClick={
+                                        clearingState === ClearingRequestStates.OPEN
+                                            ? () => setShowCreateClearingRequestModal(true)
+                                            : () => setShowViewClearingRequestModal(true)
+                                    }
                                 >
                                     {
                                         <>
                                             {clearingState === ClearingRequestStates.OPEN
-                                            ? t('Create Clearing Request')
-                                            : t('View Clearing Request')}
+                                                ? t('Create Clearing Request')
+                                                : t('View Clearing Request')}
                                         </>
                                     }
                                 </Button>
@@ -222,22 +221,22 @@ export default function LicenseClearing({
                 </div>
                 <Tab.Content className='mt-3'>
                     <Tab.Pane eventKey='tree-view'>
-                        {
-                            isDependencyNetworkFeatureEnabled
-                            ?
-                                <DependencyNetworkTreeView projectId={projectId} />
-                            :
-                                <TreeView projectId={projectId} />
-                        }
+                        {isDependencyNetworkFeatureEnabled ? (
+                            <DependencyNetworkTreeView projectId={projectId} />
+                        ) : (
+                            <TreeView projectId={projectId} />
+                        )}
                     </Tab.Pane>
                     <Tab.Pane eventKey='list-view'>
-                        {
-                            isDependencyNetworkFeatureEnabled
-                            ?
-                                <DependencyNetworkListView projectId={projectId} />
-                            :
-                                <ListView projectId={projectId} projectName={projectName} projectVersion={projectVersion} />
-                        }
+                        {isDependencyNetworkFeatureEnabled ? (
+                            <DependencyNetworkListView projectId={projectId} />
+                        ) : (
+                            <ListView
+                                projectId={projectId}
+                                projectName={projectName}
+                                projectVersion={projectVersion}
+                            />
+                        )}
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>

@@ -12,13 +12,13 @@
 
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useState, type JSX } from 'react';
+import { useCallback, useState, type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
-interface SelectedVulnerability  {
+interface SelectedVulnerability {
     releaseId: string
     vulnerExternalId: string
     index: string
@@ -35,13 +35,13 @@ interface ChangeStatePayload {
     releaseVulnerabilityRelationDTOs: [
         {
             externalId: string
-        }
+        },
     ]
     comment: string
     verificationState: string
 }
 
-const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JSX.Element => {
+const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [comment, setComment] = useState('')
 
@@ -49,17 +49,14 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JS
         setShow(!show)
     }
 
-    const updateState = useCallback(
-        async (url: string, data: ChangeStatePayload) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return
-            } 
-            await ApiUtils.PATCH(url, data, session.user.access_token)
-        },
-        []
-    )
+    const updateState = useCallback(async (url: string, data: ChangeStatePayload) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return
+        }
+        await ApiUtils.PATCH(url, data, session.user.access_token)
+    }, [])
 
     const handleSubmit = async () => {
         if (selectedVulner.length > 0) {
@@ -80,7 +77,13 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JS
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     <b>{t('Change Vulnerability Rating And Action?')}</b>
@@ -106,11 +109,19 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JS
                 </Form>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {' '}
                     {t('Close')}{' '}
                 </Button>
-                <Button className='login-btn' variant='primary' onClick={() => void handleSubmit()}>
+                <Button
+                    className='login-btn'
+                    variant='primary'
+                    onClick={() => void handleSubmit()}
+                >
                     {t('Change State')}
                 </Button>
             </Modal.Footer>

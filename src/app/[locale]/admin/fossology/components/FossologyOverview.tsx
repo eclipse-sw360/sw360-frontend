@@ -24,7 +24,7 @@ enum FossologyStatus {
     UNKNOWN = 'Unknown',
 }
 
-export default function FossologyOverview() : ReactNode {
+export default function FossologyOverview(): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
     const [toggle, setToggle] = useState<boolean>(false)
@@ -38,20 +38,15 @@ export default function FossologyOverview() : ReactNode {
     })
     const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.UNKNOWN)
 
-
-    const fetchData = useCallback(async (url: string,
-                                         serverConfig:boolean) => {
+    const fetchData = useCallback(async (url: string, serverConfig: boolean) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === HttpStatus.OK) {
             if (serverConfig) {
                 const data = await response.json()
                 return data
-            }
-            else 
-                return HttpStatus.OK
+            } else return HttpStatus.OK
         } else if (response.status === HttpStatus.UNAUTHORIZED) {
             return signOut()
         } else {
@@ -65,22 +60,21 @@ export default function FossologyOverview() : ReactNode {
             .then((response: number | undefined) => {
                 if (response === HttpStatus.OK) {
                     setFossologyStatus(FossologyStatus.SUCCESS)
-                }
-                else {
+                } else {
                     setFossologyStatus(FossologyStatus.UNKNOWN)
                 }
-        })
-            .catch ((error) => {
-                if (error instanceof DOMException && error.name === "AbortError") {
+            })
+            .catch((error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
-        })
+            })
             .finally(() => {
                 setLoading(false)
                 setRecheckConnection(false)
-        })
+            })
     }, [fetchData, recheckConnection])
 
     useEffect(() => {
@@ -89,18 +83,17 @@ export default function FossologyOverview() : ReactNode {
                 if (response) {
                     setFossologyConfigData(response)
                 }
-        })        
-        .catch ((error) => {
-            if (error instanceof DOMException && error.name === "AbortError") {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        })
+            })
+            .catch((error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            })
     }, [fetchData])
-    
-    const updateInputField = (event: React.ChangeEvent<HTMLInputElement |
-                                     HTMLTextAreaElement>) => {
+
+    const updateInputField = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFossologyConfigData({
             ...fossologyConfigData,
             [event.target.name]: event.target.value,
@@ -109,11 +102,8 @@ export default function FossologyOverview() : ReactNode {
 
     const updateFossologyConfig = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
-        const response = await ApiUtils.POST('fossology/saveConfig',
-                                             fossologyConfigData,
-                                             session.user.access_token)
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.POST('fossology/saveConfig', fossologyConfigData, session.user.access_token)
         if (response.status === HttpStatus.OK) {
             MessageService.success(t('Fossology configuration updated successfully'))
         } else if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -140,15 +130,17 @@ export default function FossologyOverview() : ReactNode {
                         >
                             {t('Re-Check connection')}
                         </button>
-                        <button type='button'
-                                className='btn btn-primary col-auto me-2'
-                                onClick={() => updateFossologyConfig()}
+                        <button
+                            type='button'
+                            className='btn btn-primary col-auto me-2'
+                            onClick={() => updateFossologyConfig()}
                         >
                             {t('Save configuration')}
                         </button>
-                        <button type='button'
-                                className='btn btn-secondary col-auto me-2'
-                                onClick={() => handleCancel()}
+                        <button
+                            type='button'
+                            className='btn btn-secondary col-auto me-2'
+                            onClick={() => handleCancel()}
                         >
                             {t('Cancel')}
                         </button>
@@ -157,7 +149,7 @@ export default function FossologyOverview() : ReactNode {
                         {t('Fossology Connection Administration')}
                     </div>
                 </div>
-            
+
                 <table className='table summary-table mt-4'>
                     <thead
                         title='Click to expand or collapse'
@@ -173,27 +165,27 @@ export default function FossologyOverview() : ReactNode {
                         <tr>
                             <td>{t('Connection to FOSSology is currently in state')}:</td>
                             <td>
-                                {
-                                    loading ?
-                                        <div className='col-12 mt-1 text-center'>
-                                            <Spinner className='spinner' />
-                                        </div> 
-                                    :
-                                        fossologyStatus === 'Success' ?
-                                            <span className='badge bg-success capsule-right'
-                                                style={{ fontSize: '0.8rem' }}>
-                                                {t(`${fossologyStatus}`)}
-                                            </span>
-                                        :
-                                            <span className='badge bg-danger capsule-right'
-                                                style={{ fontSize: '0.8rem' }}>
-                                                {t(`${fossologyStatus}`)}
-                                            </span>
-                                }
+                                {loading ? (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                ) : fossologyStatus === 'Success' ? (
+                                    <span
+                                        className='badge bg-success capsule-right'
+                                        style={{ fontSize: '0.8rem' }}
+                                    >
+                                        {t(`${fossologyStatus}`)}
+                                    </span>
+                                ) : (
+                                    <span
+                                        className='badge bg-danger capsule-right'
+                                        style={{ fontSize: '0.8rem' }}
+                                    >
+                                        {t(`${fossologyStatus}`)}
+                                    </span>
+                                )}
                             </td>
-                            <td>
-                                {t('checked on saved configuration')}
-                            </td>
+                            <td>{t('checked on saved configuration')}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -202,8 +194,9 @@ export default function FossologyOverview() : ReactNode {
                 </div>
                 <div className='row'>
                     <div className='col-lg-6 mb-3'>
-                        <label className='form-label fw-medium'
-                               htmlFor='fossologyConfig.url'
+                        <label
+                            className='form-label fw-medium'
+                            htmlFor='fossologyConfig.url'
                         >
                             {t('URL')}
                         </label>
@@ -218,8 +211,9 @@ export default function FossologyOverview() : ReactNode {
                         />
                     </div>
                     <div className='col-lg-6 mb-3'>
-                        <label className='form-label fw-medium'
-                               htmlFor='fossologyConfig.folderId'
+                        <label
+                            className='form-label fw-medium'
+                            htmlFor='fossologyConfig.folderId'
                         >
                             {t('Folder Id')}
                         </label>
@@ -236,8 +230,9 @@ export default function FossologyOverview() : ReactNode {
                 </div>
                 <div className='row'>
                     <div className='col-lg-12 mb-3'>
-                        <label className='form-label fw-medium'
-                               htmlFor='fossologyConfig.accessToken'
+                        <label
+                            className='form-label fw-medium'
+                            htmlFor='fossologyConfig.accessToken'
                         >
                             {t('Access Token')}
                         </label>
@@ -247,10 +242,9 @@ export default function FossologyOverview() : ReactNode {
                             id='fossologyConfig.token'
                             name='token'
                             required
-                            placeholder={fossologyConfigData.token_set ?? false
-                                            ? t('Token exits')
-                                            : t('No token found')
-                                        }
+                            placeholder={
+                                (fossologyConfigData.token_set ?? false) ? t('Token exits') : t('No token found')
+                            }
                             value={fossologyConfigData.token ?? ''}
                             onChange={updateInputField}
                         />

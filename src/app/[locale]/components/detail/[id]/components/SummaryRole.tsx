@@ -14,7 +14,7 @@ import { ReactNode, useState } from 'react'
 import { Component, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
-const SummaryRole = ({ component }: { component: Component }) : ReactNode => {
+const SummaryRole = ({ component }: { component: Component }): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 
@@ -33,17 +33,21 @@ const SummaryRole = ({ component }: { component: Component }) : ReactNode => {
             <tbody hidden={toggle}>
                 <tr>
                     <td>{t('Component Owner')}:</td>
-                    <td>{
-                        !CommonUtils.isNullOrUndefined(component._embedded?.componentOwner)
-                        &&
-                        <a href={`mailto:${component._embedded.componentOwner.email}`}>
-                            {component._embedded.componentOwner.fullName}
-                        </a>}
+                    <td>
+                        {!CommonUtils.isNullOrUndefined(component._embedded?.componentOwner) && (
+                            <a href={`mailto:${component._embedded.componentOwner.email}`}>
+                                {component._embedded.componentOwner.fullName}
+                            </a>
+                        )}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Owner Accounting Unit')}:</td>
-                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component.ownerAccountingUnit) && <>{component.ownerAccountingUnit}</>}</td>
+                    <td>
+                        {!CommonUtils.isNullEmptyOrUndefinedString(component.ownerAccountingUnit) && (
+                            <>{component.ownerAccountingUnit}</>
+                        )}
+                    </td>
                 </tr>
                 <tr>
                     <td>{t('Owner Billing Group')}:</td>
@@ -51,7 +55,9 @@ const SummaryRole = ({ component }: { component: Component }) : ReactNode => {
                 </tr>
                 <tr>
                     <td>{t('Owner Country')}:</td>
-                    <td>{!CommonUtils.isNullEmptyOrUndefinedString(component.ownerCountry) && component.ownerCountry}</td>
+                    <td>
+                        {!CommonUtils.isNullEmptyOrUndefinedString(component.ownerCountry) && component.ownerCountry}
+                    </td>
                 </tr>
                 <tr>
                     <td>{t('Moderators')}:</td>
@@ -62,10 +68,13 @@ const SummaryRole = ({ component }: { component: Component }) : ReactNode => {
                                     Object.values(component['_embedded']['sw360:moderators'])
                                         .map(
                                             (user: User): React.ReactNode => (
-                                                <a key={user.email} href={`mailto:${user.email}`}>
+                                                <a
+                                                    key={user.email}
+                                                    href={`mailto:${user.email}`}
+                                                >
                                                     {user.fullName}
                                                 </a>
-                                            )
+                                            ),
                                         )
                                         .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
                             </>
@@ -82,19 +91,21 @@ const SummaryRole = ({ component }: { component: Component }) : ReactNode => {
                         {component.roles &&
                             Object.keys(component.roles).map((key) => (
                                 <li key={key}>
-                                    <span className='fw-bold'>
-                                        {key}:{' '}
-                                    </span>
+                                    <span className='fw-bold'>{key}: </span>
                                     <span>
-                                        {component.roles && component.roles[key]
-                                            .map(
-                                                (email: string): React.ReactNode => (
-                                                    <a key={email} href={`mailto:${email}`}>
-                                                        {email}
-                                                    </a>
+                                        {component.roles &&
+                                            component.roles[key]
+                                                .map(
+                                                    (email: string): React.ReactNode => (
+                                                        <a
+                                                            key={email}
+                                                            href={`mailto:${email}`}
+                                                        >
+                                                            {email}
+                                                        </a>
+                                                    ),
                                                 )
-                                            )
-                                            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
                                     </span>
                                 </li>
                             ))}

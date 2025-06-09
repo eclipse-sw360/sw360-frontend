@@ -8,14 +8,14 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import LicensePage from './components/LicensePage'
 import { ReactNode } from 'react'
+import LicensePage from './components/LicensePage'
 
 export const metadata: Metadata = {
     title: 'Licenses',
 }
 
-function LicensesPage() : ReactNode {
+function LicensesPage(): ReactNode {
     return <LicensePage />
 }
 

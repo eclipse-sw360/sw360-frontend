@@ -25,7 +25,7 @@ interface Props {
     setNotificationSetting: React.Dispatch<React.SetStateAction<NotificationSetting>>
 }
 
-const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props) : ReactNode => {
+const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props): ReactNode => {
     const preferences = Preferences()
     const [isClient, setIsClient] = useState(false)
 
@@ -49,7 +49,11 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
             {preferences.map((value) => (
                 <div key={value.key}>
                     {isClient && (
-                        <Accordion.Item eventKey={value.key} key={value.key} className={styles['accordion-item']}>
+                        <Accordion.Item
+                            eventKey={value.key}
+                            key={value.key}
+                            className={styles['accordion-item']}
+                        >
                             <Accordion.Header className={styles['accordion-header']}>
                                 {value.documentType}
                             </Accordion.Header>

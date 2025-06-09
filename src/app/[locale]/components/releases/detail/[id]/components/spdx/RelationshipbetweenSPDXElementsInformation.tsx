@@ -29,7 +29,7 @@ const RelationshipbetweenSPDXElementsInformation = ({
     setRelationshipsBetweenSPDXElementSPDXs,
     relationshipsBetweenSPDXElementPackages,
     setRelationshipsBetweenSPDXElementPackages,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [changeSource, setChangeSource] = useState(false)
 
@@ -83,16 +83,25 @@ const RelationshipbetweenSPDXElementsInformation = ({
             <tbody hidden={toggle}>
                 <tr>
                     <td className='spdx-label-index'>Source</td>
-                    <td className='spdx-flex-row' style={{ height: '50.5px' }}>
+                    <td
+                        className='spdx-flex-row'
+                        style={{ height: '50.5px' }}
+                    >
                         <select
                             id='relationshipSourceSelect'
                             className='spdx-col-2'
                             onChange={changeRelationshipSource}
                         >
-                            <option value='spdxDocument' selected={relationshipSelection.isSPDXDocument}>
+                            <option
+                                value='spdxDocument'
+                                selected={relationshipSelection.isSPDXDocument}
+                            >
                                 SPDX Document
                             </option>
-                            <option value='package' selected={!relationshipSelection.isSPDXDocument}>
+                            <option
+                                value='package'
+                                selected={!relationshipSelection.isSPDXDocument}
+                            >
                                 Package
                             </option>
                         </select>
@@ -144,24 +153,24 @@ const RelationshipbetweenSPDXElementsInformation = ({
                                     <div className='spdx-col-1 '>
                                         {relationshipSelection.isSPDXDocument
                                             ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
-                                                    ?.spdxElementId
-                                            : relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
-                                                    ?.spdxElementId ?? ''}
+                                                  ?.spdxElementId
+                                            : (relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
+                                                  ?.spdxElementId ?? '')}
                                     </div>
                                     <div className='spdx-col-1 spdx-flex-row'>
                                         {relationshipSelection.isSPDXDocument
                                             ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
-                                                    ?.relationshipType
-                                            : relationshipsBetweenSPDXElementPackages[
-                                                    relationshipSelection.index
-                                                ]?.relationshipType.replace('relationshipType_', '') ?? ''}
+                                                  ?.relationshipType
+                                            : (relationshipsBetweenSPDXElementPackages[
+                                                  relationshipSelection.index
+                                              ]?.relationshipType.replace('relationshipType_', '') ?? '')}
                                     </div>
                                     <div className='spdx-col-3'>
                                         {relationshipSelection.isSPDXDocument
                                             ? relationshipsBetweenSPDXElementSPDXs[relationshipSelection.index]
-                                                    ?.relatedSpdxElement
-                                            : relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
-                                                    ?.relatedSpdxElement ?? ''}
+                                                  ?.relatedSpdxElement
+                                            : (relationshipsBetweenSPDXElementPackages[relationshipSelection.index]
+                                                  ?.relatedSpdxElement ?? '')}
                                     </div>
                                 </div>
                             </div>
@@ -173,31 +182,31 @@ const RelationshipbetweenSPDXElementsInformation = ({
                             <p className='spdx-col-2'>
                                 {relationshipSelection.isSPDXDocument
                                     ? relationshipsBetweenSPDXElementSPDXs[
-                                            relationshipSelection.index
-                                        ]?.relationshipComment
-                                            .trim()
-                                            .split('\n')
-                                            .map((item) => {
-                                                return (
-                                                    <>
-                                                        {item}
-                                                        <br></br>
-                                                    </>
-                                                )
-                                            })
-                                    : relationshipsBetweenSPDXElementPackages[
-                                            relationshipSelection.index
-                                        ]?.relationshipComment
-                                            .trim()
-                                            .split('\n')
-                                            .map((item) => {
-                                                return (
-                                                    <>
-                                                        {item}
-                                                        <br></br>
-                                                    </>
-                                                )
-                                            }) ?? ''}
+                                          relationshipSelection.index
+                                      ]?.relationshipComment
+                                          .trim()
+                                          .split('\n')
+                                          .map((item) => {
+                                              return (
+                                                  <>
+                                                      {item}
+                                                      <br></br>
+                                                  </>
+                                              )
+                                          })
+                                    : (relationshipsBetweenSPDXElementPackages[
+                                          relationshipSelection.index
+                                      ]?.relationshipComment
+                                          .trim()
+                                          .split('\n')
+                                          .map((item) => {
+                                              return (
+                                                  <>
+                                                      {item}
+                                                      <br></br>
+                                                  </>
+                                              )
+                                          }) ?? '')}
                             </p>
                         </td>
                     </tr>

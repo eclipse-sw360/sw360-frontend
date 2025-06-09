@@ -32,13 +32,13 @@ const EditSnippetInformation = ({
     setSnippetInformations,
     SPDXPayload,
     setSPDXPayload,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [snippetRanges, setSnippetRanges] = useState<SnippetRange[]>([])
 
     const [dataSnippetFromFile, setDataSnippetFromFile] = useState<InputKeyValue>({
         key: '',
-        value: ''
+        value: '',
     })
 
     const setDataSnippetRanges = (inputs: SnippetRange[]) => {
@@ -431,7 +431,7 @@ const EditSnippetInformation = ({
         } else {
             let snippetInformationDatas: SnippetInformation[] = []
             snippetInformationDatas = snippetInformations.filter(
-                (snippetInformation) => numberIndex != snippetInformation.index
+                (snippetInformation) => numberIndex != snippetInformation.index,
             )
             setNumberIndex(indexSnippetInformation)
             for (let index = 0; index < snippetInformationDatas.length; index++) {
@@ -551,7 +551,10 @@ const EditSnippetInformation = ({
                                     }
                                 >
                                     {snippetInformations.map((item) => (
-                                        <option key={item.index} value={item.index}>
+                                        <option
+                                            key={item.index}
+                                            value={item.index}
+                                        >
                                             {item.index + 1}
                                         </option>
                                     ))}
@@ -561,7 +564,11 @@ const EditSnippetInformation = ({
                                     onClick={deleteSnippetInformations}
                                 />
                             </div>
-                            <button className='spdx-add-button-main' name='add-snippet' onClick={addSnippet}>
+                            <button
+                                className='spdx-add-button-main'
+                                name='add-snippet'
+                                onClick={addSnippet}
+                            >
                                 Add new Snippet
                             </button>
                         </div>
@@ -571,8 +578,14 @@ const EditSnippetInformation = ({
                     <>
                         <tr>
                             <td style={{ width: '600px' }}>
-                                <div className='form-group' style={{ flex: 1 }}>
-                                    <label className='lableSPDX' htmlFor='snippetSpdxIdentifier'>
+                                <div
+                                    className='form-group'
+                                    style={{ flex: 1 }}
+                                >
+                                    <label
+                                        className='lableSPDX'
+                                        htmlFor='snippetSpdxIdentifier'
+                                    >
                                         9.1 Snippet SPDX identifier
                                     </label>
                                     <div style={{ display: 'flex' }}>
@@ -586,14 +599,14 @@ const EditSnippetInformation = ({
                                             onChange={updateFieldSPDXIdentifier}
                                             value={
                                                 CommonUtils.isNullEmptyOrUndefinedString(
-                                                    snippetInformations[indexSnippetInformation].SPDXID
+                                                    snippetInformations[indexSnippetInformation].SPDXID,
                                                 )
                                                     ? 'Snippet-'
                                                     : snippetInformations[indexSnippetInformation].SPDXID.startsWith(
-                                                          'SPDXRef-'
-                                                      )
-                                                    ? snippetInformations[indexSnippetInformation].SPDXID.substring(8)
-                                                    : snippetInformations[indexSnippetInformation].SPDXID
+                                                            'SPDXRef-',
+                                                        )
+                                                      ? snippetInformations[indexSnippetInformation].SPDXID.substring(8)
+                                                      : snippetInformations[indexSnippetInformation].SPDXID
                                             }
                                         />
                                     </div>
@@ -642,7 +655,7 @@ const EditSnippetInformation = ({
                                                 onChange={updateField}
                                                 value={
                                                     isNoneOrNoasserttionString(
-                                                        snippetInformations[indexSnippetInformation].licenseConcluded
+                                                        snippetInformations[indexSnippetInformation].licenseConcluded,
                                                     )
                                                         ? snippetInformations[indexSnippetInformation].licenseConcluded
                                                         : ''
@@ -712,11 +725,11 @@ const EditSnippetInformation = ({
                                                 name='licenseInfoInSnippets'
                                                 placeholder='Enter license information in snippet'
                                                 onChange={updateField}
-                                                value={
-                                                    snippetInformations[indexSnippetInformation].licenseInfoInSnippets
-                                                        .toString()
-                                                        .replaceAll(',', '\n')
-                                                }
+                                                value={snippetInformations[
+                                                    indexSnippetInformation
+                                                ].licenseInfoInSnippets
+                                                    .toString()
+                                                    .replaceAll(',', '\n')}
                                                 disabled={
                                                     licenseInfoInSnippetsNone || licenseInfoInSnippetsNoasserttion
                                                 }
@@ -762,7 +775,10 @@ const EditSnippetInformation = ({
                         <tr>
                             <td colSpan={3}>
                                 <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='snippetLicenseComments'>
+                                    <label
+                                        className='lableSPDX'
+                                        htmlFor='snippetLicenseComments'
+                                    >
                                         9.7 Snippet comments on license
                                     </label>
                                     <textarea
@@ -800,9 +816,7 @@ const EditSnippetInformation = ({
                                                 name='copyrightText'
                                                 placeholder='Enter snippet copyright text'
                                                 onChange={updateField}
-                                                value={
-                                                    snippetInformations[indexSnippetInformation].copyrightText
-                                                }
+                                                value={snippetInformations[indexSnippetInformation].copyrightText}
                                                 disabled={snippetCopyrightTextNone || snippetCopyrightTextNoasserttion}
                                             ></textarea>
                                         </div>
@@ -846,7 +860,10 @@ const EditSnippetInformation = ({
                         <tr>
                             <td colSpan={3}>
                                 <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='snippetComment'>
+                                    <label
+                                        className='lableSPDX'
+                                        htmlFor='snippetComment'
+                                    >
                                         9.9 Snippet comment
                                     </label>
                                     <textarea
@@ -864,7 +881,10 @@ const EditSnippetInformation = ({
                         <tr>
                             <td colSpan={3}>
                                 <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='snippetName'>
+                                    <label
+                                        className='lableSPDX'
+                                        htmlFor='snippetName'
+                                    >
                                         9.10 Snippet name
                                     </label>
                                     <input
@@ -882,7 +902,10 @@ const EditSnippetInformation = ({
                         <tr>
                             <td colSpan={3}>
                                 <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='snippetAttributionText'>
+                                    <label
+                                        className='lableSPDX'
+                                        htmlFor='snippetAttributionText'
+                                    >
                                         9.11 Snippet attribution text
                                     </label>
                                     <textarea
@@ -892,9 +915,7 @@ const EditSnippetInformation = ({
                                         placeholder='Enter snippet attribution text'
                                         name='snippetAttributionText'
                                         onChange={updateField}
-                                        value={
-                                            snippetInformations[indexSnippetInformation].snippetAttributionText
-                                        }
+                                        value={snippetInformations[indexSnippetInformation].snippetAttributionText}
                                     ></textarea>
                                 </div>
                             </td>

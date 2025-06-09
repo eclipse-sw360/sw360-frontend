@@ -9,13 +9,13 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import React, { useState, type JSX } from 'react';
-import { Modal } from 'react-bootstrap'
 import { HttpStatus, Vendor } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import React, { useState, type JSX } from 'react'
+import { Modal } from 'react-bootstrap'
 
 interface AlertData {
     variant: string
@@ -28,12 +28,18 @@ enum AddVendorState {
     ADD_NEW_VENDOR_REQUEST_PENDING = 'add_new_vendor_request_pending',
 }
 
-const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Dispatch<React.SetStateAction<boolean>> }) : JSX.Element => {
+const AddVendorDialog = ({
+    show,
+    setShow,
+}: {
+    show: boolean
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
+}): JSX.Element => {
     const t = useTranslations('default')
     const [vendor, setVendor] = useState<Vendor>({
         fullName: '',
         shortName: '',
-        url: ''
+        url: '',
     })
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [state, setState] = useState<AddVendorState>(AddVendorState.ADD_NEW_VENDOR)
@@ -62,9 +68,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                     variant: 'success',
                     message: (
                         <>
-                            <p>
-                                {t('Vendor is created')}
-                            </p>
+                            <p>{t('Vendor is created')}</p>
                         </>
                     ),
                 })
@@ -78,9 +82,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                     variant: 'danger',
                     message: (
                         <>
-                            <p>
-                                {t('A vendor with same name already exists')}
-                            </p>
+                            <p>{t('A vendor with same name already exists')}</p>
                         </>
                     ),
                 })
@@ -90,9 +92,7 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                     variant: 'danger',
                     message: (
                         <>
-                            <p>
-                                {t('Something went wrong')}
-                            </p>
+                            <p>{t('Something went wrong')}</p>
                         </>
                     ),
                 })
@@ -105,22 +105,35 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
     }
 
     return (
-        <Modal show={show} centered size='lg'>
+        <Modal
+            show={show}
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Create new Vendor')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {alert && (
-                    <div className={`alert alert-${alert.variant}`} role="alert">
+                    <div
+                        className={`alert alert-${alert.variant}`}
+                        role='alert'
+                    >
                         {alert.message}
                     </div>
                 )}
                 <div className='row mx-1'>
                     <h6 className='header pb-2 px-2'>{t('Add Vendor')}</h6>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.fullName' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.fullName'
+                            className='form-label fw-medium'
+                        >
                             {t('Full Name')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>
@@ -132,14 +145,23 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                             className='form-control'
                             id='vendor.fullName'
                             placeholder={t('Enter vendor full name')}
-                            disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
+                            disabled={
+                                state === AddVendorState.VENDOR_ADDED ||
+                                state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING
+                            }
                             required
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.shortName' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.shortName'
+                            className='form-label fw-medium'
+                        >
                             {t('Short Name')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>
@@ -151,14 +173,23 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                             className='form-control'
                             id='vendor.shortName'
                             placeholder={t('Enter vendor short name')}
-                            disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
+                            disabled={
+                                state === AddVendorState.VENDOR_ADDED ||
+                                state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING
+                            }
                             required
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.url' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.url'
+                            className='form-label fw-medium'
+                        >
                             {t('URL')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>
@@ -170,7 +201,10 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                             className='form-control'
                             id='vendor.url'
                             placeholder={t('Enter vendor url')}
-                            disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
+                            disabled={
+                                state === AddVendorState.VENDOR_ADDED ||
+                                state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING
+                            }
                             required
                         />
                     </div>
@@ -180,22 +214,26 @@ const AddVendorDialog = ({ show, setShow }: { show: boolean, setShow: React.Disp
                 <button
                     type='button'
                     className='fw-bold btn btn-dark me-2'
-                    onClick={() => { 
-                        setShow(!show) 
+                    onClick={() => {
+                        setShow(!show)
                         setAlert(null)
                         setVendor({
                             fullName: '',
                             shortName: '',
-                            url: ''
+                            url: '',
                         })
                         setState(AddVendorState.ADD_NEW_VENDOR)
                     }}
                 >
                     {t('Close')}
                 </button>
-                <button type='button' className='fw-bold btn btn-primary me-2' 
-                    onClick={() => void handleSubmit()} 
-                    disabled={state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING}
+                <button
+                    type='button'
+                    className='fw-bold btn btn-primary me-2'
+                    onClick={() => void handleSubmit()}
+                    disabled={
+                        state === AddVendorState.VENDOR_ADDED || state === AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING
+                    }
                 >
                     {t('Add Vendor')}
                 </button>

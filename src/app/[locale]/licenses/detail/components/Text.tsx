@@ -11,14 +11,14 @@
 'use client'
 import { LicenseDetail } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import styles from '../detail.module.css'
 import { ReactNode } from 'react'
+import styles from '../detail.module.css'
 
 interface Props {
     license: LicenseDetail
 }
 
-const Text = ({ license }: Props) : ReactNode => {
+const Text = ({ license }: Props): ReactNode => {
     const t = useTranslations('default')
     return (
         <div className='col'>

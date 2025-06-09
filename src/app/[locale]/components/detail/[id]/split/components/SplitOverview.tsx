@@ -9,18 +9,17 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { ReactNode, useState, useEffect } from 'react'
 import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { redirect, useRouter } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import ComponentTable from '../../components/ComponentTable'
-import SplitComponent from './SplitData'
 import SplitComponentConfirmation from './ConfirmSplit'
-import { redirect } from 'next/navigation'
+import SplitComponent from './SplitData'
 
 function GetNextState(currentState: MergeOrSplitActionType): MergeOrSplitActionType | null {
     if (currentState === MergeOrSplitActionType.CHOOSE_SOURCE) {
@@ -60,37 +59,32 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
         try {
             setLoading(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
             const srcPayload = {
-                ...(sourceComponent ?? {})
+                ...(sourceComponent ?? {}),
             } as Component
             delete srcPayload['_embedded']
             delete srcPayload['_links']
 
             const targetPayload = {
-                ...(targetComponent ?? {})
+                ...(targetComponent ?? {}),
             } as Component
             delete targetPayload['_embedded']
             delete targetPayload['_links']
 
             const payload: SplitComponentPayload = {
                 srcComponent: srcPayload,
-                targetComponent: targetPayload
+                targetComponent: targetPayload,
             }
 
-            const response = await ApiUtils.PATCH(
-                'components/splitComponents', 
-                payload, 
-                session.user.access_token
-            )
-            if(response.status !== 200) {
-                const err = await response.json() as ErrorDetails
+            const response = await ApiUtils.PATCH('components/splitComponents', payload, session.user.access_token)
+            if (response.status !== 200) {
+                const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") {
+            if (error instanceof DOMException && error.name === 'AbortError') {
                 return
             }
             const message = error instanceof Error ? error.message : String(error)
@@ -105,109 +99,148 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
         const controller = new AbortController()
         const signal = controller.signal
 
-            ; (async () => {
-                try {
-                    const session = await getSession()
-                    if (CommonUtils.isNullOrUndefined(session))
-                        return signOut()
-                    const response = await ApiUtils.GET(`components/${id}`, session.user.access_token, signal)
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const response = await ApiUtils.GET(`components/${id}`, session.user.access_token, signal)
 
-                    if (response.status === HttpStatus.UNAUTHORIZED) {
-                        return signOut()
-                    } else if (response.status === HttpStatus.OK) {
-                        const component = await response.json() as Component
-                        setSourceComponent(component)
-                    } else {
-                        const err = await response.json() as ErrorDetails
-                        throw new Error(err.message)
-                    }
-                } catch (error) {
-                    if (error instanceof DOMException && error.name === "AbortError") {
-                        return
-                    }
-                    const message = error instanceof Error ? error.message : String(error)
-                    MessageService.error(message)
-                    router.push(`components/${id}`)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status === HttpStatus.OK) {
+                    const component = (await response.json()) as Component
+                    setSourceComponent(component)
+                } else {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-            })()
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+                router.push(`components/${id}`)
+            }
+        })()
 
         return () => controller.abort()
     }, [id])
     return (
         <div className='mx-5 mt-3'>
-            {
-                sourceComponent
-                    ? <>
-                        <div className='col-auto buttonheader-title mb-3'>
-                            {
-                                t.rich('SPLIT_INTO_COMPONENT', {
-                                    name: sourceComponent.name,
-                                })
-                            }
+            {sourceComponent ? (
+                <>
+                    <div className='col-auto buttonheader-title mb-3'>
+                        {t.rich('SPLIT_INTO_COMPONENT', {
+                            name: sourceComponent.name,
+                        })}
+                    </div>
+                    <div className='d-flex justify-content-between text-center mb-3'>
+                        <div
+                            className={`p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.CHOOSE_SOURCE ? 'merge-split-active' : 'merge-split'}`}
+                            role='alert'
+                        >
+                            <h6 className='fw-bold'>1. {t('Choose target')}</h6>
+                            <p>{t('Choose a component into which current one should be split')}</p>
                         </div>
-                        <div className='d-flex justify-content-between text-center mb-3'>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.CHOOSE_SOURCE ? 'merge-split-active' : 'merge-split'}`} role="alert">
-                                <h6 className="fw-bold">1. {t('Choose target')}</h6>
-                                <p>{t('Choose a component into which current one should be split')}</p>
-                            </div>
-                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.PROCESS_DATA ? 'merge-split-active' : 'merge-split'}`} role="alert">
-                                <h6 className="fw-bold">2. {t('Split data')}</h6>
-                                <p>{t('Split data from current component to target component')}</p>
-                            </div>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.CONFIRM ? 'merge-split-active' : 'merge-split'}`} role="alert">
-                                <h6 className="fw-bold">3. {t('Confirm')}</h6>
-                                <p>{t('Check the split version and confirm')}</p>
-                            </div>
+                        <div
+                            className={`mx-4 p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.PROCESS_DATA ? 'merge-split-active' : 'merge-split'}`}
+                            role='alert'
+                        >
+                            <h6 className='fw-bold'>2. {t('Split data')}</h6>
+                            <p>{t('Split data from current component to target component')}</p>
                         </div>
-                        {
-                            err !== null &&
-                            <div className="alert alert-danger my-2" role="alert">
-                                {err}
-                            </div>
-                        }
-                        {
-                            splitState === MergeOrSplitActionType.CHOOSE_SOURCE && <ComponentTable component={targetComponent} setComponent={setTargetComponent} />
-                        }
-                        {
-                            splitState === MergeOrSplitActionType.PROCESS_DATA &&
-                            <SplitComponent 
-                                sourceComponent={sourceComponent}
-                                targetComponent={targetComponent}
-                                setSourceComponent={setSourceComponent}
-                                setTargetComponent={setTargetComponent}
-                            />
-                        }
-                        {
-                            splitState === MergeOrSplitActionType.CONFIRM && <SplitComponentConfirmation sourceComponent={sourceComponent} targetComponent={targetComponent} />
-                        }
-                        <div className='d-flex justify-content-end mb-3'>
-                            <div className="mt-3 btn-group col-2" role="group">
-                                <button type="button" className="btn btn-secondary" disabled={GetPrevState(splitState) === null} onClick={() => {
+                        <div
+                            className={`p-2 border rounded-2 col-12 col-md ${splitState === MergeOrSplitActionType.CONFIRM ? 'merge-split-active' : 'merge-split'}`}
+                            role='alert'
+                        >
+                            <h6 className='fw-bold'>3. {t('Confirm')}</h6>
+                            <p>{t('Check the split version and confirm')}</p>
+                        </div>
+                    </div>
+                    {err !== null && (
+                        <div
+                            className='alert alert-danger my-2'
+                            role='alert'
+                        >
+                            {err}
+                        </div>
+                    )}
+                    {splitState === MergeOrSplitActionType.CHOOSE_SOURCE && (
+                        <ComponentTable
+                            component={targetComponent}
+                            setComponent={setTargetComponent}
+                        />
+                    )}
+                    {splitState === MergeOrSplitActionType.PROCESS_DATA && (
+                        <SplitComponent
+                            sourceComponent={sourceComponent}
+                            targetComponent={targetComponent}
+                            setSourceComponent={setSourceComponent}
+                            setTargetComponent={setTargetComponent}
+                        />
+                    )}
+                    {splitState === MergeOrSplitActionType.CONFIRM && (
+                        <SplitComponentConfirmation
+                            sourceComponent={sourceComponent}
+                            targetComponent={targetComponent}
+                        />
+                    )}
+                    <div className='d-flex justify-content-end mb-3'>
+                        <div
+                            className='mt-3 btn-group col-2'
+                            role='group'
+                        >
+                            <button
+                                type='button'
+                                className='btn btn-secondary'
+                                disabled={GetPrevState(splitState) === null}
+                                onClick={() => {
                                     if (GetPrevState(splitState) !== null) {
                                         setSplitState(GetPrevState(splitState) as MergeOrSplitActionType)
                                     }
-                                }}>{t('Back')}</button>
-                                {
-                                    splitState === MergeOrSplitActionType.CONFIRM
-                                    ? <button type="button" className="btn btn-primary" onClick={handleSplitComponent} disabled={loading}>{t('Finish')}</button> 
-                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(splitState) === null || targetComponent === null} onClick={() => {
+                                }}
+                            >
+                                {t('Back')}
+                            </button>
+                            {splitState === MergeOrSplitActionType.CONFIRM ? (
+                                <button
+                                    type='button'
+                                    className='btn btn-primary'
+                                    onClick={handleSplitComponent}
+                                    disabled={loading}
+                                >
+                                    {t('Finish')}
+                                </button>
+                            ) : (
+                                <button
+                                    type='button'
+                                    className='btn btn-primary'
+                                    disabled={GetNextState(splitState) === null || targetComponent === null}
+                                    onClick={() => {
                                         if (GetNextState(splitState) !== null) {
-                                            if(targetComponent !== null && targetComponent.id === id) {
-                                                setErr('Please choose exactly one component, which is not the component itself!')
+                                            if (targetComponent !== null && targetComponent.id === id) {
+                                                setErr(
+                                                    'Please choose exactly one component, which is not the component itself!',
+                                                )
                                                 setTimeout(() => setErr(null), 5000)
                                             } else {
                                                 setSplitState(GetNextState(splitState) as MergeOrSplitActionType)
                                             }
                                         }
-                                    }}>{t('Next')}</button>
-                                }
-                            </div>
+                                    }}
+                                >
+                                    {t('Next')}
+                                </button>
+                            )}
                         </div>
-                    </>
-                    : <div className='col-12 text-center'>
-                        <Spinner className='spinner' />
                     </div>
-            }
+                </>
+            ) : (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
         </div>
     )
 }

@@ -17,10 +17,10 @@ interface Props {
     setDataAnnotationDate: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotationDate }: Props) : ReactNode {
+function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotationDate }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataAnnotationDate ? dataAnnotationDate : {} as InputKeyValue
+        const list: InputKeyValue = dataAnnotationDate ? dataAnnotationDate : ({} as InputKeyValue)
         list[name as keyof InputKeyValue] = value
         setDataAnnotationDate(list)
         setAnnotationDate(list)

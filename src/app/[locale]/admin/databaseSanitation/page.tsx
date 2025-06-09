@@ -10,14 +10,14 @@
 import { Metadata } from 'next'
 import DatabaseSanitation from './components/DatabaseSanitation'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 export const metadata: Metadata = {
     title: 'Admin',
 }
 
 function DatabaseSanitationAdministrationPage(): JSX.Element {
-    return <DatabaseSanitation/>
+    return <DatabaseSanitation />
 }
 
 export default DatabaseSanitationAdministrationPage

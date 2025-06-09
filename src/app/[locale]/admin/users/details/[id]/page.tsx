@@ -10,25 +10,23 @@
 
 'use client'
 
-import { PageButtonHeader } from '@/components/sw360'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { PageButtonHeader, PageSpinner } from '@/components/sw360'
 import { HttpStatus, User } from '@/object-types'
-import { notFound, useParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react';
-import { PageSpinner } from '@/components/sw360'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { notFound, useParams } from 'next/navigation'
+import { useEffect, useState, type JSX } from 'react'
 
 const UserDetailPage = (): JSX.Element => {
-    const params = useParams<{ id: string}>()
+    const params = useParams<{ id: string }>()
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
 
     useEffect(() => {
-        (async () => {
+        ;(async () => {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
             const response = await ApiUtils.GET(`users/byid/${params.id}`, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -36,7 +34,7 @@ const UserDetailPage = (): JSX.Element => {
             } else if (response.status !== HttpStatus.OK) {
                 return notFound()
             }
-            const user = await response.json() as User
+            const user = (await response.json()) as User
             setUser(user)
         })()
     }, [])
@@ -44,10 +42,14 @@ const UserDetailPage = (): JSX.Element => {
         'Edit User': { link: `/admin/users/edit/${params.id}`, type: 'primary', name: t('Edit User') },
     }
 
-    return (
-        (user === undefined) ? <PageSpinner /> :
+    return user === undefined ? (
+        <PageSpinner />
+    ) : (
         <div className='container page-content'>
-            <PageButtonHeader title={user.email} buttons={headerbuttons} />
+            <PageButtonHeader
+                title={user.email}
+                buttons={headerbuttons}
+            />
             <table className='table'>
                 <thead>
                     <tr>
@@ -83,12 +85,15 @@ const UserDetailPage = (): JSX.Element => {
                         <td>{t('Secondary Departments and Roles')}:</td>
                         <td>
                             <ul className='text-break text-start'>
-                                {(user.secondaryDepartmentsAndRoles !== undefined) &&
-                                    Object.entries(user.secondaryDepartmentsAndRoles).map(([department, roles], index) => (
-                                        <li key={index}>
-                                            <b>{department}</b> {'->'} {roles.map(role => t(role as never)).join(', ')}
-                                        </li>
-                                    ))}
+                                {user.secondaryDepartmentsAndRoles !== undefined &&
+                                    Object.entries(user.secondaryDepartmentsAndRoles).map(
+                                        ([department, roles], index) => (
+                                            <li key={index}>
+                                                <b>{department}</b> {'->'}{' '}
+                                                {roles.map((role) => t(role as never)).join(', ')}
+                                            </li>
+                                        ),
+                                    )}
                             </ul>
                         </td>
                     </tr>

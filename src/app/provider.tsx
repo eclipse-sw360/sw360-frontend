@@ -8,15 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { SessionProvider } from 'next-auth/react'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 type Props = {
     children?: React.ReactNode
 }
 
-export const Providers = ({ children }: Props) : JSX.Element => {
+export const Providers = ({ children }: Props): JSX.Element => {
     return <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
 }

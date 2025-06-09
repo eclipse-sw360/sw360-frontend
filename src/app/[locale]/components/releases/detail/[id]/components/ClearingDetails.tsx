@@ -18,12 +18,12 @@ import { ReactNode, useState } from 'react'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import { Attachment, ReleaseDetail } from '@/object-types'
 import { FossologyClearing } from 'next-sw360'
+import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 import ClearingInformationStatus from './ClearingInformationStatus'
 import RequestInformation from './RequestInformation'
 import SPDXAttachments from './SPDXAttachments'
 import SupplementalInformation from './SupplementalInformation'
-import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
 interface Props {
     release: ReleaseDetail
@@ -31,7 +31,7 @@ interface Props {
     embeddedAttachments: Array<Attachment>
 }
 
-const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : ReactNode => {
+const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [show, setShow] = useState(false)
@@ -39,7 +39,10 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
     return (
         <div className='col'>
             <SPDXAttachments releaseId={releaseId} />
-            <AssessmentSummaryInfo releaseId={releaseId} embeddedAttachments={embeddedAttachments} />
+            <AssessmentSummaryInfo
+                releaseId={releaseId}
+                embeddedAttachments={embeddedAttachments}
+            />
             <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
@@ -55,9 +58,7 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
                     <tr>
                         <td>{t('Clearing State')}:</td>
                         <td>
-                            {
-                                t(release.clearingState as never)
-                            }
+                            {t(release.clearingState as never)}
                             <Image
                                 src={fossologyIcon as StaticImport}
                                 width={15}
@@ -195,9 +196,7 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
                         <td>
                             <ClearingInformationStatus
                                 status={
-                                    release.clearingInformation
-                                        ? release.clearingInformation.licenseAgreement
-                                        : false
+                                    release.clearingInformation ? release.clearingInformation.licenseAgreement : false
                                 }
                             />
                         </td>
@@ -225,7 +224,7 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
                     <tr>
                         <td>{t('External URL')}:</td>
                         <td>
-                            {(release.clearingInformation && release.clearingInformation.externalUrl !== undefined) && (
+                            {release.clearingInformation && release.clearingInformation.externalUrl !== undefined && (
                                 <Link href={release.clearingInformation.externalUrl}>
                                     {release.clearingInformation.externalUrl}
                                 </Link>
@@ -240,7 +239,11 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props) : R
             </table>
             <RequestInformation clearingInformation={release.clearingInformation} />
             <SupplementalInformation clearingInformation={release.clearingInformation} />
-            <FossologyClearing show={show} setShow={setShow} releaseId={releaseId} />
+            <FossologyClearing
+                show={show}
+                setShow={setShow}
+                releaseId={releaseId}
+            />
         </div>
     )
 }

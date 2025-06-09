@@ -9,19 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useSearchParams, notFound } from 'next/navigation'
 import { CommonUtils } from '@/utils'
+import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode } from 'react'
 import EditObligation from './components/EditObligation'
 
-const ObligationEditPage = () : ReactNode => {
+const ObligationEditPage = (): ReactNode => {
     const searchParams = useSearchParams()
     const obligationId = searchParams.get('id')
 
-    return (
-        (CommonUtils.isNullEmptyOrUndefinedString(obligationId))
-        ? notFound()
-        : <EditObligation obligationId={obligationId} />
+    return CommonUtils.isNullEmptyOrUndefinedString(obligationId) ? (
+        notFound()
+    ) : (
+        <EditObligation obligationId={obligationId} />
     )
 }
 

@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import styles from './SideBar.module.css'
 
 import { CommonTabIds, LinkedVulnerability, ReleaseTabIds, VulnerabilitiesVerificationState } from '@/object-types'
@@ -70,10 +70,11 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                         id={tab.id}
                         onClick={handleSelectTab}
                     >
-                        {
-                            t(tab.name as never)
-                        }
-                        <span id={styles.numberOfVulnerabilitiesDiv} className='badge badge-light'>
+                        {t(tab.name as never)}
+                        <span
+                            id={styles.numberOfVulnerabilitiesDiv}
+                            className='badge badge-light'
+                        >
                             {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
                         </span>
                     </a>
@@ -97,9 +98,7 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                     id={tab.id}
                     onClick={handleSelectTab}
                 >
-                    {
-                        t(tab.name as never)
-                    }
+                    {t(tab.name as never)}
                 </a>
             )
         })
@@ -108,7 +107,12 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
     }
 
     return (
-        <div id='detailTab' className='list-group' data-initial-tab={selectedTab} role='tablist'>
+        <div
+            id='detailTab'
+            className='list-group'
+            data-initial-tab={selectedTab}
+            role='tablist'
+        >
             {createMenuBar()}
         </div>
     )

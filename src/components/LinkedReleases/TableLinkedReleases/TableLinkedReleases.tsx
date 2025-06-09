@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import React, { type JSX } from 'react';
+import React, { type JSX } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { ReleaseLink } from '@/object-types'
@@ -25,7 +25,7 @@ export default function TableLinkedReleases({
     releaseLinks,
     setReleaseLinks,
     setReleaseIdToRelationshipsToReleasePayLoad,
-}: Props) : JSX.Element {
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target

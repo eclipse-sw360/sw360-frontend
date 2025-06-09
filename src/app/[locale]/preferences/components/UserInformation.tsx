@@ -15,25 +15,25 @@ import Link from 'next/link'
 import { User } from '@/object-types'
 import { Gravatar } from 'next-sw360'
 
-import styles from '../preferences.module.css'
 import { ReactNode } from 'react'
+import styles from '../preferences.module.css'
 
 interface Props {
     user: User | undefined
 }
 
-const UserInformation = ({ user }: Props) : ReactNode => {
+const UserInformation = ({ user }: Props): ReactNode => {
     const t = useTranslations('default')
     const { data: session } = useSession()
     let user_data: Record<string, string> | null = null
- 
+
     if (session) {
         try {
             const tokenPayloadBase64 = session.user.access_token.split('.')[1]
             const decodedPayload = Buffer.from(tokenPayloadBase64, 'base64').toString()
             user_data = JSON.parse(decodedPayload) as Record<string, string>
         } catch (error) {
-            console.error("Failed to decode token payload:", error)
+            console.error('Failed to decode token payload:', error)
             user_data = null
         }
     }

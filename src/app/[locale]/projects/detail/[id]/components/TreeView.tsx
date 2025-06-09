@@ -9,17 +9,17 @@
 
 'use client'
 
-import { HttpStatus, NodeData, Embedded, Project, LicenseClearing, Release, UserGroupType } from '@/object-types'
+import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
+import { Embedded, HttpStatus, LicenseClearing, NodeData, Project, Release, UserGroupType } from '@/object-types'
 import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { TreeTable } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react';
-import { OverlayTrigger, Tooltip, Spinner, Button } from 'react-bootstrap'
+import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
+import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
-import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
@@ -98,7 +98,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     const extractLinkedProjectsAndTheirLinkedReleases = (
         licenseClearingData: LicenseClearing,
-        linkedProjectsData: Project[] | undefined
+        linkedProjectsData: Project[] | undefined,
     ): NodeData[] => {
         if (!linkedProjectsData) return []
         const treeData: NodeData[] = []
@@ -108,11 +108,11 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 rowData: [
                     <Link
                         href={`/projects/detail/${p['_links']['self']['href'].substring(
-                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                            p['_links']['self']['href'].lastIndexOf('/') + 1,
                         )}`}
                         className='text-link text-center'
                         key={`${p['_links']['self']['href'].substring(
-                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                            p['_links']['self']['href'].lastIndexOf('/') + 1,
                         )}-link`}
                     >
                         {`${p.name} (${p.version ?? ''})`}
@@ -120,7 +120,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     <div
                         className='text-center'
                         key={`${p['_links']['self']['href'].substring(
-                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                            p['_links']['self']['href'].lastIndexOf('/') + 1,
                         )}-projectType`}
                     >
                         {Capitalize(p.projectType ?? '')}
@@ -131,7 +131,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     <div
                         className='text-center'
                         key={`${p['_links']['self']['href'].substring(
-                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                            p['_links']['self']['href'].lastIndexOf('/') + 1,
                         )}-state`}
                     >
                         <OverlayTrigger
@@ -146,7 +146,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                         <OverlayTrigger
                             overlay={
                                 <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
-                                    p.clearingState ?? ''
+                                    p.clearingState ?? '',
                                 )}`}</Tooltip>
                             }
                         >
@@ -165,13 +165,13 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     <div
                         className='text-center'
                         key={`${p['_links']['self']['href'].substring(
-                            p['_links']['self']['href'].lastIndexOf('/') + 1
+                            p['_links']['self']['href'].lastIndexOf('/') + 1,
                         )}-edit`}
                     >
                         <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                             <Link
                                 href={`/projects/edit/${p['_links']['self']['href'].substring(
-                                    p['_links']['self']['href'].lastIndexOf('/') + 1
+                                    p['_links']['self']['href'].lastIndexOf('/') + 1,
                                 )}`}
                                 className='overlay-trigger'
                             >
@@ -182,7 +182,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 ],
                 children: extractLinkedProjectsAndTheirLinkedReleases(
                     licenseClearingData,
-                    p['_embedded']?.['sw360:linkedProjects']
+                    p['_embedded']?.['sw360:linkedProjects'],
                 ),
             }
 
@@ -190,7 +190,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 const res = licenseClearingData['_embedded']['sw360:release'].filter(
                     (e: Release) =>
                         e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
-                        l.release.substring(l.release.lastIndexOf('/') + 1)
+                        l.release.substring(l.release.lastIndexOf('/') + 1),
                 )
                 const nodeRelease: NodeData = {
                     rowData: [
@@ -232,7 +232,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             <OverlayTrigger
                                 overlay={
                                     <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
-                                        res[0].clearingState ?? ''
+                                        res[0].clearingState ?? '',
                                     )}`}</Tooltip>
                                 }
                             >
@@ -270,7 +270,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link
                                     href={`/components/releases/edit/${l.release.substring(
-                                        l.release.lastIndexOf('/') + 1
+                                        l.release.lastIndexOf('/') + 1,
                                     )}`}
                                     className='overlay-trigger'
                                 >
@@ -281,8 +281,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     ],
                     children: [],
                 }
-                if(nodeProject.children === undefined)
-                    nodeProject.children = []
+                if (nodeProject.children === undefined) nodeProject.children = []
                 nodeProject.children.push(nodeRelease)
             }
             treeData.push(nodeProject)
@@ -294,19 +293,19 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
-        
+
         void (async () => {
             try {
                 const res_licenseClearing = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearing?transitive=true`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
 
                 const res_linkedProjects = ApiUtils.GET(
                     `projects/${projectId}/linkedProjects?transitive=true`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
 
                 const responses = await Promise.all([res_licenseClearing, res_linkedProjects])
@@ -319,21 +318,22 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     return notFound()
                 }
 
-                const licenseClearingData = await responses[0].json() as LicenseClearing
-                const linkedProjectsData = await responses[1].json() as LinkedProjects
+                const licenseClearingData = (await responses[0].json()) as LicenseClearing
+                const linkedProjectsData = (await responses[1].json()) as LinkedProjects
 
                 const releases: NodeData[] = []
                 for (const l of licenseClearingData['linkedReleases']) {
                     const res = licenseClearingData['_embedded']['sw360:release'].filter(
                         (e: Release) =>
-                            e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) ===
-                            l.release.substring(l.release.lastIndexOf('/') + 1)
+                            e['_links']?.['self']['href'].substring(
+                                e['_links']['self']['href'].lastIndexOf('/') + 1,
+                            ) === l.release.substring(l.release.lastIndexOf('/') + 1),
                     )
                     const nodeRelease: NodeData = {
                         rowData: [
                             <Link
                                 href={`/components/releases/detail/${l.release.substring(
-                                    l.release.lastIndexOf('/') + 1
+                                    l.release.lastIndexOf('/') + 1,
                                 )}`}
                                 className='text-link text-center'
                                 key={`${l.release.substring(l.release.lastIndexOf('/') + 1)}-link`}
@@ -371,7 +371,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                                 <OverlayTrigger
                                     overlay={
                                         <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
-                                            res[0].clearingState ?? ''
+                                            res[0].clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
                                 >
@@ -409,7 +409,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                                 <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                     <Link
                                         href={`/components/releases/edit/${l.release.substring(
-                                            l.release.lastIndexOf('/') + 1
+                                            l.release.lastIndexOf('/') + 1,
                                         )}`}
                                         className='overlay-trigger'
                                     >
@@ -427,13 +427,13 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     ...releases,
                     ...extractLinkedProjectsAndTheirLinkedReleases(
                         licenseClearingData,
-                        linkedProjectsData['_embedded']['sw360:projects']
+                        linkedProjectsData['_embedded']['sw360:projects'],
                     ),
                 ])
             } catch (e) {
                 console.error(e)
                 setData([])
-            } 
+            }
         })()
 
         return () => controller.abort()
@@ -442,31 +442,39 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     return (
         <>
             <AddLicenseInfoToReleaseModal
-                projectId = {projectId}
-                show = {show}
-                setShow= {setShow}
+                projectId={projectId}
+                show={show}
+                setShow={setShow}
             />
             <div className='col ps-0'>
                 <Button
                     variant='secondary'
                     className='me-2 col-auto'
                     onClick={() => setShow(true)}
-                    hidden={!(session?.user.userGroup === UserGroupType.ADMIN ||
-                              session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
-                              session?.user.userGroup === UserGroupType.SW360_ADMIN
-                             )
-                            }
+                    hidden={
+                        !(
+                            session?.user.userGroup === UserGroupType.ADMIN ||
+                            session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
+                            session?.user.userGroup === UserGroupType.SW360_ADMIN
+                        )
+                    }
                 >
                     {t('Add License Info to Release')}
                 </Button>
             </div>
-            {
-                data ?
-                <TreeTable columns={columns} data={data} setData={setData as Dispatch<SetStateAction<NodeData[]>>} selector={true} sort={false} />:
+            {data ? (
+                <TreeTable
+                    columns={columns}
+                    data={data}
+                    setData={setData as Dispatch<SetStateAction<NodeData[]>>}
+                    selector={true}
+                    sort={false}
+                />
+            ) : (
                 <div className='col-12 mt-1 text-center'>
                     <Spinner className='spinner' />
                 </div>
-            }
+            )}
         </>
     )
 }

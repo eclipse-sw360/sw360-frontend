@@ -12,18 +12,23 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
 
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { Changelogs, HttpStatus, Embedded } from '@/object-types'
+import { Changelogs, Embedded, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
-function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }: 
-                   { projectId: string, isCalledFromModerationRequestCurrentProject?: boolean }): JSX.Element {
+function ChangeLog({
+    projectId,
+    isCalledFromModerationRequestCurrentProject,
+}: {
+    projectId: string
+    isCalledFromModerationRequestCurrentProject?: boolean
+}): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [key, setKey] = useState('list-change')
@@ -41,7 +46,7 @@ function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }:
                 const response = await ApiUtils.GET(
                     `changelog/document/${projectId}`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
@@ -49,12 +54,12 @@ function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }:
                     return notFound()
                 }
 
-                const data = await response.json() as EmbeddedChangeLogs
+                const data = (await response.json()) as EmbeddedChangeLogs
 
                 setChangeLogList(
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
                         ? []
-                        : data['_embedded']['sw360:changeLogs']
+                        : data['_embedded']['sw360:changeLogs'],
                 )
             } catch (e) {
                 console.error(e)
@@ -66,17 +71,30 @@ function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }:
 
     return (
         <>
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
-                <div className='row' hidden={isCalledFromModerationRequestCurrentProject}>
+            <Tab.Container
+                id='views-tab'
+                activeKey={key}
+                onSelect={(k) => setKey(k as string)}
+            >
+                <div
+                    className='row'
+                    hidden={isCalledFromModerationRequestCurrentProject}
+                >
                     <div className='col ps-0'>
-                        <Nav variant='pills' className='d-inline-flex'>
+                        <Nav
+                            variant='pills'
+                            className='d-inline-flex'
+                        >
                             <Nav.Item>
                                 <Nav.Link eventKey='list-change'>
                                     <span className='fw-medium'>{t('Change Log')}</span>
                                 </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link eventKey='view-log' disabled={changeLogIndex === -1}>
+                                <Nav.Link
+                                    eventKey='view-log'
+                                    disabled={changeLogIndex === -1}
+                                >
                                     <span className='fw-medium'>{t('Changes')}</span>
                                 </Nav.Link>
                             </Nav.Item>
@@ -94,7 +112,10 @@ function ChangeLog({ projectId, isCalledFromModerationRequestCurrentProject }:
                     </Tab.Pane>
                     <Tab.Pane eventKey='view-log'>
                         <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                        <div id='cardScreen' style={{ padding: '0px' }}></div>
+                        <div
+                            id='cardScreen'
+                            style={{ padding: '0px' }}
+                        ></div>
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>

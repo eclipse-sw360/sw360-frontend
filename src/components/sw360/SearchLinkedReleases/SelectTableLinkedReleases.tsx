@@ -10,10 +10,10 @@
 
 'use client'
 
-import React, { type JSX } from 'react';
+import React, { type JSX } from 'react'
 import { Form } from 'react-bootstrap'
 
-import { ReleaseLink, ReleaseDetail } from '@/object-types'
+import { ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { _ } from 'next-sw360'
 import LinkedReleasesTable from './LinkedReleasesTable'
@@ -26,8 +26,8 @@ interface Props {
 
 const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases }: Props) => {
     const handlerRadioButton = (item: ReleaseDetail) => {
-        if (linkedReleases.map(rel => rel.id).includes(item.id)) {
-            const index = linkedReleases.map(rel => rel.id).indexOf(item.id)
+        if (linkedReleases.map((rel) => rel.id).includes(item.id)) {
+            const index = linkedReleases.map((rel) => rel.id).indexOf(item.id)
             linkedReleases.splice(index, 1)
         } else {
             linkedReleases.push(item)
@@ -52,7 +52,7 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
         {
             id: 'releaseId',
             name: '',
-            formatter: (item: ReleaseDetail) : JSX.Element =>
+            formatter: (item: ReleaseDetail): JSX.Element =>
                 _(
                     <Form.Check
                         name='moderatorId'
@@ -60,7 +60,7 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
                         onClick={() => {
                             handlerRadioButton(item)
                         }}
-                    ></Form.Check>
+                    ></Form.Check>,
                 ) as JSX.Element,
             width: '7%',
         },
@@ -94,7 +94,10 @@ const SelectTableLinkedReleases = ({ releases, setLinkedReleases, linkedReleases
     return (
         <>
             <div className='row'>
-                <LinkedReleasesTable data={releases} columns={columns} />
+                <LinkedReleasesTable
+                    data={releases}
+                    columns={columns}
+                />
             </div>
         </>
     )

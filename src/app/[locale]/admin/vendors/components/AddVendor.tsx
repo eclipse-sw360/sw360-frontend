@@ -10,13 +10,13 @@
 'use client'
 
 import { HttpStatus, Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState, type JSX } from 'react';
+import { useState, type JSX } from 'react'
 import VendorDetailForm from './VendorDetailForm'
-import MessageService from '@/services/message.service'
 
 export default function AddVendor(): JSX.Element {
     const t = useTranslations('default')
@@ -35,10 +35,8 @@ export default function AddVendor(): JSX.Element {
     const handleSubmit = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            if(vendorData === null)
-                return 
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (vendorData === null) return
             delete vendorData['_links']
             const response = await ApiUtils.POST('vendors', vendorData, session.user.access_token)
             if (response.status == HttpStatus.CREATED) {
@@ -85,7 +83,10 @@ export default function AddVendor(): JSX.Element {
                             {t('Cancel')}
                         </button>
                     </div>
-                    <VendorDetailForm payload={vendorData as Vendor} setPayload={setVendorData} />
+                    <VendorDetailForm
+                        payload={vendorData as Vendor}
+                        setPayload={setVendorData}
+                    />
                 </form>
             </div>
         </>

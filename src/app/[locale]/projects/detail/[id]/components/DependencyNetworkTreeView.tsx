@@ -18,7 +18,7 @@ import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { EnumValueWithToolTip, TreeTable, _ } from 'next-sw360'
 import Link from 'next/link'
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState, type JSX } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import { ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 import Form from 'react-bootstrap/Form'
@@ -174,7 +174,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     const expandNextLevel = () => {
         hasExpanded.current = false
         Object.values(treeData).map((node: DependencyNetworkNodeData) => findNextToExpand(node))
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
         if (!hasExpanded.current) {
             setIsExpandedAllMessageShow(true)
         }
@@ -267,7 +267,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         if (propName === 'releaseRelationship' && obj1[propName] === undefined) {
             propName = 'relation'
         }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
         if (propName === 'componentType' && obj1[propName] === undefined) {
             propName = 'projectType'
         }
@@ -558,7 +558,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                         {nameFormatter(`${item.name} ${item.version}`)}
                     </Link>
                 ) : (
-                    item.longName ?? ''
+                    (item.longName ?? '')
                 )
             ) : (
                 <Link
@@ -780,17 +780,16 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             </div>
             <div className='my-1'>
                 {data ? (
-                    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                <TreeTable
-                columns={columns}
-                data={treeData}
-                setData={setTreeData}
-                language={language}
-                onExpand={(item) => {
-                    void onExpand(item as DependencyNetworkNodeData)
-                }}
-                search={search}
-                />
+                    <TreeTable
+                        columns={columns}
+                        data={treeData}
+                        setData={setTreeData}
+                        language={language}
+                        onExpand={(item) => {
+                            void onExpand(item as DependencyNetworkNodeData)
+                        }}
+                        search={search}
+                    />
                 ) : (
                     <div className='col-12 text-center'>
                         <Spinner className='spinner' />
@@ -798,7 +797,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                 )}
             </div>
         </>
-    );
+    )
 }
 
 const compare = (preState: { projectId: string }, nextState: { projectId: string }) => {

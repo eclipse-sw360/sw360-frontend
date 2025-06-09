@@ -9,9 +9,9 @@
 
 'use-client'
 
-import React, { type JSX } from 'react';
 import { getData } from 'country-list'
 import { useTranslations } from 'next-intl'
+import React, { type JSX } from 'react'
 
 interface Props {
     selectCountry?: React.ChangeEventHandler<HTMLSelectElement>
@@ -27,7 +27,10 @@ function SelectCountry(props: Props): JSX.Element {
     const t = useTranslations('default')
     return (
         <>
-            <label htmlFor='country' className='form-label fw-bold'>
+            <label
+                htmlFor='country'
+                className='form-label fw-bold'
+            >
                 {t('Owner Country')}
             </label>
             <select
@@ -40,7 +43,10 @@ function SelectCountry(props: Props): JSX.Element {
             >
                 <option value=''>{t('Select a country')}</option>
                 {getData().map((country: CountryData) => (
-                    <option key={country.code} value={country.code}>
+                    <option
+                        key={country.code}
+                        value={country.code}
+                    >
                         {country.name}
                     </option>
                 ))}

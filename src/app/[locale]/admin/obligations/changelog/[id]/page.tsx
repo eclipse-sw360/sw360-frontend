@@ -8,9 +8,9 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import ChangeLog from './components/Changelog';
+import ChangeLog from './components/Changelog'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Context {
     params: Promise<{ id: string }>
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 }
 
 const ObligationsChangelog = async (props: Context): Promise<JSX.Element> => {
-    const params = await props.params;
+    const params = await props.params
     return <ChangeLog obligationId={params.id} />
 }
 

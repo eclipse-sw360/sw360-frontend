@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: 'Admin',
 }
 
-function AddObligationPage() : ReactNode {
+function AddObligationPage(): ReactNode {
     return <AddObligation />
 }
 

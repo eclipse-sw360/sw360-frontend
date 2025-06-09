@@ -10,7 +10,7 @@
 
 import { OAuthClient } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import React, { useMemo, useState, type JSX } from 'react';
+import React, { useMemo, useState, type JSX } from 'react'
 import { Button, Form } from 'react-bootstrap'
 import { FaCaretDown, FaCaretRight, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 

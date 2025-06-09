@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { _, Table } from 'next-sw360'
 import KeywordSearch from './KeywordSearch'
 
-export default function Search() : ReactNode {
+export default function Search(): ReactNode {
     const t = useTranslations('default')
     const [data, setData] = useState<SearchResult[] | null>([])
 
@@ -33,19 +33,27 @@ export default function Search() : ReactNode {
                         {(() => {
                             if (type === 'package') {
                                 return (
-                                    <svg className='project_icon mb-1' height={18} width={18}>
+                                    <svg
+                                        className='project_icon mb-1'
+                                        height={18}
+                                        width={18}
+                                    >
                                         <use href='icons.svg#project'></use>
                                     </svg>
                                 )
                             } else {
                                 return (
-                                    <svg className={`${type}_icon mb-1`} height={18} width={18}>
+                                    <svg
+                                        className={`${type}_icon mb-1`}
+                                        height={18}
+                                        width={18}
+                                    >
                                         <use href={`icons.svg#${type}`}></use>
                                     </svg>
                                 )
                             }
                         })()}
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -74,7 +82,7 @@ export default function Search() : ReactNode {
                                 return <p>{name}</p>
                             }
                         })()}
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -95,7 +103,10 @@ export default function Search() : ReactNode {
                         </div>
                         <div className='row'>
                             {!data ? (
-                                <div className='col-12' style={{ textAlign: 'center' }}>
+                                <div
+                                    className='col-12'
+                                    style={{ textAlign: 'center' }}
+                                >
                                     <Spinner className='spinner' />
                                 </div>
                             ) : (
@@ -107,7 +118,10 @@ export default function Search() : ReactNode {
                                 />
                             )}
                             <div className='col-lg-8'>
-                                <Alert variant='warning' dismissible>
+                                <Alert
+                                    variant='warning'
+                                    dismissible
+                                >
                                     {t.rich('SEARCH_NOTE', {
                                         p: (chunks) => <p>{chunks}</p>,
                                         ul: (chunks) => <ul>{chunks}</ul>,

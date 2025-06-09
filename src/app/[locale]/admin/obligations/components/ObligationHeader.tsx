@@ -11,7 +11,7 @@
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { ObligationLevels, ObligationTypes, ObligationLevelInfo } from '../../../../../object-types/Obligation'
+import { ObligationLevelInfo, ObligationLevels, ObligationTypes } from '../../../../../object-types/Obligation'
 
 interface ObligationHeaderProps {
     title: string
@@ -29,7 +29,7 @@ export default function ObligationHeader({
     onTitleChange,
     onTypeChange,
     onLevelChange,
-}: ObligationHeaderProps) : ReactNode {
+}: ObligationHeaderProps): ReactNode {
     const t = useTranslations('default')
     return (
         <>
@@ -61,19 +61,25 @@ export default function ObligationHeader({
                         {t('Obligation Type')}
                     </label>
                     <select
-                    className='form-select'
-                    id='obligationType'
-                    value={obligationType}
-                    onChange={(e) => onTypeChange(e.target.value)}
+                        className='form-select'
+                        id='obligationType'
+                        value={obligationType}
+                        onChange={(e) => onTypeChange(e.target.value)}
                     >
-                    <option value='' disabled>
-                        {t('Select an obligation type')}
-                    </option>
-                    {Object.values(ObligationTypes).map((option) => (
-                        <option key={option} value={option}>
-                        {option}
+                        <option
+                            value=''
+                            disabled
+                        >
+                            {t('Select an obligation type')}
                         </option>
-                    ))}
+                        {Object.values(ObligationTypes).map((option) => (
+                            <option
+                                key={option}
+                                value={option}
+                            >
+                                {option}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
@@ -83,7 +89,7 @@ export default function ObligationHeader({
                         className='form-label'
                         style={{ fontWeight: 'bold' }}
                     >
-                        t{('Obligation Level')}
+                        t{'Obligation Level'}
                     </label>
                     <select
                         className='form-select'
@@ -91,7 +97,10 @@ export default function ObligationHeader({
                         value={obligationLevel}
                         onChange={(e) => onLevelChange(e.target.value)}
                     >
-                        <option value='' disabled>
+                        <option
+                            value=''
+                            disabled
+                        >
                             {t('Select an obligation level')}
                         </option>
                         {Object.values(ObligationLevels).map((option) => (

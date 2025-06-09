@@ -16,7 +16,7 @@ import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 import { Button } from 'react-bootstrap'
 
 interface Props {

@@ -9,14 +9,14 @@
 
 'use client'
 
-import { HttpStatus, LicenseClearing, Project, Release, Embedded } from '@/object-types'
+import { Embedded, HttpStatus, LicenseClearing, Project, Release } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
@@ -62,7 +62,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
     licenseClearingData: LicenseClearing,
     linkedProjectsData: Project[] | undefined,
     finalData: ListViewData[],
-    path: string[]
+    path: string[],
 ) => {
     if (!linkedProjectsData) return
     for (const p of linkedProjectsData) {
@@ -94,7 +94,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             const id = l.release.substring(l.release.lastIndexOf('/') + 1)
             const res = licenseClearingData['_embedded']['sw360:release'].filter(
                 (e: Release) =>
-                    e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
+                    e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id,
             )
             finalData.push({
                 elementType: ElementType.LINKED_RELEASE,
@@ -121,7 +121,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             licenseClearingData,
             p['_embedded']?.['sw360:linkedProjects'],
             finalData,
-            path
+            path,
         )
         path.pop()
     }
@@ -132,13 +132,14 @@ const extractLinkedReleases = (
     projectVersion: string,
     licenseClearingData: LicenseClearing,
     finalData: ListViewData[],
-    path: string[]
+    path: string[],
 ) => {
     path.push(`${projectName} (${projectVersion})`)
     for (const l of licenseClearingData['linkedReleases']) {
         const id = l.release.substring(l.release.lastIndexOf('/') + 1)
         const res = licenseClearingData['_embedded']['sw360:release'].filter(
-            (e: Release) => e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
+            (e: Release) =>
+                e['_links']?.['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id,
         )
         finalData.push({
             elementType: ElementType.LINKED_RELEASE,
@@ -201,7 +202,7 @@ export default function ListView({
                         className='text-link'
                     >
                         {`${name} (${version})`}
-                    </Link>
+                    </Link>,
                 ),
             sort: true,
         },
@@ -241,14 +242,20 @@ export default function ListView({
                 _(
                     <>
                         {licenses.map((e, i) => (
-                            <li key={e} style={{ display: 'inline' }}>
-                                <Link href={`/licenses/detail${e}`} className='text-link'>
+                            <li
+                                key={e}
+                                style={{ display: 'inline' }}
+                            >
+                                <Link
+                                    href={`/licenses/detail${e}`}
+                                    className='text-link'
+                                >
                                     {e}
                                 </Link>
                                 {i === licenses.length - 1 ? '' : ','}{' '}
                             </li>
                         ))}
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -264,7 +271,7 @@ export default function ListView({
                                 <OverlayTrigger
                                     overlay={
                                         <Tooltip>{`${t('Project State')}: ${Capitalize(
-                                            (state as ProjectState).state
+                                            (state as ProjectState).state,
                                         )}`}</Tooltip>
                                     }
                                 >
@@ -277,7 +284,7 @@ export default function ListView({
                                 <OverlayTrigger
                                     overlay={
                                         <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
-                                            (state as ProjectState).clearingState
+                                            (state as ProjectState).clearingState,
                                         )}`}</Tooltip>
                                     }
                                 >
@@ -290,7 +297,7 @@ export default function ListView({
                                     )}
                                 </OverlayTrigger>
                             </div>
-                        </>
+                        </>,
                     )
                 }
                 return _(
@@ -299,7 +306,7 @@ export default function ListView({
                             <OverlayTrigger
                                 overlay={
                                     <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
-                                        (state as ReleaseState).clearingState
+                                        (state as ReleaseState).clearingState,
                                     )}`}</Tooltip>
                                 }
                             >
@@ -312,7 +319,7 @@ export default function ListView({
                                 )}
                             </OverlayTrigger>
                         </div>
-                    </>
+                    </>,
                 )
             },
             sort: true,
@@ -357,7 +364,7 @@ export default function ListView({
                                 <FaPencilAlt className='btn-icon' />
                             </Link>
                         </OverlayTrigger>
-                    </>
+                    </>,
                 ),
         },
     ]
@@ -369,18 +376,17 @@ export default function ListView({
         void (async () => {
             try {
                 const session = await getSession()
-                if(CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const res_licenseClearing = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearing?transitive=true`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
 
                 const res_linkedProjects = ApiUtils.GET(
                     `projects/${projectId}/linkedProjects?transitive=true`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
 
                 const responses = await Promise.all([res_licenseClearing, res_linkedProjects])
@@ -393,8 +399,8 @@ export default function ListView({
                     return notFound()
                 }
 
-                const licenseClearingData = await responses[0].json() as LicenseClearing
-                const linkedProjectsData = await responses[1].json() as LinkedProjects
+                const licenseClearingData = (await responses[0].json()) as LicenseClearing
+                const linkedProjectsData = (await responses[1].json()) as LinkedProjects
 
                 const finalData: ListViewData[] = []
                 const path: string[] = []
@@ -403,7 +409,7 @@ export default function ListView({
                     licenseClearingData,
                     linkedProjectsData['_embedded']['sw360:projects'],
                     finalData,
-                    path
+                    path,
                 )
 
                 const d = finalData.map((e) => [
@@ -431,7 +437,12 @@ export default function ListView({
     return (
         <>
             {data ? (
-                <Table columns={columns} data={data} selector={true} sort={false} />
+                <Table
+                    columns={columns}
+                    data={data}
+                    selector={true}
+                    sort={false}
+                />
             ) : (
                 <div className='col-12 text-center'>
                     <Spinner className='spinner' />

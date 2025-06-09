@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useSession } from 'next-auth/react'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 
 import { DocumentTypes, Resources } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -37,8 +37,9 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
     }, [documentId, documentType, session])
 
     return (
-        <> {
-            (resourcesUsing !== undefined) && (
+        <>
+            {' '}
+            {resourcesUsing !== undefined && (
                 <>
                     {!CommonUtils.isNullEmptyOrUndefinedArray(resourcesUsing._embedded['sw360:projects']) && (
                         <ProjectsUsing
@@ -46,7 +47,9 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
                             documentName={documentName}
                             restrictedResource={
                                 !CommonUtils.isNullOrUndefined(resourcesUsing._embedded['sw360:restrictedResources'])
-                                ? resourcesUsing._embedded['sw360:restrictedResources'][0] : undefined}
+                                    ? resourcesUsing._embedded['sw360:restrictedResources'][0]
+                                    : undefined
+                            }
                         />
                     )}
                     {!CommonUtils.isNullEmptyOrUndefinedArray(resourcesUsing._embedded['sw360:components']) && (
@@ -56,8 +59,8 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
                         />
                     )}
                 </>
-            )
-        }</>
+            )}
+        </>
     )
 }
 

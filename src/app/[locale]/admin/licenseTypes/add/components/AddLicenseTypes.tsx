@@ -10,28 +10,25 @@
 'use client'
 
 import { HttpStatus } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useRef, type JSX } from 'react';
-import MessageService from '@/services/message.service'
+import { useRef, type JSX } from 'react'
 
 export default function AddLicenseTypes(): JSX.Element {
-    
     const router = useRouter()
     const { status } = useSession()
     const t = useTranslations('default')
     const searchValueRef = useRef<HTMLInputElement>(null)
 
-    const handleAddLicenseType = async ({ addLicenseTypeTitle }:
-                                        { addLicenseTypeTitle: string }) => {
+    const handleAddLicenseType = async ({ addLicenseTypeTitle }: { addLicenseTypeTitle: string }) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const url = CommonUtils.createUrlWithParams('licenses/addLicenseType', {
-                licenseType: addLicenseTypeTitle
+                licenseType: addLicenseTypeTitle,
             })
             const response = await ApiUtils.POST(url, {}, session.user.access_token)
             if (response.status == HttpStatus.OK) {
@@ -45,12 +42,12 @@ export default function AddLicenseTypes(): JSX.Element {
             } else {
                 MessageService.error(t('Something went wrong'))
             }
-        }   catch (error) {
-                if (error instanceof DOMException && error.name === "AbortError") {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
 
@@ -67,9 +64,7 @@ export default function AddLicenseTypes(): JSX.Element {
                     method='post'
                     onSubmit={(e) => {
                         e.preventDefault()
-                        void handleAddLicenseType(
-                            { addLicenseTypeTitle: searchValueRef.current?.value ?? '' }
-                        )
+                        void handleAddLicenseType({ addLicenseTypeTitle: searchValueRef.current?.value ?? '' })
                     }}
                 >
                     <div className='row mb-4'>
@@ -95,9 +90,15 @@ export default function AddLicenseTypes(): JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-lg'>
-                            <label htmlFor='add_license_type.title' className='form-label fw-medium'>
+                            <label
+                                htmlFor='add_license_type.title'
+                                className='form-label fw-medium'
+                            >
                                 {t('Title')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{ color: '#F7941E' }}
+                                >
                                     *
                                 </span>
                             </label>

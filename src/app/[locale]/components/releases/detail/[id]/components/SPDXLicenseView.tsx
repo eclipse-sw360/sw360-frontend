@@ -11,7 +11,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState, ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { FaInfoCircle } from 'react-icons/fa'
@@ -25,7 +25,7 @@ interface Props {
     attachmentName?: string
 }
 
-const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactNode => {
+const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedLicenseId, setSelectedLicenseId] = useState<string>()
     const [modalShow, setModalShow] = useState(false)
@@ -108,18 +108,23 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactN
             ) : (
                 <>
                     <div>
-                        <b>
-                            {
-                                t(licenseInfo.otherLicense as never)
-                            }
-                        </b>
+                        <b>{t(licenseInfo.otherLicense as never)}</b>
                     </div>
                     <ul>{renderLicenseIds(licenseInfo['otherLicenseIds'] as Array<string>)}</ul>
                 </>
             )}
 
-            <Modal show={modalShow} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-                <Modal.Header closeButton style={{ color: '#2e5aac' }}>
+            <Modal
+                show={modalShow}
+                onHide={handleCloseDialog}
+                backdrop='static'
+                centered
+                size='lg'
+            >
+                <Modal.Header
+                    closeButton
+                    style={{ color: '#2e5aac' }}
+                >
                     <Modal.Title>
                         <b>{attachmentName}</b>
                     </Modal.Title>
@@ -134,7 +139,7 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactN
                                 {t('Source File List')}:
                                 <ul>
                                     {CommonUtils.isNullEmptyOrUndefinedArray(
-                                        licenseInfo[selectedLicenseId] as Array<string>
+                                        licenseInfo[selectedLicenseId] as Array<string>,
                                     ) ? (
                                         <li>{t('Source file information not found in ISR')}</li>
                                     ) : (
@@ -146,7 +151,10 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactN
                     )}
                 </Modal.Body>
                 <Modal.Footer className='justify-content-end'>
-                    <Button variant='light' onClick={handleCloseDialog}>
+                    <Button
+                        variant='light'
+                        onClick={handleCloseDialog}
+                    >
                         {' '}
                         OK{' '}
                     </Button>

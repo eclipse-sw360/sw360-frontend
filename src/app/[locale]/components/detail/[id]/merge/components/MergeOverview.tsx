@@ -9,18 +9,17 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { ReactNode, useState, useEffect } from 'react'
 import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { redirect, useRouter } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import ComponentTable from '../../components/ComponentTable'
 import MergeComponent from './MergeComponent'
 import MergeComponentConfirmation from './MergeConfirmation'
-import { redirect } from 'next/navigation'
 
 function GetNextState(currentState: MergeOrSplitActionType): MergeOrSplitActionType | null {
     if (currentState === MergeOrSplitActionType.CHOOSE_SOURCE) {
@@ -56,24 +55,23 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
         try {
             setLoading(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const payload = {
-                ...(finalComponentPayload ?? {})
+                ...(finalComponentPayload ?? {}),
             }
             delete payload['_embedded']
             delete payload['_links']
             const response = await ApiUtils.PATCH(
-                `components/mergecomponents?mergeTargetId=${targetComponent?.id}&mergeSourceId=${sourceComponent?.id}`, 
-                payload, 
-                session.user.access_token
+                `components/mergecomponents?mergeTargetId=${targetComponent?.id}&mergeSourceId=${sourceComponent?.id}`,
+                payload,
+                session.user.access_token,
             )
-            if(response.status !== 200) {
-                const err = await response.json() as ErrorDetails
+            if (response.status !== 200) {
+                const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") {
+            if (error instanceof DOMException && error.name === 'AbortError') {
                 return
             }
             const message = error instanceof Error ? error.message : String(error)
@@ -88,114 +86,149 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
         const controller = new AbortController()
         const signal = controller.signal
 
-            ; (async () => {
-                try {
-                    const session = await getSession()
-                    if (CommonUtils.isNullOrUndefined(session))
-                        return signOut()
-                    const response = await ApiUtils.GET(`components/${id}`, session.user.access_token, signal)
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const response = await ApiUtils.GET(`components/${id}`, session.user.access_token, signal)
 
-                    if (response.status === HttpStatus.UNAUTHORIZED) {
-                        return signOut()
-                    } else if (response.status === HttpStatus.OK) {
-                        const component = await response.json() as Component
-                        setTargetComponent(component)
-                    } else {
-                        const err = await response.json() as ErrorDetails
-                        throw new Error(err.message)
-                    }
-                } catch (error) {
-                    if (error instanceof DOMException && error.name === "AbortError") {
-                        return
-                    }
-                    const message = error instanceof Error ? error.message : String(error)
-                    MessageService.error(message)
-                    router.push(`components/${id}`)
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status === HttpStatus.OK) {
+                    const component = (await response.json()) as Component
+                    setTargetComponent(component)
+                } else {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-            })()
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+                router.push(`components/${id}`)
+            }
+        })()
 
         return () => controller.abort()
     }, [id])
     return (
         <div className='mx-5 mt-3'>
-            {
-                targetComponent
-                    ? <>
-                        <div className='col-auto buttonheader-title mb-3'>
-                            {
-                                t.rich('MERGE_INTO_TARGET', {
-                                    name: targetComponent.name,
-                                })
-                            }
+            {targetComponent ? (
+                <>
+                    <div className='col-auto buttonheader-title mb-3'>
+                        {t.rich('MERGE_INTO_TARGET', {
+                            name: targetComponent.name,
+                        })}
+                    </div>
+                    <div className='d-flex justify-content-between text-center mb-3'>
+                        <div
+                            className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.CHOOSE_SOURCE ? 'merge-split-active' : 'merge-split'}`}
+                            role='alert'
+                        >
+                            <h6 className='fw-bold'>1. {t('Choose source')}</h6>
+                            <p>{t('Choose a component that should be merged into the current one')}</p>
                         </div>
-                        <div className='d-flex justify-content-between text-center mb-3'>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.CHOOSE_SOURCE ? 'merge-split-active' : 'merge-split'}`} role="alert">
-                                <h6 className="fw-bold">1. {t('Choose source')}</h6>
-                                <p>{t('Choose a component that should be merged into the current one')}</p>
-                            </div>
-                            <div className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.PROCESS_DATA ? 'merge-split-active' : 'merge-split'}`} role="alert">
-                                <h6 className="fw-bold">2. {t('Merge data')}</h6>
-                                <p>{t('Merge data from source into target component')}</p>
-                            </div>
-                            <div className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.CONFIRM ? 'merge-split-active' : 'merge-split'}`} role="alert">
-                                <h6 className="fw-bold">3. {t('Confirm')}</h6>
-                                <p>{t('Check the merged version and confirm')}</p>
-                            </div>
+                        <div
+                            className={`mx-4 p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.PROCESS_DATA ? 'merge-split-active' : 'merge-split'}`}
+                            role='alert'
+                        >
+                            <h6 className='fw-bold'>2. {t('Merge data')}</h6>
+                            <p>{t('Merge data from source into target component')}</p>
                         </div>
-                        {
-                            err !== null &&
-                            <div className="alert alert-danger my-2" role="alert">
-                                {err}
-                            </div>
-                        }
-                        {
-                            mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && <ComponentTable component={sourceComponent} setComponent={setSourceComponent} />
-                        }
-                        {
-                            mergeState === MergeOrSplitActionType.PROCESS_DATA && 
-                            <MergeComponent 
-                                targetComponent={targetComponent} 
-                                sourceComponent={sourceComponent} 
-                                finalComponentPayload={finalComponentPayload}
-                                setFinalComponentPayload={setFinalComponentPayload} 
-                            />
-                        }
-                        {
-                            mergeState === MergeOrSplitActionType.CONFIRM && 
-                            <MergeComponentConfirmation         
-                                targetComponent={targetComponent} 
-                                sourceComponent={sourceComponent}
-                                finalComponentPayload={finalComponentPayload} 
-                            />
-                        }
-                        <div className='d-flex justify-content-end mb-3'>
-                            <div className="mt-3 btn-group col-2" role="group">
-                                <button type="button" className="btn btn-secondary" disabled={GetPrevState(mergeState) === null} onClick={() => {
+                        <div
+                            className={`p-2 border rounded-2 col-12 col-md ${mergeState === MergeOrSplitActionType.CONFIRM ? 'merge-split-active' : 'merge-split'}`}
+                            role='alert'
+                        >
+                            <h6 className='fw-bold'>3. {t('Confirm')}</h6>
+                            <p>{t('Check the merged version and confirm')}</p>
+                        </div>
+                    </div>
+                    {err !== null && (
+                        <div
+                            className='alert alert-danger my-2'
+                            role='alert'
+                        >
+                            {err}
+                        </div>
+                    )}
+                    {mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && (
+                        <ComponentTable
+                            component={sourceComponent}
+                            setComponent={setSourceComponent}
+                        />
+                    )}
+                    {mergeState === MergeOrSplitActionType.PROCESS_DATA && (
+                        <MergeComponent
+                            targetComponent={targetComponent}
+                            sourceComponent={sourceComponent}
+                            finalComponentPayload={finalComponentPayload}
+                            setFinalComponentPayload={setFinalComponentPayload}
+                        />
+                    )}
+                    {mergeState === MergeOrSplitActionType.CONFIRM && (
+                        <MergeComponentConfirmation
+                            targetComponent={targetComponent}
+                            sourceComponent={sourceComponent}
+                            finalComponentPayload={finalComponentPayload}
+                        />
+                    )}
+                    <div className='d-flex justify-content-end mb-3'>
+                        <div
+                            className='mt-3 btn-group col-2'
+                            role='group'
+                        >
+                            <button
+                                type='button'
+                                className='btn btn-secondary'
+                                disabled={GetPrevState(mergeState) === null}
+                                onClick={() => {
                                     if (GetPrevState(mergeState) !== null) {
                                         setMergeState(GetPrevState(mergeState) as MergeOrSplitActionType)
                                     }
-                                }}>{t('Back')}</button>
-                                {
-                                    mergeState === MergeOrSplitActionType.CONFIRM
-                                    ? <button type="button" className="btn btn-primary" onClick={handleMergeComponent} disabled={loading}>{t('Finish')}</button> 
-                                    : <button type="button" className="btn btn-primary" disabled={GetNextState(mergeState) === null || sourceComponent === null} onClick={() => {
+                                }}
+                            >
+                                {t('Back')}
+                            </button>
+                            {mergeState === MergeOrSplitActionType.CONFIRM ? (
+                                <button
+                                    type='button'
+                                    className='btn btn-primary'
+                                    onClick={handleMergeComponent}
+                                    disabled={loading}
+                                >
+                                    {t('Finish')}
+                                </button>
+                            ) : (
+                                <button
+                                    type='button'
+                                    className='btn btn-primary'
+                                    disabled={GetNextState(mergeState) === null || sourceComponent === null}
+                                    onClick={() => {
                                         if (GetNextState(mergeState) !== null) {
-                                            if(sourceComponent !== null && sourceComponent.id === id) {
-                                                setErr('Please choose exactly one component, which is not the component itself!')
+                                            if (sourceComponent !== null && sourceComponent.id === id) {
+                                                setErr(
+                                                    'Please choose exactly one component, which is not the component itself!',
+                                                )
                                                 setTimeout(() => setErr(null), 5000)
                                             } else {
                                                 setMergeState(GetNextState(mergeState) as MergeOrSplitActionType)
                                             }
                                         }
-                                    }}>{t('Next')}</button>
-                                }
-                            </div>
+                                    }}
+                                >
+                                    {t('Next')}
+                                </button>
+                            )}
                         </div>
-                    </>
-                    : <div className='col-12 text-center'>
-                        <Spinner className='spinner' />
                     </div>
-            }
+                </>
+            ) : (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
         </div>
     )
 }

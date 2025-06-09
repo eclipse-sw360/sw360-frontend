@@ -19,7 +19,7 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : ReactNode => {
+const RequestInformation = ({ releasePayload, setReleasePayload }: Props): ReactNode => {
     const t = useTranslations('default')
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,14 +34,20 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{ padding: '0px 12px' }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
                         <span className='fw-bold'>{t('Request Information')}</span>
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='request_id' className='form-label fw-bold'>
+                            <label
+                                htmlFor='request_id'
+                                className='form-label fw-bold'
+                            >
                                 {t('Request ID')}
                             </label>
                             <input
@@ -57,7 +63,10 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='additional_request_info' className='form-label fw-bold'>
+                            <label
+                                htmlFor='additional_request_info'
+                                className='form-label fw-bold'
+                            >
                                 {t('Additional request Info')}
                             </label>
                             <input
@@ -75,7 +84,10 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='evaluation_start' className='form-label fw-bold'>
+                            <label
+                                htmlFor='evaluation_start'
+                                className='form-label fw-bold'
+                            >
                                 {t('Evaluation Start')}
                             </label>
                             <input
@@ -91,7 +103,10 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='evaluation_end' className='form-label fw-bold'>
+                            <label
+                                htmlFor='evaluation_end'
+                                className='form-label fw-bold'
+                            >
                                 {t('Evaluation End')}
                             </label>
                             <input

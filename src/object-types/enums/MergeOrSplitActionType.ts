@@ -10,7 +10,7 @@
 enum MergeOrSplitActionType {
     CHOOSE_SOURCE = 'CHOOSE_SOURCE',
     PROCESS_DATA = 'PROCESS_DATA',
-    CONFIRM = 'CONFIRM'
+    CONFIRM = 'CONFIRM',
 }
 
 export default MergeOrSplitActionType

@@ -10,16 +10,14 @@
 
 'use client'
 
-import { Button } from 'react-bootstrap'
-import { useState, useEffect, useCallback, type JSX } from 'react'
+import { HttpStatus } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import MessageService from '@/services/message.service'
-import { HttpStatus } from '@/object-types'
-import { Modal } from 'react-bootstrap'
+import { useCallback, useEffect, useState, type JSX } from 'react'
+import { Button, Modal, Spinner } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
-import { Spinner } from 'react-bootstrap'
 import ViewLogsModal from './ViewLogsModal'
 
 interface ImportDepartmentInformation {
@@ -41,12 +39,14 @@ enum ImportStatus {
     NOT_STARTED,
     IMPORTING,
     SUCCESS,
-    FAILURE
+    FAILURE,
 }
 
 const ImportSecondaryDepartmentsSection = (): JSX.Element => {
     const t = useTranslations('default')
-    const [importDepartmentInformation, setImportDepartmentInformation] = useState<ImportDepartmentInformation | undefined>(undefined)
+    const [importDepartmentInformation, setImportDepartmentInformation] = useState<
+        ImportDepartmentInformation | undefined
+    >(undefined)
     const [folderPath, setFolderPath] = useState<string>('')
     const [importedManuallyStatus, setImportedManuallyStatus] = useState<ImportStatus>(ImportStatus.NOT_STARTED)
     const [showImportManuallyModal, setShowImportManuallyModal] = useState<boolean>(false)
@@ -65,7 +65,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             return signOut()
         }
         if (response.status === HttpStatus.OK) {
-            const data = await response.json() as ImportDepartmentInformation
+            const data = (await response.json()) as ImportDepartmentInformation
             setImportDepartmentInformation(data)
             setFolderPath(data.folderPath)
         }
@@ -84,7 +84,11 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        const response = await ApiUtils.POST(`departments/${importDepartmentInformation.isSchedulerStarted ? 'unscheduleImport' : 'scheduleImport'}`, {}, session.user.access_token)
+        const response = await ApiUtils.POST(
+            `departments/${importDepartmentInformation.isSchedulerStarted ? 'unscheduleImport' : 'scheduleImport'}`,
+            {},
+            session.user.access_token,
+        )
         if (response.status === HttpStatus.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
@@ -93,10 +97,12 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        const data = await response.json() as { message: string }
+        const data = (await response.json()) as { message: string }
         if (response.status === HttpStatus.OK) {
             MessageService.success(data.message)
-            setImportDepartmentInformation((prev) => prev ? { ...prev, isSchedulerStarted: !prev.isSchedulerStarted } : prev)
+            setImportDepartmentInformation((prev) =>
+                prev ? { ...prev, isSchedulerStarted: !prev.isSchedulerStarted } : prev,
+            )
         } else {
             MessageService.error(data.message)
         }
@@ -108,7 +114,11 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        const response = await ApiUtils.POST(`departments/writePathFolder?pathFolder=${folderPath}`, {}, session.user.access_token)
+        const response = await ApiUtils.POST(
+            `departments/writePathFolder?pathFolder=${folderPath}`,
+            {},
+            session.user.access_token,
+        )
         if (response.status === HttpStatus.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
@@ -117,7 +127,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             MessageService.error(t('Update folder path failed'))
         } else {
             MessageService.success(t('Update folder path successfully'))
-            setImportDepartmentInformation((prev) => prev ? { ...prev, folderPath } : prev)
+            setImportDepartmentInformation((prev) => (prev ? { ...prev, folderPath } : prev))
         }
     }
 
@@ -139,7 +149,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             return signOut()
         }
         if (response.status === HttpStatus.OK) {
-            const data = await response.json() as ImportManualResponse
+            const data = (await response.json()) as ImportManualResponse
             if (data.requestStatus === 'SUCCESS') {
                 setImportedManuallyStatus(ImportStatus.SUCCESS)
                 setImportManualResponse(data)
@@ -159,43 +169,39 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
 
     const renderImportManualModalBody = () => {
         switch (importedManuallyStatus) {
-
             case ImportStatus.IMPORTING:
-                return (
-                    <p>{t('Importing departments')}...</p>
-                )
+                return <p>{t('Importing departments')}...</p>
             case ImportStatus.SUCCESS:
                 return (
-                    importManualResponse !== undefined && <div className='import-department-success p-3'>
-                        <table className='result-table table'>
-                            <tbody>
-                                <tr>
-                                    <th>{t('File Success')}</th>
-                                    <td>{importManualResponse.totalAffectedElements ?? 0}</td>
-                                </tr>
-                                <tr>
-                                    <th>{t('File Fail')}</th>
-                                    <td>{(importManualResponse.totalElements ?? 0) - (importManualResponse.totalAffectedElements ?? 0)}</td>
-                                </tr>
-                                <tr>
-                                    <th>{t('Total Files')}</th>
-                                    <td>{importManualResponse.totalElements ?? 0}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    importManualResponse !== undefined && (
+                        <div className='import-department-success p-3'>
+                            <table className='result-table table'>
+                                <tbody>
+                                    <tr>
+                                        <th>{t('File Success')}</th>
+                                        <td>{importManualResponse.totalAffectedElements ?? 0}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>{t('File Fail')}</th>
+                                        <td>
+                                            {(importManualResponse.totalElements ?? 0) -
+                                                (importManualResponse.totalAffectedElements ?? 0)}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>{t('Total Files')}</th>
+                                        <td>{importManualResponse.totalElements ?? 0}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )
                 )
             case ImportStatus.FAILURE:
-                return (
-                    <div className='import-department-failure p-3'>{t('Failed to import department')}!</div>
-                )
+                return <div className='import-department-failure p-3'>{t('Failed to import department')}!</div>
             case ImportStatus.NOT_STARTED:
             default:
-                return (
-                    <p>
-                        {t('Do you really want to import department')}?
-                    </p>
-                )
+                return <p>{t('Do you really want to import department')}?</p>
         }
     }
 
@@ -203,14 +209,28 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         switch (importedManuallyStatus) {
             case ImportStatus.IMPORTING:
                 return (
-                    <button className='btn btn-primary' id='submit' disabled>
-                        {t('Import Departments')} <Spinner size='sm' className='ms-1' />
+                    <button
+                        className='btn btn-primary'
+                        id='submit'
+                        disabled
+                    >
+                        {t('Import Departments')}{' '}
+                        <Spinner
+                            size='sm'
+                            className='ms-1'
+                        />
                     </button>
                 )
             case ImportStatus.SUCCESS:
             case ImportStatus.FAILURE:
                 return (
-                    <button className='btn close-btn btn-primary' onClick={() => { closeImportManuallyModal(); window.location.reload() }}>
+                    <button
+                        className='btn close-btn btn-primary'
+                        onClick={() => {
+                            closeImportManuallyModal()
+                            window.location.reload()
+                        }}
+                    >
                         {t('Close')}
                     </button>
                 )
@@ -218,10 +238,17 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             default:
                 return (
                     <>
-                        <button className='btn close-btn btn-light' onClick={() => closeImportManuallyModal()}>
+                        <button
+                            className='btn close-btn btn-light'
+                            onClick={() => closeImportManuallyModal()}
+                        >
                             {t('Cancel')}
                         </button>
-                        <button className='btn btn-primary' id='submit' onClick={() => importDeparmentManually()}>
+                        <button
+                            className='btn btn-primary'
+                            id='submit'
+                            onClick={() => importDeparmentManually()}
+                        >
                             {t('Import Departments')}
                         </button>
                     </>
@@ -233,83 +260,125 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         fetchImportSchedulerStatus().catch((err) => console.error(err))
     }, [])
 
-    return (
-        (importDepartmentInformation !== undefined)
-            ? <>
-                <div>
-                    <div className='row'>
-                        <div className='col-lg-6'>
-                            <table className='table import-config-table'>
-                                <tbody>
-                                    <tr>
-                                        <th style={{ lineHeight: '40px' }} className='table-header'>{t('Registration Folder Path')}</th>
-                                        <td>
-                                            <input id='pathFolderDepartment' type='text'
-                                                className='form-control' name='import-folder-path'
-                                                placeholder='Enter the directory path folder'
-                                                defaultValue={folderPath}
-                                                onChange={changePathFolder}
-                                            />
-                                        </td>
-                                        <td width='3%'>
-                                            <button type='button' className='btn btn-primary'
-                                                disabled={CommonUtils.isNullEmptyOrUndefinedString(folderPath) || folderPath === importDepartmentInformation.folderPath}
-                                                onClick={() => updateFolderPath().catch(err => console.error(err))}
-                                            >{t('Update')}</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th className='table-header'>{t('Interval')}</th>
-                                        <td>{importDepartmentInformation.interval} (hh:mm:ss)</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <th className='table-header'>{t('Last Running Time')}</th>
-                                        <td>{importDepartmentInformation.lastRunningTime}</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <th className='table-header'>{t('Next Running Time')}</th>
-                                        <td>{importDepartmentInformation.nextRunningTime}</td>
-                                        <td></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div className='row mb-3 mt-3'>
-                        <div className='col'>
-                            <Button variant='primary'
-                                disabled={importDepartmentInformation.isSchedulerStarted === true}
-                                onClick={() => toggleImportScheduler().catch(err => console.error(err))}
-                            >
-                                {t('schedule_deparments_generating')}
-                            </Button>
-                            <Button variant='light' className='ms-4'
-                                disabled={importDepartmentInformation.isSchedulerStarted !== true}
-                                onClick={() => toggleImportScheduler().catch(err => console.error(err))}>
-                                {t('cancel_departments_generating')}
-                            </Button>
-                            <Button variant='info' className='ms-4' onClick={() => { setShowImportManuallyModal(true) }}>{t('Manually Activate')}</Button>
-                            <Button variant='secondary' className='ms-4' onClick={() => { setShowLogsModal(true) }}>{t('View Logs')}</Button>
-                        </div>
+    return importDepartmentInformation !== undefined ? (
+        <>
+            <div>
+                <div className='row'>
+                    <div className='col-lg-6'>
+                        <table className='table import-config-table'>
+                            <tbody>
+                                <tr>
+                                    <th
+                                        style={{ lineHeight: '40px' }}
+                                        className='table-header'
+                                    >
+                                        {t('Registration Folder Path')}
+                                    </th>
+                                    <td>
+                                        <input
+                                            id='pathFolderDepartment'
+                                            type='text'
+                                            className='form-control'
+                                            name='import-folder-path'
+                                            placeholder='Enter the directory path folder'
+                                            defaultValue={folderPath}
+                                            onChange={changePathFolder}
+                                        />
+                                    </td>
+                                    <td width='3%'>
+                                        <button
+                                            type='button'
+                                            className='btn btn-primary'
+                                            disabled={
+                                                CommonUtils.isNullEmptyOrUndefinedString(folderPath) ||
+                                                folderPath === importDepartmentInformation.folderPath
+                                            }
+                                            onClick={() => updateFolderPath().catch((err) => console.error(err))}
+                                        >
+                                            {t('Update')}
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th className='table-header'>{t('Interval')}</th>
+                                    <td>{importDepartmentInformation.interval} (hh:mm:ss)</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th className='table-header'>{t('Last Running Time')}</th>
+                                    <td>{importDepartmentInformation.lastRunningTime}</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th className='table-header'>{t('Next Running Time')}</th>
+                                    <td>{importDepartmentInformation.nextRunningTime}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+                <div className='row mb-3 mt-3'>
+                    <div className='col'>
+                        <Button
+                            variant='primary'
+                            disabled={importDepartmentInformation.isSchedulerStarted === true}
+                            onClick={() => toggleImportScheduler().catch((err) => console.error(err))}
+                        >
+                            {t('schedule_deparments_generating')}
+                        </Button>
+                        <Button
+                            variant='light'
+                            className='ms-4'
+                            disabled={importDepartmentInformation.isSchedulerStarted !== true}
+                            onClick={() => toggleImportScheduler().catch((err) => console.error(err))}
+                        >
+                            {t('cancel_departments_generating')}
+                        </Button>
+                        <Button
+                            variant='info'
+                            className='ms-4'
+                            onClick={() => {
+                                setShowImportManuallyModal(true)
+                            }}
+                        >
+                            {t('Manually Activate')}
+                        </Button>
+                        <Button
+                            variant='secondary'
+                            className='ms-4'
+                            onClick={() => {
+                                setShowLogsModal(true)
+                            }}
+                        >
+                            {t('View Logs')}
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
-                <Modal show={showImportManuallyModal} onHide={() => closeImportManuallyModal()} backdrop='static' centered size='lg'>
-                    <Modal.Header>
-                        <Modal.Title><FaRegQuestionCircle /> {t('Import Departments')}? </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        {renderImportManualModalBody()}
-                    </Modal.Body>
-                    <Modal.Footer className='justify-content-end'>
-                        {renderImportManualModalFooter()}
-                    </Modal.Footer>
-                </Modal>
-                <ViewLogsModal show={showLogsModal} setShow={setShowLogsModal} />
-            </>
-            : <></>
+            <Modal
+                show={showImportManuallyModal}
+                onHide={() => closeImportManuallyModal()}
+                backdrop='static'
+                centered
+                size='lg'
+            >
+                <Modal.Header>
+                    <Modal.Title>
+                        <FaRegQuestionCircle /> {t('Import Departments')}?{' '}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{renderImportManualModalBody()}</Modal.Body>
+                <Modal.Footer className='justify-content-end'>{renderImportManualModalFooter()}</Modal.Footer>
+            </Modal>
+            <ViewLogsModal
+                show={showLogsModal}
+                setShow={setShowLogsModal}
+            />
+        </>
+    ) : (
+        <></>
     )
 }
 

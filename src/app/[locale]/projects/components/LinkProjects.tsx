@@ -13,7 +13,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useRef, useState, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
@@ -68,7 +68,7 @@ export default function LinkProjects({
                             checked={linkProjects.has(projectId)}
                             onChange={() => handleCheckboxes(projectId)}
                         />
-                    </div>
+                    </div>,
                 ),
         },
         {
@@ -90,11 +90,17 @@ export default function LinkProjects({
                     <>
                         <OverlayTrigger overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}>
                             {state === 'ACTIVE' ? (
-                                <span className='badge bg-success capsule-left' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-success capsule-left'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'PS'}
                                 </span>
                             ) : (
-                                <span className='badge bg-secondary capsule-left' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-secondary capsule-left'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'PS'}
                                 </span>
                             )}
@@ -106,20 +112,29 @@ export default function LinkProjects({
                             }
                         >
                             {clearingState === 'OPEN' ? (
-                                <span className='badge bg-danger capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-danger capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             ) : clearingState === 'IN_PROGRESS' ? (
-                                <span className='badge bg-warning capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-warning capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             ) : (
-                                <span className='badge bg-success capsule-right' style={{ fontSize: '0.8rem' }}>
+                                <span
+                                    className='badge bg-success capsule-right'
+                                    style={{ fontSize: '0.8rem' }}
+                                >
                                     {'CS'}
                                 </span>
                             )}
                         </OverlayTrigger>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -138,19 +153,15 @@ export default function LinkProjects({
     const handleSearch = async ({ searchValue }: { searchValue: string }) => {
         try {
             const session = await getSession()
-            if(CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const url = (CommonUtils.isNullEmptyOrUndefinedString(searchValue))
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const url = CommonUtils.isNullEmptyOrUndefinedString(searchValue)
                 ? `projects`
                 : `projects?name=${searchValue}&luceneSearch=true`
-            const response = await ApiUtils.GET(
-                url,
-                session.user.access_token
-            )
+            const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status !== HttpStatus.OK) {
                 return notFound()
             }
-            const data = await response.json() as EmbeddedProject
+            const data = (await response.json()) as EmbeddedProject
             const dataTableFormat =
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
                 CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
@@ -183,10 +194,9 @@ export default function LinkProjects({
         try {
             const data = { linkedProjects: Object.fromEntries(linkProjects) }
             const session = await getSession()
-            if(CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.user.access_token)
-            const res = await response.json() as Project
+            const res = (await response.json()) as Project
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 return signOut()
             } else if (response.status === HttpStatus.FORBIDDEN || response.status === HttpStatus.BAD_REQUEST) {
@@ -194,9 +204,7 @@ export default function LinkProjects({
                     variant: 'danger',
                     message: (
                         <>
-                            <p>
-                            {t('project_cannot_be_created')}.
-                            </p>
+                            <p>{t('project_cannot_be_created')}.</p>
                         </>
                     ),
                 })
@@ -213,7 +221,10 @@ export default function LinkProjects({
                         </p>
                         <p>
                             {t('Click')}{' '}
-                            <Link href={'#'} className='text-link'>
+                            <Link
+                                href={'#'}
+                                className='text-link'
+                            >
                                 {t('here')}
                             </Link>{' '}
                             {t('to edit the project relation')}.
@@ -246,7 +257,10 @@ export default function LinkProjects({
                 </Modal.Header>
                 <Modal.Body ref={topRef}>
                     {alert && (
-                        <Alert variant={alert.variant} id='linkProjects.alert'>
+                        <Alert
+                            variant={alert.variant}
+                            id='linkProjects.alert'
+                        >
                             {alert.message}
                         </Alert>
                     )}
@@ -263,7 +277,12 @@ export default function LinkProjects({
                                 </Col>
                                 <Col xs='auto'>
                                     <Form.Group controlId='exact-match-group'>
-                                        <Form.Check inline name='exact-match' type='checkbox' id='exact-match' />
+                                        <Form.Check
+                                            inline
+                                            name='exact-match'
+                                            type='checkbox'
+                                            id='exact-match'
+                                        />
                                         <Form.Label className='pt-2'>
                                             {t('Exact Match')}{' '}
                                             <sup>
@@ -275,13 +294,23 @@ export default function LinkProjects({
                                 <Col xs='auto'>
                                     <Button
                                         variant='secondary'
-                                        onClick={() => void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })}
+                                        onClick={() =>
+                                            void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })
+                                        }
                                     >
                                         {t('Search')}
                                     </Button>
                                 </Col>
                             </Row>
-                            <Row>{projectData && <Table columns={columns} data={projectData} sort={false} />}</Row>
+                            <Row>
+                                {projectData && (
+                                    <Table
+                                        columns={columns}
+                                        data={projectData}
+                                        sort={false}
+                                    />
+                                )}
+                            </Row>
                         </Col>
                     </Form>
                 </Modal.Body>

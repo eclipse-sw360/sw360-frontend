@@ -8,14 +8,14 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import SearchPage from './components/SearchPage'
 import { ReactNode } from 'react'
+import SearchPage from './components/SearchPage'
 
 export const metadata: Metadata = {
     title: 'Search',
 }
 
-function Search() : ReactNode {
+function Search(): ReactNode {
     return <SearchPage />
 }
 

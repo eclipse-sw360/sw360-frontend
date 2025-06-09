@@ -33,7 +33,7 @@ const EditLicenseDetail = ({
     inputValid,
     errorFullName,
     setErrorFullName,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
     const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
@@ -62,15 +62,14 @@ const EditLicenseDetail = ({
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`licenseTypes`, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const licenses = await response.json() as EmbeddedLicenseTypes
+                const licenses = (await response.json()) as EmbeddedLicenseTypes
                 setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
             } catch (e) {
                 console.error(e)
@@ -80,18 +79,37 @@ const EditLicenseDetail = ({
     }, [params])
 
     return (
-        <div className='row mb-4' style={{ padding: '0px 12px', fontSize: '14px' }}>
-            <div className={`${styles['header']} mb-1`} style={{ paddingTop: '0.5rem', height: '45px' }}>
-                <p className='fw-bold mt-1' style={{ fontSize: '0.875rem' }}>
+        <div
+            className='row mb-4'
+            style={{ padding: '0px 12px', fontSize: '14px' }}
+        >
+            <div
+                className={`${styles['header']} mb-1`}
+                style={{ paddingTop: '0.5rem', height: '45px' }}
+            >
+                <p
+                    className='fw-bold mt-1'
+                    style={{ fontSize: '0.875rem' }}
+                >
                     {t('License Details')}
                 </p>
             </div>
             <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
-                <div className='row' style={{ paddingBottom: '0.7rem' }}>
+                <div
+                    className='row'
+                    style={{ paddingBottom: '0.7rem' }}
+                >
                     <div className='col-lg-4'>
-                        <label htmlFor='fullName' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
+                        <label
+                            htmlFor='fullName'
+                            className='form-label fw-bold'
+                            style={{ cursor: 'pointer' }}
+                        >
                             {t('Full Name')}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>
@@ -111,9 +129,16 @@ const EditLicenseDetail = ({
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='shortName' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
+                        <label
+                            htmlFor='shortName'
+                            className='form-label fw-bold'
+                            style={{ cursor: 'pointer' }}
+                        >
                             {t('Short Name')}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{ color: '#F7941E' }}
+                            >
                                 *
                             </span>
                         </label>
@@ -149,7 +174,10 @@ const EditLicenseDetail = ({
                         >
                             <option value=''>{t('No type selected')}</option>
                             {licenseTypes.map((item) => (
-                                <option key={item.id} value={item.id}>
+                                <option
+                                    key={item.id}
+                                    value={item.id}
+                                >
                                     {item.licenseType}
                                 </option>
                             ))}
@@ -158,9 +186,16 @@ const EditLicenseDetail = ({
                 </div>
             </div>
             <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
-                <div className='row' style={{ paddingBottom: '0.7rem' }}>
+                <div
+                    className='row'
+                    style={{ paddingBottom: '0.7rem' }}
+                >
                     <div className='col-lg-4'>
-                        <label htmlFor='OSIApproved' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
+                        <label
+                            htmlFor='OSIApproved'
+                            className='form-label fw-bold'
+                            style={{ cursor: 'pointer' }}
+                        >
                             {t('OSI Approved')}{' '}
                         </label>
                         <select
@@ -177,7 +212,11 @@ const EditLicenseDetail = ({
                         </select>
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='FSFLibre' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
+                        <label
+                            htmlFor='FSFLibre'
+                            className='form-label fw-bold'
+                            style={{ cursor: 'pointer' }}
+                        >
                             {t('FSF Free Libre')}{' '}
                         </label>
                         <select
@@ -203,7 +242,11 @@ const EditLicenseDetail = ({
                                 checked={licensePayload.checked ?? false}
                                 onChange={updateFieldChecked}
                             />
-                            <label className='form-label fw-bold' htmlFor='isChecked' style={{ cursor: 'pointer' }}>
+                            <label
+                                className='form-label fw-bold'
+                                htmlFor='isChecked'
+                                style={{ cursor: 'pointer' }}
+                            >
                                 {t('Is Checked')}
                             </label>
                         </div>
@@ -211,9 +254,16 @@ const EditLicenseDetail = ({
                 </div>
             </div>
             <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC', width: '495px' }}>
-                <div className='row' style={{ paddingBottom: '0.7rem' }}>
+                <div
+                    className='row'
+                    style={{ paddingBottom: '0.7rem' }}
+                >
                     <div className='col-lg-12'>
-                        <label htmlFor='note' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
+                        <label
+                            htmlFor='note'
+                            className='form-label fw-bold'
+                            style={{ cursor: 'pointer' }}
+                        >
                             {t('Note')}
                         </label>
                         <textarea

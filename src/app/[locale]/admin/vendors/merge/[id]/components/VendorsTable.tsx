@@ -9,19 +9,21 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
-import { Vendor, Embedded } from '@/object-types'
+import { Embedded, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { useSession } from 'next-auth/react'
 import { SW360_API_URL } from '@/utils/env'
+import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import { Form } from 'react-bootstrap'
-import { Spinner } from 'react-bootstrap'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { Form, Spinner } from 'react-bootstrap'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
-export default function VendorTable({ vendor, setVendor }: Readonly<{ vendor: Vendor | null, setVendor: Dispatch<SetStateAction<null | Vendor>> }>): ReactNode {
+export default function VendorTable({
+    vendor,
+    setVendor,
+}: Readonly<{ vendor: Vendor | null; setVendor: Dispatch<SetStateAction<null | Vendor>> }>): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -29,12 +31,17 @@ export default function VendorTable({ vendor, setVendor }: Readonly<{ vendor: Ve
         {
             id: 'vendors.merge.select',
             width: '5%',
-            formatter: (vend: Vendor) => _(
-                <Form.Check 
-                    type='radio' 
-                    checked={vendor !== null && vend._links?.self.href.split('/').at(-1) === vendor._links?.self.href.split('/').at(-1)} 
-                    onChange={() => setVendor(vend)}
-                ></Form.Check>),
+            formatter: (vend: Vendor) =>
+                _(
+                    <Form.Check
+                        type='radio'
+                        checked={
+                            vendor !== null &&
+                            vend._links?.self.href.split('/').at(-1) === vendor._links?.self.href.split('/').at(-1)
+                        }
+                        onChange={() => setVendor(vend)}
+                    ></Form.Check>,
+                ),
         },
         {
             id: 'vendors.merge.fullName',
@@ -50,22 +57,17 @@ export default function VendorTable({ vendor, setVendor }: Readonly<{ vendor: Ve
             id: 'vendors.merge.url',
             name: t('URL'),
             sort: true,
-        }
+        },
     ]
 
     const initServerPaginationConfig = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
-        
+
         return {
             url: `${SW360_API_URL}/resource/api/vendors`,
             then: (data: EmbeddedVendors) => {
-                return data._embedded['sw360:vendors'].map((elem: Vendor) => {                    
-                    return [
-                        elem,
-                        elem.fullName ?? '',
-                        elem.shortName ?? '',
-                        elem.url ?? ''
-                    ]
+                return data._embedded['sw360:vendors'].map((elem: Vendor) => {
+                    return [elem, elem.fullName ?? '', elem.shortName ?? '', elem.url ?? '']
                 })
             },
             total: (data: EmbeddedVendors) => data.page?.totalElements ?? 0,
@@ -75,13 +77,17 @@ export default function VendorTable({ vendor, setVendor }: Readonly<{ vendor: Ve
 
     return (
         <>
-            {
-                status === 'loading' 
-                ? <div className='col-12 d-flex justify-content-center align-items-center'>
+            {status === 'loading' ? (
+                <div className='col-12 d-flex justify-content-center align-items-center'>
                     <Spinner className='spinner' />
                 </div>
-                : <Table columns={columns} selector={true} server={initServerPaginationConfig()} />
-            }
+            ) : (
+                <Table
+                    columns={columns}
+                    selector={true}
+                    server={initServerPaginationConfig()}
+                />
+            )}
         </>
     )
 }

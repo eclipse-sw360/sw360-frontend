@@ -7,7 +7,7 @@
 
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
- 
+
 'use client'
 
 import { useTranslations } from 'next-intl'
@@ -57,8 +57,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
     }
 
     function isPackagesPage() {
-        const currentUrl = new URL(window.location.href);
-        return currentUrl.pathname.includes('/packages');
+        const currentUrl = new URL(window.location.href)
+        return currentUrl.pathname.includes('/packages')
     }
 
     const submitSearch = () => {
@@ -87,7 +87,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                 if (Array.isArray(field.value)) {
                     return (
                         <div key='createdOn'>
-                            <Form.Group className='mb-3' controlId={field.paramName}>
+                            <Form.Group
+                                className='mb-3'
+                                controlId={field.paramName}
+                            >
                                 <Form.Label className='label'>{fieldLabel}</Form.Label>
                                 <Form.Select
                                     aria-label={field.fieldName}
@@ -99,7 +102,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                 >
                                     <option value='' />
                                     {field.value.map((option) => (
-                                        <option key={option.key} value={option.key}>
+                                        <option
+                                            key={option.key}
+                                            value={option.key}
+                                        >
                                             {option.text}
                                         </option>
                                     ))}
@@ -108,9 +114,9 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
 
                             {createdOnSearchOption !== 'BETWEEN' && createdOnSearchOption !== '' && (
                                 <Form.Group className='mb-3'>
-                                    <Form.Control 
-                                        type='date' 
-                                        size='sm' 
+                                    <Form.Control
+                                        type='date'
+                                        size='sm'
                                         name='createdOnDate'
                                         value={searchParams.createdOnDate}
                                         onChange={handleSearchParam}
@@ -121,9 +127,9 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                             {createdOnSearchOption === 'BETWEEN' && (
                                 <>
                                     <Form.Group className='mb-3'>
-                                        <Form.Control 
-                                            type='date' 
-                                            size='sm' 
+                                        <Form.Control
+                                            type='date'
+                                            size='sm'
                                             name='createdOnStart'
                                             value={searchParams.createdOnStart}
                                             onChange={handleSearchParam}
@@ -131,9 +137,9 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                     </Form.Group>
                                     <Form.Group className='mb-3'>
                                         <Form.Label className='label'>{t('To')}</Form.Label>
-                                        <Form.Control 
-                                            type='date' 
-                                            size='sm' 
+                                        <Form.Control
+                                            type='date'
+                                            size='sm'
                                             name='createdOnEnd'
                                             value={searchParams.createdOnEnd}
                                             onChange={handleSearchParam}
@@ -149,7 +155,11 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
             default:
                 if (typeof field.value === 'string') {
                     return (
-                        <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
+                        <Form.Group
+                            key={field.paramName}
+                            className='mb-3'
+                            controlId={field.paramName}
+                        >
                             <Form.Label className='label'>{fieldLabel}</Form.Label>
                             <Form.Control
                                 className='form-control'
@@ -164,7 +174,11 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                 }
                 if (Array.isArray(field.value)) {
                     return (
-                        <Form.Group key={field.paramName} className='mb-3' controlId={field.paramName}>
+                        <Form.Group
+                            key={field.paramName}
+                            className='mb-3'
+                            controlId={field.paramName}
+                        >
                             <Form.Label className='label'>{fieldLabel}</Form.Label>
                             <Form.Select
                                 className='form-control'
@@ -175,7 +189,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                             >
                                 <option value='' />
                                 {field.value.map((option) => (
-                                    <option key={option.key} value={option.key}>
+                                    <option
+                                        key={option.key}
+                                        value={option.key}
+                                    >
                                         {option.text}
                                     </option>
                                 ))}
@@ -190,7 +207,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
 
     return (
         <div className='card-deck'>
-            <div id='advanced-search' className='card'>
+            <div
+                id='advanced-search'
+                className='card'
+            >
                 <div className='card-header'>{title}</div>
 
                 <div className='card-body'>
@@ -203,10 +223,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                 label={t('Exact Match')}
                                 id='exactMatch'
                                 checked={searchParams.exactMatch === 'true'}
-                                onChange={(e) => 
-                                    setSearchParam(prev => ({
+                                onChange={(e) =>
+                                    setSearchParam((prev) => ({
                                         ...prev,
-                                        exactMatch: e.target.checked ? 'true' : ''
+                                        exactMatch: e.target.checked ? 'true' : '',
                                     }))
                                 }
                                 style={{
@@ -218,16 +238,19 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                             />
                             <ShowInfoOnHover text={t('Exact_Match_Info')} />
                         </Form.Group>
-                        <Form.Group className='mb-3' hidden={!isPackagesPage()}>
+                        <Form.Group
+                            className='mb-3'
+                            hidden={!isPackagesPage()}
+                        >
                             <Form.Check
                                 type='checkbox'
                                 label={t('Orphan Package')}
                                 id='orphanPackage'
                                 checked={searchParams.orphanPackage === 'true'}
-                                onChange={(e) => 
-                                    setSearchParam(prev => ({
+                                onChange={(e) =>
+                                    setSearchParam((prev) => ({
                                         ...prev,
-                                        orphanPackage: e.target.checked ? 'true' : ''
+                                        orphanPackage: e.target.checked ? 'true' : '',
                                     }))
                                 }
                                 style={{
@@ -241,7 +264,12 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                         </Form.Group>
 
                         <Form.Group>
-                            <Button type='submit' size='sm' variant='primary' className='w-100'>
+                            <Button
+                                type='submit'
+                                size='sm'
+                                variant='primary'
+                                className='w-100'
+                            >
                                 {t('Search')}
                             </Button>
                         </Form.Group>

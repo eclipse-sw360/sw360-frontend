@@ -11,9 +11,6 @@
 
 import ReleaseOverview from '@/app/[locale]/components/detail/[id]/components/ReleaseOverview'
 import Summary from '@/app/[locale]/components/detail/[id]/components/Summary'
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, ReactNode } from 'react'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -29,7 +26,10 @@ import {
     LinkedVulnerability,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>

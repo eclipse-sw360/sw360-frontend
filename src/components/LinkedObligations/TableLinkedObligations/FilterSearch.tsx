@@ -7,20 +7,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import styles from './TableLinkedObligations.module.css'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     title?: string
     searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
 }
-function FilterSearch({ title, searchFunction }: Props) : JSX.Element {
+function FilterSearch({ title, searchFunction }: Props): JSX.Element {
     return (
-        <div
-        className={styles['div-filter']}
-        >
+        <div className={styles['div-filter']}>
             <label>Search: </label>
             &nbsp;&nbsp;
             <input

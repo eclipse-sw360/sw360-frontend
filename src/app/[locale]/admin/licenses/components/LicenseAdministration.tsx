@@ -11,23 +11,23 @@
 
 import { HttpStatus } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRef, useState, ReactNode } from 'react'
+import { ReactNode, useRef, useState } from 'react'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
-import MessageService from '@/services/message.service'
 
-export default function LicenseAdministration() : ReactNode {
+export default function LicenseAdministration(): ReactNode {
     const t = useTranslations('default')
     const file = useRef<File | undefined>(undefined)
     const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files
-        
+
         if (!files || files.length === 0) return
-        
+
         file.current = files[0]
     }
 
@@ -50,7 +50,7 @@ export default function LicenseAdministration() : ReactNode {
             } else if (response.status === HttpStatus.OK) {
                 MessageService.success(t('Licenses uploaded successfully'))
             } else {
-                const data = await response.json() as object
+                const data = (await response.json()) as object
                 console.log(data)
                 MessageService.error(t('Something went wrong'))
             }
@@ -81,14 +81,22 @@ export default function LicenseAdministration() : ReactNode {
                         <button
                             type='button'
                             className='btn btn-primary col-auto me-2'
-                            onClick={() => {downloadLicenseArchive().catch((e) => console.error(e))}}
+                            onClick={() => {
+                                downloadLicenseArchive().catch((e) => console.error(e))
+                            }}
                         >
                             {t('Download License Archive')}
                         </button>
-                        <button type='button' className='btn btn-primary col-auto me-2'>
+                        <button
+                            type='button'
+                            className='btn btn-primary col-auto me-2'
+                        >
                             {t('Import SPDX Information')}
                         </button>
-                        <button type='button' className='btn btn-primary col-auto me-2'>
+                        <button
+                            type='button'
+                            className='btn btn-primary col-auto me-2'
+                        >
                             {t('Import OSADL Information')}
                         </button>
                         <button
@@ -105,7 +113,11 @@ export default function LicenseAdministration() : ReactNode {
                 </div>
                 <div className='mt-4'>
                     <h5 className='licadmin-upload'>{t('Upload License Archive')}</h5>
-                    <input type='file' onChange={handleFileChange} placeholder={t('Drop a File Here')} />
+                    <input
+                        type='file'
+                        onChange={handleFileChange}
+                        placeholder={t('Drop a File Here')}
+                    />
                     <div className='form-check mt-3'>
                         <input
                             id='overWriteIfExternalIdsMatch'
@@ -113,7 +125,10 @@ export default function LicenseAdministration() : ReactNode {
                             className='form-check-input'
                             name='overWriteIfExternalIdsMatch'
                         />
-                        <label className='form-check-label fw-bold fs-6' htmlFor='overWriteIfExternalIdsMatch'>
+                        <label
+                            className='form-check-label fw-bold fs-6'
+                            htmlFor='overWriteIfExternalIdsMatch'
+                        >
                             {t('Overwrite if external ids match')}
                         </label>
                     </div>
@@ -124,11 +139,20 @@ export default function LicenseAdministration() : ReactNode {
                             className='form-check-input'
                             name='overWriteIfIdsMatch'
                         />
-                        <label className='form-check-label fw-bold' htmlFor='overWriteIfIdsMatch'>
+                        <label
+                            className='form-check-label fw-bold'
+                            htmlFor='overWriteIfIdsMatch'
+                        >
                             {t('Overwrite if ids match')}
                         </label>
                     </div>
-                    <button type='button' className='btn btn-secondary col-auto mt-3' onClick={() => {uploadLicenses().catch((e) => console.error(e))}}>
+                    <button
+                        type='button'
+                        className='btn btn-secondary col-auto mt-3'
+                        onClick={() => {
+                            uploadLicenses().catch((e) => console.error(e))
+                        }}
+                    >
                         {t('Upload Licenses')}
                     </button>
                 </div>

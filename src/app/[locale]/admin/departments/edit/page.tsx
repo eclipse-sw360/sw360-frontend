@@ -10,17 +10,17 @@
 
 'use client'
 
-import { useState, useCallback, useEffect, useRef, type JSX } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut } from 'next-auth/react'
-import { CommonUtils, ApiUtils } from '@/utils'
-import { HttpStatus, User, Embedded } from '@/object-types'
+import { Embedded, HttpStatus, User } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import SecondaryDepartments from '../components/SecondaryDepartments'
 import { PageSpinner } from 'next-sw360'
-import { FaTrashAlt } from 'react-icons/fa'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import { Button } from 'react-bootstrap'
+import { FaTrashAlt } from 'react-icons/fa'
+import SecondaryDepartments from '../components/SecondaryDepartments'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
 
@@ -49,7 +49,11 @@ const EditDepartmentPage = (): JSX.Element => {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        const response = await ApiUtils.PATCH(`departments/members?departmentName=${secondaryDepartmentName}`, memberEmails , session.user.access_token)
+        const response = await ApiUtils.PATCH(
+            `departments/members?departmentName=${secondaryDepartmentName}`,
+            memberEmails,
+            session.user.access_token,
+        )
         if (response.status === HttpStatus.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
@@ -99,9 +103,8 @@ const EditDepartmentPage = (): JSX.Element => {
             MessageService.error(t('Failed to fetch member of departments'))
             return
         }
-        const users = await response.json() as EmbeddedUsers
-        const emailSuggestionsFromRequest : string[] = users._embedded['sw360:users']
-                .map((user) => user.email)
+        const users = (await response.json()) as EmbeddedUsers
+        const emailSuggestionsFromRequest: string[] = users._embedded['sw360:users'].map((user) => user.email)
         setEmailSuggestions(emailSuggestionsFromRequest)
         allEmails.current = emailSuggestionsFromRequest
     }, [])
@@ -111,13 +114,13 @@ const EditDepartmentPage = (): JSX.Element => {
         fetchSuggestionUserEmails().catch((error) => console.error(error))
     }, [])
 
-    const addNewUser = (() => {
+    const addNewUser = () => {
         if (memberEmails === undefined) {
             setMemberEmails([''])
             return
         }
         setMemberEmails([...memberEmails, ''])
-    })
+    }
 
     const changeEmail = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const changedEmail = event.target.value
@@ -146,70 +149,84 @@ const EditDepartmentPage = (): JSX.Element => {
     }
 
     return (
-        <div className = 'container page-content'>
-            {
-                memberEmails === undefined
-                ?
-                    <PageSpinner />
-                :
-                    <form
-                        onSubmit={(event) => {
-                            handleUpdateDepartmentMembers(event).catch((error) => console.error(error))
-                        }}
-                        autoCapitalize='nope'
-                    >
-                        <div>
-                            <Button variant='primary' type='submit'>
-                                {t('Update Department')}
-                            </Button>
-                            <Button variant='light' className='mx-2' onClick={() => router.push('/admin/departments')}>
-                                {t('Cancel')}
-                            </Button>
-                        </div>
-                        <table className='table row'>
-                            <thead className='col-12'>
-                                <tr className='row'>
-                                    <th colSpan={2}>{`${t('Edit Department')} ${secondaryDepartmentName}`}</th>
+        <div className='container page-content'>
+            {memberEmails === undefined ? (
+                <PageSpinner />
+            ) : (
+                <form
+                    onSubmit={(event) => {
+                        handleUpdateDepartmentMembers(event).catch((error) => console.error(error))
+                    }}
+                    autoCapitalize='nope'
+                >
+                    <div>
+                        <Button
+                            variant='primary'
+                            type='submit'
+                        >
+                            {t('Update Department')}
+                        </Button>
+                        <Button
+                            variant='light'
+                            className='mx-2'
+                            onClick={() => router.push('/admin/departments')}
+                        >
+                            {t('Cancel')}
+                        </Button>
+                    </div>
+                    <table className='table row'>
+                        <thead className='col-12'>
+                            <tr className='row'>
+                                <th colSpan={2}>{`${t('Edit Department')} ${secondaryDepartmentName}`}</th>
+                            </tr>
+                        </thead>
+                        <tbody className='col-12'>
+                            {Object.entries(memberEmails).map(([index, email]) => (
+                                <tr
+                                    key={index}
+                                    className='row'
+                                >
+                                    <td className='col-6'>
+                                        <input
+                                            list='available-email'
+                                            type='email'
+                                            required={true}
+                                            defaultValue={email}
+                                            className='form-control'
+                                            onChange={(event) => changeEmail(event, parseInt(index))}
+                                        />
+                                    </td>
+                                    <td className='col-6'>
+                                        <FaTrashAlt
+                                            size={20}
+                                            className='btn-icon mt-2 cursor-pointer'
+                                            onClick={() => deleteEmail(parseInt(index))}
+                                        />
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className='col-12'>
-                                {
-                                    Object.entries(memberEmails).map(([index, email]) => (
-                                        <tr key={index} className='row'>
-                                            <td className='col-6'>
-                                                <input
-                                                    list='available-email'
-                                                    type='email'
-                                                    required={true}
-                                                    defaultValue={email}
-                                                    className='form-control'
-                                                    onChange={(event) => changeEmail(event, parseInt(index))}
-                                                    />
-                                            </td>
-                                            <td className='col-6'>
-                                                <FaTrashAlt size={20} className='btn-icon mt-2 cursor-pointer' onClick={() => deleteEmail(parseInt(index))}/>
-                                            </td>
-                                        </tr>
-                                    ))
-                                }
-                            </tbody>
-                        </table>
-                        <div>
-                            <Button variant='secondary' onClick={addNewUser}>
-                                {t('Add User')}
-                            </Button>
-                        </div>
-                        <datalist id='available-email'>
-                            {
-                                Object.values(emailSuggestions)
-                                    .filter((email) => !memberEmails.includes(email))
-                                    .map((email) => (
-                                    <option key={email} value={email} />
-                                ))
-                            }
-                        </datalist>
-                    </form>
-            }
+                            ))}
+                        </tbody>
+                    </table>
+                    <div>
+                        <Button
+                            variant='secondary'
+                            onClick={addNewUser}
+                        >
+                            {t('Add User')}
+                        </Button>
+                    </div>
+                    <datalist id='available-email'>
+                        {Object.values(emailSuggestions)
+                            .filter((email) => !memberEmails.includes(email))
+                            .map((email) => (
+                                <option
+                                    key={email}
+                                    value={email}
+                                />
+                            ))}
+                    </datalist>
+                </form>
+            )}
         </div>
     )
 }

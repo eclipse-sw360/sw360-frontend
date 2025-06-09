@@ -9,14 +9,14 @@
 
 import { Metadata } from 'next'
 
-import AddVulnerability from './components/AddVulnerability'
 import { ReactNode } from 'react'
+import AddVulnerability from './components/AddVulnerability'
 
 export const metadata: Metadata = {
     title: 'Vulnerabilites',
 }
 
-const Vulnerability = () : ReactNode => {
+const Vulnerability = (): ReactNode => {
     return <AddVulnerability />
 }
 

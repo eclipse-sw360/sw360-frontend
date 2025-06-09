@@ -30,7 +30,7 @@ function PackageDeclaredLicense({
     declaredLicenseNoasserttion,
     setDeclaredLicenseNoasserttion,
     declaredLicense,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectDeclaredLicenseExist = () => {
         setDeclaredLicenseExist(true)
         setDeclaredLicenseNone(false)
@@ -107,7 +107,10 @@ function PackageDeclaredLicense({
                             onChange={selectDeclaredLicenseNoasserttion}
                             checked={declaredLicenseNoasserttion}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='licenseDeclaredNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='licenseDeclaredNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

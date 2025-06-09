@@ -7,13 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { Table, _ } from '@/components/sw360'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface UserType {
     userId: string
@@ -23,7 +23,13 @@ interface UserType {
     department: string
 }
 
-export default function UsersModal({ show, setShow }: { show: boolean; setShow: (show: boolean) => void }) : JSX.Element {
+export default function UsersModal({
+    show,
+    setShow,
+}: {
+    show: boolean
+    setShow: (show: boolean) => void
+}): JSX.Element {
     const t = useTranslations('default')
 
     const columns = [
@@ -33,8 +39,13 @@ export default function UsersModal({ show, setShow }: { show: boolean; setShow: 
             formatter: (userId: string) =>
                 _(
                     <div className='form-check'>
-                        <input className='form-check-input' type='radio' name='user' id={userId} />
-                    </div>
+                        <input
+                            className='form-check-input'
+                            type='radio'
+                            name='user'
+                            id={userId}
+                        />
+                    </div>,
                 ),
             width: '8%',
         },
@@ -56,9 +67,12 @@ export default function UsersModal({ show, setShow }: { show: boolean; setShow: 
             sort: true,
             formatter: (email: string) =>
                 _(
-                    <Link href={'#'} className='link'>
+                    <Link
+                        href={'#'}
+                        className='link'
+                    >
                         {email}
-                    </Link>
+                    </Link>,
                 ),
             width: '30%',
         },
@@ -74,7 +88,13 @@ export default function UsersModal({ show, setShow }: { show: boolean; setShow: 
 
     return (
         <>
-            <Modal size='lg' centered show={show} onHide={() => setShow(false)} aria-label='Search Users Modal'>
+            <Modal
+                size='lg'
+                centered
+                show={show}
+                onHide={() => setShow(false)}
+                aria-label='Search Users Modal'
+            >
                 <Modal.Header closeButton>
                     <Modal.Title id='user-modal'>{t('Search Users')}</Modal.Title>
                 </Modal.Header>
@@ -83,10 +103,16 @@ export default function UsersModal({ show, setShow }: { show: boolean; setShow: 
                         <Col>
                             <Row className='mb-3'>
                                 <Col xs={6}>
-                                    <Form.Control type='text' placeholder={t('Enter search text')} />
+                                    <Form.Control
+                                        type='text'
+                                        placeholder={t('Enter search text')}
+                                    />
                                 </Col>
                                 <Col xs={6}>
-                                    <Button variant='secondary' className='me-2'>
+                                    <Button
+                                        variant='secondary'
+                                        className='me-2'
+                                    >
                                         {t('Search')}
                                     </Button>
                                     <Button variant='secondary'>{t('Reset')}</Button>
@@ -108,7 +134,10 @@ export default function UsersModal({ show, setShow }: { show: boolean; setShow: 
                     </Row>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant='dark' onClick={() => setShow(false)}>
+                    <Button
+                        variant='dark'
+                        onClick={() => setShow(false)}
+                    >
                         {t('Close')}
                     </Button>
                     <Button

@@ -22,7 +22,7 @@ import { useSearchParams } from 'next/navigation'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 
-function LicensePage() : ReactNode {
+function LicensePage(): ReactNode {
     const params = useSearchParams()
     const searchParams = Object.fromEntries(params)
     const t = useTranslations('default')
@@ -54,19 +54,26 @@ function LicensePage() : ReactNode {
     const server = {
         url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/licenses`, searchParams),
         then: (data: Embedded<LicensePayload, 'sw360:licenses'>) => {
-            setNumberLicense( data.page ? data.page.totalElements : 0)
+            setNumberLicense(data.page ? data.page.totalElements : 0)
             return data._embedded['sw360:licenses'].map((item: LicensePayload) => [
                 item._links?.self.href.split('/').pop(),
                 item.fullName,
                 _(
                     <center>
-                        {(item.checked === true) ? <BsCheck2Circle color='#287d3c' size='16' /> : <BsXCircle color='#da1414' />}
-                    </center>
+                        {item.checked === true ? (
+                            <BsCheck2Circle
+                                color='#287d3c'
+                                size='16'
+                            />
+                        ) : (
+                            <BsXCircle color='#da1414' />
+                        )}
+                    </center>,
                 ),
                 _(<>{item.licenseType ? item.licenseType.licenseType : '--'}</>),
             ])
         },
-        total: (data: Embedded<LicensePayload, 'sw360:licenses'>) => data.page ? data.page.totalElements : 0,
+        total: (data: Embedded<LicensePayload, 'sw360:licenses'>) => (data.page ? data.page.totalElements : 0),
         headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
     }
 
@@ -75,9 +82,12 @@ function LicensePage() : ReactNode {
             name: t('License Shortname'),
             formatter: (id: string) =>
                 _(
-                    <Link href={`/licenses/detail?id=${id}`} className='link'>
+                    <Link
+                        href={`/licenses/detail?id=${id}`}
+                        className='link'
+                    >
                         {id}
-                    </Link>
+                    </Link>,
                 ),
             sort: true,
         },
@@ -96,7 +106,11 @@ function LicensePage() : ReactNode {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-2 sidebar'>
-                        <QuickFilter id='licensefilter' title={t('Quick Filter')} searchFunction={doSearch} />
+                        <QuickFilter
+                            id='licensefilter'
+                            title={t('Quick Filter')}
+                            searchFunction={doSearch}
+                        />
                     </div>
                     <div className='col col-10'>
                         <div className='col'>
@@ -105,7 +119,12 @@ function LicensePage() : ReactNode {
                                     buttons={headerButtons}
                                     title={`${t('Licenses')} (${numberLicense})`}
                                 />
-                                <Table server={server} columns={columns} search={search} selector={true} />
+                                <Table
+                                    server={server}
+                                    columns={columns}
+                                    search={search}
+                                    selector={true}
+                                />
 
                                 <div className='row mt-2'></div>
                             </div>

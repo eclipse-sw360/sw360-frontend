@@ -8,25 +8,41 @@
 // License-Filename: LICENSE
 
 'use client'
-import { JSX } from "react"
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import sw360logo from '@/assets/images/sw360-logo.svg'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { JSX } from 'react'
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
 
     return (
-        <div className="d-flex align-items-center justify-content-center w-100">
-            <div className="text-center p-4 col col-md-6">
-                <Image src={sw360logo} height={80} width={247} alt='SW360 Logo' className="my-4" />
-                <h1 className="mb-0 fw-bold">{t('Internal Server Error')}</h1>
-                <p className="lead my-3">{error.message}</p>
-                <div className="d-flex justify-content-center gap-3">
-                    <button onClick={() => reset()} className="px-4 py-2 btn btn-secondary">{t('Retry')}</button>
-                    <button className="btn btn-secondary px-4 py-2" onClick={() => router.push('/')}>{t('Return Home')}</button>
+        <div className='d-flex align-items-center justify-content-center w-100'>
+            <div className='text-center p-4 col col-md-6'>
+                <Image
+                    src={sw360logo}
+                    height={80}
+                    width={247}
+                    alt='SW360 Logo'
+                    className='my-4'
+                />
+                <h1 className='mb-0 fw-bold'>{t('Internal Server Error')}</h1>
+                <p className='lead my-3'>{error.message}</p>
+                <div className='d-flex justify-content-center gap-3'>
+                    <button
+                        onClick={() => reset()}
+                        className='px-4 py-2 btn btn-secondary'
+                    >
+                        {t('Retry')}
+                    </button>
+                    <button
+                        className='btn btn-secondary px-4 py-2'
+                        onClick={() => router.push('/')}
+                    >
+                        {t('Return Home')}
+                    </button>
                 </div>
             </div>
         </div>

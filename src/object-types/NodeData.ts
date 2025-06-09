@@ -15,7 +15,6 @@ interface NodeData {
     isExpandable?: boolean
     isNodeFetched?: boolean
     additionalData?: unknown
-  }
-  
-  export default NodeData
-  
+}
+
+export default NodeData

@@ -13,13 +13,13 @@ import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, ProjectPayload, Vendor, Project, ConfigKeys } from '@/object-types'
+import { ConfigKeys, HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 function AddProjects(): JSX.Element {
@@ -71,7 +71,7 @@ function AddProjects(): JSX.Element {
         projectManager: '',
         securityResponsibles: [],
         linkedProjects: {},
-        linkedReleases:{},
+        linkedReleases: {},
         packageIds: [],
     })
 
@@ -93,7 +93,9 @@ function AddProjects(): JSX.Element {
                     return
                 }
                 const config = await response.json()
-                setDependencyNetworkFeatureEnabled(config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true')
+                setDependencyNetworkFeatureEnabled(
+                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true',
+                )
             } catch {
                 setDependencyNetworkFeatureEnabled(false)
             }
@@ -127,19 +129,18 @@ function AddProjects(): JSX.Element {
     const createProject = async () => {
         try {
             const session = await getSession()
-            if(CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const createUrl = (isDependencyNetworkFeatureEnabled === true) ? `projects/network` : 'projects'
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
 
             if (response.status == HttpStatus.CREATED) {
-                const data = await response.json() as Project
+                const data = (await response.json()) as Project
                 MessageService.success(t('Your project is created'))
                 router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
             } else {
                 MessageService.error(t('There are some errors while creating project'))
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -161,18 +162,33 @@ function AddProjects(): JSX.Element {
                 <div>
                     <Tab.Container defaultActiveKey='summary'>
                         <Row>
-                            <Col sm='auto' className='me-3'>
+                            <Col
+                                sm='auto'
+                                className='me-3'
+                            >
                                 <ListGroup>
-                                    <ListGroup.Item action eventKey='summary'>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='summary'
+                                    >
                                         <div className='my-2'>{t('Summary')}</div>
                                     </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='administration'>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='administration'
+                                    >
                                         <div className='my-2'>{t('Administration')}</div>
                                     </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='linkedProjects'>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='linkedProjects'
+                                    >
                                         <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                     </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='linkedPackages'>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='linkedPackages'
+                                    >
                                         <div className='my-2'>{t('Linked Packages')}</div>
                                     </ListGroup.Item>
                                 </ListGroup>
@@ -198,7 +214,10 @@ function AddProjects(): JSX.Element {
                                             </Button>
                                         </Row>
                                     </Col>
-                                    <Col lg={4} className='text-truncate buttonheader-title'>
+                                    <Col
+                                        lg={4}
+                                        className='text-truncate buttonheader-title'
+                                    >
                                         {t('New Project')}
                                     </Col>
                                 </Row>
@@ -247,7 +266,7 @@ function AddProjects(): JSX.Element {
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey='linkedPackages'>
-                                            <LinkedPackages 
+                                            <LinkedPackages
                                                 projectPayload={projectPayload}
                                                 setProjectPayload={setProjectPayload}
                                             />

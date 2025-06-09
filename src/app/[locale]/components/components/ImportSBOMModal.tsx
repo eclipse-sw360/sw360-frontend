@@ -39,7 +39,7 @@ interface PrepareImportData {
     releasesName?: string
 }
 
-const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
+const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
     const t = useTranslations('default')
     const [importState, setImportState] = useState(ImportSBOMState.INIT_STATE)
     const [prepateImportData, setPrepareImportData] = useState<PrepareImportData | undefined>(undefined)
@@ -49,8 +49,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
     const router = useRouter()
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.currentTarget.files)
-            return
+        if (!e.currentTarget.files) return
         selectedFile.current = e.currentTarget.files[0]
 
         if (!selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.spdx')) {
@@ -74,7 +73,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
         const response = await ApiUtils.POST(
             'components/prepareImport/SBOM?type=SPDX',
             formData,
-            session.user.access_token
+            session.user.access_token,
         )
         if (response.status === HttpStatus.OK) {
             const responseData = (await response.json()) as PrepareImportData
@@ -98,7 +97,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
             const response = await ApiUtils.POST(
                 'components/import/SBOM?type=SPDX',
                 formData,
-                session.user.access_token
+                session.user.access_token,
             )
             if (response.status === HttpStatus.OK) {
                 const responseData = (await response.json()) as Component
@@ -135,7 +134,13 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
     }
 
     return (
-        <Modal show={show} onHide={() => closeModal()} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={() => closeModal()}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     <b>{t('Upload SBOM')}</b>
@@ -180,7 +185,10 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                                         onChange={handleFileChange}
                                         placeholder={t('Drop a File Here')}
                                     />
-                                    <button className={`${styles['button-browse']}`} onClick={handleBrowseFile}>
+                                    <button
+                                        className={`${styles['button-browse']}`}
+                                        onClick={handleBrowseFile}
+                                    >
                                         {t('Browse')}
                                     </button>
                                 </div>
@@ -189,7 +197,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                     </>
                 )}
                 {importState === ImportSBOMState.IMPORTING && <h4>{t('Importing SBOM file')}...</h4>}
-                {importState === ImportSBOMState.PREPARE_IMPORT && prepateImportData &&
+                {importState === ImportSBOMState.PREPARE_IMPORT && prepateImportData && (
                     <>
                         {!CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) ? (
                             <h4> {prepateImportData.message} </h4>
@@ -211,7 +219,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                             </div>
                         )}
                     </>
-                }
+                )}
             </Modal.Body>
             <Modal.Body>
                 {importState === ImportSBOMState.IMPORT_ERROR && (
@@ -224,18 +232,17 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                 )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                {
-                    importState === ImportSBOMState.PREPARE_IMPORT
-                        && prepateImportData
-                        && CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) && (
-                    <Button
-                        type='button'
-                        className={`fw-bold btn btn-primary button-orange`}
-                        onClick={() => void importFile()}
-                    >
-                        {t('Import')}
-                    </Button>
-                )}
+                {importState === ImportSBOMState.PREPARE_IMPORT &&
+                    prepateImportData &&
+                    CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) && (
+                        <Button
+                            type='button'
+                            className={`fw-bold btn btn-primary button-orange`}
+                            onClick={() => void importFile()}
+                        >
+                            {t('Import')}
+                        </Button>
+                    )}
                 <Button
                     type='button'
                     data-bs-dismiss='modal'
@@ -246,7 +253,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                 </Button>
             </Modal.Footer>
         </Modal>
-    );
+    )
 }
 
 export default ImportSBOMModal

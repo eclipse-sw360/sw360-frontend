@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     title: 'Admin',
 }
 
-function LicenseAdministrationPage() : ReactNode {
+function LicenseAdministrationPage(): ReactNode {
     return <LicenseAdministration />
 }
 

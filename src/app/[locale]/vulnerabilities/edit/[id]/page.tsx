@@ -21,7 +21,7 @@ interface Context {
 }
 
 const Vulnerability = async (props: Context): Promise<ReactNode> => {
-    const params = await props.params;
+    const params = await props.params
     return <EditVulnerability vulnerabilityId={params.id} />
 }
 

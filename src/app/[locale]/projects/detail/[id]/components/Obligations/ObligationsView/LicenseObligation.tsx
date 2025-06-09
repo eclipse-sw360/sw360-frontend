@@ -9,54 +9,71 @@
 
 'use client'
 
+import { Table, _ } from '@/components/sw360'
+import { LicenseObligationRelease, LicenseObligationsList } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import { SW360_API_URL } from '@/utils/env'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState, useEffect, type JSX } from 'react';
-import { Table, _ } from '@/components/sw360'
-import { LicenseObligationsList, LicenseObligationRelease } from '@/object-types'
-import { useSession } from 'next-auth/react'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
+import { useEffect, useState, type JSX } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { SW360_API_URL } from '@/utils/env'
-import { CommonUtils } from '@/utils'
+import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-function ExpandableList({ previewString, releases }: { previewString: string, releases: LicenseObligationRelease[] }) {
-    const [ isExpanded, setExpanded ] = useState(false)
+function ExpandableList({ previewString, releases }: { previewString: string; releases: LicenseObligationRelease[] }) {
+    const [isExpanded, setExpanded] = useState(false)
     return (
         <>
-            {
-                isExpanded ?
+            {isExpanded ? (
                 <div>
-                    <span><BsCaretDownFill onClick={() => setExpanded(false)} />{' '}</span>
+                    <span>
+                        <BsCaretDownFill onClick={() => setExpanded(false)} />{' '}
+                    </span>
                     {releases.map((release: LicenseObligationRelease, index: number) => {
                         return (
-                            <li key={release.id} style={{ display: 'inline' }}>
-                                <Link href={`/components/releases/detail/${release.id}`} className='text-link'>
+                            <li
+                                key={release.id}
+                                style={{ display: 'inline' }}
+                            >
+                                <Link
+                                    href={`/components/releases/detail/${release.id}`}
+                                    className='text-link'
+                                >
                                     {`${release.name} ${release.version}`}
                                 </Link>
                                 {index >= releases.length - 1 ? '' : ', '}{' '}
                             </li>
                         )
                     })}
-                </div>:
-                <div>
-                    {
-                        releases.length !== 0 &&
-                        <div><BsCaretRightFill onClick={() => setExpanded(true)} />{' '}{previewString}</div>
-                    }
                 </div>
-            }
+            ) : (
+                <div>
+                    {releases.length !== 0 && (
+                        <div>
+                            <BsCaretRightFill onClick={() => setExpanded(true)} /> {previewString}
+                        </div>
+                    )}
+                </div>
+            )}
         </>
     )
 }
 
-function ShowObligationTextOnExpand({id, infoText, colLength}: {id: string, infoText: string, colLength: number }): JSX.Element {
+function ShowObligationTextOnExpand({
+    id,
+    infoText,
+    colLength,
+}: {
+    id: string
+    infoText: string
+    colLength: number
+}): JSX.Element {
     const [isExpanded, setIsExpanded] = useState(false)
     useEffect(() => {
-        if(isExpanded) {
+        if (isExpanded) {
             const el = document.getElementById(id)
             const par = el?.parentElement?.parentElement?.parentElement
             const tr = document.createElement('tr')
@@ -70,22 +87,29 @@ function ShowObligationTextOnExpand({id, infoText, colLength}: {id: string, info
             td.appendChild(licenseObligationText)
             tr.appendChild(td)
             par?.parentNode?.insertBefore(tr, par.nextSibling)
-        }
-        else {
+        } else {
             const el = document.getElementById(`${id}_text`)
-            if(el) {
+            if (el) {
                 el.remove()
             }
         }
     }, [isExpanded])
-    
+
     return (
         <>
-            {
-                isExpanded 
-                ? <BsCaretDownFill color='gray' id={id} onClick={() => setIsExpanded(!isExpanded)} />
-                : <BsCaretRightFill color='gray' id={id} onClick={() => setIsExpanded(!isExpanded)} />
-            }
+            {isExpanded ? (
+                <BsCaretDownFill
+                    color='gray'
+                    id={id}
+                    onClick={() => setIsExpanded(!isExpanded)}
+                />
+            ) : (
+                <BsCaretRightFill
+                    color='gray'
+                    id={id}
+                    onClick={() => setIsExpanded(!isExpanded)}
+                />
+            )}
         </>
     )
 }
@@ -97,13 +121,17 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
     const columns = [
         {
             id: 'licenseObligation.expand',
-            formatter: ({id, infoText}: {id: string, infoText: string }) =>
-            _(
-                <>
-                    <ShowObligationTextOnExpand id={id} infoText={infoText} colLength={columns.length} />
-                </>
-            ),
-            width: '4%'
+            formatter: ({ id, infoText }: { id: string; infoText: string }) =>
+                _(
+                    <>
+                        <ShowObligationTextOnExpand
+                            id={id}
+                            infoText={infoText}
+                            colLength={columns.length}
+                        />
+                    </>,
+                ),
+            width: '4%',
         },
         {
             id: 'licenseObligation.licenseObligation',
@@ -114,33 +142,45 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             id: 'licenseObligation.licenses',
             name: t('Licenses'),
             formatter: (licenseIds: string[]) =>
-            _(
-                <div className='text-center'>
-                    {
-                        <ul className='px-0'>
-                            {licenseIds.map((licenseId: string, index: number) => {
-                                return (
-                                    <li key={licenseId} style={{ display: 'inline' }}>
-                                        <Link href={`/licenses/${licenseId}`} className='text-link'>
-                                            {licenseId}
-                                        </Link>
-                                        {index >= licenseIds.length - 1 ? '' : ', '}{' '}
-                                    </li>
-                                )
-                            })}
-                        </ul>
-                    }
-                </div>
-            ),
+                _(
+                    <div className='text-center'>
+                        {
+                            <ul className='px-0'>
+                                {licenseIds.map((licenseId: string, index: number) => {
+                                    return (
+                                        <li
+                                            key={licenseId}
+                                            style={{ display: 'inline' }}
+                                        >
+                                            <Link
+                                                href={`/licenses/${licenseId}`}
+                                                className='text-link'
+                                            >
+                                                {licenseId}
+                                            </Link>
+                                            {index >= licenseIds.length - 1 ? '' : ', '}{' '}
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        }
+                    </div>,
+                ),
             sort: true,
         },
         {
             id: 'licenseObligation.releases',
             name: t('Releases'),
             formatter: (releases: LicenseObligationRelease[]) => {
-                const previewString = releases.map((r) => `${r.name} ${r.version}`).join(', ').substring(0, 10)
+                const previewString = releases
+                    .map((r) => `${r.name} ${r.version}`)
+                    .join(', ')
+                    .substring(0, 10)
                 return _(
-                    <ExpandableList releases={releases} previewString={previewString} />
+                    <ExpandableList
+                        releases={releases}
+                        previewString={previewString}
+                    />,
                 )
             },
             sort: true,
@@ -164,7 +204,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             id: 'licenseObligation.comment',
             name: t('Comment'),
             sort: true,
-        }
+        },
     ]
 
     const initServerPaginationConfig = () => {
@@ -173,7 +213,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             url: `${SW360_API_URL}/resource/api/projects/${projectId}/licenseObligations`,
             then: (data: LicenseObligationsList) => {
                 const tableRows = []
-                for(const [key, val] of Object.entries(data.obligations)) {
+                for (const [key, val] of Object.entries(data.obligations)) {
                     const row = []
                     row.push(
                         ...[
@@ -187,8 +227,8 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                             Capitalize(val.status ?? ''),
                             Capitalize(val.obligationType ?? ''),
                             val.id ?? '',
-                            val.comment ?? ''
-                        ]
+                            val.comment ?? '',
+                        ],
                     )
                     tableRows.push(row)
                 }
@@ -201,11 +241,15 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
 
     return (
         <>
-            {
-                (status === 'authenticated') ? 
-                <Table columns={columns} server={initServerPaginationConfig()} selector={false} />:
+            {status === 'authenticated' ? (
+                <Table
+                    columns={columns}
+                    server={initServerPaginationConfig()}
+                    selector={false}
+                />
+            ) : (
                 <Spinner className='spinner col-12 mt-1 text-center' />
-            }
+            )}
         </>
     )
 }

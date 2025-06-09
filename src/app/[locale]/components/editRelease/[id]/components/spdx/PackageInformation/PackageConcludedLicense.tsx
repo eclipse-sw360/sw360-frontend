@@ -30,7 +30,7 @@ function PackageConcludedLicense({
     concludedLicenseNoasserttion,
     setConcludedLicenseNoasserttion,
     concludedLicense,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectConcludedLicenseExist = () => {
         setConcludedLicenseExist(true)
         setConcludedLicenseNone(false)
@@ -107,7 +107,10 @@ function PackageConcludedLicense({
                             onChange={selectConcludedLicenseNoasserttion}
                             checked={concludedLicenseNoasserttion}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='licenseConcludedNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='licenseConcludedNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

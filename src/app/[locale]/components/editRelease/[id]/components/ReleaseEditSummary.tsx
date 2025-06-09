@@ -59,7 +59,7 @@ function ReleaseEditSummary({
     cotsDetails,
     eccInformation,
     clearingInformation,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const t = useTranslations('default')
     const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
@@ -123,13 +123,17 @@ function ReleaseEditSummary({
 
         let moderatorsFromRelease = {}
         if (typeof release._embedded['sw360:moderators'] !== 'undefined') {
-            moderatorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(release._embedded['sw360:moderators'])
+            moderatorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(
+                release._embedded['sw360:moderators'],
+            )
             setModerators(moderatorsFromRelease)
         }
 
         let contributorsFromRelease = {}
         if (typeof release._embedded['sw360:contributors'] !== 'undefined') {
-            contributorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(release._embedded['sw360:contributors'])
+            contributorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(
+                release._embedded['sw360:contributors'],
+            )
             setContributors(contributorsFromRelease)
         }
 
@@ -173,7 +177,10 @@ function ReleaseEditSummary({
                     e.preventDefault()
                 }}
             >
-                <div className='col' style={{ fontSize: '0.875rem' }}>
+                <div
+                    className='col'
+                    style={{ fontSize: '0.875rem' }}
+                >
                     <ReleaseSummary
                         actionType={actionType}
                         releasePayload={releasePayload}
@@ -216,7 +223,10 @@ function ReleaseEditSummary({
                             setObject={setDataAddtionalData}
                         />
                     </div>
-                    <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                    <ReleaseRepository
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                    />
                 </div>
             </form>
         </>

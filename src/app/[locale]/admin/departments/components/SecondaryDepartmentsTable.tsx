@@ -10,16 +10,15 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
-import { useState, useEffect, useCallback, type JSX } from 'react'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
 import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { FaPencilAlt } from 'react-icons/fa'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _, PageSpinner, Table } from 'next-sw360'
 import Link from 'next/link'
-import { PageSpinner } from 'next-sw360'
+import { useCallback, useEffect, useState, type JSX } from 'react'
+import { FaPencilAlt } from 'react-icons/fa'
 import SecondaryDepartments from './SecondaryDepartments'
 
 type TableRow = [string, string[], string]
@@ -32,32 +31,34 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
         {
             id: 'department',
             name: t('Department'),
-            sort: true
+            sort: true,
         },
         {
             id: 'memberEmails',
             name: t('Member Emails'),
-            formatter: (emails: string[]) => _(
-                <ol>
-                    {Object.values(emails).map((email) => (
-                        <li key={email}>{email}</li>
-                    ))}
-                </ol>
-            ),
-            sort: false
+            formatter: (emails: string[]) =>
+                _(
+                    <ol>
+                        {Object.values(emails).map((email) => (
+                            <li key={email}>{email}</li>
+                        ))}
+                    </ol>,
+                ),
+            sort: false,
         },
         {
             id: 'action',
             name: t('Action'),
             sort: false,
             width: '90px',
-            formatter: (departmentName: string) => _(
-                <div className='d-flex align-items-center justify-content-center'>
-                    <Link href={`/admin/departments/edit?name=${departmentName}`}>
-                        <FaPencilAlt className='btn-icon'/>
-                    </Link>
-                </div>
-            ),
+            formatter: (departmentName: string) =>
+                _(
+                    <div className='d-flex align-items-center justify-content-center'>
+                        <Link href={`/admin/departments/edit?name=${departmentName}`}>
+                            <FaPencilAlt className='btn-icon' />
+                        </Link>
+                    </div>,
+                ),
         },
     ]
 
@@ -77,25 +78,24 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
         }
         const departmentsWithEmails: SecondaryDepartments = await response.json()
         const tableData = Object.keys(departmentsWithEmails).map((department) => {
-            return [
-                department,
-                departmentsWithEmails[department],
-                department
-            ] as TableRow
+            return [department, departmentsWithEmails[department], department] as TableRow
         })
         setTableData(tableData)
     }, [])
 
     useEffect(() => {
-        fetchDepartmentsWithEmails().catch(err => console.error(err))
+        fetchDepartmentsWithEmails().catch((err) => console.error(err))
     }, [])
 
-    return (
-        (tableData === undefined)
-        ?
-            <PageSpinner />
-        :
-            <Table columns={columns} data={tableData} sort={false} selector={true}/>
+    return tableData === undefined ? (
+        <PageSpinner />
+    ) : (
+        <Table
+            columns={columns}
+            data={tableData}
+            sort={false}
+            selector={true}
+        />
     )
 }
 

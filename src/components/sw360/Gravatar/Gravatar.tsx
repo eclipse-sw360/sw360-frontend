@@ -11,7 +11,7 @@
 'use client'
 
 import { MD5 } from 'crypto-js'
-import { useCallback, useEffect, type JSX } from 'react';
+import { useCallback, useEffect, type JSX } from 'react'
 import { Form, Image } from 'react-bootstrap'
 import { BsArrowCounterclockwise } from 'react-icons/bs'
 
@@ -20,7 +20,7 @@ import sw360ProfileIcon from '@/assets/images/profile.svg'
 import { useLocalStorage } from '@/hooks'
 import styles from './Gravatar.module.css'
 
-function Gravatar({ email }: { email: string }) : JSX.Element {
+function Gravatar({ email }: { email: string }): JSX.Element {
     const [gravatarImage, setGravatarImage] = useLocalStorage<string | undefined | null>('gravatarImage', null)
     const [useGravatar, setUseGravatar] = useLocalStorage<boolean>('useGravatar', false)
 

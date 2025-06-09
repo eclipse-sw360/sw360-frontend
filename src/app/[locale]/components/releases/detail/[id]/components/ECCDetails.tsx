@@ -18,7 +18,7 @@ interface Props {
     release: ReleaseDetail
 }
 
-const ECCDetails = ({ release }: Props) : ReactNode => {
+const ECCDetails = ({ release }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     return (
@@ -37,11 +37,7 @@ const ECCDetails = ({ release }: Props) : ReactNode => {
                 <tbody hidden={toggle}>
                     <tr>
                         <td>{t('ECC Status')}:</td>
-                        <td>
-                            {
-                                t(release.eccInformation?.eccStatus as never)
-                            }
-                        </td>
+                        <td>{t(release.eccInformation?.eccStatus as never)}</td>
                     </tr>
                     <tr>
                         <td>{t('AL')}:</td>
@@ -65,8 +61,8 @@ const ECCDetails = ({ release }: Props) : ReactNode => {
                             {release.eccInformation?.containsCryptography === true
                                 ? t('Yes')
                                 : release.eccInformation?.containsCryptography === false
-                                ? t('No')
-                                : t('Not Specified')}
+                                  ? t('No')
+                                  : t('Not Specified')}
                         </td>
                     </tr>
                     <tr>

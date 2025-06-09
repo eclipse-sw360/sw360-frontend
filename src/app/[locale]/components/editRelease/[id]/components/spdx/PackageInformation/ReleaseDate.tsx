@@ -17,10 +17,10 @@ interface Props {
     setDataReleaseDate: React.Dispatch<React.SetStateAction<InputKeyValue | undefined>>
 }
 
-function ReleaseDate({ dataReleaseDate, setDataReleaseDate, setReleaseDate }: Props) : ReactNode {
+function ReleaseDate({ dataReleaseDate, setDataReleaseDate, setReleaseDate }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataReleaseDate ?? {} as InputKeyValue
+        const list: InputKeyValue = dataReleaseDate ?? ({} as InputKeyValue)
         list[name as keyof InputKeyValue] = value
         setDataReleaseDate(list)
         setReleaseDate(list)
@@ -29,7 +29,10 @@ function ReleaseDate({ dataReleaseDate, setDataReleaseDate, setReleaseDate }: Pr
     return (
         <td colSpan={3}>
             <div className='form-group'>
-                <label className='lableSPDX' htmlFor='createdDate'>
+                <label
+                    className='lableSPDX'
+                    htmlFor='createdDate'
+                >
                     7.25 Release Date
                 </label>
                 <div

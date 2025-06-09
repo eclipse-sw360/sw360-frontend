@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: 'Admin',
 }
 
-function OAuthClientPage() : ReactNode {
+function OAuthClientPage(): ReactNode {
     return <OAuthClientsList />
 }
 

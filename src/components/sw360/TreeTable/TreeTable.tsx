@@ -11,19 +11,19 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 'use client'
 
-import React, { useEffect, useState, type JSX } from 'react';
+import React, { useEffect, useState, type JSX } from 'react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 import { NodeData } from '@/object-types'
-import { Table, _ } from 'next-sw360'
 import { OneDArray, TColumn } from 'gridjs/dist/src/types'
-import { ComponentChild } from 'preact'
 import { SearchConfig } from 'gridjs/dist/src/view/plugin/search/search'
+import { Table, _ } from 'next-sw360'
+import { ComponentChild } from 'preact'
 import { Language } from '../Table/Table'
 
 interface Props {
@@ -45,12 +45,22 @@ const PaddedCell: React.FC<Props> = ({
 }) => {
     return (
         <div className='d-flex'>
-            <span className='indenter' style={{paddingLeft: `${padLength * 1}rem`}} role='button'>
+            <span
+                className='indenter'
+                style={{ paddingLeft: `${padLength * 1}rem` }}
+                role='button'
+            >
                 {parent &&
                     (needExpand ? (
-                        <BsCaretDownFill color='gray' onClick={collapseRow} />
+                        <BsCaretDownFill
+                            color='gray'
+                            onClick={collapseRow}
+                        />
                     ) : (
-                        <BsCaretRightFill color='gray' onClick={expandRow} />
+                        <BsCaretRightFill
+                            color='gray'
+                            onClick={expandRow}
+                        />
                     ))}{' '}
             </span>
             {children}
@@ -69,7 +79,16 @@ interface TreeTableProps {
     sort?: boolean
 }
 
-const TreeTable = ({ data, setData, columns, onExpand, search, language, selector, sort }: TreeTableProps): JSX.Element => {
+const TreeTable = ({
+    data,
+    setData,
+    columns,
+    onExpand,
+    search,
+    language,
+    selector,
+    sort,
+}: TreeTableProps): JSX.Element => {
     const [tabledata, setTableData] = useState<any[]>([])
     useEffect(() => {
         const newData: any[] = []
@@ -109,8 +128,8 @@ const TreeTable = ({ data, setData, columns, onExpand, search, language, selecto
                                 collapseRow={() => collapseRow(item)}
                             >
                                 {cell}
-                            </PaddedCell>
-                        )
+                            </PaddedCell>,
+                        ),
                     )
                 } else {
                     parsedRowData.push(_(<PaddedCell padLength={level}>{cell}</PaddedCell>))
@@ -135,6 +154,16 @@ const TreeTable = ({ data, setData, columns, onExpand, search, language, selecto
         }
     }
 
-    return <Table data={tabledata} pagination={false} columns={columns} sort={sort} search={search} language={language} selector={selector}/>
+    return (
+        <Table
+            data={tabledata}
+            pagination={false}
+            columns={columns}
+            sort={sort}
+            search={search}
+            language={language}
+            selector={selector}
+        />
+    )
 }
 export default TreeTable

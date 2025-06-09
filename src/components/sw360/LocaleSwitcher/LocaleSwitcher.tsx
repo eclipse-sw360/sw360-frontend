@@ -10,7 +10,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import React, { useTransition, type JSX } from 'react';
+import React, { useTransition, type JSX } from 'react'
 import { NavDropdown } from 'react-bootstrap'
 
 import { LOCALES } from '@/constants'
@@ -59,7 +59,10 @@ function LocaleSwitcher(): JSX.Element {
             align='end'
         >
             {LOCALES.map((option) => (
-                <NavDropdown.Item eventKey={option.i18n} key={option.i18n}>
+                <NavDropdown.Item
+                    eventKey={option.i18n}
+                    key={option.i18n}
+                >
                     <span className={`fi fi-${option.flag} me-2`} />
                     <span>{getLanguageName(option.i18n)}</span>
                 </NavDropdown.Item>

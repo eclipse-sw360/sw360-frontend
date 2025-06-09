@@ -9,8 +9,8 @@
 // License-Filename: LICENSE
 
 import { InputKeyValue } from '@/object-types'
-import { FaTrashAlt } from 'react-icons/fa'
 import { ReactNode } from 'react'
+import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
     setInputList: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
@@ -19,7 +19,7 @@ interface Props {
     setDataCreators: (inputs: InputKeyValue[]) => void
 }
 
-function Creators({ inputList, setInputList, isAnonymous, setDataCreators }: Props) : ReactNode {
+function Creators({ inputList, setInputList, isAnonymous, setDataCreators }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: InputKeyValue[] = [...inputList]
@@ -43,7 +43,11 @@ function Creators({ inputList, setInputList, isAnonymous, setDataCreators }: Pro
         <div style={{ display: 'flex', flexDirection: 'column', flex: 7 }}>
             {inputList.map((elem, j) => {
                 return (
-                    <div key={j} style={{ display: 'flex', marginBottom: '0.75rem' }} className='creatorRow'>
+                    <div
+                        key={j}
+                        style={{ display: 'flex', marginBottom: '0.75rem' }}
+                        className='creatorRow'
+                    >
                         <select
                             style={{ flex: 2, marginRight: '1rem' }}
                             value={elem.key}
@@ -66,7 +70,10 @@ function Creators({ inputList, setInputList, isAnonymous, setDataCreators }: Pro
                             onChange={(e) => handleInputChange(e, j)}
                             disabled={isAnonymous && (elem.key === 'Organization' || elem.key === 'Person')}
                         />
-                        <FaTrashAlt className='spdx-delete-icon-main' onClick={() => handleRemoveClick(j)} />
+                        <FaTrashAlt
+                            className='spdx-delete-icon-main'
+                            onClick={() => handleRemoveClick(j)}
+                        />
                     </div>
                 )
             })}

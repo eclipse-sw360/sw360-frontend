@@ -25,7 +25,7 @@ interface Embedded<SW360Type, SW360Key extends string> {
                 href: string
                 name: string
                 templated: boolean
-            }
+            },
         ]
     }
     page?: {

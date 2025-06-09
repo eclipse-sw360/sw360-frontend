@@ -14,9 +14,9 @@ import 'bootstrap/dist/css/bootstrap.css'
 import Link from 'next/link'
 import styles from './footer.module.css'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
-function Footer() : JSX.Element {
+function Footer(): JSX.Element {
     return (
         <>
             <footer className={`${styles.sw360footer} footer d-flex flex-column`}>

@@ -16,7 +16,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
 

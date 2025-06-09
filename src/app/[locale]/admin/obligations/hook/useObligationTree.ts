@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { ObligationElement, TreeNode } from '../../../../../object-types/Obligation'
 
 interface ObligationTreeReturn {
@@ -17,8 +17,12 @@ interface ObligationTreeReturn {
     addChild: (parentId?: string) => void
     addSibling: (nodeId: string, parentId?: string) => void
     deleteNode: (nodeId: string, parentId?: string) => void
-    updateNode: (nodeId: string, field: 'type' | 'text' | 'languageElement' | 'action' | 'object', value: string ) => void
-    updateNodeElement: (nodeId: string, element: ObligationElement ) => void
+    updateNode: (
+        nodeId: string,
+        field: 'type' | 'text' | 'languageElement' | 'action' | 'object',
+        value: string,
+    ) => void
+    updateNodeElement: (nodeId: string, element: ObligationElement) => void
 }
 
 export function useObligationTree(initialText?: string): ObligationTreeReturn {
@@ -30,7 +34,7 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
         nodes.forEach((node, index) => {
             const indent = level > 0 ? '\t'.repeat(level) : ''
             let nodeText = ''
-            if(node.languageElement != null) {
+            if (node.languageElement != null) {
                 nodeText = `${node.languageElement} ${node.action} ${node.object}`.trim()
             } else {
                 nodeText = `${node.type} ${node.text}`.trim()
@@ -51,13 +55,14 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
             children: [],
             parentId,
         }
-        const updatedTree = parentId != null
-            ? tree.map((node) =>
-                  node.id === parentId
-                      ? { ...node, children: [...node.children, newNode] }
-                      : { ...node, children: updateChildren(node.children, parentId, newNode) },
-              )
-            : [...tree, newNode]
+        const updatedTree =
+            parentId != null
+                ? tree.map((node) =>
+                      node.id === parentId
+                          ? { ...node, children: [...node.children, newNode] }
+                          : { ...node, children: updateChildren(node.children, parentId, newNode) },
+                  )
+                : [...tree, newNode]
         setTree(updatedTree)
         setTreeText(getTreeAsText(updatedTree))
     }
@@ -78,25 +83,27 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
             children: [],
             parentId,
         }
-        const updatedTree = parentId != null
-            ? tree.map((node) =>
-                  node.id === parentId
-                      ? { ...node, children: [...node.children, newNode] }
-                      : { ...node, children: updateChildren(node.children, parentId, newNode) },
-              )
-            : [...tree, newNode]
+        const updatedTree =
+            parentId != null
+                ? tree.map((node) =>
+                      node.id === parentId
+                          ? { ...node, children: [...node.children, newNode] }
+                          : { ...node, children: updateChildren(node.children, parentId, newNode) },
+                  )
+                : [...tree, newNode]
         setTree(updatedTree)
         setTreeText(getTreeAsText(updatedTree))
     }
 
     const deleteNode = (nodeId: string, parentId?: string) => {
-        const updatedTree = parentId != null
-            ? tree.map((node) =>
-                  node.id === parentId
-                      ? { ...node, children: node.children.filter((child) => child.id !== nodeId) }
-                      : { ...node, children: deleteFromChildren(node.children, nodeId) },
-              )
-            : tree.filter((node) => node.id !== nodeId)
+        const updatedTree =
+            parentId != null
+                ? tree.map((node) =>
+                      node.id === parentId
+                          ? { ...node, children: node.children.filter((child) => child.id !== nodeId) }
+                          : { ...node, children: deleteFromChildren(node.children, nodeId) },
+                  )
+                : tree.filter((node) => node.id !== nodeId)
         setTree(updatedTree)
         setTreeText(getTreeAsText(updatedTree))
     }
@@ -110,11 +117,15 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
             .filter((child) => child.id !== nodeId)
     }
 
-    const updateNode = (nodeId: string, field: 'type' | 'text' | 'languageElement' | 'action' | 'object', value: string ) => {
+    const updateNode = (
+        nodeId: string,
+        field: 'type' | 'text' | 'languageElement' | 'action' | 'object',
+        value: string,
+    ) => {
         const updateNodeInTree = (nodes: TreeNode[]): TreeNode[] => {
             return nodes.map((node) => {
                 if (node.id === nodeId) {
-                        return { ...node, [field]: value }
+                    return { ...node, [field]: value }
                 }
                 return { ...node, children: updateNodeInTree(node.children) }
             })
@@ -124,13 +135,16 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
         setTreeText(getTreeAsText(updatedTree))
     }
 
-    const updateNodeElement = (nodeId: string, element: ObligationElement ) => {
+    const updateNodeElement = (nodeId: string, element: ObligationElement) => {
         const updateNodeInTree = (nodes: TreeNode[]): TreeNode[] => {
             return nodes.map((node) => {
                 if (node.id === nodeId) {
-                        return { ...node, ["languageElement"]: element.languageElement, 
-                                            ["action"]: element.action,
-                                            ["object"]: element.object }
+                    return {
+                        ...node,
+                        ['languageElement']: element.languageElement,
+                        ['action']: element.action,
+                        ['object']: element.object,
+                    }
                 }
                 return { ...node, children: updateNodeInTree(node.children) }
             })
@@ -139,7 +153,7 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
         setTree(updatedTree)
         setTreeText(getTreeAsText(updatedTree))
     }
-    
+
     const parseTextToTree = (text: string): TreeNode[] => {
         if (!text.trim()) return []
 
@@ -157,9 +171,7 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
 
             if (parts.length >= 3) {
                 const imperatives = ['YOU MUST', 'YOU MUST NOT', 'YOU MAY', 'YOU SHOULD']
-                const foundImperative = imperatives.find(imp => 
-                    trimmedLine.toUpperCase().startsWith(imp)
-                )
+                const foundImperative = imperatives.find((imp) => trimmedLine.toUpperCase().startsWith(imp))
 
                 if (foundImperative != undefined) {
                     const remainingText = trimmedLine.substring(foundImperative.length).trim()
@@ -167,7 +179,7 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
                     newNode = {
                         id: generateId(),
                         type: '',
-                        text: '', 
+                        text: '',
                         children: [],
                         languageElement: foundImperative,
                         action: action,
@@ -181,7 +193,7 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
                         id: generateId(),
                         type,
                         text,
-                        children: []
+                        children: [],
                     }
                 }
             } else {
@@ -192,7 +204,7 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
                     id: generateId(),
                     type,
                     text,
-                    children: []
+                    children: [],
                 }
             }
 
@@ -232,6 +244,6 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
         addSibling,
         deleteNode,
         updateNode,
-        updateNodeElement
+        updateNodeElement,
     }
 }

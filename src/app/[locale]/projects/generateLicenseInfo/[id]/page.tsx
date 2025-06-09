@@ -10,7 +10,7 @@
 import { Metadata } from 'next'
 import GenerateLicenseInfo from './components/GenerateLicenseInfo'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Context {
     params: Promise<{ id: string }>
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 }
 
 const GenerateLicenseInformation = async (props: Context): Promise<JSX.Element> => {
-    const params = await props.params;
+    const params = await props.params
     const projectId = params.id
 
     return <GenerateLicenseInfo projectId={projectId} />

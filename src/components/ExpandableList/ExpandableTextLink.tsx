@@ -9,25 +9,28 @@
 
 'use client'
 
-import { useState, type JSX } from 'react';
+import { useState, type JSX } from 'react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 
 export default function ExpandableTextList({ list }: { list: string[] }): JSX.Element {
-    const [ isExpanded, setExpanded ] = useState(false)
+    const [isExpanded, setExpanded] = useState(false)
     const fullString = list.join(', ')
     const previewString = fullString.slice(0, 10).concat('...')
     return (
         <>
-            {
-                isExpanded ?
-                <div><BsCaretDownFill onClick={() => setExpanded(false)}/>{' '}{fullString}</div>:
+            {isExpanded ? (
                 <div>
-                    {
-                        list.length !== 0 &&
-                        <div><BsCaretRightFill onClick={() => setExpanded(true)} />{' '}{previewString}</div>
-                    }
+                    <BsCaretDownFill onClick={() => setExpanded(false)} /> {fullString}
                 </div>
-            }
+            ) : (
+                <div>
+                    {list.length !== 0 && (
+                        <div>
+                            <BsCaretRightFill onClick={() => setExpanded(true)} /> {previewString}
+                        </div>
+                    )}
+                </div>
+            )}
         </>
     )
 }

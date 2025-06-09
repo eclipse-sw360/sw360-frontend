@@ -10,12 +10,12 @@
 
 'use client'
 
-import { useTransition, type JSX } from 'react';
+import { useTransition, type JSX } from 'react'
 import { usePathname, useRouter } from '../../../navigation'
 
 import { LOCALES } from '@/constants'
 
-function LanguageSwitcher() : JSX.Element {
+function LanguageSwitcher(): JSX.Element {
     const [, startTransition] = useTransition()
     const router = useRouter()
     const pathname = usePathname()
@@ -35,7 +35,10 @@ function LanguageSwitcher() : JSX.Element {
     return (
         <>
             {LOCALES.map((locale) => (
-                <div className='flag' key={locale.i18n}>
+                <div
+                    className='flag'
+                    key={locale.i18n}
+                >
                     <span
                         className={`fi fi-${locale.flag} custom-class`}
                         key={locale.i18n}

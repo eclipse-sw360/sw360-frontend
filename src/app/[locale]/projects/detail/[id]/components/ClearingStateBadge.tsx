@@ -8,23 +8,26 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 
-import { Tooltip, OverlayTrigger } from 'react-bootstrap'
 import { ReleaseClearingStateMapping } from '@/object-types'
-import type { JSX } from "react"
 import type { useTranslations } from 'next-intl'
+import type { JSX } from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 interface Props {
     isRelease: boolean
     clearingState: string
     projectState?: string
-    t?: ReturnType<typeof useTranslations>  
+    t?: ReturnType<typeof useTranslations>
 }
 
 const capitalize = (text: string): string => {
     return text
-        ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '').trim()
+        ? text
+              .split('_')
+              .reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+              .trim()
         : ''
 }
 
@@ -35,20 +38,24 @@ function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props
                 <OverlayTrigger
                     overlay={
                         <Tooltip>{`${t?.('Release Clearing State')}: ${t?.(
-                            ReleaseClearingStateMapping[clearingState as keyof typeof ReleaseClearingStateMapping]
+                            ReleaseClearingStateMapping[clearingState as keyof typeof ReleaseClearingStateMapping],
                         )}`}</Tooltip>
                     }
                 >
-                    {(clearingState === 'NEW_CLEARING' || clearingState === 'NEW') ? (
+                    {clearingState === 'NEW_CLEARING' || clearingState === 'NEW' ? (
                         <span className='state-box clearingStateOpen capsule-left capsule-right'>{'CS'}</span>
-                    ) : (clearingState === 'REPORT_AVAILABLE') ? (
-                        <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>{'CS'}</span>
-                    ) : (clearingState === 'UNDER_CLEARING') ? (
+                    ) : clearingState === 'REPORT_AVAILABLE' ? (
+                        <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>
+                            {'CS'}
+                        </span>
+                    ) : clearingState === 'UNDER_CLEARING' ? (
                         <span className='state-box clearingStateInProgress capsule-left capsule-right'>{'CS'}</span>
-                    ) : (clearingState === 'INTERNAL_USE_SCAN_AVAILABLE') ? (
+                    ) : clearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
                         <span className='state-box clearingStateUnknown capsule-left capsule-right'>{'CS'}</span>
-                    ) : (clearingState === 'SENT_TO_CLEARING_TOOL' || clearingState === 'SCAN_AVAILABLE') ? (
-                        <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>{'CS'}</span>
+                    ) : clearingState === 'SENT_TO_CLEARING_TOOL' || clearingState === 'SCAN_AVAILABLE' ? (
+                        <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>
+                            {'CS'}
+                        </span>
                     ) : (
                         <span className='state-box clearingStateApproved capsule-left capsule-right'>{'CS'}</span>
                     )}
@@ -57,9 +64,7 @@ function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props
                 <>
                     {projectState !== undefined && (
                         <OverlayTrigger
-                            overlay={
-                                <Tooltip>{`${t?.('Project State')}: ${t?.(capitalize(projectState))}`}</Tooltip>
-                            }
+                            overlay={<Tooltip>{`${t?.('Project State')}: ${t?.(capitalize(projectState))}`}</Tooltip>}
                         >
                             {projectState === 'ACTIVE' ? (
                                 <span className='state-box projectStateActive capsule-left'>{'PS'}</span>

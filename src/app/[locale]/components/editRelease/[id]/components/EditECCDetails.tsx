@@ -48,15 +48,24 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
 
     return (
         <>
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
-                <div className='col' style={{ padding: '0px 12px', fontSize: '0.875rem' }}>
+            <div
+                className='container'
+                style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}
+            >
+                <div
+                    className='col'
+                    style={{ padding: '0px 12px', fontSize: '0.875rem' }}
+                >
                     <div className='row mb-4'>
                         <div className='section-header mb-2'>
                             <span className='fw-bold'>{t('ECC Information')}</span>
                         </div>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
-                                <label htmlFor='ECC_Status' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='ECC_Status'
+                                    className='form-label fw-bold'
+                                >
                                     {t('ECC Status')}
                                 </label>
                                 <select
@@ -73,13 +82,19 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                     <option value='APPROVED'>{t('APPROVED')}</option>
                                     <option value='REJECTED'>{t('REJECTED')}</option>
                                 </select>
-                                <div className='form-text' id='addProjects.visibility.HelpBlock'>
+                                <div
+                                    className='form-text'
+                                    id='addProjects.visibility.HelpBlock'
+                                >
                                     <ShowInfoOnHover text={t('ECC_STATUS')} />
                                     {t('Learn more about ECC statuses')}.
                                 </div>
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='ECC_comment' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='ECC_comment'
+                                    className='form-label fw-bold'
+                                >
                                     {t('ECC Comment')}
                                 </label>
                                 <input
@@ -97,7 +112,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                         </div>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
-                                <label htmlFor='ausfuhrliste' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='ausfuhrliste'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Ausfuhrliste')}
                                 </label>
                                 <input
@@ -112,7 +130,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='eccn' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='eccn'
+                                    className='form-label fw-bold'
+                                >
                                     {t('ECCN')}
                                 </label>
                                 <input
@@ -127,7 +148,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='material_index_number' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='material_index_number'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Material Index Number')}
                                 </label>
                                 <input
@@ -164,7 +188,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                                 })
                                             }
                                         />
-                                        <label className='form-check-label' htmlFor='contains_cryptography_yes'>
+                                        <label
+                                            className='form-check-label'
+                                            htmlFor='contains_cryptography_yes'
+                                        >
                                             {t('Yes')}
                                         </label>
                                     </div>
@@ -186,12 +213,18 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                                 })
                                             }
                                         />
-                                        <label className='form-check-label' htmlFor='contains_cryptography_no'>
+                                        <label
+                                            className='form-check-label'
+                                            htmlFor='contains_cryptography_no'
+                                        >
                                             {t('No')}
                                         </label>
                                     </div>
                                 </div>
-                                <div className='form-text' id='containsCryptography.HelpBlock'>
+                                <div
+                                    className='form-text'
+                                    id='containsCryptography.HelpBlock'
+                                >
                                     <ShowInfoOnHover text={t('Contains Cryptography')} />
                                     {t('cryptoinfo')}.
                                 </div>
@@ -199,7 +232,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                         </div>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
-                                <label htmlFor='assessor_contact_person' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='assessor_contact_person'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Assessor Contact Person')}
                                 </label>
                                 <input
@@ -214,7 +250,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='assessor_department' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='assessor_department'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Assessor Department')}
                                 </label>
                                 <input
@@ -229,7 +268,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='assessment_date' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='assessment_date'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Assessment Date')}
                                 </label>
                                 <input

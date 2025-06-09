@@ -10,23 +10,26 @@
 
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { DocumentTypes, ReleaseDetail } from '@/object-types'
+import { ReactNode } from 'react'
 import ReleaseGeneral from './ReleaseGeneral'
 import ReleaseVendor from './ReleaseVendor'
-import { ReactNode } from 'react'
 
 interface Props {
     release: ReleaseDetail
     releaseId: string
 }
 
-const Summary = ({ release, releaseId }: Props) : ReactNode => {
+const Summary = ({ release, releaseId }: Props): ReactNode => {
     return (
         <div className='col'>
             <div>
                 <p id='up_Summary'>{release.description}</p>
             </div>
             <div>
-                <ReleaseGeneral release={release} releaseId={releaseId} />
+                <ReleaseGeneral
+                    release={release}
+                    releaseId={releaseId}
+                />
                 <ReleaseVendor release={release} />
                 <ResoucesUsing
                     documentId={releaseId}

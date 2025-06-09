@@ -203,7 +203,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const headerButtons = {
-        'Edit release': { link: `/components/editRelease/${releaseId}?tab=${selectedTab}`, type: 'primary', name: t('Edit release') },
+        'Edit release': {
+            link: `/components/editRelease/${releaseId}?tab=${selectedTab}`,
+            type: 'primary',
+            name: t('Edit release'),
+        },
         'Link To Project': {
             link: '',
             type: 'secondary',

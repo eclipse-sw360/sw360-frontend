@@ -23,7 +23,7 @@ interface Props {
     setObligations: (obligationsLink: Array<Obligation>) => void
 }
 
-type RadioButtonProp = { index: string, checked: boolean, obligation: string | Obligation }
+type RadioButtonProp = { index: string; checked: boolean; obligation: string | Obligation }
 
 type RowData = Array<string | Obligation | RadioButtonProp>
 
@@ -51,7 +51,7 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
         const newData = Object.entries(data).map(([i, rowData]) => {
             if (i === index) {
                 rowData[1] = {
-                    ...rowData[1] as RadioButtonProp,
+                    ...(rowData[1] as RadioButtonProp),
                     checked: !checked,
                 } as RadioButtonProp
             }
@@ -69,9 +69,9 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
     }
 
     const handleCheckAll = () => {
-        const newData = Object.values(data).map(rowData => {
+        const newData = Object.values(data).map((rowData) => {
             rowData[1] = {
-                ...rowData[1] as RadioButtonProp,
+                ...(rowData[1] as RadioButtonProp),
                 checked: !isCheckAll,
             } as RadioButtonProp
             return rowData
@@ -125,7 +125,12 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
             id: 'check',
             name: _(<i className={styles.collapse}></i>),
             formatter: (item: Obligation) =>
-                _(<i className={styles.collapse} onClick={buildAttachmentDetail(item)}></i>),
+                _(
+                    <i
+                        className={styles.collapse}
+                        onClick={buildAttachmentDetail(item)}
+                    ></i>,
+                ),
             sort: false,
         },
         {
@@ -136,9 +141,9 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
                     defaultChecked={isCheckAll}
                     type='checkbox'
                     onClick={handleCheckAll}
-                ></input>
+                ></input>,
             ),
-            formatter: ({ checked, index }: { checked: boolean, index: string}) =>
+            formatter: ({ checked, index }: { checked: boolean; index: string }) =>
                 _(
                     <input
                         className='checkbox-control'
@@ -147,7 +152,7 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
                         onClick={() => {
                             handlerRadioButton(index, checked)
                         }}
-                    ></input>
+                    ></input>,
                 ),
         },
         {
@@ -177,7 +182,10 @@ const SelectTableLinkedObligations = ({ obligations, setObligations }: Props) =>
         setSearch({ keyword: event.currentTarget.value })
     }
     return (
-        <div className='row' style={{ fontSize: '14px' }}>
+        <div
+            className='row'
+            style={{ fontSize: '14px' }}
+        >
             <TableLicense
                 data={data}
                 columns={columns}

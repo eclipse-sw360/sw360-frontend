@@ -18,9 +18,9 @@ import '@/styles/gridjs/sw360.css'
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { ReactNode, type JSX } from 'react';
+import { ReactNode, type JSX } from 'react'
 
-import { Footer, Navbar, GlobalMessages } from 'next-sw360'
+import { Footer, GlobalMessages, Navbar } from 'next-sw360'
 import { Providers } from '../provider'
 
 export const metadata: Metadata = {
@@ -37,15 +37,18 @@ type Props = {
 }
 
 async function RootLayout({ children }: Props): Promise<JSX.Element> {
-    const locale = await getLocale();
-    const messages = await getMessages();
+    const locale = await getLocale()
+    const messages = await getMessages()
 
     return (
         <html lang={locale}>
             <body>
                 <Providers>
                     <NextIntlClientProvider messages={messages}>
-                        <div id='container' className='d-flex flex-column min-vh-100'>
+                        <div
+                            id='container'
+                            className='d-flex flex-column min-vh-100'
+                        >
                             <GlobalMessages />
                             <Navbar />
                             {children}

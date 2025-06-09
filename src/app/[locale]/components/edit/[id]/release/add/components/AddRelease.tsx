@@ -10,7 +10,7 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -28,11 +28,11 @@ import {
     Repository,
     Vendor,
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import ReleaseAddSummary from './ReleaseAddSummary'
 import ReleaseAddTabs from './ReleaseAddTab'
-import MessageService from '@/services/message.service'
 
 interface Props {
     componentId?: string
@@ -55,7 +55,7 @@ const cotsDetails: COTSDetails = {
     sourceCodeAvailable: false,
 }
 
-function AddRelease({ componentId }: Props) : ReactNode {
+function AddRelease({ componentId }: Props): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -108,7 +108,7 @@ function AddRelease({ componentId }: Props) : ReactNode {
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const component: Component = await response.json() as Component
+                const component: Component = (await response.json()) as Component
                 setReleasePayload({
                     ...releasePayload,
                     name: component.name,
@@ -145,16 +145,29 @@ function AddRelease({ componentId }: Props) : ReactNode {
 
     return (
         <>
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+            <div
+                className='container'
+                style={{ maxWidth: '98vw', marginTop: '10px' }}
+            >
                 <div className='row'>
                     <div className='col-2 sidebar'>
-                        <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                        <SideBar
+                            selectedTab={selectedTab}
+                            setSelectedTab={setSelectedTab}
+                            tabList={tabList}
+                        />
                     </div>
                     <div className='col'>
-                        <div className='row' style={{ marginBottom: '20px' }}>
+                        <div
+                            className='row'
+                            style={{ marginBottom: '20px' }}
+                        >
                             <PageButtonHeader buttons={headerButtons}></PageButtonHeader>
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                        >
                             <ReleaseAddSummary
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}
@@ -166,10 +179,19 @@ function AddRelease({ componentId }: Props) : ReactNode {
                                 setOtherLicenses={setOtherLicenses}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
+                        >
+                            <LinkedReleases
+                                releasePayload={releasePayload}
+                                setReleasePayload={setReleasePayload}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}
+                        >
                             <AddCommercialDetails
                                 releasePayload={releasePayload}
                                 setReleasePayload={setReleasePayload}

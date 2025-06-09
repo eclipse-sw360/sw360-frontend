@@ -30,7 +30,7 @@ function PackageHomePage({
     packageHomePageNoasserttion,
     setPackageHomePageNoasserttion,
     packageHomePage,
-}: Props) : ReactNode{
+}: Props): ReactNode {
     const selectPackageHomePageExist = () => {
         setPackageHomePageExist(true)
         setPackageHomePageNone(false)
@@ -107,7 +107,10 @@ function PackageHomePage({
                             onChange={selectPackageHomePageNoasserttion}
                             checked={packageHomePageNoasserttion}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='packageHomePageNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='packageHomePageNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

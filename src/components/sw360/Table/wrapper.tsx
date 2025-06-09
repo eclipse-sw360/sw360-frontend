@@ -8,12 +8,11 @@
 // License-Filename: LICENSE
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 'use client'
-import { h, createRef as gCreateRef, Component as gComponent } from 'gridjs'
+import { Component as gComponent, createRef as gCreateRef, h } from 'gridjs'
 import { createRoot } from 'react-dom/client'
 
 export class ReactWrapper extends gComponent<{
@@ -27,8 +26,8 @@ export class ReactWrapper extends gComponent<{
     ref = gCreateRef()
 
     componentDidMount(): void {
-        const root = createRoot(this.ref.current);
-        root.render(this.props.element);
+        const root = createRoot(this.ref.current)
+        root.render(this.props.element)
     }
 
     render() {

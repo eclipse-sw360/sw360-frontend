@@ -25,11 +25,13 @@ interface Props {
 
 type RowData = (string | LicenseDetail)[]
 
-export default function AddMainLicenseModal({ existingMainLicense,
-                                              fetchedLicenses,
-                                              showMainLicenseModal,
-                                              setPackagePayload,
-                                              setShowMainLicenseModal}: Props) : JSX.Element {
+export default function AddMainLicenseModal({
+    existingMainLicense,
+    fetchedLicenses,
+    showMainLicenseModal,
+    setPackagePayload,
+    setShowMainLicenseModal,
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const searchText = useRef<string>('')
     const [tableData, setTableData] = useState<Array<RowData>>([])
@@ -47,23 +49,22 @@ export default function AddMainLicenseModal({ existingMainLicense,
         }
     }, [existingMainLicense])
 
-    const searchLicenses = (searchText: string,
-                            licenses: Array<RowData> ): Array<RowData> => {
+    const searchLicenses = (searchText: string, licenses: Array<RowData>): Array<RowData> => {
         if (!searchText.trim()) {
             return licenses
         }
-        const normalizedSearchText = searchText.toLowerCase().trim();
+        const normalizedSearchText = searchText.toLowerCase().trim()
         return licenses.filter((row) => {
             const license = row[0] as LicenseDetail
             const fullName = (row[1] as string) || ''
             const licenseId = license.id ?? ''
             return (
-                (licenseId.toLowerCase().includes(normalizedSearchText)) ||
+                licenseId.toLowerCase().includes(normalizedSearchText) ||
                 fullName.toLowerCase().includes(normalizedSearchText)
             )
         })
     }
-    
+
     const handleSearch = (searchText: string) => {
         const filteredResults = searchLicenses(searchText, fetchedLicenses)
         setTableData(filteredResults)
@@ -86,7 +87,7 @@ export default function AddMainLicenseModal({ existingMainLicense,
         if (newMainLicense.length > 0) {
             setPackagePayload((prevState: Package) => ({
                 ...prevState,
-                licenseIds: newMainLicense
+                licenseIds: newMainLicense,
             }))
         }
     }
@@ -101,43 +102,44 @@ export default function AddMainLicenseModal({ existingMainLicense,
         setTableData(fetchedLicenses)
     }
 
-
     const columns = [
-            {
-                id: 'license-selection',
-                name: '',
-                formatter: (licenseId: string) =>
-                    _(
-                        <div className='form-check'>
-                            <input
-                                className='form-check-input'
-                                type='checkbox'
-                                name='licenseId'
-                                value={licenseId}
-                                id={licenseId}
-                                title=''
-                                placeholder='License Id'
-                                checked={newMainLicense.includes(licenseId)}
-                                onChange={() => handleCheckboxes(licenseId)}
-                            />
-                        </div>,
-                    ),
-                width: '7%',
-                sort: false,
-            },
-            {
-                id: 'fullName',
-                name: 'Full Name',
-                width: 'auto',
-                sort: true,
-            },
+        {
+            id: 'license-selection',
+            name: '',
+            formatter: (licenseId: string) =>
+                _(
+                    <div className='form-check'>
+                        <input
+                            className='form-check-input'
+                            type='checkbox'
+                            name='licenseId'
+                            value={licenseId}
+                            id={licenseId}
+                            title=''
+                            placeholder='License Id'
+                            checked={newMainLicense.includes(licenseId)}
+                            onChange={() => handleCheckboxes(licenseId)}
+                        />
+                    </div>,
+                ),
+            width: '7%',
+            sort: false,
+        },
+        {
+            id: 'fullName',
+            name: 'Full Name',
+            width: 'auto',
+            sort: true,
+        },
     ]
 
     return (
-        <Modal show={showMainLicenseModal}
-               onHide={handleCloseDialog}
-               backdrop='static'
-               centered size='lg'
+        <Modal
+            show={showMainLicenseModal}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
         >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Search Licenses')}</Modal.Title>
@@ -150,26 +152,33 @@ export default function AddMainLicenseModal({ existingMainLicense,
                             className='form-control'
                             placeholder={t('Enter search text')}
                             aria-describedby='Search Licenses'
-                            onChange={(event) => {searchText.current = event.target.value }}
+                            onChange={(event) => {
+                                searchText.current = event.target.value
+                            }}
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <button type='button'
-                                className='btn btn-secondary me-2'
-                                onClick={() => void handleSearch(searchText.current)}
+                        <button
+                            type='button'
+                            className='btn btn-secondary me-2'
+                            onClick={() => void handleSearch(searchText.current)}
                         >
                             {t('Search')}
                         </button>
-                        <button type='button'
-                                className='btn btn-secondary me-2'
-                                onClick={resetSelection}
+                        <button
+                            type='button'
+                            className='btn btn-secondary me-2'
+                            onClick={resetSelection}
                         >
                             {t('Reset')}
                         </button>
                     </div>
                 </div>
                 <div className='mt-3'>
-                    <Table columns={columns} data={tableData} />
+                    <Table
+                        columns={columns}
+                        data={tableData}
+                    />
                 </div>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
@@ -182,14 +191,13 @@ export default function AddMainLicenseModal({ existingMainLicense,
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button'
-                        className='btn btn-primary'
-                        onClick={() => {
-                                    handleSelectLicense()
-                                    handleCloseDialog()
-                                    
-                                    }
-                                }
+                <Button
+                    type='button'
+                    className='btn btn-primary'
+                    onClick={() => {
+                        handleSelectLicense()
+                        handleCloseDialog()
+                    }}
                 >
                     {t('Select Licenses')}
                 </Button>

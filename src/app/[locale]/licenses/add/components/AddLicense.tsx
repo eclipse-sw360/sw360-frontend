@@ -10,7 +10,7 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -18,14 +18,14 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
 import { Embedded, HttpStatus, LicensePayload, LicenseTabIds, Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import AddLicenseSummary from './AddLicenseSummary'
-import MessageService from '@/services/message.service'
 
 type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
 
-export default function AddLicense() : ReactNode {
+export default function AddLicense(): ReactNode {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
     const [data, setData] = useState<Array<Array<string | Obligation>>>([])
@@ -68,12 +68,11 @@ export default function AddLicense() : ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(
                     `obligations?obligationLevel=LICENSE_OBLIGATION`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
@@ -81,7 +80,7 @@ export default function AddLicense() : ReactNode {
                     return notFound()
                 }
 
-                const obligations = await response.json() as EmbeddedObligations
+                const obligations = (await response.json()) as EmbeddedObligations
                 if (!CommonUtils.isNullEmptyOrUndefinedArray(obligations._embedded['sw360:obligations'])) {
                     const data = obligations._embedded['sw360:obligations'].map((item: Obligation) => [
                         item,
@@ -138,8 +137,7 @@ export default function AddLicense() : ReactNode {
         }
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
         const response = await ApiUtils.POST('licenses', licensePayload, session.user.access_token)
         if (response.status == HttpStatus.CREATED) {
             MessageService.success(t('License added successfully'))
@@ -167,15 +165,24 @@ export default function AddLicense() : ReactNode {
         Cancel: { link: '/licenses', type: 'light', name: t('Cancel') },
     }
 
-
     return (
-        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+        <div
+            className='container'
+            style={{ maxWidth: '98vw', marginTop: '10px' }}
+        >
             <div className='row'>
                 <div className='col-2 sidebar'>
-                    <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                    <SideBar
+                        selectedTab={selectedTab}
+                        setSelectedTab={setSelectedTab}
+                        tabList={tabList}
+                    />
                 </div>
                 <div className='col'>
-                    <div className='row' style={{ marginBottom: '20px' }}>
+                    <div
+                        className='row'
+                        style={{ marginBottom: '20px' }}
+                    >
                         {selectedTab === LicenseTabIds.OBLIGATIONS ? (
                             <PageButtonHeader
                                 buttons={headerButtonAddObligations}
@@ -190,7 +197,10 @@ export default function AddLicense() : ReactNode {
                             ></PageButtonHeader>
                         )}
                     </div>
-                    <div className='row' hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}
+                    >
                         <AddLicenseSummary
                             errorShortName={errorShortName}
                             setErrorShortName={setErrorShortName}
@@ -201,7 +211,10 @@ export default function AddLicense() : ReactNode {
                             setLicensePayload={setLicensePayload}
                         />
                     </div>
-                    <div className='row' hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}>
+                    <div
+                        className='row'
+                        hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}
+                    >
                         <LinkedObligationsDialog
                             show={addObligationDiaglog}
                             data={data}

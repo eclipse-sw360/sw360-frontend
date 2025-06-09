@@ -9,26 +9,31 @@
 
 import EditProject from './components/EditProject'
 
-import type { JSX } from 'react';
-import { getServerSession } from 'next-auth/next'
 import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ConfigKeys, Configuration } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { getServerSession } from 'next-auth/next'
+import type { JSX } from 'react'
 interface Context {
     params: Promise<{ id: string }>
 }
 
 const ProjectEditPage = async (props: Context): Promise<JSX.Element> => {
-    const params = await props.params;
+    const params = await props.params
     const projectId = params.id
     const session = await getServerSession(authOptions)
     if (CommonUtils.isNullOrUndefined(session)) {
         return <></>
     }
     const response = await ApiUtils.GET('configurations', session.user.access_token)
-    const config = await response.json() as Configuration
+    const config = (await response.json()) as Configuration
     const isDependencyNetworkFeatureEnabled = config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true'
-    return <EditProject projectId={projectId} isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}/>
+    return (
+        <EditProject
+            projectId={projectId}
+            isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}
+        />
+    )
 }
 
 export default ProjectEditPage

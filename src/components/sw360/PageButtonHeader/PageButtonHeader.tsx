@@ -7,7 +7,6 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 'use client'
 import Link from 'next/link'
 

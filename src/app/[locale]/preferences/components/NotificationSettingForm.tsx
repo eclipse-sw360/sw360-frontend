@@ -10,23 +10,22 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
+import { HttpStatus, User } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { User } from '@/object-types'
 import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
-import MessageService from '@/services/message.service'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
     notificationPreferences: { [key: string]: boolean }
 }
 
-const NotificationSettingForm = () : ReactNode => {
+const NotificationSettingForm = (): ReactNode => {
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
     const [notificationSetting, setNotificationSetting] = useState<NotificationSetting>({
@@ -37,10 +36,9 @@ const NotificationSettingForm = () : ReactNode => {
     const updateNotificationSetting = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return
+            if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
-            
+
             if (response.status === HttpStatus.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 await fetchData('users/profile')
@@ -55,12 +53,11 @@ const NotificationSettingForm = () : ReactNode => {
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
         const response = await ApiUtils.GET(url, session.user.access_token)
-    
+
         if (response.status === HttpStatus.OK) {
-            const data: User = await response.json() as User
+            const data: User = (await response.json()) as User
             setUser(data)
             setNotificationSetting({
                 wantsMailNotification: data.wantsMailNotification ?? false,
@@ -74,18 +71,28 @@ const NotificationSettingForm = () : ReactNode => {
     }, [])
 
     const buttonHeaders = {
-        'Update settings': { name: t('Update settings'), link: '#', type: 'primary', onClick: updateNotificationSetting },
+        'Update settings': {
+            name: t('Update settings'),
+            link: '#',
+            type: 'primary',
+            onClick: updateNotificationSetting,
+        },
     }
 
     useEffect(() => {
-        fetchData('users/profile').catch((error) => {console.error(error)})
+        fetchData('users/profile').catch((error) => {
+            console.error(error)
+        })
     }, [fetchData])
 
     return (
         <form>
             <div className='row'>
                 <div className='col-12'>
-                    <PageButtonHeader buttons={buttonHeaders} title={t('User preferences')} />
+                    <PageButtonHeader
+                        buttons={buttonHeaders}
+                        title={t('User preferences')}
+                    />
                 </div>
             </div>
             <br />

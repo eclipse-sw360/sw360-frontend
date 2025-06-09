@@ -11,9 +11,9 @@
 'use client'
 
 import { LicensePayload } from '@/object-types'
+import { ReactNode } from 'react'
 import EditLicenseDetail from './EditLicenseDetail'
 import EditLicenseText from './EditLicenseText'
-import { ReactNode } from 'react'
 
 interface Props {
     errorFullName: boolean
@@ -29,7 +29,7 @@ export default function EditLicenseSummary({
     errorFullName,
     setErrorFullName,
     inputValid,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     return (
         <div className='col'>
             <EditLicenseDetail

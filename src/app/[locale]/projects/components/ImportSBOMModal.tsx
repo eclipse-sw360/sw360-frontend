@@ -533,10 +533,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                         />
                                     </button>
                                     <strong>{importSummary.dupPkg.split('||').length} </strong>{' '}
-                                    {t(
-                                        'Packages were not imported',
-                                    )}
-                                    :
+                                    {t('Packages were not imported')}:
                                     <ul className='mb-0'>
                                         {importSummary.dupPkg.split('||').map((comp, index) => (
                                             <li key={index}>{comp}</li>
@@ -583,10 +580,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                         />
                                     </button>
                                     <strong>{importSummary.dupRel.split('||').length} </strong>{' '}
-                                    {t(
-                                        'Releases were not imported',
-                                    )}
-                                    :
+                                    {t('Releases were not imported')}:
                                     <ul className='mb-0'>
                                         {importSummary.dupRel.split('||').map((comp, index) => (
                                             <li key={index}>{comp}</li>

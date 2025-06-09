@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { JSX } from 'react'
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
 
@@ -10,23 +10,23 @@ import type { JSX } from "react";
 // License-Filename: LICENSE
 
 interface Props {
-  externalIds: { [k: string]: string }
+    externalIds: { [k: string]: string }
 }
 
 const ExternalIds = ({ externalIds }: Props): JSX.Element => {
-  return (
-    <> {
-        Object.entries(externalIds).map(([key, value]) => {
-          return (
-            <li key={key}>
-              <span className='fw-bold'>{key}: </span>
-              <span> {value}</span>
-            </li>
-          )
-        }
-      )}
-    </>
-  )
+    return (
+        <>
+            {' '}
+            {Object.entries(externalIds).map(([key, value]) => {
+                return (
+                    <li key={key}>
+                        <span className='fw-bold'>{key}: </span>
+                        <span> {value}</span>
+                    </li>
+                )
+            })}
+        </>
+    )
 }
 
 export default ExternalIds

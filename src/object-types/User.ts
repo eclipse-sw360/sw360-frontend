@@ -28,7 +28,7 @@ export interface User {
 
 export interface UserPayload {
     userGroup?: string
-    email?: string,
+    email?: string
     givenName?: string
     lastName?: string
     fullName?: string

@@ -10,15 +10,15 @@
 'use client'
 
 import { HttpStatus, ModerationRequestPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { _, Table } from 'next-sw360'
 import Link from 'next/link'
-import { Dispatch, SetStateAction, useEffect, useState, ReactNode } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import MessageService from '@/services/message.service'
-import { signOut, getSession, useSession } from 'next-auth/react'
-import { _, Table } from 'next-sw360'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 
@@ -27,34 +27,33 @@ interface propType {
 }
 
 interface ModerationRequestRow {
-    moderationRequestId: string, documentName: string
+    moderationRequestId: string
+    documentName: string
 }
 
 export default function BulkDeclineModerationRequestModal({
     show,
     setShow,
-    mrIdNameMap
+    mrIdNameMap,
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
     mrIdNameMap: propType
-}) : ReactNode {
+}): ReactNode {
     const t = useTranslations('default')
     const [loading, setLoading] = useState<boolean>(true)
     const [disableAcceptMr, setDisableAcceptMr] = useState<boolean>(false)
     const [disableDeclineMr, setDisableDeclineMr] = useState<boolean>(false)
     const [statusCheck, setStatusCheck] = useState<number>()
-    const [tableData, setTableData] = useState<Array<(
-        ModerationRequestRow | { progressStatus: number })[]>>([])
+    const [tableData, setTableData] = useState<Array<(ModerationRequestRow | { progressStatus: number })[]>>([])
     const [hasComment, setHasComment] = useState<boolean>(false)
     const { status } = useSession()
-    const [moderationRequestPayload, setModerationRequestPayload] =
-                    useState<ModerationRequestPayload>({
+    const [moderationRequestPayload, setModerationRequestPayload] = useState<ModerationRequestPayload>({
         action: '',
-        comment: ''
+        comment: '',
     })
 
-    const computeProgress = (responseCode:number) => {
+    const computeProgress = (responseCode: number) => {
         switch (responseCode) {
             case 202:
                 return 1
@@ -63,7 +62,7 @@ export default function BulkDeclineModerationRequestModal({
             case 500:
                 return 3
             default:
-                return 0;
+                return 0
         }
     }
 
@@ -72,106 +71,102 @@ export default function BulkDeclineModerationRequestModal({
             id: 'bulkModerationRequestAction.documentName',
             name: t('Document Name'),
             sort: true,
-            width: "50%",
-            formatter: ({moderationRequestId, documentName}:
-                        {moderationRequestId: string; documentName: string}) =>
+            width: '50%',
+            formatter: ({ moderationRequestId, documentName }: { moderationRequestId: string; documentName: string }) =>
                 _(
                     <>
-                        <Link className='link'
-                            href={`/requests/moderationRequest/${moderationRequestId}`}>
+                        <Link
+                            className='link'
+                            href={`/requests/moderationRequest/${moderationRequestId}`}
+                        >
                             {documentName}
                         </Link>
-                    </>
+                    </>,
                 ),
         },
         {
             id: 'bulkModerationRequestAction.status',
             name: t('Status'),
             sort: true,
-            width: "50%",
-            formatter: ({progressStatus}: {progressStatus:number}) => 
+            width: '50%',
+            formatter: ({ progressStatus }: { progressStatus: number }) =>
                 _(
-                    <div  style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                         <div style={{ marginLeft: '10px' }}>
                             {statusCheck === HttpStatus.ACCEPTED && (
                                 <>
-                                    <BiCheckCircle color="green" size={15} />
-                                    
+                                    <BiCheckCircle
+                                        color='green'
+                                        size={15}
+                                    />
                                 </>
                             )}
                             {statusCheck === HttpStatus.NOT_ALLOWED && (
                                 <>
-                                    <BsFillExclamationCircleFill  color="orange" size={15} />
-                                    
+                                    <BsFillExclamationCircleFill
+                                        color='orange'
+                                        size={15}
+                                    />
                                 </>
                             )}
                             {statusCheck === HttpStatus.INTERNAL_SERVER_ERROR && (
                                 <>
-                                    <BiXCircle  color="red" size={15} />
-                                    
+                                    <BiXCircle
+                                        color='red'
+                                        size={15}
+                                    />
                                 </>
                             )}
                         </div>
                         <div hidden={progressStatus === 0}>
-                            {
-                                progressStatus === 1 && (
-                                    <>
-                                        <div style={{ display: 'flex',
-                                                      alignItems: 'center',
-                                                      color: 'green' }}>
-                                            &nbsp;&nbsp;{t('Success')}&nbsp;&nbsp;
-                                            <OverlayTrigger overlay={
-                                                <Tooltip>
-                                                    {t('Request processed successfully')}
-                                                </Tooltip>}>
-                                                <span className='d-inline-block'>
-                                                    <BiInfoCircle size={18}
-                                                                  style={{ color: 'black' }}/>
-                                                </span>
-                                            </OverlayTrigger>
-                                        </div>
-                                    </>
-                                )
-                            }
-                            {
-                                progressStatus === 2 && (
-                                    <div style={{ display: 'flex',
-                                                  alignItems: 'center',
-                                                  color: 'orange' }}>
-                                        &nbsp;&nbsp;{t('Request Already Closed')}&nbsp;&nbsp;
-                                        <OverlayTrigger overlay={
-                                            <Tooltip>
-                                                {t('Moderation request is already closed')}
-                                            </Tooltip>}>
+                            {progressStatus === 1 && (
+                                <>
+                                    <div style={{ display: 'flex', alignItems: 'center', color: 'green' }}>
+                                        &nbsp;&nbsp;{t('Success')}&nbsp;&nbsp;
+                                        <OverlayTrigger
+                                            overlay={<Tooltip>{t('Request processed successfully')}</Tooltip>}
+                                        >
                                             <span className='d-inline-block'>
-                                                <BiInfoCircle size={18}
-                                                              style={{ color: 'black' }}/>
+                                                <BiInfoCircle
+                                                    size={18}
+                                                    style={{ color: 'black' }}
+                                                />
                                             </span>
                                         </OverlayTrigger>
                                     </div>
-                                )
-                            }
-                            {
-                                progressStatus === 3 && (
-                                    <div style={{ display: 'flex',
-                                                  alignItems: 'center',
-                                                  color: 'red' }}>
-                                        &nbsp;&nbsp;{t('Failed')}&nbsp;&nbsp;
-                                        <OverlayTrigger overlay={
-                                            <Tooltip>
-                                                {t('There are internal server error')}
-                                            </Tooltip>}>
-                                            <span className='d-inline-block'>
-                                                <BiInfoCircle size={18}
-                                                              style={{ color: 'black' }}/>
-                                            </span>
-                                        </OverlayTrigger>
-                                    </div>
-                                )
-                            }
+                                </>
+                            )}
+                            {progressStatus === 2 && (
+                                <div style={{ display: 'flex', alignItems: 'center', color: 'orange' }}>
+                                    &nbsp;&nbsp;{t('Request Already Closed')}&nbsp;&nbsp;
+                                    <OverlayTrigger
+                                        overlay={<Tooltip>{t('Moderation request is already closed')}</Tooltip>}
+                                    >
+                                        <span className='d-inline-block'>
+                                            <BiInfoCircle
+                                                size={18}
+                                                style={{ color: 'black' }}
+                                            />
+                                        </span>
+                                    </OverlayTrigger>
+                                </div>
+                            )}
+                            {progressStatus === 3 && (
+                                <div style={{ display: 'flex', alignItems: 'center', color: 'red' }}>
+                                    &nbsp;&nbsp;{t('Failed')}&nbsp;&nbsp;
+                                    <OverlayTrigger overlay={<Tooltip>{t('There are internal server error')}</Tooltip>}>
+                                        <span className='d-inline-block'>
+                                            <BiInfoCircle
+                                                size={18}
+                                                style={{ color: 'black' }}
+                                            />
+                                        </span>
+                                    </OverlayTrigger>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                )
+                    </div>,
+                ),
         },
     ]
 
@@ -180,16 +175,16 @@ export default function BulkDeclineModerationRequestModal({
         setTableData(
             Object.entries(mrIdNameMap).map(([key, value]) => {
                 return [
-                        {
-                            moderationRequestId: key,
-                            documentName: value
-                        },
-                        {progressStatus : 0}
-                    ]
-            })
+                    {
+                        moderationRequestId: key,
+                        documentName: value,
+                    },
+                    { progressStatus: 0 },
+                ]
+            }),
         )
         setLoading(false)
-    },[mrIdNameMap])
+    }, [mrIdNameMap])
 
     const handleCommentValidation = (comment: string) => {
         if (!comment.trim()) {
@@ -199,27 +194,26 @@ export default function BulkDeclineModerationRequestModal({
     }
 
     const handleUserComment = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const updatedComment = event.target.value;
+        const updatedComment = event.target.value
         setModerationRequestPayload({
             ...moderationRequestPayload,
             [event.target.name]: updatedComment,
         })
-        const hasCommentStatus: boolean = handleCommentValidation(updatedComment);
+        const hasCommentStatus: boolean = handleCommentValidation(updatedComment)
         setHasComment(hasCommentStatus)
     }
 
-    const rejectModerationRequest = async (singleMrId: string,
-                                                 updatedRejectPayload:ModerationRequestPayload
-                                                ) => {
+    const rejectModerationRequest = async (singleMrId: string, updatedRejectPayload: ModerationRequestPayload) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         try {
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
-            if (hasComment){
-                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`,
-                                                    updatedRejectPayload,
-                                                    session.user.access_token)
+            if (hasComment) {
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${singleMrId}`,
+                    updatedRejectPayload,
+                    session.user.access_token,
+                )
                 if (response.status == HttpStatus.ACCEPTED) {
                     await response.json()
                     setStatusCheck(HttpStatus.ACCEPTED)
@@ -233,7 +227,7 @@ export default function BulkDeclineModerationRequestModal({
                                         moderationRequestId: r.moderationRequestId,
                                         documentName: r.documentName,
                                     },
-                                    { progressStatus }
+                                    { progressStatus },
                                 ]
                             } else {
                                 return row
@@ -242,8 +236,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.success(t('You have rejected the moderation request'))
-                }
-                else if (response.status == HttpStatus.NOT_ALLOWED) {
+                } else if (response.status == HttpStatus.NOT_ALLOWED) {
                     setStatusCheck(HttpStatus.NOT_ALLOWED)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
@@ -255,7 +248,7 @@ export default function BulkDeclineModerationRequestModal({
                                         moderationRequestId: r.moderationRequestId,
                                         documentName: r.documentName,
                                     },
-                                    { progressStatus }
+                                    { progressStatus },
                                 ]
                             } else {
                                 return row
@@ -264,8 +257,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.warn(t('Moderation request is already closed'))
-                }
-                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                     setStatusCheck(HttpStatus.INTERNAL_SERVER_ERROR)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
@@ -277,7 +269,7 @@ export default function BulkDeclineModerationRequestModal({
                                         moderationRequestId: r.moderationRequestId,
                                         documentName: r.documentName,
                                     },
-                                    { progressStatus }
+                                    { progressStatus },
                                 ]
                             } else {
                                 return row
@@ -286,35 +278,30 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.error(t('There are internal server error'))
-                }
-                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
                     return signOut()
-                }
-                else {
+                } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                 }
-            }
-            else {
+            } else {
                 MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-        }
-        catch(error) {
+        } catch (error) {
             console.log(error)
         }
     }
 
-    const acceptModerationRequest = async (singleMrId: string,
-                                                 updatedAcceptPayload:ModerationRequestPayload
-                                                ) => {
+    const acceptModerationRequest = async (singleMrId: string, updatedAcceptPayload: ModerationRequestPayload) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()                                            
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         try {
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
-            if (hasComment){
-                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`,
-                                                    updatedAcceptPayload,
-                                                    session.user.access_token)
+            if (hasComment) {
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${singleMrId}`,
+                    updatedAcceptPayload,
+                    session.user.access_token,
+                )
                 if (response.status == HttpStatus.ACCEPTED) {
                     await response.json()
                     setStatusCheck(HttpStatus.ACCEPTED)
@@ -328,7 +315,7 @@ export default function BulkDeclineModerationRequestModal({
                                         moderationRequestId: r.moderationRequestId,
                                         documentName: r.documentName,
                                     },
-                                    { progressStatus }
+                                    { progressStatus },
                                 ]
                             } else {
                                 return row
@@ -337,8 +324,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.success(t('You have accepted the moderation request'))
-                }
-                else if (response.status == HttpStatus.NOT_ALLOWED) {
+                } else if (response.status == HttpStatus.NOT_ALLOWED) {
                     setStatusCheck(HttpStatus.NOT_ALLOWED)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
@@ -350,7 +336,7 @@ export default function BulkDeclineModerationRequestModal({
                                         moderationRequestId: r.moderationRequestId,
                                         documentName: r.documentName,
                                     },
-                                    { progressStatus }
+                                    { progressStatus },
                                 ]
                             } else {
                                 return row
@@ -359,8 +345,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.warn(t('Moderation request is already closed'))
-                }
-                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                     setStatusCheck(HttpStatus.INTERNAL_SERVER_ERROR)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
@@ -372,7 +357,7 @@ export default function BulkDeclineModerationRequestModal({
                                         moderationRequestId: r.moderationRequestId,
                                         documentName: r.documentName,
                                     },
-                                    { progressStatus }
+                                    { progressStatus },
                                 ]
                             } else {
                                 return row
@@ -381,19 +366,15 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.error(t('There are internal server error'))
-                }
-                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
                     return signOut()
-                }
-                else {
+                } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                 }
-            }
-            else {
+            } else {
                 MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-        }
-        catch(error) {
+        } catch (error) {
             console.log(error)
         }
     }
@@ -402,10 +383,10 @@ export default function BulkDeclineModerationRequestModal({
         setDisableAcceptMr(true)
         const updatedRejectPayload = {
             ...moderationRequestPayload,
-            action: "REJECT"
+            action: 'REJECT',
         }
         setModerationRequestPayload(updatedRejectPayload)
-        for (const [key] of Object.entries(mrIdNameMap)){
+        for (const [key] of Object.entries(mrIdNameMap)) {
             await rejectModerationRequest(key, updatedRejectPayload)
         }
     }
@@ -414,14 +395,13 @@ export default function BulkDeclineModerationRequestModal({
         setDisableDeclineMr(true)
         const updatedAcceptPayload = {
             ...moderationRequestPayload,
-            action: "ACCEPT"
+            action: 'ACCEPT',
         }
         setModerationRequestPayload(updatedAcceptPayload)
-        for (const [key] of Object.entries(mrIdNameMap)){
+        for (const [key] of Object.entries(mrIdNameMap)) {
             await acceptModerationRequest(key, updatedAcceptPayload)
         }
     }
-
 
     if (status === 'unauthenticated') {
         return signOut()
@@ -442,107 +422,109 @@ export default function BulkDeclineModerationRequestModal({
                     aria-labelledby={t('Accept Decline All Selected Moderation Requests')}
                     scrollable
                 >
-                    <Modal.Header style={{ backgroundColor: '#feefef',
-                                        color: '#da1414' }}
-                                closeButton>
+                    <Modal.Header
+                        style={{ backgroundColor: '#feefef', color: '#da1414' }}
+                        closeButton
+                    >
                         <Modal.Title id='delete-all-license-info-modal'>
                             <AiOutlineQuestionCircle />
-                                {t('Accept Decline All Selected Moderation Requests')}
+                            {t('Accept Decline All Selected Moderation Requests')}
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <p className='my-3'>{t('Accept Decline All MRs')}</p> 
+                        <p className='my-3'>{t('Accept Decline All MRs')}</p>
                         <Form>
-                        <Form.Group className='mb-3'>
-                            <Form.Label className='mb-1'>
-                                {t.rich('Your selected Moderation requests are')}
-                                <div className='col-12 d-flex justify-content-center align-items-center'>
-                                    {loading == false ? (
-                                        <div style={{ paddingLeft: '0px' }}>
-                                            <Table
-                                                columns={columns}
-                                                data={tableData}
-                                                sort={false}
-                                                selector={true}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <Spinner className='spinner' />
-                                    )}
-                                </div>
-                            </Form.Label>
-                            <br />
-                            <Form.Label style={{ fontWeight: 'bold' }}>
-                                {t('Please provide your comments')}{' '}
-                                <span
-                                    className='text-red'
-                                    style={{ color: '#F7941E' }}
+                            <Form.Group className='mb-3'>
+                                <Form.Label className='mb-1'>
+                                    {t.rich('Your selected Moderation requests are')}
+                                    <div className='col-12 d-flex justify-content-center align-items-center'>
+                                        {loading == false ? (
+                                            <div style={{ paddingLeft: '0px' }}>
+                                                <Table
+                                                    columns={columns}
+                                                    data={tableData}
+                                                    sort={false}
+                                                    selector={true}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <Spinner className='spinner' />
+                                        )}
+                                    </div>
+                                </Form.Label>
+                                <br />
+                                <Form.Label style={{ fontWeight: 'bold' }}>
+                                    {t('Please provide your comments')}{' '}
+                                    <span
+                                        className='text-red'
+                                        style={{ color: '#F7941E' }}
+                                    >
+                                        *
+                                    </span>
+                                </Form.Label>
+                                <p
+                                    className='subscriptionBox'
+                                    style={{ textAlign: 'left' }}
                                 >
-                                    *
-                                </span>
-                            </Form.Label>
-                            <p
-                                className='subscriptionBox'
-                                style={{ textAlign: 'left' }}
-                            >
-                                {t('Note for comments')}
-                            </p>
-                            <Form.Control
-                                as='textarea'
-                                name='comment'
-                                aria-label='With textarea'
-                                placeholder='Comment your message...'
-                                onChange={handleUserComment}
-                                required
-                            />
-                        </Form.Group>
-                    </Form>
+                                    {t('Note for comments')}
+                                </p>
+                                <Form.Control
+                                    as='textarea'
+                                    name='comment'
+                                    aria-label='With textarea'
+                                    placeholder='Comment your message...'
+                                    onChange={handleUserComment}
+                                    required
+                                />
+                            </Form.Group>
+                        </Form>
                     </Modal.Body>
-                <Modal.Footer>
-                    <button
-                        className='btn btn-dark'
-                        onClick={() => {
-                            setShow(false)
-                            setHasComment(false)
-                            setStatusCheck(0)
-                            setDisableAcceptMr(false)
-                            setDisableDeclineMr(false)
-                        }}
-                    >
-                        {disableAcceptMr || disableDeclineMr ? t('Close') : t('Cancel')}
-                    </button>
-                    <button
-                        className='btn btn-danger'
-                        onClick={async () => {
-                            await handleBulkDeclineModerationRequests()
-                        }}
-                        disabled={!hasComment || disableDeclineMr}
-                    >
-                        {t('Bulk Decline Moderation Requests')}{' '}
-                        {loading && (
-                            <Spinner
-                                size='sm'
-                                className='ms-1 spinner'
-                            />
-                        )}
-                    </button>
-                    <button
-                        className='btn btn-success'
-                        onClick={async () => {
-                            await handleBulkAcceptModerationRequests()
-                        }}
-                        disabled={!hasComment || disableAcceptMr}
-                    >
-                        {t('Bulk Accept Moderation Requests')}{' '}
-                        {loading && (
-                            <Spinner
-                                size='sm'
-                                className='ms-1 spinner'
-                            />
-                        )}
-                    </button>
-                </Modal.Footer>
-            </Modal>
-        </>
-    )}
+                    <Modal.Footer>
+                        <button
+                            className='btn btn-dark'
+                            onClick={() => {
+                                setShow(false)
+                                setHasComment(false)
+                                setStatusCheck(0)
+                                setDisableAcceptMr(false)
+                                setDisableDeclineMr(false)
+                            }}
+                        >
+                            {disableAcceptMr || disableDeclineMr ? t('Close') : t('Cancel')}
+                        </button>
+                        <button
+                            className='btn btn-danger'
+                            onClick={async () => {
+                                await handleBulkDeclineModerationRequests()
+                            }}
+                            disabled={!hasComment || disableDeclineMr}
+                        >
+                            {t('Bulk Decline Moderation Requests')}{' '}
+                            {loading && (
+                                <Spinner
+                                    size='sm'
+                                    className='ms-1 spinner'
+                                />
+                            )}
+                        </button>
+                        <button
+                            className='btn btn-success'
+                            onClick={async () => {
+                                await handleBulkAcceptModerationRequests()
+                            }}
+                            disabled={!hasComment || disableAcceptMr}
+                        >
+                            {t('Bulk Accept Moderation Requests')}{' '}
+                            {loading && (
+                                <Spinner
+                                    size='sm'
+                                    className='ms-1 spinner'
+                                />
+                            )}
+                        </button>
+                    </Modal.Footer>
+                </Modal>
+            </>
+        )
+    }
 }

@@ -11,7 +11,8 @@
 'use client'
 
 import TableLicense from '@/components/LinkedObligations/TableLicense'
-import { HttpStatus, LicenseDetail, Obligation, ErrorDetails } from '@/object-types'
+import { ErrorDetails, HttpStatus, LicenseDetail, Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -20,7 +21,6 @@ import { useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import styles from '../detail.module.css'
-import MessageService from '@/services/message.service'
 
 interface Props {
     licenseId?: string
@@ -31,7 +31,7 @@ interface Props {
 
 type RowData = Array<string | Obligation | string[]>
 
-const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props) : ReactNode => {
+const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props): ReactNode => {
     const t = useTranslations('default')
     const [data, setData] = useState<Array<RowData>>([])
     const [dataEditWhitelist, setDataEditWhitelist] = useState<Array<RowData>>([])
@@ -81,15 +81,14 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
                 if (response.status !== HttpStatus.OK) {
-                                        const err = await response.json() as ErrorDetails
-                                        throw new Error(err.message)
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
 
-                const license = await response.json() as LicenseDetail
+                const license = (await response.json()) as LicenseDetail
                 if (CommonUtils.isNullEmptyOrUndefinedArray(license._embedded?.['sw360:obligations'])) {
                     setData([])
                 } else {
@@ -106,7 +105,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                             item.text ?? '',
                             item.whitelist ?? [],
                         ])
-                        .filter((item: RowData) => (item[5] as string[]).length  !== 0)
+                        .filter((item: RowData) => (item[5] as string[]).length !== 0)
                     const whitelist = new Map<string, boolean>()
                     data.forEach((element: RowData) => {
                         whitelist.set(CommonUtils.getIdFromUrl((element[0] as Obligation)._links?.self.href), true)
@@ -122,8 +121,8 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                     ])
                     setDataEditWhitelist(dataEditWhitelist)
                 }
-            } catch(error: unknown) {
-                if (error instanceof DOMException && error.name === "AbortError") {
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
@@ -168,8 +167,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     ]
 
     const handlerRadioButton = (item: Obligation) => {
-        if (whitelist === undefined)
-            return
+        if (whitelist === undefined) return
         const id: string = CommonUtils.getIdFromUrl(item._links?.self.href)
         if (whitelist.has(id)) {
             if (whitelist.get(id) !== true) {

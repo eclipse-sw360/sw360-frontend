@@ -26,7 +26,7 @@ function PackageSupplier({
     setPackageSupplierToPackage,
     isPackageSupplier,
     setIsPackageSupplier,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataPackageSupplier
@@ -113,7 +113,10 @@ function PackageSupplier({
                             name='_sw360_portlet_components_SUPPLIER'
                             value='NOASSERTION'
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='supplierNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='supplierNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

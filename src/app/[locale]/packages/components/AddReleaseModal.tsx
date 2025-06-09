@@ -41,7 +41,7 @@ export default function AddReleaseModal({
     setPackagePayload,
     show,
     setShow,
-    setReleaseNameVersion
+    setReleaseNameVersion,
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const searchText = useRef<string>('')
@@ -53,13 +53,13 @@ export default function AddReleaseModal({
     const [releaseData, setReleaseData] = useState<RowData[]>([])
     const [interimReleaseId, setInterimReleaseId] = useState<string>('')
     const [interimReleaseNameVersion, setInterimReleaseNameVersion] = useState<string>('')
-    
+
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
         setMessage(message)
         setShowMessage(true)
     }
-    
+
     const handleSearch = async () => {
         const session = await getSession()
         setShowMessage(false)
@@ -99,11 +99,11 @@ export default function AddReleaseModal({
                     ? []
                     : data['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
                           {
-                            releaseId: release.id ?? '',
-                            releaseName: release.name,
-                            releaseVersion: release.version,
+                              releaseId: release.id ?? '',
+                              releaseName: release.name,
+                              releaseVersion: release.version,
                           },
-                          release.vendor ? release.vendor.fullName ?? '' : '',
+                          release.vendor ? (release.vendor.fullName ?? '') : '',
                           {
                               name: release.name,
                               componentId: release['_links']['sw360:component']['href'].split('/').pop() ?? '',
@@ -118,7 +118,7 @@ export default function AddReleaseModal({
             setReleaseData(tableData)
             setLoading(false)
         } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") {
+            if (error instanceof DOMException && error.name === 'AbortError') {
                 return
             }
             const message = error instanceof Error ? error.message : String(error)
@@ -133,8 +133,15 @@ export default function AddReleaseModal({
             id: 'linkReleases.selectReleaseCheckbox',
             name: '',
             width: '8%',
-            formatter: ({releaseId, releaseName, releaseVersion}:
-                        {releaseId: string, releaseName: string, releaseVersion: string}) =>
+            formatter: ({
+                releaseId,
+                releaseName,
+                releaseVersion,
+            }: {
+                releaseId: string
+                releaseName: string
+                releaseVersion: string
+            }) =>
                 _(
                     <div className='form-check'>
                         <input
@@ -191,29 +198,20 @@ export default function AddReleaseModal({
         },
     ]
 
-    const handleCheckboxes = (releaseId: string,
-                              releaseName: string,
-                              releaseVersion: string) => {
-
-        setInterimReleaseId((prevReleaseId) => 
-            prevReleaseId === releaseId ? '' : releaseId
-        )
+    const handleCheckboxes = (releaseId: string, releaseName: string, releaseVersion: string) => {
+        setInterimReleaseId((prevReleaseId) => (prevReleaseId === releaseId ? '' : releaseId))
         setInterimReleaseNameVersion(`${releaseName} (${releaseVersion})`)
     }
 
-    const handleLinkRelease = (interimReleaseId: string,
-                               interimReleaseNameVersion: string) => {
-        if (!CommonUtils.isNullOrUndefined(interimReleaseId)){
+    const handleLinkRelease = (interimReleaseId: string, interimReleaseNameVersion: string) => {
+        if (!CommonUtils.isNullOrUndefined(interimReleaseId)) {
             setPackagePayload((prevState) => ({
                 ...prevState,
-                releaseId: prevState.releaseId !== interimReleaseId ?
-                                                interimReleaseId :
-                                                prevState.releaseId,
-                }
-            ))
+                releaseId: prevState.releaseId !== interimReleaseId ? interimReleaseId : prevState.releaseId,
+            }))
         }
         if (!CommonUtils.isNullOrUndefined(interimReleaseNameVersion)) {
-                setReleaseNameVersion(interimReleaseNameVersion)
+            setReleaseNameVersion(interimReleaseNameVersion)
         }
     }
 
@@ -241,11 +239,13 @@ export default function AddReleaseModal({
                 <Modal.Title id='linked-projects-modal'>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Alert variant={variant}
-                        onClose={() => setShowMessage(false)}
-                        show={showMessage}
-                        dismissible>
-                        {message}
+                <Alert
+                    variant={variant}
+                    onClose={() => setShowMessage(false)}
+                    show={showMessage}
+                    dismissible
+                >
+                    {message}
                 </Alert>
                 <div className='row'>
                     <div className='col-lg-6'>
@@ -254,15 +254,16 @@ export default function AddReleaseModal({
                             className='form-control'
                             placeholder={t('Enter search text')}
                             aria-describedby='Search Users'
-                            onChange={(event) => {searchText.current = event.target.value }}
+                            onChange={(event) => {
+                                searchText.current = event.target.value
+                            }}
                         />
                     </div>
                     <div className='col-lg-6'>
-                        <button type='button'
-                                className='btn btn-secondary me-2'
-                                onClick={() => 
-                                            void handleSearch()
-                                        }
+                        <button
+                            type='button'
+                            className='btn btn-secondary me-2'
+                            onClick={() => void handleSearch()}
                         >
                             {t('Search')}
                         </button>
@@ -280,24 +281,24 @@ export default function AddReleaseModal({
                             isExactMatch.current = e.target.checked
                         }}
                     />
-                        {loading === false ? (
-                            <Table
-                                columns={columns}
-                                data={releaseData}
-                                sort={false}
-                            />
-                        ) : (
-                            <div
-                                className='col-12'
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Spinner className='spinner' />
-                            </div>
-                        )}
+                    {loading === false ? (
+                        <Table
+                            columns={columns}
+                            data={releaseData}
+                            sort={false}
+                        />
+                    ) : (
+                        <div
+                            className='col-12'
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
                 </div>
             </Modal.Body>
             <Modal.Footer>
@@ -313,17 +314,14 @@ export default function AddReleaseModal({
                     variant='primary'
                     disabled={interimReleaseId.length === 0}
                     onClick={() => {
-                                        handleLinkRelease(interimReleaseId,
-                                                          interimReleaseNameVersion)
-                                        setShow(false)
-                                        setReleaseData([])
-                                        setInterimReleaseId('')
-                                        setInterimReleaseNameVersion('')
-                                        setShowMessage(false)
-                                        isExactMatch.current = false
-
-                                    }
-                            }
+                        handleLinkRelease(interimReleaseId, interimReleaseNameVersion)
+                        setShow(false)
+                        setReleaseData([])
+                        setInterimReleaseId('')
+                        setInterimReleaseNameVersion('')
+                        setShowMessage(false)
+                        isExactMatch.current = false
+                    }}
                 >
                     {t('Link Releases')}
                 </Button>

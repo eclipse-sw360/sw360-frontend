@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { FaFileAlt } from 'react-icons/fa'
 
 import { Changelogs } from '@/object-types'
@@ -22,7 +22,7 @@ interface Props {
     changeLogList: Array<Changelogs>
 }
 
-const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props) : JSX.Element => {
+const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [changeLogData, setChangeLogData] = useState<string[][]>([])
 
@@ -68,7 +68,7 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
                                 setChangesLogTab('view-log')
                             }}
                         />
-                    </div>
+                    </div>,
                 ),
         },
     ]
@@ -76,7 +76,12 @@ const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, change
     return (
         <>
             <div className='row'>
-                <Table data={changeLogData} search={true} columns={columns} selector={true} />
+                <Table
+                    data={changeLogData}
+                    search={true}
+                    columns={columns}
+                    selector={true}
+                />
             </div>
         </>
     )

@@ -14,7 +14,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import HomeTableHeader from './HomeTableHeader'
@@ -56,8 +56,8 @@ function MyTaskSubmissionsWidget(): ReactNode {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('moderationrequest/mySubmissions').then(
-            (moderationRequests: EmbeddedTaskSubmissions | undefined) => {
+        void fetchData('moderationrequest/mySubmissions')
+            .then((moderationRequests: EmbeddedTaskSubmissions | undefined) => {
                 if (moderationRequests === undefined) {
                     return
                 }
@@ -71,15 +71,14 @@ function MyTaskSubmissionsWidget(): ReactNode {
                         ]),
                     )
                 }
-            },
-        )
-        .catch((err: Error) => {
-            throw new Error(err.message)
-        })
-        .finally(() => {
-            setLoading(false)
-        })
-    }, [fetchData,reload])
+            })
+            .catch((err: Error) => {
+                throw new Error(err.message)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }, [fetchData, reload])
 
     const handleDeleteProject = (id: string) => {
         console.log(id)
@@ -91,9 +90,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
             name: t('Document Name'),
             formatter: (cell: string) => {
                 const [documentName, id] = cell.split('|')
-                return _(
-                    <Link href={'moderationrequest/' + id}>{documentName}</Link>,
-                )
+                return _(<Link href={'moderationrequest/' + id}>{documentName}</Link>)
             },
         },
         t('Status'),
@@ -121,7 +118,10 @@ function MyTaskSubmissionsWidget(): ReactNode {
 
     return (
         <div>
-            <HomeTableHeader title={title} setReload={setReload} />
+            <HomeTableHeader
+                title={title}
+                setReload={setReload}
+            />
             {loading === false ? (
                 <Table
                     columns={columns}

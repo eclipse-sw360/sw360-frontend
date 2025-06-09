@@ -26,7 +26,7 @@ function PackageOriginator({
     setPackageOriginatorToPackage,
     isPackageOriginator,
     setIsPackageOriginator,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataPackageOriginator
@@ -113,7 +113,10 @@ function PackageOriginator({
                             onClick={selectPackageOriginatorNoasserttion}
                             checked={!isPackageOriginator}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='originatorNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='originatorNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

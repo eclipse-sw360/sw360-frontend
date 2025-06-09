@@ -130,7 +130,7 @@ function reducer(state: SEARCH_STATE, action: SEARCH_ACTIONS): SEARCH_STATE {
     }
 }
 
-function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchResult[] | null>> }) : ReactNode {
+function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchResult[] | null>> }): ReactNode {
     const t = useTranslations('default')
 
     const initialState: SEARCH_STATE = {
@@ -180,7 +180,7 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
             } else if (response.status !== HttpStatus.OK) {
                 notFound()
             }
-            const data = await response.json() as EmbeddedSearchResults
+            const data = (await response.json()) as EmbeddedSearchResults
             if (!CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:searchResults']))
                 setData(data['_embedded']['sw360:searchResults'])
         } catch (e) {
@@ -191,7 +191,10 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
     return (
         <>
             <div className='card-deck'>
-                <div id='keyword-search' className='card'>
+                <div
+                    id='keyword-search'
+                    className='card'
+                >
                     <div className='card-header'>{t('Keyword Search')}</div>
                     <div className='card-body'>
                         <input
@@ -215,8 +218,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_PROJECTS' })}
                                 id='keyboard-check-projects'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-projects'>
-                                <svg className='project_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-projects'
+                            >
+                                <svg
+                                    className='project_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#project'></use>
                                 </svg>{' '}
                                 {'Projects'}
@@ -230,8 +240,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_COMPONENTS' })}
                                 id='keyboard-check-components'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-components'>
-                                <svg className='component_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-components'
+                            >
+                                <svg
+                                    className='component_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#component'></use>
                                 </svg>{' '}
                                 {'Components'}
@@ -245,8 +262,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_LICENSES' })}
                                 id='keyboard-check-licenses'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-licenses'>
-                                <svg className='license_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-licenses'
+                            >
+                                <svg
+                                    className='license_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#license'></use>
                                 </svg>{' '}
                                 {'Licenses'}
@@ -260,8 +284,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_RELEASES' })}
                                 id='keyboard-check-releases'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-releases'>
-                                <svg className='release_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-releases'
+                            >
+                                <svg
+                                    className='release_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#release'></use>
                                 </svg>{' '}
                                 {'Releases'}
@@ -275,8 +306,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_PACKAGES' })}
                                 id='keyboard-check-packages'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-packages'>
-                                <svg className='package_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-packages'
+                            >
+                                <svg
+                                    className='package_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#project'></use>
                                 </svg>{' '}
                                 {'Packages'}
@@ -290,8 +328,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_OBLIGATIONS' })}
                                 id='keyboard-check-obligations'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-obligations'>
-                                <svg className='obligation_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-obligations'
+                            >
+                                <svg
+                                    className='obligation_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#obligation'></use>
                                 </svg>{' '}
                                 {'Obligations'}
@@ -305,8 +350,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_USERS' })}
                                 id='keyboard-check-users'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-users'>
-                                <svg className='user_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-users'
+                            >
+                                <svg
+                                    className='user_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#user'></use>
                                 </svg>{' '}
                                 {'Users'}
@@ -320,8 +372,15 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_VENDORS' })}
                                 id='keyboard-check-vendors'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-vendors'>
-                                <svg className='vendor_icon mb-1' height={18} width={18}>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-vendors'
+                            >
+                                <svg
+                                    className='vendor_icon mb-1'
+                                    height={18}
+                                    width={18}
+                                >
                                     <use href='icons.svg#vendor'></use>
                                 </svg>{' '}
                                 {'Vendors'}
@@ -335,12 +394,19 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                                 onChange={() => dispatch({ type: 'TOGGLE_ENTIRE_DOCUMENT' })}
                                 id='keyboard-check-entire-document'
                             />
-                            <label className='form-check-label fw-medium' htmlFor='keyboard-check-entire-document'>
+                            <label
+                                className='form-check-label fw-medium'
+                                htmlFor='keyboard-check-entire-document'
+                            >
                                 {'Entire Document'}
                             </label>
                         </div>
                         <div className='row mt-2'>
-                            <div className='btn-group' role='group' aria-label='Toggle buttons'>
+                            <div
+                                className='btn-group'
+                                role='group'
+                                aria-label='Toggle buttons'
+                            >
                                 <button
                                     type='button'
                                     className='btn btn-sm btn-secondary'
@@ -358,7 +424,11 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
                             </div>
                         </div>
                         <div className='row mt-4 px-2'>
-                            <button type='button' className='btn btn-sm btn-primary' onClick={() => void handleSearch()}>
+                            <button
+                                type='button'
+                                className='btn btn-sm btn-primary'
+                                onClick={() => void handleSearch()}
+                            >
                                 {t('Search')}
                             </button>
                         </div>

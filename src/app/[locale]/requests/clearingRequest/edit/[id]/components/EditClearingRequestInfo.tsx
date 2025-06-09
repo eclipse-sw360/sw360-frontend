@@ -9,38 +9,40 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { signOut, useSession } from 'next-auth/react'
-import { ReactNode, useEffect, useState } from 'react'
-import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
+import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
+import { ReactNode, useEffect, useState } from 'react'
 
 interface Props {
-    clearingRequestData: ClearingRequestDetails | undefined,
+    clearingRequestData: ClearingRequestDetails | undefined
     updateClearingRequestPayload: UpdateClearingRequestPayload
-    setUpdateClearingRequestPayload : React.Dispatch<React.SetStateAction<UpdateClearingRequestPayload>>
+    setUpdateClearingRequestPayload: React.Dispatch<React.SetStateAction<UpdateClearingRequestPayload>>
 }
 
 interface DataTypeProp {
-    [key: string]: string;
+    [key: string]: string
 }
 
-export default function EditClearingRequestInfo({ clearingRequestData,
-                                                  updateClearingRequestPayload,
-                                                  setUpdateClearingRequestPayload }: Props): ReactNode {
+export default function EditClearingRequestInfo({
+    clearingRequestData,
+    updateClearingRequestPayload,
+    setUpdateClearingRequestPayload,
+}: Props): ReactNode {
     const t = useTranslations('default')
-    const { data:session, status } = useSession()
+    const { data: session, status } = useSession()
     const [minDate, setMinDate] = useState('')
     const [dialogOpenRequestingUser, setDialogOpenRequestingUser] = useState(false)
     const [requestingUserData, setRequestingUserData] = useState<{ [k: string]: string }>({})
 
     useEffect(() => {
-        const currentDate = new Date();
-        setMinDate(currentDate.toISOString().split('T')[0]);
+        const currentDate = new Date()
+        setMinDate(currentDate.toISOString().split('T')[0])
     }, [])
-    
+
     const setRequestingUserEmail = (user: DataTypeProp) => {
         const userEmails = Object.keys(user)
         setRequestingUserData(user)
@@ -50,103 +52,108 @@ export default function EditClearingRequestInfo({ clearingRequestData,
         })
     }
 
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                     HTMLInputElement |
-                                     HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setUpdateClearingRequestPayload({
             ...updateClearingRequestPayload,
             [event.target.name]: event.target.value,
         })
     }
 
-
     if (status === 'unauthenticated') {
         void signOut()
     } else {
-    return (
-        <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
-                <thead>
-                    <tr>
-                        <th colSpan={2}>{t('Clearing Request')}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{t('Requesting User')}:</td>
-                        <td>
-                            <input
-                                type='text'
-                                className='form-control'
-                                id='editClearingRequest.requestingUser'
-                                readOnly={true}
-                                name='requestingUser'
-                                onClick={() => setDialogOpenRequestingUser(true)}
-                                value={updateClearingRequestPayload.requestingUser}
-                                disabled={CommonUtils.isNullOrUndefined(session) || session.user.userGroup === UserGroupType.USER}
-
-                            />
-                            <SelectUsersDialog
-                                show={dialogOpenRequestingUser}
-                                setShow={setDialogOpenRequestingUser}
-                                setSelectedUsers={setRequestingUserEmail}
-                                selectedUsers={requestingUserData}
-                                multiple={false}
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{t('Created On')}:</td>
-                        <td>{clearingRequestData?.createdOn ?? ''}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Preferred Clearing Date')}:</td>
-                        <td>
-                            <input
-                                type='date'
-                                className='form-control'
-                                aria-label='Preferred Clearing Date YYYY-MM-DD'
-                                id='requestedClearingDate'
-                                aria-describedby='requestedClearingDate'
-                                name='requestedClearingDate'
-                                value={updateClearingRequestPayload.requestedClearingDate}
-                                onChange={updateInputField}
-                                min={minDate}
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{t('Business Area Line')}:</td>
-                        <td>{clearingRequestData?.projectBU ?? ''}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Clearing Type')}:</td>
-                        <td>
-                            <select
-                                className='form-select'
-                                id='editClearingRequest.clearingType'
-                                name='clearingType'
-                                value={updateClearingRequestPayload.clearingType}
-                                onChange={updateInputField}
-                                disabled={CommonUtils.isNullOrUndefined(session) || session.user.userGroup === UserGroupType.USER}
-                                required
-                            >
-                                <option value='DEEP'>{t('Deep Level CLX')}</option>
-                                <option value='HIGH'>{t('High Level ISR')}</option>
-                            </select>
-                            <div className='form-text'
-                                 id='editClearingRequest.clearingType.HelpBlock'>
-                                 <ShowInfoOnHover text={t('Clearing request type info')}/>
-                                                {' '}{t('Learn more about clearing request type')}.
-                            </div>
-                        </td> 
-                    </tr>
-                    <tr>
-                        <td>{t('Requester Comment')}:</td>
-                        <td>{clearingRequestData?.requestingUserComment ?? ''}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </>
-    )}
+        return (
+            <>
+                <table className={`table label-value-table ${styles['summary-table']}`}>
+                    <thead>
+                        <tr>
+                            <th colSpan={2}>{t('Clearing Request')}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{t('Requesting User')}:</td>
+                            <td>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    id='editClearingRequest.requestingUser'
+                                    readOnly={true}
+                                    name='requestingUser'
+                                    onClick={() => setDialogOpenRequestingUser(true)}
+                                    value={updateClearingRequestPayload.requestingUser}
+                                    disabled={
+                                        CommonUtils.isNullOrUndefined(session) ||
+                                        session.user.userGroup === UserGroupType.USER
+                                    }
+                                />
+                                <SelectUsersDialog
+                                    show={dialogOpenRequestingUser}
+                                    setShow={setDialogOpenRequestingUser}
+                                    setSelectedUsers={setRequestingUserEmail}
+                                    selectedUsers={requestingUserData}
+                                    multiple={false}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{t('Created On')}:</td>
+                            <td>{clearingRequestData?.createdOn ?? ''}</td>
+                        </tr>
+                        <tr>
+                            <td>{t('Preferred Clearing Date')}:</td>
+                            <td>
+                                <input
+                                    type='date'
+                                    className='form-control'
+                                    aria-label='Preferred Clearing Date YYYY-MM-DD'
+                                    id='requestedClearingDate'
+                                    aria-describedby='requestedClearingDate'
+                                    name='requestedClearingDate'
+                                    value={updateClearingRequestPayload.requestedClearingDate}
+                                    onChange={updateInputField}
+                                    min={minDate}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{t('Business Area Line')}:</td>
+                            <td>{clearingRequestData?.projectBU ?? ''}</td>
+                        </tr>
+                        <tr>
+                            <td>{t('Clearing Type')}:</td>
+                            <td>
+                                <select
+                                    className='form-select'
+                                    id='editClearingRequest.clearingType'
+                                    name='clearingType'
+                                    value={updateClearingRequestPayload.clearingType}
+                                    onChange={updateInputField}
+                                    disabled={
+                                        CommonUtils.isNullOrUndefined(session) ||
+                                        session.user.userGroup === UserGroupType.USER
+                                    }
+                                    required
+                                >
+                                    <option value='DEEP'>{t('Deep Level CLX')}</option>
+                                    <option value='HIGH'>{t('High Level ISR')}</option>
+                                </select>
+                                <div
+                                    className='form-text'
+                                    id='editClearingRequest.clearingType.HelpBlock'
+                                >
+                                    <ShowInfoOnHover text={t('Clearing request type info')} />{' '}
+                                    {t('Learn more about clearing request type')}.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{t('Requester Comment')}:</td>
+                            <td>{clearingRequestData?.requestingUserComment ?? ''}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </>
+        )
+    }
 }

@@ -9,23 +9,23 @@
 
 'use client'
 
+import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
+import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
+import { Changelogs, HttpStatus } from '@/object-types'
+import { ApiUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
-import { HttpStatus, Changelogs } from '@/object-types'
-import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
-import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { ApiUtils } from '@/utils'
 
 interface PackageChangelogs {
     _embedded: {
-      "sw360:changeLogs": Array<Changelogs>
+        'sw360:changeLogs': Array<Changelogs>
     }
-  }
+}
 
-function ChangeLog({ packageId }: { packageId: string }) : ReactNode {
+function ChangeLog({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [key, setKey] = useState('list-change')
@@ -43,19 +43,17 @@ function ChangeLog({ packageId }: { packageId: string }) : ReactNode {
                 const response = await ApiUtils.GET(
                     `changelog/document/${packageId}`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-        
-                const data = await response.json() as PackageChangelogs
-        
-                setChangeLogList(
-                    data['_embedded']['sw360:changeLogs']
-                )
+
+                const data = (await response.json()) as PackageChangelogs
+
+                setChangeLogList(data['_embedded']['sw360:changeLogs'])
             } catch (e) {
                 console.error(e)
             }
@@ -66,17 +64,27 @@ function ChangeLog({ packageId }: { packageId: string }) : ReactNode {
 
     return (
         <>
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k ?? '')}>
+            <Tab.Container
+                id='views-tab'
+                activeKey={key}
+                onSelect={(k) => setKey(k ?? '')}
+            >
                 <div className='row'>
                     <div className='col ps-0'>
-                        <Nav variant='pills' className='d-inline-flex'>
+                        <Nav
+                            variant='pills'
+                            className='d-inline-flex'
+                        >
                             <Nav.Item>
                                 <Nav.Link eventKey='list-change'>
                                     <span className='fw-medium'>{t('Change Log')}</span>
                                 </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link eventKey='view-log' disabled={changeLogIndex === -1}>
+                                <Nav.Link
+                                    eventKey='view-log'
+                                    disabled={changeLogIndex === -1}
+                                >
                                     <span className='fw-medium'>{t('Changes')}</span>
                                 </Nav.Link>
                             </Nav.Item>
@@ -94,7 +102,10 @@ function ChangeLog({ packageId }: { packageId: string }) : ReactNode {
                     </Tab.Pane>
                     <Tab.Pane eventKey='view-log'>
                         <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                        <div id='cardScreen' style={{ padding: '0px' }}></div>
+                        <div
+                            id='cardScreen'
+                            style={{ padding: '0px' }}
+                        ></div>
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>

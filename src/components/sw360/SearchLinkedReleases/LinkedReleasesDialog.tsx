@@ -13,7 +13,7 @@
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
@@ -40,7 +40,7 @@ const LinkedReleasesDialog = ({
     setReleaseLinks,
     releasePayload,
     setReleasePayload,
-}: Props) : JSX.Element => {
+}: Props): JSX.Element => {
     const t = useTranslations('default')
     const [data, setData] = useState<(string | ReleaseDetail)[][]>([])
     const params = useSearchParams()
@@ -63,16 +63,18 @@ const LinkedReleasesDialog = ({
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
-                const queryUrl = CommonUtils.createUrlWithParams(`releases`, { ...Object.fromEntries(params), allDetails: 'true' })
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(`releases`, {
+                    ...Object.fromEntries(params),
+                    allDetails: 'true',
+                })
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const releases = await response.json() as EmbeddedReleases
+                const releases = (await response.json()) as EmbeddedReleases
                 if (
                     !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
@@ -115,11 +117,17 @@ const LinkedReleasesDialog = ({
 
     const getLinkedReleases: (releaseLink: ReleaseLink[]) => void = useCallback(
         (releaseLink: ReleaseLink[]) => setLinkedReleasesResponse(releaseLink),
-        []
+        [],
     )
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
@@ -162,7 +170,11 @@ const LinkedReleasesDialog = ({
                 >
                     {t('Close')}
                 </Button>
-                <Button type='button' className={`fw-bold btn btn-secondary`} onClick={handleClickSelectLinkedReleases}>
+                <Button
+                    type='button'
+                    className={`fw-bold btn btn-secondary`}
+                    onClick={handleClickSelectLinkedReleases}
+                >
                     {t('Link Releases')}
                 </Button>
             </Modal.Footer>

@@ -9,19 +9,19 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useSearchParams, notFound } from 'next/navigation'
 import { CommonUtils } from '@/utils'
+import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode } from 'react'
 import DuplicateObligation from './components/DuplicateObligation'
 
-const DuplicateObligationPage = () : ReactNode => {
+const DuplicateObligationPage = (): ReactNode => {
     const searchParams = useSearchParams()
     const obligationId = searchParams.get('id')
 
-    return (
-        (CommonUtils.isNullEmptyOrUndefinedString(obligationId))
-        ? notFound()
-        : <DuplicateObligation obligationId={obligationId} />
+    return CommonUtils.isNullEmptyOrUndefinedString(obligationId) ? (
+        notFound()
+    ) : (
+        <DuplicateObligation obligationId={obligationId} />
     )
 }
 

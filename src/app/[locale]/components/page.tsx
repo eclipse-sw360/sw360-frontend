@@ -10,14 +10,14 @@
 
 import { Metadata } from 'next'
 
-import ComponentIndex from './components/ComponentIndex'
 import { ReactNode } from 'react'
+import ComponentIndex from './components/ComponentIndex'
 
 export const metadata: Metadata = {
     title: 'Components',
 }
 
-function ComponentIndexPage() : ReactNode {
+function ComponentIndexPage(): ReactNode {
     return <ComponentIndex />
 }
 

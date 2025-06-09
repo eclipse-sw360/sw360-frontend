@@ -81,7 +81,10 @@ function MySubscriptionsWidget(): ReactNode {
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('My Subscriptions')} setReload={setReload} />
+            <HomeTableHeader
+                title={t('My Subscriptions')}
+                setReload={setReload}
+            />
             {loading === false ? (
                 <>
                     {componentData.length > 0 && (

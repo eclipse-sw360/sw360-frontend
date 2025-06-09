@@ -19,7 +19,7 @@ interface Props {
     release: ReleaseDetail
 }
 
-const ReleaseVendor = ({ release }: Props) : ReactNode => {
+const ReleaseVendor = ({ release }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 

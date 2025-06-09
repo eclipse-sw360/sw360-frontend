@@ -18,7 +18,7 @@ import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
 import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession, getSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -36,8 +36,7 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
 
         void (async () => {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             try {
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
@@ -50,7 +49,7 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
                     return notFound()
                 }
 
-                const data = await response.json() as SummaryDataType | AdministrationDataType
+                const data = (await response.json()) as SummaryDataType | AdministrationDataType
 
                 setSummaryData({ ...data, id: projectId } as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)

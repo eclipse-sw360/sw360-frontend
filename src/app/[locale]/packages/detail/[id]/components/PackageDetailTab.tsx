@@ -10,17 +10,17 @@
 'use client'
 
 import { HttpStatus, Package } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState, ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
-import MessageService from '@/services/message.service'
-import Summary from './Summary'
 import ChangeLog from './Changelog'
+import Summary from './Summary'
 
-export default function PackageDetailTab({ packageId }: { packageId: string }) : ReactNode {
+export default function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
@@ -34,18 +34,14 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `packages/${packageId}`,
-                    session.user.access_token,
-                    signal
-                )
+                const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token, signal)
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
 
-                const data = await response.json() as Package
+                const data = (await response.json()) as Package
 
                 setSummaryData({ id: packageId, ...data })
             } catch (e) {
@@ -58,11 +54,10 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
 
     const handleEditPackage = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
-        if (session.user.email === summaryData?._embedded?.createdBy?.email){
+        if (session.user.email === summaryData?._embedded?.createdBy?.email) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/packages/edit/${packageId}`)
-        }
-        else {
+        } else {
             MessageService.success(t('You will create a moderation request if you update'))
             router.push(`/packages/edit/${packageId}`)
         }
@@ -71,14 +66,24 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
     return (
         <>
             <div className='container page-content'>
-                <Tab.Container defaultActiveKey='summary' mountOnEnter={true} unmountOnExit={true}>
+                <Tab.Container
+                    defaultActiveKey='summary'
+                    mountOnEnter={true}
+                    unmountOnExit={true}
+                >
                     <div className='row'>
                         <div className='col-sm-2 me-3'>
                             <ListGroup>
-                                <ListGroup.Item action eventKey='summary'>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='summary'
+                                >
                                     <div className='my-2'>{t('Summary')}</div>
                                 </ListGroup.Item>
-                                <ListGroup.Item action eventKey='changeLog'>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='changeLog'
+                                >
                                     <div className='my-2'>{t('Change Log')}</div>
                                 </ListGroup.Item>
                             </ListGroup>
@@ -100,7 +105,10 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
                                 <Tab.Content>
                                     <Tab.Pane eventKey='summary'>
                                         {!summaryData ? (
-                                            <div className='col-12' style={{ textAlign: 'center' }}>
+                                            <div
+                                                className='col-12'
+                                                style={{ textAlign: 'center' }}
+                                            >
                                                 <Spinner className='spinner' />
                                             </div>
                                         ) : (

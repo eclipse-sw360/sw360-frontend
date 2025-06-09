@@ -11,7 +11,7 @@
 import { Component } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { Table, _ } from '../sw360'
 import styles from './ResourceUsing.module.css'
 
@@ -52,7 +52,7 @@ const ComponentsUsing = ({ componentsUsing, documentName }: Props): JSX.Element 
                     href={`/components/detail/${component._links?.self.href.split('/').at(-1)}`}
                 >
                     {component.name}
-                </Link>
+                </Link>,
             ) as JSX.Element,
             component.mainLicenseIds ? component.mainLicenseIds.join(', ') : '',
             component.componentType ?? '',
@@ -63,7 +63,10 @@ const ComponentsUsing = ({ componentsUsing, documentName }: Props): JSX.Element 
     return (
         <>
             <h5 id={styles['upper-case-title']}>{`${documentName} ${t('IS USED BY THE FOLLOWING COMPONENTS')}`}</h5>
-            <Table data={tableData} columns={columns} />
+            <Table
+                data={tableData}
+                columns={columns}
+            />
         </>
     )
 }

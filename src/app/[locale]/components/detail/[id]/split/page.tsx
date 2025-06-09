@@ -15,7 +15,7 @@ interface Context {
 }
 
 const Detail = async (props: Context): Promise<ReactNode> => {
-    const params = await props.params;
+    const params = await props.params
     const componentId = params.id
 
     return <SplitOverview id={componentId} />

@@ -9,12 +9,12 @@
 
 'use client'
 
+import { Vulnerability } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ReactNode, useState } from 'react'
-import { Vulnerability } from '@/object-types'
 
-export default function Summary({ summaryData }: { summaryData: Vulnerability }) : ReactNode {
+export default function Summary({ summaryData }: { summaryData: Vulnerability }): ReactNode {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
 

@@ -10,10 +10,10 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState, ReactNode } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { HttpStatus, LicensePayload } from '@/object-types'
@@ -26,7 +26,7 @@ interface Props {
     setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNode => {
+const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
     const [variant, setVariant] = useState('success')
@@ -47,8 +47,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
 
     const deleteLicense = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return
         const response = await ApiUtils.DELETE(`licenses/${licensePayload.shortName}`, session.user.access_token)
         try {
             if (response.status == HttpStatus.OK) {
@@ -82,7 +81,13 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414' }}>
                 <h5>
                     <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
@@ -108,7 +113,12 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
                 </button>
             </Modal.Header>
             <Modal.Body>
-                <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
+                <Alert
+                    variant={variant}
+                    onClose={() => setShowMessage(false)}
+                    dismissible
+                    show={showMessage}
+                >
                     {message}
                 </Alert>
                 <Form>
@@ -119,10 +129,19 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
                 </Form>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {t('Cancel')}
                 </Button>
-                <Button className='login-btn' variant='danger' onClick={() => handleSubmit()} hidden={reloadPage}>
+                <Button
+                    className='login-btn'
+                    variant='danger'
+                    onClick={() => handleSubmit()}
+                    hidden={reloadPage}
+                >
                     {t('Delete License')}
                 </Button>
             </Modal.Footer>

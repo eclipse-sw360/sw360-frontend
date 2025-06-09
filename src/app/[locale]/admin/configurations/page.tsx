@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import FeatureConfigurations from './components/FeatureConfigurations'
 import { Metadata } from 'next'
 import type { JSX } from 'react'
+import FeatureConfigurations from './components/FeatureConfigurations'
 
 export const metadata: Metadata = {
     title: 'Configurations',

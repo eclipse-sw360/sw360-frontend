@@ -9,18 +9,18 @@
 
 'use client'
 
+import { useTranslations } from 'next-intl'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { Modal } from 'react-bootstrap'
 import { AiOutlineInfoCircle } from 'react-icons/ai'
-import { useTranslations } from "next-intl"
-import { Dispatch, ReactNode, SetStateAction } from 'react'
 
 export default function LicenseInfoDownloadConfirmationModal({
     show,
-    setShow
-} :{
+    setShow,
+}: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
-}) : ReactNode {
+}): ReactNode {
     const t = useTranslations('default')
 
     return (
@@ -32,7 +32,7 @@ export default function LicenseInfoDownloadConfirmationModal({
                 onHide={() => setShow(false)}
                 scrollable
             >
-                <Modal.Header 
+                <Modal.Header
                     style={{ backgroundColor: '#eef2fa', color: '#2e5aac' }}
                     closeButton
                 >
@@ -41,7 +41,9 @@ export default function LicenseInfoDownloadConfirmationModal({
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>{t('Downloading is in progress')}. {t('It will be sent you over an email once its completed')}.</p>
+                    <p>
+                        {t('Downloading is in progress')}. {t('It will be sent you over an email once its completed')}.
+                    </p>
                 </Modal.Body>
                 <Modal.Footer>
                     <button

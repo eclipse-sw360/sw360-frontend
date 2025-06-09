@@ -25,7 +25,7 @@ interface SnippetRangeInput {
     reference: string
 }
 
-function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props) : ReactNode {
+function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: SnippetRange[] = [...inputList]
@@ -58,7 +58,10 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
         <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1rem' }}>
             {inputList.map((elem, j) => {
                 return (
-                    <div key={j} style={{ display: 'flex', marginBottom: '0.75rem' }}>
+                    <div
+                        key={j}
+                        style={{ display: 'flex', marginBottom: '0.75rem' }}
+                    >
                         <select
                             style={{ flex: 1, marginRight: '1rem' }}
                             className='form-control range-type form-select'
@@ -96,11 +99,18 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
                             value={elem.reference}
                             onChange={(e) => handleInputChange(e, j)}
                         />
-                        <FaTrashAlt className='spdx-delete-icon-main' onClick={() => handleRemoveClick(j)} />
+                        <FaTrashAlt
+                            className='spdx-delete-icon-main'
+                            onClick={() => handleRemoveClick(j)}
+                        />
                     </div>
                 )
             })}
-            <button id='addNewRange' className='spdx-add-button-sub' onClick={() => handleAddClick()}>
+            <button
+                id='addNewRange'
+                className='spdx-add-button-sub'
+                onClick={() => handleAddClick()}
+            >
                 Add new Range
             </button>
         </div>

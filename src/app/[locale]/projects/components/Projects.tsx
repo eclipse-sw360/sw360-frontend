@@ -11,6 +11,7 @@
 'use client'
 
 import { Embedded, HttpStatus, Project as TypeProject } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -18,15 +19,14 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
+import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
 import DeleteProjectDialog from './DeleteProjectDialog'
 import ImportSBOMModal from './ImportSBOMModal'
-import MessageService from '@/services/message.service'
-import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
 
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
@@ -54,20 +54,20 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                 if (!session) {
                     return signOut()
                 }
-    
+
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearingCount`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
                 if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-    
-                const data = await response.json() as LicenseClearingData
-    
+
+                const data = (await response.json()) as LicenseClearingData
+
                 setLcData(data)
             } catch (e) {
                 console.error(e)
@@ -82,7 +82,10 @@ function LicenseClearing({ projectId }: { projectId: string }) {
                 <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
             ) : (
                 <div className='col-12 text-center'>
-                    <Spinner className='spinner' size='sm'/>
+                    <Spinner
+                        className='spinner'
+                        size='sm'
+                    />
                 </div>
             )}
         </>
@@ -96,8 +99,10 @@ function Project(): JSX.Element {
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>
-                                                            ({ show: false, importType: 'SPDX' })
+    const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
+        show: false,
+        importType: 'SPDX',
+    })
 
     const [showCreateCRModal, setShowCreateCRModal] = useState(false)
     const [createCRProjectId, setCreateCRProjectId] = useState('')
@@ -124,13 +129,16 @@ function Project(): JSX.Element {
             id: 'projects.name',
             name: t('Project Name'),
             width: '15%',
-            formatter: ({ id, name, version }: { id: string; name: string; version: string; }) =>
+            formatter: ({ id, name, version }: { id: string; name: string; version: string }) =>
                 _(
                     <>
-                        <Link href={`/projects/detail/${id}`} className='text-link'>
-                            {name}{' '}{(version !== "") && `(${version})`}
+                        <Link
+                            href={`/projects/detail/${id}`}
+                            className='text-link'
+                        >
+                            {name} {version !== '' && `(${version})`}
                         </Link>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -146,10 +154,13 @@ function Project(): JSX.Element {
             formatter: (email: string) =>
                 _(
                     <>
-                        <Link href={`mailto:${email}`} className='text-link'>
+                        <Link
+                            href={`mailto:${email}`}
+                            className='text-link'
+                        >
                             {email}
                         </Link>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -181,7 +192,7 @@ function Project(): JSX.Element {
                                 <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
                             )}
                         </OverlayTrigger>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -207,35 +218,39 @@ function Project(): JSX.Element {
                                     <FaPencilAlt className='btn-icon' />
                                 </span>
                             </OverlayTrigger>
-                            {   
-                                clearingRequestId !== '' ? (
-                                    <OverlayTrigger overlay={<Tooltip>{t("View Clearing Request")}</Tooltip>}>
-                                        <span
-                                            className='d-inline-block'
-                                            onClick={() => {
-                                                setClearingRequestId(clearingRequestId)
-                                                setShowViewCRModal(true)
-                                            }}
-                                        >
-                                            <MdOutlineTask className='btn-icon overlay-trigger' style={{ fill: 'orange' }}  />
-                                        </span>
-                                    </OverlayTrigger>
-                                ) : (
-                                    <OverlayTrigger overlay={<Tooltip>{t("Create Clearing Request")}</Tooltip>}>
-                                        <span
-                                            className='d-inline-block'
-                                            onClick={() => {
-                                                setCreateCRProjectId(projectId)
-                                                setShowCreateCRModal(true)
-                                            }}
-                                        >
-                                            <MdOutlineTask className='btn-icon overlay-trigger' />
-                                        </span>
-                                    </OverlayTrigger>
-                                )
-                            }
+                            {clearingRequestId !== '' ? (
+                                <OverlayTrigger overlay={<Tooltip>{t('View Clearing Request')}</Tooltip>}>
+                                    <span
+                                        className='d-inline-block'
+                                        onClick={() => {
+                                            setClearingRequestId(clearingRequestId)
+                                            setShowViewCRModal(true)
+                                        }}
+                                    >
+                                        <MdOutlineTask
+                                            className='btn-icon overlay-trigger'
+                                            style={{ fill: 'orange' }}
+                                        />
+                                    </span>
+                                </OverlayTrigger>
+                            ) : (
+                                <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
+                                    <span
+                                        className='d-inline-block'
+                                        onClick={() => {
+                                            setCreateCRProjectId(projectId)
+                                            setShowCreateCRModal(true)
+                                        }}
+                                    >
+                                        <MdOutlineTask className='btn-icon overlay-trigger' />
+                                    </span>
+                                </OverlayTrigger>
+                            )}
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
-                                <Link href={`/projects/duplicate/${projectId}`} className='overlay-trigger'>
+                                <Link
+                                    href={`/projects/duplicate/${projectId}`}
+                                    className='overlay-trigger'
+                                >
                                     <FaClipboard className='btn-icon' />
                                 </Link>
                             </OverlayTrigger>
@@ -250,7 +265,7 @@ function Project(): JSX.Element {
                                 </span>
                             </OverlayTrigger>
                         </span>
-                    </>
+                    </>,
                 ),
             sort: true,
         },
@@ -258,7 +273,7 @@ function Project(): JSX.Element {
 
     const initServerPaginationConfig = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
-        
+
         const searchParams = Object.fromEntries(params)
         searchParams.allDetails = 'true'
 
@@ -267,19 +282,21 @@ function Project(): JSX.Element {
             then: (data: EmbeddedProjects) => {
                 return data._embedded['sw360:projects'].map((elem: TypeProject) => {
                     const clearingRequestId = elem.clearingRequestId ?? ''
-                    const projectId = elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1)
-                    
+                    const projectId = elem['_links']['self']['href'].substring(
+                        elem['_links']['self']['href'].lastIndexOf('/') + 1,
+                    )
+
                     return [
                         {
                             id: projectId,
                             name: elem.name,
-                            version: elem.version ?? ''
+                            version: elem.version ?? '',
                         },
                         elem.description ?? '',
                         elem.projectResponsible ?? '',
                         { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
                         projectId,
-                        [projectId, clearingRequestId]
+                        [projectId, clearingRequestId],
                     ]
                 })
             },
@@ -288,44 +305,37 @@ function Project(): JSX.Element {
         }
     }
 
-    const exportProjectSpreadsheet = async ({withLinkedRelease} : {withLinkedRelease : boolean}) => {
+    const exportProjectSpreadsheet = async ({ withLinkedRelease }: { withLinkedRelease: boolean }) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             if (withLinkedRelease === false) {
                 const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
                 if (response.status == HttpStatus.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                }
-                else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == HttpStatus.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                }
-                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                }
-                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
-            }
-            else {
-                const response = await ApiUtils.GET('reports?module=PROJECTS&withLinkedRelease=true',
-                                                     session.user.access_token)
+            } else {
+                const response = await ApiUtils.GET(
+                    'reports?module=PROJECTS&withLinkedRelease=true',
+                    session.user.access_token,
+                )
                 if (response.status == HttpStatus.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                }
-                else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == HttpStatus.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                }
-                else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                }
-                else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == HttpStatus.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             }
-        }
-        catch(e) {
+        } catch (e) {
             console.log(e)
         }
     }
@@ -436,31 +446,56 @@ function Project(): JSX.Element {
 
     return (
         <>
-            <ImportSBOMModal importSBOMMetadata={importSBOMMetadata} setImportSBOMMetadata={setImportSBOMMetadata} />
-            {
-                deleteProjectId &&
-                <DeleteProjectDialog projectId={deleteProjectId} show={deleteDialogOpen} setShow={setDeleteDialogOpen} />
-            }
+            <ImportSBOMModal
+                importSBOMMetadata={importSBOMMetadata}
+                setImportSBOMMetadata={setImportSBOMMetadata}
+            />
+            {deleteProjectId && (
+                <DeleteProjectDialog
+                    projectId={deleteProjectId}
+                    show={deleteDialogOpen}
+                    setShow={setDeleteDialogOpen}
+                />
+            )}
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
-                        <AdvancedSearch title='Advanced Search'
-                                        fields={advancedSearch}
-                                        />
+                        <AdvancedSearch
+                            title='Advanced Search'
+                            fields={advancedSearch}
+                        />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between'>
                             <div className='col-lg-5'>
                                 <div className='row'>
-                                    <div className='btn-group col-auto' role='group'>
-                                        <button className='btn btn-primary' onClick={handleAddProject}>
+                                    <div
+                                        className='btn-group col-auto'
+                                        role='group'
+                                    >
+                                        <button
+                                            className='btn btn-primary'
+                                            onClick={handleAddProject}
+                                        >
                                             {t('Add Project')}
                                         </button>
                                         <Dropdown>
                                             <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
                                             <Dropdown.Menu>
-                                                <Dropdown.Item onClick={() => setImportSBOMMetadata({ importType: 'SPDX', show: true })}>{t('SPDX')}</Dropdown.Item>
-                                                <Dropdown.Item onClick={() => setImportSBOMMetadata({ importType: 'CycloneDx', show: true })}>{t('CycloneDX')}</Dropdown.Item>
+                                                <Dropdown.Item
+                                                    onClick={() =>
+                                                        setImportSBOMMetadata({ importType: 'SPDX', show: true })
+                                                    }
+                                                >
+                                                    {t('SPDX')}
+                                                </Dropdown.Item>
+                                                <Dropdown.Item
+                                                    onClick={() =>
+                                                        setImportSBOMMetadata({ importType: 'CycloneDx', show: true })
+                                                    }
+                                                >
+                                                    {t('CycloneDX')}
+                                                </Dropdown.Item>
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
@@ -468,11 +503,13 @@ function Project(): JSX.Element {
                                         <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
                                             <Dropdown.Item
-                                                onClick = {() => exportProjectSpreadsheet({ withLinkedRelease: false })}>
+                                                onClick={() => exportProjectSpreadsheet({ withLinkedRelease: false })}
+                                            >
                                                 {t('Projects only')}
                                             </Dropdown.Item>
                                             <Dropdown.Item
-                                                onClick = {() => exportProjectSpreadsheet({ withLinkedRelease: true })}>
+                                                onClick={() => exportProjectSpreadsheet({ withLinkedRelease: true })}
+                                            >
                                                 {t('Projects with linked releases')}
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
@@ -482,7 +519,12 @@ function Project(): JSX.Element {
                             <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
                         </div>
                         {status === 'authenticated' ? (
-                            <Table columns={columns} server={initServerPaginationConfig()} selector={true} sort={false} />
+                            <Table
+                                columns={columns}
+                                server={initServerPaginationConfig()}
+                                selector={true}
+                                sort={false}
+                            />
                         ) : (
                             <div className='col-12 d-flex justify-content-center align-items-center'>
                                 <Spinner className='spinner' />
@@ -496,7 +538,7 @@ function Project(): JSX.Element {
                 setShow={setShowCreateCRModal}
                 projectId={createCRProjectId}
             />
-            <ViewClearingRequestModal 
+            <ViewClearingRequestModal
                 show={showViewCRModal}
                 setShow={setShowViewCRModal}
                 clearingRequestId={clearingRequestId}

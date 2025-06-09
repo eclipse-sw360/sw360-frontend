@@ -20,9 +20,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import React, { ReactNode, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
-import DeleteObligationDialog from './DeleteObligationDialog'
-import { ObligationLevels, ObligationLevelInfo } from '../../../../../object-types/Obligation'
 import { MdOutlineTask } from 'react-icons/md'
+import { ObligationLevelInfo, ObligationLevels } from '../../../../../object-types/Obligation'
+import DeleteObligationDialog from './DeleteObligationDialog'
 
 function Obligations(): ReactNode {
     const params = useSearchParams()
@@ -103,18 +103,18 @@ function Obligations(): ReactNode {
             width: '30%',
             formatter: (obligationLevel: string) => {
                 return _(
-                        <OverlayTrigger
+                    <OverlayTrigger
                         overlay={
                             <Tooltip id={`tooltip-${obligationLevel}`}>
-                                {ObligationLevelInfo[obligationLevel as keyof typeof ObligationLevelInfo] 
-                                    ? ObligationLevelInfo[obligationLevel as keyof typeof ObligationLevelInfo] 
+                                {ObligationLevelInfo[obligationLevel as keyof typeof ObligationLevelInfo]
+                                    ? ObligationLevelInfo[obligationLevel as keyof typeof ObligationLevelInfo]
                                     : 'No description available.'}
                             </Tooltip>
                         }
                         placement='top'
                     >
                         <span>{obligationLevel}</span>
-                    </OverlayTrigger>
+                    </OverlayTrigger>,
                 )
             },
             sort: true,
@@ -139,7 +139,11 @@ function Obligations(): ReactNode {
                             <OverlayTrigger overlay={<Tooltip>{t('Change Log')}</Tooltip>}>
                                 <span
                                     className='d-inline-block btn-overlay cursor-pointer'
-                                    onClick={() => router.push(`obligations/changelog/${item._links?.self.href.split('/').at(-1) ?? ''}`)}
+                                    onClick={() =>
+                                        router.push(
+                                            `obligations/changelog/${item._links?.self.href.split('/').at(-1) ?? ''}`,
+                                        )
+                                    }
                                 >
                                     {item.id}
                                     <MdOutlineTask className='btn-icon overlay-trigger' />

@@ -9,22 +9,25 @@
 // License-Filename: LICENSE
 
 'use client'
-import { Dispatch, SetStateAction, type JSX } from 'react'
-import { Configuration, ConfigKeys } from '@/object-types'
+import { ConfigKeys, Configuration } from '@/object-types'
 import { useTranslations } from 'next-intl'
+import { Dispatch, SetStateAction, type JSX } from 'react'
 import OnOffSwitch from './OnOffSwitch'
 
 interface Props {
     currentConfig: Configuration
-    setCurrentConfig: Dispatch<SetStateAction<Configuration | undefined>>,
+    setCurrentConfig: Dispatch<SetStateAction<Configuration | undefined>>
 }
 
-const MailConfigurations = ({ currentConfig, setCurrentConfig }: Props) : JSX.Element => {
+const MailConfigurations = ({ currentConfig, setCurrentConfig }: Props): JSX.Element => {
     const t = useTranslations('default')
 
     return (
         <>
-            <h6 className='fw-bold text-uppercase' style={{ color: '#5D8EA9' }}>
+            <h6
+                className='fw-bold text-uppercase'
+                style={{ color: '#5D8EA9' }}
+            >
                 {t('Mail Configurations')}
                 <hr className='my-2 mb-2' />
             </h6>
@@ -42,30 +45,28 @@ const MailConfigurations = ({ currentConfig, setCurrentConfig }: Props) : JSX.El
                             {t('Enable Sending Project Spreadshet Export Via Mail')}
                         </td>
                         <td>
-                            <OnOffSwitch size={25}
+                            <OnOffSwitch
+                                size={25}
                                 setCurrentConfig={setCurrentConfig}
                                 checked={currentConfig[ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT] === 'true'}
                                 propKey={ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT}
                             />
                         </td>
-                        <td>
-                            {t('send_project_spreadsheet_export_to_mail_enabled_description')}
-                        </td>
+                        <td>{t('send_project_spreadsheet_export_to_mail_enabled_description')}</td>
                     </tr>
                     <tr id='send-component-spreadsheet-export-to-mail-enabled'>
                         <td className='align-middle fw-bold'>
                             {t('Enable Sending Component Spreadshet Export Via Mail')}
                         </td>
                         <td>
-                            <OnOffSwitch size={25}
+                            <OnOffSwitch
+                                size={25}
                                 setCurrentConfig={setCurrentConfig}
                                 checked={currentConfig[ConfigKeys.MAIL_REQUEST_FOR_COMPONENT_REPORT] === 'true'}
                                 propKey={ConfigKeys.MAIL_REQUEST_FOR_COMPONENT_REPORT}
                             />
                         </td>
-                        <td>
-                            {t('send_component_spreadsheet_export_to_mail_enabled_description')}
-                        </td>
+                        <td>{t('send_component_spreadsheet_export_to_mail_enabled_description')}</td>
                     </tr>
                 </tbody>
             </table>

@@ -8,17 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use client';
+'use client'
 import { LicensePayload, Obligation } from '@/object-types'
 import TableLinkedObligations from './TableLinkedObligations/TableLinkedObligations'
 
-import type { JSX } from "react";
+import type { JSX } from 'react'
 
 interface Props {
     data: Array<(string | Obligation)[]>
     setData: React.Dispatch<React.SetStateAction<Array<(string | Obligation)[]>>>
     licensePayload: LicensePayload
-    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload >>
+    setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
 
 const LinkedObligations = ({ data, setData, licensePayload, setLicensePayload }: Props): JSX.Element => {
@@ -30,7 +30,10 @@ const LinkedObligations = ({ data, setData, licensePayload, setLicensePayload }:
     }
 
     return (
-        <div className='col' style={{ fontSize: '0.875rem' }}>
+        <div
+            className='col'
+            style={{ fontSize: '0.875rem' }}
+        >
             <div>
                 <TableLinkedObligations
                     data={data}
