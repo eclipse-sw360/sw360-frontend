@@ -9,7 +9,7 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
+import { ErrorDetails, HttpStatus } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
@@ -22,6 +22,9 @@ export default function LicenseAdministration(): ReactNode {
     const t = useTranslations('default')
     const file = useRef<File | undefined>(undefined)
     const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)
+    const [overwriteIfExternalIdMatches, setOverwriteIfExternalIdMatches] = useState(false)
+    const [overwriteIfIdMatchesEvenWithoutExternalIdMatch, setOverwriteIfIdMatchesEvenWithoutExternalIdMatch] =
+        useState(false)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files
@@ -44,18 +47,25 @@ export default function LicenseAdministration(): ReactNode {
             if (!session) {
                 return signOut()
             }
-            const response = await ApiUtils.POST('licenses/upload', formData, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                await signOut()
-            } else if (response.status === HttpStatus.OK) {
+            const response = await ApiUtils.POST(
+                `licenses/upload?overwriteIfExternalIdMatches=${
+                    overwriteIfExternalIdMatches
+                }&overwriteIfIdMatchesEvenWithoutExternalIdMatch=${overwriteIfIdMatchesEvenWithoutExternalIdMatch}`,
+                formData,
+                session.user.access_token,
+            )
+            if (response.status === HttpStatus.OK) {
                 MessageService.success(t('Licenses uploaded successfully'))
             } else {
-                const data = (await response.json()) as object
-                console.log(data)
-                MessageService.error(t('Something went wrong'))
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
             }
-        } catch (err) {
-            console.error(err)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
 
@@ -64,8 +74,12 @@ export default function LicenseAdministration(): ReactNode {
             const session = await getSession()
             if (!session) return signOut()
             DownloadService.download('licenses/downloadLicenses', session, `LicensesBackup.lics`)
-        } catch (e) {
-            console.error(e)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
 
@@ -81,9 +95,7 @@ export default function LicenseAdministration(): ReactNode {
                         <button
                             type='button'
                             className='btn btn-primary col-auto me-2'
-                            onClick={() => {
-                                downloadLicenseArchive().catch((e) => console.error(e))
-                            }}
+                            onClick={() => downloadLicenseArchive()}
                         >
                             {t('Download License Archive')}
                         </button>
@@ -124,6 +136,8 @@ export default function LicenseAdministration(): ReactNode {
                             type='checkbox'
                             className='form-check-input'
                             name='overWriteIfExternalIdsMatch'
+                            checked={overwriteIfExternalIdMatches}
+                            onChange={() => setOverwriteIfExternalIdMatches(!overwriteIfExternalIdMatches)}
                         />
                         <label
                             className='form-check-label fw-bold fs-6'
@@ -138,6 +152,12 @@ export default function LicenseAdministration(): ReactNode {
                             type='checkbox'
                             className='form-check-input'
                             name='overWriteIfIdsMatch'
+                            checked={overwriteIfIdMatchesEvenWithoutExternalIdMatch}
+                            onChange={() =>
+                                setOverwriteIfIdMatchesEvenWithoutExternalIdMatch(
+                                    !overwriteIfIdMatchesEvenWithoutExternalIdMatch,
+                                )
+                            }
                         />
                         <label
                             className='form-check-label fw-bold'
@@ -149,9 +169,7 @@ export default function LicenseAdministration(): ReactNode {
                     <button
                         type='button'
                         className='btn btn-secondary col-auto mt-3'
-                        onClick={() => {
-                            uploadLicenses().catch((e) => console.error(e))
-                        }}
+                        onClick={() => uploadLicenses()}
                     >
                         {t('Upload Licenses')}
                     </button>
