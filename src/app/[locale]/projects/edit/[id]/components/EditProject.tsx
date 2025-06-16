@@ -343,10 +343,43 @@ function EditProject({
         })()
     }, [projectId, setProjectPayload])
 
+    const checkUpdateEligibility = async (projectId: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
+            entityType: 'PROJECT',
+            entityId: projectId,
+        })
+        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.warn(t('Unauthorized request'))
+            return false
+        } else if (response.status === HttpStatus.FORBIDDEN) {
+            MessageService.warn(t('Access Denied'))
+            return false
+        } else if (response.status === HttpStatus.BAD_REQUEST) {
+            MessageService.warn(t('Invalid request'))
+            return false
+        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+            MessageService.warn(t('Internal server error'))
+            return false
+        } else if (response.status === HttpStatus.OK) {
+            MessageService.info(t('You are editing the original document'))
+            return true
+        } else if (response.status !== HttpStatus.ACCEPTED) {
+            MessageService.info(t('You are editing the original document'))
+            return true
+        }
+    }
+
     const updateProject = async () => {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const eligibleToUpdate = await checkUpdateEligibility(projectId)
+            if (!eligibleToUpdate) {
+                return
+            }
             const requests = [
                 ApiUtils.PATCH(
                     isDependencyNetworkFeatureEnabled === true
