@@ -358,16 +358,16 @@ function EditProject({
             MessageService.warn(t('Access Denied'))
             return false
         } else if (response.status === HttpStatus.BAD_REQUEST) {
-            MessageService.warn(t('Invalid request'))
+            MessageService.warn(t('Invalid input or missing required parameters'))
             return false
         } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
             MessageService.warn(t('Internal server error'))
             return false
         } else if (response.status === HttpStatus.OK) {
-            MessageService.info(t('You are editing the original document'))
+            MessageService.info(t('You can write to the entity'))
             return true
         } else if (response.status !== HttpStatus.ACCEPTED) {
-            MessageService.info(t('You are editing the original document'))
+            MessageService.info(t('You are allowed to perform write with MR'))
             return true
         }
     }
