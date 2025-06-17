@@ -11,45 +11,41 @@
 
 import { ProjectPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
-// import { useRouter } from 'next/navigation'
 import { ChangeEvent, useState, type JSX } from 'react'
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
+import { Button, Form, Modal } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
 interface Props {
-    projectPayload: ProjectPayload
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
+    updateProject: () => Promise<void>
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function CreateMRCommentDialog({ projectPayload, show, setShow }: Props): JSX.Element {
+export default function CreateMRCommentDialog({ show, setShow, updateProject, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
-    // const router = useRouter()
-    const [variant, setVariant] = useState('success')
-    const [message, setMessage] = useState('')
-    const [showMessage, setShowMessage] = useState(false)
-    const [reloadPage, setReloadPage] = useState(false)
-    const [visuallyHideLinkedData, setVisuallyHideLinkedData] = useState(true)
-    // Comment functionality is not implemented yet. This feature should be added in the future.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [comment, setComment] = useState('')
-
-    const handleSubmit = () => {
-        console.log(projectPayload, setMessage, setVariant, setShowMessage, setReloadPage, setVisuallyHideLinkedData)
-    }
+    const [userComment, setUserComment] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const handleCloseDialog = () => {
         setShow(!show)
-        setShowMessage(false)
-        setComment('')
-        setVisuallyHideLinkedData(!visuallyHideLinkedData)
-        if (reloadPage === true) {
-            window.location.reload()
-        }
+        setUserComment('')
     }
 
     const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
-        setComment(e.target.value)
+        setUserComment(e.target.value)
+    }
+
+    const handleSubmit = async () => {
+        setLoading(true)
+        setProjectPayload((prev) => ({
+            ...prev,
+            comment: userComment,
+        }))
+        await updateProject()
+        setLoading(false)
+        setShow(!show)
+        setUserComment('')
     }
 
     return (
@@ -71,14 +67,6 @@ export default function CreateMRCommentDialog({ projectPayload, show, setShow }:
             </Modal.Header>
             <Modal.Body>
                 <>
-                    <Alert
-                        variant={variant}
-                        onClose={() => setShowMessage(false)}
-                        dismissible
-                        show={showMessage}
-                    >
-                        {message}
-                    </Alert>
                     <Form>
                         <Form.Group className='mb-3'>
                             <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
@@ -105,7 +93,7 @@ export default function CreateMRCommentDialog({ projectPayload, show, setShow }:
                     className='login-btn'
                     variant='danger'
                     onClick={() => handleSubmit()}
-                    hidden={reloadPage}
+                    disabled={userComment.length === 0 || loading}
                 >
                     {t('Send moderation request')}
                 </Button>
