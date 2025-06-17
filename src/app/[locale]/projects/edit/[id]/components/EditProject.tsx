@@ -381,10 +381,6 @@ function EditProject({
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const eligibleToUpdate = await checkUpdateEligibility(projectId)
-            if (!eligibleToUpdate) {
-                return
-            }
             const requests = [
                 ApiUtils.PATCH(
                     isDependencyNetworkFeatureEnabled === true
@@ -425,6 +421,12 @@ function EditProject({
         } catch (e) {
             console.error(e)
         }
+    }
+
+    const preRequisite = async () => {
+        const isEligible = await checkUpdateEligibility(projectId)
+        if (!isEligible) return
+        await updateProject()
     }
 
     const handleCancelClick = () => {
@@ -515,7 +517,7 @@ function EditProject({
                                                 variant='primary'
                                                 type='submit'
                                                 className='me-2 col-auto'
-                                                onClick={() => void updateProject()}
+                                                onClick={() => void preRequisite()}
                                             >
                                                 {t('Update Project')}
                                             </Button>
