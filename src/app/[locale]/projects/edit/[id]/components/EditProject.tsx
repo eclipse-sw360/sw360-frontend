@@ -10,6 +10,7 @@
 'use client'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
+import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
@@ -91,6 +92,8 @@ function EditProject({
         setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
         router.push(`?tab=${key}`)
     }
+
+    const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
 
     const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
 
@@ -361,13 +364,14 @@ function EditProject({
             MessageService.warn(t('Invalid input or missing required parameters'))
             return false
         } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
-            MessageService.warn(t('Internal server error'))
+            MessageService.error(t('Internal server error'))
             return false
         } else if (response.status === HttpStatus.OK) {
             MessageService.info(t('You can write to the entity'))
             return true
         } else if (response.status !== HttpStatus.ACCEPTED) {
             MessageService.info(t('You are allowed to perform write with MR'))
+            setShowCommentModal(true)
             return true
         }
     }
@@ -433,6 +437,13 @@ function EditProject({
                     projectId={projectId}
                     show={deleteDialogOpen}
                     setShow={setDeleteDialogOpen}
+                />
+            )}
+            {projectId && (
+                <CreateMRCommentDialog
+                    projectPayload={projectPayload}
+                    show={showCommentModal}
+                    setShow={setShowCommentModal}
                 />
             )}
             <form
