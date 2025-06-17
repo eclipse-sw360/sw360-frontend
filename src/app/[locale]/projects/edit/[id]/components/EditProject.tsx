@@ -153,6 +153,7 @@ function EditProject({
         leadArchitect: '',
         projectManager: '',
         packageIds: [],
+        comment: '',
     })
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
@@ -441,9 +442,10 @@ function EditProject({
             )}
             {projectId && (
                 <CreateMRCommentDialog
-                    projectPayload={projectPayload}
                     show={showCommentModal}
                     setShow={setShowCommentModal}
+                    updateProject={updateProject}
+                    setProjectPayload={setProjectPayload}
                 />
             )}
             <form

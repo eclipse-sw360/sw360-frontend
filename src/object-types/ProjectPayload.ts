@@ -54,6 +54,7 @@ interface ProjectPayload {
     considerReleasesFromExternalList?: boolean
     packageIds?: string[]
     attachments?: Array<Attachment> | null
+    comment?: string
     linkedProjects?: {
         [key: string]: {
             projectRelationship: string
