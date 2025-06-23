@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -353,7 +354,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         return validate
     }
 
-    const submit = async () => {
+    const updateRelease = async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
@@ -403,12 +404,47 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         }
     }
 
+    const checkUpdateEligibility = async (releaseId: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
+            entityType: 'RELEASE',
+            entityId: releaseId,
+        })
+        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.warn(t('Unauthorized request'))
+            return false
+        } else if (response.status === HttpStatus.FORBIDDEN) {
+            MessageService.warn(t('Access Denied'))
+            return false
+        } else if (response.status === HttpStatus.BAD_REQUEST) {
+            MessageService.warn(t('Invalid input or missing required parameters'))
+            return false
+        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+            MessageService.error(t('Internal server error'))
+            return false
+        } else if (response.status === HttpStatus.OK) {
+            MessageService.info(t('You can write to the entity'))
+            return true
+        } else if (response.status !== HttpStatus.ACCEPTED) {
+            MessageService.info(t('You are allowed to perform write with MR'))
+            return true
+        }
+    }
+
+    const checkPreRequisite = async () => {
+        const isEligible = await checkUpdateEligibility(releaseId)
+        if (!isEligible) return
+        await updateRelease()
+    }
+
     const handleDeleteRelease = () => {
         setDeleteModalOpen(true)
     }
 
     const headerButtons = {
-        'Update Release': { link: '', type: 'primary', onClick: submit, name: t('Update Release') },
+        'Update Release': { link: '', type: 'primary', onClick: checkPreRequisite, name: t('Update Release') },
         'Delete Release': {
             link: '',
             type: 'danger',
