@@ -33,6 +33,7 @@ import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
+import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 
 interface Props {
     componentId: string
@@ -63,6 +64,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     const [component, setComponent] = useState<Component>()
     const [attachmentData, setAttachmentData] = useState<Array<Attachment>>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
         createBy: '',
@@ -85,6 +87,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         wiki: '',
         blog: '',
         attachments: null,
+        comment: ''
     })
 
     useEffect(() => {
@@ -211,62 +214,70 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
 
     return (
         component && (
-            <div className='container page-content'>
-                <div className='row'>
-                    <DeleteComponentDialog
-                        componentId={componentId}
-                        show={deleteDialogOpen}
-                        setShow={setDeleteDialogOpen}
-                        actionType={ActionType.EDIT}
-                    />
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
+            <>
+                <CreateMRCommentDialog
+                    show={showCommentModal}
+                    setShow={setShowCommentModal}
+                    updateProject={updateComponent}
+                    setProjectPayload={setComponentPayload}
+                />
+                <div className='container page-content'>
+                    <div className='row'>
+                        <DeleteComponentDialog
+                            componentId={componentId}
+                            show={deleteDialogOpen}
+                            setShow={setDeleteDialogOpen}
+                            actionType={ActionType.EDIT}
                         />
-                    </div>
-                    <div className='col'>
-                        <div
-                            className='row'
-                            style={{ marginBottom: '20px' }}
-                        >
-                            <PageButtonHeader
-                                title={component.name}
-                                buttons={headerButtons}
-                            ></PageButtonHeader>
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                        >
-                            <ComponentEditSummary
-                                attachmentData={attachmentData}
-                                componentId={componentId}
-                                componentPayload={componentPayload}
-                                setComponentPayload={setComponentPayload}
+                        <div className='col-2 sidebar'>
+                            <SideBar
+                                selectedTab={selectedTab}
+                                setSelectedTab={setSelectedTab}
+                                tabList={tabList}
                             />
                         </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}
-                        >
-                            <Releases componentId={componentId} />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
-                        >
-                            <EditAttachments
-                                documentId={componentId}
-                                documentType={DocumentTypes.COMPONENT}
-                                documentPayload={componentPayload}
-                                setDocumentPayload={setComponentPayload}
-                            />
+                        <div className='col'>
+                            <div
+                                className='row'
+                                style={{ marginBottom: '20px' }}
+                            >
+                                <PageButtonHeader
+                                    title={component.name}
+                                    buttons={headerButtons}
+                                ></PageButtonHeader>
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                            >
+                                <ComponentEditSummary
+                                    attachmentData={attachmentData}
+                                    componentId={componentId}
+                                    componentPayload={componentPayload}
+                                    setComponentPayload={setComponentPayload}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}
+                            >
+                                <Releases componentId={componentId} />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
+                            >
+                                <EditAttachments
+                                    documentId={componentId}
+                                    documentType={DocumentTypes.COMPONENT}
+                                    documentPayload={componentPayload}
+                                    setDocumentPayload={setComponentPayload}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         )
     )
 }
