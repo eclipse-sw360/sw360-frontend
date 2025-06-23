@@ -17,6 +17,7 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
+import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import {
     ActionType,
     Attachment,
@@ -33,7 +34,6 @@ import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
-import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 
 interface Props {
     componentId: string
@@ -87,7 +87,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         wiki: '',
         blog: '',
         attachments: null,
-        comment: ''
+        comment: '',
     })
 
     useEffect(() => {
@@ -216,7 +216,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     return (
         component && (
             <>
-                <CreateMRCommentDialog <ComponentPayload>
+                <CreateMRCommentDialog<ComponentPayload>
                     show={showCommentModal}
                     setShow={setShowCommentModal}
                     updateEntity={updateComponent}
