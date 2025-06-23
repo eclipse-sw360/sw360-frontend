@@ -9,20 +9,19 @@
 
 'use client'
 
-import { ComponentPayload, ProjectPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, useState, type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
-interface Props {
+interface Props<T> {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    updateProject: () => Promise<void>
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload | ComponentPayload>>
+    updateEntity: () => Promise<void>
+    setEntityPayload: React.Dispatch<React.SetStateAction<T>>
 }
 
-export default function CreateMRCommentDialog({ show, setShow, updateProject, setProjectPayload }: Props): JSX.Element {
+export default function CreateMRCommentDialog<T>({ show, setShow, updateEntity, setEntityPayload }: Props<T>): JSX.Element {
     const t = useTranslations('default')
     const [userComment, setUserComment] = useState('')
     const [loading, setLoading] = useState(false)
@@ -38,11 +37,11 @@ export default function CreateMRCommentDialog({ show, setShow, updateProject, se
 
     const handleSubmit = async () => {
         setLoading(true)
-        setProjectPayload((prev) => ({
+        setEntityPayload((prev) => ({
             ...prev,
             comment: userComment,
         }))
-        await updateProject()
+        await updateEntity()
         setLoading(false)
         setShow(!show)
         setUserComment('')
