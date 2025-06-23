@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -137,7 +138,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         return () => controller.abort()
     }, [params, componentId])
 
-    const submit = async () => {
+    const updateComponent = async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
@@ -153,6 +154,41 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         }
     }
 
+    const checkUpdateEligibility = async (componentId: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
+            entityType: 'COMPONENT',
+            entityId: componentId,
+        })
+        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.warn(t('Unauthorized request'))
+            return false
+        } else if (response.status === HttpStatus.FORBIDDEN) {
+            MessageService.warn(t('Access Denied'))
+            return false
+        } else if (response.status === HttpStatus.BAD_REQUEST) {
+            MessageService.warn(t('Invalid input or missing required parameters'))
+            return false
+        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+            MessageService.error(t('Internal server error'))
+            return false
+        } else if (response.status === HttpStatus.OK) {
+            MessageService.info(t('You can write to the entity'))
+            return true
+        } else if (response.status !== HttpStatus.ACCEPTED) {
+            MessageService.info(t('You are allowed to perform write with MR'))
+            return true
+        }
+    }
+
+    const checkPreRequisite = async () => {
+        const isEligible = await checkUpdateEligibility(componentId)
+        if (!isEligible) return
+        await updateComponent()
+    }
+
     const handleDeleteComponent = () => {
         setDeleteDialogOpen(true)
     }
@@ -162,7 +198,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
             link: '/components/edit/' + componentId,
             type: 'primary',
             name: t('Update Component'),
-            onClick: submit,
+            onClick: checkPreRequisite,
         },
         'Delete Component': {
             link: '/components/edit/' + componentId,
