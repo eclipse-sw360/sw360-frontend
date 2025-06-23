@@ -18,6 +18,7 @@ import { ReactNode, useEffect, useState } from 'react'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
+import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
     ActionType,
@@ -44,7 +45,6 @@ import EditECCDetails from './EditECCDetails'
 import EditSPDXDocument from './EditSPDXDocument'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
-import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 
 interface Props {
     releaseId: string
@@ -460,7 +460,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     return (
         release && (
             <>
-                <CreateMRCommentDialog <Release>
+                <CreateMRCommentDialog<Release>
                     show={showCommentModal}
                     setShow={setShowCommentModal}
                     updateEntity={updateRelease}

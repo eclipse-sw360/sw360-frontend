@@ -21,7 +21,12 @@ interface Props<T> {
     setEntityPayload: React.Dispatch<React.SetStateAction<T>>
 }
 
-export default function CreateMRCommentDialog<T>({ show, setShow, updateEntity, setEntityPayload }: Props<T>): JSX.Element {
+export default function CreateMRCommentDialog<T>({
+    show,
+    setShow,
+    updateEntity,
+    setEntityPayload,
+}: Props<T>): JSX.Element {
     const t = useTranslations('default')
     const [userComment, setUserComment] = useState('')
     const [loading, setLoading] = useState(false)
