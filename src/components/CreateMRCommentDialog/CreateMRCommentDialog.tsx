@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ProjectPayload } from '@/object-types'
+import { ComponentPayload, ProjectPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, useState, type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
@@ -19,7 +19,7 @@ interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
     updateProject: () => Promise<void>
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload | ComponentPayload>>
 }
 
 export default function CreateMRCommentDialog({ show, setShow, updateProject, setProjectPayload }: Props): JSX.Element {
