@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -17,6 +18,7 @@ import { ReactNode, useEffect, useState } from 'react'
 
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
+import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
     ActionType,
@@ -61,6 +63,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
 
     const [SPDXPayload, setSPDXPayload] = useState<SPDX>({
         spdxDocument: null,
@@ -353,7 +356,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         return validate
     }
 
-    const submit = async () => {
+    const updateRelease = async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
@@ -403,12 +406,48 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         }
     }
 
+    const checkUpdateEligibility = async (releaseId: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
+            entityType: 'RELEASE',
+            entityId: releaseId,
+        })
+        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.warn(t('Unauthorized request'))
+            return false
+        } else if (response.status === HttpStatus.FORBIDDEN) {
+            MessageService.warn(t('Access Denied'))
+            return false
+        } else if (response.status === HttpStatus.BAD_REQUEST) {
+            MessageService.warn(t('Invalid input or missing required parameters'))
+            return false
+        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+            MessageService.error(t('Internal server error'))
+            return false
+        } else if (response.status === HttpStatus.OK) {
+            MessageService.info(t('You can write to the entity'))
+            return true
+        } else if (response.status !== HttpStatus.ACCEPTED) {
+            MessageService.info(t('You are allowed to perform write with MR'))
+            setShowCommentModal(true)
+            return true
+        }
+    }
+
+    const checkPreRequisite = async () => {
+        const isEligible = await checkUpdateEligibility(releaseId)
+        if (!isEligible) return
+        await updateRelease()
+    }
+
     const handleDeleteRelease = () => {
         setDeleteModalOpen(true)
     }
 
     const headerButtons = {
-        'Update Release': { link: '', type: 'primary', onClick: submit, name: t('Update Release') },
+        'Update Release': { link: '', type: 'primary', onClick: checkPreRequisite, name: t('Update Release') },
         'Delete Release': {
             link: '',
             type: 'danger',
@@ -420,128 +459,136 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
 
     return (
         release && (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
-                        />
-                    </div>
-                    <div className='col'>
-                        <div
-                            className='row'
-                            style={{ marginBottom: '20px' }}
-                        >
-                            <PageButtonHeader
-                                buttons={headerButtons}
-                                title={release.name}
-                            ></PageButtonHeader>
-                        </div>
-                        <DeleteReleaseModal
-                            actionType={ActionType.EDIT}
-                            componentId={componentId}
-                            releaseId={deletingRelease}
-                            show={deleteModalOpen}
-                            setShow={setDeleteModalOpen}
-                        />
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                        >
-                            <ReleaseEditSummary
-                                release={release}
-                                releaseId={releaseId}
-                                actionType={ActionType.EDIT}
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                                vendor={vendor}
-                                setVendor={setVendor}
-                                mainLicenses={mainLicenses}
-                                setMainLicenses={setMainLicenses}
-                                otherLicenses={otherLicenses}
-                                setOtherLicenses={setOtherLicenses}
-                                cotsDetails={cotsDetails}
-                                eccInformation={eccInformation}
-                                clearingInformation={clearingInformation}
+            <>
+                <CreateMRCommentDialog<Release>
+                    show={showCommentModal}
+                    setShow={setShowCommentModal}
+                    updateEntity={updateRelease}
+                    setEntityPayload={setReleasePayload}
+                />
+                <div className='container page-content'>
+                    <div className='row'>
+                        <div className='col-2 sidebar'>
+                            <SideBar
+                                selectedTab={selectedTab}
+                                setSelectedTab={setSelectedTab}
+                                tabList={tabList}
                             />
                         </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
-                        >
-                            <LinkedReleases
-                                actionType={ActionType.EDIT}
-                                release={release}
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}
-                        >
-                            <EditClearingDetails
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                            />
-                        </div>
-                        {isSPDXFeatureEnabled === true && (
+                        <div className='col'>
                             <div
                                 className='row'
-                                hidden={selectedTab !== ReleaseTabIds.SPDX_DOCUMENT ? true : false}
+                                style={{ marginBottom: '20px' }}
                             >
-                                <EditSPDXDocument
+                                <PageButtonHeader
+                                    buttons={headerButtons}
+                                    title={release.name}
+                                ></PageButtonHeader>
+                            </div>
+                            <DeleteReleaseModal
+                                actionType={ActionType.EDIT}
+                                componentId={componentId}
+                                releaseId={deletingRelease}
+                                show={deleteModalOpen}
+                                setShow={setDeleteModalOpen}
+                            />
+                            <div
+                                className='row'
+                                hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                            >
+                                <ReleaseEditSummary
+                                    release={release}
                                     releaseId={releaseId}
-                                    SPDXPayload={SPDXPayload}
-                                    setSPDXPayload={setSPDXPayload}
-                                    errorLicenseIdentifier={errorLicenseIdentifier}
-                                    setErrorLicenseIdentifier={setErrorLicenseIdentifier}
-                                    errorExtractedText={errorExtractedText}
-                                    setErrorExtractedText={setErrorExtractedText}
-                                    errorCreator={errorCreator}
-                                    setErrorCreator={setErrorCreator}
-                                    inputValid={inputValid}
+                                    actionType={ActionType.EDIT}
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
+                                    vendor={vendor}
+                                    setVendor={setVendor}
+                                    mainLicenses={mainLicenses}
+                                    setMainLicenses={setMainLicenses}
+                                    otherLicenses={otherLicenses}
+                                    setOtherLicenses={setOtherLicenses}
+                                    cotsDetails={cotsDetails}
+                                    eccInformation={eccInformation}
+                                    clearingInformation={clearingInformation}
                                 />
                             </div>
-                        )}
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}
-                        >
-                            <EditECCDetails
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}
-                        >
-                            {releasePayload.componentId !== null && (
-                                <EditAttachments
-                                    documentId={releaseId}
-                                    documentType={DocumentTypes.RELEASE}
-                                    documentPayload={releasePayload}
-                                    setDocumentPayload={setReleasePayload}
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
+                            >
+                                <LinkedReleases
+                                    actionType={ActionType.EDIT}
+                                    release={release}
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
                                 />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}
+                            >
+                                <EditClearingDetails
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
+                                />
+                            </div>
+                            {isSPDXFeatureEnabled === true && (
+                                <div
+                                    className='row'
+                                    hidden={selectedTab !== ReleaseTabIds.SPDX_DOCUMENT ? true : false}
+                                >
+                                    <EditSPDXDocument
+                                        releaseId={releaseId}
+                                        SPDXPayload={SPDXPayload}
+                                        setSPDXPayload={setSPDXPayload}
+                                        errorLicenseIdentifier={errorLicenseIdentifier}
+                                        setErrorLicenseIdentifier={setErrorLicenseIdentifier}
+                                        errorExtractedText={errorExtractedText}
+                                        setErrorExtractedText={setErrorExtractedText}
+                                        errorCreator={errorCreator}
+                                        setErrorCreator={setErrorCreator}
+                                        inputValid={inputValid}
+                                    />
+                                </div>
                             )}
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}
-                        >
-                            <AddCommercialDetails
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                                cotsResponsible={cotsResponsible}
-                                setCotsResponsible={setCotsResponsible}
-                            />
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}
+                            >
+                                <EditECCDetails
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}
+                            >
+                                {releasePayload.componentId !== null && (
+                                    <EditAttachments
+                                        documentId={releaseId}
+                                        documentType={DocumentTypes.RELEASE}
+                                        documentPayload={releasePayload}
+                                        setDocumentPayload={setReleasePayload}
+                                    />
+                                )}
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}
+                            >
+                                <AddCommercialDetails
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
+                                    cotsResponsible={cotsResponsible}
+                                    setCotsResponsible={setCotsResponsible}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         )
     )
 }
