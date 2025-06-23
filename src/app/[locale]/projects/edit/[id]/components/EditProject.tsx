@@ -443,11 +443,11 @@ function EditProject({
                 />
             )}
             {projectId && (
-                <CreateMRCommentDialog
+                <CreateMRCommentDialog <ProjectPayload>
                     show={showCommentModal}
                     setShow={setShowCommentModal}
-                    updateProject={updateProject}
-                    setProjectPayload={setProjectPayload}
+                    updateEntity={updateProject}
+                    setEntityPayload={setProjectPayload}
                 />
             )}
             <form
