@@ -182,6 +182,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
             return true
         } else if (response.status !== HttpStatus.ACCEPTED) {
             MessageService.info(t('You are allowed to perform write with MR'))
+            setShowCommentModal(true)
             return true
         }
     }
@@ -215,11 +216,11 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     return (
         component && (
             <>
-                <CreateMRCommentDialog
+                <CreateMRCommentDialog <ComponentPayload>
                     show={showCommentModal}
                     setShow={setShowCommentModal}
-                    updateProject={updateComponent}
-                    setProjectPayload={setComponentPayload}
+                    updateEntity={updateComponent}
+                    setEntityPayload={setComponentPayload}
                 />
                 <div className='container page-content'>
                     <div className='row'>
