@@ -82,7 +82,6 @@ export default function ECC(): ReactNode {
                     elem.eccInformation.assessorContactPerson,
                     elem.eccInformation.assessorDepartment,
                     elem.eccInformation.assessmentDate,
-                    elem.eccInformation.eccn,
                 ])
             },
             total: (data: EmbeddedECC) => (data.page ? data.page.totalElements : 0),
