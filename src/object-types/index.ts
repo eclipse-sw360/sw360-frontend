@@ -32,7 +32,6 @@ import Embedded from './Embedded'
 import FossologyConfig from './FossologyConfig'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
-import ImportSummary from './ImportSummary'
 import InputKeyValue from './InputKeyValue'
 import LicenseClearing from './LicenseClearing'
 import LicenseDetail from './LicenseDetail'
@@ -91,6 +90,8 @@ import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
 import { ProjectVulnerabilityTrackingStatus, VulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
+import ImportSBOMMetadata from './cyclonedx/ImportSBOMMetadata'
+import ImportSummary from './cyclonedx/ImportSummary'
 import ErrorDetails from './error'
 import Annotations from './spdx/Annotations'
 import CheckSum from './spdx/CheckSum'
@@ -144,6 +145,7 @@ export type {
     FossologyConfig,
     FossologyProcessInfo,
     FossologyProcessStatus,
+    ImportSBOMMetadata,
     ImportSummary,
     InputKeyValue,
     LicenseClearing,

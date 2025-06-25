@@ -8,5 +8,7 @@
   "i18n-ally.indent": 2,
   "i18n-ally.tabStyle": "space",
   "cSpell.words": ["myprojects"],
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
