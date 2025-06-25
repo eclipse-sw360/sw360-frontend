@@ -232,6 +232,7 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
                     variant='danger'
                     onClick={() => handleSubmit()}
                     hidden={reloadPage}
+                    disabled={!comment}
                 >
                     {t('Delete Project')}
                 </Button>
