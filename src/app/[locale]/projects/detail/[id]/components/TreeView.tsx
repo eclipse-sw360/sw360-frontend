@@ -269,7 +269,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                         >
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link
-                                    href={`/components/releases/edit/${l.release.substring(
+                                    href={`/components/editRelease/${l.release.substring(
                                         l.release.lastIndexOf('/') + 1,
                                     )}`}
                                     className='overlay-trigger'

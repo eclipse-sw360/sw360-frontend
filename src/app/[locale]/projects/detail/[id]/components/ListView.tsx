@@ -357,7 +357,7 @@ export default function ListView({
                                 href={
                                     type === ElementType.LINKED_PROJECT
                                         ? `/projects/edit/${id}`
-                                        : `/components/releases/edit/${id}`
+                                        : `/components/editRelease/${id}`
                                 }
                                 className='overlay-trigger'
                             >
