@@ -23,6 +23,7 @@ import { useEffect, useState, type JSX } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
+import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
 import DeleteProjectDialog from './DeleteProjectDialog'
@@ -36,11 +37,6 @@ const Capitalize = (text: string) =>
 interface LicenseClearingData {
     'Release Count': number
     'Approved Count': number
-}
-
-interface ImportSBOMMetadata {
-    importType: 'SPDX' | 'CycloneDx'
-    show: boolean
 }
 
 function LicenseClearing({ projectId }: { projectId: string }) {
