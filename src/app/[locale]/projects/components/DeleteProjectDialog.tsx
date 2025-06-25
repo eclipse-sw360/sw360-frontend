@@ -41,8 +41,6 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
     const [visuallyHideLinkedData, setVisuallyHideLinkedData] = useState(true)
-    // Comment functionality is not implemented yet. This feature should be added in the future.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [comment, setComment] = useState('')
 
     const displayMessage = (variant: string, message: string) => {
@@ -59,8 +57,11 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     const deleteProject = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
-            const response = await ApiUtils.DELETE(`projects/${projectId}`, session.user.access_token)
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const url = CommonUtils.createUrlWithParams(`projects/${projectId}`, {
+                comment: comment,
+            })
+            const response = await ApiUtils.DELETE(url, session.user.access_token)
             if (response.status === HttpStatus.OK) {
                 displayMessage('success', t('Delete project successful'))
                 router.push('/projects')
@@ -69,6 +70,8 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
                 displayMessage('info', t('Moderation request is created'))
             } else if (response.status == HttpStatus.CONFLICT) {
                 displayMessage('danger', t('The project cannot be deleted'))
+            } else if (response.status == HttpStatus.FORBIDDEN) {
+                displayMessage('danger', t('Request Forbidden'))
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 await signOut()
             } else {
