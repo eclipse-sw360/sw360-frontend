@@ -1077,6 +1077,7 @@
     "Request Already Closed": "リクエストはすでに終了しています",
     "Request Closed On": "リクエストの締め切り日",
     "Request Closed on": "リクエストは終了しました",
+    "Request Forbidden": "禁止されているリクエスト！",
     "Request ID": "リクエスト ID",
     "Request Information": "リクエスト情報",
     "Request Status": "リクエストステータス",
