@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Attachment, COTSDetails, ClearingInformation, ECCInformation, Links, Repository } from '@/object-types'
+import { Attachment, COTSDetails, ClearingInformation, ECCInformation, Links, Repository, Vendor } from '@/object-types'
 
 interface Release {
     id?: string
@@ -32,6 +32,7 @@ interface Release {
     mainLicenseIds?: Array<string> | null
     otherLicenseIds?: Array<string> | null
     vendorId?: string | null
+    vendor?: Vendor
     languages?: Array<string> | null
     operatingSystems?: Array<string> | null
     softwarePlatforms?: Array<string> | null
