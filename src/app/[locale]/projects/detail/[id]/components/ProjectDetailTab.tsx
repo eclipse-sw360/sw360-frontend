@@ -31,6 +31,10 @@ import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
+import { ShowInfoOnHover } from 'next-sw360'
+import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
+import ImportSBOMModal from '../../../components/ImportSBOMModal'
+
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
@@ -42,6 +46,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
     const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
+    const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
+        show: false,
+        importType: 'CycloneDx',
+    })
 
     useEffect(() => {
         const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB
@@ -97,6 +105,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
     return (
         <>
+            <ImportSBOMModal
+                importSBOMMetadata={importSBOMMetadata}
+                setImportSBOMMetadata={setImportSBOMMetadata}
+            />
             <ExportProjectSbomModal
                 show={showExportProjectSbomModal}
                 setShow={setShowExportProjectSbomModal}
@@ -208,6 +220,67 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         >
                                             {t('Link to Projects')}
                                         </Button>
+                                        <Dropdown className='col-auto'>
+                                            <Dropdown.Toggle
+                                                variant='dark'
+                                                id='exportSBOM'
+                                                className='px-2'
+                                            >
+                                                {t('Import SBOM')}
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu>
+                                                <Dropdown.Item
+                                                    onClick={() =>
+                                                        setImportSBOMMetadata({
+                                                            importType: 'CycloneDx',
+                                                            show: true,
+                                                            projectId: projectId,
+                                                            doNotReplace: false,
+                                                        })
+                                                    }
+                                                >
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                        }}
+                                                    >
+                                                        {t('replace existing releases and packages')}
+                                                        <ShowInfoOnHover
+                                                            text={t(
+                                                                'This will remove all current releases and packages and replace them with data from the SBOM',
+                                                            )}
+                                                        />
+                                                    </span>
+                                                </Dropdown.Item>
+                                                <Dropdown.Item
+                                                    onClick={() =>
+                                                        setImportSBOMMetadata({
+                                                            importType: 'CycloneDx',
+                                                            show: true,
+                                                            projectId: projectId,
+                                                            doNotReplace: true,
+                                                        })
+                                                    }
+                                                >
+                                                    <span
+                                                        style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                        }}
+                                                    >
+                                                        {t('Add new releases and packages')}
+                                                        <ShowInfoOnHover
+                                                            text={t(
+                                                                'Adds new data from the SBOM without modifying existing releases and packages',
+                                                            )}
+                                                        />
+                                                    </span>
+                                                </Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
                                         <Dropdown className='col-auto'>
                                             <Dropdown.Toggle
                                                 variant='dark'

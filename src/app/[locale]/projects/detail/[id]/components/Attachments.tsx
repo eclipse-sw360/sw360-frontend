@@ -13,20 +13,29 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState, type JSX } from 'react'
 
+import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Table, _ } from '@/components/sw360'
 import { Attachment, HttpStatus } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { notFound } from 'next/navigation'
-import { Spinner } from 'react-bootstrap'
+import { Button, Modal, Spinner } from 'react-bootstrap'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
+import { FaInfoCircle } from 'react-icons/fa'
 import { LuDownload } from 'react-icons/lu'
+import ImportSummary from '../../../../../../object-types/cyclonedx/ImportSummary'
 
 interface EmbeddedAttachments {
     _embedded?: {
         'sw360:attachments'?: Array<Attachment>
     }
+}
+
+interface AttachmentRowMeta {
+    projectId: string
+    attachmentId: string
+    attachmentName: string
 }
 
 const handleAttachmentDownload = async ({
@@ -140,6 +149,28 @@ function ShowAttachmentTextOnExpand({
 export default function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const [data, setData] = useState<(string | object)[][] | null>(null)
+    const [importStatusData, setImportStatusData] = useState<ImportSummary | null>(null)
+
+    const handleImportStatusView = async (projectId: string, attachmentId: string) => {
+        try {
+            const session = await getSession()
+            if (!session) return signOut()
+
+            const res = await ApiUtils.GET(
+                `projects/${projectId}/attachments/${attachmentId}`,
+                session.user.access_token,
+            )
+
+            if (res.status === HttpStatus.OK) {
+                const data = await res.json()
+                setImportStatusData(data)
+            } else {
+                console.error(`Failed to fetch import status. Status: ${res.status}`)
+            }
+        } catch (err) {
+            console.error('Error fetching SBOM import status:', err)
+        }
+    }
 
     const columns = [
         {
@@ -179,6 +210,29 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
             name: t('File name'),
             sort: true,
             width: '20%',
+            formatter: (filename: string, row: { _id: string; _cells: { _id: string; data: unknown }[] }) => {
+                const isImportStatus = filename.includes('ImportStatus_') && filename.endsWith('.json')
+
+                const meta = row._cells[9]?.data as AttachmentRowMeta | undefined
+
+                if (!isImportStatus || meta?.attachmentId == null) {
+                    return filename
+                }
+
+                return _(
+                    <span className='d-inline-flex align-items-center gap-1'>
+                        {filename}
+                        <span
+                            role='button'
+                            style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: 'black' }}
+                            onClick={() => handleImportStatusView(meta.projectId, meta.attachmentId)}
+                            title={t('Click to view SBOM import result')}
+                        >
+                            <FaInfoCircle size={14} />
+                        </span>
+                    </span>,
+                )
+            },
         },
         {
             id: 'attachments.size',
@@ -330,6 +384,36 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
                 <div className='col-12 d-flex justify-content-center align-items-center'>
                     <Spinner className='spinner' />
                 </div>
+            )}
+            {importStatusData != null && (
+                <Modal
+                    show={true}
+                    onHide={() => setImportStatusData(null)}
+                    size='lg'
+                    centered
+                    scrollable
+                >
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            <span className='text-primary'>{t('SBOM Import Statistics for')}:</span>{' '}
+                            <span className='text-warning'>{importStatusData.fileName}</span>
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <CDXImportStatus
+                            data={importStatusData}
+                            isNewProject={false}
+                        />
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button
+                            variant='secondary'
+                            onClick={() => setImportStatusData(null)}
+                        >
+                            {t('Close')}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             )}
         </>
     )
