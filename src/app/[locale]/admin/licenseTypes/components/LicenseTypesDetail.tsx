@@ -64,7 +64,6 @@ export default function LicenseTypesDetail(): ReactNode {
                             [item.id, item.licenseType],
                         ]),
                     )
-
                     setLicenseTypeCount(licenseTypeDetails._embedded['sw360:licenseTypes'].length)
                 }
             })
@@ -109,13 +108,13 @@ export default function LicenseTypesDetail(): ReactNode {
                 _(
                     <div className='d-flex justify-content-between'>
                         <OverlayTrigger overlay={<Tooltip>{t('Delete License Type')}</Tooltip>}>
-                            <span
-                                className='d-inline-block'
-                                onClick={() => {
-                                    handleDeleteLicenseType(id, licenseTypeName)
-                                }}
-                            >
-                                <FaTrashAlt className='btn-icon' />
+                            <span className='d-inline-block'>
+                                <FaTrashAlt
+                                    className='btn-icon'
+                                    onClick={() => {
+                                        handleDeleteLicenseType(id, licenseTypeName)
+                                    }}
+                                />
                             </span>
                         </OverlayTrigger>
                     </div>,
@@ -126,12 +125,14 @@ export default function LicenseTypesDetail(): ReactNode {
 
     return (
         <>
-            <DeleteLicenseTypesModal
-                licenseTypeId={licenseTypeId}
-                licenseTypeName={licenseTypeName}
-                show={showDeleteModal}
-                setShow={setShowDeleteModal}
-            />
+            {showDeleteModal && (
+                <DeleteLicenseTypesModal
+                    licenseTypeId={licenseTypeId}
+                    licenseTypeName={licenseTypeName}
+                    show={showDeleteModal}
+                    setShow={setShowDeleteModal}
+                />
+            )}
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
