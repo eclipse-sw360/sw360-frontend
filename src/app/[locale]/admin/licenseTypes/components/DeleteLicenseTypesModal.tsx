@@ -25,8 +25,8 @@ interface Props {
 }
 
 interface LicenseTypeInfo {
-    inUse: boolean
-    usageCount: number
+    isUsed: boolean
+    count: number
 }
 
 export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName, show, setShow }: Props): JSX.Element {
@@ -52,15 +52,14 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
 
     useEffect(() => {
         setLoading(true)
-        // API might be different. As of now, the API is not yet developed.
-        void fetchData('checkLicenseTypeUsage')
+        void fetchData(`licenseTypes/${licenseTypeId}/usage`)
             .then((licenseTypeInfo: LicenseTypeInfo) => {
                 if (licenseTypeInfo === undefined) {
                     return
                 }
-                if (licenseTypeInfo.inUse) {
+                if (licenseTypeInfo.isUsed) {
                     setLicenseTypeInUse(true)
-                    setLicenseTypeUsageCount(licenseTypeInfo.usageCount)
+                    setLicenseTypeUsageCount(licenseTypeInfo.count)
                 }
             })
             .catch((error) => {
@@ -73,7 +72,7 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
             .finally(() => {
                 setLoading(false)
             })
-    }, [fetchData])
+    }, [fetchData, licenseTypeId])
 
     const handleDeleteLicenseType = async () => {
         try {
