@@ -86,16 +86,6 @@ const ComponentIndex = (): ReactNode => {
             paramName: 'type',
         },
         {
-            fieldName: 'Group',
-            value: [
-                {
-                    key: 'None',
-                    text: t('None'),
-                },
-            ],
-            paramName: 'group',
-        },
-        {
             fieldName: t('Languages'),
             value: '',
             paramName: 'languages',
