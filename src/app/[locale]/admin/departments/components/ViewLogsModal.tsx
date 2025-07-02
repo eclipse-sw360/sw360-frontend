@@ -108,6 +108,7 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
                             className='col-sm-12 px-2'
                             disabled={selectedDate === undefined}
                             onChange={onDateChange}
+                            max={new Date().toISOString().split('T')[0]}
                         />
                     </div>
                     <div className='row mt-3'>

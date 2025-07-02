@@ -51,6 +51,7 @@ function BuiltDate({ dataBuiltDate, setDataBuiltDate, setBuiltDate }: Props) {
                             onChange={handleInputChange}
                             name='key'
                             value={dataBuiltDate?.key ?? ''}
+                            max={new Date().toISOString().split('T')[0]}
                         />
                     </div>
                     <div>

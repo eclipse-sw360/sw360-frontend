@@ -49,6 +49,7 @@ function Created({ dataCreated, setDataCreated, setCreated }: Props): ReactNode 
                                 placeholder='created.date.yyyy.mm.dd'
                                 onChange={handleInputChange}
                                 value={dataCreated.key}
+                                max={new Date().toISOString().split('T')[0]}
                             />
                         </div>
                         <div>
