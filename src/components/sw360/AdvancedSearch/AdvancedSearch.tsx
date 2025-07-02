@@ -120,6 +120,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                         name='createdOnDate'
                                         value={searchParams.createdOnDate}
                                         onChange={handleSearchParam}
+                                        max={new Date().toISOString().split('T')[0]}
                                     />
                                 </Form.Group>
                             )}
@@ -133,6 +134,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                             name='createdOnStart'
                                             value={searchParams.createdOnStart}
                                             onChange={handleSearchParam}
+                                            max={new Date().toISOString().split('T')[0]}
                                         />
                                     </Form.Group>
                                     <Form.Group className='mb-3'>
@@ -143,6 +145,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                             name='createdOnEnd'
                                             value={searchParams.createdOnEnd}
                                             onChange={handleSearchParam}
+                                            max={new Date().toISOString().split('T')[0]}
                                         />
                                     </Form.Group>
                                 </>
