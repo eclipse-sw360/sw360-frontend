@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -88,6 +89,26 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                     />
                 </div>
                 <div className='col-lg-6'>
+                    <label
+                        htmlFor='user.globalIdentifier'
+                        className='form-label fw-medium'
+                    >
+                        {t('Global Identifier')} <span className='required'>*</span>
+                    </label>
+                    <input
+                        type='globalIdentifier'
+                        name='globalIdentifier'
+                        value={userPayload.externalid}
+                        onChange={handleChange}
+                        className='form-control'
+                        id='user.globalIdentifier'
+                        placeholder={t('Enter user externaId or Global Identifier')}
+                        required
+                    />
+                </div>
+            </div>
+            <div className='row with-divider mb-3 pb-3 px-0'>
+                <div className='col-lg-12'>
                     <label
                         htmlFor='user.password'
                         className='form-label fw-medium'
