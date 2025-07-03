@@ -15,6 +15,8 @@ enum UserGroupType {
     SECURITY_ADMIN = 'SECURITY_ADMIN',
     SW360_ADMIN = 'SW360_ADMIN',
     CLEARING_EXPERT = 'CLEARING_EXPERT',
+    SECURITY_USER = 'SECURITY_USER',
+    VIEWER = 'VIEWER',
 }
 
 export default UserGroupType
