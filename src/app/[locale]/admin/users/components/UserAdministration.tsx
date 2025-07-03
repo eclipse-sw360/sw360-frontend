@@ -219,12 +219,12 @@ export default function UserAdminstration(): JSX.Element {
         {
             fieldName: t('Given Name'),
             value: '',
-            paramName: 'givenName',
+            paramName: 'givenname',
         },
         {
             fieldName: t('Last Name'),
             value: '',
-            paramName: 'lastName',
+            paramName: 'lastname',
         },
         {
             fieldName: t('Email'),
@@ -241,8 +241,45 @@ export default function UserAdminstration(): JSX.Element {
         },
         {
             fieldName: t('Primary Department Role'),
-            value: '',
-            paramName: 'departmentRole',
+            value: [
+                {
+                    key: 'USER',
+                    text: t('User'),
+                },
+                {
+                    key: 'ADMIN',
+                    text: t('Admin'),
+                },
+                {
+                    key: 'CLEARING_ADMIN',
+                    text: t('CLEARING_ADMIN'),
+                },
+                {
+                    key: 'CLEARING_EXPERT',
+                    text: t('CLEARING_EXPERT'),
+                },
+                {
+                    key: 'ECC_ADMIN',
+                    text: t('ECC_ADMIN'),
+                },
+                {
+                    key: 'SECURITY_ADMIN',
+                    text: t('SECURITY_ADMIN'),
+                },
+                {
+                    key: 'SW360_ADMIN',
+                    text: t('SW360_ADMIN'),
+                },
+                {
+                    key: 'SECURITY_USER',
+                    text: t('SECURITY_USER'),
+                },
+                {
+                    key: 'VIEWER',
+                    text: t('VIEWER'),
+                },
+            ],
+            paramName: 'usergroup',
         },
     ]
 
