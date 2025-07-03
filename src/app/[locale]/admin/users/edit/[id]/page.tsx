@@ -136,6 +136,7 @@ const AdminEditUserPage = (): JSX.Element => {
                     >
                         {t('Cancel')}
                     </button>
+                    <div className='col col-auto text-truncate buttonheader-title me-3'>{userPayload.email}</div>
                 </div>
                 <UserEditForm
                     userPayload={userPayload}
