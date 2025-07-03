@@ -9,18 +9,19 @@
 
 'use client'
 
-import { Embedded, User } from '@/object-types'
+import { Embedded, HttpStatus, User } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { SW360_API_URL } from '@/utils/env'
-import { getSession, useSession } from 'next-auth/react'
+import { ApiUtils } from '@/utils/index'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import React, { useState, type JSX } from 'react'
+import React, { useCallback, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import { TfiFiles } from 'react-icons/tfi'
@@ -38,6 +39,7 @@ export default function UserAdminstration(): JSX.Element {
     const [num, setNum] = useState<number>(0)
     const router = useRouter()
     const [editingUserId, setEditingUserId] = useState<string | undefined>(undefined)
+    const [departments, setDepartments] = useState<Array<string | undefined>>([])
     const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] =
         useState<boolean>(false)
 
@@ -58,6 +60,40 @@ export default function UserAdminstration(): JSX.Element {
                 MessageService.error(message)
             })
     }
+
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = await response.json()
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Unauthorized request'))
+            return
+        } else {
+            return undefined
+        }
+    }, [])
+
+    useEffect(() => {
+        void fetchData('users/departments')
+            .then((departments: Array<string> | undefined) => {
+                if (departments === undefined) {
+                    return
+                }
+                if (!CommonUtils.isNullOrUndefined(departments)) {
+                    setDepartments(departments)
+                }
+            })
+            .catch((error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            })
+    }, [])
 
     const handleEditSecondaryDepartmentAndRoles = (id: string) => {
         setEditingUserId(id)
@@ -197,7 +233,10 @@ export default function UserAdminstration(): JSX.Element {
         },
         {
             fieldName: t('Primary Department'),
-            value: '',
+            value: departments.map((department) => ({
+                key: department ?? '',
+                text: department ?? '',
+            })),
             paramName: 'department',
         },
         {
