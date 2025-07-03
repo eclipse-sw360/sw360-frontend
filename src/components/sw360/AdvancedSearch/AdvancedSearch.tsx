@@ -61,6 +61,11 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
         return currentUrl.pathname.includes('/packages')
     }
 
+    function isUsersPage() {
+        const currentUrl = new URL(window.location.href)
+        return currentUrl.pathname.includes('/users')
+    }
+
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)
         const searchUrl = new URL(currentUrl.origin + currentUrl.pathname)
@@ -220,7 +225,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                     <Form onSubmit={handleSubmit}>
                         {fields?.map((field) => renderField(field))}
 
-                        <Form.Group className='mb-3'>
+                        <Form.Group
+                            className='mb-3'
+                            hidden={isUsersPage()}
+                        >
                             <Form.Check
                                 type='checkbox'
                                 label={t('Exact Match')}
