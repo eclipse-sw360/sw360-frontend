@@ -12,7 +12,7 @@
 
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRef, useState, type JSX } from 'react'
+import { useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, User } from '@/object-types'
@@ -42,16 +42,16 @@ const SelectUsersDialog = ({
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [selectingUsers, setSelectingUsers] = useState({})
-    const searchText = useRef<string>('')
+    const [searchText, setSearchText] = useState('')
 
     const handleCloseDialog = () => {
         setShow(!show)
         setSelectingUsers(selectedUsers)
     }
 
-    const searchUsers = async () => {
+    const searchUsers = async (text: string) => {
         const session = await getSession()
-        const queryUrl = CommonUtils.createUrlWithParams(`users`, { email: searchText.current })
+        const queryUrl = CommonUtils.createUrlWithParams(`users`, { email: text })
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
             return
@@ -85,7 +85,8 @@ const SelectUsersDialog = ({
     }
 
     const resetSelection = () => {
-        // TODO: specifications are unclear
+        setSearchText('')
+        void searchUsers('')
     }
 
     return (
@@ -105,18 +106,17 @@ const SelectUsersDialog = ({
                         <input
                             type='text'
                             className='form-control'
+                            value={searchText}
                             placeholder={t('Enter search text')}
                             aria-describedby='Search Users'
-                            onChange={(event) => {
-                                searchText.current = event.target.value
-                            }}
+                            onChange={(event) => setSearchText(event.target.value)}
                         />
                     </div>
                     <div className='col-lg-4'>
                         <button
                             type='button'
                             className='btn btn-secondary me-2'
-                            onClick={() => void searchUsers()}
+                            onClick={() => void searchUsers(searchText)}
                         >
                             {t('Search')}
                         </button>
