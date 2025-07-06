@@ -48,7 +48,7 @@ http://localhost:3000
 
 Every file need to have the conformant license headers. To do that:
 
--   Add this on the header of your source
+- Add this on the header of your source
 
 ```typescript
 // Copyright (C) SW360 Frontend Authors (see <https://github.com/eclipse-sw360/sw360-frontend/blob/main/NOTICE>)
@@ -57,7 +57,7 @@ Every file need to have the conformant license headers. To do that:
 // License-Filename: LICENSE
 ```
 
--   Add your copyright on thr NOTICE file
+- Add your copyright on thr NOTICE file
 
 If you want to check your code before push to CI is possible with docker. Just execute this command from the root of the projects:
 
@@ -77,23 +77,23 @@ Example:
 
 Types allowed for this project commit:
 
--   **build** - For buildsystem related commits
--   **chore** - For small commit tasks
--   **ci** - For CI related commits
--   **docs** - For documentation related tasks
--   **feat** - For new features commits
--   **fix** - For code fix commits
--   **perf** - Performance related commits
--   **refactor** - For refactoring related commits
--   **revert** - For revert commits
--   **style** - For layout and styling commits
--   **test** - For test related commits
+- **build** - For buildsystem related commits
+- **chore** - For small commit tasks
+- **ci** - For CI related commits
+- **docs** - For documentation related tasks
+- **feat** - For new features commits
+- **fix** - For code fix commits
+- **perf** - Performance related commits
+- **refactor** - For refactoring related commits
+- **revert** - For revert commits
+- **style** - For layout and styling commits
+- **test** - For test related commits
 
 Any other header will be caught on CI, and build will fail.
 
 ## Project Rules
 
--   You shall never try to commit package managers lock file.
--   You shall never try to commit image files except as SVG.
--   You shall use NPM. Yarn and pnpm are as good, but we need deal with one only. You can use on your dev environment, but the default reference for testing is npm.
--   You shall NEVER remove the copytright lines from NOTICE unless you are the owner
+- You shall never try to commit package managers lock file
+- You shall never try to commit image files except as SVG
+- You shall use NPM. Yarn and pnpm are as good, but we need deal with one only. You can use on your dev environment, but the default reference for testing is npm
+- You shall NEVER remove the copytright lines from NOTICE unless you are the owner
