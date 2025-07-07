@@ -15,7 +15,7 @@
   "dependencies": {
     "classnames": "^2.5.1",
     "crypto-js": "^4.2.0",
-    "dotenv": "^17.0.0",
+    "dotenv": "^17.0.1",
     "flag-icons": "^7.3.2",
     "gridjs": "^6.2.0",
     "html-react-parser": "^5.2.3",
