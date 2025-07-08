@@ -16,7 +16,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { AdvancedSearch, Table, _ } from 'next-sw360'
+import { AdvancedSearch, Breadcrumb, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
@@ -456,6 +456,7 @@ function Project(): JSX.Element {
                     setShow={setDeleteDialogOpen}
                 />
             )}
+            <Breadcrumb name={t('Projects')} />
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
