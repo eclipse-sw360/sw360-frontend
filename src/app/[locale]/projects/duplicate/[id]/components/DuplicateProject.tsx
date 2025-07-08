@@ -26,6 +26,7 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { Breadcrumb } from 'next-sw360'
 import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -335,132 +336,135 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     }
 
     return (
-        <div className='container page-content'>
-            <form
-                action=''
-                id='form_submit'
-                method='post'
-                onSubmit={(event) => {
-                    event.preventDefault()
-                }}
-            >
-                <div>
-                    <Tab.Container defaultActiveKey='summary'>
-                        <Row>
-                            <Col
-                                sm='auto'
-                                className='me-3'
-                            >
-                                <ListGroup>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='summary'
-                                    >
-                                        <div className='my-2'>{t('Summary')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='administration'
-                                    >
-                                        <div className='my-2'>{t('Administration')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='linkedProjects'
-                                    >
-                                        <div className='my-2'>{t('Linked Releases and Projects')}</div>
-                                    </ListGroup.Item>
-                                </ListGroup>
-                            </Col>
-                            <Col className='me-3'>
-                                <Row className='d-flex justify-content-between'>
-                                    <Col lg={3}>
-                                        <Row>
-                                            <Button
-                                                variant='primary'
-                                                type='submit'
-                                                className='me-2 col-auto'
-                                                onClick={() => void createProject()}
-                                            >
-                                                {t('Create Project')}
-                                            </Button>
-                                            <Button
-                                                variant='secondary'
-                                                className='col-auto'
-                                                onClick={() => handleCancelClick()}
-                                            >
-                                                {t('Cancel')}
-                                            </Button>
-                                        </Row>
-                                    </Col>
-                                    <Col
-                                        lg={4}
-                                        className='text-truncate buttonheader-title'
-                                    >
-                                        {`${projectPayload.name} (${projectPayload.version})`}
-                                    </Col>
-                                </Row>
-                                <Row className='mt-5'>
-                                    <Tab.Content>
-                                        <Tab.Pane eventKey='summary'>
-                                            <Summary
-                                                vendor={vendor}
-                                                setVendor={setVendor}
-                                                externalUrls={externalUrls}
-                                                setExternalUrls={setExternalUrls}
-                                                setExternalUrlsData={setDataExternalUrls}
-                                                externalIds={externalIds}
-                                                setExternalIds={setExternalIds}
-                                                setExternalIdsData={setDataExternalIds}
-                                                additionalData={additionalData}
-                                                setAdditionalData={setAdditionalData}
-                                                setAdditionalDataObject={setDataAdditionalData}
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                                additionalRoles={additionalRoles}
-                                                setAdditionalRoles={setAdditionalRoles}
-                                                setDataAdditionalRoles={setDataAdditionalRoles}
-                                                moderators={moderators}
-                                                setModerators={setModerators}
-                                                contributors={contributors}
-                                                setContributors={setContributors}
-                                                securityResponsibles={securityResponsibles}
-                                                setSecurityResponsibles={setSecurityResponsibles}
-                                                projectOwner={projectOwner}
-                                                setProjectOwner={setProjectOwner}
-                                                projectManager={projectManager}
-                                                setProjectManager={setProjectManager}
-                                                leadArchitect={leadArchitect}
-                                                setLeadArchitect={setLeadArchitect}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='administration'>
-                                            <Administration
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='linkedProjects'>
-                                            {isDuplicateProjectFetched && (
-                                                <LinkedReleasesAndProjects
-                                                    projectId={projectId}
+        <>
+            <Breadcrumb name={t('Create Duplicate Project')} />
+            <div className='container page-content'>
+                <form
+                    action=''
+                    id='form_submit'
+                    method='post'
+                    onSubmit={(event) => {
+                        event.preventDefault()
+                    }}
+                >
+                    <div>
+                        <Tab.Container defaultActiveKey='summary'>
+                            <Row>
+                                <Col
+                                    sm='auto'
+                                    className='me-3'
+                                >
+                                    <ListGroup>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='summary'
+                                        >
+                                            <div className='my-2'>{t('Summary')}</div>
+                                        </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='administration'
+                                        >
+                                            <div className='my-2'>{t('Administration')}</div>
+                                        </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='linkedProjects'
+                                        >
+                                            <div className='my-2'>{t('Linked Releases and Projects')}</div>
+                                        </ListGroup.Item>
+                                    </ListGroup>
+                                </Col>
+                                <Col className='me-3'>
+                                    <Row className='d-flex justify-content-between'>
+                                        <Col lg={3}>
+                                            <Row>
+                                                <Button
+                                                    variant='primary'
+                                                    type='submit'
+                                                    className='me-2 col-auto'
+                                                    onClick={() => void createProject()}
+                                                >
+                                                    {t('Create Project')}
+                                                </Button>
+                                                <Button
+                                                    variant='secondary'
+                                                    className='col-auto'
+                                                    onClick={() => handleCancelClick()}
+                                                >
+                                                    {t('Cancel')}
+                                                </Button>
+                                            </Row>
+                                        </Col>
+                                        <Col
+                                            lg={4}
+                                            className='text-truncate buttonheader-title'
+                                        >
+                                            {`${projectPayload.name} (${projectPayload.version})`}
+                                        </Col>
+                                    </Row>
+                                    <Row className='mt-5'>
+                                        <Tab.Content>
+                                            <Tab.Pane eventKey='summary'>
+                                                <Summary
+                                                    vendor={vendor}
+                                                    setVendor={setVendor}
+                                                    externalUrls={externalUrls}
+                                                    setExternalUrls={setExternalUrls}
+                                                    setExternalUrlsData={setDataExternalUrls}
+                                                    externalIds={externalIds}
+                                                    setExternalIds={setExternalIds}
+                                                    setExternalIdsData={setDataExternalIds}
+                                                    additionalData={additionalData}
+                                                    setAdditionalData={setAdditionalData}
+                                                    setAdditionalDataObject={setDataAdditionalData}
                                                     projectPayload={projectPayload}
                                                     setProjectPayload={setProjectPayload}
-                                                    existingReleaseData={existingReleaseData}
-                                                    isDependencyNetworkFeatureEnabled={
-                                                        isDependencyNetworkFeatureEnabled
-                                                    }
+                                                    additionalRoles={additionalRoles}
+                                                    setAdditionalRoles={setAdditionalRoles}
+                                                    setDataAdditionalRoles={setDataAdditionalRoles}
+                                                    moderators={moderators}
+                                                    setModerators={setModerators}
+                                                    contributors={contributors}
+                                                    setContributors={setContributors}
+                                                    securityResponsibles={securityResponsibles}
+                                                    setSecurityResponsibles={setSecurityResponsibles}
+                                                    projectOwner={projectOwner}
+                                                    setProjectOwner={setProjectOwner}
+                                                    projectManager={projectManager}
+                                                    setProjectManager={setProjectManager}
+                                                    leadArchitect={leadArchitect}
+                                                    setLeadArchitect={setLeadArchitect}
                                                 />
-                                            )}
-                                        </Tab.Pane>
-                                    </Tab.Content>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Tab.Container>
-                </div>
-            </form>
-        </div>
+                                            </Tab.Pane>
+                                            <Tab.Pane eventKey='administration'>
+                                                <Administration
+                                                    projectPayload={projectPayload}
+                                                    setProjectPayload={setProjectPayload}
+                                                />
+                                            </Tab.Pane>
+                                            <Tab.Pane eventKey='linkedProjects'>
+                                                {isDuplicateProjectFetched && (
+                                                    <LinkedReleasesAndProjects
+                                                        projectId={projectId}
+                                                        projectPayload={projectPayload}
+                                                        setProjectPayload={setProjectPayload}
+                                                        existingReleaseData={existingReleaseData}
+                                                        isDependencyNetworkFeatureEnabled={
+                                                            isDependencyNetworkFeatureEnabled
+                                                        }
+                                                    />
+                                                )}
+                                            </Tab.Pane>
+                                        </Tab.Content>
+                                    </Row>
+                                </Col>
+                            </Row>
+                        </Tab.Container>
+                    </div>
+                </form>
+            </div>
+        </>
     )
 }
 
