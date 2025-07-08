@@ -25,7 +25,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState, type JSX } from 'react'
@@ -564,6 +564,7 @@ function Project(): JSX.Element {
                     setShow={setDeleteDialogOpen}
                 />
             )}
+            <Breadcrumb name={t('Projects')} />
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>

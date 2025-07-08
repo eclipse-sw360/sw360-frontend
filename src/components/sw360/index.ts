@@ -11,6 +11,7 @@ import AddAdditionalRoles from './AddAdditionalRoles/AddAdditionalRoles'
 import AddKeyValue from './AddKeyValue/AddKeyValue'
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
+import Breadcrumb from './Breadcrumb/Breadcrumb'
 import EnumValueWithToolTip from './EnumValueWithToolTip/EnumValueWIthToolTip'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
@@ -45,6 +46,7 @@ export {
     AddKeyValue,
     AdvancedSearch,
     AuthScreen,
+    Breadcrumb,
     EnumValueWithToolTip,
     FilterComponent,
     Footer,

@@ -31,7 +31,7 @@ import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
-import { ShowInfoOnHover } from 'next-sw360'
+import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 
@@ -127,6 +127,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setShow={setShow}
                 projectId={projectId}
             />
+            {summaryData?.name ? <Breadcrumb name={summaryData?.name} /> : <Breadcrumb name={' '} />}
             <div className='container page-content'>
                 <Tab.Container
                     activeKey={activeKey}
