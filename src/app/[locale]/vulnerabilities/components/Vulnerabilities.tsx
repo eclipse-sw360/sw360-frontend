@@ -35,6 +35,7 @@ function Vulnerabilities(): ReactNode {
     const [vulnerabilityToBeDeleted, setVulnerabilityToBeDeleted] = useState<null | string>(null)
     const router = useRouter()
     const { data: session, status } = useSession()
+    const [reloadKey, setReloadKey] = useState(1)
 
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
@@ -158,6 +159,9 @@ function Vulnerabilities(): ReactNode {
                 <DeleteVulnerabilityModal
                     vulnerabilityId={vulnerabilityToBeDeleted}
                     setVulnerability={setVulnerabilityToBeDeleted}
+                    reloadKey={reloadKey}
+                    setReloadKey={setReloadKey}
+                    isEditPage={false}
                 />
                 <div className='container page-content'>
                     <div className='row'>
@@ -188,6 +192,7 @@ function Vulnerabilities(): ReactNode {
                             <div className='row mt-3'>
                                 {status === 'authenticated' ? (
                                     <VulnerabilitesTable
+                                        key={reloadKey}
                                         columns={columns}
                                         server={initServerPaginationConfig(session) as ServerStorageOptions}
                                         selector={true}
