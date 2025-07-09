@@ -61,7 +61,7 @@ export default function AddValues({
                 <div className='row header mb-2 pb-2 px-2'>
                     <h6>{t(componentName)}</h6>
                 </div>
-                {(payload[payloadKeyName] as Array<string>).map((elem, i) => (
+                {((payload[payloadKeyName] ?? []) as Array<string>).map((elem, i) => (
                     <div
                         className='row mb-2'
                         key={i}

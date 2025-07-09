@@ -168,7 +168,7 @@
     "CVSS Date YYYY-MM-DD": "CVSS Fecha YYYY-MM-DD",
     "CVSS Time": "CVSS Hora",
     "CWE": "CWE",
-    "Can not remove vulnerability because it is used by release": "No puede eliminar la vulnerabilidad porque se utiliza por liberación",
+    "Can not remove vulnerability because it is used by release": "No puede eliminar la vulnerabilidad porque se usa por liberación",
     "Cancel": "Cancelar",
     "Cancel CVE Service": "Cancelar el servicio CVE",
     "Cancel Scheduled Attachment Deletion From Localm FS": "Cancelar la eliminación de archivos adjuntos programados de la localm FS",

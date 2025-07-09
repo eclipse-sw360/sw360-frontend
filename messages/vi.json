@@ -168,7 +168,7 @@
     "CVSS Date YYYY-MM-DD": "Ngày CVSS YYYY-MM-DD",
     "CVSS Time": "Thời gian CVSS",
     "CWE": "CWE",
-    "Can not remove vulnerability because it is used by release": "Không thể loại bỏ lỗ hổng vì nó được sử dụng bởi bản phát hành",
+    "Can not remove vulnerability because it is used by release": "Không thể loại bỏ lỗ hổng vì nó được sử dụng bằng cách phát hành",
     "Cancel": "Hủy bỏ",
     "Cancel CVE Service": "Hủy dịch vụ CVE",
     "Cancel Scheduled Attachment Deletion From Localm FS": "Hủy bỏ tệp đính kèm theo lịch trình từ Localm FS",
