@@ -14,7 +14,7 @@ import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { MdDeleteOutline } from 'react-icons/md'
+import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
     header: string
@@ -99,8 +99,8 @@ function AddKeyValue(props: Props): JSX.Element {
                             <div className='col-lg-1'>
                                 <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                     <span className='d-inline-block'>
-                                        <MdDeleteOutline
-                                            size={25}
+                                        <FaTrashAlt
+                                            size={22}
                                             className='ms-2 btn-icon'
                                             onClick={() => handleRemoveClick(j)}
                                         />
