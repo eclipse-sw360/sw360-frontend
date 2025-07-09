@@ -10,8 +10,9 @@
 name: Build Frontend
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
+
   pull_request:
     branches:
       - main
@@ -55,16 +56,28 @@ jobs:
         run: |
           pnpm lint --output-file eslint_report.json --format json
         continue-on-error: true
-        
 
       - name: Run build
         shell: bash
         run: |
           pnpm build --no-lint > typescript.log
         continue-on-error: true
-      
+
       - name: Annotate Code
         uses: DerLev/eslint-annotations@v2
         with:
           eslint-report: eslint_report.json
           typescript-log: typescript.log
+
+      - name: Create Deploy Tarball
+        shell: bash
+        run: |
+          pnpm pack --pack-destination dist
+
+      - name: Create GH release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          token: ${{ secrets.SW360_DEPLOY_TOKEN }}
+          files: |
+            dist/sw360-frontend-*.tgz

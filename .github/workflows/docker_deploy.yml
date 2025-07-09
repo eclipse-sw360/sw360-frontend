@@ -15,9 +15,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'sw360-*'
-    paths-ignore:
-      - "**.md"
+      - 'v*'
 
 env:
   REGISTRY: ghcr.io
@@ -77,4 +75,3 @@ jobs:
           labels: ${{ steps.meta_runtime.outputs.labels }}
           cache-from: type=gha,scope=runtime
           cache-to: type=gha,scope=runtime,mode=max
-

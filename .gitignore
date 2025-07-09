@@ -49,3 +49,4 @@ output
 # cypress
 /cypress/screenshots
 /cypress/downloads
+dist
