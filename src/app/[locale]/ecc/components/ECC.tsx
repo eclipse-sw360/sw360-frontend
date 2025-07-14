@@ -9,7 +9,8 @@
 
 'use client'
 
-import type { ECC, Embedded } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { UserGroupType, type ECC, type Embedded } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
@@ -23,7 +24,7 @@ type EmbeddedECC = Embedded<ECC, 'sw360:releases'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function ECC(): ReactNode {
+function ECC(): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -118,3 +119,6 @@ export default function ECC(): ReactNode {
         </div>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ECC, [UserGroupType.SECURITY_USER])
