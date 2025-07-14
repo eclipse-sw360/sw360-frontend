@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -15,9 +16,18 @@ import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { Embedded, HttpStatus, LicenseDetail, LicensePayload, LicenseTabIds, Obligation } from '@/object-types'
+import {
+    Embedded,
+    HttpStatus,
+    LicenseDetail,
+    LicensePayload,
+    LicenseTabIds,
+    Obligation,
+    UserGroupType,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { PageButtonHeader, SideBar } from 'next-sw360'
@@ -30,7 +40,7 @@ interface Props {
 
 type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
 
-export default function EditLicense({ licenseId }: Props): ReactNode {
+function EditLicense({ licenseId }: Props): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const params = useSearchParams()
@@ -261,3 +271,6 @@ export default function EditLicense({ licenseId }: Props): ReactNode {
         </div>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(EditLicense, [UserGroupType.SECURITY_USER])

@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,10 +11,19 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { PageButtonHeader, SideBar } from '@/components/sw360'
-import { Changelogs, Embedded, ErrorDetails, HttpStatus, LicenseDetail, LicenseTabIds } from '@/object-types'
+import {
+    Changelogs,
+    Embedded,
+    ErrorDetails,
+    HttpStatus,
+    LicenseDetail,
+    LicenseTabIds,
+    UserGroupType,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -299,4 +309,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     )
 }
 
-export default LicenseDetailOverview
+// export default LicenseDetailOverview
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(LicenseDetailOverview, [UserGroupType.SECURITY_USER])

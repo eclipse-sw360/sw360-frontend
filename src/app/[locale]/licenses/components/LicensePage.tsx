@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,7 +10,8 @@
 
 'use client'
 
-import { Embedded, LicensePayload } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Embedded, LicensePayload, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
@@ -135,4 +137,6 @@ function LicensePage(): ReactNode {
         )
     }
 }
-export default LicensePage
+// export default LicensePage
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(LicensePage, [UserGroupType.SECURITY_USER])
