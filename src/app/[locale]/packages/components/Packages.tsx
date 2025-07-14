@@ -9,7 +9,8 @@
 
 'use client'
 
-import { Embedded, Package } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Embedded, Package, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
@@ -33,7 +34,7 @@ interface DeletePackageModalMetData {
     packageVersion: string
 }
 
-export default function Packages(): ReactNode {
+function Packages(): ReactNode {
     const { data: session, status } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -261,3 +262,6 @@ export default function Packages(): ReactNode {
         )
     }
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(Packages, [UserGroupType.SECURITY_USER])
