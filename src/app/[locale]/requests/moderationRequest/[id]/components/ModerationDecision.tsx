@@ -9,7 +9,8 @@
 
 'use client'
 
-import { ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ReactNode } from 'react'
@@ -24,11 +25,7 @@ interface Props {
     setModerationRequestPayload: React.Dispatch<React.SetStateAction<ModerationRequestPayload>>
 }
 
-export default function ModerationDecision({
-    data,
-    moderationRequestPayload,
-    setModerationRequestPayload,
-}: Props): ReactNode {
+function ModerationDecision({ data, moderationRequestPayload, setModerationRequestPayload }: Props): ReactNode {
     const t = useTranslations('default')
     const moderationRequestStatus: ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
@@ -93,3 +90,6 @@ export default function ModerationDecision({
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ModerationDecision, [UserGroupType.SECURITY_USER])
