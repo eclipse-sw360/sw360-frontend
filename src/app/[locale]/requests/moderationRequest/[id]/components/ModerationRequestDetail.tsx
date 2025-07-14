@@ -10,7 +10,8 @@
 'use client'
 
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -453,4 +454,5 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     }
 }
 
-export default ModerationRequestDetail
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ModerationRequestDetail, [UserGroupType.SECURITY_USER])

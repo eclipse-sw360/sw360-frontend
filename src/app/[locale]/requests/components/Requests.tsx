@@ -9,7 +9,8 @@
 
 'use client'
 
-import { ClearingRequest, Embedded, HttpStatus, ModerationRequest } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ClearingRequest, Embedded, HttpStatus, ModerationRequest, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -291,4 +292,5 @@ function Requests(): ReactNode | undefined {
     }
 }
 
-export default Requests
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(Requests, [UserGroupType.SECURITY_USER])
