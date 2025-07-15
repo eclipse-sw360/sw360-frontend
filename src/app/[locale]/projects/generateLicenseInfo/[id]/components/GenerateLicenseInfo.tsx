@@ -9,6 +9,7 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     AttachmentUsage,
     AttachmentUsages,
@@ -19,6 +20,7 @@ import {
     ProjectLinkedRelease,
     Release,
     SaveUsagesPayload,
+    UserGroupType,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -81,7 +83,7 @@ const setExpandedFieldsOfNewData = (prevState: NodeData[], newState: NodeData[])
     }
 }
 
-export default function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): ReactNode {
+function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [project, setProject] = useState<Project>()
@@ -619,3 +621,6 @@ export default function GenerateLicenseInfo({ projectId }: Readonly<{ projectId:
         )
     }
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(GenerateLicenseInfo, [UserGroupType.SECURITY_USER])

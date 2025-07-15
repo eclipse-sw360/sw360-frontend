@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ActionType, AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
+import { ActionType, AdministrationDataType, HttpStatus, SummaryDataType, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -149,6 +149,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='licenseClearing'
+                                    hidden={
+                                        status === 'authenticated' &&
+                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                    }
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
                                 </ListGroup.Item>
@@ -161,12 +165,20 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='obligations'
+                                    hidden={
+                                        status === 'authenticated' &&
+                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                    }
                                 >
                                     <div className='my-2'>{t('Obligations')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
                                     eventKey='ecc'
+                                    hidden={
+                                        status === 'authenticated' &&
+                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                    }
                                 >
                                     <div className='my-2'>{t('ECC')}</div>
                                 </ListGroup.Item>
@@ -179,12 +191,20 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='attachments'
+                                    hidden={
+                                        status === 'authenticated' &&
+                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                    }
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
                                     eventKey='attachmentUsages'
+                                    hidden={
+                                        status === 'authenticated' &&
+                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                    }
                                 >
                                     <div className='my-2'>{t('Attachment Usages')}</div>
                                 </ListGroup.Item>
@@ -197,6 +217,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='changeLog'
+                                    hidden={
+                                        status === 'authenticated' &&
+                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                    }
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>
                                 </ListGroup.Item>
@@ -210,6 +234,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             variant='primary'
                                             className='me-2 col-auto'
                                             onClick={() => handleEditProject(projectId)}
+                                            disabled={
+                                                status === 'authenticated' &&
+                                                session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                            }
                                         >
                                             {t('Edit Projects')}
                                         </Button>
@@ -217,6 +245,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             variant='secondary'
                                             className='col-auto'
                                             onClick={() => setShow(true)}
+                                            disabled={
+                                                status === 'authenticated' &&
+                                                session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                            }
                                         >
                                             {t('Link to Projects')}
                                         </Button>
@@ -225,6 +257,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 variant='dark'
                                                 id='exportSBOM'
                                                 className='px-2'
+                                                hidden={
+                                                    status === 'authenticated' &&
+                                                    session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                }
                                             >
                                                 {t('Import SBOM')}
                                             </Dropdown.Toggle>
@@ -286,6 +322,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 variant='dark'
                                                 id='exportSBOM'
                                                 className='px-2'
+                                                hidden={
+                                                    status === 'authenticated' &&
+                                                    session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                }
                                             >
                                                 {t('Export SBOM')}
                                             </Dropdown.Toggle>

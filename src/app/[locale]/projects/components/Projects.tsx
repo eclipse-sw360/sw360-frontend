@@ -10,7 +10,7 @@
 
 'use client'
 
-import { Embedded, HttpStatus, Project as TypeProject } from '@/object-types'
+import { Embedded, HttpStatus, Project as TypeProject, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -202,6 +202,9 @@ function Project(): JSX.Element {
             id: 'projects.actions',
             name: t('Actions'),
             width: '13%',
+            hidden: () => {
+                return session?.user?.userGroup === UserGroupType.SECURITY_USER
+            },
             formatter: ([projectId, clearingRequestId]: [string, string]) =>
                 _(
                     <>
@@ -472,11 +475,23 @@ function Project(): JSX.Element {
                                         <button
                                             className='btn btn-primary'
                                             onClick={handleAddProject}
+                                            disabled={
+                                                status === 'authenticated' &&
+                                                session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                            }
                                         >
                                             {t('Add Project')}
                                         </button>
                                         <Dropdown>
-                                            <Dropdown.Toggle variant='secondary'>{t('Import SBOM')}</Dropdown.Toggle>
+                                            <Dropdown.Toggle
+                                                variant='secondary'
+                                                hidden={
+                                                    status === 'authenticated' &&
+                                                    session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                }
+                                            >
+                                                {t('Import SBOM')}
+                                            </Dropdown.Toggle>
                                             <Dropdown.Menu>
                                                 <Dropdown.Item
                                                     onClick={() =>
