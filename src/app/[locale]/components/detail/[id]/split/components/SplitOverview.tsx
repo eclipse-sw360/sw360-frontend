@@ -9,7 +9,8 @@
 
 'use client'
 
-import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -46,7 +47,7 @@ interface SplitComponentPayload {
     targetComponent: Component
 }
 
-export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
+function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
     const [splitState, setSplitState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
@@ -244,3 +245,6 @@ export default function SplitOverview({ id }: Readonly<{ id: string }>): ReactNo
         </div>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(SplitOverview, [UserGroupType.SECURITY_USER])

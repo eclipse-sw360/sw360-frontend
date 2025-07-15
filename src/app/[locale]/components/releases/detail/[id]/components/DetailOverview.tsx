@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,7 +11,7 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -35,6 +36,7 @@ import {
     ReleaseLink,
     ReleaseTabIds,
     User,
+    UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -44,7 +46,7 @@ import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
 import LinkedReleases from './LinkedReleases'
-import ReleaseDetailTabs from './ReleaseDetailTabs'
+import { ReleaseDetailTabs } from './ReleaseDetailTabs'
 import Summary from './Summary'
 import SPDXDocumentTab from './spdx/SPDXDocumentTab'
 
@@ -59,6 +61,12 @@ interface Props {
 
 const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const t = useTranslations('default')
+    const {
+        WITH_COMMERCIAL_DETAILS,
+        WITH_SPDX,
+        WITHOUT_COMMERCIAL_DETAILS_AND_SPDX,
+        WITH_COMMERCIAL_DETAILS_AND_SPDX,
+    } = ReleaseDetailTabs()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
@@ -69,12 +77,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
-
-    const [tabList, setTabList] = useState(ReleaseDetailTabs.WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
+    const { data: session } = useSession()
+    const [tabList, setTabList] = useState(WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === HttpStatus.OK) {
@@ -97,7 +104,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const extractUserEmail = async () => {
-        const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return
         setUserEmail(session.user.email)
     }
@@ -122,15 +128,15 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 }
 
                 if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
-                    setTabList(ReleaseDetailTabs.WITH_COMMERCIAL_DETAILS)
+                    setTabList(WITH_COMMERCIAL_DETAILS)
                 }
 
                 if (release.componentType === 'COTS' && isSPDXFeatureEnabled === true) {
-                    setTabList(ReleaseDetailTabs.WITH_COMMERCIAL_DETAILS_AND_SPDX)
+                    setTabList(WITH_COMMERCIAL_DETAILS_AND_SPDX)
                 }
 
                 if (release.componentType !== 'COTS' && isSPDXFeatureEnabled === true) {
-                    setTabList(ReleaseDetailTabs.WITH_SPDX)
+                    setTabList(WITH_SPDX)
                 }
                 return release
             })
@@ -171,9 +177,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [fetchData, releaseId])
 
     const downloadBundle = async () => {
-        const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return
-
         DownloadService.download(
             `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
             session,
@@ -182,7 +186,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const handleSubcriptions = async () => {
-        const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
             return
@@ -207,6 +210,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             link: `/components/editRelease/${releaseId}?tab=${selectedTab}`,
             type: 'primary',
             name: t('Edit release'),
+            disable: session?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
         'Link To Project': {
             link: '',
@@ -215,8 +219,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 setLinkProjectModalShow(true)
             },
             name: t('Link To Project'),
+            disable: session?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
-        Merge: { link: '', type: 'secondary', name: t('Merge') },
+        Merge: {
+            link: '',
+            type: 'secondary',
+            name: t('Merge'),
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
         Subscribe: {
             link: '',
             type: isUserSubscribed() ? 'outline-danger' : 'outline-success',
