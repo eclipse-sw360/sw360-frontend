@@ -9,6 +9,7 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     AttachmentUsage,
     AttachmentUsages,
@@ -19,6 +20,7 @@ import {
     ProjectLinkedRelease,
     Release,
     SaveUsagesPayload,
+    UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -95,7 +97,7 @@ function isSourceCodeBundleDisabled(type: string): boolean {
     return false
 }
 
-export default function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
+function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [data, setData] = useState<Array<NodeData>>()
@@ -547,3 +549,6 @@ export default function AttachmentUsagesComponent({ projectId }: { projectId: st
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(AttachmentUsagesComponent, [UserGroupType.SECURITY_USER])

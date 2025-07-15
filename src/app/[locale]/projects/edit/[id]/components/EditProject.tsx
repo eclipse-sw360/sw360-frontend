@@ -9,6 +9,7 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import Administration from '@/components/ProjectAddSummary/Administration'
@@ -27,6 +28,7 @@ import {
     ProjectObligationData,
     ProjectPayload,
     ReleaseDetail,
+    UserGroupType,
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -632,4 +634,5 @@ function EditProject({
     )
 }
 
-export default EditProject
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(EditProject, [UserGroupType.SECURITY_USER])

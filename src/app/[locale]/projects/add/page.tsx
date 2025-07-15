@@ -9,11 +9,12 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { ConfigKeys, HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor } from '@/object-types'
+import { ConfigKeys, HttpStatus, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -282,4 +283,5 @@ function AddProjects(): JSX.Element {
     )
 }
 
-export default AddProjects
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(AddProjects, [UserGroupType.SECURITY_USER])
