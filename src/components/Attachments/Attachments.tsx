@@ -140,7 +140,7 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
     const downloadBundle = async () => {
         try {
             const session = await getSession()
-            DownloadService.download(
+            await DownloadService.download(
                 `${documentType}/${documentId}/attachments/download`,
                 session,
                 'AttachmentBundle.zip',

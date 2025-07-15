@@ -76,14 +76,14 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
     const downloadBundle = async () => {
         if (CommonUtils.isNullOrUndefined(session)) return
-        DownloadService.download(
+        await DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
             session,
             'AttachmentBundle.zip',
         )
     }
 
-    const extractUserEmailFromSession = async () => {
+    const extractUserEmailFromSession = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
         setUserEmail(session.user.email)
     }

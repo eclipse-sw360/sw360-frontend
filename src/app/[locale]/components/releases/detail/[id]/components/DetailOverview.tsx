@@ -103,7 +103,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             : []
     }
 
-    const extractUserEmail = async () => {
+    const extractUserEmail = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
         setUserEmail(session.user.email)
     }
@@ -178,7 +178,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
     const downloadBundle = async () => {
         if (CommonUtils.isNullOrUndefined(session)) return
-        DownloadService.download(
+        await DownloadService.download(
             `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
             session,
             'AttachmentBundle.zip',
