@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,7 +11,7 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
@@ -29,6 +30,7 @@ import {
     HttpStatus,
     LinkedVulnerability,
     User,
+    UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -43,29 +45,6 @@ interface Props {
     componentId: string
 }
 
-const tabList = [
-    {
-        id: CommonTabIds.SUMMARY,
-        name: 'Summary',
-    },
-    {
-        id: ComponentTabIds.RELEASE_OVERVIEW,
-        name: 'Release Overview',
-    },
-    {
-        id: CommonTabIds.ATTACHMENTS,
-        name: 'Attachments',
-    },
-    {
-        id: CommonTabIds.VULNERABILITIES,
-        name: 'Vulnerabilities',
-    },
-    {
-        id: CommonTabIds.CHANGE_LOG,
-        name: 'Change Log',
-    },
-]
-
 const DetailOverview = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
@@ -77,23 +56,25 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
+    const { data: session } = useSession()
 
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
-            return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            return undefined
-        }
-    }, [])
+    const fetchData = useCallback(
+        async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
+                const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
+                return data
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                return undefined
+            }
+        },
+        [session],
+    )
 
     const downloadBundle = async () => {
-        const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return
         DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
@@ -103,7 +84,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const extractUserEmailFromSession = async () => {
-        const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return
         setUserEmail(session.user.email)
     }
@@ -158,7 +138,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const handleSubcriptions = async () => {
-        const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
             return
@@ -173,10 +152,50 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             .catch((e) => console.error(e))
     }
 
+    const tabList = [
+        {
+            id: CommonTabIds.SUMMARY,
+            name: 'Summary',
+        },
+        {
+            id: ComponentTabIds.RELEASE_OVERVIEW,
+            name: 'Release Overview',
+        },
+        {
+            id: CommonTabIds.ATTACHMENTS,
+            name: 'Attachments',
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        {
+            id: CommonTabIds.VULNERABILITIES,
+            name: 'Vulnerabilities',
+        },
+        {
+            id: CommonTabIds.CHANGE_LOG,
+            name: 'Change Log',
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+    ]
+
     const headerButtons = {
-        Edit: { link: `/components/edit/${componentId}`, type: 'primary', name: t('Edit component') },
-        Merge: { link: `/components/detail/${componentId}/merge`, type: 'secondary', name: t('Merge') },
-        Split: { link: `/components/detail/${componentId}/split`, type: 'secondary', name: t('Split') },
+        Edit: {
+            link: `/components/edit/${componentId}`,
+            type: 'primary',
+            name: t('Edit component'),
+            disable: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        Merge: {
+            link: `/components/detail/${componentId}/merge`,
+            type: 'secondary',
+            name: t('Merge'),
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        Split: {
+            link: `/components/detail/${componentId}/split`,
+            type: 'secondary',
+            name: t('Split'),
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
         Subscribe: {
             link: '',
             type: isUserSubscribed() ? 'outline-danger' : 'outline-success',

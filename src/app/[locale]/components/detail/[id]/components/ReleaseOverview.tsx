@@ -11,7 +11,7 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
@@ -23,7 +23,7 @@ import { HiOutlineLink } from 'react-icons/hi'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import { Embedded, HttpStatus, LinkedRelease, ReleaseLink } from '@/object-types'
+import { Embedded, HttpStatus, LinkedRelease, ReleaseLink, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { Table, _ } from 'next-sw360'
 import DeleteReleaseModal from './DeleteReleaseModal'
@@ -44,6 +44,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
     const [linkingReleaseId, setLinkingReleaseId] = useState<string | undefined>(undefined)
     const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
+    const { data: session } = useSession()
 
     const handleClickDelete = (releaseId: string) => {
         setDeletingRelease(releaseId)
@@ -135,6 +136,9 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         {
             id: 'action',
             name: t('Actions'),
+            hidden: () => {
+                return session?.user?.userGroup === UserGroupType.SECURITY_USER
+            },
             formatter: (id: string) =>
                 _(
                     <span>
