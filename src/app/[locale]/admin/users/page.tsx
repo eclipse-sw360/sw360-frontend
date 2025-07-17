@@ -16,8 +16,8 @@ export const metadata: Metadata = {
     title: 'Admin',
 }
 
-function LicenseAdministrationPage(): JSX.Element {
+function UsersAdministrationPage(): JSX.Element {
     return <UserAdministration />
 }
 
-export default LicenseAdministrationPage
+export default UsersAdministrationPage

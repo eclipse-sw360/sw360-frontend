@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Table, _ } from 'next-sw360'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
@@ -29,9 +29,6 @@ import { TfiFiles } from 'react-icons/tfi'
 const EditSecondaryDepartmentAndRolesModal = dynamic(() => import('./EditSecondaryDepartmentsAndRolesModal'), {
     ssr: false,
 })
-
-// Prevent re-rendering of the table when the open/close button of the modal is clicked
-const MemoTable = React.memo(Table, () => true)
 
 export default function UserAdminstration(): JSX.Element {
     const t = useTranslations('default')
@@ -42,6 +39,7 @@ export default function UserAdminstration(): JSX.Element {
     const [departments, setDepartments] = useState<Array<string | undefined>>([])
     const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] =
         useState<boolean>(false)
+    const params = useSearchParams()
 
     const handleAddUsers = () => {
         router.push('/admin/users/add')
@@ -195,8 +193,10 @@ export default function UserAdminstration(): JSX.Element {
 
     const initServerPaginationConfig = () => {
         if (CommonUtils.isNullOrUndefined(session)) return
+        const searchParams = Object.fromEntries(params)
+        searchParams.allDetails = 'true'
         return {
-            url: `${SW360_API_URL}/resource/api/users`,
+            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/users`, searchParams),
             then: (data: Embedded<User, 'sw360:users'>) => {
                 setNum(data.page ? data.page.totalElements : 0)
                 return data._embedded['sw360:users'].map((elem: User) => [
@@ -314,7 +314,7 @@ export default function UserAdminstration(): JSX.Element {
                         <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('Users')}</h5>
                         {status === 'authenticated' ? (
                             <div className='ms-1'>
-                                <MemoTable
+                                <Table
                                     columns={columns}
                                     server={initServerPaginationConfig()}
                                     selector={true}
