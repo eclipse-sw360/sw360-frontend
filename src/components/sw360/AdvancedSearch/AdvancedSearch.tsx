@@ -12,7 +12,7 @@
 
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useState, type JSX } from 'react'
+import React, { useEffect, useState, type JSX } from 'react'
 import { Button, Form } from 'react-bootstrap'
 
 import CommonUtils from '@/utils/common.utils'
@@ -44,6 +44,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
     const params = Object.fromEntries(useSearchParams())
     const [searchParams, setSearchParam] = useState<SearchParams>(params)
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')
+    const [isUsersPage, setIsUsersPage] = useState(false)
+    const [isPackagesPage, setIsPackagesPage] = useState(false)
 
     const handleSearchParam = (event: React.ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         setSearchParam((prev: SearchParams) => ({
@@ -56,15 +58,15 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
         setCreatedOnSearchOption(event.target.value)
     }
 
-    function isPackagesPage() {
+    useEffect(() => {
         const currentUrl = new URL(window.location.href)
-        return currentUrl.pathname.includes('/packages')
-    }
+        setIsUsersPage(currentUrl.pathname.includes('users'))
+    }, [])
 
-    function isUsersPage() {
+    useEffect(() => {
         const currentUrl = new URL(window.location.href)
-        return currentUrl.pathname.includes('/users')
-    }
+        setIsPackagesPage(currentUrl.pathname.includes('packages'))
+    }, [])
 
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)
@@ -227,7 +229,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
 
                         <Form.Group
                             className='mb-3'
-                            hidden={isUsersPage()}
+                            hidden={isUsersPage}
                         >
                             <Form.Check
                                 type='checkbox'
@@ -251,7 +253,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                         </Form.Group>
                         <Form.Group
                             className='mb-3'
-                            hidden={!isPackagesPage()}
+                            hidden={!isPackagesPage}
                         >
                             <Form.Check
                                 type='checkbox'
