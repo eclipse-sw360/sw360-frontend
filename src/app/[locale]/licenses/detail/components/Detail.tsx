@@ -92,7 +92,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                     </tr>
                     <tr>
                         <td>{t('Type')}:</td>
-                        <td></td>
+                        <td>{license.licenseType?.licenseType}</td>
                     </tr>
                     <tr>
                         <td>{t('OSI Approved')}:</td>
