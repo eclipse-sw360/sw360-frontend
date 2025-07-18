@@ -976,12 +976,14 @@
     "Postpone Request": "リクエストの延期",
     "Preferences": "環境設定",
     "Preferred Clearing Date": "希望決済日",
+    "Previous": "前の",
     "Primary Department": "一次部門",
     "Primary Department Role": "主要部門の役割",
     "Primary role": "主な役割",
     "Priority": "优先级",
     "Priority Text": "Priority Text",
     "Private": "プライベート",
+    "Processing": "処理",
     "Product": "製品",
     "Programming Languages": "プログラミング言語",
     "Project": "プロジェクト",
@@ -1529,11 +1531,13 @@
     "schedule_deparments_generating": "生成部門をスケジュールします",
     "send_component_spreadsheet_export_to_mail_enabled_description": "メールでコンポーネントのスプレッドシェットエクスポートを送信できます",
     "send_project_spreadsheet_export_to_mail_enabled_description": "メールでプロジェクトのスプレッドシェットエクスポートを送信できるようにします",
+    "showing page entries": "{EntryStart}から{EntryEnd}の{TotalElements}エントリを表示します",
     "spdx_feature_description": "この設定により、SPDX ドキュメント機能をオン/オフにすることができます (リリース詳細ページの SPDX ドキュメント タブ)",
     "to edit the project relation": "プロジェクト関係を編集するには",
     "updated successfully": "更新成功！",
     "use_license_info_from_file_description": "ファイルからライセンス情報を使用します",
     "vector": "ベクター",
     "wrong_spdx_information": "間違ったSPDXを入力すると情報が正しく登録されません"
-  }
+  },
+  "showing page entries": ""
 }

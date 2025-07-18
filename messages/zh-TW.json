@@ -976,12 +976,14 @@
     "Postpone Request": "延遲請求",
     "Preferences": "首选项",
     "Preferred Clearing Date": "首選清算日期",
+    "Previous": "以前的",
     "Primary Department": "小學部",
     "Primary Department Role": "主要部門角色",
     "Primary role": "主要角色",
     "Priority": "优先",
     "Priority Text": "优先文本",
     "Private": "私人",
+    "Processing": "加工",
     "Product": "產品",
     "Programming Languages": "編程語言",
     "Project": "專案",
@@ -1529,11 +1531,13 @@
     "schedule_deparments_generating": "安排部門生成",
     "send_component_spreadsheet_export_to_mail_enabled_description": "通過郵件啟用發送組件電子表格導出",
     "send_project_spreadsheet_export_to_mail_enabled_description": "通過郵件啟用發送項目電子表格導出",
+    "showing page entries": "顯示{entrystart}到{entryEnd}的{entryend} {totallements}條目",
     "spdx_feature_description": "此配置允許開啟/關閉 SPDX 文件功能（發布詳細資訊頁面中的 SPDX 文件標籤）",
     "to edit the project relation": "要編輯專案關係",
     "updated successfully": "更新成功！",
     "use_license_info_from_file_description": "使用文件中的許可證信息",
     "vector": "向量",
     "wrong_spdx_information": "如果輸入錯誤的 SPDX , 資訊將無法正確登記"
-  }
+  },
+  "showing page entries": ""
 }
