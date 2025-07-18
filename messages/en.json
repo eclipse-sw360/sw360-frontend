@@ -976,12 +976,14 @@
     "Postpone Request": "Postpone Request",
     "Preferences": "Preferences",
     "Preferred Clearing Date": "Preferred Clearing Date",
+    "Previous": "Previous",
     "Primary Department": "Primary Department",
     "Primary Department Role": "Primary Department Role",
     "Primary role": "Primary role",
     "Priority": "Priority",
     "Priority Text": "Priority Text",
     "Private": "Private",
+    "Processing": "Processing",
     "Product": "Product",
     "Programming Languages": "Programming Languages",
     "Project": "Project",
@@ -1529,11 +1531,13 @@
     "schedule_deparments_generating": "Schedule Dept. Generating",
     "send_component_spreadsheet_export_to_mail_enabled_description": "Enable sending component spreadshet export via mail",
     "send_project_spreadsheet_export_to_mail_enabled_description": "Enable sending project spreadshet export via mail",
+    "showing page entries": "Showing {entryStart} to {entryEnd} of {totalElements} entries",
     "spdx_feature_description": "This configuration allow to turn ON/OFF SPDX document feature (SPDX Document Tab in release detail page)",
     "to edit the project relation": "to edit the project relation",
     "updated successfully": "updated successfully!",
     "use_license_info_from_file_description": "Use license info from files",
     "vector": "vector",
     "wrong_spdx_information": "If the wrong SPDX is entered, the information will not be registered correctly"
-  }
+  },
+  "showing page entries": "Showing {entryStart} to {entryEnd} of {totalElements} entries"
 }

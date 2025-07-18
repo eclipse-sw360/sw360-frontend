@@ -976,12 +976,14 @@
     "Postpone Request": "Reporter la demande",
     "Preferences": "Préférences",
     "Preferred Clearing Date": "Date de compensation souhaitée",
+    "Previous": "Précédent",
     "Primary Department": "Département principal",
     "Primary Department Role": "Rôle du département principal",
     "Primary role": "Rôle principal",
     "Priority": "Priorité",
     "Priority Text": "Texte prioritaire",
     "Private": "Privé",
+    "Processing": "Traitement",
     "Product": "Produit",
     "Programming Languages": "Langues de programmation",
     "Project": "Projet",
@@ -1529,11 +1531,13 @@
     "schedule_deparments_generating": "Planifier les services générateurs",
     "send_component_spreadsheet_export_to_mail_enabled_description": "Activer l'exportation de calcul des composants d'envoi par courrier",
     "send_project_spreadsheet_export_to_mail_enabled_description": "Activer l'exportation de disposition du projet d'envoi par courrier",
+    "showing page entries": "Affichage {EntryStart} à {entrée} de {TotalElements} Entrées",
     "spdx_feature_description": "Cette configuration permet d'activer/désactiver la fonctionnalité de document SPDX (onglet Document SPDX dans la page de détails de la version)",
     "to edit the project relation": "pour modifier la relation du projet",
     "updated successfully": "Mis à jour avec succés!",
     "use_license_info_from_file_description": "Utiliser les informations de licence à partir de fichiers",
     "vector": "vecteur",
     "wrong_spdx_information": "Si le SPDX incorrect est entré, les informations ne seront pas enregistrées correctement"
-  }
+  },
+  "showing page entries": ""
 }

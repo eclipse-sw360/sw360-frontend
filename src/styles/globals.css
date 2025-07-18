@@ -1495,3 +1495,77 @@ input[checked] + .slider:before {
 .input-disabled:hover {
     cursor: not-allowed;
 }
+
+.table-component {
+    font-size: 0.875rem !important;
+}
+
+.pagination .page-link {
+    border: none !important;
+    background: none !important;
+    color: inherit !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease-in-out;
+    font-size: 0.875rem;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #c2c3c7 !important;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #b7bac3 !important;
+    cursor: not-allowed;
+}
+
+.pagination .page-link:hover {
+    background-color: #f1f2f5 !important;
+    color: inherit;
+}
+
+.sw360-table {
+    border-spacing: 0;
+    color: #272833;
+    margin-bottom: 0;
+    width: 100%;
+    padding: 10px;
+    table-layout: fixed;
+    border-color: var(--table-border-color);
+}
+
+.sw360-table thead th {
+    background-color: var(--sw360-primary-background-color);
+    color: white;
+    font-weight: bold;
+}
+
+.sw360-table td {
+    padding: 12px !important;
+    vertical-align: middle;
+}
+
+.sw360-table th {
+    padding: 12px !important;
+    vertical-align: middle;
+}
+
+.sw360-table thead th a {
+    border-radius: 1px;
+    border-color: #6b6c7e;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.restrict-row-height {
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+
+    white-space: normal;
+    max-height: 84px;
+}

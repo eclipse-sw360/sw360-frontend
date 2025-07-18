@@ -976,12 +976,14 @@
     "Postpone Request": "Anfrage verschieben",
     "Preferences": "Präferenzen",
     "Preferred Clearing Date": "Bevorzugter Clearingtermin",
+    "Previous": "Vorherige",
     "Primary Department": "Hauptabteilung",
     "Primary Department Role": "Primärabteilungsrolle",
     "Primary role": "Primäre Rolle",
     "Priority": "Priorität",
     "Priority Text": "Prioritätstext",
     "Private": "Privatpersonen",
+    "Processing": "Verarbeitung",
     "Product": "Erzeugnis",
     "Programming Languages": "Programmiersprachen",
     "Project": "Projekt",
@@ -1529,11 +1531,13 @@
     "schedule_deparments_generating": "Zeitplanabteilungen generieren",
     "send_component_spreadsheet_export_to_mail_enabled_description": "Aktivieren Sie das Senden des Exports von Komponenten -Spreadshet per E -Mail",
     "send_project_spreadsheet_export_to_mail_enabled_description": "Aktivieren Sie das Senden des Senden von Project Spreadshet Export per E -Mail",
+    "showing page entries": "{EntryStart} zu {Eintragung} von {TotalElements} Einträgen anzeigen",
     "spdx_feature_description": "Diese Konfiguration ermöglicht das Ein-/Ausschalten der SPDX-Dokumentfunktion (Registerkarte „SPDX-Dokument“ auf der Release-Detailseite).",
     "to edit the project relation": "zur Bearbeitung der Projektbeziehung",
     "updated successfully": "Erfolgreich geupdated!",
     "use_license_info_from_file_description": "Verwenden Sie Lizenzinformationen aus Dateien",
     "vector": "Vektor",
     "wrong_spdx_information": "Wenn das falsche SPDX eingegeben wird, werden die Informationen nicht korrekt registriert."
-  }
+  },
+  "showing page entries": ""
 }

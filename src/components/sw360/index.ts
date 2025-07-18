@@ -30,6 +30,7 @@ import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
+import { PageSizeSelector, SW360Table, TableFooter } from './Table/Components'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 
@@ -53,10 +54,12 @@ export {
     LocaleSwitcher,
     Navbar,
     PageButtonHeader,
+    PageSizeSelector,
     PageSpinner,
     ProfileDropdown,
     QuickFilter,
     ReactWrapper,
+    SW360Table,
     SearchUsersModal,
     SearchVendorsModal,
     SelectCountry,
@@ -64,6 +67,7 @@ export {
     ShowInfoOnHover,
     SideBar,
     Table,
+    TableFooter,
     ThemeSwitcher,
     ToastMessage,
     TreeTable,

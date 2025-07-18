@@ -976,12 +976,14 @@
     "Postpone Request": "Trì hoãn yêu cầu",
     "Preferences": "Sở thích",
     "Preferred Clearing Date": "Ngày thanh toán ưu tiên",
+    "Previous": "Trước",
     "Primary Department": "Bộ phận chính",
     "Primary Department Role": "Vai trò của bộ phận chính",
     "Primary role": "Vai trò chính",
     "Priority": "Sự ưu tiên",
     "Priority Text": "Văn bản ưu tiên",
     "Private": "Riêng tư",
+    "Processing": "Xử lý",
     "Product": "Sản phẩm",
     "Programming Languages": "Ngôn ngữ lập trình",
     "Project": "Dự án",
@@ -1529,11 +1531,13 @@
     "schedule_deparments_generating": "Lịch trình bộ phận tạo ra",
     "send_component_spreadsheet_export_to_mail_enabled_description": "Cho phép gửi bảng tính thành phần xuất qua thư",
     "send_project_spreadsheet_export_to_mail_enabled_description": "Cho phép gửi bảng tính dự án xuất qua thư",
+    "showing page entries": "Hiển thị {EntryStart} đến {Entryend} của {TotalErements}",
     "spdx_feature_description": "Cấu hình này cho phép BẬT/TẮT tính năng tài liệu SPDX (Tab Tài liệu SPDX trong trang chi tiết phát hành)",
     "to edit the project relation": "để chỉnh sửa mối quan hệ dự án",
     "updated successfully": "cập nhật thành công!",
     "use_license_info_from_file_description": "Sử dụng thông tin giấy phép từ các tệp",
     "vector": "vectơ",
     "wrong_spdx_information": "Nếu nhập sai SPDX thì thông tin sẽ không được đăng ký chính xác"
-  }
+  },
+  "showing page entries": ""
 }
