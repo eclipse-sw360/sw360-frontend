@@ -63,6 +63,7 @@ import {
     ProjectObligationData,
 } from './Obligation'
 import Package from './Package'
+import { ColumnMeta, PageableQueryParam, PaginationMeta } from './Pageable'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
 import ProjectPayload from './ProjectPayload'
@@ -126,6 +127,7 @@ export type {
     ClearingRequest,
     ClearingRequestComments,
     ClearingRequestDetails,
+    ColumnMeta,
     Component,
     ComponentObligationData,
     ComponentPayload,
@@ -178,6 +180,8 @@ export type {
     Package,
     PackageInformation,
     PackageVerificationCode,
+    PageableQueryParam,
+    PaginationMeta,
     Project,
     ProjectData,
     ProjectLinkedRelease,
