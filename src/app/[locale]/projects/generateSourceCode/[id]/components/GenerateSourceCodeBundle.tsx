@@ -9,6 +9,7 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     AttachmentUsage,
     AttachmentUsages,
@@ -19,6 +20,7 @@ import {
     ProjectLinkedRelease,
     Release,
     SaveUsagesPayload,
+    UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -62,7 +64,7 @@ const setExpandedFieldsOfNewData = (prevState: NodeData[], newState: NodeData[])
     }
 }
 
-export default function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>): ReactNode {
+function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [project, setProject] = useState<Project>()
@@ -547,3 +549,6 @@ export default function GenerateSourceCodeBundle({ projectId }: Readonly<{ proje
         )
     }
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(GenerateSourceCodeBundle, [UserGroupType.SECURITY_USER])

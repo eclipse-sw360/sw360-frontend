@@ -9,7 +9,8 @@
 
 'use client'
 
-import { HttpStatus, Package } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { HttpStatus, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -19,7 +20,7 @@ import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
 
-export default function EditPackage({ packageId }: { packageId: string }): ReactNode {
+function EditPackage({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
@@ -113,3 +114,6 @@ export default function EditPackage({ packageId }: { packageId: string }): React
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(EditPackage, [UserGroupType.SECURITY_USER])

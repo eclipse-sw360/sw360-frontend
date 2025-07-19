@@ -9,7 +9,8 @@
 
 'use client'
 
-import { HttpStatus, Package } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { HttpStatus, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
@@ -20,7 +21,7 @@ import { ListGroup, Spinner, Tab } from 'react-bootstrap'
 import ChangeLog from './Changelog'
 import Summary from './Summary'
 
-export default function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
+function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
@@ -127,3 +128,6 @@ export default function PackageDetailTab({ packageId }: { packageId: string }): 
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(PackageDetailTab, [UserGroupType.SECURITY_USER])

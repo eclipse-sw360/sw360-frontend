@@ -9,12 +9,14 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     ActionType,
     ComponentObligationData,
     LicenseObligationData,
     OrganizationObligationData,
     ProjectObligationData,
+    UserGroupType,
 } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -35,7 +37,7 @@ interface Props {
     >
 }
 
-export default function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX.Element {
+function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
@@ -119,3 +121,6 @@ export default function Obligations({ projectId, actionType, payload, setPayload
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(Obligations, [UserGroupType.SECURITY_USER])

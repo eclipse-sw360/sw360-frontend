@@ -9,7 +9,8 @@
 
 'use client'
 
-import { ClearingRequestStates, ConfigKeys, HttpStatus } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ClearingRequestStates, ConfigKeys, HttpStatus, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
@@ -26,7 +27,7 @@ import ViewClearingRequestModal from './ViewClearingRequestModal'
 const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
 const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
 
-export default function LicenseClearing({
+function LicenseClearing({
     projectId,
     projectName,
     projectVersion,
@@ -243,3 +244,6 @@ export default function LicenseClearing({
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(LicenseClearing, [UserGroupType.SECURITY_USER])

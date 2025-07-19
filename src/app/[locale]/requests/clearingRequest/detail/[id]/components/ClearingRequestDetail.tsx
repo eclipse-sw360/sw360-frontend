@@ -10,7 +10,8 @@
 'use client'
 
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { ClearingRequestDetails, HttpStatus } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ClearingRequestDetails, HttpStatus, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -249,4 +250,5 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     }
 }
 
-export default ClearingRequestDetail
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ClearingRequestDetail, [UserGroupType.SECURITY_USER])

@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import { ECC, Embedded } from '@/object-types'
+import { ECC, Embedded, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -18,6 +18,7 @@ import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { Button, Spinner } from 'react-bootstrap'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import type { JSX } from 'react'
 
 type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
@@ -31,7 +32,7 @@ interface Props {
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Element {
+function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
 
@@ -166,3 +167,6 @@ export default function EccDetails({ projectId, projectName, projectVersion }: P
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(EccDetails, [UserGroupType.SECURITY_USER])

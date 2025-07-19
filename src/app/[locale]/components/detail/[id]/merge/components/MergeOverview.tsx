@@ -9,7 +9,8 @@
 
 'use client'
 
-import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -41,7 +42,7 @@ function GetPrevState(currentState: MergeOrSplitActionType): MergeOrSplitActionT
     }
 }
 
-export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNode {
+function MergeOverview({ id }: Readonly<{ id: string }>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
@@ -232,3 +233,6 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
         </div>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(MergeOverview, [UserGroupType.SECURITY_USER])

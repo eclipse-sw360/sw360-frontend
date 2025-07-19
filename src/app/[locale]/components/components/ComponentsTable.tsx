@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -18,7 +19,7 @@ import { useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 
-import { Component, Embedded } from '@/object-types'
+import { Component, Embedded, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { Table, _ } from 'next-sw360'
@@ -93,6 +94,9 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
         {
             id: 'action',
             name: t('Actions'),
+            hidden: () => {
+                return session?.user?.userGroup === UserGroupType.SECURITY_USER
+            },
             formatter: (id: string) =>
                 _(
                     <span>

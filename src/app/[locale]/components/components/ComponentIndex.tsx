@@ -16,6 +16,7 @@ import { ReactNode, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
+import { UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import ComponentsTable from './ComponentsTable'
 import ImportSBOMModal from './ImportSBOMModal'
@@ -32,8 +33,19 @@ const ComponentIndex = (): ReactNode => {
     }
 
     const headerbuttons = {
-        'Add Component': { link: '/components/add', type: 'primary', name: t('Add Component') },
-        'Import SBOM': { link: '#', type: 'secondary', onClick: handleClickImportSBOM, name: t('Import SBOM') },
+        'Add Component': {
+            link: '/components/add',
+            type: 'primary',
+            name: t('Add Component'),
+            disable: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        'Import SBOM': {
+            link: '#',
+            type: 'secondary',
+            onClick: handleClickImportSBOM,
+            name: t('Import SBOM'),
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
     }
 
     const advancedSearch = [

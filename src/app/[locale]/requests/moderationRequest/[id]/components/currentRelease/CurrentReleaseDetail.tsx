@@ -12,7 +12,7 @@
 import ClearingDetails from '@/app/[locale]/components/releases/detail/[id]/components/ClearingDetails'
 import ECCDetails from '@/app/[locale]/components/releases/detail/[id]/components/ECCDetails'
 import LinkedReleases from '@/app/[locale]/components/releases/detail/[id]/components/LinkedReleases'
-import ReleaseDetailTabs from '@/app/[locale]/components/releases/detail/[id]/components/ReleaseDetailTabs'
+import { ReleaseDetailTabs } from '@/app/[locale]/components/releases/detail/[id]/components/ReleaseDetailTabs'
 import Summary from '@/app/[locale]/components/releases/detail/[id]/components/Summary'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
@@ -47,7 +47,8 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
-    const [tabList] = useState(ReleaseDetailTabs.MODERATION_REQUEST)
+    const { MODERATION_REQUEST } = ReleaseDetailTabs()
+    const [tabList] = useState(MODERATION_REQUEST)
 
     const fetchData = async (url: string, signal: AbortSignal) => {
         try {

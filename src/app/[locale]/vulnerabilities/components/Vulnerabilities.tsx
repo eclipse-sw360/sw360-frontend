@@ -9,7 +9,7 @@
 
 'use client'
 
-import { Embedded, Vulnerability } from '@/object-types'
+import { Embedded, UserGroupType, Vulnerability } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
@@ -104,6 +104,9 @@ function Vulnerabilities(): ReactNode {
         {
             id: 'vulnerabilities.actions',
             name: t('Actions'),
+            hidden: () => {
+                return session?.user?.userGroup === UserGroupType.SECURITY_USER
+            },
             formatter: (id: string) =>
                 _(
                     <>
@@ -180,6 +183,10 @@ function Vulnerabilities(): ReactNode {
                                         <button
                                             className='btn btn-primary col-auto'
                                             onClick={handleAddVulnerability}
+                                            disabled={
+                                                status === 'authenticated' &&
+                                                session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                            }
                                         >
                                             {t('Add Vulnerability')}
                                         </button>

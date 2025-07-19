@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,10 +12,9 @@
 import Link from 'next/link'
 
 import { useTranslations } from 'next-intl'
+import type { JSX } from 'react'
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
 import styles from './pagebuttonheader.module.css'
-
-import type { JSX } from 'react'
 
 function PageButtonHeader({
     title,
@@ -25,9 +25,26 @@ function PageButtonHeader({
     changeLogIndex,
     setChangesLogTab,
 }: PageButtonHeaderProps): JSX.Element {
-    let buttonList: JSX.Element[] = []
+    let buttonList: (JSX.Element | null)[] = []
     if (buttons) {
         buttonList = Object.entries(buttons).map(([key, value]) => {
+            const isDisabled = value.disable ?? false
+            const isHidden = value.hidden ?? false
+            if (isHidden) {
+                return null
+            }
+            if (isDisabled) {
+                return (
+                    <button
+                        key={key}
+                        className={`btn btn-${value.type}`}
+                        style={{ marginRight: '10px' }}
+                        disabled
+                    >
+                        {value.name}
+                    </button>
+                )
+            }
             return (
                 // Button needs to link to the referenced page from props (value)
                 // and switch to the correct tab (key)

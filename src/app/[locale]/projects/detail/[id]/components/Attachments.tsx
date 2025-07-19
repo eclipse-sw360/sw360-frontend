@@ -13,9 +13,10 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState, type JSX } from 'react'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Table, _ } from '@/components/sw360'
-import { Attachment, HttpStatus } from '@/object-types'
+import { Attachment, HttpStatus, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -146,7 +147,7 @@ function ShowAttachmentTextOnExpand({
     )
 }
 
-export default function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
+function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const [data, setData] = useState<(string | object)[][] | null>(null)
     const [importStatusData, setImportStatusData] = useState<ImportSummary | null>(null)
@@ -418,3 +419,6 @@ export default function ProjectAttachments({ projectId }: { projectId: string })
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ProjectAttachments, [UserGroupType.SECURITY_USER])

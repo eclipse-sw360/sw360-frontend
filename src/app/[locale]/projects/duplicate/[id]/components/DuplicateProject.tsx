@@ -9,10 +9,19 @@
 
 'use client'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ProjectPayload, ReleaseDetail, Vendor } from '@/object-types'
+import {
+    HttpStatus,
+    InputKeyValue,
+    Project,
+    ProjectPayload,
+    ReleaseDetail,
+    UserGroupType,
+    Vendor,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
@@ -448,4 +457,5 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     )
 }
 
-export default DuplicateProject
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(DuplicateProject, [UserGroupType.SECURITY_USER])

@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
@@ -34,6 +35,7 @@ import {
     ReleaseDetail,
     ReleaseTabIds,
     SPDX,
+    UserGroupType,
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -593,4 +595,5 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     )
 }
 
-export default EditRelease
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(EditRelease, [UserGroupType.SECURITY_USER])

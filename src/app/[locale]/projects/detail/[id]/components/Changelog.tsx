@@ -15,9 +15,10 @@ import { notFound } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { Changelogs, Embedded, HttpStatus } from '@/object-types'
+import { Changelogs, Embedded, HttpStatus, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
@@ -123,4 +124,5 @@ function ChangeLog({
     )
 }
 
-export default ChangeLog
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ChangeLog, [UserGroupType.SECURITY_USER])

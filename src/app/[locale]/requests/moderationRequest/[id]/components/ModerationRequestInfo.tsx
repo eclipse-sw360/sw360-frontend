@@ -9,12 +9,13 @@
 
 'use client'
 
-import { ModerationRequestDetails } from '@/object-types'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ModerationRequestDetails, UserGroupType } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 
-export default function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | undefined }): ReactNode {
+function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | undefined }): ReactNode {
     const t = useTranslations('default')
 
     const formatDate = (timestamp: number | undefined): string | null => {
@@ -69,3 +70,6 @@ export default function ModerationRequestInfo({ data }: { data: ModerationReques
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ModerationRequestInfo, [UserGroupType.SECURITY_USER])

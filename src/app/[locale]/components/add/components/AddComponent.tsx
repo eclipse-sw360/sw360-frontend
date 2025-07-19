@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -24,14 +25,16 @@ import {
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
+    UserGroupType,
     Vendor,
 } from '@/object-types'
 
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
 
-export default function AddComponent(): ReactNode {
+function AddComponent(): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const { data: session, status } = useSession()
@@ -217,3 +220,6 @@ export default function AddComponent(): ReactNode {
         )
     }
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(AddComponent, [UserGroupType.SECURITY_USER])
