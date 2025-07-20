@@ -103,7 +103,8 @@
   "pnpm": {
     "overrides": {
       "@types/react": "19.0.10",
-      "@types/react-dom": "19.1.6"
+      "@types/react-dom": "19.1.6",
+      "@eslint/plugin-kit": "^0.3.3"
     },
     "ignoredBuiltDependencies": [
       "cypress",
