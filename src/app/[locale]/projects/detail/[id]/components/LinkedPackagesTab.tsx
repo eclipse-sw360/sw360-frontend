@@ -176,15 +176,10 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
     }, [])
 
     useEffect(() => {
-        fetchData(`projects/${projectId}/linkedPackages`)
+        fetchData(`projects/${projectId}/packages`)
             .then((linkedPackages: EmbeddedLinkedPackages | undefined) => {
-                if (linkedPackages === undefined) return
-
-                if (
-                    !CommonUtils.isNullOrUndefined(linkedPackages['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(linkedPackages['_embedded']['sw360:packages'])
-                ) {
-                    const data = linkedPackages['_embedded']['sw360:packages'].map((item: LinkedPackage) => [
+                if (Array.isArray(linkedPackages)) {
+                    const data = linkedPackages.map((item: LinkedPackage) => [
                         [item.vendorId ?? '', item.vendorName ?? ''],
                         [item.id, item.name, item.packageVersion],
                         [
@@ -198,6 +193,27 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                         item.id,
                     ])
                     setTableData(data)
+                } else if (
+                    linkedPackages?._embedded?.['sw360:packages'] &&
+                    Array.isArray(linkedPackages._embedded['sw360:packages'])
+                ) {
+                    const packages = linkedPackages._embedded['sw360:packages']
+                    const data = packages.map((item: LinkedPackage) => [
+                        [item.vendorId ?? '', item.vendorName ?? ''],
+                        [item.id, item.name, item.packageVersion],
+                        [
+                            item.releaseId ?? '',
+                            item._embedded?.['sw360:release']?.name ?? '',
+                            item._embedded?.['sw360:release']?.version ?? '',
+                        ],
+                        item._embedded?.['sw360:release']?.clearingState ?? '',
+                        item.licenseIds ?? [],
+                        item.packageManager ?? '',
+                        item.id,
+                    ])
+                    setTableData(data)
+                } else {
+                    setTableData([])
                 }
             })
             .catch((err) => console.error(err))
