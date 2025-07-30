@@ -55,13 +55,11 @@ jobs:
         shell: bash
         run: |
           pnpm lint --output-file eslint_report.json --format json
-        continue-on-error: true
 
       - name: Run build
         shell: bash
         run: |
           pnpm build --no-lint > typescript.log
-        continue-on-error: true
 
       - name: Annotate Code
         uses: DerLev/eslint-annotations@v2
