@@ -73,7 +73,7 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
 
     const submitObligation = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         if (
             !isFieldValid(obligation.title) ||

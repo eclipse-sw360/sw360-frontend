@@ -312,7 +312,7 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const res = await ApiUtils.GET(`projects/${projectId}/attachments`, session.user.access_token, signal)
 
                 if (res.status === HttpStatus.UNAUTHORIZED) {

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
@@ -54,12 +54,12 @@ const SelectUsersDialog = ({
         const queryUrl = CommonUtils.createUrlWithParams(`users`, { email: text })
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(queryUrl, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
 
         const users = (await response.json()) as EmbeddedUsers

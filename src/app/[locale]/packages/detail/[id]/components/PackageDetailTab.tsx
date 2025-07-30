@@ -54,7 +54,7 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     }, [packageId, session, status])
 
     const handleEditPackage = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         if (session.user.email === summaryData?._embedded?.createdBy?.email) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/packages/edit/${packageId}`)

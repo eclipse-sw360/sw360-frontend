@@ -153,7 +153,7 @@ export default function CompareObligation({
     const handleSearch = async ({ searchValue }: { searchValue: string }) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.GET(
                 `projects?name=${searchValue}&luceneSearch=false`,
                 session.user.access_token,

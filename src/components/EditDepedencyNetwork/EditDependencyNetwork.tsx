@@ -13,7 +13,7 @@
 import { Embedded, HttpStatus, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { ReactNode, useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import { Alert, Tooltip as BootstrapTooltip, Button, Form, Modal, OverlayTrigger, Spinner } from 'react-bootstrap'
@@ -283,7 +283,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(
             `releases/${releaseNode.releaseId}/releases?transitive=true`,
@@ -328,7 +328,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`projects/network/${projectId}/linkedReleases`, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -519,7 +519,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`components/${release.componentId}/releases`, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -549,7 +549,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
 
         if (compareSpinner.current !== null) {
@@ -577,7 +577,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return []
+            return signOut()
         }
         const cyclicCheckPayload: CheckCyclicLinkPayload = {
             linkedReleases: linkedReleases,
@@ -609,10 +609,10 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         for (const release of selectedReleases) {
             if (release.id === undefined) continue
             const cyclicLinksOfRelease = await getCyclicLinks([], linkedToReleases.current ?? [], release.id)
-            if (cyclicLinksOfRelease.length === 0) {
+            if (Array.isArray(cyclicLinksOfRelease) && cyclicLinksOfRelease.length === 0) {
                 validSelectedReleases.push(release)
             }
-            cyclicLinks.push(...cyclicLinksOfRelease)
+            cyclicLinks.push(...(cyclicLinksOfRelease ?? []))
         }
         setDisplayedCyclicLinks(cyclicLinks)
         if (cyclicLinks.length > 0) {

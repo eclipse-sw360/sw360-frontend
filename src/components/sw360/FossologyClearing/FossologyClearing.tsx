@@ -17,7 +17,7 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 import { Attachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import styles from './fossologyClearing.module.css'
 
 interface Props {
@@ -96,7 +96,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return undefined
+            return signOut()
         }
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {
@@ -196,7 +196,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return undefined
+            return signOut()
         }
         const url = `releases/${releaseId}/reloadFossologyReport`
         const response = await ApiUtils.GET(url, session.user.access_token)

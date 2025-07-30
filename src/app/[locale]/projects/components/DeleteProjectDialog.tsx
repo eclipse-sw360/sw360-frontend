@@ -85,7 +85,7 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     useEffect(() => {
         const fetchData = async (projectId: string) => {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
             if (projectsResponse.status == HttpStatus.OK) {
                 const projectData = (await projectsResponse.json()) as Project

@@ -30,7 +30,7 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token)
                 if (response.status === HttpStatus.OK) {
                     setPackagePayload((await response.json()) as Package)
@@ -47,7 +47,7 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
         try {
             setUpdatingPackage(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.PATCH(
                 `packages/${packageId}`,
                 {

@@ -75,7 +75,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     )
 
     const downloadBundle = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         await DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
             session,
@@ -84,7 +84,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const extractUserEmailFromSession = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         setUserEmail(session.user.email)
     }
 
@@ -140,7 +140,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const handleSubcriptions = async () => {
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.user.access_token)
         fetchData(`components/${componentId}`)

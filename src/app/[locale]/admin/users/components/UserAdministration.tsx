@@ -41,6 +41,12 @@ export default function UserAdminstration(): JSX.Element {
         useState<boolean>(false)
     const params = useSearchParams()
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const handleAddUsers = () => {
         router.push('/admin/users/add')
     }
@@ -48,6 +54,7 @@ export default function UserAdminstration(): JSX.Element {
     const downloadUsers = () => {
         getSession()
             .then((session) => {
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 DownloadService.download('importExport/downloadUsers', session, 'users.csv', { Accept: 'text/plain' })
             })
             .catch((error: unknown) => {

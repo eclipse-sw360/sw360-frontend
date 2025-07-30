@@ -143,7 +143,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
 
     const updateComponent = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
         if (response.status === HttpStatus.OK) {
             MessageService.success(`Component ${componentPayload.name}  updated successfully!`)

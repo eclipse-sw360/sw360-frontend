@@ -55,7 +55,7 @@ const AddVendorDialog = ({
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
                 setState(AddVendorState.ADD_NEW_VENDOR)
-                return
+                return signOut()
             }
             const payload: Vendor = {
                 fullName: vendor.fullName,
