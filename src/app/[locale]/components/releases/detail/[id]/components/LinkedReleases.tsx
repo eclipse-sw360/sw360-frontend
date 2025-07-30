@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 
@@ -29,8 +29,10 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
     const [data, setData] = useState<Array<NodeData>>([])
 
     useEffect(() => {
-        if (CommonUtils.isNullOrUndefined(session)) return
-
+        if (CommonUtils.isNullOrUndefined(session)) {
+            signOut()
+            return
+        }
         const convertNodeData = (children: Array<ReleaseLink>): Array<NodeData> => {
             const childrenNodeData: Array<NodeData> = []
             children.forEach((child: ReleaseLink) => {

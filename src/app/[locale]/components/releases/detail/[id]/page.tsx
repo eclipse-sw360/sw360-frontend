@@ -12,6 +12,7 @@ import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
 import { ConfigKeys, Configuration } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getServerSession } from 'next-auth'
+import { signOut } from 'next-auth/react'
 import { ReactNode } from 'react'
 import DetailOverview from './components/DetailOverview'
 
@@ -24,7 +25,7 @@ const Detail = async (props: Context): Promise<ReactNode> => {
     const releaseId = params.id
     const session = await getServerSession(authOptions)
     if (CommonUtils.isNullOrUndefined(session)) {
-        return <></>
+        return signOut()
     }
     const response = await ApiUtils.GET('configurations', session.user.access_token)
     const configs = (await response.json()) as Configuration

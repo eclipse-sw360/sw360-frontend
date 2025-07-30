@@ -12,7 +12,7 @@
 
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import type { useTranslations } from 'next-intl'
 import React, { useCallback, useEffect, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
@@ -173,7 +173,7 @@ const FileListModal = ({
 
     const fetchReleasesToFilesMapping = useCallback(async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(`releases/${releaseId}/licensesToSourceFiles`, session.user.access_token)
         const data = (await response.json()) as LicensesToSourcesMapping
         setLicensesToSourceFilesMapping(data)

@@ -39,7 +39,7 @@ export default function LicenseDbObligationsModal({
     setRefresh: Dispatch<SetStateAction<boolean>>
 }): ReactNode {
     const t = useTranslations('default')
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [obligationIds, setObligationIds] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
 
@@ -235,12 +235,18 @@ export default function LicenseDbObligationsModal({
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Table
-                    columns={columns}
-                    server={initServerPaginationConfig()}
-                    selector={true}
-                    sort={false}
-                />
+                {status === 'authenticated' ? (
+                    <Table
+                        columns={columns}
+                        server={initServerPaginationConfig()}
+                        selector={true}
+                        sort={false}
+                    />
+                ) : (
+                    <div className='col-12 d-flex justify-content-center align-items-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
             </Modal.Body>
             <Modal.Footer>
                 <button

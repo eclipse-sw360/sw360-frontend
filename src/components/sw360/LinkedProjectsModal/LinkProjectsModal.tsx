@@ -12,7 +12,7 @@
 import { Embedded, HttpStatus, LinkedProjectData, Project, ProjectPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import { ChangeEvent, useRef, useState, type JSX } from 'react'
@@ -192,7 +192,7 @@ export default function LinkProjectsModal({
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
-                return
+                return signOut()
             }
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
             if (response.status !== HttpStatus.OK) {

@@ -33,7 +33,7 @@ function CreatePackage(): ReactNode {
         try {
             setCreatingPackage(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.POST(
                 'packages',
                 {

@@ -12,7 +12,7 @@
 
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
@@ -353,7 +353,7 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
-                return
+                return signOut()
             }
             try {
                 const listViewResponse = await ApiUtils.GET(

@@ -13,7 +13,7 @@ import { HttpStatus, Obligation } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { useRouter } from 'next/navigation'
@@ -34,7 +34,7 @@ function AddObligation(): ReactNode {
         field !== null && field !== undefined && field.trim() !== ''
     const submitObligation = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         if (
             !isFieldValid(obligation.title) ||

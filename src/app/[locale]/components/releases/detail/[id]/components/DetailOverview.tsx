@@ -104,7 +104,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const extractUserEmail = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         setUserEmail(session.user.email)
     }
 
@@ -177,7 +177,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [fetchData, releaseId])
 
     const downloadBundle = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         await DownloadService.download(
             `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
             session,
@@ -188,7 +188,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const handleSubcriptions = async () => {
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         await ApiUtils.POST(`releases/${releaseId}/subscriptions`, {}, session.user.access_token)
         fetchData(`releases/${releaseId}`)

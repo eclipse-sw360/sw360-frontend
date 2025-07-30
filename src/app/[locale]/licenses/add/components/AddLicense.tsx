@@ -139,7 +139,7 @@ function AddLicense(): ReactNode {
         }
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.POST('licenses', licensePayload, session.user.access_token)
         if (response.status == HttpStatus.CREATED) {
             MessageService.success(t('License added successfully'))

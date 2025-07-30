@@ -132,7 +132,7 @@ function Packages(): ReactNode {
     ]
 
     const initServerPaginationConfig = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         return {
             url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/packages`, Object.fromEntries(params)),
             then: (data: EmbeddedPackages) => {

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useRef, useState, type JSX } from 'react'
 import { Button, Form, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -41,7 +41,7 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const params: { [k: string]: string } = {
             allDetails: 'true',
@@ -68,7 +68,7 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`projects/${projectId}/subProjects/releases`, session.user.access_token)
         if (response.status === HttpStatus.UNAUTHORIZED) {

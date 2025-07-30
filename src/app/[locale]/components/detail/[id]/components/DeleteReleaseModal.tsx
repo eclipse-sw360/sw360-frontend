@@ -55,7 +55,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     const deleteComponent = async () => {
         if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) return
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.DELETE(`releases/${releaseId}`, session.user.access_token)
         try {
             if (response.status === HttpStatus.MULTIPLE_STATUS) {
@@ -88,7 +88,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         async (signal: AbortSignal) => {
             if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) return
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const releaseResponse = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
             if (releaseResponse.status === HttpStatus.OK) {
                 const release = (await releaseResponse.json()) as ReleaseDetail

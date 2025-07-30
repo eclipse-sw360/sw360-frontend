@@ -68,7 +68,7 @@ export default function AddReleaseModal({
             if (CommonUtils.isNullOrUndefined(session)) {
                 displayMessage('danger', <>{t('Session has expired')}</>)
                 setLoading(false)
-                return signOut
+                return signOut()
             }
             const queryUrl = CommonUtils.createUrlWithParams('releases', {
                 name: searchText.current,
@@ -79,7 +79,7 @@ export default function AddReleaseModal({
             if (response.status === HttpStatus.UNAUTHORIZED) {
                 displayMessage('warning', <>{t('Unauthorized request')}</>)
                 setLoading(false)
-                return signOut
+                return signOut()
             }
             if (response.status === HttpStatus.NO_CONTENT) {
                 displayMessage('info', <>{t('No matching data found')}</>)

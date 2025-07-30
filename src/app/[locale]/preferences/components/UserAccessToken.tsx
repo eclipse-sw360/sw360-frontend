@@ -13,7 +13,7 @@
 import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useState } from 'react'
@@ -42,7 +42,7 @@ const UserAccessToken = (): ReactNode => {
             setValidated(false)
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
 
                 if (response.status === HttpStatus.CREATED) {

@@ -36,7 +36,7 @@ const NotificationSettingForm = (): ReactNode => {
     const updateNotificationSetting = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
 
             if (response.status === HttpStatus.OK) {
@@ -53,7 +53,7 @@ const NotificationSettingForm = (): ReactNode => {
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
 
         if (response.status === HttpStatus.OK) {
