@@ -50,7 +50,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
     const deleteLicense = async () => {
         setLoading(true)
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.DELETE(`licenses/${licensePayload.shortName}`, session.user.access_token)
         try {
             if (response.status == HttpStatus.OK) {

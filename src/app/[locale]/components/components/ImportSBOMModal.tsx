@@ -10,7 +10,7 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React, { ReactNode, useRef, useState } from 'react'
@@ -64,7 +64,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
         if (!selectedFile.current) return
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         setNotAllowedMessageDisplayed(false)
         const formData = new FormData()
@@ -88,7 +88,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
         if (!selectedFile.current) return
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const formData = new FormData()
         formData.append('file', selectedFile.current, selectedFile.current.name)

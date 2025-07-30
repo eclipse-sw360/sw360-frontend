@@ -12,10 +12,10 @@
 import { Embedded, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
@@ -26,6 +26,12 @@ export default function VendorTable({
 }: Readonly<{ vendor: Vendor | null; setVendor: Dispatch<SetStateAction<null | Vendor>> }>): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {
@@ -77,16 +83,16 @@ export default function VendorTable({
 
     return (
         <>
-            {status === 'loading' ? (
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <Spinner className='spinner' />
-                </div>
-            ) : (
+            {status === 'authenticated' ? (
                 <Table
                     columns={columns}
                     selector={true}
                     server={initServerPaginationConfig()}
                 />
+            ) : (
+                <div className='col-12 d-flex justify-content-center align-items-center'>
+                    <Spinner className='spinner' />
+                </div>
             )}
         </>
     )

@@ -14,7 +14,7 @@ import { Attachment, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { EnumValueWithToolTip, TreeTable, _ } from 'next-sw360'
 import Link from 'next/link'
@@ -206,7 +206,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         if (item.additionalData.isRelease === false) {
             const response = await ApiUtils.GET(
@@ -752,7 +752,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`projects/network/${projectId}/linkedResources`, session.user.access_token)
         const responseData = (await response.json()) as ProjectClearingState

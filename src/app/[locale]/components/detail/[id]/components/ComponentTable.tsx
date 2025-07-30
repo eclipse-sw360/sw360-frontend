@@ -81,16 +81,16 @@ export default function ComponentTable({
 
     return (
         <>
-            {status === 'loading' ? (
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <Spinner className='spinner' />
-                </div>
-            ) : (
+            {status === 'authenticated' ? (
                 <Table
                     columns={columns}
                     selector={true}
                     server={initServerPaginationConfig()}
                 />
+            ) : (
+                <div className='col-12 d-flex justify-content-center align-items-center'>
+                    <Spinner className='spinner' />
+                </div>
             )}
         </>
     )

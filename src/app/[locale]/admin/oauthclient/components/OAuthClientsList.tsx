@@ -82,7 +82,7 @@ function OAuthClientsList(): ReactNode {
             if (CommonUtils.isNullOrUndefined(session)) {
                 console.log('Session is null or undefined')
                 setLoading(false)
-                return
+                return signOut()
             }
 
             const response = await sendOAuthClientRequest(session.user.access_token)

@@ -31,7 +31,7 @@ function DeleteObligationDialog({ obligationId, show, setShow }: Props): ReactNo
     const deleteObligation = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.DELETE(`obligations/${obligationId}`, session.user.access_token)
             if (response.status === HttpStatus.MULTIPLE_STATUS) {
                 MessageService.success(t('Obligation deleted successfully'))

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState, type JSX } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
@@ -56,7 +56,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const handleLinkToProject = () => {
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         if (selectedProjectId !== undefined) {
             ApiUtils.PATCH(`projects/${selectedProjectId}/releases`, [releaseId], session.user.access_token)
@@ -70,7 +70,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const getLinkedProjects = async () => {
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.user.access_token)
         if (response.status === HttpStatus.OK) {
@@ -91,7 +91,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const handleSearchProject = async () => {
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         await getLinkedProjects()
 

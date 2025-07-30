@@ -13,7 +13,7 @@ import Table, { TableProps } from '@/components/sw360/Table/Table'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
 import React, { useEffect, useMemo, useState, type JSX } from 'react'
@@ -101,7 +101,7 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`users/groupList`, session.user.access_token)
         const departmentGroups = (await response.json()) as DepartmentGroups

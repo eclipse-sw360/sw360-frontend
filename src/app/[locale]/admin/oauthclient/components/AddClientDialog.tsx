@@ -13,7 +13,7 @@ import { HttpStatus, OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { SW360_API_URL } from '@/utils/env'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
@@ -161,7 +161,7 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         }
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await sendOAuthClientRequest(requestBody, session.user.access_token)
         if (response.status === HttpStatus.OK) {
