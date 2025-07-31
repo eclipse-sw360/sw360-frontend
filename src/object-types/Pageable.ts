@@ -23,3 +23,18 @@ export interface PaginationMeta {
 export interface ColumnMeta {
     width?: string
 }
+
+export interface TypedEntity<K, Type extends string> {
+    type: Type
+    entity: K
+}
+
+export interface NestedRows<K> {
+    node: K
+    children?: NestedRows<K>[]
+}
+
+export interface FilterOption {
+    tag: string
+    value: string
+}
