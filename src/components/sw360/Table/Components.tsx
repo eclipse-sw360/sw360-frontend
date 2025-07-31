@@ -7,11 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ColumnMeta, PageableQueryParam, PaginationMeta } from '@/object-types'
-import { Table, flexRender } from '@tanstack/react-table'
+import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
+import { ColumnFiltersState, Row, Table, flexRender } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
+import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
+import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
+import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { RiSortAsc, RiSortDesc } from 'react-icons/ri'
 
 export function TableFooter({
@@ -170,7 +172,7 @@ export function SW360Table<K>({ table, showProcessing }: { table: Table<K>; show
                                         width: (header.column.columnDef.meta as ColumnMeta | undefined)?.width,
                                     }}
                                 >
-                                    <div className='d-flex justify-content-between restrict-row-height'>
+                                    <div className='d-flex justify-content-between'>
                                         <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
                                         <span onClick={(e) => header.column.getToggleSortingHandler()?.(e)}>
                                             {header.column.getCanSort() === true &&
@@ -211,5 +213,107 @@ export function SW360Table<K>({ table, showProcessing }: { table: Table<K>; show
                 </div>
             )}
         </div>
+    )
+}
+
+export function PaddedCell<K>({ children, row }: { children: ReactNode; row: Row<K> }): ReactNode {
+    return (
+        <div className='d-flex'>
+            <span
+                className='indenter'
+                style={{ paddingLeft: `${row.depth}rem` }}
+                role='button'
+                onClick={row.getToggleExpandedHandler()}
+            >
+                {row.getCanExpand() &&
+                    (row.getIsExpanded() ? <BsCaretDownFill color='gray' /> : <BsCaretRightFill color='gray' />)}{' '}
+            </span>
+            {children}
+        </div>
+    )
+}
+
+export function FilterComponent({
+    renderFilterOptions,
+    setColumnFilters,
+    columnFilters,
+    id,
+    show,
+    setShow,
+    header,
+}: {
+    renderFilterOptions: FilterOption[]
+    setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>
+    columnFilters: ColumnFiltersState
+    id: string
+    show: string | undefined
+    setShow: Dispatch<SetStateAction<string | undefined>>
+    header: string
+}): ReactNode {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        const checked = e.target.checked
+
+        const existingFilter = columnFilters.find((f) => f.id === id)
+        const existingValues = (existingFilter?.value ?? []) as string[]
+
+        let newFilterValues: string[]
+
+        if (checked) {
+            newFilterValues = [...existingValues, value]
+        } else {
+            newFilterValues = existingValues.filter((v) => v !== value)
+        }
+
+        const newFilters = [
+            ...columnFilters.filter((f) => f.id !== id),
+            ...(newFilterValues.length > 0 ? [{ id, value: newFilterValues }] : []),
+        ]
+        setColumnFilters(newFilters)
+    }
+
+    const selectedValues = (columnFilters.find((f) => f.id === id)?.value ?? []) as string[]
+
+    return (
+        <DropdownButton
+            size='sm'
+            title=''
+            as='span'
+            className='filter-button'
+            show={show === id}
+            onToggle={() => setShow(show === id ? undefined : id)}
+            autoClose={false}
+        >
+            <Dropdown.Item
+                href='#'
+                className='fw-medium'
+            >
+                {header}
+            </Dropdown.Item>
+            <Dropdown.Divider />
+            {renderFilterOptions.map((op) => (
+                <Dropdown.Item
+                    href='#'
+                    key={`check-${op.value}`}
+                >
+                    <div className='form-check'>
+                        <input
+                            className='form-check-input'
+                            type='checkbox'
+                            value={op.value}
+                            id={`check-${op.value}`}
+                            checked={selectedValues.includes(op.value)}
+                            onChange={handleChange}
+                        />
+                        <label
+                            className='form-check-label fw-medium'
+                            htmlFor={`check-${op.value}`}
+                        >
+                            {op.tag}
+                        </label>
+                    </div>
+                </Dropdown.Item>
+            ))}
+        </DropdownButton>
     )
 }
