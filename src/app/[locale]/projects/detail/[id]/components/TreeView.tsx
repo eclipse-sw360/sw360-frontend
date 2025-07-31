@@ -183,7 +183,6 @@ const buildTable = (
         releaseRows.push(nodeRelease)
     }
 
-    console.log(licenseClearing, linkedProjects)
     setRowData([...linkedProjectRows, ...releaseRows])
 }
 
@@ -274,7 +273,6 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     </>
                 ),
                 cell: ({ row }) => {
-                    console.log(row.original.node.entity, rowData)
                     const { id, name, version } = row.original.node.entity
                     const url =
                         row.original.node.type === 'project'
