@@ -9,6 +9,7 @@
 
 'use client'
 
+import LicenseClearing from '@/components/LicenseClearing'
 import { ClearingRequest, Embedded, HttpStatus, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -22,11 +23,6 @@ import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
-interface LicenseClearingData {
-    'Release Count': number
-    'Approved Count': number
-}
-
 interface LicenseClearing {
     isProjectDeleted?: boolean
     projectId?: string
@@ -38,59 +34,6 @@ interface ProjectData {
     isProjectDeleted?: boolean
     projectId?: string
     projectName?: string
-}
-
-function LicenseClearing(licenseClearing: LicenseClearing): ReactNode {
-    const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
-                const response = await ApiUtils.GET(
-                    `projects/${licenseClearing.projectId}/licenseClearingCount`,
-                    session.user.access_token,
-                    signal,
-                )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-
-                const data = (await response.json()) as LicenseClearingData
-
-                setLcData(data)
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [licenseClearing.projectId])
-
-    return (
-        <>
-            {lcData ? (
-                <>
-                    {licenseClearing.openReleases !== undefined && lcData['Release Count'] ? (
-                        <div className='text-center'>{`${lcData['Release Count']}`}</div>
-                    ) : null}
-                    {licenseClearing.clearingProgress !== undefined ? (
-                        <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
-                    ) : null}
-                </>
-            ) : (
-                <div className='col-12 text-center'>
-                    <Spinner className='spinner' />
-                </div>
-            )}
-        </>
-    )
 }
 
 function OpenClearingRequest(): ReactNode | undefined {
@@ -231,10 +174,7 @@ function OpenClearingRequest(): ReactNode | undefined {
                     licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted ? (
                         t('Not Available')
                     ) : (
-                        <LicenseClearing
-                            projectId={licenseClearing.projectId}
-                            openReleases={licenseClearing.openReleases}
-                        />
+                        <>{licenseClearing.projectId && <LicenseClearing projectId={licenseClearing.projectId} />}</>
                     ),
                 ),
         },
@@ -348,10 +288,7 @@ function OpenClearingRequest(): ReactNode | undefined {
                     licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted ? (
                         t('Not Available')
                     ) : (
-                        <LicenseClearing
-                            projectId={licenseClearing.projectId}
-                            clearingProgress={licenseClearing.clearingProgress}
-                        />
+                        <>{licenseClearing.projectId && <LicenseClearing projectId={licenseClearing.projectId} />}</>
                     ),
                 ),
         },
