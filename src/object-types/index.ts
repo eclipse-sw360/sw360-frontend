@@ -63,7 +63,7 @@ import {
     ProjectObligationData,
 } from './Obligation'
 import Package from './Package'
-import { ColumnMeta, PageableQueryParam, PaginationMeta } from './Pageable'
+import { ColumnMeta, FilterOption, NestedRows, PageableQueryParam, PaginationMeta, TypedEntity } from './Pageable'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
 import ProjectPayload from './ProjectPayload'
@@ -144,6 +144,7 @@ export type {
     ErrorDetails,
     ExternalDocumentReferences,
     ExternalReference,
+    FilterOption,
     FossologyConfig,
     FossologyProcessInfo,
     FossologyProcessStatus,
@@ -172,6 +173,7 @@ export type {
     ModerationRequestPayload,
     ModerationState,
     NavItem,
+    NestedRows,
     NodeData,
     OAuthClient,
     Obligation,
@@ -210,6 +212,7 @@ export type {
     SPDXDocument,
     SummaryDataType,
     ToastData,
+    TypedEntity,
     UpdateClearingRequestPayload,
     User,
     UserCredentialInfo,

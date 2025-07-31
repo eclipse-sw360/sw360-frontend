@@ -79,6 +79,7 @@ code {
     --tab-hover-foreground: var(--primary-color);
     --card-background: #ebf0f5;
     --placeholder-foreground: #2728336d;
+    --sw360-primary-hover-color: #df7f17;
 }
 
 [data-theme='dark'] {
@@ -1568,4 +1569,39 @@ input[checked] + .slider:before {
 
     white-space: normal;
     max-height: 84px;
+}
+
+.table-text-link {
+    text-decoration: none;
+    color: var(--sw360-primary-color);
+}
+
+.table-text-link:visited {
+    text-decoration: none;
+    color: var(--sw360-primary-color);
+}
+
+.table-text-link:hover {
+    text-decoration: underline;
+    color: var(--sw360-primary-hover-color);
+}
+
+.filter-button {
+    .btn {
+        color: inherit !important;
+        background-color: inherit !important;
+        padding: 0px 2px !important;
+        border-color: inherit !important;
+        border-width: 2px !important;
+        box-shadow: none !important;
+        height: auto !important;
+        min-height: unset !important;
+        line-height: 1 !important;
+
+        &:hover {
+            color: inherit !important;
+            background-color: inherit !important;
+            border-color: inherit !important;
+        }
+    }
 }
