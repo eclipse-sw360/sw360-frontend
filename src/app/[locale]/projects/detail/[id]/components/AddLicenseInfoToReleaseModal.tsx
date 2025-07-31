@@ -13,10 +13,10 @@ import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -47,6 +47,13 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
     const [addLicenseInfoToReleaseData, setAddLicenseInfoToReleaseData] = useState<AddLicenseInfoToReleaseData | null>(
         null,
     )
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleSubmit = async (projectId: string) => {
         setIsLoading(true)

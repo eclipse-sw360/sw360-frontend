@@ -11,7 +11,7 @@
 
 import { HttpStatus, Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, useCallback, useEffect, useState, type JSX } from 'react'
@@ -42,6 +42,13 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     const [reloadPage, setReloadPage] = useState(false)
     const [visuallyHideLinkedData, setVisuallyHideLinkedData] = useState(true)
     const [comment, setComment] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)

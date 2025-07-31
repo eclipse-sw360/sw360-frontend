@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,7 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useEffect, useState, type JSX } from 'react'
 
 import { DocumentTypes, Resources } from '@/object-types'
@@ -25,6 +26,13 @@ interface Props {
 const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.Element => {
     const { data: session } = useSession()
     const [resourcesUsing, setResourceUsing] = useState<Resources | undefined>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         if (CommonUtils.isNullOrUndefined(session)) return

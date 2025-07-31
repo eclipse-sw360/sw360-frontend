@@ -18,9 +18,10 @@ import {
     ProjectObligationData,
     UserGroupType,
 } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useState, type JSX } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import CompareObligation from './CompareObligation'
 import ObligationView from './ObligationsView/ObligationsView'
@@ -43,6 +44,13 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
     const [key, setKey] = useState('obligations-view')
     const [show, setShow] = useState(false)
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
         const isCalledFromProjectLicenseTab = false

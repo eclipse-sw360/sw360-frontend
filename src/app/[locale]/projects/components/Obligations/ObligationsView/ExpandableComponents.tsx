@@ -10,6 +10,7 @@
 'use client'
 
 import { LicenseObligationRelease } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { JSX, useEffect, useState } from 'react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
@@ -24,6 +25,14 @@ export function ShowObligationTextOnExpand({
     colLength: number
 }): JSX.Element {
     const [isExpanded, setIsExpanded] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     useEffect(() => {
         if (isExpanded) {
             const el = document.getElementById(id)
@@ -76,6 +85,13 @@ export function ExpandableList({
     commonReleases: LicenseObligationRelease[]
 }): JSX.Element {
     const [isExpanded, setExpanded] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
     return (
         <>
             {isExpanded ? (

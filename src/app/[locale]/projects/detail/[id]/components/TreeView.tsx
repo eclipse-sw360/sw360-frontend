@@ -31,7 +31,7 @@ import {
     getExpandedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
 import Link from 'next/link'
@@ -244,6 +244,12 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const memoizedLicenseClearing = useMemo(() => licenseClearing, [licenseClearing])
 
     const [rowData, setRowData] = useState<NestedRows<TypedProject | TypedRelease>[]>([])
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = useMemo<ColumnDef<NestedRows<TypedProject | TypedRelease>>[]>(
         () => [

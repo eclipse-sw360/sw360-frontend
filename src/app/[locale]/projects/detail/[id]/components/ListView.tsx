@@ -11,7 +11,7 @@
 
 import { Embedded, HttpStatus, LicenseClearing, Project, Release } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
@@ -175,6 +175,13 @@ export default function ListView({
 }): JSX.Element {
     const t = useTranslations('default')
     const [data, setData] = useState<null | (object | string)[][]>()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {
