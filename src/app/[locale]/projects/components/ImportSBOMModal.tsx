@@ -9,9 +9,9 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { JSX, useRef, useState } from 'react'
+import React, { JSX, useEffect, useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
@@ -51,6 +51,13 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
     const inputRef = useRef<HTMLInputElement | null>(null)
     const isExistingProject =
         typeof importSBOMMetadata.projectId === 'string' && importSBOMMetadata.projectId.trim().length > 0
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         selectedFile.current = e.currentTarget.files?.[0] ?? null

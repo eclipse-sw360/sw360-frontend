@@ -82,6 +82,12 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
     })
     const [loading, setLoading] = useState(false)
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const handleDownloadSourceCodeBundle = async (projectId: string) => {
         try {
             setLoading(true)

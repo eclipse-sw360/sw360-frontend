@@ -13,7 +13,7 @@ import { Table, _ } from '@/components/sw360'
 import { LicenseObligationRelease, LicenseObligationsList } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState, type JSX } from 'react'
@@ -25,6 +25,7 @@ const Capitalize = (text: string) =>
 
 function ExpandableList({ previewString, releases }: { previewString: string; releases: LicenseObligationRelease[] }) {
     const [isExpanded, setExpanded] = useState(false)
+
     return (
         <>
             {isExpanded ? (
@@ -72,6 +73,7 @@ function ShowObligationTextOnExpand({
     colLength: number
 }): JSX.Element {
     const [isExpanded, setIsExpanded] = useState(false)
+
     useEffect(() => {
         if (isExpanded) {
             const el = document.getElementById(id)
@@ -117,6 +119,12 @@ function ShowObligationTextOnExpand({
 export default function LicenseObligation({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {

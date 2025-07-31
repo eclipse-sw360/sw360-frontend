@@ -39,6 +39,13 @@ export default function ComponentObligation({ projectId, actionType, payload, se
     const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [componentObligations, setComponentObligations] = useState<null | ComponentObligations>(null)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const columns =
         actionType === ActionType.DETAIL
             ? [

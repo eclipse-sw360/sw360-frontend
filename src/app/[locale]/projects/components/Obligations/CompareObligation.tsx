@@ -9,11 +9,11 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
 import { notFound } from 'next/navigation'
-import { useRef, useState, type JSX } from 'react'
+import { useEffect, useRef, useState, type JSX } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
@@ -45,6 +45,13 @@ export default function CompareObligation({
     const searchValueRef = useRef<HTMLInputElement>(null)
     const topRef = useRef(null)
     const [pid, setPid] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const scrollToTop = () => {
         ;(topRef.current as HTMLDivElement | null)?.scrollTo({ top: 0, left: 0 })

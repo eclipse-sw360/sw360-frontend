@@ -52,6 +52,12 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     })
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB
         setActiveKey(fragment)
     }, [searchParams])

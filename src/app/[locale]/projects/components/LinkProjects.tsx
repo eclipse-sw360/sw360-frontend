@@ -9,17 +9,16 @@
 
 'use client'
 
+import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState, type JSX } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
-
-import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -46,6 +45,13 @@ export default function LinkProjects({
     const searchValueRef = useRef<HTMLInputElement>(null)
     const topRef = useRef<HTMLDivElement | null>(null)
     const [linking, setLinking] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const scrollToTop = () => {
         topRef.current?.scrollTo({ top: 0, left: 0 })

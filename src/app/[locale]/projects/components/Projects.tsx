@@ -62,6 +62,12 @@ function Project(): JSX.Element {
     const [showViewCRModal, setShowViewCRModal] = useState(false)
     const [clearingRequestId, setClearingRequestId] = useState('')
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const handleDeleteProject = (projectId: string) => {
         setDeleteProjectId(projectId)
         setDeleteDialogOpen(true)

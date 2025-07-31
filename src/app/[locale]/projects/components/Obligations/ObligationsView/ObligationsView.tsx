@@ -16,8 +16,9 @@ import {
     OrganizationObligationData,
     ProjectObligationData,
 } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, type JSX } from 'react'
+import { Dispatch, SetStateAction, useEffect, type JSX } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import ComponentObligation from './ComponentObligation'
 import LicenseObligation from './LicenseObligation'
@@ -44,6 +45,14 @@ export default function ObligationView({
     selectedProjectId,
 }: Props): JSX.Element {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     return (
         <Tabs
             defaultActiveKey='license-obligation'
