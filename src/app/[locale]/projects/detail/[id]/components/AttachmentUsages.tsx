@@ -113,6 +113,12 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         linkedProjects: LinkedProjects
     }>()
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const handleSaveUsages = async () => {
         try {
             setSaveUsagesLoading(true)

@@ -139,7 +139,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         if (CommonUtils.isNullOrUndefined(whitelist)) return
         const whitelistObj = Object.fromEntries(whitelist)

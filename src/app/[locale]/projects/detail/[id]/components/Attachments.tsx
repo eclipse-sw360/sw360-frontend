@@ -19,7 +19,7 @@ import { Table, _ } from '@/components/sw360'
 import { Attachment, HttpStatus, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
@@ -151,6 +151,13 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const [data, setData] = useState<(string | object)[][] | null>(null)
     const [importStatusData, setImportStatusData] = useState<ImportSummary | null>(null)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleImportStatusView = async (projectId: string, attachmentId: string) => {
         try {
@@ -312,7 +319,7 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const res = await ApiUtils.GET(`projects/${projectId}/attachments`, session.user.access_token, signal)
 
                 if (res.status === HttpStatus.UNAUTHORIZED) {

@@ -33,6 +33,12 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const [data, setData] = useState<Array<NodeData> | null>(null)
     const [show, setShow] = useState<boolean>(false)
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const columns = [
         {
             id: 'licenseClearing.treeview.name',

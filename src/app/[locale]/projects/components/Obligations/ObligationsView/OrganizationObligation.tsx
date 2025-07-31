@@ -40,6 +40,13 @@ export default function OrganizationObligation({ projectId, actionType, payload,
     const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [organizationObligations, setOrganizationObligations] = useState<null | OrganizationObligations>(null)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const columns =
         actionType === ActionType.DETAIL
             ? [

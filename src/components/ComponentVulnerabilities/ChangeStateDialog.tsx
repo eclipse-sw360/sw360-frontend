@@ -10,7 +10,7 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState, type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
@@ -53,7 +53,7 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         await ApiUtils.PATCH(url, data, session.user.access_token)
     }, [])

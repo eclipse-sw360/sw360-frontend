@@ -30,7 +30,7 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
     const fetchData = useCallback(async (url: string) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.GET(url, session.user.access_token)
 
             if (response.status === HttpStatus.OK) {
@@ -81,7 +81,7 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
     const revokeToken = async (tokenName: string) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.DELETE(
                 CommonUtils.createUrlWithParams('users/tokens', { name: tokenName }),
                 session.user.access_token,

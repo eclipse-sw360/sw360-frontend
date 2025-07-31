@@ -12,6 +12,7 @@ import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
 import { ConfigKeys, Configuration } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getServerSession } from 'next-auth/next'
+import { signOut } from 'next-auth/react'
 import { ReactNode } from 'react'
 import EditRelease from './components/EditRelease'
 
@@ -24,7 +25,7 @@ const ReleaseEditPage = async (props: Context): Promise<ReactNode> => {
     const releaseId = params.id
     const session = await getServerSession(authOptions)
     if (CommonUtils.isNullOrUndefined(session)) {
-        return <></>
+        return signOut()
     }
     const response = await ApiUtils.GET('configurations', session.user.access_token)
     const config = (await response.json()) as Configuration

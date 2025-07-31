@@ -12,7 +12,7 @@
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { ClearingRequestDetails, HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -59,6 +59,13 @@ export default function ViewClearingRequestModal({
         setMessage(message)
         setShowMessage(true)
     }
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         const controller = new AbortController()

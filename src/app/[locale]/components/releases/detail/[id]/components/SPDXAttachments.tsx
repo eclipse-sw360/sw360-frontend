@@ -111,7 +111,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
     const handleAddSpdxLicenses = async (rowIndex: number) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const requestBody = {
             otherLicenseIds: tableData[rowIndex]?.[2].licenseInfo?.otherLicenseIds ?? [],

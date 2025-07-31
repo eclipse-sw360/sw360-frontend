@@ -12,7 +12,7 @@
 import { Embedded, HttpStatus, LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
@@ -68,7 +68,7 @@ export default function LinkedReleasesModal({
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
                 setLoading(false)
-                return
+                return signOut()
             }
             const queryUrl = CommonUtils.createUrlWithParams('releases', {
                 name: `${searchValue}`,

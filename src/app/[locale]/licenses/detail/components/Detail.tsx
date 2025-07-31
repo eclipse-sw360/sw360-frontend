@@ -12,7 +12,7 @@
 import { HttpStatus, LicenseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
@@ -41,7 +41,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license, session.user.access_token)
         if (response.status === HttpStatus.OK) {

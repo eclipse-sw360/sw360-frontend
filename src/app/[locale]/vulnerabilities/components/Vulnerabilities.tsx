@@ -130,7 +130,7 @@ function Vulnerabilities(): ReactNode {
     ]
 
     const initServerPaginationConfig = (session: Session) => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         return {
             url: CommonUtils.createUrlWithParams(
                 `${SW360_API_URL}/resource/api/vulnerabilities`,

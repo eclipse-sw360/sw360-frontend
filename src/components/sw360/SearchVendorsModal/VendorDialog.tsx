@@ -17,7 +17,7 @@ import { Button, Modal } from 'react-bootstrap'
 import { Embedded, HttpStatus, Vendor, VendorType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import AddVendorDialog from './AddVendor'
 import SelectTableVendor from './SelectTableVendor'
 
@@ -49,7 +49,7 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props): JSX.Element => {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
-                return
+                return signOut()
             }
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {

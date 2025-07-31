@@ -43,7 +43,7 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
     const deleteProject = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await sendOAuthClientRequest(clientId, session.user.access_token)
             if (response.status === HttpStatus.OK) {
                 MessageService.success(t('Client deleted successfully'))

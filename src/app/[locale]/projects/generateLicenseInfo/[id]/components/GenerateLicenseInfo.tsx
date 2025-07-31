@@ -105,6 +105,12 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
     const [withSubProjects, setWithSubProjects] = useState<boolean>(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const formatReleaseAndAttachments = (projectPath: string, r: Release, level: number): NodeData | undefined => {
         if (!r.attachments) {
             r.attachments = []

@@ -161,7 +161,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
         if (response.status == HttpStatus.OK) {

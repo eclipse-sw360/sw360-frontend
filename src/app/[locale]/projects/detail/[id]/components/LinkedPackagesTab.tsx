@@ -13,7 +13,7 @@ import { _, Table } from '@/components/sw360'
 import { Embedded, HttpStatus, LinkedPackage, ReleaseClearingStateMapping } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, type JSX } from 'react'
@@ -31,6 +31,13 @@ type RowData = (string | string[] | undefined)[]
 export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {

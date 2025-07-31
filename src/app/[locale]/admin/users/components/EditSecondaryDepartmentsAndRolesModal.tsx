@@ -39,7 +39,7 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
-                return
+                return signOut()
             }
             const response = await ApiUtils.GET(`users/byid/${editingUserId}`, session.user.access_token)
             if (response.status === HttpStatus.UNAUTHORIZED) {

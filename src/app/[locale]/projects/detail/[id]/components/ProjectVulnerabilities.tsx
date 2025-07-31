@@ -39,6 +39,12 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
     const [data, setData] = useState<ProjectData[]>([])
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         if (status !== 'authenticated') return
 
         const controller = new AbortController()

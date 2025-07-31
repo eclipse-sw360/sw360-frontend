@@ -52,6 +52,12 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     })
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB
         setActiveKey(fragment)
     }, [searchParams])
@@ -68,7 +74,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
                     session.user.access_token,
@@ -93,7 +99,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }, [projectId, session, status])
 
     const handleEditProject = (projectId: string) => {
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         if (session.user.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/projects/edit/${projectId}?tab=${activeKey}`)

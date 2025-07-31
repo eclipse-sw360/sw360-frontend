@@ -17,7 +17,7 @@ import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
 import { GrCheckboxSelected } from 'react-icons/gr'
 import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
@@ -39,9 +39,15 @@ export default function LicenseDbObligationsModal({
     setRefresh: Dispatch<SetStateAction<boolean>>
 }): ReactNode {
     const t = useTranslations('default')
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [obligationIds, setObligationIds] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const addObligationsToLicense = async () => {
         try {
@@ -235,12 +241,18 @@ export default function LicenseDbObligationsModal({
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Table
-                    columns={columns}
-                    server={initServerPaginationConfig()}
-                    selector={true}
-                    sort={false}
-                />
+                {status === 'authenticated' ? (
+                    <Table
+                        columns={columns}
+                        server={initServerPaginationConfig()}
+                        selector={true}
+                        sort={false}
+                    />
+                ) : (
+                    <div className='col-12 d-flex justify-content-center align-items-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
             </Modal.Body>
             <Modal.Footer>
                 <button

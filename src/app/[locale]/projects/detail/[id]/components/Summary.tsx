@@ -11,9 +11,10 @@
 
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { DocumentTypes, SummaryDataType } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
 
@@ -28,6 +29,13 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
     const [toggleRoles, setToggleRoles] = useState(false)
     const [toggleVendor, setToggleVendor] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const Clipboard = ({ text }: { text: string }) => {
         return (

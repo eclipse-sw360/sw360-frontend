@@ -10,8 +10,9 @@
 'use client'
 
 import { AdministrationDataType } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 
 const Capitalize = (text: string) => {
     return text
@@ -24,6 +25,13 @@ export default function Administration({ data }: { data: AdministrationDataType 
     const [toggleClearing, setToggleClearing] = useState(false)
     const [toggleLifecycle, setToggleLifecycle] = useState(false)
     const [toggleLicenseInfoHeader, setToggleLicenseInfoHeader] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     return (
         <>

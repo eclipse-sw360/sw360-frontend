@@ -12,7 +12,7 @@
 import { Table, _ } from '@/components/sw360'
 import { ActionType, ErrorDetails, HttpStatus, LicenseObligationData, LicenseObligationRelease } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
@@ -50,6 +50,14 @@ interface UpdateCommentModalProps {
 function UpdateCommentModal({ modalMetaData, setModalMetaData, payload, setPayload }: UpdateCommentModalProps) {
     const t = useTranslations('default')
     const [commentText, setCommentText] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     useEffect(() => {
         setCommentText(modalMetaData?.comment ?? '')
     }, [modalMetaData])
