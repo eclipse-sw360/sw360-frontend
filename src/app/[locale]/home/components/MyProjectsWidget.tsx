@@ -7,9 +7,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import LicenseClearing from '@/components/LicenseClearing'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
 import { Spinner } from 'react-bootstrap'
 
@@ -23,64 +24,6 @@ import { Embedded, Project } from '@/object-types'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
-
-interface LicenseClearingData {
-    'Release Count': number
-    'Approved Count': number
-}
-
-function LicenseClearing({ projectId }: { projectId: string }) {
-    const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (!session) {
-                    return signOut()
-                }
-
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/licenseClearingCount`,
-                    session.user.access_token,
-                    signal,
-                )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-
-                const data = (await response.json()) as LicenseClearingData
-
-                setLcData(data)
-            } catch (e) {
-                if (e instanceof Error) {
-                    throw new Error(e.message)
-                } else {
-                    throw new Error('Unknown error')
-                }
-            }
-        })()
-        return () => controller.abort()
-    }, [])
-
-    return (
-        <>
-            {lcData ? (
-                <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
-            ) : (
-                <div className='col-12 text-center'>
-                    <Spinner
-                        className='spinner'
-                        size='sm'
-                    />
-                </div>
-            )}
-        </>
-    )
-}
 
 function MyProjectsWidget(): ReactNode {
     const [data, setData] = useState<Array<(string | JSX.Element)[]>>([])

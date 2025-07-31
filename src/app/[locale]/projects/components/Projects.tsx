@@ -10,6 +10,7 @@
 
 'use client'
 
+import LicenseClearing from '@/components/LicenseClearing'
 import {
     Embedded,
     ErrorDetails,
@@ -42,63 +43,6 @@ type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
-interface LicenseClearingData {
-    'Release Count': number
-    'Approved Count': number
-}
-
-function LicenseClearing({ projectId }: { projectId: string }) {
-    const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (!session) {
-                    return signOut()
-                }
-
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/licenseClearingCount`,
-                    session.user.access_token,
-                    signal,
-                )
-                if (response.status !== HttpStatus.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
-                }
-
-                const data = (await response.json()) as LicenseClearingData
-
-                setLcData(data)
-            } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
-            }
-        })()
-        return () => controller.abort()
-    }, [])
-
-    return (
-        <>
-            {lcData ? (
-                <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
-            ) : (
-                <div className='col-12 text-center'>
-                    <Spinner
-                        className='spinner'
-                        size='sm'
-                    />
-                </div>
-            )}
-        </>
-    )
-}
 
 function Project(): JSX.Element {
     const t = useTranslations('default')
