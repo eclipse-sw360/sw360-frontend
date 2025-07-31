@@ -12,10 +12,10 @@
 import { HttpStatus, SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
-import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -39,6 +39,13 @@ export default function DownloadLicenseInfoModal({
     const t = useTranslations('default')
     const params = useSearchParams()
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {

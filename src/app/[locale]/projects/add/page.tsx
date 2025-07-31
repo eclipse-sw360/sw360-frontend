@@ -17,7 +17,7 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import { ConfigKeys, HttpStatus, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
@@ -77,6 +77,13 @@ function AddProjects(): JSX.Element {
     })
 
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         ;(async () => {

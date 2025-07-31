@@ -24,7 +24,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
@@ -54,6 +54,7 @@ interface LinkedReleaseData {
 function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
+    const { status } = useSession()
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -115,6 +116,12 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         leadArchitect: '',
         projectManager: '',
     })
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)

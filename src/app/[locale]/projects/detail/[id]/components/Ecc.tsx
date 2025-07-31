@@ -19,7 +19,7 @@ import Link from 'next/link'
 import { Button, Spinner } from 'react-bootstrap'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import type { JSX } from 'react'
+import { useEffect, type JSX } from 'react'
 
 type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
 
@@ -35,6 +35,12 @@ const Capitalize = (text: string) =>
 function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {

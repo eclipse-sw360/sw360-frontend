@@ -33,7 +33,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
@@ -77,6 +77,14 @@ function EditProject({
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleDeleteProject = () => {
         setDeleteDialogOpen(true)

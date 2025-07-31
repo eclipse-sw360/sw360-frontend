@@ -37,6 +37,12 @@ function ChangeLog({
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         if (status !== 'authenticated') return
 
         const controller = new AbortController()

@@ -12,9 +12,9 @@
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -46,6 +46,13 @@ export default function ExportProjectSbomModal({
     const [disableExportSbom, setDisableExportSbom] = useState<boolean>(true)
     const [exportTime, setExportTime] = useState<number | null>(null)
     const [downloadState, setDownloadState] = useState<DownloadState>(DownloadState.INIT)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value, type } = event.target

@@ -47,6 +47,12 @@ export default function ReleaseView({ projectId }: Readonly<{ projectId: string 
     const [data, setData] = useState<NodeData[]>()
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 

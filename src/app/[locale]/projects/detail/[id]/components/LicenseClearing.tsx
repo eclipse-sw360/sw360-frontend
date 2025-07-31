@@ -13,7 +13,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequestStates, ConfigKeys, HttpStatus, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -48,6 +48,13 @@ function LicenseClearing({
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         ;(async () => {
