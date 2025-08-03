@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -16,6 +17,7 @@ import { FaInfoCircle } from 'react-icons/fa'
 
 import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
 import { LinkedVulnerability, VerificationStateInfo, VulnerabilitiesVerificationState } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { Table, _ } from 'next-sw360'
 import ChangeStateDialog from './ChangeStateDialog'
 import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
@@ -46,6 +48,13 @@ const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
     const [data, setData] = useState<RowData[]>([])
     const [selectedVulner, setSelectedVulner] = useState<Array<SelectedVulnerability>>([])
     const [checkAll, setCheckAll] = useState<boolean>(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleCheckBox = (index: string, checked: boolean) => {
         const newData = Object.entries(data).map(([i, rowData]) => {

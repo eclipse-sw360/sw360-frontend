@@ -11,6 +11,7 @@
 
 import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
 import { CommonUtils } from '@/utils'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -31,6 +32,14 @@ function AddAdditionalRoles({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputListData, setInputListData] = useState<InputKeyValue[]>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     useEffect(() => {
         setInputListData(
             !CommonUtils.isNullOrUndefined(propInputList)

@@ -1,4 +1,3 @@
-import type { JSX } from 'react'
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
 
@@ -8,6 +7,8 @@ import type { JSX } from 'react'
 
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
+
+import type { JSX } from 'react'
 
 const getJsonPrettyFormat = (obj: unknown): JSX.Element | string => {
     let jsonView: string | JSX.Element = JSON.stringify(obj, undefined, 5)

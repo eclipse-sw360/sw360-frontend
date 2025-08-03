@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,6 +10,7 @@
 // License-Filename: LICENSE
 
 import { Component } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState, type JSX } from 'react'
@@ -23,6 +25,13 @@ interface Props {
 const ComponentsUsing = ({ componentsUsing, documentName }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<(string | JSX.Element)[]>>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {

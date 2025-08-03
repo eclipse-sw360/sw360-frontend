@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -13,10 +14,11 @@
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import fossologyIcon from '@/assets/images/fossology.svg'
 import { Attachment, ReleaseDetail } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { FossologyClearing } from 'next-sw360'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
@@ -35,6 +37,13 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props): Re
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [show, setShow] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     return (
         <div className='col'>

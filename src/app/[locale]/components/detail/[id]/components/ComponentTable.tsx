@@ -12,10 +12,10 @@
 import { Component, Embedded } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
@@ -26,6 +26,12 @@ export default function ComponentTable({
 }: Readonly<{ component: Component | null; setComponent: Dispatch<SetStateAction<null | Component>> }>): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {

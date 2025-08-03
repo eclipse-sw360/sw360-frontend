@@ -24,9 +24,8 @@ interface Props {
 }
 
 const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.Element => {
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [resourcesUsing, setResourceUsing] = useState<Resources | undefined>(undefined)
-    const { status } = useSession()
 
     useEffect(() => {
         if (status === 'unauthenticated') {

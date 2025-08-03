@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,7 +11,7 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -96,6 +97,14 @@ function AddRelease({ componentId }: Props): ReactNode {
     const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
 
     const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
+
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         void (async () => {

@@ -10,8 +10,9 @@
 'use client'
 
 import { Component } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 
 export default function SplitComponentConfirmation({
     targetComponent,
@@ -21,6 +22,13 @@ export default function SplitComponentConfirmation({
     sourceComponent: Component | null
 }): ReactNode {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     return (
         <>

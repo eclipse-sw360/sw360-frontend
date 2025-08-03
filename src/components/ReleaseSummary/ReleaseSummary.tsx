@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,10 +12,11 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useState, type JSX } from 'react'
+import React, { useCallback, useEffect, useState, type JSX } from 'react'
 import { GiCancel } from 'react-icons/gi'
 
 import { ActionType, Release, ReleaseDetail, Vendor } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
@@ -63,6 +65,13 @@ const ReleaseSummary = ({
     const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const setMainLicensesToPayload = (mainLicenses: { [k: string]: string }) => {
         setMainLicenses(mainLicenses)

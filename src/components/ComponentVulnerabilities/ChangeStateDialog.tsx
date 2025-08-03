@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,9 +11,9 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useState, type JSX } from 'react'
+import { useCallback, useEffect, useState, type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 
 import MessageService from '@/services/message.service'
@@ -44,6 +45,13 @@ interface ChangeStatePayload {
 const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [comment, setComment] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleCloseDialog = () => {
         setShow(!show)

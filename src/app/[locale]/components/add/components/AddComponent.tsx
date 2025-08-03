@@ -14,7 +14,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
@@ -73,6 +73,12 @@ function AddComponent(): ReactNode {
         blog: '',
     })
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const tabList = [
         {
             id: CommonTabIds.SUMMARY,
@@ -113,112 +119,108 @@ function AddComponent(): ReactNode {
         }
     }
 
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <>
-                <SearchUsersModal />
-                <form
-                    action=''
-                    id='form_submit'
-                    method='post'
-                    onSubmit={(e) => {
-                        e.preventDefault()
-                        void submit()
-                    }}
-                >
-                    <div className='container page-content'>
-                        <div className='row'>
-                            <div className='col-2 sidebar'>
-                                <SideBar
-                                    selectedTab={selectedTab}
-                                    setSelectedTab={setSelectedTab}
-                                    tabList={tabList}
-                                />
-                            </div>
+    return (
+        <>
+            <SearchUsersModal />
+            <form
+                action=''
+                id='form_submit'
+                method='post'
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    void submit()
+                }}
+            >
+                <div className='container page-content'>
+                    <div className='row'>
+                        <div className='col-2 sidebar'>
+                            <SideBar
+                                selectedTab={selectedTab}
+                                setSelectedTab={setSelectedTab}
+                                tabList={tabList}
+                            />
+                        </div>
 
-                            <div className='col'>
-                                <div
-                                    className='row'
-                                    style={{ marginBottom: '20px' }}
-                                >
-                                    <div className='col-auto'>
+                        <div className='col'>
+                            <div
+                                className='row'
+                                style={{ marginBottom: '20px' }}
+                            >
+                                <div className='col-auto'>
+                                    <div
+                                        className='btn-toolbar'
+                                        role='toolbar'
+                                    >
                                         <div
-                                            className='btn-toolbar'
-                                            role='toolbar'
+                                            className='btn-group'
+                                            role='group'
                                         >
-                                            <div
-                                                className='btn-group'
-                                                role='group'
+                                            <button
+                                                type='submit'
+                                                className='btn btn-primary'
                                             >
-                                                <button
-                                                    type='submit'
-                                                    className='btn btn-primary'
-                                                >
-                                                    {t('Create Component')}
-                                                </button>
-                                            </div>
-                                            <div
-                                                className='btn-group'
-                                                role='group'
+                                                {t('Create Component')}
+                                            </button>
+                                        </div>
+                                        <div
+                                            className='btn-group'
+                                            role='group'
+                                        >
+                                            <button
+                                                type='button'
+                                                id='mergeButton'
+                                                className='btn btn-secondary'
+                                                onClick={handleCancelClick}
                                             >
-                                                <button
-                                                    type='button'
-                                                    id='mergeButton'
-                                                    className='btn btn-secondary'
-                                                    onClick={handleCancelClick}
-                                                >
-                                                    {t('Cancel')}
-                                                </button>
-                                            </div>
+                                                {t('Cancel')}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div className='col'>
-                                    <GeneralInfoComponent
-                                        vendor={vendor}
-                                        setVendor={setVendor}
-                                        componentPayload={componentPayload}
-                                        setComponentPayload={setComponentPayload}
+                            </div>
+                            <div className='col'>
+                                <GeneralInfoComponent
+                                    vendor={vendor}
+                                    setVendor={setVendor}
+                                    componentPayload={componentPayload}
+                                    setComponentPayload={setComponentPayload}
+                                />
+                                <RolesInformation
+                                    componentOwner={componentOwner}
+                                    setComponentOwner={setComponentOwner}
+                                    moderators={moderators}
+                                    setModerators={setModerators}
+                                    componentPayload={componentPayload}
+                                    setComponentPayload={setComponentPayload}
+                                />
+                                <div className='row mb-4'>
+                                    <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
+                                </div>
+                                <div className='row mb-4'>
+                                    <AddKeyValue
+                                        header={t('External Ids')}
+                                        keyName={'external id'}
+                                        setData={setExternalIds}
+                                        data={externalIds}
+                                        setObject={setDataExternalIds}
                                     />
-                                    <RolesInformation
-                                        componentOwner={componentOwner}
-                                        setComponentOwner={setComponentOwner}
-                                        moderators={moderators}
-                                        setModerators={setModerators}
-                                        componentPayload={componentPayload}
-                                        setComponentPayload={setComponentPayload}
+                                </div>
+                                <div className='row mb-4'>
+                                    <AddKeyValue
+                                        header={t('Additional Data')}
+                                        keyName={'additional data'}
+                                        setData={setAddtionalData}
+                                        data={addtionalData}
+                                        setObject={setDataAddtionalData}
                                     />
-                                    <div className='row mb-4'>
-                                        <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
-                                    </div>
-                                    <div className='row mb-4'>
-                                        <AddKeyValue
-                                            header={t('External Ids')}
-                                            keyName={'external id'}
-                                            setData={setExternalIds}
-                                            data={externalIds}
-                                            setObject={setDataExternalIds}
-                                        />
-                                    </div>
-                                    <div className='row mb-4'>
-                                        <AddKeyValue
-                                            header={t('Additional Data')}
-                                            keyName={'additional data'}
-                                            setData={setAddtionalData}
-                                            data={addtionalData}
-                                            setObject={setDataAddtionalData}
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </form>
-            </>
-        )
-    }
+                </div>
+            </form>
+        </>
+    )
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access

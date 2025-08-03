@@ -11,6 +11,7 @@
 
 import { AddtionalDataType } from '@/object-types'
 import { CommonUtils } from '@/utils'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -32,6 +33,14 @@ interface Input {
 function AddKeyValue(props: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     useEffect(() => {
         setInputList(!CommonUtils.isNullOrUndefined(props.data) ? props.data : [])
     }, [props.data])

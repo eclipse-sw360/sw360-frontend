@@ -11,7 +11,7 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -89,6 +89,13 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         attachments: null,
         comment: '',
     })
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         const controller = new AbortController()
