@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -13,7 +14,8 @@
 import { useTranslations } from 'next-intl'
 
 import { Release } from '@/object-types'
-import { ReactNode } from 'react'
+import { signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect } from 'react'
 
 interface Props {
     releasePayload: Release
@@ -22,6 +24,13 @@ interface Props {
 
 const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props): ReactNode => {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReleasePayload({

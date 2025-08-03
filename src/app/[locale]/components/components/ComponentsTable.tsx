@@ -16,7 +16,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { FaPencilAlt } from 'react-icons/fa'
 
 import {
@@ -48,6 +48,12 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const session = useSession()
     const router = useRouter()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)

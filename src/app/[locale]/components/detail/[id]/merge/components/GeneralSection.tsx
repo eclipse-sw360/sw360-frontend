@@ -10,6 +10,7 @@
 'use client'
 
 import { Component, ListFieldProcessComponent, Vendor } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BiInfoCircle } from 'react-icons/bi'
@@ -30,6 +31,13 @@ export default function GeneralSection({
     const t = useTranslations('default')
     const [defaultVendor, setDefaultVendor] = useState<Vendor>({})
     const [categoryMergeList, setCategoryMergeList] = useState<ListFieldProcessComponent[]>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         setDefaultVendor(targetComponent?._embedded?.defaultVendor ?? {})

@@ -44,7 +44,13 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
     const [linkingReleaseId, setLinkingReleaseId] = useState<string | undefined>(undefined)
     const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleClickDelete = (releaseId: string) => {
         setDeletingRelease(releaseId)

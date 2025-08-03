@@ -77,9 +77,15 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [tabList, setTabList] = useState(WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchData = useCallback(async (url: string) => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()

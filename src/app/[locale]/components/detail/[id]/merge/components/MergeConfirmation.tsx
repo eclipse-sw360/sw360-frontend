@@ -10,8 +10,9 @@
 'use client'
 
 import { Attachment, Component } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 
 export default function MergeComponentConfirmation({
     finalComponentPayload,
@@ -23,6 +24,14 @@ export default function MergeComponentConfirmation({
     sourceComponent: Component | null
 }): ReactNode {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     return (
         <>
             {finalComponentPayload && targetComponent && sourceComponent && (

@@ -13,7 +13,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { redirect, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -55,6 +55,13 @@ function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
     const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
     const [err, setErr] = useState<null | string>(null)
     const [loading, setLoading] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleSplitComponent = async () => {
         try {

@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,7 +10,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
@@ -40,6 +41,13 @@ interface CellData {
 const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<Array<CellData>>>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {

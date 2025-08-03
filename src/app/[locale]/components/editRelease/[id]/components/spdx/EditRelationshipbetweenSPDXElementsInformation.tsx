@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,11 +10,12 @@
 // License-Filename: LICENSE
 
 'use client'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { PackageInformation, RelationshipsBetweenSPDXElements, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
+import { signOut, useSession } from 'next-auth/react'
 
 interface Props {
     indexRelation: number
@@ -39,6 +41,13 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
     const [toggle, setToggle] = useState(false)
     const [changeSource, setChangeSource] = useState(false)
     const [isSourceSPDXDocument, setIsSourceSPDXDocument] = useState<boolean>(true)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const relationTypes: Array<string> = [
         'DESCRIBES',

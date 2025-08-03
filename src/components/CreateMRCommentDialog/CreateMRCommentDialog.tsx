@@ -9,8 +9,9 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, useState, type JSX } from 'react'
+import { ChangeEvent, useEffect, useState, type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
@@ -30,6 +31,13 @@ export default function CreateMRCommentDialog<T>({
     const t = useTranslations('default')
     const [userComment, setUserComment] = useState('')
     const [loading, setLoading] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleCloseDialog = () => {
         setShow(!show)

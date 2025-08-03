@@ -12,7 +12,7 @@
 'use client'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
@@ -26,6 +26,12 @@ const ComponentIndex = (): ReactNode => {
     const [numberOfComponent, setNumberOfComponent] = useState(0)
     const [importModalOpen, setImportModalOpen] = useState(false)
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleClickImportSBOM = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault()
@@ -160,61 +166,57 @@ const ComponentIndex = (): ReactNode => {
         )
     }
 
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <AdvancedSearch
-                            title='Advanced Search'
-                            fields={advancedSearch}
-                        />
-                    </div>
-                    <div className='col'>
-                        <PageButtonHeader
-                            title={`${t('Components')} (${numberOfComponent})`}
-                            buttons={headerbuttons}
-                        >
-                            <div
-                                style={{ marginLeft: '5px' }}
-                                className='btn-group'
-                                role='group'
-                            >
-                                <Dropdown>
-                                    <Dropdown.Toggle
-                                        variant='secondary'
-                                        id='project-export'
-                                    >
-                                        {t('Export Spreadsheet')}
-                                    </Dropdown.Toggle>
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item onClick={() => handleExportComponent('false')}>
-                                            {t('Components only')}
-                                        </Dropdown.Item>
-                                        <Dropdown.Item onClick={() => handleExportComponent('true')}>
-                                            {t('Components with releases')}
-                                        </Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-                            </div>
-                        </PageButtonHeader>
+    return (
+        <div className='container page-content'>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <AdvancedSearch
+                        title='Advanced Search'
+                        fields={advancedSearch}
+                    />
+                </div>
+                <div className='col'>
+                    <PageButtonHeader
+                        title={`${t('Components')} (${numberOfComponent})`}
+                        buttons={headerbuttons}
+                    >
                         <div
-                            className='row'
-                            style={{ marginBottom: '20px' }}
+                            style={{ marginLeft: '5px' }}
+                            className='btn-group'
+                            role='group'
                         >
-                            <ComponentsTable setNumberOfComponent={setNumberOfComponent} />
+                            <Dropdown>
+                                <Dropdown.Toggle
+                                    variant='secondary'
+                                    id='project-export'
+                                >
+                                    {t('Export Spreadsheet')}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Dropdown.Item onClick={() => handleExportComponent('false')}>
+                                        {t('Components only')}
+                                    </Dropdown.Item>
+                                    <Dropdown.Item onClick={() => handleExportComponent('true')}>
+                                        {t('Components with releases')}
+                                    </Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
                         </div>
-                        <ImportSBOMModal
-                            show={importModalOpen}
-                            setShow={setImportModalOpen}
-                        />
+                    </PageButtonHeader>
+                    <div
+                        className='row'
+                        style={{ marginBottom: '20px' }}
+                    >
+                        <ComponentsTable setNumberOfComponent={setNumberOfComponent} />
                     </div>
+                    <ImportSBOMModal
+                        show={importModalOpen}
+                        setShow={setImportModalOpen}
+                    />
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 export default ComponentIndex

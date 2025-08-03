@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,6 +12,7 @@
 'use client'
 import { Annotations, InputKeyValue, PackageInformation, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
+import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import AnnotationDate from './AnnotationInformation/AnnotationDate'
@@ -45,6 +47,13 @@ const EditAnnotationInformation = ({
     const handleInputKeyToAnnotator = (data: InputKeyValue) => {
         return data.key + ':' + data.value
     }
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const setAnnotatorToAnnotation = (input: InputKeyValue) => {
         if (isSourceSPDXDocument) {

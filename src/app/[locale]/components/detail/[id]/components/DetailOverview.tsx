@@ -56,7 +56,13 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchData = useCallback(
         async (url: string) => {
