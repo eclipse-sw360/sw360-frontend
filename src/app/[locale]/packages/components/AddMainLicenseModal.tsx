@@ -10,6 +10,7 @@
 'use client'
 
 import { LicenseDetail, Package } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _, Table } from 'next-sw360'
 import { useEffect, useRef, useState, type JSX } from 'react'
@@ -36,6 +37,13 @@ export default function AddMainLicenseModal({
     const searchText = useRef<string>('')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         if (fetchedLicenses.length > 0) {

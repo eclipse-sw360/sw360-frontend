@@ -13,7 +13,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { HttpStatus, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
@@ -25,6 +25,13 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
     const router = useRouter()
     const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
     const [updatingPackage, setUpdatingPackage] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         void (async () => {

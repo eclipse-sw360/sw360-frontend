@@ -13,7 +13,7 @@ import { Embedded, HttpStatus, LicenseDetail, Package } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { useRouter } from 'next/navigation'
@@ -64,6 +64,13 @@ export default function CreateOrEditPackage({
     const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
     const [existingMainLicense, setExistingMainLicense] = useState<Array<string>>([])
     const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleReleaseName = () => {
         if (isEditPage) {

@@ -28,6 +28,12 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const router = useRouter()
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         if (status !== 'authenticated') return
 
         const controller = new AbortController()

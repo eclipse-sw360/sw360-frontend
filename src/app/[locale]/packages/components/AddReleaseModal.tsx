@@ -13,11 +13,11 @@ import { Embedded, HttpStatus, Package, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
-import { SetStateAction, useRef, useState, type JSX } from 'react'
+import { SetStateAction, useEffect, useRef, useState, type JSX } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
@@ -53,6 +53,13 @@ export default function AddReleaseModal({
     const [releaseData, setReleaseData] = useState<RowData[]>([])
     const [interimReleaseId, setInterimReleaseId] = useState<string>('')
     const [interimReleaseNameVersion, setInterimReleaseNameVersion] = useState<string>('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)

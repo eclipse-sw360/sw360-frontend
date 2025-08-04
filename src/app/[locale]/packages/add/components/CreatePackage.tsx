@@ -13,10 +13,10 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { HttpStatus, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { ListGroup, Tab } from 'react-bootstrap'
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
 
@@ -28,6 +28,13 @@ function CreatePackage(): ReactNode {
         createdOn: `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`,
     })
     const [creatingPackage, setCreatingPackage] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleCreatePackage = async () => {
         try {
