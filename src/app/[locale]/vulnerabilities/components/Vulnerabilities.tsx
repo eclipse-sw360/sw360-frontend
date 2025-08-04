@@ -60,12 +60,6 @@ function Vulnerabilities(): ReactNode {
         }
     }, [status])
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
-
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
     }

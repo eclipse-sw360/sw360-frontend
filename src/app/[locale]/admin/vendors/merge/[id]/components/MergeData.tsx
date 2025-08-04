@@ -10,6 +10,7 @@
 'use client'
 
 import { Vendor } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
@@ -27,6 +28,13 @@ export default function MergeVendor({
     setFinalVendorPayload: Dispatch<SetStateAction<null | Vendor>>
 }): ReactNode {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         setFinalVendorPayload(targetVendor)

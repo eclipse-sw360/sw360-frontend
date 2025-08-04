@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -13,7 +14,7 @@
 import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState, type JSX } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
@@ -52,6 +53,13 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
     const [showImportManuallyModal, setShowImportManuallyModal] = useState<boolean>(false)
     const [importManualResponse, setImportManualResponse] = useState<ImportManualResponse | undefined>(undefined)
     const [showLogsModal, setShowLogsModal] = useState<boolean>(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchImportSchedulerStatus = useCallback(async () => {
         const session = await getSession()

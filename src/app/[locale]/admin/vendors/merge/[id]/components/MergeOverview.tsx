@@ -12,7 +12,7 @@
 import { ErrorDetails, HttpStatus, MergeOrSplitActionType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -49,6 +49,13 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
     const [finalVendorPayload, setFinalVendorPayload] = useState<null | Vendor>(null)
     const [err, setErr] = useState<null | string>(null)
     const [loading, setLoading] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleMergeVendor = async () => {
         try {
@@ -109,6 +116,7 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
 
         return () => controller.abort()
     }, [id])
+
     return (
         <div className='mx-5 mt-3'>
             {targetVendor ? (

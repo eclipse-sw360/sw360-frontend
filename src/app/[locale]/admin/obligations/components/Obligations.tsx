@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -17,7 +18,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, QuickFilter, Table, _ } from 'next-sw360'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
@@ -31,11 +32,15 @@ function Obligations(): ReactNode {
     const [search, setSearch] = useState({})
     const [obligationCount, setObligationCount] = useState(0)
     const { data: session, status } = useSession()
-
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [deletedObligationId, setDeletedObligationId] = useState('')
-
     const router = useRouter()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const openDeleteDialog = (obligationId: string | undefined) => {
         if (obligationId !== undefined) {
@@ -182,51 +187,48 @@ function Obligations(): ReactNode {
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
         setSearch({ keyword: event.currentTarget.value })
     }
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <div className='container page-content'>
-                <DeleteObligationDialog
-                    obligationId={deletedObligationId}
-                    show={showDeleteDialog}
-                    setShow={setShowDeleteDialog}
-                />
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <QuickFilter
-                            id='obligationsFilter'
-                            title={t('Quick Filter')}
-                            searchFunction={doSearch}
-                        />
-                    </div>
-                    <div className='col col-10'>
-                        <div className='col'>
-                            <div className='row'>
-                                <PageButtonHeader
-                                    buttons={headerButtons}
-                                    title={`${t('Obligations')} (${obligationCount})`}
-                                />
-                                {status === 'authenticated' ? (
-                                    <Table
-                                        server={server}
-                                        columns={columns}
-                                        search={search}
-                                        selector={true}
-                                    />
-                                ) : (
-                                    <div className='col-12 d-flex justify-content-center align-items-center'>
-                                        <Spinner className='spinner' />
-                                    </div>
-                                )}
 
-                                <div className='row mt-2'></div>
-                            </div>
+    return (
+        <div className='container page-content'>
+            <DeleteObligationDialog
+                obligationId={deletedObligationId}
+                show={showDeleteDialog}
+                setShow={setShowDeleteDialog}
+            />
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <QuickFilter
+                        id='obligationsFilter'
+                        title={t('Quick Filter')}
+                        searchFunction={doSearch}
+                    />
+                </div>
+                <div className='col col-10'>
+                    <div className='col'>
+                        <div className='row'>
+                            <PageButtonHeader
+                                buttons={headerButtons}
+                                title={`${t('Obligations')} (${obligationCount})`}
+                            />
+                            {status === 'authenticated' ? (
+                                <Table
+                                    server={server}
+                                    columns={columns}
+                                    search={search}
+                                    selector={true}
+                                />
+                            ) : (
+                                <div className='col-12 d-flex justify-content-center align-items-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+
+                            <div className='row mt-2'></div>
                         </div>
                     </div>
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 export default Obligations

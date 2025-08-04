@@ -13,7 +13,7 @@ import { Embedded, HttpStatus, LicenseType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _, QuickFilter, Table } from 'next-sw360'
 import { useRouter } from 'next/navigation'
@@ -34,6 +34,13 @@ export default function LicenseTypesDetail(): ReactNode {
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
     const [licenseTypeData, setLicenseTypeData] = useState<Array<Array<string | string[]>>>([])
     const [licenseTypeCount, setLicenseTypeCount] = useState<null | number>(null)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()

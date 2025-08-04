@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl'
 import { QuickFilter, Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useState, type JSX } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import { FaTrashAlt } from 'react-icons/fa'
@@ -107,6 +107,13 @@ export default function VendorsList(): JSX.Element {
     const [numVendors, setNumVendors] = useState<null | number>(null)
     const [delVendor, setDelVendor] = useState<Vendor | null>(null)
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const handleAddVendor = () => {
         router.push('/admin/vendors/add')
     }

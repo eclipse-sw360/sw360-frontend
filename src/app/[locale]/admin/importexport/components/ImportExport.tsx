@@ -13,9 +13,9 @@ import { ErrorDetails, HttpStatus } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, RefObject, useRef } from 'react'
+import { ReactNode, RefObject, useEffect, useRef } from 'react'
 import { MdOutlineFileDownload, MdOutlineFileUpload } from 'react-icons/md'
 
 export default function ImportExportComponent(): ReactNode {
@@ -24,6 +24,13 @@ export default function ImportExportComponent(): ReactNode {
     const componentsAttachmentFile = useRef<File | undefined>(undefined)
     const releaseLinksFile = useRef<File | undefined>(undefined)
     const licenseArchiveFile = useRef<File | undefined>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, file: RefObject<File | undefined>) => {
         const files = e.currentTarget.files

@@ -12,7 +12,7 @@
 import { Embedded, ErrorDetails, HttpStatus, Release, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -27,6 +27,13 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
     const router = useRouter()
     const [vendorData, setVendorData] = useState<Vendor | null>(null)
     const [releases, setReleases] = useState<Release[] | null>(null)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         const controller = new AbortController()

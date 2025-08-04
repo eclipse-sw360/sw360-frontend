@@ -10,7 +10,7 @@
 'use client'
 
 import MessageService from '@/services/message.service'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
@@ -29,6 +29,13 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>([])
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         const controller = new AbortController()

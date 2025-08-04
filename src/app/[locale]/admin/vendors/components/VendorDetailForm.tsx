@@ -10,8 +10,9 @@
 'use client'
 
 import { Vendor } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, type JSX } from 'react'
+import { Dispatch, SetStateAction, useEffect, type JSX } from 'react'
 
 export default function VendorDetailForm({
     payload,
@@ -21,6 +22,13 @@ export default function VendorDetailForm({
     setPayload: Dispatch<SetStateAction<Vendor | null>>
 }): JSX.Element {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setPayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))

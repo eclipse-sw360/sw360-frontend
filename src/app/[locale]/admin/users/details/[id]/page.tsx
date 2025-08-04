@@ -14,7 +14,7 @@
 import { PageButtonHeader, PageSpinner } from '@/components/sw360'
 import { HttpStatus, User } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useParams } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
@@ -23,6 +23,13 @@ const UserDetailPage = (): JSX.Element => {
     const params = useParams<{ id: string }>()
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         ;(async () => {

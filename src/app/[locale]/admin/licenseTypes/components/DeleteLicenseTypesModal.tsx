@@ -11,7 +11,7 @@
 import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState, type JSX } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
@@ -34,6 +34,13 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
     const [loading, setLoading] = useState<boolean>(false)
     const [licenseTypeInUse, setLicenseTypeInUse] = useState<boolean>(false)
     const [licenseTypeUsageCount, setLicenseTypeUsageCount] = useState<number | null>(null)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
