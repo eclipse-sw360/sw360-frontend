@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 import MessageService from '@/services/message.service'
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -47,7 +47,7 @@ export default function MyComponentsWidget(): ReactNode {
                     )
                 },
                 meta: {
-                    width: '17.5%',
+                    width: '40%',
                 },
             },
             {
@@ -56,7 +56,7 @@ export default function MyComponentsWidget(): ReactNode {
                 accessorKey: 'description',
                 cell: (info) => info.getValue(),
                 meta: {
-                    width: '32.5%',
+                    width: '60%',
                 },
             },
         ],
@@ -105,7 +105,7 @@ export default function MyComponentsWidget(): ReactNode {
                 const data = (await response.json()) as EmbeddedComponents
                 setPaginationMeta(data.page)
                 setComponentData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:components'])
+                    CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:components'])
                         ? []
                         : data['_embedded']['sw360:components'],
                 )
@@ -145,7 +145,6 @@ export default function MyComponentsWidget(): ReactNode {
 
         // server side sorting config
         manualSorting: true,
-        getSortedRowModel: getSortedRowModel(),
         onSortingChange: (updater) => {
             setPageableQueryParam((prev) => {
                 const prevSorting: SortingState = [
@@ -204,6 +203,7 @@ export default function MyComponentsWidget(): ReactNode {
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
+                            noRecordsFoundMessage={t('NotOwnComponent')}
                         />
                         <TableFooter
                             pageableQueryParam={pageableQueryParam}
