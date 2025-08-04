@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -13,7 +14,7 @@
 import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _, PageSpinner, Table } from 'next-sw360'
 import Link from 'next/link'
@@ -26,6 +27,13 @@ type TableRow = [string, string[], string]
 const SecondaryDepartmentsTable = (): JSX.Element => {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<TableRow> | undefined>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {

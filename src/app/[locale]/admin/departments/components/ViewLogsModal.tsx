@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -12,7 +13,7 @@
 
 import { HttpStatus } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useCallback, useEffect, useState, type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
@@ -27,6 +28,13 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
     const [logFilesDate, setLogFilesDate] = useState<string[]>([])
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
     const [logFileContents, setLogFileContents] = useState<string[]>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchLogFiles = useCallback(async () => {
         const session = await getSession()

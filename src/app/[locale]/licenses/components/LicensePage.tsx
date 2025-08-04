@@ -107,41 +107,38 @@ function LicensePage(): ReactNode {
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
         setSearch({ keyword: event.currentTarget.value })
     }
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <QuickFilter
-                            id='licensefilter'
-                            title={t('Quick Filter')}
-                            searchFunction={doSearch}
-                        />
-                    </div>
-                    <div className='col col-10'>
-                        <div className='col'>
-                            <div className='row'>
-                                <PageButtonHeader
-                                    buttons={headerButtons}
-                                    title={`${t('Licenses')} (${numberLicense})`}
-                                />
-                                <Table
-                                    server={server}
-                                    columns={columns}
-                                    search={search}
-                                    selector={true}
-                                />
 
-                                <div className='row mt-2'></div>
-                            </div>
+    return (
+        <div className='container page-content'>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <QuickFilter
+                        id='licensefilter'
+                        title={t('Quick Filter')}
+                        searchFunction={doSearch}
+                    />
+                </div>
+                <div className='col col-10'>
+                    <div className='col'>
+                        <div className='row'>
+                            <PageButtonHeader
+                                buttons={headerButtons}
+                                title={`${t('Licenses')} (${numberLicense})`}
+                            />
+                            <Table
+                                server={server}
+                                columns={columns}
+                                search={search}
+                                selector={true}
+                            />
+
+                            <div className='row mt-2'></div>
                         </div>
                     </div>
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 // export default LicensePage
 // Pass notAllowedUserGroups to AccessControl to restrict access

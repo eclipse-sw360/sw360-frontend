@@ -305,25 +305,21 @@ export default function ReleaseView({ projectId }: Readonly<{ projectId: string 
         },
     ]
 
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <div className='ms-1'>
-                {data ? (
-                    <TreeTable
-                        columns={columns}
-                        data={data}
-                        setData={setData as Dispatch<SetStateAction<NodeData[]>>}
-                        selector={true}
-                        sort={false}
-                    />
-                ) : (
-                    <div className='col-12 text-center'>
-                        <Spinner className='spinner' />
-                    </div>
-                )}
-            </div>
-        )
-    }
+    return (
+        <div className='ms-1'>
+            {data ? (
+                <TreeTable
+                    columns={columns}
+                    data={data}
+                    setData={setData as Dispatch<SetStateAction<NodeData[]>>}
+                    selector={true}
+                    sort={false}
+                />
+            ) : (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </div>
+    )
 }

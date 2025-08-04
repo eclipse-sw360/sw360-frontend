@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -32,6 +33,12 @@ function OAuthClientsList(): ReactNode {
     const [refreshTrigger, setRefreshTrigger] = useState(0)
     const [clients, setClients] = useState<OAuthClient[]>([])
     const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const addClient = () => {
         setSelectedClient(null)
@@ -108,49 +115,45 @@ function OAuthClientsList(): ReactNode {
         fetchClientsData()
     }, [refreshTrigger])
 
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <div className='container page-content'>
-                <AddClientDialog
-                    show={openAddClientDialog}
+    return (
+        <div className='container page-content'>
+            <AddClientDialog
+                show={openAddClientDialog}
+                setShow={handleDialogClose}
+                client={selectedClient}
+            />
+            {selectedClient && (
+                <DeleteClientDialog
+                    show={openDeleteClientDialog}
                     setShow={handleDialogClose}
-                    client={selectedClient}
+                    clientId={selectedClient.client_id}
                 />
-                {selectedClient && (
-                    <DeleteClientDialog
-                        show={openDeleteClientDialog}
-                        setShow={handleDialogClose}
-                        clientId={selectedClient.client_id}
-                    />
-                )}
-                <div className='row'>
-                    <div className='col col-12'>
-                        <div className='col'>
-                            <div className='row'>
-                                <PageButtonHeader
-                                    buttons={headerButtons}
-                                    title={`${t('OAuth Client')} (${numberClient})`}
-                                />
+            )}
+            <div className='row'>
+                <div className='col col-12'>
+                    <div className='col'>
+                        <div className='row'>
+                            <PageButtonHeader
+                                buttons={headerButtons}
+                                title={`${t('OAuth Client')} (${numberClient})`}
+                            />
 
-                                <div className='row mt-3'>
-                                    {loading ? (
-                                        <p>Loading clients...</p>
-                                    ) : (
-                                        <OAuthClientTable
-                                            updateClient={updateClient}
-                                            deleteClient={deleteClient}
-                                            clients={clients}
-                                        />
-                                    )}
-                                </div>
+                            <div className='row mt-3'>
+                                {loading ? (
+                                    <p>Loading clients...</p>
+                                ) : (
+                                    <OAuthClientTable
+                                        updateClient={updateClient}
+                                        deleteClient={deleteClient}
+                                        clients={clients}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 export default OAuthClientsList

@@ -11,9 +11,9 @@
 
 import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -32,6 +32,13 @@ export default function DeleteAllLicenseInformationModal({
     const t = useTranslations('default')
     const [deleting, setDeleting] = useState<boolean>(false)
     const [message, setMessage] = useState<undefined | Message>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleDelete = async () => {
         try {

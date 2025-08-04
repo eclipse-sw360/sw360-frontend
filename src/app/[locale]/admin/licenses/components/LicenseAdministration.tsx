@@ -13,15 +13,22 @@ import { HttpStatus } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useRef, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
 export default function LicenseAdministration(): ReactNode {
     const t = useTranslations('default')
     const file = useRef<File | undefined>(undefined)
     const [deleteAllLicenseInformationModal, showDeleteAllLicenseInformationModal] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files

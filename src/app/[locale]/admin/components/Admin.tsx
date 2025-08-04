@@ -19,10 +19,18 @@ import { ImUsers } from 'react-icons/im'
 import { RiArrowUpDownFill, RiOrganizationChart } from 'react-icons/ri'
 import { RxCalendar } from 'react-icons/rx'
 
-import type { JSX } from 'react'
+import { signOut, useSession } from 'next-auth/react'
+import { useEffect, type JSX } from 'react'
 
 const AdminMainPage = (): JSX.Element => {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     return (
         <>

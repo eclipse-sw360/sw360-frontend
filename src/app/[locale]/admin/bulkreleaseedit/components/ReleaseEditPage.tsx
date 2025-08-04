@@ -41,6 +41,13 @@ function UpdateReleaseModal({
     const [vendor, setVendor] = useState<Vendor>(release?.vendor ?? {})
     const [selectVendor, setSelectVendor] = useState(false)
     const [alert, setAlert] = useState<AlertData | null>(null)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     useEffect(() => {
         setVendor(release?.vendor ?? {})

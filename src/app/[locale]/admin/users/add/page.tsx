@@ -14,10 +14,10 @@ import UserOperationType from '@/components/UserEditForm/UserOperationType'
 import { HttpStatus, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 
 export default function CreateUser(): JSX.Element {
     const t = useTranslations('default')
@@ -31,6 +31,13 @@ export default function CreateUser(): JSX.Element {
         secondaryDepartmentsAndRoles: {},
     })
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }))

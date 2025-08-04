@@ -11,16 +11,23 @@
 
 import { HttpStatus, SearchDuplicatesResponse } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Table, _ } from 'next-sw360'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 
 export default function DatabaseSanitation(): JSX.Element {
     const t = useTranslations('default')
     const [duplicates, setDuplicates] = useState<SearchDuplicatesResponse | null | undefined>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const searchDuplicate = async () => {
         try {

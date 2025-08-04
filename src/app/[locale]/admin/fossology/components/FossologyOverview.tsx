@@ -13,7 +13,7 @@ import { FossologyConfig, HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -37,6 +37,13 @@ export default function FossologyOverview(): ReactNode {
         token_set: false,
     })
     const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.UNKNOWN)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchData = useCallback(async (url: string, serverConfig: boolean) => {
         const session = await getSession()

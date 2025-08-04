@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,12 +11,12 @@
 
 import { HttpStatus } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 import MessageService from '@/services/message.service'
 import { useTranslations } from 'next-intl'
-import React, { type JSX } from 'react'
+import React, { useEffect, type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
 
@@ -36,6 +37,13 @@ const ToggleUserActiveModal = ({
 }: Props): JSX.Element => {
     const t = useTranslations('default')
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const toggleUserAccount = async () => {
         try {

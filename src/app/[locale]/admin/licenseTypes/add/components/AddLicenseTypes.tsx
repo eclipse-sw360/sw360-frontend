@@ -15,13 +15,19 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useRef, type JSX } from 'react'
+import { useEffect, useRef, type JSX } from 'react'
 
 export default function AddLicenseTypes(): JSX.Element {
     const router = useRouter()
     const { status } = useSession()
     const t = useTranslations('default')
     const searchValueRef = useRef<HTMLInputElement>(null)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleAddLicenseType = async ({ addLicenseTypeTitle }: { addLicenseTypeTitle: string }) => {
         try {

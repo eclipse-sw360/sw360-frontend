@@ -15,7 +15,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 import VendorDetailForm from './VendorDetailForm'
 
 export default function AddVendor(): JSX.Element {
@@ -27,6 +27,12 @@ export default function AddVendor(): JSX.Element {
         shortName: '',
         url: '',
     })
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleCancel = () => {
         router.push('/admin/vendors')
