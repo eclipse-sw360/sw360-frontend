@@ -26,7 +26,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import React, { ReactNode, useEffect, useState } from 'react'
@@ -51,6 +51,13 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const [isEditWhitelist, setIsEditWhitelist] = useState(false)
     const [whitelist, setWhitelist] = useState<Map<string, boolean> | undefined>(undefined)
     const params = useSearchParams()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const tabList = [
         {

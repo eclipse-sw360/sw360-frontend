@@ -11,7 +11,7 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -65,6 +65,13 @@ function EditLicense({ licenseId }: Props): ReactNode {
         checked: false,
         licenseTypeDatabaseId: '',
     })
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleReRender = () => {
         setReRender(!reRender)

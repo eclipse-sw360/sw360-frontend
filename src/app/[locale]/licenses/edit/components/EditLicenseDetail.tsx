@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,7 +12,7 @@
 'use client'
 import { Embedded, HttpStatus, LicensePayload, LicenseType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -37,6 +38,13 @@ const EditLicenseDetail = ({
     const t = useTranslations('default')
     const params = useSearchParams()
     const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.target.name === 'fullName') {

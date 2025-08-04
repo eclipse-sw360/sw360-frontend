@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,10 +9,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState, type JSX } from 'react'
+import React, { useEffect, useState, type JSX } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { Obligation } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
 import TableLicense from '../TableLicense'
@@ -28,6 +30,13 @@ export default function TableLinkedObligations({ data, setData, setObligationIdT
     const t = useTranslations('default')
     const [obligation, setObligation] = useState<Obligation | undefined>(undefined)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
     const deleteObligation = (item: Obligation) => {
         setObligation(item)
         setDeleteDialogOpen(true)
