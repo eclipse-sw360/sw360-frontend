@@ -9,10 +9,10 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { Dispatch, ReactNode, SetStateAction, useReducer, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
 import { PiInfoBold } from 'react-icons/pi'
 
 import { Embedded, HttpStatus, SearchResult } from '@/object-types'
@@ -147,6 +147,13 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
 
     const [searchOptions, dispatch] = useReducer(reducer, initialState)
     const [searchText, setSearchText] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleSearch = async () => {
         try {
