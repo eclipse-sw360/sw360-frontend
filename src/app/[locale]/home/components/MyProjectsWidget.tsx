@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,7 +10,7 @@
 
 import LicenseClearing from '@/components/LicenseClearing'
 import MessageService from '@/services/message.service'
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -49,7 +50,7 @@ export default function MyProjectsWidget(): ReactNode {
                     )
                 },
                 meta: {
-                    width: '17.5%',
+                    width: '30%',
                 },
             },
             {
@@ -58,7 +59,7 @@ export default function MyProjectsWidget(): ReactNode {
                 accessorKey: 'description',
                 cell: (info) => info.getValue(),
                 meta: {
-                    width: '32.5%',
+                    width: '50%',
                 },
             },
             {
@@ -70,7 +71,7 @@ export default function MyProjectsWidget(): ReactNode {
                     return <>{id && <LicenseClearing projectId={id} />}</>
                 },
                 meta: {
-                    width: '10%',
+                    width: '20%',
                 },
             },
         ],
@@ -159,7 +160,6 @@ export default function MyProjectsWidget(): ReactNode {
 
         // server side sorting config
         manualSorting: true,
-        getSortedRowModel: getSortedRowModel(),
         onSortingChange: (updater) => {
             setPageableQueryParam((prev) => {
                 const prevSorting: SortingState = [
@@ -218,6 +218,7 @@ export default function MyProjectsWidget(): ReactNode {
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
+                            noRecordsFoundMessage={t('NoProjectsFound')}
                         />
                         <TableFooter
                             pageableQueryParam={pageableQueryParam}

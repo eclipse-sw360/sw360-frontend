@@ -157,10 +157,18 @@ export function PageSizeSelector({
     )
 }
 
-export function SW360Table<K>({ table, showProcessing }: { table: Table<K>; showProcessing: boolean }): ReactNode {
+export function SW360Table<K>({
+    table,
+    showProcessing,
+    noRecordsFoundMessage,
+}: {
+    table: Table<K>
+    showProcessing: boolean
+    noRecordsFoundMessage?: string
+}): ReactNode {
     const t = useTranslations('default')
     return (
-        <div className='table-component potition-relative'>
+        <div className='table-component position-relative'>
             <table className='sw360-table table-bordered mt-3'>
                 <thead>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -191,6 +199,15 @@ export function SW360Table<K>({ table, showProcessing }: { table: Table<K>; show
                     ))}
                 </thead>
                 <tbody>
+                    {!showProcessing &&
+                        table.getRowModel().rows.length === 0 &&
+                        noRecordsFoundMessage !== undefined && (
+                            <tr>
+                                <td colSpan={table.getVisibleFlatColumns().length}>
+                                    <div className='restrict-row-height text-center'>{noRecordsFoundMessage}</div>
+                                </td>
+                            </tr>
+                        )}
                     {table.getRowModel().rows.map((row) => (
                         <tr key={row.id}>
                             {row.getVisibleCells().map((cell) => (
@@ -205,10 +222,7 @@ export function SW360Table<K>({ table, showProcessing }: { table: Table<K>; show
                 </tbody>
             </table>
             {showProcessing && (
-                <div
-                    className='position-absolute top-50 start-50 d-flex align-items-center justify-content-center'
-                    style={{ zIndex: 10 }}
-                >
+                <div className='position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center'>
                     <div className='bg-white p-4 border rounded shadow'>{t('Processing')}…</div>
                 </div>
             )}
