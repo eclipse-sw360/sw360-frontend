@@ -202,7 +202,9 @@ export function SW360Table<K>({
                         noRecordsFoundMessage !== undefined && (
                             <tr>
                                 <td colSpan={table.getVisibleFlatColumns().length}>
-                                    <div className='restrict-row-height text-center'>{noRecordsFoundMessage}</div>
+                                    <div className='restrict-row-height text-center'>
+                                        {noRecordsFoundMessage ?? t('No data available in table')}
+                                    </div>
                                 </td>
                             </tr>
                         )}
