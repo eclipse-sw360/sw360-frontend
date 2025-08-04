@@ -13,10 +13,10 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { UserGroupType, type ECC, type Embedded } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 import { Session } from 'next-auth'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { QuickFilter, Table, _ } from 'next-sw360'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { Spinner } from 'react-bootstrap'
 
 type EmbeddedECC = Embedded<ECC, 'sw360:releases'>
@@ -27,6 +27,12 @@ const Capitalize = (text: string) =>
 function ECC(): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const columns = [
         {
