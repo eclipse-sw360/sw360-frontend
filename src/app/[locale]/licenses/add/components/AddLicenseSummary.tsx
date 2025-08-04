@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,7 +12,8 @@
 'use client'
 
 import { LicensePayload } from '@/object-types'
-import { ReactNode } from 'react'
+import { signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect } from 'react'
 import AddLicenseDetail from './AddLicenseDetail'
 import AddLicenseText from './AddLicenseText'
 
@@ -34,6 +36,13 @@ export default function AddLicenseSummary({
     setErrorShortName,
     setErrorFullName,
 }: Props): ReactNode {
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
     return (
         <div className='col'>
             <AddLicenseDetail

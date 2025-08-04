@@ -34,6 +34,12 @@ function LicensePage(): ReactNode {
     const deleteLicense = params.get('delete')
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedString(deleteLicense)) {
             MessageService.success(t('License removed successfully'))
         }
