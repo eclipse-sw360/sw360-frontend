@@ -37,6 +37,12 @@ function ClosedModerationRequest(): ReactNode {
         REJECTED: t('REJECTED'),
     }
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const formatDate = (timestamp: number | undefined): string | null => {
         if (timestamp === undefined) {
             return null
@@ -143,28 +149,24 @@ function ClosedModerationRequest(): ReactNode {
         },
     ]
 
-    if (status === 'unauthenticated') {
-        void signOut()
-    } else {
-        return (
-            <div className='row mb-4'>
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    {loading == false ? (
-                        <div style={{ paddingLeft: '0px' }}>
-                            <Table
-                                columns={columns}
-                                data={tableData}
-                                sort={false}
-                                selector={true}
-                            />
-                        </div>
-                    ) : (
-                        <Spinner className='spinner' />
-                    )}
-                </div>
+    return (
+        <div className='row mb-4'>
+            <div className='col-12 d-flex justify-content-center align-items-center'>
+                {loading == false ? (
+                    <div style={{ paddingLeft: '0px' }}>
+                        <Table
+                            columns={columns}
+                            data={tableData}
+                            sort={false}
+                            selector={true}
+                        />
+                    </div>
+                ) : (
+                    <Spinner className='spinner' />
+                )}
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 export default ClosedModerationRequest

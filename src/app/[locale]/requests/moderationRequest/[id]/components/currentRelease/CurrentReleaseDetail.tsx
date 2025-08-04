@@ -30,7 +30,7 @@ import {
     ReleaseTabIds,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
@@ -49,6 +49,13 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
     const { MODERATION_REQUEST } = ReleaseDetailTabs()
     const [tabList] = useState(MODERATION_REQUEST)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const fetchData = async (url: string, signal: AbortSignal) => {
         try {

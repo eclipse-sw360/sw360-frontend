@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,9 +11,9 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, type JSX } from 'react'
+import { useEffect, useState, type JSX } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
 import { Embedded, HttpStatus, User } from '@/object-types'
@@ -43,6 +44,13 @@ const SelectUsersDialog = ({
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [selectingUsers, setSelectingUsers] = useState({})
     const [searchText, setSearchText] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const handleCloseDialog = () => {
         setShow(!show)

@@ -65,6 +65,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     })
     const toastShownRef = useRef(false)
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const fetchData = async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -242,216 +248,204 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         setOpenCardIndex((prevIndex) => (prevIndex === index ? -1 : index))
     }
 
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <div className='ms-5 mt-2'>
-                <Tab.Container>
+    return (
+        <div className='ms-5 mt-2'>
+            <Tab.Container>
+                <Row>
                     <Row>
-                        <Row>
-                            <Col
-                                lg={12}
-                                className='text-truncate buttonheader-title me-3'
-                            >
-                                {moderationRequestData &&
-                                    (moderationRequestData.documentType === 'COMPONENT' ||
-                                        moderationRequestData.documentType === 'RELEASE') &&
-                                    `${moderationRequestData.documentName}
-                                (${moderationRequestData.componentType})`}
-                                {moderationRequestData &&
-                                    moderationRequestData.documentType === 'PROJECT' &&
-                                    `${moderationRequestData.documentName}`}
-                            </Col>
-                        </Row>
-                        <Col className='ps-2 me-3 mt-3'>
-                            <Row className='d-flex justify-content-between'>
-                                <Col lg={6}>
-                                    <Row>
-                                        <Button
-                                            variant='success'
-                                            className='me-2 col-auto'
-                                            onClick={handleAcceptModerationRequest}
-                                        >
-                                            {t('Accept Request')}
-                                        </Button>
-                                        <Button
-                                            variant='danger'
-                                            className='me-2 col-auto'
-                                            onClick={handleRejectModerationRequest}
-                                        >
-                                            {t('Decline Request')}
-                                        </Button>
-                                        <Button
-                                            variant='secondary'
-                                            className='me-2 col-auto'
-                                            onClick={handlePostponeModerationRequest}
-                                        >
-                                            {t('Postpone Request')}
-                                        </Button>
-                                        <Button
-                                            variant='secondary'
-                                            className='me-2 col-auto'
-                                            onClick={handleUnassignModerationRequest}
-                                        >
-                                            {t('Remove Me From Moderators')}
-                                        </Button>
-                                        <Button
-                                            variant='dark'
-                                            className='me-2 col-auto'
-                                            onClick={handleCancel}
-                                        >
-                                            {t('Cancel')}
-                                        </Button>
-                                    </Row>
-                                </Col>
-                            </Row>
-                            <Row className='mt-3'>
-                                <Card className={`${styles['card']}`}>
-                                    <div
-                                        onClick={() => toggleCollapse(0)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
-                                    >
-                                        <Card.Header
-                                            className={`
-                                                                ${
-                                                                    openCardIndex === 0
-                                                                        ? styles['cardHeader-expanded']
-                                                                        : ''
-                                                                }`}
-                                            id={`${styles['cardHeader']}`}
-                                        >
-                                            <Button
-                                                variant='button'
-                                                className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls='example-collapse-text-1'
-                                                aria-expanded={openCardIndex === 0}
-                                            >
-                                                {t('Moderation Request Information')}
-                                            </Button>
-                                        </Card.Header>
-                                    </div>
-                                    <Collapse in={openCardIndex === 0}>
-                                        <div id='example-collapse-text-1'>
-                                            <Card.Body className={`${styles['card-body']}`}>
-                                                <div className='row'>
-                                                    <div className='col'>
-                                                        <ModerationRequestInfo data={moderationRequestData} />
-                                                    </div>
-                                                    <div className='col'>
-                                                        <ModerationDecision
-                                                            data={moderationRequestData}
-                                                            moderationRequestPayload={moderationRequestPayload}
-                                                            setModerationRequestPayload={setModerationRequestPayload}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </Card.Body>
-                                        </div>
-                                    </Collapse>
-                                </Card>
-                            </Row>
-                            <Row>
-                                <Card className={`${styles['card']}`}>
-                                    <div
-                                        onClick={() => toggleCollapse(1)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
-                                    >
-                                        <Card.Header
-                                            className={`
-                                                                ${
-                                                                    openCardIndex === 1
-                                                                        ? styles['cardHeader-expanded']
-                                                                        : ''
-                                                                }`}
-                                            id={`${styles['cardHeader']}`}
-                                        >
-                                            <Button
-                                                variant='button'
-                                                className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls='example-collapse-text-2'
-                                                aria-expanded={openCardIndex === 1}
-                                            >
-                                                {t('Proposed Changes')}
-                                            </Button>
-                                        </Card.Header>
-                                    </div>
-                                    <Collapse in={openCardIndex === 1}>
-                                        <div id='example-collapse-text-2'>
-                                            <Card.Body className={`${styles['card-body']}`}>
-                                                <div className='row'>
-                                                    <div className='col'>
-                                                        <ProposedChanges
-                                                            moderationRequestData={moderationRequestData}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </Card.Body>
-                                        </div>
-                                    </Collapse>
-                                </Card>
-                            </Row>
-                            <Row>
-                                <Card className={`${styles['card']}`}>
-                                    <div
-                                        onClick={() => toggleCollapse(2)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
-                                    >
-                                        <Card.Header
-                                            className={`
-                                                                ${
-                                                                    openCardIndex === 2
-                                                                        ? styles['cardHeader-expanded']
-                                                                        : ''
-                                                                }`}
-                                            id={`${styles['cardHeader']}`}
-                                        >
-                                            <Button
-                                                variant='button'
-                                                className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls='example-collapse-text-3'
-                                                aria-expanded={openCardIndex === 2}
-                                            >
-                                                {(moderationRequestData?.documentType === 'COMPONENT' &&
-                                                    t('Current Component')) ||
-                                                    (moderationRequestData?.documentType === 'RELEASE' &&
-                                                        t('Current Release')) ||
-                                                    (moderationRequestData?.documentType === 'PROJECT' &&
-                                                        t('Current Project')) ||
-                                                    (moderationRequestData?.documentType === 'LICENSE' &&
-                                                        t('Current License'))}
-                                            </Button>
-                                        </Card.Header>
-                                    </div>
-                                    <Collapse in={openCardIndex === 2}>
-                                        <div id='example-collapse-text-3'>
-                                            <Card.Body className={`${styles['card-body']}`}>
-                                                {(moderationRequestData?.documentType === 'COMPONENT' && (
-                                                    <CurrentComponentDetail
-                                                        componentId={moderationRequestData.documentId}
-                                                    />
-                                                )) ||
-                                                    (moderationRequestData?.documentType === 'PROJECT' && (
-                                                        <CurrentProjectDetail
-                                                            projectId={moderationRequestData.documentId}
-                                                        />
-                                                    )) ||
-                                                    (moderationRequestData?.documentType === 'RELEASE' && (
-                                                        <CurrentReleaseDetail
-                                                            releaseId={moderationRequestData.documentId}
-                                                        />
-                                                    ))}
-                                            </Card.Body>
-                                        </div>
-                                    </Collapse>
-                                </Card>
-                            </Row>
+                        <Col
+                            lg={12}
+                            className='text-truncate buttonheader-title me-3'
+                        >
+                            {moderationRequestData &&
+                                (moderationRequestData.documentType === 'COMPONENT' ||
+                                    moderationRequestData.documentType === 'RELEASE') &&
+                                `${moderationRequestData.documentName}
+                            (${moderationRequestData.componentType})`}
+                            {moderationRequestData &&
+                                moderationRequestData.documentType === 'PROJECT' &&
+                                `${moderationRequestData.documentName}`}
                         </Col>
                     </Row>
-                </Tab.Container>
-            </div>
-        )
-    }
+                    <Col className='ps-2 me-3 mt-3'>
+                        <Row className='d-flex justify-content-between'>
+                            <Col lg={6}>
+                                <Row>
+                                    <Button
+                                        variant='success'
+                                        className='me-2 col-auto'
+                                        onClick={handleAcceptModerationRequest}
+                                    >
+                                        {t('Accept Request')}
+                                    </Button>
+                                    <Button
+                                        variant='danger'
+                                        className='me-2 col-auto'
+                                        onClick={handleRejectModerationRequest}
+                                    >
+                                        {t('Decline Request')}
+                                    </Button>
+                                    <Button
+                                        variant='secondary'
+                                        className='me-2 col-auto'
+                                        onClick={handlePostponeModerationRequest}
+                                    >
+                                        {t('Postpone Request')}
+                                    </Button>
+                                    <Button
+                                        variant='secondary'
+                                        className='me-2 col-auto'
+                                        onClick={handleUnassignModerationRequest}
+                                    >
+                                        {t('Remove Me From Moderators')}
+                                    </Button>
+                                    <Button
+                                        variant='dark'
+                                        className='me-2 col-auto'
+                                        onClick={handleCancel}
+                                    >
+                                        {t('Cancel')}
+                                    </Button>
+                                </Row>
+                            </Col>
+                        </Row>
+                        <Row className='mt-3'>
+                            <Card className={`${styles['card']}`}>
+                                <div
+                                    onClick={() => toggleCollapse(0)}
+                                    style={{ cursor: 'pointer', padding: '0' }}
+                                >
+                                    <Card.Header
+                                        className={`
+                                                            ${
+                                                                openCardIndex === 0 ? styles['cardHeader-expanded'] : ''
+                                                            }`}
+                                        id={`${styles['cardHeader']}`}
+                                    >
+                                        <Button
+                                            variant='button'
+                                            className={`p-0 border-0 ${styles['header-button']}`}
+                                            aria-controls='example-collapse-text-1'
+                                            aria-expanded={openCardIndex === 0}
+                                        >
+                                            {t('Moderation Request Information')}
+                                        </Button>
+                                    </Card.Header>
+                                </div>
+                                <Collapse in={openCardIndex === 0}>
+                                    <div id='example-collapse-text-1'>
+                                        <Card.Body className={`${styles['card-body']}`}>
+                                            <div className='row'>
+                                                <div className='col'>
+                                                    <ModerationRequestInfo data={moderationRequestData} />
+                                                </div>
+                                                <div className='col'>
+                                                    <ModerationDecision
+                                                        data={moderationRequestData}
+                                                        moderationRequestPayload={moderationRequestPayload}
+                                                        setModerationRequestPayload={setModerationRequestPayload}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </Card.Body>
+                                    </div>
+                                </Collapse>
+                            </Card>
+                        </Row>
+                        <Row>
+                            <Card className={`${styles['card']}`}>
+                                <div
+                                    onClick={() => toggleCollapse(1)}
+                                    style={{ cursor: 'pointer', padding: '0' }}
+                                >
+                                    <Card.Header
+                                        className={`
+                                                            ${
+                                                                openCardIndex === 1 ? styles['cardHeader-expanded'] : ''
+                                                            }`}
+                                        id={`${styles['cardHeader']}`}
+                                    >
+                                        <Button
+                                            variant='button'
+                                            className={`p-0 border-0 ${styles['header-button']}`}
+                                            aria-controls='example-collapse-text-2'
+                                            aria-expanded={openCardIndex === 1}
+                                        >
+                                            {t('Proposed Changes')}
+                                        </Button>
+                                    </Card.Header>
+                                </div>
+                                <Collapse in={openCardIndex === 1}>
+                                    <div id='example-collapse-text-2'>
+                                        <Card.Body className={`${styles['card-body']}`}>
+                                            <div className='row'>
+                                                <div className='col'>
+                                                    <ProposedChanges moderationRequestData={moderationRequestData} />
+                                                </div>
+                                            </div>
+                                        </Card.Body>
+                                    </div>
+                                </Collapse>
+                            </Card>
+                        </Row>
+                        <Row>
+                            <Card className={`${styles['card']}`}>
+                                <div
+                                    onClick={() => toggleCollapse(2)}
+                                    style={{ cursor: 'pointer', padding: '0' }}
+                                >
+                                    <Card.Header
+                                        className={`
+                                                            ${
+                                                                openCardIndex === 2 ? styles['cardHeader-expanded'] : ''
+                                                            }`}
+                                        id={`${styles['cardHeader']}`}
+                                    >
+                                        <Button
+                                            variant='button'
+                                            className={`p-0 border-0 ${styles['header-button']}`}
+                                            aria-controls='example-collapse-text-3'
+                                            aria-expanded={openCardIndex === 2}
+                                        >
+                                            {(moderationRequestData?.documentType === 'COMPONENT' &&
+                                                t('Current Component')) ||
+                                                (moderationRequestData?.documentType === 'RELEASE' &&
+                                                    t('Current Release')) ||
+                                                (moderationRequestData?.documentType === 'PROJECT' &&
+                                                    t('Current Project')) ||
+                                                (moderationRequestData?.documentType === 'LICENSE' &&
+                                                    t('Current License'))}
+                                        </Button>
+                                    </Card.Header>
+                                </div>
+                                <Collapse in={openCardIndex === 2}>
+                                    <div id='example-collapse-text-3'>
+                                        <Card.Body className={`${styles['card-body']}`}>
+                                            {(moderationRequestData?.documentType === 'COMPONENT' && (
+                                                <CurrentComponentDetail
+                                                    componentId={moderationRequestData.documentId}
+                                                />
+                                            )) ||
+                                                (moderationRequestData?.documentType === 'PROJECT' && (
+                                                    <CurrentProjectDetail
+                                                        projectId={moderationRequestData.documentId}
+                                                    />
+                                                )) ||
+                                                (moderationRequestData?.documentType === 'RELEASE' && (
+                                                    <CurrentReleaseDetail
+                                                        releaseId={moderationRequestData.documentId}
+                                                    />
+                                                ))}
+                                        </Card.Body>
+                                    </div>
+                                </Collapse>
+                            </Card>
+                        </Row>
+                    </Col>
+                </Row>
+            </Tab.Container>
+        </div>
+    )
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access

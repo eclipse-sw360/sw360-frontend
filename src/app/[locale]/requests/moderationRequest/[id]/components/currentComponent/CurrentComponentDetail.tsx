@@ -26,7 +26,7 @@ import {
     LinkedVulnerability,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
@@ -45,6 +45,13 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [component, setComponent] = useState<Component>()
     const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const tabList = [
         {

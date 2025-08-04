@@ -43,6 +43,12 @@ function OpenClearingRequest(): ReactNode | undefined {
     const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
     const [tableData, setTableData] = useState<(object | string)[][]>([])
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const fetchData = async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
@@ -357,28 +363,24 @@ function OpenClearingRequest(): ReactNode | undefined {
         },
     ]
 
-    if (status === 'unauthenticated') {
-        void signOut()
-    } else {
-        return (
-            <div className='row mb-4'>
-                <div className='col d-flex justify-content-center align-items-center'>
-                    {loading == false ? (
-                        <div style={{ paddingLeft: '0px' }}>
-                            <Table
-                                columns={columns}
-                                data={tableData}
-                                sort={false}
-                                selector={true}
-                            />
-                        </div>
-                    ) : (
-                        <Spinner className='spinner' />
-                    )}
-                </div>
+    return (
+        <div className='row mb-4'>
+            <div className='col d-flex justify-content-center align-items-center'>
+                {loading == false ? (
+                    <div style={{ paddingLeft: '0px' }}>
+                        <Table
+                            columns={columns}
+                            data={tableData}
+                            sort={false}
+                            selector={true}
+                        />
+                    </div>
+                ) : (
+                    <Spinner className='spinner' />
+                )}
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 export default OpenClearingRequest

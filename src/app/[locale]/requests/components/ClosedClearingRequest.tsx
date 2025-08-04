@@ -35,6 +35,12 @@ function ClosedClearingRequest(): ReactNode {
     const [isProjectDeleted, setIsProjectDeleted] = useState(false)
     const { status } = useSession()
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const columns = [
         {
             id: 'closedClearingRequest.requestId',
@@ -247,28 +253,24 @@ function ClosedClearingRequest(): ReactNode {
         })
     }, [])
 
-    if (status === 'unauthenticated') {
-        void signOut()
-    } else {
-        return (
-            <div className='row mb-4'>
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    {loading == false ? (
-                        <div style={{ paddingLeft: '0px' }}>
-                            <Table
-                                columns={columns}
-                                data={tableData}
-                                sort={false}
-                                selector={true}
-                            />
-                        </div>
-                    ) : (
-                        <Spinner className='spinner' />
-                    )}
-                </div>
+    return (
+        <div className='row mb-4'>
+            <div className='col-12 d-flex justify-content-center align-items-center'>
+                {loading == false ? (
+                    <div style={{ paddingLeft: '0px' }}>
+                        <Table
+                            columns={columns}
+                            data={tableData}
+                            sort={false}
+                            selector={true}
+                        />
+                    </div>
+                ) : (
+                    <Spinner className='spinner' />
+                )}
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 export default ClosedClearingRequest

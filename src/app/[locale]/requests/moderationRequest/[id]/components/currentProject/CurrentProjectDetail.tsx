@@ -31,6 +31,12 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
 
     useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
+    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -61,135 +67,131 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
         return () => controller.abort()
     }, [projectId, session, status])
 
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <div className='ms-5 mt-2'>
-                <Tab.Container
-                    defaultActiveKey='summary'
-                    mountOnEnter={true}
-                    unmountOnExit={true}
-                >
-                    <Row>
-                        <Col
-                            sm='auto'
-                            className='me-3'
-                        >
-                            <ListGroup>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='summary'
-                                >
-                                    <div className='my-2'>{t('Summary')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='administration'
-                                >
-                                    <div className='my-2'>{t('Administration')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='licenseClearing'
-                                >
-                                    <div className='my-2'>{t('License Clearing')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='ecc'
-                                >
-                                    <div className='my-2'>{t('ECC')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='vulnerabilityTrackingStatus'
-                                >
-                                    <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='attachments'
-                                >
-                                    <div className='my-2'>{t('Attachments')}</div>
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='changeLog'
-                                >
-                                    <div className='my-2'>{t('Change Log')}</div>
-                                </ListGroup.Item>
-                            </ListGroup>
-                        </Col>
-                        <Col className='ps-2 me-3'>
-                            <Row className='mt-3'>
-                                <Tab.Content>
-                                    <Tab.Pane eventKey='summary'>
-                                        {!summaryData ? (
-                                            <div
-                                                className='col-12'
-                                                style={{ textAlign: 'center' }}
-                                            >
-                                                <Spinner className='spinner' />
-                                            </div>
-                                        ) : (
-                                            <Summary summaryData={summaryData} />
-                                        )}
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='administration'>
-                                        {!administrationData ? (
-                                            <div
-                                                className='col-12'
-                                                style={{ textAlign: 'center' }}
-                                            >
-                                                <Spinner className='spinner' />
-                                            </div>
-                                        ) : (
-                                            <Administration data={administrationData} />
-                                        )}
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='licenseClearing'>
-                                        {summaryData && (
-                                            <LicenseClearing
-                                                projectId={projectId}
-                                                projectName={summaryData.name}
-                                                projectVersion={summaryData.version ?? ''}
-                                                isCalledFromModerationRequestCurrentProject={true}
-                                            />
-                                        )}
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='ecc'>
-                                        <EccDetails projectId={projectId} />
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='vulnerabilityTrackingStatus'>
-                                        {summaryData && (
-                                            <VulnerabilityTrackingStatusComponent
-                                                projectData={{
-                                                    id: projectId,
-                                                    name: summaryData.name,
-                                                    version: summaryData.version ?? '',
-                                                    enableSvm: summaryData.enableSvm ?? false,
-                                                    enableVulnerabilitiesDisplay:
-                                                        summaryData.enableVulnerabilitiesDisplay ?? false,
-                                                }}
-                                            />
-                                        )}
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='attachments'>
-                                        <ProjectAttachments projectId={projectId} />
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='changeLog'>
-                                        <ChangeLog
+    return (
+        <div className='ms-5 mt-2'>
+            <Tab.Container
+                defaultActiveKey='summary'
+                mountOnEnter={true}
+                unmountOnExit={true}
+            >
+                <Row>
+                    <Col
+                        sm='auto'
+                        className='me-3'
+                    >
+                        <ListGroup>
+                            <ListGroup.Item
+                                action
+                                eventKey='summary'
+                            >
+                                <div className='my-2'>{t('Summary')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey='administration'
+                            >
+                                <div className='my-2'>{t('Administration')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey='licenseClearing'
+                            >
+                                <div className='my-2'>{t('License Clearing')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey='ecc'
+                            >
+                                <div className='my-2'>{t('ECC')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey='vulnerabilityTrackingStatus'
+                            >
+                                <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey='attachments'
+                            >
+                                <div className='my-2'>{t('Attachments')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey='changeLog'
+                            >
+                                <div className='my-2'>{t('Change Log')}</div>
+                            </ListGroup.Item>
+                        </ListGroup>
+                    </Col>
+                    <Col className='ps-2 me-3'>
+                        <Row className='mt-3'>
+                            <Tab.Content>
+                                <Tab.Pane eventKey='summary'>
+                                    {!summaryData ? (
+                                        <div
+                                            className='col-12'
+                                            style={{ textAlign: 'center' }}
+                                        >
+                                            <Spinner className='spinner' />
+                                        </div>
+                                    ) : (
+                                        <Summary summaryData={summaryData} />
+                                    )}
+                                </Tab.Pane>
+                                <Tab.Pane eventKey='administration'>
+                                    {!administrationData ? (
+                                        <div
+                                            className='col-12'
+                                            style={{ textAlign: 'center' }}
+                                        >
+                                            <Spinner className='spinner' />
+                                        </div>
+                                    ) : (
+                                        <Administration data={administrationData} />
+                                    )}
+                                </Tab.Pane>
+                                <Tab.Pane eventKey='licenseClearing'>
+                                    {summaryData && (
+                                        <LicenseClearing
                                             projectId={projectId}
+                                            projectName={summaryData.name}
+                                            projectVersion={summaryData.version ?? ''}
                                             isCalledFromModerationRequestCurrentProject={true}
                                         />
-                                    </Tab.Pane>
-                                </Tab.Content>
-                            </Row>
-                        </Col>
-                    </Row>
-                </Tab.Container>
-            </div>
-        )
-    }
+                                    )}
+                                </Tab.Pane>
+                                <Tab.Pane eventKey='ecc'>
+                                    <EccDetails projectId={projectId} />
+                                </Tab.Pane>
+                                <Tab.Pane eventKey='vulnerabilityTrackingStatus'>
+                                    {summaryData && (
+                                        <VulnerabilityTrackingStatusComponent
+                                            projectData={{
+                                                id: projectId,
+                                                name: summaryData.name,
+                                                version: summaryData.version ?? '',
+                                                enableSvm: summaryData.enableSvm ?? false,
+                                                enableVulnerabilitiesDisplay:
+                                                    summaryData.enableVulnerabilitiesDisplay ?? false,
+                                            }}
+                                        />
+                                    )}
+                                </Tab.Pane>
+                                <Tab.Pane eventKey='attachments'>
+                                    <ProjectAttachments projectId={projectId} />
+                                </Tab.Pane>
+                                <Tab.Pane eventKey='changeLog'>
+                                    <ChangeLog
+                                        projectId={projectId}
+                                        isCalledFromModerationRequestCurrentProject={true}
+                                    />
+                                </Tab.Pane>
+                            </Tab.Content>
+                        </Row>
+                    </Col>
+                </Row>
+            </Tab.Container>
+        </div>
+    )
 }

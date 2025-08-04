@@ -42,6 +42,12 @@ function OpenModerationRequest(): ReactNode {
         REJECTED: t('REJECTED'),
     }
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const formatDate = (timestamp: number | undefined): string | null => {
         if (timestamp === undefined) {
             return null
@@ -202,44 +208,40 @@ function OpenModerationRequest(): ReactNode {
         },
     ]
 
-    if (status === 'unauthenticated') {
-        void signOut()
-    } else {
-        return (
-            <>
-                <BulkDeclineModerationRequestModal
-                    show={bulkDeclineMRModal}
-                    setShow={setBulkDeclineMRModal}
-                    mrIdNameMap={mrIdNameMap}
-                />
-                <div className='row mb-4'>
-                    <div className='col-12'>
-                        <button
-                            className='btn btn-danger'
-                            disabled={disableBulkDecline}
-                            onClick={() => setBulkDeclineMRModal(true)}
-                        >
-                            {t('Bulk Actions')}
-                        </button>
-                    </div>
-                    <div className='col-12 d-flex justify-content-center align-items-center'>
-                        {loading == false ? (
-                            <div style={{ paddingLeft: '0px' }}>
-                                <Table
-                                    columns={columns}
-                                    data={tableData}
-                                    sort={false}
-                                    selector={true}
-                                />
-                            </div>
-                        ) : (
-                            <Spinner className='spinner' />
-                        )}
-                    </div>
+    return (
+        <>
+            <BulkDeclineModerationRequestModal
+                show={bulkDeclineMRModal}
+                setShow={setBulkDeclineMRModal}
+                mrIdNameMap={mrIdNameMap}
+            />
+            <div className='row mb-4'>
+                <div className='col-12'>
+                    <button
+                        className='btn btn-danger'
+                        disabled={disableBulkDecline}
+                        onClick={() => setBulkDeclineMRModal(true)}
+                    >
+                        {t('Bulk Actions')}
+                    </button>
                 </div>
-            </>
-        )
-    }
+                <div className='col-12 d-flex justify-content-center align-items-center'>
+                    {loading == false ? (
+                        <div style={{ paddingLeft: '0px' }}>
+                            <Table
+                                columns={columns}
+                                data={tableData}
+                                sort={false}
+                                selector={true}
+                            />
+                        </div>
+                    ) : (
+                        <Spinner className='spinner' />
+                    )}
+                </div>
+            </div>
+        </>
+    )
 }
 
 export default OpenModerationRequest
