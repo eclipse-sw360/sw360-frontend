@@ -12,10 +12,10 @@
 import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { redirect, useRouter } from 'next/navigation'
-import { Dispatch, ReactNode, SetStateAction, useState, type JSX } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
@@ -44,6 +44,13 @@ export default function DeletePackageModal({
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [deleting, setDeleting] = useState<boolean | null>(null)
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
 
     const deletePackage = async () => {
         try {

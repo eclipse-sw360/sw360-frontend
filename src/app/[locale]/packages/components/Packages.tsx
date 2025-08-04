@@ -46,6 +46,12 @@ function Packages(): ReactNode {
         packageVersion: '',
     })
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const handleCreatePackage = () => {
         router.push('/packages/add')
     }
@@ -213,54 +219,50 @@ function Packages(): ReactNode {
         },
     ]
 
-    if (status === 'unauthenticated') {
-        return signOut()
-    } else {
-        return (
-            <>
-                <DeletePackageModal
-                    modalMetaData={deletePackageModalMetaData}
-                    setModalMetaData={setDeletePackageModalMetaData}
-                    isEditPage={false}
-                />
-                <div className='container page-content'>
-                    <div className='row'>
-                        <div className='col-2'>
-                            <AdvancedSearch
-                                title='Advanced Search'
-                                fields={advancedSearch}
-                            />
-                        </div>
-                        <div className='col-10'>
-                            <div className='row'>
-                                <div className='col d-flex justify-content-between'>
-                                    <button
-                                        className='btn btn-primary col-auto'
-                                        onClick={handleCreatePackage}
-                                    >
-                                        {t('Add Package')}
-                                    </button>
-                                    <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
-                                </div>
+    return (
+        <>
+            <DeletePackageModal
+                modalMetaData={deletePackageModalMetaData}
+                setModalMetaData={setDeletePackageModalMetaData}
+                isEditPage={false}
+            />
+            <div className='container page-content'>
+                <div className='row'>
+                    <div className='col-2'>
+                        <AdvancedSearch
+                            title='Advanced Search'
+                            fields={advancedSearch}
+                        />
+                    </div>
+                    <div className='col-10'>
+                        <div className='row'>
+                            <div className='col d-flex justify-content-between'>
+                                <button
+                                    className='btn btn-primary col-auto'
+                                    onClick={handleCreatePackage}
+                                >
+                                    {t('Add Package')}
+                                </button>
+                                <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
                             </div>
-                            {status === 'authenticated' ? (
-                                <Table
-                                    columns={columns}
-                                    server={initServerPaginationConfig() as ServerStorageOptions}
-                                    selector={true}
-                                    sort={false}
-                                />
-                            ) : (
-                                <div className='col-12 d-flex justify-content-center align-items-center'>
-                                    <Spinner className='spinner' />
-                                </div>
-                            )}
                         </div>
+                        {status === 'authenticated' ? (
+                            <Table
+                                columns={columns}
+                                server={initServerPaginationConfig() as ServerStorageOptions}
+                                selector={true}
+                                sort={false}
+                            />
+                        ) : (
+                            <div className='col-12 d-flex justify-content-center align-items-center'>
+                                <Spinner className='spinner' />
+                            </div>
+                        )}
                     </div>
                 </div>
-            </>
-        )
-    }
+            </div>
+        </>
+    )
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
