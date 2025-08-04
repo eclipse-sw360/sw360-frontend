@@ -33,6 +33,13 @@ function Requests(): ReactNode | undefined {
     const [closedModerationRequestCount, setClosedModerationRequestCount] = useState(0)
     const [openClearingRequestCount, setOpenClearingRequestCount] = useState(0)
     const [closedClearingRequestCount, setClosedClearingRequestCount] = useState(0)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const advancedSearch = [
         {
             fieldName: t('Date'),
@@ -194,102 +201,98 @@ function Requests(): ReactNode | undefined {
         }
     }, [])
 
-    if (status === 'unauthenticated') {
-        void signOut()
-    } else {
-        return (
-            <>
-                <div className='container page-content'>
-                    <Tab.Container
-                        defaultActiveKey='openModerationrequests'
-                        mountOnEnter={true}
-                        unmountOnExit={true}
-                    >
-                        <Row>
-                            <Col
-                                sm='auto'
-                                className='me-3'
-                            >
-                                <ListGroup>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='openModerationrequests'
-                                    >
-                                        <div className='my-2'>{t('Open Moderation Requests')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='closedModerationrequests'
-                                    >
-                                        <div className='my-2'>{t('Closed Moderation Requests')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='openClearingRequests'
-                                    >
-                                        <div className='my-2'>{t('Open Clearing Requests')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='closedClearingRequests'
-                                    >
-                                        <div className='my-2'>{t('Closed Clearing Requests')}</div>
-                                    </ListGroup.Item>
-                                </ListGroup>
-                                <div className='mt-4 mb-4'>
-                                    <AdvancedSearch
-                                        title='Advanced Search'
-                                        fields={advancedSearch}
-                                    />
-                                </div>
-                            </Col>
-                            <Col>
-                                <Row
-                                    className='mt-3'
-                                    style={{ marginRight: '0px' }}
+    return (
+        <>
+            <div className='container page-content'>
+                <Tab.Container
+                    defaultActiveKey='openModerationrequests'
+                    mountOnEnter={true}
+                    unmountOnExit={true}
+                >
+                    <Row>
+                        <Col
+                            sm='auto'
+                            className='me-3'
+                        >
+                            <ListGroup>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='openModerationrequests'
                                 >
-                                    <Tab.Content>
-                                        <Tab.Pane eventKey='openModerationrequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('MODERATIONS') +
-                                                    `(${openModerationRequestCount}/
-                                                ${closedModerationRequestCount})`}
-                                            </Row>
-                                            <OpenModerationRequest />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='closedModerationrequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('MODERATIONS') +
-                                                    `(${openModerationRequestCount}/
-                                                ${closedModerationRequestCount})`}
-                                            </Row>
-                                            <ClosedModerationRequest />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='openClearingRequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('CLEARING') +
-                                                    `(${openClearingRequestCount}/
-                                                ${closedClearingRequestCount})`}
-                                            </Row>
-                                            <OpenClearingRequest />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='closedClearingRequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('CLEARING') +
-                                                    `(${openClearingRequestCount}/
-                                                ${closedClearingRequestCount})`}
-                                            </Row>
-                                            <ClosedClearingRequest />
-                                        </Tab.Pane>
-                                    </Tab.Content>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Tab.Container>
-                </div>
-            </>
-        )
-    }
+                                    <div className='my-2'>{t('Open Moderation Requests')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='closedModerationrequests'
+                                >
+                                    <div className='my-2'>{t('Closed Moderation Requests')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='openClearingRequests'
+                                >
+                                    <div className='my-2'>{t('Open Clearing Requests')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='closedClearingRequests'
+                                >
+                                    <div className='my-2'>{t('Closed Clearing Requests')}</div>
+                                </ListGroup.Item>
+                            </ListGroup>
+                            <div className='mt-4 mb-4'>
+                                <AdvancedSearch
+                                    title='Advanced Search'
+                                    fields={advancedSearch}
+                                />
+                            </div>
+                        </Col>
+                        <Col>
+                            <Row
+                                className='mt-3'
+                                style={{ marginRight: '0px' }}
+                            >
+                                <Tab.Content>
+                                    <Tab.Pane eventKey='openModerationrequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('MODERATIONS') +
+                                                `(${openModerationRequestCount}/
+                                            ${closedModerationRequestCount})`}
+                                        </Row>
+                                        <OpenModerationRequest />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='closedModerationrequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('MODERATIONS') +
+                                                `(${openModerationRequestCount}/
+                                            ${closedModerationRequestCount})`}
+                                        </Row>
+                                        <ClosedModerationRequest />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='openClearingRequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('CLEARING') +
+                                                `(${openClearingRequestCount}/
+                                            ${closedClearingRequestCount})`}
+                                        </Row>
+                                        <OpenClearingRequest />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='closedClearingRequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('CLEARING') +
+                                                `(${openClearingRequestCount}/
+                                            ${closedClearingRequestCount})`}
+                                        </Row>
+                                        <ClosedClearingRequest />
+                                    </Tab.Pane>
+                                </Tab.Content>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Tab.Container>
+            </div>
+        </>
+    )
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access

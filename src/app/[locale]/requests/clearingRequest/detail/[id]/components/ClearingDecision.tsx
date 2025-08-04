@@ -13,7 +13,7 @@ import { ClearingRequestDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 
 interface ClearingRequestDataMap {
     [key: string]: string
@@ -26,6 +26,13 @@ interface Props {
 export default function ClearingDecision({ data }: Readonly<Props>): ReactNode | undefined {
     const t = useTranslations('default')
     const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
+
     const clearingRequestStatus: ClearingRequestDataMap = {
         NEW: t('New'),
         IN_PROGRESS: t('In Progress'),
@@ -46,51 +53,45 @@ export default function ClearingDecision({ data }: Readonly<Props>): ReactNode |
         CRITICAL: t('Critical'),
     }
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <table className='table summary-table'>
-                <thead>
-                    <tr>
-                        <th colSpan={2}>{t('Clearing Decision')}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{t('Request Status')}:</td>
-                        <td>
-                            {data?.clearingState !== undefined ? clearingRequestStatus[data.clearingState] : undefined}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{t('Priority')}:</td>
-                        <td>{data?.priority !== undefined ? clearingRequestPriority[data.priority] : undefined}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Clearing Team')}:</td>
-                        <td>
-                            {data?.clearingTeam !== undefined ? (
-                                <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
-                            ) : (
-                                ''
-                            )}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{t('Agreed Clearing Date')}:</td>
-                        <td>{data?.agreedClearingDate ?? ''}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Request Closed on')}:</td>
-                        <td>{data?._embedded?.requestClosedOn}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Last Updated on')}:</td>
-                        <td>{''}</td>
-                    </tr>
-                </tbody>
-            </table>
-        )
-    }
+    return (
+        <table className='table summary-table'>
+            <thead>
+                <tr>
+                    <th colSpan={2}>{t('Clearing Decision')}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{t('Request Status')}:</td>
+                    <td>{data?.clearingState !== undefined ? clearingRequestStatus[data.clearingState] : undefined}</td>
+                </tr>
+                <tr>
+                    <td>{t('Priority')}:</td>
+                    <td>{data?.priority !== undefined ? clearingRequestPriority[data.priority] : undefined}</td>
+                </tr>
+                <tr>
+                    <td>{t('Clearing Team')}:</td>
+                    <td>
+                        {data?.clearingTeam !== undefined ? (
+                            <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
+                        ) : (
+                            ''
+                        )}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{t('Agreed Clearing Date')}:</td>
+                    <td>{data?.agreedClearingDate ?? ''}</td>
+                </tr>
+                <tr>
+                    <td>{t('Request Closed on')}:</td>
+                    <td>{data?._embedded?.requestClosedOn}</td>
+                </tr>
+                <tr>
+                    <td>{t('Last Updated on')}:</td>
+                    <td>{''}</td>
+                </tr>
+            </tbody>
+        </table>
+    )
 }
