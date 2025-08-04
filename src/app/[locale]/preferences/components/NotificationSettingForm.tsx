@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -13,7 +14,7 @@
 import { HttpStatus, User } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -28,6 +29,13 @@ interface NotificationSetting {
 const NotificationSettingForm = (): ReactNode => {
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [status])
     const [notificationSetting, setNotificationSetting] = useState<NotificationSetting>({
         wantsMailNotification: false,
         notificationPreferences: {},
