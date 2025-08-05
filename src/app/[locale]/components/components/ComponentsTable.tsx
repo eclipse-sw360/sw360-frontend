@@ -11,141 +11,326 @@
 
 'use client'
 
-import { Session } from 'next-auth'
-import { useSession } from 'next-auth/react'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import React, { useState } from 'react'
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { FaPencilAlt } from 'react-icons/fa'
 
-import { Component, Embedded, UserGroupType } from '@/object-types'
-import { CommonUtils } from '@/utils'
-import { SW360_API_URL } from '@/utils/env'
-import { Table, _ } from 'next-sw360'
-import styles from '../components.module.css'
+import {
+    Component,
+    Embedded,
+    ErrorDetails,
+    HttpStatus,
+    PageableQueryParam,
+    PaginationMeta,
+    UserGroupType,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { MdDeleteOutline } from 'react-icons/md'
 import DeleteComponentDialog from './DeleteComponentDialog'
 
 interface Props {
     setNumberOfComponent: React.Dispatch<React.SetStateAction<number>>
 }
 
-function ComponentsTable({ setNumberOfComponent }: Props) {
+type EmbeddedComponents = Embedded<Component, 'sw360:components'>
+
+export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const t = useTranslations('default')
     const params = useSearchParams()
-    const searchParams = Object.fromEntries(params)
     const [deletingComponent, setDeletingComponent] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const { data: session, status } = useSession()
+    const session = useSession()
+    const router = useRouter()
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)
         setDeleteDialogOpen(true)
     }
 
-    const columns = [
-        {
-            id: 'vendor',
-            name: t('Vendor'),
-            sort: true,
-        },
-        {
-            id: 'name',
-            name: t('Component Name'),
-            formatter: ([id, name]: Array<string>) =>
-                _(
-                    <Link
-                        href={'/components/detail/' + id}
-                        className='link'
-                    >
-                        {name}
-                    </Link>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'mainLicenses',
-            name: t('Main Licenses'),
-            formatter: (licenseIds: Array<string>) =>
-                licenseIds.length > 0 &&
-                _(
-                    Object.entries(licenseIds)
-                        .map(
-                            ([, item]: Array<string>): React.ReactNode => (
-                                <Link
-                                    key={item}
-                                    className='link'
-                                    href={'/licenses/detail/?id=' + item}
-                                >
-                                    {' '}
-                                    {item}{' '}
-                                </Link>
-                            ),
-                        )
-                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr]),
-                ),
-            sort: true,
-        },
-        {
-            id: 'type',
-            name: t('Component Type'),
-            sort: true,
-        },
-        {
-            id: 'action',
-            name: t('Actions'),
-            hidden: () => {
-                return session?.user?.userGroup === UserGroupType.SECURITY_USER
-            },
-            formatter: (id: string) =>
-                _(
-                    <span>
-                        <Link
-                            href={'/components/edit/' + id}
-                            style={{ color: 'gray', fontSize: '14px' }}
-                        >
-                            <FaPencilAlt />
-                        </Link>{' '}
-                        &nbsp;
-                        <FaTrashAlt
-                            className={styles['delete-btn']}
-                            onClick={() => handleClickDelete(id)}
-                        />
-                    </span>,
-                ),
-        },
-    ]
-
-    const initServerPaginationConfig = (session: Session) => {
-        return {
-            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/components`, {
-                ...searchParams,
-                allDetails: 'true',
-            }),
-            then: (data: Embedded<Component, 'sw360:components'>) => {
-                setNumberOfComponent(data.page ? data.page.totalElements : 0)
-                return data._embedded['sw360:components'].map((item: Component) => [
-                    !CommonUtils.isNullOrUndefined(item.defaultVendor) ? item.defaultVendor.shortName : '',
-                    [item.id, item.name],
-                    !CommonUtils.isNullOrUndefined(item.mainLicenseIds) ? item.mainLicenseIds : [],
-                    item.componentType,
-                    item.id,
-                ])
-            },
-            total: (data: Embedded<Component, 'sw360:components'>) => (data.page ? data.page.totalElements : 0),
-            headers: { Authorization: `${session.user.access_token}` },
-        }
+    const handleEditComponent = (projectId: string) => {
+        router.push(`/projects/edit/${projectId}`)
+        MessageService.success(t('You are editing the original document'))
     }
+
+    const columns = useMemo<ColumnDef<Component>[]>(
+        () => [
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                accessorKey: 'vendor',
+                cell: (info) => info.getValue(),
+                enableSorting: true,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'name',
+                accessorKey: 'name',
+                header: t('Component Name'),
+                enableSorting: true,
+                cell: ({ row }) => {
+                    const { name, id } = row.original
+                    return (
+                        <Link
+                            href={`/components/detail/${id}`}
+                            className='text-link'
+                        >
+                            {name}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'mainLicenses',
+                header: t('Main licenses'),
+                cell: ({ row }) => {
+                    return (
+                        <>
+                            {row.original.mainLicenseIds?.map(
+                                (lic, i): ReactNode => (
+                                    <>
+                                        <Link
+                                            key={lic}
+                                            className='link'
+                                            href={`/licenses/detail/?id=${lic}`}
+                                        >
+                                            {lic}
+                                        </Link>
+                                        {i !== (row.original.mainLicenseIds?.length ?? 0) - 1 && ', '}
+                                    </>
+                                ),
+                            )}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Component Type'),
+                accessorKey: 'componentType',
+                cell: ({ row }) => <>{row.original.componentType}</>,
+                enableSorting: true,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const { id } = row.original
+                    return (
+                        <>
+                            {id && (
+                                <span className='d-flex justify-content-evenly'>
+                                    <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                        <span
+                                            className='d-inline-block'
+                                            onClick={() => handleEditComponent(id)}
+                                        >
+                                            <FaPencilAlt
+                                                className='btn-icon'
+                                                size={18}
+                                            />
+                                        </span>
+                                    </OverlayTrigger>
+
+                                    <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                        <span className='d-inline-block'>
+                                            <MdDeleteOutline
+                                                className='btn-icon'
+                                                size={25}
+                                                onClick={() => handleClickDelete(id)}
+                                            />
+                                        </span>
+                                    </OverlayTrigger>
+                                </span>
+                            )}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [t],
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [componentData, setComponentData] = useState<Component[]>(() => [])
+    const memoizedData = useMemo(() => componentData, [componentData])
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = componentData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const searchParams = Object.fromEntries(params.entries())
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `components`,
+                    Object.fromEntries(
+                        Object.entries({ ...searchParams, ...pageableQueryParam }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as EmbeddedComponents
+                setPaginationMeta(data.page)
+                setNumberOfComponent(data.page?.totalElements ?? 0)
+                setComponentData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:components'])
+                        ? []
+                        : data['_embedded']['sw360:components'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [pageableQueryParam, params.toString(), session])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            columnVisibility: {
+                actions: !(session?.data?.user?.userGroup === UserGroupType.SECURITY_USER),
+            },
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
+        },
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
 
     return (
         <>
-            <div className='col'>
-                {status === 'authenticated' && (
-                    <Table
-                        columns={columns}
-                        selector={true}
-                        server={initServerPaginationConfig(session)}
-                    />
+            <div className='mb-3'>
+                {pageableQueryParam && table && paginationMeta ? (
+                    <>
+                        <PageSizeSelector
+                            pageableQueryParam={pageableQueryParam}
+                            setPageableQueryParam={setPageableQueryParam}
+                        />
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                        />
+                        <TableFooter
+                            pageableQueryParam={pageableQueryParam}
+                            setPageableQueryParam={setPageableQueryParam}
+                            paginationMeta={paginationMeta}
+                        />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
                 )}
             </div>
             <DeleteComponentDialog
@@ -156,5 +341,3 @@ function ComponentsTable({ setNumberOfComponent }: Props) {
         </>
     )
 }
-
-export default React.memo(ComponentsTable)
