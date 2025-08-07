@@ -163,7 +163,7 @@ function EditProject({
         projectOwner: '',
         leadArchitect: '',
         projectManager: '',
-        packageIds: [],
+        packageIds: {},
         comment: '',
     })
 
@@ -347,8 +347,18 @@ function EditProject({
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
-                    packageIds: (project._embedded?.['sw360:packages'] ?? []).map(
-                        (singlePackage) => singlePackage.id ?? '',
+                    packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
+                        (acc, singlePackage) => {
+                            if (singlePackage.id) {
+                                // Get comment from project's packageIds if it exists, otherwise empty string
+                                const existingComment = project.packageIds?.[singlePackage.id]?.comment || ''
+                                acc[singlePackage.id] = {
+                                    comment: existingComment,
+                                }
+                            }
+                            return acc
+                        },
+                        {} as { [key: string]: { comment?: string } },
                     ),
                 }
                 setProjectPayload(projectPayloadData)

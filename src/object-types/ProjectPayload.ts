@@ -52,7 +52,11 @@ interface ProjectPayload {
     projectOwner?: string
     securityResponsibles?: string[]
     considerReleasesFromExternalList?: boolean
-    packageIds?: string[]
+    packageIds?: {
+        [key: string]: {
+            comment?: string
+        }
+    }
     attachments?: Array<Attachment> | null
     comment?: string
     linkedProjects?: {

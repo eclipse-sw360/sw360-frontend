@@ -938,6 +938,7 @@
     "PROJECT_TYPE_INFO": "Cliente: \n Interno: \n Produto: \n Serviço: \n Interno Fonte:",
     "PTC Integrity": "Integridade PTC",
     "Package": "Pacote",
+    "Package Link Date": "Data do link do pacote",
     "Package Management Configurations": "Configurações de gerenciamento de pacotes",
     "Package Management Write Access User Group": "Gerenciamento de pacotes Grupo de usuários de acesso a acesso",
     "Package Manager": "Gerenciador de pacotes",
