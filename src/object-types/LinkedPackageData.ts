@@ -11,6 +11,7 @@ interface LinkedPackageData {
     version: string
     licenseIds: Array<string>
     packageManager: string
+    comment?: string
 }
 
 export default LinkedPackageData

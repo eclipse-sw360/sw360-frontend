@@ -938,6 +938,7 @@
     "PROJECT_TYPE_INFO": "Client:\nInterne:\nProduit:\nService:\nSource intérieure : ",
     "PTC Integrity": "PTC Intégrité",
     "Package": "Emballer",
+    "Package Link Date": "Date du lien du package",
     "Package Management Configurations": "Configurations de gestion des packages",
     "Package Management Write Access User Group": "Gestion des packages Groupe d'utilisateurs d'accès en écriture",
     "Package Manager": "Directeur chargé d'emballage",
