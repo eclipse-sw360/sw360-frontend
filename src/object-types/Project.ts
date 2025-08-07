@@ -73,6 +73,11 @@ export interface Project {
         }
     }
     linkedReleases?: ProjectLinkedRelease[]
+    packageIds?: {
+        [key: string]: {
+            comment?: string
+        }
+    }
     _links: Links
     _embedded?: {
         leadArchitect?: User
