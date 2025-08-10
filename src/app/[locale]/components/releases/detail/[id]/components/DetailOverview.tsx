@@ -87,21 +87,24 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         }
     }, [status])
 
-    const fetchData = useCallback(async (url: string) => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            const data = (await response.json()) as ReleaseDetail &
-                EmbeddedReleaseLinks &
-                EmbeddedVulnerabilities &
-                EmbeddedChangelogs
-            return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            return undefined
-        }
-    }, [])
+    const fetchData = useCallback(
+        async (url: string) => {
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
+                const data = (await response.json()) as ReleaseDetail &
+                    EmbeddedReleaseLinks &
+                    EmbeddedVulnerabilities &
+                    EmbeddedChangelogs
+                return data
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                return undefined
+            }
+        },
+        [session],
+    )
 
     const getSubcribersEmail = (release: ReleaseDetail) => {
         return release._embedded['sw360:subscribers']
@@ -115,7 +118,12 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     useEffect(() => {
+        if (status === 'loading') return
+        const timeLimit = 700
+        const timeout = setTimeout(() => {}, timeLimit)
+
         void extractUserEmail()
+
         fetchData(`releases/${releaseId}`)
             .then((release: ReleaseDetail | undefined) => {
                 if (CommonUtils.isNullOrUndefined(release)) {
@@ -180,7 +188,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 }
             })
             .catch((err) => console.error(err))
-    }, [fetchData, releaseId])
+            .finally(() => {
+                clearTimeout(timeout)
+            })
+    }, [fetchData, releaseId, session])
 
     const downloadBundle = async () => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
