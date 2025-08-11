@@ -10,7 +10,7 @@
 'use client'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ClearingRequestStates, ConfigKeys, HttpStatus, UserGroupType } from '@/object-types'
+import { ConfigKeys, HttpStatus, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -31,14 +31,12 @@ function LicenseClearing({
     projectId,
     projectName,
     projectVersion,
-    clearingState,
     clearingRequestId,
     isCalledFromModerationRequestCurrentProject,
 }: {
     projectId: string
     projectName: string
     projectVersion: string
-    clearingState?: string
     clearingRequestId?: string
     isCalledFromModerationRequestCurrentProject?: boolean
 }): JSX.Element {
@@ -210,16 +208,16 @@ function LicenseClearing({
                                     variant='secondary'
                                     className='me-2 col-auto'
                                     onClick={
-                                        clearingState === ClearingRequestStates.OPEN
-                                            ? () => setShowCreateClearingRequestModal(true)
-                                            : () => setShowViewClearingRequestModal(true)
+                                        clearingRequestId && clearingRequestId !== ''
+                                            ? () => setShowViewClearingRequestModal(true)
+                                            : () => setShowCreateClearingRequestModal(true)
                                     }
                                 >
                                     {
                                         <>
-                                            {clearingState === ClearingRequestStates.OPEN
-                                                ? t('Create Clearing Request')
-                                                : t('View Clearing Request')}
+                                            {clearingRequestId && clearingRequestId !== ''
+                                                ? t('View Clearing Request')
+                                                : t('Create Clearing Request')}
                                         </>
                                     }
                                 </Button>
