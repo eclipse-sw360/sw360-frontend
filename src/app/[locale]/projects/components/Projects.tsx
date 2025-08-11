@@ -248,6 +248,7 @@ function Project(): JSX.Element {
                 enableSorting: false,
                 cell: ({ row }) => {
                     const id = row.original['_links']['self']['href'].split('/').at(-1)
+                    const projectClearingRequestId = row.original.clearingRequestId
                     return (
                         <>
                             {id && (
@@ -260,12 +261,12 @@ function Project(): JSX.Element {
                                             <FaPencilAlt className='btn-icon' />
                                         </span>
                                     </OverlayTrigger>
-                                    {clearingRequestId !== '' ? (
+                                    {projectClearingRequestId && projectClearingRequestId !== '' ? (
                                         <OverlayTrigger overlay={<Tooltip>{t('View Clearing Request')}</Tooltip>}>
                                             <span
                                                 className='d-inline-block'
                                                 onClick={() => {
-                                                    setClearingRequestId(clearingRequestId)
+                                                    setClearingRequestId(projectClearingRequestId)
                                                     setShowViewCRModal(true)
                                                 }}
                                             >
