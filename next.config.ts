@@ -7,11 +7,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const createNextIntlPlugin = require('next-intl/plugin')
+import { NextConfig } from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
 const withNextIntl = createNextIntlPlugin()
 
-const nextConfig = {
+const config: NextConfig = {
+    productionBrowserSourceMaps: true,
     reactStrictMode: true,
     output: 'standalone',
     typescript: {
@@ -19,4 +20,4 @@ const nextConfig = {
     },
 }
 
-module.exports = withNextIntl(nextConfig)
+export default withNextIntl(config)
