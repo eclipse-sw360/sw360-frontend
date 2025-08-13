@@ -118,7 +118,10 @@ function Vulnerabilities(): ReactNode {
                     const { cvss, cvssTime } = row.original
                     return (
                         <>
-                            {cvss && cvssTime && <span style={{ color: 'red' }}>{`${cvss} (as of: ${cvssTime})`}</span>}
+                            <span style={{ color: 'red' }}>
+                                {cvss && <>{cvss}</>}
+                                {cvssTime && <>{` (as of: ${cvssTime.substring(0, 10)})`}</>}
+                            </span>
                         </>
                     )
                 },
@@ -132,7 +135,7 @@ function Vulnerabilities(): ReactNode {
                 accessorKey: 'publishDate',
                 cell: ({ row }) => {
                     const { publishDate } = row.original
-                    return <>{publishDate && <>{publishDate.substring(0, publishDate.lastIndexOf('T'))}</>}</>
+                    return <>{publishDate && <>{publishDate.substring(0, 10)}</>}</>
                 },
                 meta: {
                     width: '10%',
@@ -143,12 +146,11 @@ function Vulnerabilities(): ReactNode {
                 header: t('Last Update'),
                 accessorKey: 'lastUpdateDate',
                 cell: ({ row }) => {
-                    const { lastExternalUpdate } = row.original
+                    const { lastExternalUpdate, lastUpdateDate } = row.original
                     return (
                         <>
-                            {lastExternalUpdate && (
-                                <>{lastExternalUpdate.substring(0, lastExternalUpdate.lastIndexOf('T'))}</>
-                            )}
+                            {(lastExternalUpdate && <>{lastExternalUpdate.substring(0, 10)}</>) ||
+                                (lastUpdateDate && <>{lastUpdateDate.substring(0, 10)}</>)}
                         </>
                     )
                 },

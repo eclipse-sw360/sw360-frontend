@@ -13,7 +13,7 @@ import { ReactNode } from 'react'
 import VulnerabilityDetailsTab from './components/VulnerabilityDetailsTab'
 
 export const metadata: Metadata = {
-    title: 'Vulnerabilites',
+    title: 'Vulnerabilities',
 }
 
 interface Context {
