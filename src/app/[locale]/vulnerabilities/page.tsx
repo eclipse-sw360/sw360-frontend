@@ -13,7 +13,7 @@ import { ReactNode } from 'react'
 import Vulnerabilities from './components/Vulnerabilities'
 
 export const metadata: Metadata = {
-    title: 'Vulnerabilites',
+    title: 'Vulnerabilities',
 }
 
 function Vulnerability(): ReactNode {

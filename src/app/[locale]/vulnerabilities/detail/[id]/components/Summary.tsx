@@ -9,11 +9,13 @@
 
 'use client'
 
+import { DisplayMap } from '@/components/DisplayMap/DisplayMap'
 import { Vulnerability } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ReactNode, useEffect, useState } from 'react'
+import UsingReleasesTable from './UsingReleasesTable'
 
 export default function Summary({ summaryData }: { summaryData: Vulnerability }): ReactNode {
     const t = useTranslations('default')
@@ -74,17 +76,7 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     </tr>
                     <tr>
                         <td>{t('Impact')}:</td>
-                        <td>
-                            <ul className='px-3'>
-                                {summaryData.impact &&
-                                    Object.entries(summaryData.impact).map(([key, val]) => (
-                                        <li key={key}>
-                                            <b>{t(key as never)}: </b>
-                                            {val}
-                                        </li>
-                                    ))}
-                            </ul>
-                        </td>
+                        <td>{summaryData.impact && <DisplayMap mapElement={Object.entries(summaryData.impact)} />}</td>
                     </tr>
                     <tr>
                         <td>{t('Legal Notice')}:</td>
@@ -152,17 +144,7 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     </tr>
                     <tr>
                         <td>{t('Access')}:</td>
-                        <td>
-                            <ul className='px-3'>
-                                {summaryData.access &&
-                                    Object.entries(summaryData.access).map(([key, val]) => (
-                                        <li key={key}>
-                                            <b>{t(key as never)}: </b>
-                                            {val}
-                                        </li>
-                                    ))}
-                            </ul>
-                        </td>
+                        <td>{summaryData.access && <DisplayMap mapElement={Object.entries(summaryData.access)} />}</td>
                     </tr>
                     <tr>
                         <td>{t('Common weakness enumeration')}:</td>
@@ -181,18 +163,14 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     <tr>
                         <td>{t('Vulnerable configurations')}:</td>
                         <td>
-                            <ul className='px-3'>
-                                {summaryData.vulnerableConfiguration &&
-                                    Object.entries(summaryData.vulnerableConfiguration).map(([key, value]) => (
-                                        <li key={key}>
-                                            <span className='fw-bold'>{key}</span> {value}
-                                        </li>
-                                    ))}
-                            </ul>
+                            {summaryData.vulnerableConfiguration && (
+                                <DisplayMap mapElement={Object.entries(summaryData.vulnerableConfiguration)} />
+                            )}
                         </td>
                     </tr>
                 </tbody>
             </table>
+            <UsingReleasesTable summaryData={summaryData} />
         </>
     )
 }

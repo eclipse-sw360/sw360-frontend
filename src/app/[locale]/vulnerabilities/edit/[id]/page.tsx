@@ -13,7 +13,7 @@ import { ReactNode } from 'react'
 import EditVulnerability from './components/EditVulnerability'
 
 export const metadata: Metadata = {
-    title: 'Vulnerabilites',
+    title: 'Vulnerabilities',
 }
 
 interface Context {
