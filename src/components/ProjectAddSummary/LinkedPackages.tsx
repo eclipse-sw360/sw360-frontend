@@ -12,6 +12,7 @@
 import { _, Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
 import { HttpStatus, LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
@@ -62,8 +63,9 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
                     }
                 })
             }
-        } catch (e) {
-            console.error(e)
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
 
@@ -207,7 +209,10 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
                     // Extract data from the newly created map with comments
                     setTableData(extractDataFromMap(updatedMap))
                 })
-                .catch((err) => console.error(err))
+                .catch((error) => {
+                    const message = error instanceof Error ? error.message : String(error)
+                    MessageService.error(message)
+                })
         } else {
             setTableData([])
         }

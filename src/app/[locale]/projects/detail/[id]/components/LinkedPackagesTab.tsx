@@ -10,7 +10,8 @@
 'use client'
 
 import { _, Table } from '@/components/sw360'
-import { HttpStatus, LinkedPackage, ReleaseClearingStateMapping } from '@/object-types'
+import { HttpStatus, LinkedPackage, Project, ReleaseClearingStateMapping } from '@/object-types'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -22,6 +23,16 @@ import { FaPencilAlt } from 'react-icons/fa'
 
 interface Props {
     projectId: string
+}
+
+// Extended interface for project data with packageIds including createdOn
+interface ProjectWithPackageDetails extends Omit<Project, 'packageIds'> {
+    packageIds?: {
+        [key: string]: {
+            comment?: string
+            createdOn?: string
+        }
+    }
 }
 
 type RowData = (string | string[] | undefined)[]
@@ -36,7 +47,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             signOut()
         }
     }, [status])
-    const [projectData, setProjectData] = useState<any>(undefined)
+    const [projectData, setProjectData] = useState<ProjectWithPackageDetails | undefined>(undefined)
 
     const columns = [
         {
@@ -68,9 +79,13 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             formatter: ([releaseId, releaseName, releaseVersion]: Array<string>) =>
                 _(
                     <>
-                        <Link href={`/components/releases/detail/${releaseId}`}>
-                            {`${releaseName} (${releaseVersion})`}
-                        </Link>
+                        {releaseId && releaseName ? (
+                            <Link href={`/components/releases/detail/${releaseId}`}>
+                                {`${releaseName} (${releaseVersion || ''})`}
+                            </Link>
+                        ) : (
+                            <>{t('No Linked Release')}</>
+                        )}
                     </>,
                 ),
         },
@@ -216,23 +231,14 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                     const comment = currentProjectData?.packageIds?.[item.id]?.comment || ''
                     const packageLinkDate = currentProjectData?.packageIds?.[item.id]?.createdOn || ''
 
-                    // Build vendor array with only defined values
-                    const vendorInfo = []
-                    if (item.vendorId) vendorInfo.push(item.vendorId)
-                    if (item.vendorName) vendorInfo.push(item.vendorName)
-
-                    // Build package info array with only defined values
-                    const packageInfo = []
-                    if (item.id) packageInfo.push(item.id)
-                    if (item.name) packageInfo.push(item.name)
-                    if (item.version) packageInfo.push(item.version)
-
-                    // Build release info array with only defined values
-                    const releaseInfo = []
-                    if (item.releaseId) releaseInfo.push(item.releaseId)
-                    if (item._embedded?.['sw360:release']?.name) releaseInfo.push(item._embedded['sw360:release'].name)
-                    if (item._embedded?.['sw360:release']?.version)
-                        releaseInfo.push(item._embedded['sw360:release'].version)
+                    // Build arrays with only defined values using filter(Boolean)
+                    const vendorInfo = [item.vendorId, item.vendorName].filter(Boolean) as string[]
+                    const packageInfo = [item.id, item.name, item.version].filter(Boolean) as string[]
+                    const releaseInfo = [
+                        item.releaseId,
+                        item._embedded?.['sw360:release']?.name,
+                        item._embedded?.['sw360:release']?.version,
+                    ].filter(Boolean) as string[]
 
                     // Build license array with only defined values
                     const licenseInfo = item.licenseIds ? item.licenseIds.filter((id) => id) : []
@@ -253,7 +259,10 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             }
         }
 
-        fetchProjectDataIfNeeded().catch((err) => console.error(err))
+        fetchProjectDataIfNeeded().catch((error) => {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        })
     }, [projectId, fetchData])
 
     return (

@@ -347,15 +347,15 @@ function EditProject({
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
                     packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
-                        (acc, singlePackage) => {
-                            if (singlePackage.id) {
+                        (packageCommentsMap, linkedPackage) => {
+                            if (linkedPackage.id) {
                                 // Get comment from project's packageIds if it exists, otherwise empty string
-                                const existingComment = project.packageIds?.[singlePackage.id]?.comment || ''
-                                acc[singlePackage.id] = {
+                                const existingComment = project.packageIds?.[linkedPackage.id]?.comment || ''
+                                packageCommentsMap[linkedPackage.id] = {
                                     comment: existingComment,
                                 }
                             }
-                            return acc
+                            return packageCommentsMap
                         },
                         {} as { [key: string]: { comment?: string } },
                     ),
