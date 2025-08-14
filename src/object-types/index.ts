@@ -76,6 +76,7 @@ import SearchDuplicatesResponse from './SearchDuplicateResponse'
 import SearchResult from './SearchResult'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
+import UiConfiguration from './UiConfiguration'
 import Annotations from './spdx/Annotations'
 import CheckSum from './spdx/CheckSum'
 import Creator from './spdx/Creator'
@@ -202,6 +203,7 @@ export type {
     SummaryDataType,
     ToastData,
     TypedEntity,
+    UiConfiguration,
     UpdateClearingRequestPayload,
     User,
     UserCredentialInfo,
@@ -221,6 +223,7 @@ export { NavList, Preferences }
 import AttachmentTypes from './constants/AttachmentTypes'
 import CommonTabIds from './constants/CommonTabsIds'
 import ComponentTabIds from './constants/ComponentTabIds'
+import ConfigurationContainers from './constants/ConfigurationContainers'
 import HttpStatus from './constants/HttpStatus'
 import LicenseTabIds from './constants/LicenseTabIds'
 import ReleaseTabIds from './constants/ReleaseTabIds'
@@ -233,17 +236,20 @@ import ObligationType from './enums/ObligationType'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
+import { ArrayTypeUIConfigKeys, UIConfigKeys } from './enums/UIConfigKeys'
 import RequestType from './enums/RequestType'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 
 export {
     ActionType,
+    ArrayTypeUIConfigKeys,
     AttachmentTypes,
     ClearingRequestStates,
     CommonTabIds,
     ComponentTabIds,
     ConfigKeys,
+    ConfigurationContainers,
     DocumentTypes,
     HttpStatus,
     LicenseTabIds,
@@ -253,6 +259,7 @@ export {
     ReleaseClearingStateMapping,
     ReleaseTabIds,
     RequestDocumentTypes,
+    UIConfigKeys,
     UserGroupType,
     VulnerabilitiesVerificationState,
     RequestType,

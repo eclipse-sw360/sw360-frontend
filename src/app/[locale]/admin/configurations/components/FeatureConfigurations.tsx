@@ -11,7 +11,7 @@
 
 'use client'
 
-import { ConfigKeys, Configuration, HttpStatus } from '@/object-types'
+import { ConfigKeys, Configuration, ConfigurationContainers, HttpStatus, UiConfiguration } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -19,6 +19,7 @@ import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner } from 'next-sw360'
 import { useCallback, useEffect, useState, type JSX } from 'react'
 import AttachmentStorageConfigurations from './AttachmentStorageConfigurations'
+import FrontEndConfigs from './FrontEndConfigs'
 import MailConfigurations from './MailConfigurations'
 import OnOffSwitch from './OnOffSwitch'
 import PackageManagementConfigurations from './PackageManagementConfigurations'
@@ -27,6 +28,7 @@ import SelectUserGroup from './SelectUserGroup'
 const FeatureConfigurations = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentConfig, setCurrentConfig] = useState<Configuration | undefined>(undefined)
+    const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
     const { status } = useSession()
 
     useEffect(() => {
@@ -35,14 +37,17 @@ const FeatureConfigurations = (): JSX.Element => {
         }
     }, [status])
 
-    const fetchConfig = useCallback(async () => {
+    const fetchSw360Config = useCallback(async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
             signOut()
             return
         }
-        const response = await ApiUtils.GET('configurations?changeable=true', session.user.access_token)
+        const response = await ApiUtils.GET(
+            `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`,
+            session.user.access_token,
+        )
         if (response.status == HttpStatus.OK) {
             const data = (await response.json()) as Configuration
             setCurrentConfig(data)
@@ -53,8 +58,30 @@ const FeatureConfigurations = (): JSX.Element => {
         }
     }, [])
 
+    const fetchUiConfig = useCallback(async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            signOut()
+            return
+        }
+        const response = await ApiUtils.GET(
+            `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`,
+            session.user.access_token,
+        )
+        if (response.status == HttpStatus.OK) {
+            const data = (await response.json()) as UiConfiguration
+            setCurrentUiConfig(data)
+        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            await signOut()
+        } else {
+            setCurrentUiConfig({} as UiConfiguration)
+        }
+    }, [])
+
     useEffect(() => {
-        fetchConfig()
+        fetchSw360Config()
+        fetchUiConfig()
     }, [])
 
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
@@ -82,206 +109,229 @@ const FeatureConfigurations = (): JSX.Element => {
     }
 
     return (
-        <div className='container page-content'>
-            <PageButtonHeader
-                title={`${t('Configurations')}`}
-                buttons={headerbuttons}
-            />
-            {currentConfig ? (
-                <>
-                    <h6
-                        className='fw-bold text-uppercase'
-                        style={{ color: '#5D8EA9' }}
-                    >
-                        {t('Feature Configurations')}
-                        <hr className='my-2 mb-2' />
-                    </h6>
-                    <table className='table label-value-table'>
-                        <thead>
-                            <tr>
-                                <th>{t('Name')}</th>
-                                <th>{t('Value')}</th>
-                                <th>{t('Description')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr id='spdx-document'>
-                                <td className='align-middle fw-bold'>{t('SPDX Document Feature')}</td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={currentConfig[ConfigKeys.SPDX_DOCUMENT_ENABLED] === 'true'}
-                                        propKey={ConfigKeys.SPDX_DOCUMENT_ENABLED}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('spdx_feature_description')}</td>
-                            </tr>
-                            <tr id='component-visibility-restriction'>
-                                <td className='align-middle fw-bold'>
-                                    {t('Component Visibility Restriction Feature')}
-                                </td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={
-                                            currentConfig[ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED] ===
-                                            'true'
-                                        }
-                                        propKey={ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('component_visibility_retriction_description')}</td>
-                            </tr>
-                            <tr id='use-license-info-from-files'>
-                                <td className='align-middle fw-bold'>{t('Use license info from files')}</td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={currentConfig[ConfigKeys.USE_LICENSE_INFO_FROM_FILES] === 'true'}
-                                        propKey={ConfigKeys.USE_LICENSE_INFO_FROM_FILES}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('use_license_info_from_file_description')}</td>
-                            </tr>
-                            <tr id='mainline-state-enabled-for-user'>
-                                <td className='align-middle fw-bold'>
-                                    {t('Enable Editing Of Mainline State For User')}
-                                </td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={currentConfig[ConfigKeys.MAINLINE_STATE_ENABLED_FOR_USER] === 'true'}
-                                        propKey={ConfigKeys.MAINLINE_STATE_ENABLED_FOR_USER}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('mainline_state_enabled_for_user_description')}</td>
-                            </tr>
-                            <tr id='auto-set-ecc-status'>
-                                <td className='align-middle fw-bold'>{t('Enable Auto Set ECC Status')}</td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={currentConfig[ConfigKeys.AUTO_SET_ECC_STATUS] === 'true'}
-                                        propKey={ConfigKeys.AUTO_SET_ECC_STATUS}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('enable_auto_set_ecc_status_description')}</td>
-                            </tr>
-                            <tr id='bulk-release-deleting'>
-                                <td className='align-middle fw-bold'>{t('Bulk Release Deleting Feature')}</td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={currentConfig[ConfigKeys.IS_BULK_RELEASE_DELETING_ENABLED] === 'true'}
-                                        propKey={ConfigKeys.IS_BULK_RELEASE_DELETING_ENABLED}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('bulk_release_deleting_description')}</td>
-                            </tr>
-                            <tr id='disable-clearing-report-download'>
-                                <td className='align-middle fw-bold'>{t('Disable Clearing Report Download')}</td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={
-                                            currentConfig[ConfigKeys.DISABLE_CLEARING_FOSSOLOGY_REPORT_DOWNLOAD] ===
-                                            'true'
-                                        }
-                                        propKey={ConfigKeys.DISABLE_CLEARING_FOSSOLOGY_REPORT_DOWNLOAD}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('disable_clearing_report_download_description')}</td>
-                            </tr>
-                            <tr id='force-update-enabled'>
-                                <td className='align-middle fw-bold'>{t('Enable Force Update Feature')}</td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={currentConfig[ConfigKeys.IS_FORCE_UPDATE_ENABLED] === 'true'}
-                                        propKey={ConfigKeys.IS_FORCE_UPDATE_ENABLED}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('force_update_enabled_description')}</td>
-                            </tr>
-                            <tr id='admin-private-access-enabled'>
-                                <td className='align-middle fw-bold'>{t('Enable Admin Private Access')}</td>
-                                <td>
-                                    <OnOffSwitch
-                                        size={25}
-                                        setCurrentConfig={setCurrentConfig}
-                                        checked={currentConfig[ConfigKeys.IS_ADMIN_PRIVATE_ACCESS_ENABLED] === 'true'}
-                                        propKey={ConfigKeys.IS_ADMIN_PRIVATE_ACCESS_ENABLED}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('admin_private_access_description')}</td>
-                            </tr>
-                            <tr id='sbom-import-export-access-usergroup'>
-                                <td className='align-middle fw-bold'>{t('SBOM Import Export Access User Group')}</td>
-                                <td>
-                                    <SelectUserGroup
-                                        setCurrentConfig={setCurrentConfig}
-                                        currentConfig={currentConfig}
-                                        configKey={ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE}
-                                    />
-                                </td>
-                                <td className='align-middle'>{t('SBOM Import Export Access User Group')}</td>
-                            </tr>
-                            <tr id='release-sourcecodeurl-skip-domains'>
-                                <td className='align-middle fw-bold'>
-                                    <label htmlFor='release-sourcecodeurl-skip-domains-regex'>
-                                        {t('Skip domains for Release Source URL')}
-                                    </label>
-                                </td>
-                                <td>
-                                    <input
-                                        type='text'
-                                        className='form-control'
-                                        id='release-sourcecodeurl-skip-domains-regex'
-                                        name='release-sourcecodeurl-skip-domains'
-                                        placeholder={t('Enter regex for domains to skip')}
-                                        value={currentConfig[ConfigKeys.RELEASE_SOURCECODE_URL_SKIP_DOMAINS]}
-                                        onChange={(event) => {
-                                            setCurrentConfig((prev) => {
-                                                return {
-                                                    ...prev,
-                                                    [ConfigKeys.RELEASE_SOURCECODE_URL_SKIP_DOMAINS]:
-                                                        event.target.value.toString(),
-                                                } as Configuration
-                                            })
-                                        }}
-                                    />
-                                </td>
-                                <td className='align-middle'>
-                                    {t("Regex for domains to skip URL check in Release's Source Download URL")}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <AttachmentStorageConfigurations
-                        currentConfig={currentConfig}
-                        setCurrentConfig={setCurrentConfig}
+        <>
+            <div className='container page-content'>
+                <PageButtonHeader
+                    title={`${t('Configurations')}`}
+                    buttons={headerbuttons}
+                />
+                {currentConfig ? (
+                    <>
+                        <h6
+                            className='fw-bold text-uppercase'
+                            style={{ color: '#5D8EA9' }}
+                        >
+                            {t('Feature Configurations')}
+                            <hr className='my-2 mb-2' />
+                        </h6>
+                        <table className='table label-value-table'>
+                            <thead>
+                                <tr>
+                                    <th>{t('Name')}</th>
+                                    <th>{t('Value')}</th>
+                                    <th>{t('Description')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id='spdx-document'>
+                                    <td className='align-middle fw-bold'>{t('SPDX Document Feature')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.SPDX_DOCUMENT_ENABLED] === 'true'}
+                                            propKey={ConfigKeys.SPDX_DOCUMENT_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('spdx_feature_description')}</td>
+                                </tr>
+                                <tr id='component-visibility-restriction'>
+                                    <td className='align-middle fw-bold'>
+                                        {t('Component Visibility Restriction Feature')}
+                                    </td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={
+                                                currentConfig[
+                                                    ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED
+                                                ] === 'true'
+                                            }
+                                            propKey={ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('component_visibility_retriction_description')}</td>
+                                </tr>
+                                <tr id='use-license-info-from-files'>
+                                    <td className='align-middle fw-bold'>{t('Use license info from files')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.USE_LICENSE_INFO_FROM_FILES] === 'true'}
+                                            propKey={ConfigKeys.USE_LICENSE_INFO_FROM_FILES}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('use_license_info_from_file_description')}</td>
+                                </tr>
+                                <tr id='mainline-state-enabled-for-user'>
+                                    <td className='align-middle fw-bold'>
+                                        {t('Enable Editing Of Mainline State For User')}
+                                    </td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={
+                                                currentConfig[ConfigKeys.MAINLINE_STATE_ENABLED_FOR_USER] === 'true'
+                                            }
+                                            propKey={ConfigKeys.MAINLINE_STATE_ENABLED_FOR_USER}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('mainline_state_enabled_for_user_description')}</td>
+                                </tr>
+                                <tr id='auto-set-ecc-status'>
+                                    <td className='align-middle fw-bold'>{t('Enable Auto Set ECC Status')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.AUTO_SET_ECC_STATUS] === 'true'}
+                                            propKey={ConfigKeys.AUTO_SET_ECC_STATUS}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('enable_auto_set_ecc_status_description')}</td>
+                                </tr>
+                                <tr id='bulk-release-deleting'>
+                                    <td className='align-middle fw-bold'>{t('Bulk Release Deleting Feature')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={
+                                                currentConfig[ConfigKeys.IS_BULK_RELEASE_DELETING_ENABLED] === 'true'
+                                            }
+                                            propKey={ConfigKeys.IS_BULK_RELEASE_DELETING_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('bulk_release_deleting_description')}</td>
+                                </tr>
+                                <tr id='disable-clearing-report-download'>
+                                    <td className='align-middle fw-bold'>{t('Disable Clearing Report Download')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={
+                                                currentConfig[ConfigKeys.DISABLE_CLEARING_FOSSOLOGY_REPORT_DOWNLOAD] ===
+                                                'true'
+                                            }
+                                            propKey={ConfigKeys.DISABLE_CLEARING_FOSSOLOGY_REPORT_DOWNLOAD}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>
+                                        {t('disable_clearing_report_download_description')}
+                                    </td>
+                                </tr>
+                                <tr id='force-update-enabled'>
+                                    <td className='align-middle fw-bold'>{t('Enable Force Update Feature')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.IS_FORCE_UPDATE_ENABLED] === 'true'}
+                                            propKey={ConfigKeys.IS_FORCE_UPDATE_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('force_update_enabled_description')}</td>
+                                </tr>
+                                <tr id='admin-private-access-enabled'>
+                                    <td className='align-middle fw-bold'>{t('Enable Admin Private Access')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={
+                                                currentConfig[ConfigKeys.IS_ADMIN_PRIVATE_ACCESS_ENABLED] === 'true'
+                                            }
+                                            propKey={ConfigKeys.IS_ADMIN_PRIVATE_ACCESS_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('admin_private_access_description')}</td>
+                                </tr>
+                                <tr id='sbom-import-export-access-usergroup'>
+                                    <td className='align-middle fw-bold'>
+                                        {t('SBOM Import Export Access User Group')}
+                                    </td>
+                                    <td>
+                                        <SelectUserGroup
+                                            setCurrentConfig={setCurrentConfig}
+                                            currentConfig={currentConfig}
+                                            configKey={ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('SBOM Import Export Access User Group')}</td>
+                                </tr>
+                                <tr id='release-sourcecodeurl-skip-domains'>
+                                    <td className='align-middle fw-bold'>
+                                        <label htmlFor='release-sourcecodeurl-skip-domains-regex'>
+                                            {t('Skip domains for Release Source URL')}
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input
+                                            type='text'
+                                            className='form-control'
+                                            id='release-sourcecodeurl-skip-domains-regex'
+                                            name='release-sourcecodeurl-skip-domains'
+                                            placeholder={t('Enter regex for domains to skip')}
+                                            value={currentConfig[ConfigKeys.RELEASE_SOURCECODE_URL_SKIP_DOMAINS]}
+                                            onChange={(event) => {
+                                                setCurrentConfig((prev) => {
+                                                    return {
+                                                        ...prev,
+                                                        [ConfigKeys.RELEASE_SOURCECODE_URL_SKIP_DOMAINS]:
+                                                            event.target.value.toString(),
+                                                    } as Configuration
+                                                })
+                                            }}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>
+                                        {t("Regex for domains to skip URL check in Release's Source Download URL")}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <AttachmentStorageConfigurations
+                            currentConfig={currentConfig}
+                            setCurrentConfig={setCurrentConfig}
+                        />
+                        <PackageManagementConfigurations
+                            currentConfig={currentConfig}
+                            setCurrentConfig={setCurrentConfig}
+                        />
+                        <MailConfigurations
+                            currentConfig={currentConfig}
+                            setCurrentConfig={setCurrentConfig}
+                        />
+                    </>
+                ) : (
+                    <PageSpinner />
+                )}
+            </div>
+            <div className='container page-content'>
+                {currentUiConfig ? (
+                    <FrontEndConfigs
+                        currentUiConfig={currentUiConfig}
+                        setCurrentUiConfig={setCurrentUiConfig}
                     />
-                    <PackageManagementConfigurations
-                        currentConfig={currentConfig}
-                        setCurrentConfig={setCurrentConfig}
-                    />
-                    <MailConfigurations
-                        currentConfig={currentConfig}
-                        setCurrentConfig={setCurrentConfig}
-                    />
-                </>
-            ) : (
-                <PageSpinner />
-            )}
-        </div>
+                ) : (
+                    <PageSpinner />
+                )}
+            </div>
+        </>
     )
 }
 
