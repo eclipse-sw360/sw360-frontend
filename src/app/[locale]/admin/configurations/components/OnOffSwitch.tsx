@@ -8,17 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Configuration } from '@/object-types'
+import { Configuration, UiConfiguration } from '@/object-types'
 import { Dispatch, SetStateAction, type JSX } from 'react'
 
 interface SwitchProps {
     size: number
     checked: boolean
-    setCurrentConfig: Dispatch<SetStateAction<Configuration | undefined>>
+    setCurrentConfig?: Dispatch<SetStateAction<Configuration | undefined>>
+    setCurrentUiConfig?: Dispatch<SetStateAction<UiConfiguration | undefined>>
     propKey: string
 }
 
-const OnOffSwitch = ({ size, checked, setCurrentConfig, propKey }: SwitchProps): JSX.Element => {
+const OnOffSwitch = ({ size, checked, setCurrentConfig, setCurrentUiConfig, propKey }: SwitchProps): JSX.Element => {
     return (
         <div>
             <span className='align-middle fw-bold p-2'>OFF</span>
@@ -30,12 +31,22 @@ const OnOffSwitch = ({ size, checked, setCurrentConfig, propKey }: SwitchProps):
                     type='checkbox'
                     defaultChecked={checked}
                     onChange={(event) => {
-                        setCurrentConfig((prev) => {
-                            return {
-                                ...prev,
-                                [propKey]: event.target.checked.toString(),
-                            } as Configuration
-                        })
+                        if (setCurrentConfig) {
+                            setCurrentConfig((prev) => {
+                                return {
+                                    ...prev,
+                                    [propKey]: event.target.checked.toString(),
+                                } as Configuration
+                            })
+                        }
+                        if (setCurrentUiConfig) {
+                            setCurrentUiConfig((prev) => {
+                                return {
+                                    ...prev,
+                                    [propKey]: event.target.checked.toString(),
+                                } as UiConfiguration
+                            })
+                        }
                     }}
                 />
                 <span
