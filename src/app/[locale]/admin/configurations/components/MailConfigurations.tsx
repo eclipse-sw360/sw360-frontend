@@ -42,7 +42,7 @@ const MailConfigurations = ({ currentConfig, setCurrentConfig }: Props): JSX.Ele
                 <tbody>
                     <tr id='send-project-spreadsheet-export-to-mail-enabled'>
                         <td className='align-middle fw-bold'>
-                            {t('Enable Sending Project Spreadshet Export Via Mail')}
+                            {t('Enable Sending Project Spreadsheet Export Via Mail')}
                         </td>
                         <td>
                             <OnOffSwitch
@@ -56,7 +56,7 @@ const MailConfigurations = ({ currentConfig, setCurrentConfig }: Props): JSX.Ele
                     </tr>
                     <tr id='send-component-spreadsheet-export-to-mail-enabled'>
                         <td className='align-middle fw-bold'>
-                            {t('Enable Sending Component Spreadshet Export Via Mail')}
+                            {t('Enable Sending Component Spreadsheet Export Via Mail')}
                         </td>
                         <td>
                             <OnOffSwitch
