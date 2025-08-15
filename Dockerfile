@@ -16,7 +16,7 @@ RUN npm install -g pnpm
 
 WORKDIR /frontend
 
-# Prepare the build environment 
+# Prepare the build environment
 COPY . .
 RUN pnpm install && pnpm build
 
@@ -25,11 +25,10 @@ ARG VARIANT=22-slim
 FROM node:${VARIANT}
 WORKDIR /frontend
 
-COPY --from=build /frontend/next.config.js .
+COPY --from=build /frontend/next.config.ts .
 COPY --from=build /frontend/public ./public
 COPY --from=build /frontend/.next/standalone ./
 COPY --from=build /frontend/.next/static ./.next/static
 
 CMD ["node", "server.js"]
 EXPOSE 3000
-
