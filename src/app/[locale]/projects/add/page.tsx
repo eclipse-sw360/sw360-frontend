@@ -74,7 +74,7 @@ function AddProjects(): JSX.Element {
         securityResponsibles: [],
         linkedProjects: {},
         linkedReleases: {},
-        packageIds: [],
+        packageIds: {},
     })
 
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
