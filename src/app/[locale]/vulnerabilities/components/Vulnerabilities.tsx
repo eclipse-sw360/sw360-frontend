@@ -20,7 +20,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
@@ -279,7 +279,6 @@ function Vulnerabilities(): ReactNode {
 
         // server side sorting config
         manualSorting: true,
-        getSortedRowModel: getSortedRowModel(),
         onSortingChange: (updater) => {
             setPageableQueryParam((prev) => {
                 const prevSorting: SortingState = [

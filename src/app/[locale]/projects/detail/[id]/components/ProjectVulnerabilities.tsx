@@ -10,7 +10,8 @@
 'use client'
 
 import { Embedded, HttpStatus, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { notFound } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
@@ -40,12 +41,12 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
 
     useEffect(() => {
         if (status === 'unauthenticated') {
-            signOut()
+            void signOut()
         }
     }, [status])
 
     useEffect(() => {
-        if (status !== 'authenticated') return
+        if (CommonUtils.isNullOrUndefined(session)) return
 
         const controller = new AbortController()
         const signal = controller.signal
@@ -69,15 +70,19 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                 d.push(projectData)
 
                 extractLinkedProjects(data._embedded['sw360:projects'], d)
-
                 setData(d)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                console.error(error)
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
 
         return () => controller.abort(signal)
-    }, [status])
+    }, [session])
 
     return (
         <>
