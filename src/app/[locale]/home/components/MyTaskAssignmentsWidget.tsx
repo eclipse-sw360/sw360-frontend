@@ -100,8 +100,12 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const queryUrl = CommonUtils.createUrlWithParams(
-                    `components/mycomponents`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    `moderationrequest/byState`,
+                    Object.fromEntries(
+                        Object.entries({ ...pageableQueryParam, state: 'open', allDetails: false }).map(
+                            ([key, value]) => [key, String(value)],
+                        ),
+                    ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status !== HttpStatus.OK) {

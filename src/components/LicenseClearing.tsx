@@ -53,7 +53,7 @@ export default function LicenseClearing({ projectId }: { projectId: string }): R
             }
         })()
         return () => controller.abort()
-    }, [])
+    }, [projectId])
 
     return (
         <>
