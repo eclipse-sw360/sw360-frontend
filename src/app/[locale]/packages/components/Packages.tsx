@@ -1,31 +1,53 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
-
+//
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
 // which is available at https://www.eclipse.org/legal/epl-2.0/
-
+//
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
 'use client'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { Embedded, Package, UserGroupType } from '@/object-types'
-import { CommonUtils } from '@/utils'
-import { SW360_API_URL } from '@/utils/env'
-import { ServerStorageOptions } from 'gridjs/dist/src/storage/server'
+import {
+    Embedded,
+    ErrorDetails,
+    HttpStatus,
+    Package,
+    PageableQueryParam,
+    PaginationMeta,
+    UserGroupType,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { AdvancedSearch, Table, _ } from 'next-sw360'
+import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import Link from 'next/link'
-import { redirect, useRouter, useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { FaPencilAlt } from 'react-icons/fa'
+import { MdDeleteOutline } from 'react-icons/md'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
+
+interface ReleaseCache {
+    id: string
+    name: string
+    version: string
+    clearingState: string
+}
+
+interface PackageWithRelease extends Package {
+    releaseName?: string
+    releaseVersion?: string
+    releaseClearingState?: string
+}
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -39,12 +61,30 @@ function Packages(): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
     const router = useRouter()
+
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
         show: false,
         packageId: '',
         packageName: '',
         packageVersion: '',
     })
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [packageData, setPackageData] = useState<PackageWithRelease[]>([])
+    const memoizedData = useMemo(() => packageData, [packageData])
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    const releaseCache = useMemo(() => new Map<string, ReleaseCache>(), [])
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -56,164 +96,321 @@ function Packages(): ReactNode {
         router.push('/packages/add')
     }
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            redirect('/')
-        }
-    }, [status])
+    const handleEditPackage = (packageId: string) => {
+        router.push(`/packages/edit/${packageId}`)
+        MessageService.success(t('You are editing the original document'))
+    }
 
-    const columns = [
-        {
-            id: 'packages.name',
-            name: `${t('Package Name')} (${t('Version')})`,
-            formatter: ({ id, name, version }: { id: string; name: string; version: string }) =>
-                _(
-                    <>
+    const columns = useMemo<ColumnDef<PackageWithRelease>[]>(
+        () => [
+            {
+                id: 'name',
+                header: `${t('Package Name')} (${t('Version')})`,
+                accessorKey: 'name',
+                cell: ({ row }) => {
+                    const { id, name, version } = row.original
+                    return (
                         <Link
                             href={`/packages/detail/${id}`}
                             className='text-link'
                         >
-                            {name} {version !== '' && `(${version})`}
+                            {name} {version && `(${version})`}
                         </Link>
-                    </>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'packages.releaseName',
-            name: `${t('Release Name')} (${t('Version')})`,
-            sort: true,
-        },
-        {
-            id: 'packages.releaseClearingState',
-            name: t('Release Clearing State'),
-            sort: true,
-        },
-        {
-            id: 'packages.licenses',
-            name: t('Licenses'),
-            width: '8%',
-            sort: true,
-        },
-        {
-            id: 'packages.packageManager',
-            name: t('Package Manager'),
-            sort: true,
-        },
-        {
-            id: 'packages.actions',
-            name: t('Actions'),
-            width: '13%',
-            formatter: ({ id, name, version }: { id: string; name: string; version: string }) =>
-                _(
-                    <span className='d-flex justify-content-evenly'>
-                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                            <Link
-                                href={`/packages/edit/${id}`}
-                                className='overlay-trigger'
-                            >
-                                <FaPencilAlt className='btn-icon' />
-                            </Link>
-                        </OverlayTrigger>
-                        <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                            <span className='d-inline-block'>
-                                <FaTrashAlt
-                                    className='btn-icon'
-                                    onClick={() =>
-                                        setDeletePackageModalMetaData({
-                                            show: true,
-                                            packageId: id,
-                                            packageName: name,
-                                            packageVersion: version,
-                                        })
-                                    }
-                                    style={{ color: 'gray', fontSize: '18px' }}
-                                />
-                            </span>
-                        </OverlayTrigger>
-                    </span>,
-                ),
-            sort: true,
-        },
-    ]
-
-    const initServerPaginationConfig = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        return {
-            url: CommonUtils.createUrlWithParams(`${SW360_API_URL}/resource/api/packages`, Object.fromEntries(params)),
-            then: (data: EmbeddedPackages) => {
-                return data._embedded['sw360:packages'].map((elem: Package) => [
-                    {
-                        id: elem._links?.self.href.split('/').at(-1) ?? '',
-                        name: elem.name ?? '',
-                        version: elem.version ?? '',
-                    },
-                    '',
-                    '',
-                    '',
-                    elem.packageManager ?? '',
-                    {
-                        id: elem._links?.self.href.split('/').at(-1) ?? '',
-                        name: elem.name ?? '',
-                        version: elem.version ?? '',
-                    },
-                ])
+                    )
+                },
             },
-            total: (data: EmbeddedPackages) => data.page?.totalElements,
-            headers: { Authorization: `${session.user.access_token}` },
-        }
-    }
+            {
+                id: 'releaseName',
+                header: `${t('Release Name')} (${t('Version')})`,
+                accessorKey: 'releaseName',
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const { releaseId, releaseName, releaseVersion } = row.original
+                    if (!releaseId) {
+                        return <span className='text-muted'>No Linked Release</span>
+                    }
+                    return (
+                        <Link
+                            href={`/components/releases/detail/${releaseId}`}
+                            className='text-link'
+                        >
+                            {releaseName} {releaseVersion && `(${releaseVersion})`}
+                        </Link>
+                    )
+                },
+            },
+            {
+                id: 'releaseClearingState',
+                header: t('Release Clearing State'),
+                accessorKey: 'releaseClearingState',
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const { releaseId, releaseClearingState } = row.original
+                    if (!releaseId) {
+                        return (
+                            <div className='text-center'>
+                                <span className='text-muted'>Not Applicable</span>
+                            </div>
+                        )
+                    }
+
+                    return (
+                        <div className='text-center'>
+                            <OverlayTrigger
+                                overlay={
+                                    <Tooltip>{`${t('Release Clearing State')}: ${releaseClearingState ?? ''}`}</Tooltip>
+                                }
+                            >
+                                {releaseClearingState === 'NEW_CLEARING' ? (
+                                    <span className='badge bg-danger overlay-badge'>{'CS'}</span>
+                                ) : releaseClearingState === 'REPORT_AVAILABLE' ? (
+                                    <span className='badge bg-primary overlay-badge'>{'CS'}</span>
+                                ) : releaseClearingState === 'IN_PROGRESS' ? (
+                                    <span className='badge bg-warning overlay-badge'>{'CS'}</span>
+                                ) : releaseClearingState === 'SCAN_AVAILABLE' ? (
+                                    <span className='badge bg-orange overlay-badge'>{'CS'}</span>
+                                ) : (
+                                    <span className='badge bg-success overlay-badge'>{'CS'}</span>
+                                )}
+                            </OverlayTrigger>
+                        </div>
+                    )
+                },
+            },
+            {
+                id: 'licenses',
+                header: t('Licenses'),
+                accessorKey: 'licenseIds',
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const licenseIds: string[] = row.original.licenseIds ?? []
+                    return (
+                        <>
+                            {licenseIds.map((lic: string, i: number) => (
+                                <span key={lic}>
+                                    <Link
+                                        href={`/licenses/detail?id=${lic}`}
+                                        className='text-link'
+                                    >
+                                        {lic}
+                                    </Link>
+                                    {i < licenseIds.length - 1 && ', '}
+                                </span>
+                            ))}
+                        </>
+                    )
+                },
+            },
+            {
+                id: 'packageManager',
+                header: t('Package Manager'),
+                accessorKey: 'packageManager',
+                enableSorting: false,
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const { id, name, version } = row.original
+                    return (
+                        <>
+                            {id && (
+                                <span className='d-flex justify-content-evenly'>
+                                    <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                        <span
+                                            className='d-inline-block'
+                                            onClick={() => handleEditPackage(id)}
+                                        >
+                                            <FaPencilAlt
+                                                className='btn-icon'
+                                                size={18}
+                                            />
+                                        </span>
+                                    </OverlayTrigger>
+
+                                    <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                        <span className='d-inline-block'>
+                                            <MdDeleteOutline
+                                                className='btn-icon'
+                                                size={25}
+                                                onClick={() =>
+                                                    setDeletePackageModalMetaData({
+                                                        show: true,
+                                                        packageId: id ?? '',
+                                                        packageName: name ?? '',
+                                                        packageVersion: version ?? '',
+                                                    })
+                                                }
+                                            />
+                                        </span>
+                                    </OverlayTrigger>
+                                </span>
+                            )}
+                        </>
+                    )
+                },
+            },
+        ],
+        [t],
+    )
+
+    useEffect(() => {
+        if (status !== 'authenticated') return
+        const controller = new AbortController()
+        const signal = controller.signal
+        const timeout = setTimeout(() => setShowProcessing(true), packageData.length !== 0 ? 700 : 0)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+
+                const searchParams = Object.fromEntries(params.entries())
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `packages`,
+                    Object.fromEntries(
+                        Object.entries({ ...searchParams, ...pageableQueryParam, allDetails: true }).map(([k, v]) => [
+                            k,
+                            String(v),
+                        ]),
+                    ),
+                )
+
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as EmbeddedPackages
+                setPaginationMeta(
+                    data.page ?? {
+                        size: 0,
+                        totalElements: 0,
+                        totalPages: 0,
+                        number: 0,
+                    },
+                )
+
+                const pkgs = CommonUtils.isNullOrUndefined(data['_embedded']['sw360:packages'])
+                    ? []
+                    : data['_embedded']['sw360:packages']
+
+                // fetch release details with caching
+                const pkgsWithRelease = await Promise.all(
+                    pkgs.map(async (pkg) => {
+                        if (!pkg.releaseId) return pkg
+                        if (releaseCache.has(pkg.releaseId)) {
+                            const rel = releaseCache.get(pkg.releaseId)
+                            if (rel) {
+                                return {
+                                    ...pkg,
+                                    releaseName: rel.name,
+                                    releaseClearingState: rel.clearingState,
+                                    releaseVersion: rel.version,
+                                }
+                            }
+                        }
+                        try {
+                            const releaseResp = await ApiUtils.GET(
+                                `releases/${pkg.releaseId}`,
+                                session.user.access_token,
+                                signal,
+                            )
+                            if (releaseResp.status === HttpStatus.OK) {
+                                const release = await releaseResp.json()
+                                releaseCache.set(pkg.releaseId, release)
+                                return {
+                                    ...pkg,
+                                    releaseName: release.name,
+                                    releaseClearingState: release.clearingState,
+                                    releaseVersion: release.version,
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Failed fetching release', pkg.releaseId, e)
+                        }
+                        return pkg
+                    }),
+                )
+
+                setPackageData(pkgsWithRelease)
+            } catch (error) {
+                if (!(error instanceof DOMException && error.name === 'AbortError')) {
+                    MessageService.error(error instanceof Error ? error.message : String(error))
+                }
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [pageableQueryParam, params.toString(), status])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        manualSorting: true,
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
+        },
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return { ...prev, sort: `${id},${desc ? 'desc' : 'asc'}` }
+                }
+                return { ...prev, sort: '' }
+            })
+        },
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({ pageIndex: pageableQueryParam.page, pageSize: pageableQueryParam.page_entries })
+                    : updater
+            setPageableQueryParam((prev) => ({ ...prev, page: next.pageIndex + 1, page_entries: next.pageSize }))
+        },
+    })
 
     const advancedSearch = [
-        {
-            fieldName: t('Package Name'),
-            value: '',
-            paramName: 'name',
-        },
-        {
-            fieldName: t('Package Version'),
-            value: '',
-            paramName: 'version',
-        },
+        { fieldName: t('Package Name'), value: '', paramName: 'name' },
+        { fieldName: t('Package Version'), value: '', paramName: 'version' },
         {
             fieldName: t('Package Manager'),
             value: packageManagers.map((p) => ({ key: p, text: p })),
             paramName: 'packageManager',
         },
-        {
-            fieldName: t('Licenses'),
-            value: '',
-            paramName: 'licenses',
-        },
-        {
-            fieldName: t('purl'),
-            value: '',
-            paramName: 'purl',
-        },
-        {
-            fieldName: `${t('Created By')} (${t('Email')})`,
-            value: '',
-            paramName: 'createdBy',
-        },
+        { fieldName: t('Licenses'), value: '', paramName: 'licenses' },
+        { fieldName: t('purl'), value: '', paramName: 'purl' },
+        { fieldName: `${t('Created By')} (${t('Email')})`, value: '', paramName: 'createdBy' },
         {
             fieldName: t('Created On'),
             value: [
-                {
-                    key: 'EQUAL',
-                    text: '=',
-                },
-                {
-                    key: 'LESS_THAN_OR_EQUAL_TO',
-                    text: '<=',
-                },
-                {
-                    key: 'GREATER_THAN_OR_EQUAL_TO',
-                    text: '>=',
-                },
-                {
-                    key: 'BETWEEN',
-                    text: t('Between'),
-                },
+                { key: 'EQUAL', text: '=' },
+                { key: 'LESS_THAN_OR_EQUAL_TO', text: '<=' },
+                { key: 'GREATER_THAN_OR_EQUAL_TO', text: '>=' },
+                { key: 'BETWEEN', text: t('Between') },
             ],
             paramName: 'createdOn',
         },
@@ -225,6 +422,9 @@ function Packages(): ReactNode {
                 modalMetaData={deletePackageModalMetaData}
                 setModalMetaData={setDeletePackageModalMetaData}
                 isEditPage={false}
+                onDeleteSuccess={(deletedPackageId) => {
+                    setPackageData((prev) => prev.filter((pkg) => pkg.id !== deletedPackageId))
+                }}
             />
             <div className='container page-content'>
                 <div className='row'>
@@ -246,18 +446,29 @@ function Packages(): ReactNode {
                                 <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
                             </div>
                         </div>
-                        {status === 'authenticated' ? (
-                            <Table
-                                columns={columns}
-                                server={initServerPaginationConfig() as ServerStorageOptions}
-                                selector={true}
-                                sort={false}
-                            />
-                        ) : (
-                            <div className='col-12 d-flex justify-content-center align-items-center'>
-                                <Spinner className='spinner' />
-                            </div>
-                        )}
+                        <div className='row my-3'>
+                            {pageableQueryParam && table && paginationMeta ? (
+                                <>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing}
+                                    />
+                                    <TableFooter
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        paginationMeta={paginationMeta}
+                                    />
+                                </>
+                            ) : (
+                                <div className='col-12 d-flex justify-content-center align-items-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -265,5 +476,4 @@ function Packages(): ReactNode {
     )
 }
 
-// Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(Packages, [UserGroupType.SECURITY_USER])
