@@ -60,8 +60,8 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
         setDeleteDialogOpen(true)
     }
 
-    const handleEditComponent = (projectId: string) => {
-        router.push(`/projects/edit/${projectId}`)
+    const handleEditComponent = (componentId: string) => {
+        router.push(`/components/edit/${componentId}`)
         MessageService.success(t('You are editing the original document'))
     }
 
