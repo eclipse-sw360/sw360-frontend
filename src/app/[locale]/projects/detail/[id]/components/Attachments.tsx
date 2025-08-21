@@ -9,160 +9,38 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useEffect, useState, type JSX } from 'react'
-
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
-import { Table, _ } from '@/components/sw360'
-import { Attachment, HttpStatus, UserGroupType } from '@/object-types'
+import { Attachment, Embedded, ErrorDetails, HttpStatus, NestedRows, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { notFound } from 'next/navigation'
+import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { PaddedCell, SW360Table } from 'next-sw360'
+import Link from 'next/link'
+import { useEffect, useMemo, useState, type JSX } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { FaInfoCircle } from 'react-icons/fa'
 import { LuDownload } from 'react-icons/lu'
 import ImportSummary from '../../../../../../object-types/cyclonedx/ImportSummary'
 
-interface EmbeddedAttachments {
-    _embedded?: {
-        'sw360:attachments'?: Array<Attachment>
-    }
-}
-
-interface AttachmentRowMeta {
-    projectId: string
-    attachmentId: string
-    attachmentName: string
-}
-
-const handleAttachmentDownload = async ({
-    projectId,
-    attachmentId,
-    attachmentName,
-}: {
-    projectId: string
-    attachmentId: string
-    attachmentName: string
-}) => {
-    try {
-        const session = await getSession()
-        DownloadService.download(`projects/${projectId}/attachments/${attachmentId}`, session, attachmentName)
-    } catch (e) {
-        console.error(e)
-    }
-}
-
-function ShowAttachmentTextOnExpand({
-    id,
-    sha1,
-    uploadedOn,
-    uploadedComment,
-    checkedOn,
-    checkedComment,
-    colLength,
-}: {
-    id: string
-    sha1: string
-    uploadedOn: string
-    uploadedComment: string
-    checkedOn: string
-    checkedComment: string
-    colLength: number
-}): JSX.Element {
-    const [isExpanded, setIsExpanded] = useState(false)
-    useEffect(() => {
-        if (isExpanded) {
-            const el = document.getElementById(id)
-            const par = el?.parentElement?.parentElement?.parentElement
-            const tr = document.createElement('tr')
-            tr.id = `${id}_text`
-            const td = document.createElement('td')
-            td.colSpan = colLength
-
-            const attachmentDetailsFirstRow = document.createElement('div')
-            attachmentDetailsFirstRow.className = 'row justify-content-between mx-5 my-2'
-
-            const sha1Elem = document.createElement('div')
-            sha1Elem.className = 'col'
-            sha1Elem.textContent = `SHA1: ${sha1}`
-            attachmentDetailsFirstRow.appendChild(sha1Elem)
-
-            const uploadedOnElem = document.createElement('div')
-            uploadedOnElem.className = 'col'
-            uploadedOnElem.textContent = `Uploaded On: ${uploadedOn}`
-            attachmentDetailsFirstRow.appendChild(uploadedOnElem)
-
-            const uploadedCommentElem = document.createElement('div')
-            uploadedCommentElem.className = 'col'
-            uploadedCommentElem.textContent = `Uploaded Comment: ${uploadedComment}`
-            attachmentDetailsFirstRow.appendChild(uploadedCommentElem)
-
-            td.appendChild(attachmentDetailsFirstRow)
-
-            const attachmentDetailsSecondRow = document.createElement('div')
-            attachmentDetailsSecondRow.className = 'row justify-content-between mx-5 mb-2'
-
-            const checkedOnElem = document.createElement('div')
-            checkedOnElem.className = 'col'
-            checkedOnElem.textContent = `Checked On: ${checkedOn}`
-            attachmentDetailsSecondRow.appendChild(checkedOnElem)
-
-            const checkedCommentElem = document.createElement('div')
-            checkedCommentElem.className = 'col'
-            checkedCommentElem.textContent = `Checked Comment: ${checkedComment}`
-            attachmentDetailsSecondRow.appendChild(checkedCommentElem)
-
-            td.appendChild(attachmentDetailsSecondRow)
-
-            tr.appendChild(td)
-            par?.parentNode?.insertBefore(tr, par.nextSibling)
-        } else {
-            const el = document.getElementById(`${id}_text`)
-            if (el) {
-                el.remove()
-            }
-        }
-    }, [isExpanded])
-
-    return (
-        <>
-            {isExpanded ? (
-                <BsCaretDownFill
-                    color='gray'
-                    id={id}
-                    onClick={() => setIsExpanded(!isExpanded)}
-                />
-            ) : (
-                <BsCaretRightFill
-                    color='gray'
-                    id={id}
-                    onClick={() => setIsExpanded(!isExpanded)}
-                />
-            )}
-        </>
-    )
-}
+type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
 function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
-    const [data, setData] = useState<(string | object)[][] | null>(null)
     const [importStatusData, setImportStatusData] = useState<ImportSummary | null>(null)
-    const { status } = useSession()
+    const { status, data: session } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
+    const handleAttachmentDownload = async (projectId: string, attachmentId: string, attachmentName: string) => {
+        if (CommonUtils.isNullOrUndefined(session)) return
+        await DownloadService.download(`projects/${projectId}/attachments/${attachmentId}`, session, attachmentName)
+    }
 
     const handleImportStatusView = async (projectId: string, attachmentId: string) => {
         try {
-            const session = await getSession()
-            if (!session) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return
 
             const res = await ApiUtils.GET(
                 `projects/${projectId}/attachments/${attachmentId}`,
@@ -170,229 +48,288 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
             )
 
             if (res.status === HttpStatus.OK) {
-                const data = await res.json()
+                const data = (await res.json()) as ImportSummary
                 setImportStatusData(data)
             } else {
-                console.error(`Failed to fetch import status. Status: ${res.status}`)
+                const err = (await res.json()) as ErrorDetails
+                throw new Error(err.message)
             }
-        } catch (err) {
-            console.error('Error fetching SBOM import status:', err)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
 
-    const columns = [
-        {
-            id: 'attachments.expand',
-            formatter: ({
-                id,
-                sha1,
-                uploadedOn,
-                uploadedComment,
-                checkedOn,
-                checkedComment,
-            }: {
-                id: string
-                sha1: string
-                uploadedOn: string
-                uploadedComment: string
-                checkedOn: string
-                checkedComment: string
-            }) =>
-                _(
-                    <>
-                        <ShowAttachmentTextOnExpand
-                            id={id}
-                            sha1={sha1}
-                            uploadedOn={uploadedOn}
-                            uploadedComment={uploadedComment}
-                            checkedOn={checkedOn}
-                            checkedComment={checkedComment}
-                            colLength={columns.length}
-                        />
-                    </>,
-                ),
-            width: '4%',
-        },
-        {
-            id: 'attachments.fileName',
-            name: t('File name'),
-            sort: true,
-            width: '20%',
-            formatter: (filename: string, row: { _id: string; _cells: { _id: string; data: unknown }[] }) => {
-                const isImportStatus = filename.includes('ImportStatus_') && filename.endsWith('.json')
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [status])
 
-                const meta = row._cells[9]?.data as AttachmentRowMeta | undefined
-
-                if (!isImportStatus || meta?.attachmentId == null) {
-                    return filename
-                }
-
-                return _(
-                    <span className='d-inline-flex align-items-center gap-1'>
-                        {filename}
-                        <span
-                            role='button'
-                            style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: 'black' }}
-                            onClick={() => handleImportStatusView(meta.projectId, meta.attachmentId)}
-                            title={t('Click to view SBOM import result')}
-                        >
-                            <FaInfoCircle size={14} />
-                        </span>
-                    </span>,
-                )
+    const columns = useMemo<ColumnDef<NestedRows<Attachment>>[]>(
+        () => [
+            {
+                id: 'expand',
+                cell: ({ row }) => {
+                    console.log(row.meta?.isFullSpanRow, row.depth)
+                    if (row.depth > 0) {
+                        return (
+                            <>
+                                <div className='row justify-content-between mx-5 my-2'>
+                                    <div className='col'>{`SHA1: ${row.original.node.sha1 ?? ''}`}</div>
+                                    <div className='col'>{`${t('Uploaded On')}: ${row.original.node.createdOn ?? ''}`}</div>
+                                    <div className='col'>{`${t('Uploaded Comment')}: ${row.original.node.createdComment ?? ''}`}</div>
+                                </div>
+                                <div className='row justify-content-between mx-5 my-2'>
+                                    <div className='col'>{`${t('Checked On')}: ${row.original.node.checkedOn ?? ''}`}</div>
+                                    <div className='col'>{`${t('Checked Comment')}: ${row.original.node.checkedComment ?? ''}`}</div>
+                                </div>
+                            </>
+                        )
+                    } else {
+                        return <PaddedCell row={row}></PaddedCell>
+                    }
+                },
+                meta: {
+                    width: '3%',
+                },
             },
-        },
-        {
-            id: 'attachments.size',
-            name: t('Size'),
-            sort: true,
-        },
-        {
-            id: 'attachments.type',
-            name: t('Type'),
-            sort: true,
-        },
-        {
-            id: 'attachments.createdTeam',
-            name: t('Group'),
-            sort: true,
-        },
-        {
-            id: 'attachments.uploadedBy',
-            name: t('Uploaded by'),
-            sort: true,
-        },
-        {
-            id: 'attachments.checkedTeam',
-            name: t('Group'),
-            sort: true,
-        },
-        {
-            id: 'attachments.checkedBy',
-            name: t('Checked By'),
-            formatter: (email: string) =>
-                _(
-                    <>
+            {
+                id: 'fileName',
+                header: t('File name'),
+                meta: {
+                    width: '20%',
+                },
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    const { filename, attachmentContentId } = row.original.node
+                    const isImportStatus = filename.includes('ImportStatus_') && filename.endsWith('.json')
+
+                    if (!isImportStatus) {
+                        return <p>{filename}</p>
+                    }
+
+                    return (
+                        <span className='d-inline-flex align-items-center gap-1'>
+                            {filename}
+                            <span
+                                role='button'
+                                style={{
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    color: 'black',
+                                }}
+                                onClick={() => void handleImportStatusView(projectId, attachmentContentId ?? '')}
+                                title={t('Click to view SBOM import result')}
+                            >
+                                <FaInfoCircle size={14} />
+                            </span>
+                        </span>
+                    )
+                },
+            },
+            {
+                id: 'size',
+                header: t('Size'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.size ?? 'n/a'}</p>
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Type'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.attachmentType ?? ''}</p>
+                },
+            },
+            {
+                id: 'createdTeam',
+                header: t('Group'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.createdTeam ?? ''}</p>
+                },
+            },
+            {
+                id: 'createdBy',
+                header: t('Uploaded by'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.createdBy ?? ''}</p>
+                },
+            },
+            {
+                id: 'checkedTeam',
+                header: t('Group'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.checkedTeam ?? ''}</p>
+                },
+            },
+            {
+                id: 'checkedBy',
+                header: t('Checked By'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return (
                         <Link
-                            href={`mailto:${email}`}
-                            className='text-link'
+                            href={`mailto:${row.original.node.checkedBy ?? ''}`}
+                            className='text-link w-100 text-center'
                         >
-                            {email}
+                            {row.original.node.checkedBy ?? ''}
                         </Link>
-                    </>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'attachments.usages',
-            name: t('Usages'),
-            sort: true,
-        },
-        {
-            id: 'attachments.actions',
-            name: t('Actions'),
-            formatter: ({
-                projectId,
-                attachmentId,
-                attachmentName,
-            }: {
-                projectId: string
-                attachmentId: string
-                attachmentName: string
-            }) =>
-                _(
-                    <LuDownload
-                        className='btn-icon'
-                        size={18}
-                        onClick={() => void handleAttachmentDownload({ projectId, attachmentId, attachmentName })}
-                    />,
-                ),
-            sort: true,
-            width: '6%',
-        },
-    ]
+                    )
+                },
+            },
+            {
+                id: 'usages',
+                header: t('Usages'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    const { projectAttachmentUsage } = row.original.node
+                    if (projectAttachmentUsage?.visible === 0 && projectAttachmentUsage.restricted === 0) {
+                        return <p className='text-center'>{'n/a'}</p>
+                    } else {
+                        return (
+                            <Link
+                                href='#'
+                                title='visible / restricted'
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                }}
+                                className='text-center'
+                            >
+                                {projectAttachmentUsage?.visible ?? 0} / {projectAttachmentUsage?.restricted ?? 0}
+                            </Link>
+                        )
+                    }
+                },
+                meta: {
+                    width: '5%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    const { attachmentContentId, filename } = row.original.node
+                    return (
+                        <LuDownload
+                            className='btn-icon text-center w-100'
+                            size={18}
+                            onClick={() =>
+                                void handleAttachmentDownload(projectId, attachmentContentId ?? '', filename)
+                            }
+                        />
+                    )
+                },
+                meta: {
+                    width: '5%',
+                },
+            },
+        ],
+        [t],
+    )
+
+    const [attachmentData, setAttachmentData] = useState<NestedRows<Attachment>[]>(() => [])
+    const memoizedData = useMemo(() => attachmentData, [attachmentData])
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
+        if (CommonUtils.isNullOrUndefined(session)) return
         const controller = new AbortController()
         const signal = controller.signal
 
+        const timeLimit = attachmentData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const res = await ApiUtils.GET(`projects/${projectId}/attachments`, session.user.access_token, signal)
-
-                if (res.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (res.status !== HttpStatus.OK) {
-                    return notFound()
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/attachments`,
+                    session.user.access_token,
+                    signal,
+                )
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
 
-                const projectAttachments = (await res.json()) as EmbeddedAttachments
-
-                const tableData: (string | object)[][] = []
-                for (const attachment of projectAttachments['_embedded']?.['sw360:attachments'] ?? []) {
-                    tableData.push([
-                        {
-                            id: `projectAttachments.${attachment.sha1}`,
-                            sha1: attachment.sha1,
-                            uploadedOn: attachment.createdOn ?? '',
-                            uploadedComment: attachment.createdComment ?? '',
-                            checkedOn: attachment.checkedOn ?? '',
-                            checkedComment: attachment.checkedComment ?? '',
-                        },
-                        attachment.filename,
-                        attachment.size ?? 'n/a',
-                        attachment.attachmentType,
-                        attachment.createdTeam ?? '',
-                        attachment.createdBy ?? '',
-                        attachment.checkedTeam ?? '',
-                        attachment.checkedBy ?? '',
-                        attachment.projectAttachmentUsage?.visible === 0 &&
-                        attachment.projectAttachmentUsage.restricted === 0
-                            ? 'n/a'
-                            : _(
-                                  <a
-                                      href='#'
-                                      title='visible / restricted'
-                                      onClick={(e) => {
-                                          e.preventDefault()
-                                      }}
-                                  >
-                                      {attachment.projectAttachmentUsage?.visible ?? 0} /{' '}
-                                      {attachment.projectAttachmentUsage?.restricted ?? 0}
-                                  </a>,
-                              ),
-                        {
-                            projectId,
-                            attachmentId: CommonUtils.getIdFromUrl(attachment._links?.self.href),
-                            attachmentName: attachment.filename,
-                        },
-                    ])
+                const data = (await response.json()) as EmbeddedAttachments
+                setAttachmentData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:attachments'])
+                        ? []
+                        : data['_embedded']['sw360:attachments'].map(
+                              (att) => ({ node: att, children: [{ node: att }] }) as NestedRows<Attachment>,
+                          ),
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
                 }
-                setData(tableData)
-            } catch (e) {
-                console.error(e)
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
             }
         })()
 
         return () => controller.abort()
-    }, [projectId, t])
+    }, [session])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => {
+            if (row.depth === 1) {
+                row.meta = {
+                    isFullSpanRow: true,
+                }
+            }
+            return row.depth === 0
+        },
+    })
+
+    table.getRowModel().rows.forEach((row) => {
+        if (row.depth === 1) {
+            row.meta = {
+                isFullSpanRow: true,
+            }
+        }
+    })
 
     return (
         <>
-            {data ? (
-                <Table
-                    columns={columns}
-                    data={data}
-                    pagination={false}
-                    selector={false}
-                />
-            ) : (
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <Spinner className='spinner' />
-                </div>
-            )}
+            <div className='mb-3'>
+                {table ? (
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                    />
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
             {importStatusData != null && (
                 <Modal
                     show={true}
