@@ -15,7 +15,7 @@
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
-    "country-list": "^2.3.0",
+    "country-list": "^2.4.1",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.2.1",
     "flag-icons": "^7.3.2",
