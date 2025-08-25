@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 import { ColumnFiltersState, Row, Table, flexRender } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
@@ -199,28 +200,40 @@ export function SW360Table<K>({
                     ))}
                 </thead>
                 <tbody>
-                    {!showProcessing &&
-                        table.getRowModel().rows.length === 0 &&
-                        noRecordsFoundMessage !== undefined && (
-                            <tr>
-                                <td colSpan={table.getVisibleFlatColumns().length}>
-                                    <div className='restrict-row-height text-center'>
-                                        {noRecordsFoundMessage ?? t('No data available in table')}
+                    {!showProcessing && table.getRowModel().rows.length === 0 && (
+                        <tr>
+                            <td colSpan={table.getVisibleFlatColumns().length}>
+                                <div className='restrict-row-height text-center'>
+                                    {noRecordsFoundMessage ?? t('No data available in table')}
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                    {table.getRowModel().rows.map((row) =>
+                        !CommonUtils.isNullOrUndefined(row.meta?.isFullSpanRow) && row.meta.isFullSpanRow === true ? (
+                            <tr key={row.id}>
+                                <td colSpan={table.getVisibleLeafColumns().length}>
+                                    <div className='restrict-row-height'>
+                                        {row.getVisibleCells()?.[0] &&
+                                            flexRender(
+                                                row.getVisibleCells()[0].column.columnDef.cell,
+                                                row.getVisibleCells()[0].getContext(),
+                                            )}
                                     </div>
                                 </td>
                             </tr>
-                        )}
-                    {table.getRowModel().rows.map((row) => (
-                        <tr key={row.id}>
-                            {row.getVisibleCells().map((cell) => (
-                                <td key={cell.id}>
-                                    <div className='restrict-row-height'>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </div>
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
+                        ) : (
+                            <tr key={row.id}>
+                                {row.getVisibleCells().map((cell) => (
+                                    <td key={cell.id}>
+                                        <div className='restrict-row-height'>
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </div>
+                                    </td>
+                                ))}
+                            </tr>
+                        ),
+                    )}
                 </tbody>
             </table>
             {showProcessing && (
@@ -232,7 +245,7 @@ export function SW360Table<K>({
     )
 }
 
-export function PaddedCell<K>({ children, row }: { children: ReactNode; row: Row<K> }): ReactNode {
+export function PaddedCell<K>({ children, row }: { children?: ReactNode; row: Row<K> }): ReactNode {
     return (
         <div className='d-flex'>
             <span
