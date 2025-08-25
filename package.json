@@ -46,7 +46,7 @@
     "@types/react-dom": "19.1.6",
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
-    "@typescript-eslint/typescript-estree": "^8.37.0",
+    "@typescript-eslint/typescript-estree": "^8.40.0",
     "bootstrap": "^5.3.7",
     "classnames": "^2.3.2",
     "commitlint": "^19.8.0",
