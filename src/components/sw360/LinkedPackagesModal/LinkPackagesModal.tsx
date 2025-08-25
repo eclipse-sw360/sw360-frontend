@@ -181,11 +181,13 @@ export default function LinkPackagesModal({
             if (linkedPackagePayloadData.size > 0) {
                 const updatedProjectPayload = { ...projectPayload }
                 if (updatedProjectPayload.packageIds === undefined) {
-                    updatedProjectPayload.packageIds = []
-                } else {
-                    for (const [packageId] of linkedPackagePayloadData) {
-                        if (!updatedProjectPayload.packageIds.includes(packageId))
-                            updatedProjectPayload.packageIds.push(packageId)
+                    updatedProjectPayload.packageIds = {}
+                }
+                for (const [packageId, packageData] of linkedPackagePayloadData) {
+                    if (!updatedProjectPayload.packageIds[packageId]) {
+                        updatedProjectPayload.packageIds[packageId] = {
+                            comment: packageData.comment || '',
+                        }
                     }
                 }
                 setProjectPayload(updatedProjectPayload)
@@ -202,7 +204,10 @@ export default function LinkPackagesModal({
         } else {
             const interimData = extractInterimPackageData(packageId)
             if (interimData === undefined) return
-            m.set(packageId, interimData)
+            m.set(packageId, {
+                ...interimData,
+                comment: '',
+            })
         }
         setLinkPackages(m)
     }

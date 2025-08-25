@@ -12,6 +12,7 @@
 import { _, Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
 import { HttpStatus, LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
@@ -27,13 +28,46 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-type RowData = (string | string[] | undefined)[]
+type RowData = (string | string[] | { comment?: string; key?: string } | undefined)[]
 
 export default function LinkedPackages({ projectId, projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
     const [newLinkedPackageData, setNewLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
+
+    const handleComments = (
+        packageId: string,
+        updatedComment: string,
+        linkedPackageData: Map<string, LinkedPackageData>,
+    ) => {
+        try {
+            if (linkedPackageData.has(packageId)) {
+                linkedPackageData.forEach((value, key) => {
+                    if (key === packageId) {
+                        value.comment = updatedComment
+                        setNewLinkedPackageData(new Map(linkedPackageData))
+
+                        // Update project payload
+                        const updatedProjectPayload = { ...projectPayload }
+                        if (updatedProjectPayload.packageIds === undefined) {
+                            updatedProjectPayload.packageIds = {}
+                        }
+                        updatedProjectPayload.packageIds[packageId] = {
+                            comment: updatedComment,
+                        }
+                        setProjectPayload(updatedProjectPayload)
+
+                        const updatedTableData = extractDataFromMap(linkedPackageData)
+                        setTableData(updatedTableData)
+                    }
+                })
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
+    }
 
     const columns = [
         {
@@ -63,6 +97,30 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
             sort: true,
         },
         {
+            id: 'linkedPackagesData.comment',
+            name: t('Comments'),
+            sort: true,
+            formatter: ({ comment, key }: { comment: string; key: string }) =>
+                _(
+                    <div className='col-lg-9'>
+                        <input
+                            key={`comment-${key}-${newLinkedPackageData.get(key)?.comment || comment}`}
+                            type='text'
+                            className='form-control'
+                            placeholder='Enter Comments'
+                            id={`linkedPackagesData.comment-${key}`}
+                            aria-describedby='linkedPackagesData.comment'
+                            name='comment'
+                            defaultValue={newLinkedPackageData.get(key)?.comment || comment}
+                            onBlur={(event) => {
+                                const updatedComment = event.target.value
+                                handleComments(key, updatedComment, newLinkedPackageData)
+                            }}
+                        />
+                    </div>,
+                ),
+        },
+        {
             id: 'linkedPackagesData.deleteLinkedPackage',
             name: t('Actions'),
             sort: true,
@@ -88,8 +146,8 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
         newLinkedPackageData.forEach((_, key) => {
             if (key === packageId) {
                 newLinkedPackageData.delete(key)
-                if (updatedProjectPayload.packageIds && updatedProjectPayload.packageIds.includes(key)) {
-                    updatedProjectPayload.packageIds.splice(updatedProjectPayload.packageIds.indexOf(key), 1)
+                if (updatedProjectPayload.packageIds && updatedProjectPayload.packageIds[key]) {
+                    delete updatedProjectPayload.packageIds[key]
                     setProjectPayload(updatedProjectPayload)
                 }
                 const updatedTableData = extractDataFromMap(newLinkedPackageData)
@@ -106,6 +164,7 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
                 value.version,
                 value.licenseIds,
                 value.packageManager,
+                { comment: value.comment || '', key: value.packageId },
                 value.packageId,
             ])
         })
@@ -127,33 +186,37 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
     }, [])
 
     useEffect(() => {
-        if (projectPayload.packageIds && projectPayload.packageIds.length > 0) {
+        if (projectPayload.packageIds && Object.keys(projectPayload.packageIds).length > 0) {
             fetchData(`projects/${projectId}/packages`)
                 .then((linkedPackages: LinkedPackage[] | undefined) => {
                     if (!linkedPackages) return
-                    setNewLinkedPackageData((prevMap) => {
-                        const updatedMap = new Map(prevMap)
 
-                        linkedPackages.forEach((item) => {
-                            if (!updatedMap.has(item.id)) {
-                                updatedMap.set(item.id, {
-                                    packageId: item.id,
-                                    name: item.name,
-                                    version: item.version as string,
-                                    licenseIds: item.licenseIds as string[],
-                                    packageManager: item.packageManager as string,
-                                })
-                            }
+                    const updatedMap = new Map<string, LinkedPackageData>()
+
+                    linkedPackages.forEach((item) => {
+                        const packageComment = projectPayload.packageIds?.[item.id]?.comment || ''
+                        updatedMap.set(item.id, {
+                            packageId: item.id,
+                            name: item.name,
+                            version: item.version as string,
+                            licenseIds: item.licenseIds as string[],
+                            packageManager: item.packageManager as string,
+                            comment: packageComment,
                         })
-                        return updatedMap
                     })
-                    setTableData(extractDataFromMap(newLinkedPackageData))
+
+                    setNewLinkedPackageData(updatedMap)
+                    // Extract data from the newly created map with comments
+                    setTableData(extractDataFromMap(updatedMap))
                 })
-                .catch((err) => console.error(err))
+                .catch((error) => {
+                    const message = error instanceof Error ? error.message : String(error)
+                    MessageService.error(message)
+                })
         } else {
             setTableData([])
         }
-    }, [projectId])
+    }, [projectId, projectPayload.packageIds])
 
     useEffect(() => {
         setTableData(extractDataFromMap(newLinkedPackageData))
