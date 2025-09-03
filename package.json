@@ -52,7 +52,7 @@
     "commitlint": "^19.8.0",
     "cypress": "^15.0.0",
     "eslint": "^9.33.0",
-    "eslint-config-next": "15.4.6",
+    "eslint-config-next": "15.5.2",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.3",
