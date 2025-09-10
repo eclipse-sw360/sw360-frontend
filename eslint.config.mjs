@@ -2,6 +2,7 @@ import eslint from '@eslint/js'
 import prettierPlugin from 'eslint-plugin-prettier'
 import { globalIgnores } from 'eslint/config'
 import tseslint from 'typescript-eslint'
+import nextPlugin from '@next/eslint-plugin-next'
 
 export default tseslint.config(
     globalIgnores([
@@ -12,6 +13,7 @@ export default tseslint.config(
         'commitlint.config.js',
         'global.d.ts',
         'next.config.js',
+        'next-env.d.ts',
     ]),
 
     eslint.configs.recommended,
@@ -22,6 +24,17 @@ export default tseslint.config(
                 projectService: true,
                 tsconfigRootDir: import.meta.dirname,
             },
+        },
+    },
+
+    //NextJS rules
+    {
+        files: ['src/**/*.{ts,tsx}'],
+        plugins: {
+            '@next/next': nextPlugin,
+        },
+        rules: {
+            ...nextPlugin.configs.recommended.rules,
         },
     },
 
