@@ -115,14 +115,18 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
-
-                const data = (await response.json()) as EmbeddedChangeLogs
-
-                setChangeLogList(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
-                        ? []
-                        : data['_embedded']['sw360:changeLogs'],
-                )
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangeLogs
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
             } catch (error: unknown) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
