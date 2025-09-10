@@ -241,7 +241,7 @@ export default function ProjectObligation({ projectId, actionType, payload, setP
                 },
                 { status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
-                val.status ?? '',
+                val.id ?? '',
                 { comment: val.comment ?? '' },
             ])
         }

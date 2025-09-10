@@ -240,7 +240,7 @@ export default function OrganizationObligation({ projectId, actionType, payload,
                 },
                 { status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
-                val.status ?? '',
+                val.id ?? '',
                 { comment: val.comment ?? '' },
             ])
         }

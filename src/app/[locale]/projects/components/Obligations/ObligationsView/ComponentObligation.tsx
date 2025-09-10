@@ -239,7 +239,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                 },
                 { status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
-                val.status ?? '',
+                val.id ?? '',
                 { comment: val.comment ?? '' },
             ])
         }

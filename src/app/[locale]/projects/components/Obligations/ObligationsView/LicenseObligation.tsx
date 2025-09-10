@@ -547,7 +547,7 @@ export default function LicenseObligation({
                 },
                 { status: obl.status ?? '', obligation: key, payload },
                 Capitalize(val.obligationType ?? ''),
-                '',
+                obl.id ?? '',
                 { comment: obl.comment ?? '', obligation: key, payload },
             ])
         }
