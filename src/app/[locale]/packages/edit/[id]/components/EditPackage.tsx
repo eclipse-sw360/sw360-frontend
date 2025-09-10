@@ -65,7 +65,7 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
             )
             if (response.status == HttpStatus.OK) {
                 MessageService.success(t('Package updated successfully'))
-                router.push('/packages')
+                router.push(`/packages/detail/${packageId}`)
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 await signOut()
             } else {

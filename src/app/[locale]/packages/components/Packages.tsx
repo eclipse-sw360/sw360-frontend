@@ -216,7 +216,7 @@ function Packages(): ReactNode {
                     return (
                         <>
                             {id && (
-                                <span className='d-flex justify-content-evenly'>
+                                <span className='d-flex justify-content-evenly cursor-pointer'>
                                     <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                         <span
                                             className='d-inline-block'

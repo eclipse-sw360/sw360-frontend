@@ -72,16 +72,32 @@ export default function CreateOrEditPackage({
         }
     }, [status])
 
+    const handleGoBack = () => {
+        if (window.history.length > 1) {
+            router.back()
+        } else {
+            router.push('/packages')
+        }
+    }
+
     const handleReleaseName = () => {
+        const releaseId = packagePayload.releaseId ?? ''
+
+        if (!releaseId) {
+            return releaseNameVersion
+        }
+
+        if (releaseNameVersion) {
+            return releaseNameVersion
+        }
+
         if (isEditPage) {
-            if (releaseNameVersion !== '') {
-                return releaseNameVersion
-            } else {
-                const name = packagePayload._embedded?.['sw360:release']?.name ?? ''
-                const version = packagePayload._embedded?.['sw360:release']?.version ?? ''
-                return name && version ? `${name} (${version})` : ''
-            }
-        } else return ''
+            const name = packagePayload._embedded?.['sw360:release']?.name ?? ''
+            const version = packagePayload._embedded?.['sw360:release']?.version ?? ''
+            return name && version ? `${name} (${version})` : ''
+        }
+
+        return ''
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
@@ -207,7 +223,7 @@ export default function CreateOrEditPackage({
                     <button
                         type='button'
                         className='mb-3 me-1 col-auto btn btn-secondary'
-                        onClick={() => router.push('/packages')}
+                        onClick={handleGoBack}
                     >
                         {t('Cancel')}
                     </button>
@@ -382,14 +398,20 @@ export default function CreateOrEditPackage({
                             <div className='input-group'>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     placeholder={t('Click to link a Release')}
                                     id='createOrEditPackage.release'
                                     value={handleReleaseName()}
                                     onClick={() => setShowLinkedReleasesModal(true)}
                                     readOnly
                                 />
-                                <span className='input-group-text'>
+                                <span
+                                    className='input-group-text cursor-pointer'
+                                    onClick={() => {
+                                        setReleaseNameVersion('')
+                                        setPackagePayload((prev) => ({ ...prev, releaseId: '' }))
+                                    }}
+                                >
                                     <IoIosClose />
                                 </span>
                             </div>

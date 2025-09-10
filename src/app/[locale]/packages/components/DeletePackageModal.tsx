@@ -14,7 +14,7 @@ import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
@@ -54,12 +54,20 @@ export default function DeletePackageModal({
         }
     }, [status])
 
+    const handleGoBack = () => {
+        if (window.history.length > 1) {
+            router.back()
+        } else {
+            router.push('/packages')
+        }
+    }
+
     const deletePackage = async () => {
         try {
             setDeleting(true)
             const session = await getSession()
             if (!session) {
-                return redirect('/')
+                return router.push('/')
             }
 
             const response = await ApiUtils.DELETE(`packages/${modalMetaData.packageId}`, session.user.access_token)
@@ -73,7 +81,7 @@ export default function DeletePackageModal({
                         packageName: '',
                         packageVersion: '',
                     })
-                    router.push('/packages')
+                    handleGoBack()
                 } else {
                     setAlert({
                         variant: 'success',
@@ -99,7 +107,7 @@ export default function DeletePackageModal({
                 if (isEditPage) {
                     MessageService.error(t('Package cannot be deleted'))
                     setModalMetaData({ show: false, packageId: '', packageName: '', packageVersion: '' })
-                    router.push('/packages')
+                    router.push(`/packages/edit/${modalMetaData.packageId}`)
                 } else {
                     setAlert({
                         variant: 'danger',
