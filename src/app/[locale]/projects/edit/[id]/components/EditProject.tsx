@@ -39,6 +39,7 @@ import { Breadcrumb } from 'next-sw360'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, type JSX } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
 
@@ -412,13 +413,41 @@ function EditProject({
                 ),
             ]
             if (Object.keys(obligations).length !== 0) {
-                requests.push(
-                    ApiUtils.PATCH(
-                        `projects/${projectId}/updateLicenseObligation`,
-                        obligations,
-                        session.user.access_token,
-                    ),
-                )
+                for (const key in obligations) {
+                    if (obligations[key]?.obligationType === ObligationLevels.LICENSE_OBLIGATION) {
+                        requests.push(
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateLicenseObligation`,
+                                obligations,
+                                session.user.access_token,
+                            ),
+                        )
+                    } else if (obligations[key]?.obligationType === ObligationLevels.COMPONENT_OBLIGATION) {
+                        requests.push(
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=component`,
+                                obligations,
+                                session.user.access_token,
+                            ),
+                        )
+                    } else if (obligations[key]?.obligationType === ObligationLevels.PROJECT_OBLIGATION) {
+                        requests.push(
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=project`,
+                                obligations,
+                                session.user.access_token,
+                            ),
+                        )
+                    } else if (obligations[key]?.obligationType === ObligationLevels.ORGANISATION_OBLIGATION) {
+                        requests.push(
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=organization`,
+                                obligations,
+                                session.user.access_token,
+                            ),
+                        )
+                    }
+                }
             }
             const responses = await Promise.all(requests)
             let allOk = true
@@ -439,8 +468,12 @@ function EditProject({
                         ` ${projectPayload.name} (${projectPayload.version})!`,
                 )
             }
-        } catch (e) {
-            console.error(e)
+        } catch (error: unknown) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
 
