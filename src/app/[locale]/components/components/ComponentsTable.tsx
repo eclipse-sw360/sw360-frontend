@@ -50,10 +50,10 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const router = useRouter()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)

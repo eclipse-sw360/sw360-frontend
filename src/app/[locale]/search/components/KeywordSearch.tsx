@@ -9,13 +9,13 @@
 
 'use client'
 
-import { getSession, signOut, useSession } from 'next-auth/react'
+import MessageService from '@/services/message.service'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
 import { PiInfoBold } from 'react-icons/pi'
 
-import { Embedded, HttpStatus, SearchResult } from '@/object-types'
+import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface SEARCH_STATE {
@@ -130,7 +130,17 @@ function reducer(state: SEARCH_STATE, action: SEARCH_ACTIONS): SEARCH_STATE {
     }
 }
 
-function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchResult[] | null>> }): ReactNode {
+function KeywordSearch({
+    setData,
+    setShowProcessing,
+    setPaginationMeta,
+    pageableQueryParam,
+}: {
+    setData: Dispatch<SetStateAction<SearchResult[]>>
+    setShowProcessing: Dispatch<SetStateAction<boolean>>
+    setPaginationMeta: Dispatch<SetStateAction<PaginationMeta | undefined>>
+    pageableQueryParam: PageableQueryParam
+}): ReactNode {
     const t = useTranslations('default')
 
     const initialState: SEARCH_STATE = {
@@ -147,51 +157,51 @@ function KeywordSearch({ setData }: { setData: Dispatch<SetStateAction<SearchRes
 
     const [searchOptions, dispatch] = useReducer(reducer, initialState)
     const [searchText, setSearchText] = useState('')
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
     const handleSearch = async () => {
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, 300)
+
         try {
-            setData(null)
-            let queryUrl = 'search'
-            let paramString = ''
-            paramString += `?searchText=${encodeURIComponent(searchText)}`
-            for (const k in searchOptions) {
-                if (searchOptions[k as keyof SEARCH_STATE] === false) continue
-                if (k === 'entireDocument') {
-                    paramString += '&typeMasks=document'
-                } else {
-                    paramString += `&typeMasks=${encodeURIComponent(k)}`
-                }
-            }
-            queryUrl += paramString
+            if (session.status !== 'authenticated') return
+            const queryUrl = CommonUtils.createUrlWithParams('search', {
+                searchText: String(searchText),
+                ...Object.fromEntries([
+                    ...Object.entries(searchOptions)
+                        .filter(([, v]) => v !== false)
+                        .map(([key]) => (key === 'entireDocument' ? ['typeMasks', 'document'] : ['typeMasks', key])),
+                    ...Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)]),
+                ]),
+            } as Record<string, string>)
 
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                await signOut()
-                return
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token)
+            if (response.status !== HttpStatus.OK || response.status !== HttpStatus.NO_CONTENT) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
             }
 
-            const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                await signOut()
-                return
-            } else if (response.status === HttpStatus.NO_CONTENT) {
-                setData([])
-                return
-            } else if (response.status !== HttpStatus.OK) {
-                notFound()
-            }
             const data = (await response.json()) as EmbeddedSearchResults
-            if (!CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:searchResults']))
+            if (!CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:searchResults'])) {
                 setData(data['_embedded']['sw360:searchResults'])
-        } catch (e) {
-            console.error(e)
+                setPaginationMeta(data.page)
+            }
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            clearTimeout(timeout)
+            setShowProcessing(false)
         }
     }
 
