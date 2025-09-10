@@ -36,6 +36,14 @@ function CreatePackage(): ReactNode {
         }
     }, [status])
 
+    const handleGoBack = () => {
+        if (window.history.length > 1) {
+            router.back()
+        } else {
+            router.push('/packages')
+        }
+    }
+
     const handleCreatePackage = async () => {
         try {
             setCreatingPackage(true)
@@ -50,13 +58,17 @@ function CreatePackage(): ReactNode {
                 },
                 session.user.access_token,
             )
+            const res = (await response.json()) as Record<string, string>
             if (response.status == HttpStatus.CREATED) {
                 MessageService.success(t('Package created successfully'))
-                router.push('/packages')
+                if (res.id) {
+                    router.push(`/packages/detail/${res.id}`)
+                } else {
+                    handleGoBack()
+                }
             } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 await signOut()
             } else {
-                const res = (await response.json()) as Record<string, string>
                 MessageService.error(`${t('Something went wrong')}: ${res.message}`)
             }
         } catch (e) {

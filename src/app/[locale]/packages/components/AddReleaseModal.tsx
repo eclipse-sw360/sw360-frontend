@@ -1,9 +1,9 @@
 // Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
-
+//
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
 // which is available at https://www.eclipse.org/legal/epl-2.0/
-
+//
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
@@ -13,11 +13,12 @@ import { Embedded, HttpStatus, Package, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
+import { SW360Table } from 'next-sw360'
 import Link from 'next/link'
-import { SetStateAction, useEffect, useRef, useState, type JSX } from 'react'
+import { SetStateAction, useEffect, useMemo, useRef, useState, type JSX } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
@@ -53,6 +54,7 @@ export default function AddReleaseModal({
     const [releaseData, setReleaseData] = useState<RowData[]>([])
     const [interimReleaseId, setInterimReleaseId] = useState<string>('')
     const [interimReleaseNameVersion, setInterimReleaseNameVersion] = useState<string>('')
+    const [sorting, setSorting] = useState<SortingState>([])
     const { status } = useSession()
 
     useEffect(() => {
@@ -107,7 +109,7 @@ export default function AddReleaseModal({
                     : data['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
                           {
                               releaseId: release.id ?? '',
-                              releaseName: release.name,
+                              name: release.name,
                               releaseVersion: release.version,
                           },
                           release.vendor ? (release.vendor.fullName ?? '') : '',
@@ -135,76 +137,6 @@ export default function AddReleaseModal({
         }
     }
 
-    const columns = [
-        {
-            id: 'linkReleases.selectReleaseCheckbox',
-            name: '',
-            width: '8%',
-            formatter: ({
-                releaseId,
-                releaseName,
-                releaseVersion,
-            }: {
-                releaseId: string
-                releaseName: string
-                releaseVersion: string
-            }) =>
-                _(
-                    <div className='form-check'>
-                        <input
-                            className='form-check-input'
-                            type='checkbox'
-                            name='releaseId'
-                            value={releaseId}
-                            id={releaseId}
-                            title=''
-                            placeholder='Release Id'
-                            checked={interimReleaseId.includes(releaseId)}
-                            onChange={() => handleCheckboxes(releaseId, releaseName, releaseVersion)}
-                        />
-                    </div>,
-                ),
-        },
-        {
-            id: 'linkReleases.vendor',
-            name: t('Vendor'),
-            sort: true,
-        },
-        {
-            id: 'linkReleases.componentName',
-            name: t('Component Name'),
-            sort: true,
-            formatter: ({ name, componentId }: { name: string; componentId: string }) =>
-                _(
-                    <>
-                        <Link href={`/components/detail/${componentId}`}>{name}</Link>
-                    </>,
-                ),
-        },
-        {
-            id: 'linkReleases.releaseVersion',
-            name: t('Release version'),
-            width: '15%',
-            formatter: ({ releaseVersion, releaseId }: { releaseVersion: string; releaseId: string }) =>
-                _(
-                    <>
-                        <Link href={`/components/releases/detail/${releaseId}`}>{releaseVersion}</Link>
-                    </>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'linkReleases.clearingState',
-            name: t('Clearing State'),
-            sort: true,
-        },
-        {
-            id: 'linkReleases.mainlineState',
-            name: t('Mainline State'),
-            sort: true,
-        },
-    ]
-
     const handleCheckboxes = (releaseId: string, releaseName: string, releaseVersion: string) => {
         setInterimReleaseId((prevReleaseId) => (prevReleaseId === releaseId ? '' : releaseId))
         setInterimReleaseNameVersion(`${releaseName} (${releaseVersion})`)
@@ -230,6 +162,84 @@ export default function AddReleaseModal({
         setInterimReleaseNameVersion('')
         isExactMatch.current = false
     }
+
+    const columns = useMemo<ColumnDef<RowData>[]>(
+        () => [
+            {
+                id: 'select',
+                header: '',
+                cell: ({ row }) => {
+                    const data = row.original[0] as SummaryReleaseInfo
+                    return (
+                        <div className='form-check'>
+                            <input
+                                className='form-check-input'
+                                type='checkbox'
+                                name='releaseId'
+                                value={data.releaseId}
+                                checked={interimReleaseId.includes(data.releaseId ?? '')}
+                                onChange={() =>
+                                    handleCheckboxes(data.releaseId ?? '', data.name ?? '', data.releaseVersion ?? '')
+                                }
+                            />
+                        </div>
+                    )
+                },
+                meta: { width: '8%' },
+            },
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                accessorFn: (row) => row[1] as string,
+            },
+            {
+                id: 'componentName',
+                header: t('Component Name'),
+                accessorFn: (row) => (row[2] as { name: string }).name,
+                cell: ({ row }) => {
+                    const data = row.original[2] as {
+                        name: string
+                        componentId: string
+                    }
+                    return <Link href={`/components/detail/${data.componentId}`}>{data.name}</Link>
+                },
+            },
+            {
+                id: 'releaseVersion',
+                header: t('Release version'),
+                accessorFn: (row) => (row[3] as { releaseVersion: string }).releaseVersion,
+                cell: ({ row }) => {
+                    const data = row.original[3] as {
+                        releaseVersion: string
+                        releaseId: string
+                    }
+                    return <Link href={`/components/releases/detail/${data.releaseId}`}>{data.releaseVersion}</Link>
+                },
+            },
+            {
+                id: 'clearingState',
+                header: t('Clearing State'),
+                accessorFn: (row) => row[4] as string,
+            },
+            {
+                id: 'mainlineState',
+                header: t('Mainline State'),
+                accessorFn: (row) => row[5] as string,
+            },
+        ],
+        [t, interimReleaseId],
+    )
+
+    const table = useReactTable({
+        data: releaseData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        state: {
+            sorting,
+        },
+        onSortingChange: setSorting,
+    })
 
     return (
         <Modal
@@ -289,10 +299,9 @@ export default function AddReleaseModal({
                         }}
                     />
                     {loading === false ? (
-                        <Table
-                            columns={columns}
-                            data={releaseData}
-                            sort={false}
+                        <SW360Table
+                            table={table}
+                            showProcessing={false}
                         />
                     ) : (
                         <div
