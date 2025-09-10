@@ -9,7 +9,7 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-ARG VARIANT=22-slim
+ARG VARIANT=24-slim
 FROM node:${VARIANT} AS build
 
 RUN npm install -g pnpm
