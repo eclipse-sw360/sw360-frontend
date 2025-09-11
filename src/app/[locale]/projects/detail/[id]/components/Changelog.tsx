@@ -19,6 +19,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { Changelogs, Embedded, HttpStatus, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
@@ -60,16 +61,24 @@ function ChangeLog({
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-
-                const data = (await response.json()) as EmbeddedChangeLogs
-
-                setChangeLogList(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
-                        ? []
-                        : data['_embedded']['sw360:changeLogs'],
-                )
-            } catch (e) {
-                console.error(e)
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangeLogs
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
 
