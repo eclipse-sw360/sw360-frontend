@@ -112,12 +112,11 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
         fetchData(`changelog/document/${componentId}`)
             .then((changeLogs: EmbeddedChangelogs | undefined) => {
-                if (changeLogs === undefined) return
-                setChangeLogList(
-                    CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
-                        ? []
-                        : changeLogs['_embedded']['sw360:changeLogs'],
-                )
+                if (changeLogs && CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])) {
+                    setChangeLogList([])
+                } else {
+                    setChangeLogList(changeLogs?._embedded?.['sw360:changeLogs'] || [])
+                }
             })
             .catch((err) => console.error(err))
 
