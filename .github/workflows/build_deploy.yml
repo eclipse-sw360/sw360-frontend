@@ -43,7 +43,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
 
       - name: 📦 Install dependencies
@@ -55,6 +55,7 @@ jobs:
         shell: bash
         run: |
           pnpm lint --output-file eslint_report.json --format json
+        continue-on-error: true
 
       - name: Run build
         shell: bash
@@ -62,10 +63,11 @@ jobs:
           pnpm build --no-lint > typescript.log
 
       - name: Annotate Code
-        uses: DerLev/eslint-annotations@v2
+        uses: ataylorme/eslint-annotate-action@21a1ba0738d8b732639999029c4ff40b6e121bb4
+        if: always()
         with:
-          eslint-report: eslint_report.json
-          typescript-log: typescript.log
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          report-json: eslint_report.json
 
       - name: Create Deploy Tarball
         shell: bash
