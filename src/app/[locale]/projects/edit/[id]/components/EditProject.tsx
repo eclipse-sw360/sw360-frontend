@@ -415,10 +415,8 @@ function EditProject({
             if (Object.keys(obligations).length !== 0) {
                 for (const key in obligations) {
                     if (obligations[key]?.obligationType === ObligationLevels.LICENSE_OBLIGATION) {
-                        for (const _ in obligations[key]) {
-                            if (obligations[key].hasOwnProperty('obligationType')) {
-                                delete obligations[key].obligationType
-                            }
+                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                            delete obligations[key].obligationType
                         }
                         requests.push(
                             ApiUtils.PATCH(
@@ -428,10 +426,8 @@ function EditProject({
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.COMPONENT_OBLIGATION) {
-                        for (const _ in obligations[key]) {
-                            if (obligations[key].hasOwnProperty('obligationType')) {
-                                delete obligations[key].obligationType
-                            }
+                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                            delete obligations[key].obligationType
                         }
                         requests.push(
                             ApiUtils.PATCH(
@@ -441,10 +437,8 @@ function EditProject({
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.PROJECT_OBLIGATION) {
-                        for (const _ in obligations[key]) {
-                            if (obligations[key].hasOwnProperty('obligationType')) {
-                                delete obligations[key].obligationType
-                            }
+                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                            delete obligations[key].obligationType
                         }
                         requests.push(
                             ApiUtils.PATCH(
@@ -454,6 +448,9 @@ function EditProject({
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.ORGANISATION_OBLIGATION) {
+                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                            delete obligations[key].obligationType
+                        }
                         requests.push(
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=organization`,
