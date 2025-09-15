@@ -18,13 +18,20 @@ import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import { ShowObligationTextOnExpand } from './ExpandableComponents'
+import UpdateCommentModal from './UpdateCommentModal'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface ComponentObligations {
     obligations: ComponentObligationData
+}
+
+interface UpdateCommentModalMetadata {
+    obligation: string
+    comment?: string
 }
 
 interface Props {
@@ -39,6 +46,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
     const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [componentObligations, setComponentObligations] = useState<null | ComponentObligations>(null)
+    const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -144,7 +152,11 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                                   onChange={(e) => {
                                       if (setPayload) {
                                           let obligationValue = payload?.[obligation] ?? {}
-                                          obligationValue = { ...obligationValue, status: e.target.value }
+                                          obligationValue = {
+                                              ...obligationValue,
+                                              status: e.target.value,
+                                              obligationType: ObligationLevels.COMPONENT_OBLIGATION,
+                                          }
                                           setPayload((payload: ComponentObligationData) => ({
                                               ...payload,
                                               [obligation]: obligationValue,
@@ -182,11 +194,17 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                   {
                       id: 'componentObligation.comment',
                       name: t('Comment'),
-                      formatter: ({ obligation, comment }: { obligation: string; comment: string }) => {
+                      formatter: ({ obligation, comment }: { comment: string; obligation: string }) => {
                           return _(
                               <input
                                   type='text'
                                   value={payload?.[obligation]?.comment ?? comment}
+                                  onClick={() => {
+                                      setUpdateCommentModalData({
+                                          comment: payload?.[obligation]?.comment ?? comment,
+                                          obligation,
+                                      })
+                                  }}
                                   className='form-control'
                                   placeholder={t('Enter comments')}
                                   readOnly
@@ -212,7 +230,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const componentObligation = await response.json()
+                const componentObligation = (await response.json()) as ComponentObligations
                 setComponentObligations(componentObligation)
             } catch (error: unknown) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
@@ -237,10 +255,10 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                 {
                     oblTitle: key,
                 },
-                { status: val.status ?? '' },
+                { obligation: key, status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
                 val.id ?? '',
-                { comment: val.comment ?? '' },
+                { obligation: key, comment: val.comment ?? '' },
             ])
         }
         setTableData(tableRows)
@@ -248,6 +266,13 @@ export default function ComponentObligation({ projectId, actionType, payload, se
 
     return (
         <>
+            <UpdateCommentModal
+                modalMetaData={updateCommentModalData}
+                setModalMetaData={setUpdateCommentModalData}
+                payload={payload}
+                setPayload={setPayload}
+                obligationTypeName={ObligationLevels.COMPONENT_OBLIGATION}
+            />
             {tableData ? (
                 <Table
                     columns={columns}

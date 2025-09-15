@@ -19,10 +19,17 @@ import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import { ShowObligationTextOnExpand } from './ExpandableComponents'
+import UpdateCommentModal from './UpdateCommentModal'
 
 interface OrganizationObligations {
     obligations: OrganizationObligationData
+}
+
+interface UpdateCommentModalMetadata {
+    obligation: string
+    comment?: string
 }
 
 interface Props {
@@ -40,6 +47,7 @@ export default function OrganizationObligation({ projectId, actionType, payload,
     const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [organizationObligations, setOrganizationObligations] = useState<null | OrganizationObligations>(null)
+    const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -145,7 +153,11 @@ export default function OrganizationObligation({ projectId, actionType, payload,
                                   onChange={(e) => {
                                       if (setPayload) {
                                           let obligationValue = payload?.[obligation] ?? {}
-                                          obligationValue = { ...obligationValue, status: e.target.value }
+                                          obligationValue = {
+                                              ...obligationValue,
+                                              status: e.target.value,
+                                              obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                                          }
                                           setPayload((payload: OrganizationObligationData) => ({
                                               ...payload,
                                               [obligation]: obligationValue,
@@ -188,6 +200,12 @@ export default function OrganizationObligation({ projectId, actionType, payload,
                               <input
                                   type='text'
                                   value={payload?.[obligation]?.comment ?? comment}
+                                  onClick={() => {
+                                      setUpdateCommentModalData({
+                                          comment: payload?.[obligation]?.comment ?? comment,
+                                          obligation,
+                                      })
+                                  }}
                                   className='form-control'
                                   placeholder={t('Enter comments')}
                                   readOnly
@@ -238,10 +256,10 @@ export default function OrganizationObligation({ projectId, actionType, payload,
                 {
                     oblTitle: key,
                 },
-                { status: val.status ?? '' },
+                { obligation: key, status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
                 val.id ?? '',
-                { comment: val.comment ?? '' },
+                { obligation: key, comment: val.comment ?? '' },
             ])
         }
         setTableData(tableRows)
@@ -249,6 +267,13 @@ export default function OrganizationObligation({ projectId, actionType, payload,
 
     return (
         <>
+            <UpdateCommentModal
+                modalMetaData={updateCommentModalData}
+                setModalMetaData={setUpdateCommentModalData}
+                payload={payload}
+                setPayload={setPayload}
+                obligationTypeName={ObligationLevels.ORGANISATION_OBLIGATION}
+            />
             {tableData ? (
                 <Table
                     columns={columns}
