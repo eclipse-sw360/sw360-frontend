@@ -12,6 +12,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 
 interface UpdateCommentModalMetadata {
     obligation: string
@@ -86,7 +87,11 @@ export default function UpdateCommentModal({
                     onClick={() => {
                         if (modalMetaData !== null && payload && setPayload) {
                             let obligationValue = payload[modalMetaData.obligation] ?? {}
-                            obligationValue = { ...obligationValue, comment: commentText }
+                            obligationValue = {
+                                ...obligationValue,
+                                comment: commentText,
+                                obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                            }
                             setPayload((payload: LicenseObligationData) => ({
                                 ...payload,
                                 [modalMetaData.obligation]: obligationValue,
