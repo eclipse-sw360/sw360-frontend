@@ -69,7 +69,7 @@ export interface ComponentObligationData {
         obligationLevel?: string
         modifiedBy?: string
         modifiedOn?: string
-        releaseIdToAcceptedCLI?: {}
+        releaseIdToAcceptedCLI?: object
     }
 }
 
