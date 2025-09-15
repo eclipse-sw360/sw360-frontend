@@ -19,13 +19,20 @@ import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import { ShowObligationTextOnExpand } from './ExpandableComponents'
+import UpdateCommentModal from './UpdateCommentModal'
 
 interface Props {
     projectId: string
     actionType: ActionType
     payload?: ProjectObligationData
     setPayload?: Dispatch<SetStateAction<ProjectObligationData>>
+}
+
+interface UpdateCommentModalMetadata {
+    obligation: string
+    comment?: string
 }
 
 interface ProjectObligations {
@@ -40,6 +47,7 @@ export default function ProjectObligation({ projectId, actionType, payload, setP
     const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [projectObligations, setProjectObligations] = useState<null | ProjectObligations>(null)
+    const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -146,7 +154,11 @@ export default function ProjectObligation({ projectId, actionType, payload, setP
                                   onChange={(e) => {
                                       if (setPayload) {
                                           let obligationValue = payload?.[obligation] ?? {}
-                                          obligationValue = { ...obligationValue, status: e.target.value }
+                                          obligationValue = {
+                                              ...obligationValue,
+                                              status: e.target.value,
+                                              obligationType: ObligationLevels.PROJECT_OBLIGATION,
+                                          }
                                           setPayload((payload: ProjectObligationData) => ({
                                               ...payload,
                                               [obligation]: obligationValue,
@@ -189,6 +201,12 @@ export default function ProjectObligation({ projectId, actionType, payload, setP
                               <input
                                   type='text'
                                   value={payload?.[obligation]?.comment ?? comment}
+                                  onClick={() => {
+                                      setUpdateCommentModalData({
+                                          comment: payload?.[obligation]?.comment ?? comment,
+                                          obligation,
+                                      })
+                                  }}
                                   className='form-control'
                                   placeholder={t('Enter comments')}
                                   readOnly
@@ -239,10 +257,10 @@ export default function ProjectObligation({ projectId, actionType, payload, setP
                 {
                     oblTitle: key,
                 },
-                { status: val.status ?? '' },
+                { obligation: key, status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
                 val.id ?? '',
-                { comment: val.comment ?? '' },
+                { obligation: key, comment: val.comment ?? '' },
             ])
         }
         setTableData(tableRows)
@@ -250,6 +268,13 @@ export default function ProjectObligation({ projectId, actionType, payload, setP
 
     return (
         <>
+            <UpdateCommentModal
+                modalMetaData={updateCommentModalData}
+                setModalMetaData={setUpdateCommentModalData}
+                payload={payload}
+                setPayload={setPayload}
+                obligationTypeName={ObligationLevels.PROJECT_OBLIGATION}
+            />
             {tableData ? (
                 <Table
                     columns={columns}
