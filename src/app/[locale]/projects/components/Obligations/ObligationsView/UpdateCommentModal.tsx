@@ -7,12 +7,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { LicenseObligationData } from '@/object-types'
+import {
+    ComponentObligationData,
+    LicenseObligationData,
+    OrganizationObligationData,
+    ProjectObligationData,
+} from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
 
 interface UpdateCommentModalMetadata {
     obligation: string
@@ -24,6 +28,7 @@ interface UpdateCommentModalProps {
     setModalMetaData: Dispatch<SetStateAction<UpdateCommentModalMetadata | null>>
     payload?: LicenseObligationData
     setPayload?: Dispatch<SetStateAction<LicenseObligationData>>
+    obligationTypeName: string | null
 }
 
 export default function UpdateCommentModal({
@@ -31,6 +36,7 @@ export default function UpdateCommentModal({
     setModalMetaData,
     payload,
     setPayload,
+    obligationTypeName,
 }: UpdateCommentModalProps) {
     const t = useTranslations('default')
     const [commentText, setCommentText] = useState('')
@@ -90,12 +96,20 @@ export default function UpdateCommentModal({
                             obligationValue = {
                                 ...obligationValue,
                                 comment: commentText,
-                                obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                                obligationType: obligationTypeName ?? '',
                             }
-                            setPayload((payload: LicenseObligationData) => ({
-                                ...payload,
-                                [modalMetaData.obligation]: obligationValue,
-                            }))
+                            setPayload(
+                                (
+                                    payload:
+                                        | LicenseObligationData
+                                        | ComponentObligationData
+                                        | ProjectObligationData
+                                        | OrganizationObligationData,
+                                ) => ({
+                                    ...payload,
+                                    [modalMetaData.obligation]: obligationValue,
+                                }),
+                            )
                             setCommentText('')
                             setModalMetaData(null)
                         }

@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import { ShowObligationTextOnExpand } from './ExpandableComponents'
 import UpdateCommentModal from './UpdateCommentModal'
 
@@ -225,7 +226,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                 } else if (response.status !== HttpStatus.OK) {
                     return notFound()
                 }
-                const componentObligation = await response.json()
+                const componentObligation = (await response.json()) as ComponentObligations
                 setComponentObligations(componentObligation)
             } catch (error: unknown) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
@@ -253,7 +254,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                 { status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
                 val.id ?? '',
-                { comment: val.comment ?? '' },
+                { obligation: key, comment: val.comment ?? '' },
             ])
         }
         setTableData(tableRows)
@@ -266,6 +267,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                 setModalMetaData={setUpdateCommentModalData}
                 payload={payload}
                 setPayload={setPayload}
+                obligationTypeName={ObligationLevels.COMPONENT_OBLIGATION}
             />
             {tableData ? (
                 <Table

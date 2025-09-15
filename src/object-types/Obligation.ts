@@ -66,6 +66,10 @@ export interface ComponentObligationData {
         status?: string
         comment?: string
         obligationType?: string
+        obligationLevel?: string
+        modifiedBy?: string
+        modifiedOn?: string
+        releaseIdToAcceptedCLI?: {}
     }
 }
 
