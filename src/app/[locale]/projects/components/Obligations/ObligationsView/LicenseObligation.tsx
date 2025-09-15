@@ -17,6 +17,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
 
@@ -103,7 +104,11 @@ function UpdateCommentModal({ modalMetaData, setModalMetaData, payload, setPaylo
                     onClick={() => {
                         if (modalMetaData !== null && payload && setPayload) {
                             let obligationValue = payload[modalMetaData.obligation] ?? {}
-                            obligationValue = { ...obligationValue, comment: commentText }
+                            obligationValue = {
+                                ...obligationValue,
+                                comment: commentText,
+                                obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                            }
                             setPayload((payload: LicenseObligationData) => ({
                                 ...payload,
                                 [modalMetaData.obligation]: obligationValue,

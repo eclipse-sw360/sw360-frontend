@@ -415,6 +415,11 @@ function EditProject({
             if (Object.keys(obligations).length !== 0) {
                 for (const key in obligations) {
                     if (obligations[key]?.obligationType === ObligationLevels.LICENSE_OBLIGATION) {
+                        for (const _ in obligations[key]) {
+                            if (obligations[key].hasOwnProperty('obligationType')) {
+                                delete obligations[key].obligationType
+                            }
+                        }
                         requests.push(
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateLicenseObligation`,
