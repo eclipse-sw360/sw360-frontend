@@ -285,7 +285,11 @@ export default function LicenseObligation({
                                   onChange={(e) => {
                                       if (setPayload) {
                                           let obligationValue = payload?.[obligation] ?? {}
-                                          obligationValue = { ...obligationValue, status: e.target.value }
+                                          obligationValue = {
+                                              ...obligationValue,
+                                              status: e.target.value,
+                                              obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                                          }
                                           setPayload((payload: LicenseObligationData) => ({
                                               ...payload,
                                               [obligation]: obligationValue,
