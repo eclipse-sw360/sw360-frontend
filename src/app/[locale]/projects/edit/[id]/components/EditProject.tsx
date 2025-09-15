@@ -441,6 +441,11 @@ function EditProject({
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.PROJECT_OBLIGATION) {
+                        for (const _ in obligations[key]) {
+                            if (obligations[key].hasOwnProperty('obligationType')) {
+                                delete obligations[key].obligationType
+                            }
+                        }
                         requests.push(
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=project`,
