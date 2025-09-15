@@ -19,12 +19,18 @@ import { notFound } from 'next/navigation'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { ShowObligationTextOnExpand } from './ExpandableComponents'
+import UpdateCommentModal from './UpdateCommentModal'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface ComponentObligations {
     obligations: ComponentObligationData
+}
+
+interface UpdateCommentModalMetadata {
+    obligation: string
+    comment?: string
 }
 
 interface Props {
@@ -39,6 +45,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
     const { status } = useSession()
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [componentObligations, setComponentObligations] = useState<null | ComponentObligations>(null)
+    const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -182,11 +189,17 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                   {
                       id: 'componentObligation.comment',
                       name: t('Comment'),
-                      formatter: ({ obligation, comment }: { obligation: string; comment: string }) => {
+                      formatter: ({ obligation, comment }: { comment: string; obligation: string }) => {
                           return _(
                               <input
                                   type='text'
                                   value={payload?.[obligation]?.comment ?? comment}
+                                  onClick={() => {
+                                      setUpdateCommentModalData({
+                                          comment: payload?.[obligation]?.comment ?? comment,
+                                          obligation,
+                                      })
+                                  }}
                                   className='form-control'
                                   placeholder={t('Enter comments')}
                                   readOnly
@@ -248,6 +261,12 @@ export default function ComponentObligation({ projectId, actionType, payload, se
 
     return (
         <>
+            <UpdateCommentModal
+                modalMetaData={updateCommentModalData}
+                setModalMetaData={setUpdateCommentModalData}
+                payload={payload}
+                setPayload={setPayload}
+            />
             {tableData ? (
                 <Table
                     columns={columns}
