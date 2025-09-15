@@ -152,7 +152,11 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                                   onChange={(e) => {
                                       if (setPayload) {
                                           let obligationValue = payload?.[obligation] ?? {}
-                                          obligationValue = { ...obligationValue, status: e.target.value }
+                                          obligationValue = {
+                                              ...obligationValue,
+                                              status: e.target.value,
+                                              obligationType: ObligationLevels.COMPONENT_OBLIGATION,
+                                          }
                                           setPayload((payload: ComponentObligationData) => ({
                                               ...payload,
                                               [obligation]: obligationValue,
@@ -251,7 +255,7 @@ export default function ComponentObligation({ projectId, actionType, payload, se
                 {
                     oblTitle: key,
                 },
-                { status: val.status ?? '' },
+                { obligation: key, status: val.status ?? '' },
                 Capitalize(val.obligationType ?? ''),
                 val.id ?? '',
                 { obligation: key, comment: val.comment ?? '' },
