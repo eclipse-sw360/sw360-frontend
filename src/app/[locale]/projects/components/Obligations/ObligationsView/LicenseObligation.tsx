@@ -17,6 +17,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
 import UpdateCommentModal from './UpdateCommentModal'
@@ -493,6 +494,7 @@ export default function LicenseObligation({
                 setModalMetaData={setUpdateCommentModalData}
                 payload={payload}
                 setPayload={setPayload}
+                obligationTypeName={ObligationLevels.LICENSE_OBLIGATION}
             />
             <LicenseDbObligationsModal
                 show={showLicenseDbObligationsModal}
