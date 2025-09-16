@@ -105,6 +105,7 @@ export default function ClearingComments({
             setInputComment('')
             setComments(response_data._embedded['sw360:comments'])
             MessageService.success(t('Your comments updated successfully'))
+            setCommentPayload({ text: '' })
         } else if (response.status == HttpStatus.UNAUTHORIZED) {
             return signOut()
         } else {
