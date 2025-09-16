@@ -94,7 +94,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                 setClearingRequestData(clearingRequestDetails)
             },
         )
-    }, [])
+    }, [clearingRequestId])
 
     const handleEditClearingRequest = (requestId: string | undefined) => {
         router.push(`/requests/clearingRequest/edit/${requestId}`)
@@ -150,11 +150,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                     >
                                         <Card.Header
                                             className={`
-                                                                    ${
-                                                                        openCardIndex === 0
-                                                                            ? styles['cardHeader-expanded']
-                                                                            : ''
-                                                                    }`}
+                                                        ${openCardIndex === 0 ? styles['cardHeader-expanded'] : ''}`}
                                             id={`${styles['cardHeader']}`}
                                         >
                                             <Button
@@ -208,11 +204,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                     >
                                         <Card.Header
                                             className={`
-                                                                    ${
-                                                                        openCardIndex === 1
-                                                                            ? styles['cardHeader-expanded']
-                                                                            : ''
-                                                                    }`}
+                                                        ${openCardIndex === 1 ? styles['cardHeader-expanded'] : ''}`}
                                             id={`${styles['cardHeader']}`}
                                         >
                                             <Button
