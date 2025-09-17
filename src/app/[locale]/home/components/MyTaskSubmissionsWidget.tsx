@@ -55,7 +55,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
                     const { documentName, documentId } = row.original
                     return (
                         <Link
-                            href={`/moderationrequest/${documentId}`} // fix
+                            href={`/requests/moderationRequest/${documentId}`}
                             className='text-link'
                         >
                             {documentName}
