@@ -22,6 +22,7 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
+import Link from 'next/link'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import HomeTableHeader from './HomeTableHeader'
@@ -49,7 +50,14 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 enableSorting: true,
                 cell: ({ row }) => {
                     const { id, documentName } = row.original
-                    return <>{`${id}|${documentName}`}</>
+                    return (
+                        <Link
+                            href={`/requests/moderationRequest/${id}`}
+                            className='text-link'
+                        >
+                            {documentName}
+                        </Link>
+                    )
                 },
                 meta: {
                     width: '60%',
