@@ -26,24 +26,9 @@ export function TableFooter({
     setPageableQueryParam: Dispatch<SetStateAction<PageableQueryParam>>
     paginationMeta: PaginationMeta
 }): ReactNode {
-    const t = useTranslations('default')
-
-    if (paginationMeta.totalElements === 0) {
-        return (
-            <div className='table-component d-flex justify-content-between align-items-center mt-3'>
-                <p className='mb-0'>
-                    {t.rich('showing page entries', {
-                        entryStart: 0,
-                        entryEnd: 0,
-                        totalElements: 0,
-                    })}
-                </p>
-            </div>
-        )
-    }
-
     const currentPage = paginationMeta.number
     const totalPages = paginationMeta.totalPages
+    const totalElements = paginationMeta.totalElements
     const pageSize = pageableQueryParam.page_entries
 
     const entryStart = currentPage * pageSize + 1
@@ -67,12 +52,95 @@ export function TableFooter({
     const sortedPages = Array.from(pageNumbers).sort((a, b) => a - b)
 
     return (
+        <TableFooterUI
+            entryStart={entryStart}
+            entryEnd={entryEnd}
+            totalElements={totalElements}
+            currentPage={currentPage}
+            sortedPages={sortedPages}
+            totalPages={totalPages}
+            goToPage={goToPage}
+        />
+    )
+}
+
+export function ClientSideTableFooter<K>({ table }: { table: Table<K> }): ReactNode {
+    const currentPage = table.getState().pagination.pageIndex
+    const totalPages = table.getPageCount()
+    const totalElements = table.getRowCount()
+    const pageSize = table.getState().pagination.pageSize
+
+    const entryStart = currentPage * pageSize + 1
+    const entryEnd = Math.min(entryStart + pageSize - 1, totalElements)
+
+    const goToPage = (page: number) => {
+        table.setPageIndex(page)
+    }
+
+    const pageNumbers = new Set<number>()
+
+    // Always show first and last
+    pageNumbers.add(0)
+    pageNumbers.add(totalPages - 1)
+
+    // Two before and after current page
+    for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+        if (i > 0 && i < totalPages - 1) pageNumbers.add(i)
+    }
+
+    const sortedPages = Array.from(pageNumbers).sort((a, b) => a - b)
+
+    return (
+        <TableFooterUI
+            entryStart={entryStart}
+            entryEnd={entryEnd}
+            totalElements={totalElements}
+            currentPage={currentPage}
+            sortedPages={sortedPages}
+            totalPages={totalPages}
+            goToPage={goToPage}
+        />
+    )
+}
+
+function TableFooterUI({
+    entryStart,
+    entryEnd,
+    totalElements,
+    currentPage,
+    sortedPages,
+    totalPages,
+    goToPage,
+}: {
+    entryStart: number
+    entryEnd: number
+    totalElements: number
+    currentPage: number
+    sortedPages: number[]
+    totalPages: number
+    goToPage: (page: number) => void
+}) {
+    const t = useTranslations('default')
+    if (totalElements === 0) {
+        return (
+            <div className='table-component d-flex justify-content-between align-items-center mt-3'>
+                <p className='mb-0'>
+                    {t.rich('showing page entries', {
+                        entryStart: 0,
+                        entryEnd: 0,
+                        totalElements: 0,
+                    })}
+                </p>
+            </div>
+        )
+    }
+    return (
         <div className='d-flex justify-content-between align-items-center mt-3'>
             <p className='mb-0 table-component'>
                 {t.rich('showing page entries', {
                     entryStart,
                     entryEnd,
-                    totalElements: paginationMeta.totalElements,
+                    totalElements,
                 })}
             </p>
             <nav>
@@ -133,6 +201,26 @@ export function PageSizeSelector({
     pageableQueryParam: PageableQueryParam
     setPageableQueryParam: Dispatch<SetStateAction<PageableQueryParam>>
 }): ReactNode {
+    const setPageSize = (sz: number) => setPageableQueryParam({ ...pageableQueryParam, page_entries: sz })
+    return (
+        <PageSelectorUI
+            pageSize={pageableQueryParam.page_entries}
+            setPageSize={setPageSize}
+        />
+    )
+}
+
+export function ClientSidePageSizeSelector<K>({ table }: { table: Table<K> }): ReactNode {
+    const setPageSize = (sz: number) => table.setPageSize(sz)
+    return (
+        <PageSelectorUI
+            pageSize={table.getState().pagination.pageSize}
+            setPageSize={setPageSize}
+        />
+    )
+}
+
+function PageSelectorUI({ pageSize, setPageSize }: { pageSize: number; setPageSize: (size: number) => void }) {
     const t = useTranslations('default')
     return (
         <div className='table-component mt-3 mb-3'>
@@ -141,10 +229,8 @@ export function PageSizeSelector({
                 <label className='mx-2'>
                     <select
                         className='form-select'
-                        value={pageableQueryParam.page_entries}
-                        onChange={(e) =>
-                            setPageableQueryParam({ ...pageableQueryParam, page_entries: Number(e.target.value) })
-                        }
+                        value={pageSize}
+                        onChange={(e) => setPageSize(Number(e.target.value))}
                     >
                         <option value={10}>10</option>
                         <option value={25}>25</option>
@@ -270,6 +356,7 @@ export function FilterComponent({
     show,
     setShow,
     header,
+    resetPaginationParams,
 }: {
     renderFilterOptions: FilterOption[]
     setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>
@@ -278,6 +365,7 @@ export function FilterComponent({
     show: string | undefined
     setShow: Dispatch<SetStateAction<string | undefined>>
     header: string
+    resetPaginationParams?: () => void
 }): ReactNode {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -299,6 +387,7 @@ export function FilterComponent({
             ...(newFilterValues.length > 0 ? [{ id, value: newFilterValues }] : []),
         ]
         setColumnFilters(newFilters)
+        resetPaginationParams?.()
     }
 
     const selectedValues = (columnFilters.find((f) => f.id === id)?.value ?? []) as string[]
