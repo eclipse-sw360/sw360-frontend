@@ -247,7 +247,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     useEffect(() => {
         if (status === 'unauthenticated') {
-            signOut()
+            void signOut()
         }
     }, [status])
 
@@ -389,7 +389,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     if (row.original.node.type === 'release') {
                         return (
                             <div className='text-center'>
-                                {(row.original.node.entity.mainLicenseIds ?? []).join(', ')}
+                                <ExpandableTextList list={row.original.node.entity.mainLicenseIds ?? []} />
                             </div>
                         )
                     }
@@ -406,7 +406,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     if (row.original.node.type === 'release') {
                         return (
                             <div className='text-center'>
-                                {(row.original.node.entity.otherLicenseIds ?? []).join(', ')}
+                                <ExpandableTextList list={row.original.node.entity.otherLicenseIds ?? []} />
                             </div>
                         )
                     }
@@ -499,7 +499,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     if (row.original.node.type === 'release') {
                         return (
                             <div className='text-center'>
-                                {(row.original.node.entity.otherLicenseIds ?? []).join(', ')}
+                                {Capitalize(row.original.node.entity.mainlineState ?? '')}
                             </div>
                         )
                     }
@@ -514,11 +514,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 enableColumnFilter: false,
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
-                        return (
-                            <div className='text-center'>
-                                <ExpandableTextList list={row.original.node.entity.otherLicenseIds ?? []} />
-                            </div>
-                        )
+                        return <div className='text-center'></div>
                     }
                 },
                 meta: {

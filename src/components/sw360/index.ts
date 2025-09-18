@@ -31,7 +31,15 @@ import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 import SideBar from './SideBar/SideBar'
-import { FilterComponent, PaddedCell, PageSizeSelector, SW360Table, TableFooter } from './Table/Components'
+import {
+    ClientSidePageSizeSelector,
+    ClientSideTableFooter,
+    FilterComponent,
+    PaddedCell,
+    PageSizeSelector,
+    SW360Table,
+    TableFooter,
+} from './Table/Components'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 
@@ -47,6 +55,8 @@ export {
     AdvancedSearch,
     AuthScreen,
     Breadcrumb,
+    ClientSidePageSizeSelector,
+    ClientSideTableFooter,
     EnumValueWithToolTip,
     FilterComponent,
     Footer,
