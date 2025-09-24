@@ -7,6 +7,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import Project from './Project'
+import { User } from './User'
+
 export default interface ClearingRequest {
     id: string
     requestedClearingDate?: string
@@ -29,5 +32,12 @@ export default interface ClearingRequest {
         self: {
             href: string
         }
+    }
+    _embedded?: {
+        openRelease?: number
+        requestingUser?: User
+        totalRelease?: number
+        createdOn?: string
+        'sw360:project'?: Project
     }
 }
