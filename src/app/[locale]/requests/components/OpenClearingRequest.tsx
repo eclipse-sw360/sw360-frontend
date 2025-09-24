@@ -9,7 +9,6 @@
 
 'use client'
 
-import LicenseClearing from '@/components/LicenseClearing'
 import { ClearingRequest, Embedded, HttpStatus, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -23,17 +22,21 @@ import { FaPencilAlt } from 'react-icons/fa'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
-interface LicenseClearing {
+interface LicenseClearingData {
     isProjectDeleted?: boolean
-    projectId?: string
-    clearingProgress?: boolean
-    openReleases?: boolean
+    openRelease?: number
+    totalRelease?: number
 }
 
 interface ProjectData {
     isProjectDeleted?: boolean
     projectId?: string
     projectName?: string
+}
+
+interface RequestingUser {
+    requestingUserName?: string
+    requestingUserEmail?: string
 }
 
 function OpenClearingRequest(): ReactNode | undefined {
@@ -85,6 +88,7 @@ function OpenClearingRequest(): ReactNode | undefined {
                                 requestId: item.id,
                             },
                             item.projectBU ?? t('Not Available'),
+                            item._embedded?.['sw360:project']?.tag ?? t('Not Available'),
                             isProjectDeleted
                                 ? {
                                       isProjectDeleted: true,
@@ -92,7 +96,7 @@ function OpenClearingRequest(): ReactNode | undefined {
                                 : {
                                       isProjectDeleted: false,
                                       projectId: item.projectId ?? '',
-                                      projectName: item.projectName ?? '',
+                                      projectName: item._embedded?.['sw360:project']?.name,
                                   },
                             isProjectDeleted
                                 ? {
@@ -100,28 +104,30 @@ function OpenClearingRequest(): ReactNode | undefined {
                                   }
                                 : {
                                       isProjectDeleted: false,
-                                      projectId: item.projectId ?? '',
-                                      openReleases: true,
+                                      openRelease: item._embedded?.openRelease,
                                   },
                             item.clearingState ?? '',
                             item.priority ?? '',
-                            item.requestingUser ?? '',
+                            {
+                                requestingUserName: item._embedded?.requestingUser?.fullName ?? '',
+                                requestingUserEmail: item._embedded?.requestingUser?.email ?? '',
+                            },
                             isProjectDeleted
                                 ? {
                                       isProjectDeleted: true,
                                   }
                                 : {
                                       isProjectDeleted: false,
-                                      projectId: item.projectId ?? '',
-                                      clearingProgress: true,
+                                      openRelease: item._embedded?.openRelease,
+                                      totalRelease: item._embedded?.totalRelease,
                                   },
-                            item.createdOn ?? '',
+                            item._embedded?.createdOn ?? '',
                             item.requestedClearingDate ?? '',
                             item.agreedClearingDate ?? '',
                             item.clearingType ?? '',
                             {
                                 requestId: item.id,
-                                requestingUser: item.requestingUser,
+                                requestingUser: item._embedded?.requestingUser?.email ?? '',
                             },
                         ]
                     }),
@@ -136,6 +142,7 @@ function OpenClearingRequest(): ReactNode | undefined {
             id: 'openClearingRequest.requestId',
             name: t('Request ID'),
             sort: true,
+            width: '5%',
             formatter: ({ requestId }: { requestId: string }) =>
                 _(
                     <Link
@@ -149,6 +156,11 @@ function OpenClearingRequest(): ReactNode | undefined {
         {
             id: 'openClearingRequest.baBlGroup',
             name: t('BA-BL/Group'),
+            sort: true,
+        },
+        {
+            id: 'openClearingRequest.tag',
+            name: t('Tag'),
             sort: true,
         },
         {
@@ -175,12 +187,12 @@ function OpenClearingRequest(): ReactNode | undefined {
             id: 'openClearingRequest.openReleases',
             name: t('Open Releases'),
             sort: true,
-            formatter: (licenseClearing: LicenseClearing) =>
+            formatter: (licenseClearingData: LicenseClearingData) =>
                 _(
-                    licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted ? (
+                    licenseClearingData.isProjectDeleted !== undefined && licenseClearingData.isProjectDeleted ? (
                         t('Not Available')
                     ) : (
-                        <>{licenseClearing.projectId && <LicenseClearing projectId={licenseClearing.projectId} />}</>
+                        <>{licenseClearingData.openRelease}</>
                     ),
                 ),
         },
@@ -284,17 +296,43 @@ function OpenClearingRequest(): ReactNode | undefined {
             id: 'openClearingRequest.requestingUser',
             name: t('Requesting User'),
             sort: true,
+            formatter: (requestingUser: RequestingUser) =>
+                _(
+                    <>
+                        {requestingUser.requestingUserEmail !== '' ? (
+                            <Link
+                                href={`mailto:${requestingUser.requestingUserEmail}`}
+                                className='text-link'
+                            >
+                                {requestingUser.requestingUserName}
+                            </Link>
+                        ) : (
+                            <>{t('Not Available')}</>
+                        )}
+                    </>,
+                ),
         },
         {
             id: 'openClearingRequest.clearingProgress',
             name: t('Clearing Progress'),
             sort: true,
-            formatter: (licenseClearing: LicenseClearing) =>
+            formatter: (licenseClearingData: LicenseClearingData) =>
                 _(
-                    licenseClearing.isProjectDeleted !== undefined && licenseClearing.isProjectDeleted ? (
+                    licenseClearingData.isProjectDeleted !== undefined && licenseClearingData.isProjectDeleted ? (
                         t('Not Available')
                     ) : (
-                        <>{licenseClearing.projectId && <LicenseClearing projectId={licenseClearing.projectId} />}</>
+                        <>
+                            {licenseClearingData?.totalRelease !== undefined &&
+                            licenseClearingData?.openRelease !== undefined
+                                ? licenseClearingData.totalRelease > 0
+                                    ? (
+                                          ((licenseClearingData.totalRelease - licenseClearingData.openRelease) /
+                                              licenseClearingData.totalRelease) *
+                                          100
+                                      ).toFixed(2) + '%'
+                                    : '0%'
+                                : t('Not Available')}
+                        </>
                     ),
                 ),
         },
@@ -371,7 +409,7 @@ function OpenClearingRequest(): ReactNode | undefined {
                         <Table
                             columns={columns}
                             data={tableData}
-                            sort={false}
+                            sort={true}
                             selector={true}
                         />
                     </div>
