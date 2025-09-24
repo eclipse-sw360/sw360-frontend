@@ -174,7 +174,7 @@ export default function EditClearingDecision({
                 </tr>
                 <tr>
                     <td>{t('Last Updated on')}:</td>
-                    <td>{clearingRequestData?.lastUpdatedOn ?? ''}</td>
+                    <td>{clearingRequestData?._embedded?.lastUpdatedOn ?? ''}</td>
                 </tr>
                 <tr>
                     <td>{t('Reopened on')}:</td>

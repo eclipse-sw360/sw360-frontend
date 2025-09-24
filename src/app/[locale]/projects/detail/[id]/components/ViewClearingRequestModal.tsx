@@ -37,22 +37,7 @@ export default function ViewClearingRequestModal({
     const [message, setMessage] = useState('')
     const [variant, setVariant] = useState('success')
     const [showMessage, setShowMessage] = useState(false)
-    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>({
-        id: '',
-        requestedClearingDate: '',
-        projectId: '',
-        projectName: '',
-        requestingUser: '',
-        projectBU: '',
-        requestingUserComment: '',
-        clearingTeam: '',
-        agreedClearingDate: '',
-        priority: '',
-        clearingType: '',
-        reOpenedOn: undefined,
-        createdOn: '',
-        comments: [{}],
-    })
+    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails>()
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -133,7 +118,7 @@ export default function ViewClearingRequestModal({
                     <Form.Group>
                         <Form.Label className='mb-4'>
                             {t.rich('View clearing request detail', {
-                                id: clearingRequestData.id,
+                                id: clearingRequestData?.id ?? '',
                                 strong: (chunks) => (
                                     <b>
                                         <Link
@@ -156,49 +141,49 @@ export default function ViewClearingRequestModal({
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Requesting User')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.requestingUser ?? ''}</td>
+                                    <td>{clearingRequestData?.requestingUser ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Requester Comment')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.requestingUserComment ?? ''}</td>
+                                    <td>{clearingRequestData?.requestingUserComment ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Created On')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.createdOn ?? ''}</td>
+                                    <td>{clearingRequestData?._embedded?.createdOn ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Preferred Clearing Date')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.requestedClearingDate ?? ''}</td>
+                                    <td>{clearingRequestData?.requestedClearingDate ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Clearing Team')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.clearingTeam ?? ''}</td>
+                                    <td>{clearingRequestData?.clearingTeam ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Agreed Clearing Date')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.agreedClearingDate ?? ''}</td>
+                                    <td>{clearingRequestData?.agreedClearingDate ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Priority')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.priority ?? ''}</td>
+                                    <td>{clearingRequestData?.priority ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td className={`${styles['summary-table-view-cr']}`}>
                                         <b>{t('Request Status')}:</b>
                                     </td>
-                                    <td>{clearingRequestData.clearingState ?? ''}</td>
+                                    <td>{clearingRequestData?.clearingState ?? ''}</td>
                                 </tr>
                             </tbody>
                         </table>

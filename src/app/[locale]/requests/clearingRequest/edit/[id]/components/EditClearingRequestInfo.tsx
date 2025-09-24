@@ -34,7 +34,7 @@ export default function EditClearingRequestInfo({
 }: Props): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    const [minDate, setMinDate] = useState('')
+    const [, setMinDate] = useState('')
     const [dialogOpenRequestingUser, setDialogOpenRequestingUser] = useState(false)
     const [requestingUserData, setRequestingUserData] = useState<{ [k: string]: string }>({})
 
@@ -101,23 +101,11 @@ export default function EditClearingRequestInfo({
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{clearingRequestData?.createdOn ?? ''}</td>
+                        <td>{clearingRequestData?._embedded?.createdOn ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
-                        <td>
-                            <input
-                                type='date'
-                                className='form-control'
-                                aria-label='Preferred Clearing Date YYYY-MM-DD'
-                                id='requestedClearingDate'
-                                aria-describedby='requestedClearingDate'
-                                name='requestedClearingDate'
-                                value={updateClearingRequestPayload.requestedClearingDate}
-                                onChange={updateInputField}
-                                min={minDate}
-                            />
-                        </td>
+                        <td>{clearingRequestData?.requestedClearingDate ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Business Area Line')}:</td>
