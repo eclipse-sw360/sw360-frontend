@@ -26,7 +26,6 @@ export default interface ClearingRequestDetails {
     clearingType?: string
     clearingState?: string
     reOpenedOn?: number
-    createdOn?: string
     lastUpdatedOn?: string
     comments?: [
         {
@@ -40,9 +39,13 @@ export default interface ClearingRequestDetails {
         }
     }
     _embedded?: {
+        createdOn?: string
         clearingTeam?: User
         requestingUser?: User
         'sw360:project'?: Project
         requestClosedOn?: string
+        lastUpdatedOn?: string
+        totalRelease?: number
+        openRelease?: number
     }
 }
