@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import Link from 'next/link'
 import { notFound, useRouter } from 'next/navigation'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ClearingComments from './../../../detail/[id]/components/ClearingComments'
 import EditClearingDecision from './EditClearingDecision'
@@ -29,24 +29,8 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const router = useRouter()
-    const toastShownRef = useRef(false)
     const { status } = useSession()
-    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
-        id: '',
-        requestedClearingDate: '',
-        projectId: '',
-        projectName: '',
-        requestingUser: '',
-        projectBU: '',
-        requestingUserComment: '',
-        clearingTeam: '',
-        agreedClearingDate: '',
-        priority: '',
-        clearingType: '',
-        reOpenedOn: undefined,
-        createdOn: '',
-        comments: [{}],
-    })
+    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>()
     const [updateClearingRequestPayload, setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
         requestedClearingDate: '',
         clearingType: '',
@@ -78,26 +62,26 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     }
 
     useEffect(() => {
-        if (!toastShownRef.current) {
-            toastShownRef.current = true
-        }
-
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
             (clearingRequestDetails: ClearingRequestDetails | undefined) => {
                 setClearingRequestData(clearingRequestDetails)
             },
         )
-        const updatedClearingRequestData: UpdateClearingRequestPayload = {
-            requestedClearingDate: clearingRequestData?.requestedClearingDate ?? '',
-            clearingType: clearingRequestData?.clearingType ?? '',
-            clearingState: clearingRequestData?.clearingState ?? '',
-            priority: clearingRequestData?.priority ?? '',
-            clearingTeam: clearingRequestData?.clearingTeam ?? '',
-            agreedClearingDate: clearingRequestData?.agreedClearingDate ?? '',
-            requestingUser: clearingRequestData?.requestingUser ?? '',
-        }
-        setUpdateClearingRequestPayload(updatedClearingRequestData)
-    }, [setUpdateClearingRequestPayload])
+    }, [clearingRequestId])
+
+    useEffect(() => {
+        if (!clearingRequestData) return
+
+        setUpdateClearingRequestPayload({
+            requestedClearingDate: clearingRequestData.requestedClearingDate ?? '',
+            clearingType: clearingRequestData.clearingType ?? '',
+            clearingState: clearingRequestData.clearingState ?? '',
+            priority: clearingRequestData.priority ?? '',
+            clearingTeam: clearingRequestData.clearingTeam ?? '',
+            agreedClearingDate: clearingRequestData.agreedClearingDate ?? '',
+            requestingUser: clearingRequestData.requestingUser ?? '',
+        })
+    }, [clearingRequestData])
 
     const handleUpdateClearingRequest = async () => {
         const session = await getSession()
@@ -112,7 +96,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                 MessageService.success(
                     t('Clearing Request') + `${clearingRequestData?.id} ` + t('updated successfully'),
                 )
-                router.push(`/clearingRequest/detail/${clearingRequestData?.id}`)
+                router.push(`/requests/clearingRequest/detail/${clearingRequestData?.id}`)
             } else if (response.status == HttpStatus.UNAUTHORIZED) {
                 await signOut()
             }
