@@ -385,7 +385,8 @@ function OpenClearingRequest(): ReactNode | undefined {
                                     isProjectDeleted ||
                                     (session !== null &&
                                         session.user.userGroup === UserGroupType.USER &&
-                                        session.user.email !== requestingUser)
+                                        session.user.email !== requestingUser) ||
+                                    !(session !== null && session.user.userGroup === UserGroupType.ADMIN)
                                 }
                             >
                                 <Link
