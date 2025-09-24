@@ -72,8 +72,10 @@ export default function ClearingDecision({ data }: Readonly<Props>): ReactNode |
                 <tr>
                     <td>{t('Clearing Team')}:</td>
                     <td>
-                        {data?.clearingTeam !== undefined ? (
-                            <Link href={`mailto:${data.clearingTeam}`}>{data.clearingTeamName}</Link>
+                        {data?.clearingTeam !== undefined && data?._embedded?.clearingTeam?.fullName !== undefined ? (
+                            <Link href={`mailto:${data._embedded.clearingTeam.email}`}>
+                                {data._embedded.clearingTeam.fullName}
+                            </Link>
                         ) : (
                             ''
                         )}
@@ -83,13 +85,59 @@ export default function ClearingDecision({ data }: Readonly<Props>): ReactNode |
                     <td>{t('Agreed Clearing Date')}:</td>
                     <td>{data?.agreedClearingDate ?? ''}</td>
                 </tr>
-                <tr>
+                <tr
+                    hidden={
+                        data?.clearingState !== undefined &&
+                        !(data?.clearingState === 'CLOSED' || data?.clearingState === 'REJECTED')
+                    }
+                >
                     <td>{t('Request Closed on')}:</td>
                     <td>{data?._embedded?.requestClosedOn}</td>
                 </tr>
                 <tr>
                     <td>{t('Last Updated on')}:</td>
-                    <td>{''}</td>
+                    <td>{data?._embedded?.lastUpdatedOn ?? ''}</td>
+                </tr>
+                <tr
+                    hidden={
+                        data?.clearingState !== undefined &&
+                        (data?.clearingState === 'CLOSED' || data?.clearingState === 'REJECTED')
+                    }
+                >
+                    <td>{t('Clearing Progress')}:</td>
+                    <td>
+                        <>
+                            {data?._embedded?.totalRelease !== undefined && data?._embedded?.openRelease !== undefined
+                                ? (() => {
+                                      const percentage =
+                                          data._embedded.totalRelease > 0
+                                              ? ((data._embedded.totalRelease - data._embedded.openRelease) /
+                                                    data._embedded.totalRelease) *
+                                                100
+                                              : 0
+
+                                      return (
+                                          <div className='progress position-relative'>
+                                              <div
+                                                  className='progress-bar progress-bar-striped progress-bar-animated bg-warning'
+                                                  role='progressbar'
+                                                  aria-valuenow={percentage}
+                                                  aria-valuemin={0}
+                                                  aria-valuemax={100}
+                                                  style={{ width: `${percentage}%` }}
+                                              ></div>
+                                              <span
+                                                  className='position-absolute w-100 text-center'
+                                                  style={{ color: 'black', fontWeight: 'bold', left: 0 }}
+                                              >
+                                                  {percentage.toFixed(2)}%
+                                              </span>
+                                          </div>
+                                      )
+                                  })()
+                                : t('Not Available')}
+                        </>
+                    </td>
                 </tr>
             </tbody>
         </table>

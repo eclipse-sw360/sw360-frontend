@@ -33,22 +33,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const [isProjectDeleted, setIsProjectDeleted] = useState<boolean>(false)
     const [isReopenClosedCR, setIsReopenClosedCR] = useState<boolean>(false)
     const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState<boolean>(false)
-    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>({
-        id: '',
-        requestedClearingDate: '',
-        projectId: '',
-        projectName: '',
-        requestingUser: '',
-        projectBU: '',
-        requestingUserComment: '',
-        clearingTeam: '',
-        agreedClearingDate: '',
-        priority: '',
-        clearingType: '',
-        reOpenedOn: undefined,
-        createdOn: '',
-        comments: [{}],
-    })
+    const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>()
     const { status } = useSession()
 
     useEffect(() => {

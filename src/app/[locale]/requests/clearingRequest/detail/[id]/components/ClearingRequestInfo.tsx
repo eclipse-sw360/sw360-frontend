@@ -35,8 +35,11 @@ export default function ClearingRequestInfo({
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data?.requestingUser !== undefined && data.requestingUserName !== undefined ? (
-                                <Link href={`mailto:${data.requestingUser}`}>{data.requestingUserName}</Link>
+                            {data?.requestingUser !== undefined &&
+                            data?._embedded?.requestingUser?.fullName !== undefined ? (
+                                <Link href={`mailto:${data._embedded.requestingUser.email}`}>
+                                    {data._embedded.requestingUser.fullName}
+                                </Link>
                             ) : (
                                 ''
                             )}
@@ -44,7 +47,7 @@ export default function ClearingRequestInfo({
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{data?.createdOn ?? ''}</td>
+                        <td>{data?._embedded?.createdOn ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
