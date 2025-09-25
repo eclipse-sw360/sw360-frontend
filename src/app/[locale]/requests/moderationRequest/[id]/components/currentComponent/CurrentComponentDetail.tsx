@@ -22,14 +22,18 @@ import {
     ComponentTabIds,
     DocumentTypes,
     Embedded,
+    ErrorDetails,
     HttpStatus,
     LinkedVulnerability,
+    PageableQueryParam,
+    PaginationMeta,
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -41,17 +45,16 @@ interface Props {
 const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [changesLogTab, setChangesLogTab] = useState('list-change')
-    const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [component, setComponent] = useState<Component>()
-    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
-    const { status } = useSession()
+    const [changelogTab, setChangelogTab] = useState('list-change')
+    const [changeLogId, setChangeLogId] = useState('')
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
     const tabList = [
         {
@@ -74,7 +77,7 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
 
     const fetchData = async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
@@ -92,17 +95,73 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
                 setComponent(component)
             })
             .catch((err) => console.error(err))
-
-        fetchData(`changelog/document/${componentId}`)
-            .then((changeLogs: EmbeddedChangelogs | undefined) => {
-                if (changeLogs && CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])) {
-                    setChangeLogList([])
-                } else {
-                    setChangeLogList(changeLogs?._embedded?.['sw360:changeLogs'] || [])
-                }
-            })
-            .catch((err) => console.error(err))
     }, [componentId, fetchData])
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
+    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = changeLogList.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `changelog/document/${componentId}`,
+                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                )
+
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangelogs
+                    setPaginationMeta(data.page)
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [pageableQueryParam, componentId, session])
 
     return component ? (
         <div className='container page-content'>
@@ -149,20 +208,26 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
                         <div className='col'>
                             <div
                                 className='row'
-                                hidden={changesLogTab != 'list-change'}
+                                hidden={changelogTab !== 'list-change'}
                             >
                                 <ChangeLogList
-                                    setChangeLogIndex={setChangeLogIndex}
+                                    setChangeLogId={setChangeLogId}
                                     documentId={componentId}
-                                    setChangesLogTab={setChangesLogTab}
-                                    changeLogList={changeLogList}
+                                    setChangesLogTab={setChangelogTab}
+                                    changeLogList={memoizedData}
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                    showProcessing={showProcessing}
+                                    paginationMeta={paginationMeta}
                                 />
                             </div>
                             <div
                                 className='row'
-                                hidden={changesLogTab != 'view-log'}
+                                hidden={changelogTab != 'view-log'}
                             >
-                                <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
+                                <ChangeLogDetail
+                                    changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
+                                />
                                 <div
                                     id='cardScreen'
                                     style={{ padding: '0px' }}

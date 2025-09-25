@@ -16,7 +16,7 @@ export interface PageButtonHeaderProps {
     children?: ReactNode
     checked?: boolean
     changesLogTab?: string
-    changeLogIndex?: number
+    changeLogId?: string
     setChangesLogTab?: (key: string) => void
 }
 

@@ -22,6 +22,8 @@ import {
     HttpStatus,
     LicenseDetail,
     LicenseTabIds,
+    PageableQueryParam,
+    PaginationMeta,
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -29,7 +31,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import styles from '../detail.module.css'
 import Detail from './Detail'
 import Obligations from './Obligations'
@@ -44,20 +46,19 @@ type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
-    const [changesLogTab, setChangesLogTab] = useState('list-change')
-    const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [license, setLicenseDetail] = useState<LicenseDetail | undefined>(undefined)
-    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [isEditWhitelist, setIsEditWhitelist] = useState(false)
     const [whitelist, setWhitelist] = useState<Map<string, boolean> | undefined>(undefined)
     const params = useSearchParams()
-    const { status } = useSession()
+    const [changeLogId, setChangeLogId] = useState('')
+    const [changelogTab, setChangelogTab] = useState('list-change')
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
     const tabList = [
         {
@@ -102,40 +103,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                 MessageService.error(message)
             }
         })()
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(
-                    `changelog/document/${licenseId}`,
-                    session.user.access_token,
-                    signal,
-                )
-                if (response.status !== HttpStatus.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
-                }
-                const responseText = await response.text()
-                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
-                    setChangeLogList([])
-                    return
-                } else {
-                    const data = JSON.parse(responseText) as EmbeddedChangeLogs
-                    setChangeLogList(
-                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
-                            ? []
-                            : data['_embedded']['sw360:changeLogs'],
-                    )
-                }
-            } catch (error: unknown) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
-            }
-        })()
-
         return () => controller.abort()
     }, [params, licenseId])
 
@@ -188,6 +155,72 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
         'Update whitelist': { link: '', type: 'primary', onClick: handleUpdateWhitelist, name: t('Update whitelist') },
         Cancel: { link: '', type: 'light', onClick: handleCancel, name: t('Cancel') },
     }
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
+    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = changeLogList.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `changelog/document/${licenseId}`,
+                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                )
+
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangeLogs
+                    setPaginationMeta(data.page)
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [pageableQueryParam, licenseId, session])
 
     return (
         license && (
@@ -243,9 +276,9 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                                                     title={`${license.fullName} (${license.shortName})`}
                                                     buttons={headerButtons}
                                                     checked={license.checked}
-                                                    changesLogTab={changesLogTab}
-                                                    setChangesLogTab={setChangesLogTab}
-                                                    changeLogIndex={changeLogIndex}
+                                                    changesLogTab={changelogTab}
+                                                    setChangesLogTab={setChangelogTab}
+                                                    changeLogId={changeLogId}
                                                 ></PageButtonHeader>
                                             ) : (
                                                 <PageButtonHeader
@@ -292,20 +325,26 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                             <div className='col'>
                                 <div
                                     className='row'
-                                    hidden={changesLogTab != 'list-change' ? true : false}
+                                    hidden={changelogTab !== 'list-change' ? true : false}
                                 >
                                     <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
+                                        setChangeLogId={setChangeLogId}
                                         documentId={licenseId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
+                                        setChangesLogTab={setChangelogTab}
+                                        changeLogList={memoizedData}
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        showProcessing={showProcessing}
+                                        paginationMeta={paginationMeta}
                                     />
                                 </div>
                                 <div
                                     className='row'
-                                    hidden={changesLogTab != 'view-log' ? true : false}
+                                    hidden={changelogTab !== 'view-log' ? true : false}
                                 >
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
+                                    <ChangeLogDetail
+                                        changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
+                                    />
                                     <div
                                         id='cardScreen'
                                         style={{ padding: '0px' }}
