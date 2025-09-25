@@ -13,7 +13,7 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
@@ -27,8 +27,11 @@ import {
     ComponentTabIds,
     DocumentTypes,
     Embedded,
+    ErrorDetails,
     HttpStatus,
     LinkedVulnerability,
+    PageableQueryParam,
+    PaginationMeta,
     User,
     UserGroupType,
 } from '@/object-types'
@@ -48,26 +51,25 @@ interface Props {
 const DetailOverview = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [changesLogTab, setChangesLogTab] = useState('list-change')
-    const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [component, setComponent] = useState<Component | undefined>(undefined)
-    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
-    const { data: session, status } = useSession()
+    const [changeLogId, setChangeLogId] = useState('')
+    const [changelogTab, setChangelogTab] = useState('list-change')
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
     const fetchData = useCallback(
         async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (CommonUtils.isNullOrUndefined(session.data)) return
+            const response = await ApiUtils.GET(url, session.data.user.access_token)
             if (response.status === HttpStatus.OK) {
                 const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
                 return data
@@ -84,14 +86,14 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         await DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
-            session,
+            session.data,
             'AttachmentBundle.zip',
         )
     }
 
     const extractUserEmailFromSession = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        setUserEmail(session.user.email)
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        setUserEmail(session.data.user.email)
     }
 
     useEffect(() => {
@@ -106,16 +108,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                     !CommonUtils.isNullOrUndefined(component['_embedded']['sw360:attachments'])
                 ) {
                     setAttachmentNumber(component['_embedded']['sw360:attachments'].length)
-                }
-            })
-            .catch((err) => console.error(err))
-
-        fetchData(`changelog/document/${componentId}`)
-            .then((changeLogs: EmbeddedChangelogs | undefined) => {
-                if (changeLogs && CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])) {
-                    setChangeLogList([])
-                } else {
-                    setChangeLogList(changeLogs?._embedded?.['sw360:changeLogs'] || [])
                 }
             })
             .catch((err) => console.error(err))
@@ -143,11 +135,9 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const handleSubcriptions = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.user.access_token)
+        if (CommonUtils.isNullOrUndefined(session.data)) return
+
+        await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.data.user.access_token)
         fetchData(`components/${componentId}`)
             .then((component: Component | undefined) => {
                 if (component === undefined) return
@@ -169,7 +159,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         {
             id: CommonTabIds.ATTACHMENTS,
             name: 'Attachments',
-            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
         {
             id: CommonTabIds.VULNERABILITIES,
@@ -178,7 +168,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         {
             id: CommonTabIds.CHANGE_LOG,
             name: 'Change Log',
-            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
     ]
 
@@ -187,19 +177,19 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             link: `/components/edit/${componentId}`,
             type: 'primary',
             name: t('Edit component'),
-            disable: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
         Merge: {
             link: `/components/detail/${componentId}/merge`,
             type: 'secondary',
             name: t('Merge'),
-            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
         Split: {
             link: `/components/detail/${componentId}/split`,
             type: 'secondary',
             name: t('Split'),
-            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
         Subscribe: {
             link: '',
@@ -208,6 +198,72 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             onClick: handleSubcriptions,
         },
     }
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
+    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = changeLogList.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `changelog/document/${componentId}`,
+                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                )
+
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangelogs
+                    setPaginationMeta(data.page)
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [pageableQueryParam, componentId, session])
 
     return (
         component && (
@@ -257,21 +313,17 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                         role='tablist'
                                     >
                                         <a
-                                            className={`nav-item nav-link ${
-                                                changesLogTab == 'list-change' ? 'active' : ''
-                                            }`}
-                                            onClick={() => setChangesLogTab('list-change')}
+                                            className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
+                                            onClick={() => setChangelogTab('list-change')}
                                             style={{ color: '#F7941E', fontWeight: 'bold' }}
                                         >
                                             {t('Change Log')}
                                         </a>
                                         <a
-                                            className={`nav-item nav-link ${
-                                                changesLogTab == 'view-log' ? 'active' : ''
-                                            }`}
+                                            className={`nav-item nav-link ${changelogTab == 'view-log' ? 'active' : ''}`}
                                             onClick={() => {
-                                                if (changeLogIndex !== -1) {
-                                                    setChangesLogTab('view-log')
+                                                if (changeLogId !== '') {
+                                                    setChangelogTab('view-log')
                                                 }
                                             }}
                                             style={{ color: '#F7941E', fontWeight: 'bold' }}
@@ -319,20 +371,26 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                             <div className='col'>
                                 <div
                                     className='row'
-                                    hidden={changesLogTab != 'list-change' ? true : false}
+                                    hidden={changelogTab !== 'list-change' ? true : false}
                                 >
                                     <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
+                                        setChangeLogId={setChangeLogId}
                                         documentId={componentId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
+                                        setChangesLogTab={setChangelogTab}
+                                        changeLogList={memoizedData}
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        showProcessing={showProcessing}
+                                        paginationMeta={paginationMeta}
                                     />
                                 </div>
                                 <div
                                     className='row'
-                                    hidden={changesLogTab != 'view-log' ? true : false}
+                                    hidden={changelogTab !== 'view-log' ? true : false}
                                 >
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
+                                    <ChangeLogDetail
+                                        changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
+                                    />
                                     <div
                                         id='cardScreen'
                                         style={{ padding: '0px' }}

@@ -10,89 +10,170 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
+import { Dispatch, SetStateAction, useMemo, type JSX } from 'react'
 import { FaFileAlt } from 'react-icons/fa'
 
-import { Changelogs } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
-import { Table, _ } from 'next-sw360'
+import { Changelogs, PageableQueryParam, PaginationMeta } from '@/object-types'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 
 interface Props {
     documentId: string
-    setChangeLogIndex: React.Dispatch<React.SetStateAction<number>>
+    setChangeLogId: React.Dispatch<React.SetStateAction<string>>
     setChangesLogTab: React.Dispatch<React.SetStateAction<string>>
     changeLogList: Array<Changelogs>
+    pageableQueryParam: PageableQueryParam
+    setPageableQueryParam: Dispatch<SetStateAction<PageableQueryParam>>
+    showProcessing: boolean
+    paginationMeta: PaginationMeta | undefined
 }
 
-const ChangeLogList = ({ documentId, setChangeLogIndex, setChangesLogTab, changeLogList }: Props): JSX.Element => {
+const ChangeLogList = ({
+    documentId,
+    setChangeLogId,
+    setChangesLogTab,
+    changeLogList,
+    pageableQueryParam,
+    setPageableQueryParam,
+    showProcessing,
+    paginationMeta,
+}: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [changeLogData, setChangeLogData] = useState<string[][]>([])
-    const { status } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
+    const columns = useMemo<ColumnDef<Changelogs>[]>(
+        () => [
+            {
+                id: 'date',
+                header: t('Date'),
+                accessorKey: 'changeTimestamp',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'id',
+                header: t('Change Log Id'),
+                accessorKey: 'id',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Change Type'),
+                cell: ({ row }) => {
+                    return (
+                        <>
+                            {row.original.documentId === documentId
+                                ? t('Attributes change')
+                                : `${t('Reference Doc Changes')} : ${row.original.documentType}`}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'userEdited',
+                header: t('User'),
+                accessorKey: 'userEdited',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    const { id } = row.original
+                    return (
+                        <>
+                            {id && (
+                                <OverlayTrigger overlay={<Tooltip>{t('View Change Logs')}</Tooltip>}>
+                                    <div className='cursor-pointer'>
+                                        <FaFileAlt
+                                            style={{ color: '#F7941E', fontSize: '18px' }}
+                                            onClick={() => {
+                                                setChangeLogId(id)
+                                                setChangesLogTab('view-log')
+                                            }}
+                                        />
+                                    </div>
+                                </OverlayTrigger>
+                            )}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [t],
+    )
 
-    useEffect(() => {
-        const data = Object.entries(changeLogList).map(([index, item]: [index: string, item: Changelogs]) => [
-            item.changeTimestamp,
-            item.id,
-            item.documentId === documentId
-                ? t('Attributes change')
-                : `${t('Reference Doc Changes')} : ${item.documentType}`,
-            item.userEdited,
-            index,
-        ])
-        setChangeLogData(data)
-    }, [changeLogList, documentId, t])
+    const table = useReactTable({
+        data: changeLogList,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
 
-    const columns = [
-        {
-            name: t('Date'),
-            sort: true,
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
         },
-        {
-            name: t('Change Log Id'),
-            sort: true,
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
         },
-        {
-            name: t('Change Type'),
-            sort: true,
-        },
-        {
-            name: t('User'),
-            sort: true,
-        },
-        {
-            name: t('Actions'),
-            formatter: (index: string) =>
-                _(
-                    <div className='cursor-pointer'>
-                        <FaFileAlt
-                            style={{ color: '#F7941E', fontSize: '18px' }}
-                            onClick={() => {
-                                setChangeLogIndex(parseInt(index))
-                                setChangesLogTab('view-log')
-                            }}
-                        />
-                    </div>,
-                ),
-        },
-    ]
+    })
 
     return (
-        <>
-            <div className='row'>
-                <Table
-                    data={changeLogData}
-                    search={true}
-                    columns={columns}
-                    selector={true}
-                />
-            </div>
-        </>
+        <div className='mb-3'>
+            {pageableQueryParam && table && paginationMeta ? (
+                <>
+                    <PageSizeSelector
+                        pageableQueryParam={pageableQueryParam}
+                        setPageableQueryParam={setPageableQueryParam}
+                    />
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                    />
+                    <TableFooter
+                        pageableQueryParam={pageableQueryParam}
+                        setPageableQueryParam={setPageableQueryParam}
+                        paginationMeta={paginationMeta}
+                    />
+                </>
+            ) : (
+                <div className='col-12 mt-1 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </div>
     )
 }
 

@@ -22,7 +22,7 @@ function PageButtonHeader({
     children,
     checked,
     changesLogTab,
-    changeLogIndex,
+    changeLogId,
     setChangesLogTab,
 }: PageButtonHeaderProps): JSX.Element {
     let buttonList: (JSX.Element | null)[] = []
@@ -122,7 +122,7 @@ function PageButtonHeader({
                             <a
                                 className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''} ${styles['a-changes']}`}
                                 onClick={() => {
-                                    if (changeLogIndex !== -1 && setChangesLogTab !== undefined) {
+                                    if (changeLogId !== '' && setChangesLogTab !== undefined) {
                                         setChangesLogTab('view-log')
                                     }
                                 }}
