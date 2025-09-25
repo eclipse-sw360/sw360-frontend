@@ -8,7 +8,6 @@
 // License-Filename: LICENSE
 
 export default interface UpdateClearingRequestPayload {
-    requestedClearingDate?: string
     clearingType?: string
     clearingState?: string
     priority?: string

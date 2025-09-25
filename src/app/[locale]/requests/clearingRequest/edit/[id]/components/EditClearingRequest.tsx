@@ -32,7 +32,6 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     const { status } = useSession()
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>()
     const [updateClearingRequestPayload, setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
-        requestedClearingDate: '',
         clearingType: '',
         clearingState: '',
         priority: '',
@@ -73,7 +72,6 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
         if (!clearingRequestData) return
 
         setUpdateClearingRequestPayload({
-            requestedClearingDate: clearingRequestData.requestedClearingDate ?? '',
             clearingType: clearingRequestData.clearingType ?? '',
             clearingState: clearingRequestData.clearingState ?? '',
             priority: clearingRequestData.priority ?? '',
