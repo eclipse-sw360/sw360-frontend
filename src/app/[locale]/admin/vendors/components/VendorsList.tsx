@@ -9,21 +9,20 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, Session, Vendor } from '@/object-types'
+import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { SW360_API_URL } from '@/utils/env'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { QuickFilter, Table, _ } from 'next-sw360'
+import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
-import { Modal, Spinner } from 'react-bootstrap'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState, type JSX } from 'react'
+import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import { FaTrashAlt } from 'react-icons/fa'
-import { FiEdit2 } from 'react-icons/fi'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { IoMdGitMerge } from 'react-icons/io'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
@@ -87,7 +86,7 @@ function DeletionModal({
                 <button
                     className='btn btn-danger'
                     onClick={() => {
-                        ;(async () => {
+                        void (async () => {
                             await DeleteVendor(vendor?._links?.self.href.split('/').at(-1) ?? '')
                             setVendor(null)
                         })()
@@ -106,78 +105,193 @@ export default function VendorsList(): JSX.Element {
 
     const [numVendors, setNumVendors] = useState<null | number>(null)
     const [delVendor, setDelVendor] = useState<Vendor | null>(null)
-    const { data: session, status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
     const handleAddVendor = () => {
         router.push('/admin/vendors/add')
     }
 
-    const columns = [
-        {
-            id: 'vendors.fullName',
-            name: t('Full Name'),
-            formatter: ({ name, id }: { name: string; id: string }) =>
-                _(
-                    <>
+    const columns = useMemo<ColumnDef<Vendor>[]>(
+        () => [
+            {
+                id: 'name',
+                header: t('Full Name'),
+                cell: ({ row }) => {
+                    return (
                         <Link
-                            href={`/admin/vendors/edit/${id}`}
+                            href={`/admin/vendors/edit/${row.original._links?.self.href.split('/').at(-1)}`}
                             className='text-link'
                         >
-                            {name}
+                            {row.original.fullName}
                         </Link>
-                    </>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'vendors.shortName',
-            name: t('Short Name'),
-            sort: true,
-        },
-        {
-            id: 'vendors.url',
-            name: t('URL'),
-            sort: true,
-        },
-        {
-            id: 'vendors.actions',
-            name: t('Actions'),
-            width: '8%',
-            formatter: (vendor: Vendor) => {
-                return _(
-                    <div className='d-flex justify-content-between'>
-                        <Link
-                            href={`/admin/vendors/edit/${vendor._links?.self.href.split('/').at(-1)}`}
-                            className='text-link'
-                        >
-                            <FiEdit2 className='btn-icon' />
-                        </Link>
-                        <span
-                            className='d-inline-block'
-                            onClick={() => {
-                                setDelVendor(vendor)
-                            }}
-                        >
-                            <FaTrashAlt className='btn-icon' />
-                        </span>
-                        <Link
-                            href={`vendors/merge/${vendor._links?.self.href.split('/').at(-1)}`}
-                            className='text-link'
-                        >
-                            <IoMdGitMerge className='btn-icon' />
-                        </Link>
-                    </div>,
-                )
+                    )
+                },
+                meta: {
+                    width: '30%',
+                },
             },
-            sort: true,
+            {
+                id: 'shortName',
+                accessorKey: 'shortName',
+                header: t('Short Name'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'url',
+                header: t('URL'),
+                accessorKey: 'url',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '40%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    return (
+                        <>
+                            <span className='d-flex justify-content-evenly'>
+                                <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                    <Link
+                                        href={`/admin/vendors/edit/${row.original._links?.self.href.split('/').at(-1)}`}
+                                        className='text-link'
+                                    >
+                                        <FaPencilAlt
+                                            className='btn-icon'
+                                            size={18}
+                                        />
+                                    </Link>
+                                </OverlayTrigger>
+                                <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
+                                    <Link
+                                        href={`vendors/merge/${row.original._links?.self.href.split('/').at(-1)}`}
+                                        className='text-link'
+                                    >
+                                        <IoMdGitMerge className='btn-icon' />
+                                    </Link>
+                                </OverlayTrigger>
+                                <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                    <span
+                                        className='d-inline-block'
+                                        onClick={() => setDelVendor(row.original)}
+                                    >
+                                        <FaTrashAlt className='btn-icon' />
+                                    </span>
+                                </OverlayTrigger>
+                            </span>
+                        </>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [t],
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [vendorData, setVendorData] = useState<Vendor[]>(() => [])
+    const memoizedData = useMemo(() => vendorData, [vendorData])
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = vendorData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `vendors`,
+                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as EmbeddedVendors
+                setPaginationMeta(data.page)
+                setNumVendors(data.page?.totalElements ?? 0)
+                setVendorData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:vendors'])
+                        ? []
+                        : data['_embedded']['sw360:vendors'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [pageableQueryParam, session])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
         },
-    ]
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
 
     const handleExportSpreadsheet = async () => {
         try {
@@ -185,30 +299,13 @@ export default function VendorsList(): JSX.Element {
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const url = 'vendors/exportVendorDetails'
             const currentDate = new Date().toISOString().split('T')[0]
-            DownloadService.download(url, session, `vendors-${currentDate}.xlsx`)
+            void DownloadService.download(url, session, `vendors-${currentDate}.xlsx`)
         } catch (error: unknown) {
             if (error instanceof DOMException && error.name === 'AbortError') {
                 return
             }
             const message = error instanceof Error ? error.message : String(error)
             MessageService.error(message)
-        }
-    }
-
-    const initServerPaginationConfig = (session: Session) => {
-        return {
-            url: `${SW360_API_URL}/resource/api/vendors`,
-            then: (data: EmbeddedVendors) => {
-                setNumVendors(data.page?.totalElements ?? 0)
-                return data._embedded['sw360:vendors'].map((elem: Vendor) => [
-                    { name: elem.fullName ?? '', id: elem._links?.self.href.split('/').at(-1) ?? '' },
-                    elem.shortName ?? '',
-                    elem.url ?? '',
-                    elem,
-                ])
-            },
-            total: (data: EmbeddedVendors) => (data.page ? data.page.totalElements : 0),
-            headers: { Authorization: `${session.user?.access_token}` },
         }
     }
 
@@ -234,25 +331,36 @@ export default function VendorsList(): JSX.Element {
                                 </button>
                                 <button
                                     className='btn btn-secondary col-auto'
-                                    onClick={() => handleExportSpreadsheet()}
+                                    onClick={() => void handleExportSpreadsheet()}
                                 >
                                     {t('Export Spreadsheet')}
                                 </button>
                             </div>
                             <div className='col-auto buttonheader-title'>{`${t('VENDORS')} (${numVendors ?? ''})`}</div>
                         </div>
-                        {status === 'authenticated' ? (
-                            <Table
-                                columns={columns}
-                                server={initServerPaginationConfig(session)}
-                                selector={true}
-                                sort={false}
-                            />
-                        ) : (
-                            <div className='col-12 d-flex justify-content-center align-items-center'>
-                                <Spinner className='spinner' />
-                            </div>
-                        )}
+                        <div className='mb-3'>
+                            {pageableQueryParam && table && paginationMeta ? (
+                                <>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing}
+                                    />
+                                    <TableFooter
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        paginationMeta={paginationMeta}
+                                    />
+                                </>
+                            ) : (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
