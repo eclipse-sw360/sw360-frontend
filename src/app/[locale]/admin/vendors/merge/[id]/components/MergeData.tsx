@@ -32,7 +32,7 @@ export default function MergeVendor({
 
     useEffect(() => {
         if (status === 'unauthenticated') {
-            signOut()
+            void signOut()
         }
     }, [status])
 
