@@ -53,7 +53,7 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
 
     useEffect(() => {
         if (status === 'unauthenticated') {
-            signOut()
+            void signOut()
         }
     }, [status])
 
@@ -89,7 +89,7 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        void (async () => {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -216,7 +216,7 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                                     type='button'
                                     className='btn btn-primary'
                                     disabled={loading}
-                                    onClick={handleMergeVendor}
+                                    onClick={() => void handleMergeVendor()}
                                 >
                                     {t('Finish')}
                                 </button>
