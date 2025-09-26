@@ -62,7 +62,7 @@ export default function middleware(req: NextRequest): NextResponse | Promise<Nex
     const isPublicPage = publicPathnameRegex.test(req.nextUrl.pathname)
 
     const adminPathnameRegex = RegExp(
-        `^(/(${locales.join('|')}))?(${adminPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})/?$`,
+        `^(/(${locales.join('|')}))?(${adminPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})(/.*)?$`,
         'i',
     )
     const isAdminPage = adminPathnameRegex.test(req.nextUrl.pathname)
