@@ -32,7 +32,7 @@ import {
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
+import { AddAdditionalRoles, AddKeyValue, Breadcrumb, SearchUsersModal, SideBar } from 'next-sw360'
 
 function AddComponent(): ReactNode {
     const t = useTranslations('default')
@@ -131,6 +131,12 @@ function AddComponent(): ReactNode {
                     void submit()
                 }}
             >
+                <Breadcrumb
+                    customSegments={[
+                        { label: 'Components', href: '/components' },
+                        { label: t('Add Component'), isLast: true },
+                    ]}
+                />
                 <div className='container page-content'>
                     <div className='row'>
                         <div className='col-2 sidebar'>

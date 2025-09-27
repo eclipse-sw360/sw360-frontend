@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 
-import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
+import { AdvancedSearch, Breadcrumb, PageButtonHeader } from '@/components/sw360'
 import { UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import ComponentsTable from './ComponentsTable'
@@ -167,55 +167,58 @@ const ComponentIndex = (): ReactNode => {
     }
 
     return (
-        <div className='container page-content'>
-            <div className='row'>
-                <div className='col-2 sidebar'>
-                    <AdvancedSearch
-                        title='Advanced Search'
-                        fields={advancedSearch}
-                    />
-                </div>
-                <div className='col'>
-                    <PageButtonHeader
-                        title={`${t('Components')} (${numberOfComponent})`}
-                        buttons={headerbuttons}
-                    >
-                        <div
-                            style={{ marginLeft: '5px' }}
-                            className='btn-group'
-                            role='group'
-                        >
-                            <Dropdown>
-                                <Dropdown.Toggle
-                                    variant='secondary'
-                                    id='project-export'
-                                >
-                                    {t('Export Spreadsheet')}
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item onClick={() => handleExportComponent('false')}>
-                                        {t('Components only')}
-                                    </Dropdown.Item>
-                                    <Dropdown.Item onClick={() => handleExportComponent('true')}>
-                                        {t('Components with releases')}
-                                    </Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </div>
-                    </PageButtonHeader>
-                    <div
-                        className='row'
-                        style={{ marginBottom: '20px' }}
-                    >
-                        <ComponentsTable setNumberOfComponent={setNumberOfComponent} />
+        <>
+            <Breadcrumb customSegments={[{ label: 'Components', isLast: true }]} />
+            <div className='container page-content'>
+                <div className='row'>
+                    <div className='col-2 sidebar'>
+                        <AdvancedSearch
+                            title='Advanced Search'
+                            fields={advancedSearch}
+                        />
                     </div>
-                    <ImportSBOMModal
-                        show={importModalOpen}
-                        setShow={setImportModalOpen}
-                    />
+                    <div className='col'>
+                        <PageButtonHeader
+                            title={`${t('Components')} (${numberOfComponent})`}
+                            buttons={headerbuttons}
+                        >
+                            <div
+                                style={{ marginLeft: '5px' }}
+                                className='btn-group'
+                                role='group'
+                            >
+                                <Dropdown>
+                                    <Dropdown.Toggle
+                                        variant='secondary'
+                                        id='project-export'
+                                    >
+                                        {t('Export Spreadsheet')}
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item onClick={() => handleExportComponent('false')}>
+                                            {t('Components only')}
+                                        </Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleExportComponent('true')}>
+                                            {t('Components with releases')}
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                        </PageButtonHeader>
+                        <div
+                            className='row'
+                            style={{ marginBottom: '20px' }}
+                        >
+                            <ComponentsTable setNumberOfComponent={setNumberOfComponent} />
+                        </div>
+                        <ImportSBOMModal
+                            show={importModalOpen}
+                            setShow={setImportModalOpen}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 
