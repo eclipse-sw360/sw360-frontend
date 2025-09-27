@@ -12,12 +12,48 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+interface BreadcrumbSegment {
+    label: string
+    href?: string
+    isLast?: boolean
+}
 interface BreadcrumbProps {
     name?: string
+    customSegments?: BreadcrumbSegment[]
 }
 
-export default function Breadcrumb({ name }: BreadcrumbProps) {
+export default function Breadcrumb({ name, customSegments }: BreadcrumbProps) {
     const pathname = usePathname()
+
+    // If custom segments are provided, use them instead of auto-generated ones
+    if (customSegments && customSegments.length > 0) {
+        return (
+            <nav aria-label='breadcrumb'>
+                <div className='d-flex flex-wrap align-items-center container page-content'>
+                    {customSegments.map((segment, index) => (
+                        <span
+                            key={`${segment.href || index}`}
+                            className='d-flex align-items-center'
+                        >
+                            {index > 0 && <span className='mx-1 text-muted'>{'>'}</span>}
+                            {segment.href && !segment.isLast ? (
+                                <Link
+                                    href={segment.href}
+                                    className='btn-icon'
+                                >
+                                    {segment.label}
+                                </Link>
+                            ) : (
+                                <span className='fw-semibold text-dark'>{segment.label}</span>
+                            )}
+                        </span>
+                    ))}
+                </div>
+            </nav>
+        )
+    }
+
+    // Default behavior - auto-generate from URL
     const segments = pathname.split('/').filter(Boolean)
     const visibleSegments = segments.slice(0, 2)
 

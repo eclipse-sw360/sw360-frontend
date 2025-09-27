@@ -30,7 +30,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
+import { Breadcrumb, PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
@@ -229,6 +229,16 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                     updateEntity={updateComponent}
                     setEntityPayload={setComponentPayload}
                 />
+                {componentPayload?.name ? (
+                    <Breadcrumb
+                        customSegments={[
+                            { label: 'Components', href: '/components' },
+                            { label: componentPayload.name, isLast: true },
+                        ]}
+                    />
+                ) : (
+                    <Breadcrumb name={' '} />
+                )}
                 <div className='container page-content'>
                     <div className='row'>
                         <DeleteComponentDialog

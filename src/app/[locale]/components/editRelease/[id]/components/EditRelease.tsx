@@ -26,6 +26,7 @@ import {
     COTSDetails,
     ClearingInformation,
     CommonTabIds,
+    Component,
     Creator,
     DocumentCreationInformation,
     DocumentTypes,
@@ -40,7 +41,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
+import { Breadcrumb, PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
@@ -63,6 +64,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
+    const [parentComponent, setParentComponent] = useState<Component>()
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
@@ -167,7 +169,18 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 setSPDXPayload(SPDXPayload)
                 setRelease(release)
                 setDeletingRelease(releaseId)
-                setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
+                const parentComponentId = CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href'])
+                setComponentId(parentComponentId)
+
+                // Fetch parent component information for breadcrumb
+                const componentResponse = await ApiUtils.GET(
+                    `components/${parentComponentId}`,
+                    session.user.access_token,
+                )
+                if (componentResponse.status === HttpStatus.OK) {
+                    const componentData = (await componentResponse.json()) as Component
+                    setParentComponent(componentData)
+                }
 
                 if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
                     setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
@@ -475,6 +488,17 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     updateEntity={updateRelease}
                     setEntityPayload={setReleasePayload}
                 />
+                {parentComponent?.name ? (
+                    <Breadcrumb
+                        customSegments={[
+                            { label: 'Components', href: '/components' },
+                            { label: parentComponent.name, href: `/components/detail/${componentId}` },
+                            { label: `${release.name} ${release.version}`, isLast: true },
+                        ]}
+                    />
+                ) : (
+                    <Breadcrumb name={`${release.name} ${release.version}`} />
+                )}
                 <div className='container page-content'>
                     <div className='row'>
                         <div className='col-2 sidebar'>
