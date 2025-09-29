@@ -11,99 +11,141 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
+import { ErrorDetails, HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, PageSpinner, Table } from 'next-sw360'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import Link from 'next/link'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { useEffect, useMemo, useState, type JSX } from 'react'
+import { Spinner } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import SecondaryDepartments from './SecondaryDepartments'
 
-type TableRow = [string, string[], string]
-
 const SecondaryDepartmentsTable = (): JSX.Element => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<Array<TableRow> | undefined>(undefined)
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
-    const columns = [
-        {
-            id: 'department',
-            name: t('Department'),
-            sort: true,
-        },
-        {
-            id: 'memberEmails',
-            name: t('Member Emails'),
-            formatter: (emails: string[]) =>
-                _(
-                    <ol>
-                        {Object.values(emails).map((email) => (
-                            <li key={email}>{email}</li>
-                        ))}
-                    </ol>,
-                ),
-            sort: false,
-        },
-        {
-            id: 'action',
-            name: t('Action'),
-            sort: false,
-            width: '90px',
-            formatter: (departmentName: string) =>
-                _(
-                    <div className='d-flex align-items-center justify-content-center'>
-                        <Link href={`/admin/departments/edit?name=${departmentName}`}>
-                            <FaPencilAlt className='btn-icon' />
-                        </Link>
-                    </div>,
-                ),
-        },
-    ]
+    const columns = useMemo<ColumnDef<[string, string[]]>[]>(
+        () => [
+            {
+                id: 'department',
+                header: t('Department'),
+                cell: ({ row }) => <>{row.original[0]}</>,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'name',
+                header: t('Member Emails'),
+                cell: ({ row }) => {
+                    return (
+                        <ol>
+                            {row.original[1].map((email) => (
+                                <li key={email}>{email}</li>
+                            ))}
+                        </ol>
+                    )
+                },
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    return (
+                        <div className='d-flex align-items-center justify-content-center'>
+                            <Link href={`/admin/departments/edit?name=${row.original[0]}`}>
+                                <FaPencilAlt className='btn-icon' />
+                            </Link>
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [t],
+    )
 
-    const fetchDepartmentsWithEmails = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            return signOut()
-        }
-        const response = await ApiUtils.GET(`departments/members`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
-            return signOut()
-        }
-        if (response.status !== HttpStatus.OK) {
-            MessageService.error(t('Failed to fetch secondary departments'))
-            setTableData([])
-            return
-        }
-        const departmentsWithEmails: SecondaryDepartments = await response.json()
-        const tableData = Object.keys(departmentsWithEmails).map((department) => {
-            return [department, departmentsWithEmails[department], department] as TableRow
-        })
-        setTableData(tableData)
-    }, [])
+    const [secondaryDepartments, setSecondaryDepartments] = useState<SecondaryDepartments>(() => ({}))
+    const memoizedData = useMemo(() => secondaryDepartments, [secondaryDepartments])
+    const [showProcessing, setShowProcessing] = useState(true)
 
     useEffect(() => {
-        fetchDepartmentsWithEmails().catch((err) => console.error(err))
-    }, [])
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
 
-    return tableData === undefined ? (
-        <PageSpinner />
-    ) : (
-        <Table
-            columns={columns}
-            data={tableData}
-            sort={false}
-            selector={true}
-        />
+        const timeLimit = Object.entries(secondaryDepartments).length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+                const response = await ApiUtils.GET('departments/members', session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as SecondaryDepartments
+                setSecondaryDepartments(data)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [session])
+
+    const table = useReactTable({
+        data: Object.entries(memoizedData),
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        getPaginationRowModel: getPaginationRowModel(),
+    })
+
+    return (
+        <div className='mb-3'>
+            {table ? (
+                <>
+                    <ClientSidePageSizeSelector table={table} />
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                    />
+                    <ClientSideTableFooter table={table} />
+                </>
+            ) : (
+                <div className='col-12 mt-1 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
+        </div>
     )
 }
 
