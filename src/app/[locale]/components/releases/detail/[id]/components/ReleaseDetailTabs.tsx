@@ -25,6 +25,11 @@ export function ReleaseDetailTabs() {
             name: 'Linked Releases',
         },
         {
+            id: ReleaseTabIds.LINKED_PACKAGES,
+            name: 'Linked Packages',
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        {
             id: ReleaseTabIds.CLEARING_DETAILS,
             name: 'Clearing Details',
             hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
@@ -58,6 +63,11 @@ export function ReleaseDetailTabs() {
         {
             id: ReleaseTabIds.LINKED_RELEASES,
             name: 'Linked Releases',
+        },
+        {
+            id: ReleaseTabIds.LINKED_PACKAGES,
+            name: 'Linked Packages',
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
         {
             id: ReleaseTabIds.CLEARING_DETAILS,
@@ -100,6 +110,11 @@ export function ReleaseDetailTabs() {
             name: 'Linked Releases',
         },
         {
+            id: ReleaseTabIds.LINKED_PACKAGES,
+            name: 'Linked Packages',
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        {
             id: ReleaseTabIds.CLEARING_DETAILS,
             name: 'Clearing Details',
             hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
@@ -134,6 +149,11 @@ export function ReleaseDetailTabs() {
         {
             id: ReleaseTabIds.LINKED_RELEASES,
             name: 'Linked Releases',
+        },
+        {
+            id: ReleaseTabIds.LINKED_PACKAGES,
+            name: 'Linked Packages',
+            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
         },
         {
             id: ReleaseTabIds.CLEARING_DETAILS,
