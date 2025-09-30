@@ -18,6 +18,7 @@ import { notFound } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 
+import LinkedPackagesTab from '@/app/[locale]/components/releases/detail/[id]/components/LinkedPackagesTab'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -380,6 +381,12 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                             hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
                         >
                             <LinkedReleases releaseId={releaseId} />
+                        </div>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ReleaseTabIds.LINKED_PACKAGES ? true : false}
+                        >
+                            <LinkedPackagesTab releaseId={releaseId} />
                         </div>
                         <div
                             className='row'
