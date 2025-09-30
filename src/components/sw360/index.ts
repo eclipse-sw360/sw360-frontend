@@ -39,6 +39,7 @@ import {
     PageSizeSelector,
     SW360Table,
     TableFooter,
+    TableSearch,
 } from './Table/Components'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
@@ -82,6 +83,7 @@ export {
     SideBar,
     Table,
     TableFooter,
+    TableSearch,
     ThemeSwitcher,
     ToastMessage,
     TreeTable,
