@@ -11,15 +11,18 @@
 
 'use client'
 
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 
-import { Table, _ } from '@/components/sw360'
-import { Embedded, HttpStatus, LinkedRelease } from '@/object-types'
+import { SW360Table } from '@/components/sw360'
+import { Embedded, ErrorDetails, HttpStatus, LinkedRelease, ReleaseLink } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { Spinner } from 'react-bootstrap'
 
 interface Props {
     componentId: string
@@ -29,87 +32,122 @@ type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
 
 const Releases = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
-    const params = useSearchParams()
-    const [linkedReleases, setLinkedReleases] = useState<Array<Array<string | string[]>>>([])
     const router = useRouter()
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
+
+    const columns = useMemo<ColumnDef<ReleaseLink>[]>(
+        () => [
+            {
+                id: 'name',
+                header: t('Name'),
+                accessorKey: 'name',
+                enableSorting: false,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '50%',
+                },
+            },
+            {
+                id: 'version',
+                header: t('Version'),
+                cell: ({ row }) => {
+                    const { version, id } = row.original
+                    return (
+                        <Link
+                            href={'/components/releases/detail/' + id}
+                            className='link'
+                        >
+                            {version}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '50%',
+                },
+            },
+        ],
+        [t],
+    )
+
+    const [releaseData, setReleaseData] = useState<ReleaseLink[]>(() => [])
+    const memoizedData = useMemo(() => releaseData, [releaseData])
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
+        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
+
+        const timeLimit = releaseData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const queryUrl = CommonUtils.createUrlWithParams(
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(
                     `components/${componentId}/releases`,
-                    Object.fromEntries(params),
+                    session.data.user.access_token,
+                    signal,
                 )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-                const releaseLinks = (await response.json()) as EmbeddedLinkedReleases
-                if (
-                    !CommonUtils.isNullOrUndefined(releaseLinks._embedded) &&
-                    !CommonUtils.isNullOrUndefined(releaseLinks._embedded['sw360:releaseLinks'])
-                ) {
-                    setLinkedReleases(
-                        releaseLinks._embedded['sw360:releaseLinks'].map((item: LinkedRelease) => [
-                            item.name,
-                            [item.id, item.version],
-                        ]),
-                    )
+
+                const data = (await response.json()) as EmbeddedLinkedReleases
+                setReleaseData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
+                        ? []
+                        : data['_embedded']['sw360:releaseLinks'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
                 }
-            } catch (e) {
-                console.error(e)
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
             }
         })()
 
         return () => controller.abort()
-    }, [params, componentId])
+    }, [session, componentId])
 
-    const columns = [
-        {
-            id: 'name',
-            name: t('Name'),
-            sort: true,
-        },
-        {
-            id: 'version',
-            name: t('Version'),
-            formatter: ([id, version]: Array<string>) =>
-                _(
-                    <Link
-                        href={'/components/releases/detail/' + id}
-                        className='link'
-                    >
-                        {version}
-                    </Link>,
-                ),
-            sort: true,
-        },
-    ]
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+    })
+
     const handleAddReleaseClick = () => {
         router.push(`/components/edit/${componentId}/release/add`)
     }
 
     return (
         <>
-            <div className='row'>
-                <Table
-                    data={linkedReleases}
-                    search={true}
-                    columns={columns}
-                />
+            <div className='mb-3'>
+                {table ? (
+                    <>
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                        />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
             </div>
             <div>
                 <button
