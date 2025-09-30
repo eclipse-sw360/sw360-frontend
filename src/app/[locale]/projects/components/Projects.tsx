@@ -199,6 +199,8 @@ function Project(): JSX.Element {
                 cell: ({ row }) => {
                     const id = row.original['_links']['self']['href'].split('/').at(-1)
                     const projectClearingRequestId = row.original.clearingRequestId
+                    const clearingState = row.original.clearingState
+                    const isOpenClearingRequest = clearingState === 'OPEN'
                     return (
                         <>
                             {id && (
@@ -222,7 +224,7 @@ function Project(): JSX.Element {
                                             >
                                                 <MdOutlineTask
                                                     size={25}
-                                                    className='btn-icon overlay-trigger'
+                                                    className={`btn-icon overlay-trigger ${isOpenClearingRequest ? 'cr-icon-highlighted' : ''}`}
                                                 />
                                             </span>
                                         </OverlayTrigger>

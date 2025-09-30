@@ -9,15 +9,16 @@
 
 'use client'
 
-import { Embedded, HttpStatus, LicenseType } from '@/object-types'
+import { Embedded, ErrorDetails, HttpStatus, LicenseType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, QuickFilter, Table } from 'next-sw360'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, QuickFilter, SW360Table } from 'next-sw360'
 import { useRouter } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import DeleteLicenseTypesModal from './DeleteLicenseTypesModal'
@@ -28,63 +29,113 @@ export default function LicenseTypesDetail(): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
     const [quickFilter, setQuickFilter] = useState({})
-    const [loading, setLoading] = useState<boolean>(false)
     const [licenseTypeId, setLicenseTypeId] = useState<string>('')
     const [licenseTypeName, setLicenseTypeName] = useState<string>('')
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
-    const [licenseTypeData, setLicenseTypeData] = useState<Array<Array<string | string[]>>>([])
     const [licenseTypeCount, setLicenseTypeCount] = useState<null | number>(null)
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            const data = (await response.json()) as EmbeddedLicenseTypes
-            return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            MessageService.error(t('Unauthorized request'))
-            return
-        } else {
-            return undefined
-        }
-    }, [])
-
-    useEffect(() => {
-        setLoading(true)
-        void fetchData('licenseTypes')
-            .then((licenseTypeDetails: EmbeddedLicenseTypes | undefined) => {
-                if (licenseTypeDetails === undefined) {
-                    return
-                }
-                if (!CommonUtils.isNullOrUndefined(licenseTypeDetails['_embedded']['sw360:licenseTypes'])) {
-                    setLicenseTypeData(
-                        licenseTypeDetails._embedded['sw360:licenseTypes'].map((item: LicenseType) => [
-                            item.licenseType,
-                            [item.id, item.licenseType],
-                        ]),
+    const columns = useMemo<ColumnDef<LicenseType>[]>(
+        () => [
+            {
+                id: 'licenseType',
+                header: t('License Type'),
+                accessorKey: 'licenseType',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '80%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    return (
+                        <div className='d-flex justify-content-between'>
+                            <OverlayTrigger overlay={<Tooltip>{t('Delete License Type')}</Tooltip>}>
+                                <span className='d-inline-block'>
+                                    <FaTrashAlt
+                                        className='btn-icon'
+                                        onClick={() => {
+                                            handleDeleteLicenseType(row.original.id, row.original.licenseType)
+                                        }}
+                                    />
+                                </span>
+                            </OverlayTrigger>
+                        </div>
                     )
-                    setLicenseTypeCount(licenseTypeDetails._embedded['sw360:licenseTypes'].length)
+                },
+                meta: {
+                    width: '20%',
+                },
+            },
+        ],
+        [t],
+    )
+
+    const [licenseTypes, setLicenseTypes] = useState<LicenseType[]>(() => [])
+    const memoizedData = useMemo(() => licenseTypes, [licenseTypes])
+    const [showProcessing, setShowProcessing] = useState(true)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = licenseTypes.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    'licenseTypes',
+                    Object.fromEntries(Object.entries(quickFilter).map(([key, value]) => [key, String(value)])),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-            })
-            .catch((error) => {
+
+                const data = (await response.json()) as EmbeddedLicenseTypes
+                console.log(data['_embedded']?.['sw360:licenseTypes'])
+                setLicenseTypes(
+                    CommonUtils.isNullOrUndefined(data?.['_embedded']?.['sw360:licenseTypes'])
+                        ? []
+                        : data['_embedded']['sw360:licenseTypes'],
+                )
+                setLicenseTypeCount(data['_embedded']?.['sw360:licenseTypes'].length ?? 0)
+            } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
-            })
-            .finally(() => {
-                setLoading(false)
-            })
-    }, [fetchData])
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [session, quickFilter])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        getPaginationRowModel: getPaginationRowModel(),
+    })
 
     const handleAddLicenseType = () => {
         router.push('/admin/licenseTypes/add')
@@ -97,38 +148,8 @@ export default function LicenseTypesDetail(): ReactNode {
     }
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        setQuickFilter({ keyword: event.currentTarget.value })
+        setQuickFilter({ search: event.currentTarget.value })
     }
-
-    const columns = [
-        {
-            id: 'licenseType.licenseType',
-            name: t('License Type'),
-            width: '80%',
-            sort: true,
-        },
-        {
-            id: 'licenseType.actions',
-            name: t('Actions'),
-            width: '20%',
-            formatter: ([id, licenseTypeName]: Array<string>) =>
-                _(
-                    <div className='d-flex justify-content-between'>
-                        <OverlayTrigger overlay={<Tooltip>{t('Delete License Type')}</Tooltip>}>
-                            <span className='d-inline-block'>
-                                <FaTrashAlt
-                                    className='btn-icon'
-                                    onClick={() => {
-                                        handleDeleteLicenseType(id, licenseTypeName)
-                                    }}
-                                />
-                            </span>
-                        </OverlayTrigger>
-                    </div>,
-                ),
-            sort: true,
-        },
-    ]
 
     return (
         <>
@@ -163,19 +184,22 @@ export default function LicenseTypesDetail(): ReactNode {
                                 {`${t('License Types')} (${licenseTypeCount ?? ''})`}
                             </div>
                         </div>
-                        {!loading ? (
-                            <Table
-                                columns={columns}
-                                data={licenseTypeData}
-                                selector={true}
-                                sort={false}
-                                search={quickFilter}
-                            />
-                        ) : (
-                            <div className='col-12 d-flex justify-content-center align-items-center'>
-                                <Spinner className='spinner' />
-                            </div>
-                        )}
+                        <div className='mb-3'>
+                            {table ? (
+                                <>
+                                    <ClientSidePageSizeSelector table={table} />
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing}
+                                    />
+                                    <ClientSideTableFooter table={table} />
+                                </>
+                            ) : (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1161,6 +1161,10 @@ input[type='date'] {
     background-color: #f7941e;
 }
 
+.cr-icon-highlighted {
+    color: #ffc107 !important;
+}
+
 .tab-content {
     padding-left: 0px !important;
 }

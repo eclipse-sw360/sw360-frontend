@@ -9,140 +9,202 @@
 
 'use client'
 
-import { HttpStatus, SearchDuplicatesResponse } from '@/object-types'
+import { ErrorDetails, HttpStatus, SearchDuplicatesResponse } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
+import { SW360Table } from 'next-sw360'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { useEffect, useMemo, useState, type JSX } from 'react'
 
 export default function DatabaseSanitation(): JSX.Element {
     const t = useTranslations('default')
     const [duplicates, setDuplicates] = useState<SearchDuplicatesResponse | null | undefined>(undefined)
-    const { status } = useSession()
+    const memoizedData = useMemo(() => duplicates, [duplicates])
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
     const searchDuplicate = async () => {
         try {
             setDuplicates(null)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.GET('databaseSanitation/searchDuplicate', session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else if (response.status !== HttpStatus.OK) {
-                return notFound()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            const response = await ApiUtils.GET('databaseSanitation/searchDuplicate', session.data.user.access_token)
+            if (response.status !== HttpStatus.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
             }
             const data = (await response.json()) as SearchDuplicatesResponse
             setDuplicates(data)
-        } catch (e) {
-            console.error(e)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
 
-    const duplicateReleasesColumns = [
-        {
-            id: 'duplicateReleases.releaseName',
-            name: t('Release Name'),
-            sort: true,
-        },
-        {
-            id: 'duplicateReleases.links',
-            name: t('Links'),
-            formatter: (ids: string[]) =>
-                _(
-                    <>
-                        {ids.map((id, index) => (
-                            <>
-                                <Link
-                                    className='text-link'
-                                    href={`/components/releases/detail/${id}`}
-                                >
-                                    {index + 1}
-                                </Link>{' '}
-                            </>
-                        ))}
-                    </>,
-                ),
-        },
-    ]
-
-    const duplicateReleaseSourcesColumns = [
-        {
-            id: 'duplicateReleaseSources.releaseName',
-            name: t('Release Name'),
-            sort: true,
-        },
-        {
-            id: 'duplicateReleaseSources.sourceAttachmentsCounts',
-            name: t('Source Attachments Counts'),
-            formatter: (ids: string[]) => _(<>{ids.length}</>),
-        },
-    ]
-
-    const duplicateComponentsColumns = [
-        {
-            id: 'duplicateComponents.componentName',
-            name: t('Component Name'),
-            sort: true,
-        },
-        {
-            id: 'duplicateComponents.links',
-            name: t('Links'),
-            formatter: (ids: string[]) =>
-                _(
-                    <>
-                        {ids.map((id, index) => (
-                            <>
-                                <Link
-                                    className='text-link'
-                                    href={`/components/detail/${id}`}
-                                >
-                                    {index + 1}
-                                </Link>{' '}
-                            </>
-                        ))}
-                    </>,
-                ),
-        },
-    ]
-
-    const duplicateProjectsColumns = [
-        {
-            id: 'duplicateProjects.projectName',
-            name: t('Project Name'),
-            sort: true,
-        },
-        {
-            id: 'duplicateProjects.links',
-            name: t('Links'),
-            formatter: (ids: string[]) =>
-                _(
-                    <>
-                        <ul>
-                            {ids.map((id, index) => (
-                                <>
+    const duplicateReleasesColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+        () => [
+            {
+                id: 'releaseName',
+                header: t('Release Name'),
+                cell: ({ row }) => row.original[0],
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'links',
+                header: t('Links'),
+                cell: ({ row }) => {
+                    return (
+                        <>
+                            {row.original[1].map((id, index) => (
+                                <span key={id}>
                                     <Link
-                                        key={index}
+                                        className='text-link'
+                                        href={`/components/releases/detail/${id}`}
+                                    >
+                                        {index + 1}
+                                    </Link>{' '}
+                                </span>
+                            ))}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '70%',
+                },
+            },
+        ],
+        [t],
+    )
+    const duplicateReleasesTable = useReactTable({
+        data: Object.entries(memoizedData?.duplicateReleases ?? []),
+        columns: duplicateReleasesColumns,
+        getCoreRowModel: getCoreRowModel(),
+    })
+
+    const duplicateReleaseSourcesColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+        () => [
+            {
+                id: 'releaseName',
+                header: t('Release Name'),
+                cell: ({ row }) => row.original[0],
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'sourceAttachmentsCounts',
+                header: t('Source Attachments Counts'),
+                cell: ({ row }) => {
+                    return <>{row.original[1].length}</>
+                },
+                meta: {
+                    width: '70%',
+                },
+            },
+        ],
+        [t],
+    )
+    const duplicateReleaseSourcesTable = useReactTable({
+        data: Object.entries(memoizedData?.duplicateReleaseSources ?? []),
+        columns: duplicateReleaseSourcesColumns,
+        getCoreRowModel: getCoreRowModel(),
+    })
+
+    const duplicateComponentsColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+        () => [
+            {
+                id: 'componentName',
+                header: t('Component Name'),
+                cell: ({ row }) => row.original[0],
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'links',
+                header: t('Links'),
+                cell: ({ row }) => {
+                    return (
+                        <>
+                            {row.original[1].map((id, index) => (
+                                <span key={id}>
+                                    <Link
+                                        className='text-link'
+                                        href={`/components/detail/${id}`}
+                                    >
+                                        {index + 1}
+                                    </Link>{' '}
+                                </span>
+                            ))}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '70%',
+                },
+            },
+        ],
+        [t],
+    )
+    const duplicateComponentsTable = useReactTable({
+        data: Object.entries(memoizedData?.duplicateComponents ?? []),
+        columns: duplicateComponentsColumns,
+        getCoreRowModel: getCoreRowModel(),
+    })
+
+    const duplicateProjectsColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+        () => [
+            {
+                id: 'projectName',
+                header: t('Project Name'),
+                cell: ({ row }) => row.original[0],
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'links',
+                header: t('Links'),
+                cell: ({ row }) => {
+                    return (
+                        <>
+                            {row.original[1].map((id, index) => (
+                                <span key={id}>
+                                    <Link
                                         className='text-link'
                                         href={`/projects/detail/${id}`}
                                     >
                                         {index + 1}
                                     </Link>{' '}
-                                </>
+                                </span>
                             ))}
-                        </ul>
-                    </>,
-                ),
-        },
-    ]
+                        </>
+                    )
+                },
+                meta: {
+                    width: '70%',
+                },
+            },
+        ],
+        [t],
+    )
+    const duplicateProjectsTable = useReactTable({
+        data: Object.entries(memoizedData?.duplicateProjects ?? []),
+        columns: duplicateProjectsColumns,
+        getCoreRowModel: getCoreRowModel(),
+    })
 
     return (
         <div className='mx-5 mt-3'>
@@ -185,34 +247,30 @@ export default function DatabaseSanitation(): JSX.Element {
                     </div>
                     <div className='mb-3'>
                         <h6 className='header-underlined'>{t('RELEASES WITH THE SAME IDENTIFIER')}</h6>
-                        <Table
-                            columns={duplicateReleasesColumns}
-                            data={Object.entries(duplicates.duplicateReleases)}
-                            sort={false}
+                        <SW360Table
+                            table={duplicateReleasesTable}
+                            showProcessing={false}
                         />
                     </div>
                     <div className='mb-3'>
                         <h6 className='header-underlined'>{t('RELEASES WITH MORE THAN ONE SOURCE ATTACHMENT')}</h6>
-                        <Table
-                            columns={duplicateReleaseSourcesColumns}
-                            data={Object.entries(duplicates.duplicateReleaseSources)}
-                            sort={false}
+                        <SW360Table
+                            table={duplicateReleaseSourcesTable}
+                            showProcessing={false}
                         />
                     </div>
                     <div className='mb-3'>
                         <h6 className='header-underlined'>{t('COMPONENTS WITH THE SAME IDENTIFIER')}</h6>
-                        <Table
-                            columns={duplicateComponentsColumns}
-                            data={Object.entries(duplicates.duplicateComponents)}
-                            sort={false}
+                        <SW360Table
+                            table={duplicateComponentsTable}
+                            showProcessing={false}
                         />
                     </div>
                     <div className='mb-3'>
                         <h6 className='header-underlined'>{t('PROJECTS WITH THE SAME IDENTIFIER')}</h6>
-                        <Table
-                            columns={duplicateProjectsColumns}
-                            data={Object.entries(duplicates.duplicateProjects)}
-                            sort={false}
+                        <SW360Table
+                            table={duplicateProjectsTable}
+                            showProcessing={false}
                         />
                     </div>
                 </>

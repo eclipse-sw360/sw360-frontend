@@ -435,3 +435,31 @@ export function FilterComponent({
         </DropdownButton>
     )
 }
+
+export function TableSearch({
+    searchFunction,
+}: {
+    searchFunction: (event: React.KeyboardEvent<HTMLInputElement>) => void
+}) {
+    const t = useTranslations('default')
+    return (
+        <div className='row mt-3'>
+            <div className='col-auto px-0'>
+                <label
+                    htmlFor='table-search'
+                    className='col-sm-2 col-form-label'
+                >
+                    {t('Search')}:
+                </label>
+            </div>
+            <div className='col-auto'>
+                <input
+                    className='form-control'
+                    type='text'
+                    onKeyUp={searchFunction}
+                    id='table-search'
+                />
+            </div>
+        </div>
+    )
+}
