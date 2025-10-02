@@ -13,8 +13,9 @@
 
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
+import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -466,9 +467,18 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         Cancel: { link: '/components/releases/detail/' + releaseId, type: 'secondary', name: t('Cancel') },
     }
 
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const componentsPath = `/${locale}/components`
+
     return (
         release && (
             <>
+                <Breadcrumb className='container page-content'>
+                    <Breadcrumb.Item href={componentsPath}>{t('Components')}</Breadcrumb.Item>
+                    <Breadcrumb.Item href={`${componentsPath}/detail/${componentId}`}>{release.name}</Breadcrumb.Item>
+                    <Breadcrumb.Item active>{`${release.name} (${release.version})`}</Breadcrumb.Item>
+                </Breadcrumb>
                 <CreateMRCommentDialog<Release>
                     show={showCommentModal}
                     setShow={setShowCommentModal}

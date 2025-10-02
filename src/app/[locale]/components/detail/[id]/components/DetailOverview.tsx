@@ -13,7 +13,9 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
@@ -265,142 +267,154 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         return () => controller.abort()
     }, [pageableQueryParam, componentId, session])
 
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const componentsPath = `/${locale}/components`
+
     return (
         component && (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
-                            vulnerabilities={vulnerData}
-                        />
-                    </div>
-                    <div className='col'>
-                        <div
-                            className='row'
-                            style={{ marginBottom: '20px' }}
-                        >
-                            <PageButtonHeader
-                                title={component.name}
-                                buttons={headerButtons}
+            <>
+                <Breadcrumb className='container page-content'>
+                    <Breadcrumb.Item href={componentsPath}>{t('Components')}</Breadcrumb.Item>
+                    <Breadcrumb.Item active>{component.name}</Breadcrumb.Item>
+                </Breadcrumb>
+                <div className='container page-content'>
+                    <div className='row'>
+                        <div className='col-2 sidebar'>
+                            <SideBar
+                                selectedTab={selectedTab}
+                                setSelectedTab={setSelectedTab}
+                                tabList={tabList}
+                                vulnerabilities={vulnerData}
+                            />
+                        </div>
+                        <div className='col'>
+                            <div
+                                className='row'
+                                style={{ marginBottom: '20px' }}
                             >
-                                {selectedTab === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
-                                    <div
-                                        className='list-group-companion'
-                                        data-belong-to='tab-Attachments'
-                                    >
+                                <PageButtonHeader
+                                    title={component.name}
+                                    buttons={headerButtons}
+                                >
+                                    {selectedTab === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
                                         <div
-                                            className='btn-group'
-                                            role='group'
+                                            className='list-group-companion'
+                                            data-belong-to='tab-Attachments'
                                         >
-                                            <button
-                                                id='downloadAttachmentBundle'
-                                                type='button'
-                                                className='btn btn-secondary'
-                                                onClick={() => void downloadBundle()}
+                                            <div
+                                                className='btn-group'
+                                                role='group'
                                             >
-                                                {t('Download Attachment Bundle')}
-                                            </button>
+                                                <button
+                                                    id='downloadAttachmentBundle'
+                                                    type='button'
+                                                    className='btn btn-secondary'
+                                                    onClick={() => void downloadBundle()}
+                                                >
+                                                    {t('Download Attachment Bundle')}
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                                {selectedTab === CommonTabIds.CHANGE_LOG && (
+                                    )}
+                                    {selectedTab === CommonTabIds.CHANGE_LOG && (
+                                        <div
+                                            className='nav nav-pills justify-content-center bg-light font-weight-bold'
+                                            id='pills-tab'
+                                            role='tablist'
+                                        >
+                                            <a
+                                                className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
+                                                onClick={() => setChangelogTab('list-change')}
+                                                style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                            >
+                                                {t('Change Log')}
+                                            </a>
+                                            <a
+                                                className={`nav-item nav-link ${changelogTab == 'view-log' ? 'active' : ''}`}
+                                                onClick={() => {
+                                                    if (changeLogId !== '') {
+                                                        setChangelogTab('view-log')
+                                                    }
+                                                }}
+                                                style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                            >
+                                                {t('Changes')}
+                                            </a>
+                                        </div>
+                                    )}
+                                </PageButtonHeader>
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                            >
+                                <Summary
+                                    component={component}
+                                    componentId={componentId}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}
+                            >
+                                <ReleaseOverview componentId={componentId} />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
+                            >
+                                <Attachments
+                                    documentId={componentId}
+                                    documentType={DocumentTypes.COMPONENT}
+                                />
+                            </div>
+                            <div
+                                className='containers'
+                                hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}
+                            >
+                                <ComponentVulnerabilities vulnerData={vulnerData} />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}
+                            >
+                                <div className='col'>
                                     <div
-                                        className='nav nav-pills justify-content-center bg-light font-weight-bold'
-                                        id='pills-tab'
-                                        role='tablist'
+                                        className='row'
+                                        hidden={changelogTab !== 'list-change' ? true : false}
                                     >
-                                        <a
-                                            className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
-                                            onClick={() => setChangelogTab('list-change')}
-                                            style={{ color: '#F7941E', fontWeight: 'bold' }}
-                                        >
-                                            {t('Change Log')}
-                                        </a>
-                                        <a
-                                            className={`nav-item nav-link ${changelogTab == 'view-log' ? 'active' : ''}`}
-                                            onClick={() => {
-                                                if (changeLogId !== '') {
-                                                    setChangelogTab('view-log')
-                                                }
-                                            }}
-                                            style={{ color: '#F7941E', fontWeight: 'bold' }}
-                                        >
-                                            {t('Changes')}
-                                        </a>
+                                        <ChangeLogList
+                                            setChangeLogId={setChangeLogId}
+                                            documentId={componentId}
+                                            setChangesLogTab={setChangelogTab}
+                                            changeLogList={memoizedData}
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                            showProcessing={showProcessing}
+                                            paginationMeta={paginationMeta}
+                                        />
                                     </div>
-                                )}
-                            </PageButtonHeader>
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                        >
-                            <Summary
-                                component={component}
-                                componentId={componentId}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}
-                        >
-                            <ReleaseOverview componentId={componentId} />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
-                        >
-                            <Attachments
-                                documentId={componentId}
-                                documentType={DocumentTypes.COMPONENT}
-                            />
-                        </div>
-                        <div
-                            className='containers'
-                            hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}
-                        >
-                            <ComponentVulnerabilities vulnerData={vulnerData} />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}
-                        >
-                            <div className='col'>
-                                <div
-                                    className='row'
-                                    hidden={changelogTab !== 'list-change' ? true : false}
-                                >
-                                    <ChangeLogList
-                                        setChangeLogId={setChangeLogId}
-                                        documentId={componentId}
-                                        setChangesLogTab={setChangelogTab}
-                                        changeLogList={memoizedData}
-                                        pageableQueryParam={pageableQueryParam}
-                                        setPageableQueryParam={setPageableQueryParam}
-                                        showProcessing={showProcessing}
-                                        paginationMeta={paginationMeta}
-                                    />
-                                </div>
-                                <div
-                                    className='row'
-                                    hidden={changelogTab !== 'view-log' ? true : false}
-                                >
-                                    <ChangeLogDetail
-                                        changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
-                                    />
                                     <div
-                                        id='cardScreen'
-                                        style={{ padding: '0px' }}
-                                    ></div>
+                                        className='row'
+                                        hidden={changelogTab !== 'view-log' ? true : false}
+                                    >
+                                        <ChangeLogDetail
+                                            changeLogData={
+                                                changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]
+                                            }
+                                        />
+                                        <div
+                                            id='cardScreen'
+                                            style={{ padding: '0px' }}
+                                        ></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         )
     )
 }
