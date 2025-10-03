@@ -28,6 +28,7 @@ import {
     ProjectObligationData,
     ProjectPayload,
     ReleaseDetail,
+    User,
     UserGroupType,
     Vendor,
 } from '@/object-types'
@@ -37,7 +38,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { useCallback, useEffect, useState, type JSX } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
@@ -166,6 +167,7 @@ function EditProject({
         projectManager: '',
         packageIds: {},
         comment: '',
+        projectResponsible: '',
     })
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
@@ -234,6 +236,21 @@ function EditProject({
         }
     }
 
+    const fetchUserData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === HttpStatus.OK) {
+            const data = (await response.json()) as User
+            return data
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            MessageService.error(t('Unauthorized request'))
+            return
+        } else {
+            return undefined
+        }
+    }, [])
+
     useEffect(() => {
         void (async () => {
             try {
@@ -271,18 +288,30 @@ function EditProject({
                     })
                 }
 
-                if (project['_embedded']?.['projectOwner'] !== undefined) {
-                    setProjectOwner({
-                        [project['_embedded']['projectOwner'].email]:
-                            project['_embedded']['projectOwner'].fullName ?? '',
-                    })
+                if (project?.projectOwner !== undefined) {
+                    const userData = await fetchUserData(`users/${project?.projectOwner}`)
+                    if (!CommonUtils.isNullOrUndefined(userData)) {
+                        setProjectOwner({
+                            [project?.projectOwner]: userData?.fullName ?? project?.projectOwner,
+                        })
+                    } else {
+                        setProjectOwner({
+                            [project?.projectOwner]: project?.projectOwner,
+                        })
+                    }
                 }
 
-                if (project['_embedded']?.['projectManager'] !== undefined) {
-                    setProjectManager({
-                        [project['_embedded']['projectManager'].email]:
-                            project['_embedded']['projectManager'].fullName ?? '',
-                    })
+                if (project?.projectResponsible !== undefined) {
+                    const userData = await fetchUserData(`users/${project?.projectResponsible}`)
+                    if (!CommonUtils.isNullOrUndefined(userData)) {
+                        setProjectManager({
+                            [project?.projectResponsible]: userData?.fullName ?? project?.projectResponsible,
+                        })
+                    } else {
+                        setProjectManager({
+                            [project?.projectResponsible]: project?.projectResponsible,
+                        })
+                    }
                 }
 
                 if (project['_embedded']?.['sw360:moderators'] !== undefined) {
@@ -345,7 +374,8 @@ function EditProject({
                     securityResponsibles: project.securityResponsibles ?? [],
                     contributors: (project._embedded?.['sw360:contributors'] ?? []).map((user) => user.email),
                     moderators: (project._embedded?.['sw360:moderators'] ?? []).map((user) => user.email),
-                    projectOwner: project._embedded?.projectOwner?.email ?? '',
+                    projectOwner: project.projectOwner ?? '',
+                    projectResponsible: project.projectResponsible ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
                     packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
