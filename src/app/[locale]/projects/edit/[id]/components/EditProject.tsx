@@ -332,14 +332,19 @@ function EditProject({
 
                 if (project?.securityResponsibles !== undefined) {
                     const securityResponsiblesMap = new Map<string, string>()
-                    project.securityResponsibles.map(async (securityResponsible) => {
-                        const userData = await fetchUserData(`users/${securityResponsible}`)
-                        if (!CommonUtils.isNullOrUndefined(userData)) {
-                            securityResponsiblesMap.set(securityResponsible, userData.fullName ?? '')
-                        } else {
-                            securityResponsiblesMap.set(securityResponsible, securityResponsible)
-                        }
-                    })
+                    await Promise.all(
+                        project.securityResponsibles.map(async (securityResponsible) => {
+                            const userData = await fetchUserData(`users/${securityResponsible}`)
+                            if (!CommonUtils.isNullOrUndefined(userData)) {
+                                securityResponsiblesMap.set(
+                                    securityResponsible,
+                                    userData?.fullName ?? securityResponsible,
+                                )
+                            } else {
+                                securityResponsiblesMap.set(securityResponsible, securityResponsible)
+                            }
+                        }),
+                    )
                     setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
                 }
 
