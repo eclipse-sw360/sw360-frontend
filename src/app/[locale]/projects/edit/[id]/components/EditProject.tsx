@@ -330,10 +330,15 @@ function EditProject({
                     setContributors(Object.fromEntries(contributorMap))
                 }
 
-                if (project['_embedded']?.['sw360:securityResponsibles'] !== undefined) {
+                if (project?.securityResponsibles !== undefined) {
                     const securityResponsiblesMap = new Map<string, string>()
-                    project['_embedded']['sw360:securityResponsibles'].map((securityResponsible) => {
-                        securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName ?? '')
+                    project.securityResponsibles.map(async (securityResponsible) => {
+                        const userData = await fetchUserData(`users/${securityResponsible}`)
+                        if (!CommonUtils.isNullOrUndefined(userData)) {
+                            securityResponsiblesMap.set(securityResponsible, userData.fullName ?? '')
+                        } else {
+                            securityResponsiblesMap.set(securityResponsible, securityResponsible)
+                        }
                     })
                     setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
                 }
