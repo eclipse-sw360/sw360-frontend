@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import React, { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import DeleteItemWarning from '../DeleteItemWarning/DeleteItemWarning'
 
 interface Props {
     header: string
@@ -33,6 +34,8 @@ interface Input {
 function AddKeyValue(props: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
+    const [isDeleteItem, setIsDeleteItem] = useState<boolean>(false)
+    const [currentIndex, setCurrentIndex] = useState<number>(-1)
     const { status } = useSession()
 
     useEffect(() => {
@@ -60,9 +63,8 @@ function AddKeyValue(props: Props): JSX.Element {
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList]
-        list.splice(index, 1)
-        setInputList(list)
+        setCurrentIndex(index)
+        setIsDeleteItem(true)
     }
 
     const handleAddClick = () => {
@@ -71,6 +73,15 @@ function AddKeyValue(props: Props): JSX.Element {
 
     return (
         <>
+            <DeleteItemWarning
+                isDeleteItem={isDeleteItem}
+                setIsDeleteItem={setIsDeleteItem}
+                inputList={inputList}
+                setInputList={setInputList}
+                index={currentIndex}
+                setData={props.setData}
+                setObject={props.setObject}
+            />
             <div className='section-header mb-2'>
                 <span className='fw-bold'>{props.header}</span>
             </div>
