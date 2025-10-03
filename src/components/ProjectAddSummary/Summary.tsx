@@ -134,7 +134,7 @@ export default function Summary({
                 <div className='row mb-4'>
                     <AddKeyValue
                         header={t('Additional Data')}
-                        keyName={'additional data'}
+                        keyName={'Additional Data'}
                         data={additionalData}
                         setData={setAdditionalData}
                         setObject={setAdditionalDataObject}

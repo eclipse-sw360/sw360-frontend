@@ -88,7 +88,7 @@ function AddKeyValue(props: Props): JSX.Element {
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     className='form-control'
-                                    placeholder={t('ENTER_VALUE_KEY', { value: props.keyName.toLowerCase() })}
+                                    placeholder={t('Enter_Args', { args: props.keyName.toLowerCase() + ' key' })}
                                     required
                                     aria-describedby={`${props.keyName.toLowerCase()} key`}
                                 />
@@ -100,7 +100,7 @@ function AddKeyValue(props: Props): JSX.Element {
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     className='form-control'
-                                    placeholder={t('Enter_Args', { args: props.keyName.toLowerCase() + 'value' })}
+                                    placeholder={t('Enter_Args', { args: props.keyName.toLowerCase() + ' value' })}
                                     required
                                     aria-describedby={`${props.keyName.toLowerCase()} value`}
                                 />
