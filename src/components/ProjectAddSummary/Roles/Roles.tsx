@@ -146,13 +146,13 @@ export default function Roles({
             setProjectManager({})
             setProjectPayload({
                 ...projectPayload,
-                projectManager: '',
+                projectResponsible: '',
             })
         } else {
             setProjectManager(user)
             setProjectPayload({
                 ...projectPayload,
-                projectManager: userEmails[0],
+                projectResponsible: userEmails[0],
             })
         }
     }
@@ -161,7 +161,7 @@ export default function Roles({
         setProjectManager({})
         setProjectPayload({
             ...projectPayload,
-            projectManager: '',
+            projectResponsible: '',
         })
     }
 
