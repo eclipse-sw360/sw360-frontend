@@ -9,7 +9,7 @@
 
 'use client'
 
-import { AddtionalDataType } from '@/object-types'
+import { AddtionalDataType, RolesType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -28,8 +28,9 @@ interface Props {
     inputList: Input[]
     setInputList: React.Dispatch<React.SetStateAction<Input[]>>
     index: number
-    setData: React.Dispatch<React.SetStateAction<Input[]>>
+    setData?: React.Dispatch<React.SetStateAction<Input[]>>
     setObject?: AddtionalDataType
+    setDataInputList?: RolesType
 }
 
 const DeleteItemWarning = ({
@@ -40,6 +41,7 @@ const DeleteItemWarning = ({
     index,
     setData,
     setObject,
+    setDataInputList,
 }: Props): JSX.Element => {
     const t = useTranslations('default')
     const { status } = useSession()
@@ -50,18 +52,23 @@ const DeleteItemWarning = ({
         }
     }, [status])
 
-    const deleteItem = async () => {
+    const deleteItem = () => {
         try {
             const list: Input[] = [...inputList]
             list.splice(index, 1)
             setInputList(list)
-            setData(list)
+            if (setData) {
+                setData(list)
+            }
             if (setObject) {
                 const map = new Map<string, string>()
                 list.forEach((item) => {
                     map.set(item.key, item.value)
                 })
                 setObject(map)
+            }
+            if (setDataInputList) {
+                setDataInputList(list)
             }
             setIsDeleteItem(false)
         } catch (error) {

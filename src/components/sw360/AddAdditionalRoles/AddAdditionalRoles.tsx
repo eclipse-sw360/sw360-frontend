@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
+import DeleteItemWarning from '../DeleteItemWarning/DeleteItemWarning'
 
 interface Props {
     documentType?: string
@@ -32,6 +33,8 @@ function AddAdditionalRoles({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputListData, setInputListData] = useState<InputKeyValue[]>([])
+    const [isDeleteItem, setIsDeleteItem] = useState<boolean>(false)
+    const [currentIndex, setCurrentIndex] = useState<number>(-1)
     const { status } = useSession()
 
     useEffect(() => {
@@ -65,12 +68,8 @@ function AddAdditionalRoles({
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputListData]
-        list.splice(index, 1)
-        setInputData(list)
-        if (setDataInputList) {
-            setDataInputList(list)
-        }
+        setCurrentIndex(index)
+        setIsDeleteItem(true)
     }
 
     const handleAddClick = () => {
@@ -87,6 +86,14 @@ function AddAdditionalRoles({
 
     return (
         <>
+            <DeleteItemWarning
+                isDeleteItem={isDeleteItem}
+                setIsDeleteItem={setIsDeleteItem}
+                inputList={inputListData}
+                setInputList={setInputListData}
+                index={currentIndex}
+                setDataInputList={setDataInputList}
+            />
             <div className='section-header mb-2'>
                 <span className='fw-bold'>{t('Additional Roles')}</span>
             </div>
