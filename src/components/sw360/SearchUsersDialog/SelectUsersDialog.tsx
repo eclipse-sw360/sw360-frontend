@@ -59,7 +59,7 @@ const SelectUsersDialog = ({
 
     const searchUsers = async (text: string) => {
         const session = await getSession()
-        const queryUrl = CommonUtils.createUrlWithParams(`users`, { email: text })
+        const queryUrl = CommonUtils.createUrlWithParams(`users`, { givenname: text, luceneSearch: 'true' })
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
             return signOut()
