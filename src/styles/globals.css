@@ -1609,3 +1609,17 @@ input[checked] + .slider:before {
         }
     }
 }
+
+.custom-logo {
+    font-size: 0.65rem;
+    font-family: sans-serif;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.logo-sw360text-dark {
+    color: rgb(255, 255, 255);
+}
+.logo-sw360text-light {
+    color: rgb(0, 0, 0);
+}
