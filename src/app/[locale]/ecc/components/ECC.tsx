@@ -10,13 +10,22 @@
 'use client'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { UserGroupType, type ECC, type Embedded } from '@/object-types'
-import { SW360_API_URL } from '@/utils/env'
-import { Session } from 'next-auth'
+import {
+    ErrorDetails,
+    HttpStatus,
+    PageableQueryParam,
+    PaginationMeta,
+    UserGroupType,
+    type ECC,
+    type Embedded,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { QuickFilter, Table, _ } from 'next-sw360'
-import { ReactNode, useEffect } from 'react'
+import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 
 type EmbeddedECC = Embedded<ECC, 'sw360:releases'>
@@ -26,75 +35,172 @@ const Capitalize = (text: string) =>
 
 function ECC(): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [session])
 
-    const columns = [
-        {
-            id: 'ecc.status',
-            name: t('Status'),
-            sort: true,
-        },
-        {
-            id: 'ecc.releaseName',
-            name: t('Release name'),
-            formatter: ({ name, version }: { id: string; name: string; version: string }) =>
-                _(<div>{`${name} (${version})`}</div>),
-            sort: true,
-        },
-        {
-            id: 'ecc.releaseVersion',
-            name: t('Release version'),
-            sort: true,
-        },
-        {
-            id: 'ecc.creatorGroup',
-            name: t('Creator Group'),
-            sort: true,
-        },
-        {
-            id: 'ecc.eccAssessor',
-            name: t('ECC Assessor'),
-            sort: true,
-        },
-        {
-            id: 'ecc.eccAssessorGroup',
-            name: t('ECC Assessor Group'),
-            sort: true,
-        },
-        {
-            id: 'ecc.eccAssessmentDate',
-            name: t('ECC Assessment Date'),
-            sort: true,
-        },
-    ]
-
-    const initServerPaginationConfig = (session: Session) => {
-        return {
-            url: `${SW360_API_URL}/resource/api/ecc`,
-            then: (data: EmbeddedECC) => {
-                return data._embedded['sw360:releases'].map((elem: ECC) => [
-                    Capitalize(elem.eccInformation.eccStatus),
-                    {
-                        version: elem.version,
-                        name: elem.name,
-                    },
-                    elem.version,
-                    elem.eccInformation.creatorGroup,
-                    elem.eccInformation.assessorContactPerson,
-                    elem.eccInformation.assessorDepartment,
-                    elem.eccInformation.assessmentDate,
-                ])
+    const columns = useMemo<ColumnDef<ECC>[]>(
+        () => [
+            {
+                id: 'status',
+                header: t('Status'),
+                cell: ({ row }) => <>{Capitalize(row.original.eccInformation.eccStatus)}</>,
+                meta: {
+                    width: '10%',
+                },
             },
-            total: (data: EmbeddedECC) => (data.page ? data.page.totalElements : 0),
-            headers: { Authorization: `${session.user.access_token}` },
-        }
-    }
+            {
+                id: 'releaseName',
+                header: t('Release name'),
+                cell: ({ row }) => {
+                    const { name, version } = row.original
+                    return <div>{`${name} (${version})`}</div>
+                },
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'version',
+                header: t('Release version'),
+                accessorKey: 'version',
+                cell: (info) => info.getValue(),
+                enableSorting: false,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'creatorGroup',
+                header: t('Creator Group'),
+                cell: ({ row }) => <>{row.original.eccInformation.creatorGroup}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'eccAssessor',
+                header: t('ECC Assessor'),
+                cell: ({ row }) => <>{row.original.eccInformation.assessorContactPerson}</>,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'eccAssessorGroup',
+                header: t('ECC Assessor Group'),
+                cell: ({ row }) => <>{row.original.eccInformation.assessorDepartment}</>,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'ecc.eccAssessmentDate',
+                header: t('ECC Assessment Date'),
+                cell: ({ row }) => <>{row.original.eccInformation.assessmentDate}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [t],
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [eccData, setEccData] = useState<ECC[]>(() => [])
+    const memoizedData = useMemo(() => eccData, [eccData])
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = eccData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `ecc`,
+                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as EmbeddedECC
+                setPaginationMeta(data.page)
+                setEccData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
+                        ? []
+                        : data['_embedded']['sw360:releases'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [pageableQueryParam, session])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
 
     return (
         <div className='container page-content'>
@@ -106,16 +212,25 @@ function ECC(): ReactNode {
                 </div>
                 <div className='col-lg-10'>
                     <div className='buttonheader-title ms-1'>{t('ECC Overview')}</div>
-                    <div className='row mt-3'>
-                        {status === 'authenticated' ? (
-                            <Table
-                                columns={columns}
-                                server={initServerPaginationConfig(session)}
-                                selector={true}
-                                sort={false}
-                            />
+                    <div className='mb-3'>
+                        {pageableQueryParam && table && paginationMeta ? (
+                            <>
+                                <PageSizeSelector
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                />
+                                <SW360Table
+                                    table={table}
+                                    showProcessing={showProcessing}
+                                />
+                                <TableFooter
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                    paginationMeta={paginationMeta}
+                                />
+                            </>
                         ) : (
-                            <div className='col-12 d-flex justify-content-center align-items-center'>
+                            <div className='col-12 mt-1 text-center'>
                                 <Spinner className='spinner' />
                             </div>
                         )}
