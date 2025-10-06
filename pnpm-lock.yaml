@@ -69,8 +69,8 @@ importers:
         version: 7.8.2
     devDependencies:
       '@commitlint/cli':
-        specifier: 20.0.0
-        version: 20.0.0(@types/node@24.6.1)(typescript@5.9.3)
+        specifier: 20.1.0
+        version: 20.1.0(@types/node@24.6.1)(typescript@5.9.3)
       '@commitlint/config-conventional':
         specifier: 19.8.0
         version: 19.8.0
@@ -211,8 +211,8 @@ packages:
     engines: {node: '>=v18'}
     hasBin: true
 
-  '@commitlint/cli@20.0.0':
-    resolution: {integrity: sha512-I3D7Yldq8ZhOB3qEaTvXWIgib6tSZhbCpRObfFQ/aYI0J9AH8NMwT07Ak+bpE3n6Yn7EtbqEhQUkJZ/jZ5kCeQ==}
+  '@commitlint/cli@20.1.0':
+    resolution: {integrity: sha512-pW5ujjrOovhq5RcYv5xCpb4GkZxkO2+GtOdBW2/qrr0Ll9tl3PX0aBBobGQl3mdZUbOBgwAexEQLeH6uxL0VYg==}
     engines: {node: '>=v18'}
     hasBin: true
 
@@ -3412,7 +3412,7 @@ snapshots:
       - '@types/node'
       - typescript
 
-  '@commitlint/cli@20.0.0(@types/node@24.6.1)(typescript@5.9.3)':
+  '@commitlint/cli@20.1.0(@types/node@24.6.1)(typescript@5.9.3)':
     dependencies:
       '@commitlint/format': 20.0.0
       '@commitlint/lint': 20.0.0
