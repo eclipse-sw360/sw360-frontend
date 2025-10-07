@@ -56,15 +56,7 @@ import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import {
-    ComponentObligationData,
-    LicenseObligationData,
-    LicenseObligationRelease,
-    LicenseObligationsList,
-    Obligation,
-    OrganizationObligationData,
-    ProjectObligationData,
-} from './Obligation'
+import { Obligation, ObligationData, ObligationEntry, ObligationRelease, ObligationResponse } from './Obligation'
 import Package from './Package'
 import { ColumnMeta, FilterOption, NestedRows, PageableQueryParam, PaginationMeta, TypedEntity } from './Pageable'
 import Preferences from './Preferences'
@@ -129,7 +121,6 @@ export type {
     ClearingRequestDetails,
     ColumnMeta,
     Component,
-    ComponentObligationData,
     ComponentPayload,
     Configuration,
     COTSDetails,
@@ -153,9 +144,6 @@ export type {
     InputKeyValue,
     LicenseClearing,
     LicenseDetail,
-    LicenseObligationData,
-    LicenseObligationRelease,
-    LicenseObligationsList,
     LicensePayload,
     LicenseType,
     LinkedPackage,
@@ -177,7 +165,10 @@ export type {
     NodeData,
     OAuthClient,
     Obligation,
-    OrganizationObligationData,
+    ObligationData,
+    ObligationEntry,
+    ObligationRelease,
+    ObligationResponse,
     OtherLicensingInformationDetected,
     Package,
     PackageInformation,
@@ -187,7 +178,6 @@ export type {
     Project,
     ProjectData,
     ProjectLinkedRelease,
-    ProjectObligationData,
     ProjectPayload,
     ProjectVulnerability,
     ProjectVulnerabilityTrackingStatus,
@@ -241,6 +231,7 @@ import ClearingRequestStates from './enums/ClearingRequestStates'
 import ConfigKeys from './enums/ConfigKeys'
 import DocumentTypes from './enums/DocumentTypes'
 import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
+import ObligationType from './enums/ObligationType'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
@@ -258,6 +249,7 @@ export {
     HttpStatus,
     LicenseTabIds,
     MergeOrSplitActionType,
+    ObligationType,
     ProjectVulnerabilityTabType,
     ReleaseClearingStateMapping,
     ReleaseTabIds,

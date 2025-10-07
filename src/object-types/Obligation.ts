@@ -9,6 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { PaginationMeta } from './Pageable'
+
 export interface Obligation {
     id?: string
     type?: string
@@ -29,68 +31,34 @@ export interface Obligation {
     }
 }
 
-export interface LicenseObligationRelease {
+export interface ObligationRelease {
     name: string
     version: string
     type: string
     id: string
 }
 
-export interface LicenseObligationData {
-    [k: string]: {
-        text?: string
-        licenseIds?: string[]
-        id?: string
-        obligationLevel?: string
-        status?: string
-        comment?: string
-        obligationType?: string
-        releases?: LicenseObligationRelease[]
-    }
+export interface ObligationData {
+    text?: string
+    id?: string
+    status?: string
+    comment?: string
+    obligationType?: string
+    obligationLevel?: string
+    modifiedBy?: string
+    modifiedOn?: string
+    releaseIdToAcceptedCLI?: object
+    licenseIds?: string[]
+    releases?: ObligationRelease[]
 }
 
-export interface LicenseObligationsList {
-    obligations: LicenseObligationData
-    page?: {
-        size?: number
-        totalElements?: number
-        totalPages?: number
-        number?: number
-    }
+export interface ObligationEntry {
+    [k: string]: ObligationData
 }
 
-export interface ComponentObligationData {
-    [k: string]: {
-        text?: string
-        id?: string
-        status?: string
-        comment?: string
-        obligationType?: string
-        obligationLevel?: string
-        modifiedBy?: string
-        modifiedOn?: string
-        releaseIdToAcceptedCLI?: object
-    }
-}
-
-export interface ProjectObligationData {
-    [k: string]: {
-        text?: string
-        id?: string
-        status?: string
-        comment?: string
-        obligationType?: string
-    }
-}
-
-export interface OrganizationObligationData {
-    [k: string]: {
-        text?: string
-        id?: string
-        status?: string
-        comment?: string
-        obligationType?: string
-    }
+export interface ObligationResponse {
+    obligations: ObligationEntry
+    page?: PaginationMeta
 }
 
 export interface TreeNode {

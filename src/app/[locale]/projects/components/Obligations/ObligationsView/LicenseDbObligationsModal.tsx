@@ -10,7 +10,7 @@
 'use client'
 
 import { Table, _ } from '@/components/sw360'
-import { ErrorDetails, HttpStatus, LicenseObligationRelease, LicenseObligationsList } from '@/object-types'
+import { ErrorDetails, HttpStatus, ObligationRelease, ObligationResponse } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -165,7 +165,7 @@ export default function LicenseDbObligationsModal({
         {
             id: 'licenseDbObligation.releases',
             name: t('Releases'),
-            formatter: (releases: LicenseObligationRelease[]) =>
+            formatter: (releases: ObligationRelease[]) =>
                 _(
                     <>
                         {Array.isArray(releases) && releases.length > 0 ? (
@@ -201,7 +201,7 @@ export default function LicenseDbObligationsModal({
         if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: `${SW360_API_URL}/resource/api/projects/${projectId}/licenseDbObligations`,
-            then: (data: LicenseObligationsList) => {
+            then: (data: ObligationResponse) => {
                 const tableData = []
                 for (const [key, val] of Object.entries(data.obligations)) {
                     tableData.push([
@@ -219,7 +219,7 @@ export default function LicenseDbObligationsModal({
                 }
                 return tableData
             },
-            total: (data: LicenseObligationsList) => data.page?.totalElements ?? 0,
+            total: (data: ObligationResponse) => data.page?.totalElements ?? 0,
             headers: { Authorization: session.user.access_token },
         }
     }
