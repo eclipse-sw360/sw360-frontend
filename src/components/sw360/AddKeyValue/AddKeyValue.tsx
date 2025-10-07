@@ -9,14 +9,13 @@
 
 'use client'
 
+import DeleteItemWarning from '@/components/sw360/DeleteItemWarning/DeleteItemWarning'
 import { AddtionalDataType } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
-import DeleteItemWarning from '../DeleteItemWarning/DeleteItemWarning'
 
 interface Props {
     header: string
@@ -36,13 +35,6 @@ function AddKeyValue(props: Props): JSX.Element {
     const [inputList, setInputList] = useState<Input[]>([])
     const [isDeleteItem, setIsDeleteItem] = useState<boolean>(false)
     const [currentIndex, setCurrentIndex] = useState<number>(-1)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
 
     useEffect(() => {
         setInputList(!CommonUtils.isNullOrUndefined(props.data) ? props.data : [])
