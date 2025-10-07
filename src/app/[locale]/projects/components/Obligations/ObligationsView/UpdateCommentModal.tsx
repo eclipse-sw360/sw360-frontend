@@ -7,12 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import {
-    ComponentObligationData,
-    LicenseObligationData,
-    OrganizationObligationData,
-    ProjectObligationData,
-} from '@/object-types'
+import { ObligationEntry } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
@@ -26,8 +21,8 @@ interface UpdateCommentModalMetadata {
 interface UpdateCommentModalProps {
     modalMetaData: UpdateCommentModalMetadata | null
     setModalMetaData: Dispatch<SetStateAction<UpdateCommentModalMetadata | null>>
-    payload?: LicenseObligationData
-    setPayload?: Dispatch<SetStateAction<LicenseObligationData>>
+    payload?: ObligationEntry
+    setPayload?: Dispatch<SetStateAction<ObligationEntry>>
     obligationTypeName: string | null
 }
 
@@ -44,7 +39,7 @@ export default function UpdateCommentModal({
 
     useEffect(() => {
         if (status === 'unauthenticated') {
-            signOut()
+            void signOut()
         }
     }, [status])
 
@@ -98,18 +93,10 @@ export default function UpdateCommentModal({
                                 comment: commentText,
                                 obligationType: obligationTypeName ?? '',
                             }
-                            setPayload(
-                                (
-                                    payload:
-                                        | LicenseObligationData
-                                        | ComponentObligationData
-                                        | ProjectObligationData
-                                        | OrganizationObligationData,
-                                ) => ({
-                                    ...payload,
-                                    [modalMetaData.obligation]: obligationValue,
-                                }),
-                            )
+                            setPayload((payload: ObligationEntry) => ({
+                                ...payload,
+                                [modalMetaData.obligation]: obligationValue,
+                            }))
                             setCommentText('')
                             setModalMetaData(null)
                         }

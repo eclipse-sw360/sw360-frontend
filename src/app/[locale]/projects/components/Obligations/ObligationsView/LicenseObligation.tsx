@@ -10,7 +10,14 @@
 'use client'
 
 import { Table, _ } from '@/components/sw360'
-import { ActionType, ErrorDetails, HttpStatus, LicenseObligationData, LicenseObligationRelease } from '@/object-types'
+import {
+    ActionType,
+    ErrorDetails,
+    HttpStatus,
+    ObligationEntry,
+    ObligationRelease,
+    ObligationResponse,
+} from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -25,10 +32,6 @@ import UpdateCommentModal from './UpdateCommentModal'
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-interface LicenseObligations {
-    obligations: LicenseObligationData
-}
-
 interface UpdateCommentModalMetadata {
     obligation: string
     comment?: string
@@ -37,8 +40,8 @@ interface UpdateCommentModalMetadata {
 interface Props {
     projectId: string
     actionType: ActionType
-    payload?: LicenseObligationData
-    setPayload?: Dispatch<SetStateAction<LicenseObligationData>>
+    payload?: ObligationEntry
+    setPayload?: Dispatch<SetStateAction<ObligationEntry>>
     selectedProjectId: string | null
 }
 
@@ -52,9 +55,9 @@ export default function LicenseObligation({
     const t = useTranslations('default')
     const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
-    const [projectLicenseOligations, setProjectLicenseObligations] = useState<null | LicenseObligations>(null)
+    const [projectLicenseOligations, setProjectLicenseObligations] = useState<null | ObligationResponse>(null)
     const [selectedProjectLicenseOligations, setSelectedProjectLicenseObligations] =
-        useState<null | LicenseObligations>(null)
+        useState<null | ObligationResponse>(null)
     const [showLicenseDbObligationsModal, setShowLicenseDbObligationsModal] = useState(false)
     const [refresh, setRefresh] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -118,7 +121,7 @@ export default function LicenseObligation({
                   {
                       id: 'licenseObligation.releases',
                       name: t('Releases'),
-                      formatter: ({ releases }: { releases: LicenseObligationRelease[] }) =>
+                      formatter: ({ releases }: { releases: ObligationRelease[] }) =>
                           _(
                               <>
                                   {Array.isArray(releases) && releases.length > 0 ? (
@@ -253,8 +256,8 @@ export default function LicenseObligation({
                           releases,
                           commonReleases,
                       }: {
-                          releases: LicenseObligationRelease[]
-                          commonReleases: LicenseObligationRelease[]
+                          releases: ObligationRelease[]
+                          commonReleases: ObligationRelease[]
                       }) =>
                           _(
                               <>
@@ -290,7 +293,7 @@ export default function LicenseObligation({
                                               status: e.target.value,
                                               obligationType: ObligationLevels.LICENSE_OBLIGATION,
                                           }
-                                          setPayload((payload: LicenseObligationData) => ({
+                                          setPayload((payload: ObligationEntry) => ({
                                               ...payload,
                                               [obligation]: obligationValue,
                                           }))
@@ -362,7 +365,7 @@ export default function LicenseObligation({
                     signal,
                 )
                 if (response.status === HttpStatus.OK) {
-                    setProjectLicenseObligations((await response.json()) as LicenseObligations)
+                    setProjectLicenseObligations((await response.json()) as ObligationResponse)
                 } else if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else {
@@ -385,7 +388,7 @@ export default function LicenseObligation({
         const controller = new AbortController()
         const signal = controller.signal
         if (selectedProjectId === null) {
-            setSelectedProjectLicenseObligations({ obligations: {} } as LicenseObligations)
+            setSelectedProjectLicenseObligations({ obligations: {} } as ObligationResponse)
             return
         }
         ;(async () => {
@@ -398,7 +401,7 @@ export default function LicenseObligation({
                     signal,
                 )
                 if (response.status === HttpStatus.OK) {
-                    setProjectLicenseObligations((await response.json()) as LicenseObligations)
+                    setProjectLicenseObligations((await response.json()) as ObligationResponse)
                 } else if (response.status === HttpStatus.UNAUTHORIZED) {
                     return signOut()
                 } else {
@@ -423,7 +426,7 @@ export default function LicenseObligation({
             let isMatchingKey = false,
                 status = '',
                 comment = '',
-                selectedProjOblReleases: LicenseObligationRelease[] = []
+                selectedProjOblReleases: ObligationRelease[] = []
 
             if (selectedProjectId !== null) {
                 isMatchingKey = key in selectedProjectLicenseOligations.obligations
@@ -439,17 +442,17 @@ export default function LicenseObligation({
             }
 
             const projOblReleases = obl.releases ?? []
-            const commonReleases = projOblReleases.filter((release: LicenseObligationRelease) =>
+            const commonReleases = projOblReleases.filter((release: ObligationRelease) =>
                 selectedProjOblReleases.some(
-                    (r: LicenseObligationRelease) => r.name === release.name && r.version === release.version,
+                    (r: ObligationRelease) => r.name === release.name && r.version === release.version,
                 ),
             )
 
             let match = false
             if (selectedProjOblReleases.length > 0 && selectedProjOblReleases.length === projOblReleases.length) {
-                match = selectedProjOblReleases.every((selectedProjRelease: LicenseObligationRelease) =>
+                match = selectedProjOblReleases.every((selectedProjRelease: ObligationRelease) =>
                     projOblReleases.some(
-                        (projRelease: LicenseObligationRelease) =>
+                        (projRelease: ObligationRelease) =>
                             projRelease.name === selectedProjRelease.name &&
                             projRelease.version === selectedProjRelease.version,
                     ),

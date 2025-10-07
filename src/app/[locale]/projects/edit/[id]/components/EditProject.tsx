@@ -18,14 +18,11 @@ import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedRele
 import Summary from '@/components/ProjectAddSummary/Summary'
 import {
     ActionType,
-    ComponentObligationData,
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
-    LicenseObligationData,
-    OrganizationObligationData,
+    ObligationEntry,
     Project,
-    ProjectObligationData,
     ProjectPayload,
     ReleaseDetail,
     UserGroupType,
@@ -122,9 +119,7 @@ function EditProject({
     const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
     const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()
-    const [obligations, setObligations] = useState<
-        LicenseObligationData | ComponentObligationData | ProjectObligationData | OrganizationObligationData
-    >({})
+    const [obligations, setObligations] = useState<ObligationEntry>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
