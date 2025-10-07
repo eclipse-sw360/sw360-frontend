@@ -44,13 +44,6 @@ const DeleteItemWarning = ({
     setDataInputList,
 }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
 
     const deleteItem = () => {
         try {
