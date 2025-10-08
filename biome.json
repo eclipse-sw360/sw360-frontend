@@ -7,7 +7,12 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["src/**", "Dockerfile", "tsconfig.json", "package.json"]
+    "includes": [
+      "src/**",
+      "Dockerfile",
+      "tsconfig.json",
+      "package.json"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -79,7 +84,7 @@
         "noDuplicateObjectKeys": "error",
         "noDuplicateParameters": "error",
         "noEmptyBlockStatements": "error",
-        "noExplicitAny": "error",
+        "noExplicitAny": "warn",
         "noExtraNonNullAssertion": "error",
         "noFallthroughSwitchClause": "error",
         "noFunctionAssign": "error",

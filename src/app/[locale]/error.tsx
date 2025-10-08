@@ -8,13 +8,14 @@
 // License-Filename: LICENSE
 
 'use client'
-import sw360logo from '@/assets/images/sw360-logo.svg'
-import { useTranslations } from 'next-intl'
+
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { JSX } from 'react'
+import sw360logo from '@/assets/images/sw360-logo.svg'
 
-export default function Error({ error, reset }: { error: Error; reset: () => void }): JSX.Element {
+function SW360Error({ error, reset }: { error: Error; reset: () => void }): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
 
@@ -48,3 +49,5 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
         </div>
     )
 }
+
+export default SW360Error

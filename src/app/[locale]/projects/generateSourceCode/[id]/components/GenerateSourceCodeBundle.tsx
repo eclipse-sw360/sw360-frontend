@@ -9,6 +9,13 @@
 
 'use client'
 
+import Link from 'next/link'
+import { notFound, useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _, TreeTable } from 'next-sw360'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Button, Form, Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     AttachmentUsage,
@@ -25,13 +32,6 @@ import {
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { TreeTable, _ } from 'next-sw360'
-import Link from 'next/link'
-import { notFound, useSearchParams } from 'next/navigation'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Button, Form, Spinner } from 'react-bootstrap'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -64,7 +64,11 @@ const setExpandedFieldsOfNewData = (prevState: NodeData[], newState: NodeData[])
     }
 }
 
-function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>): ReactNode {
+function GenerateSourceCodeBundle({
+    projectId,
+}: Readonly<{
+    projectId: string
+}>): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [project, setProject] = useState<Project>()
@@ -86,13 +90,15 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleDownloadSourceCodeBundle = async (projectId: string) => {
         try {
             setLoading(true)
             const searchParams = Object.fromEntries(params)
-            if (Object.prototype.hasOwnProperty.call(searchParams, 'withSubProjects') === false) {
+            if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                 return
             }
             const session = await getSession()
@@ -161,14 +167,20 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
                                 if (saveUsagesPayload.selected.indexOf(val) === -1) {
                                     setSaveUsagesPayload({
                                         ...saveUsagesPayload,
-                                        selected: [...saveUsagesPayload.selected, val],
+                                        selected: [
+                                            ...saveUsagesPayload.selected,
+                                            val,
+                                        ],
                                         deselected: saveUsagesPayload.deselected.filter((item) => item !== val),
                                     })
                                 } else {
                                     setSaveUsagesPayload({
                                         ...saveUsagesPayload,
                                         selected: saveUsagesPayload.selected.filter((item) => item !== val),
-                                        deselected: [...saveUsagesPayload.deselected, val],
+                                        deselected: [
+                                            ...saveUsagesPayload.deselected,
+                                            val,
+                                        ],
                                     })
                                 }
                             }}
@@ -280,12 +292,14 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
         ;(async () => {
             try {
                 const searchParams = Object.fromEntries(params)
-                if (Object.prototype.hasOwnProperty.call(searchParams, 'withSubProjects') === false) {
+                if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                     return
                 }
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const requests = [ApiUtils.GET(`projects/${projectId}`, session.user.access_token, signal)]
+                const requests = [
+                    ApiUtils.GET(`projects/${projectId}`, session.user.access_token, signal),
+                ]
                 if (searchParams.withSubProjects === 'true') {
                     requests.push(
                         ApiUtils.GET(
@@ -356,7 +370,10 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
             }
         })()
         return () => controller.abort()
-    }, [projectId, params])
+    }, [
+        projectId,
+        params,
+    ])
 
     useEffect(() => {
         if (attachmentUsagesAndLinkedProjects === undefined) return
@@ -452,7 +469,10 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
             if (prevState !== undefined) setExpandedFieldsOfNewData(prevState, tableData)
             return tableData
         })
-    }, [attachmentUsagesAndLinkedProjects, saveUsagesPayload])
+    }, [
+        attachmentUsagesAndLinkedProjects,
+        saveUsagesPayload,
+    ])
 
     const columns = [
         {
@@ -529,7 +549,11 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
                             </Button>
                             <div
                                 className='subscriptionBox my-2'
-                                style={{ maxWidth: '98vw', textAlign: 'left', fontSize: '15px' }}
+                                style={{
+                                    maxWidth: '98vw',
+                                    textAlign: 'left',
+                                    fontSize: '15px',
+                                }}
                             >
                                 {t(
                                     'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
@@ -557,4 +581,6 @@ function GenerateSourceCodeBundle({ projectId }: Readonly<{ projectId: string }>
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(GenerateSourceCodeBundle, [UserGroupType.SECURITY_USER])
+export default AccessControl(GenerateSourceCodeBundle, [
+    UserGroupType.SECURITY_USER,
+])

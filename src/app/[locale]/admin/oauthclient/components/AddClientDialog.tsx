@@ -10,14 +10,14 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, OAuthClient } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
+import { HttpStatus, OAuthClient } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { SW360_API_URL } from '@/utils/env'
 
 interface Props {
     show: boolean
@@ -67,10 +67,15 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
-        setFormState((prev) => ({ ...prev, [field]: value }))
+        setFormState((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
     }
 
     useEffect(() => {
@@ -88,7 +93,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         } else {
             setFormState(defaultState)
         }
-    }, [show])
+    }, [
+        show,
+    ])
 
     const convertTokenValidity = (value: string, fromUnit: 'Days' | 'Seconds', toUnit: 'Days' | 'Seconds') => {
         const numValue = Number(value)
@@ -120,12 +127,17 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         description: formState.description,
         access_token_validity: calculateValidity(formState.accessTokenValidity, formState.accessTokenUnit),
         refresh_token_validity: calculateValidity(formState.refreshTokenValidity, formState.refreshTokenUnit),
-        authorities: [formState.authorities],
-        scope: [formState.readAccess ? 'READ' : '', formState.writeAccess ? 'WRITE' : ''].filter(Boolean),
+        authorities: [
+            formState.authorities,
+        ],
+        scope: [
+            formState.readAccess ? 'READ' : '',
+            formState.writeAccess ? 'WRITE' : '',
+        ].filter(Boolean),
     }
 
     const sendOAuthClientRequest = async (data: object, token: string): Promise<Response> => {
-        return fetch(`${SW360_API_URL}/authorization/client-management`, {
+        return await fetch(`${SW360_API_URL}/authorization/client-management`, {
             method: 'POST',
             headers: {
                 Accept: 'application/*',
@@ -196,11 +208,17 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
             <Modal.Body>
                 <Form>
                     <Form.Group className='mb-3'>
-                        <Form.Label style={{ fontWeight: 'bold' }}>
+                        <Form.Label
+                            style={{
+                                fontWeight: 'bold',
+                            }}
+                        >
                             {t('Description')}
                             <span
                                 className='text-red'
-                                style={{ color: 'red' }}
+                                style={{
+                                    color: 'red',
+                                }}
                             >
                                 *
                             </span>
@@ -217,11 +235,17 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label style={{ fontWeight: 'bold' }}>
+                                <Form.Label
+                                    style={{
+                                        fontWeight: 'bold',
+                                    }}
+                                >
                                     {t('Authorities')}
                                     <span
                                         className='text-red'
-                                        style={{ color: 'red' }}
+                                        style={{
+                                            color: 'red',
+                                        }}
                                     >
                                         *
                                     </span>
@@ -237,11 +261,17 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                         </Col>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label style={{ fontWeight: 'bold' }}>
+                                <Form.Label
+                                    style={{
+                                        fontWeight: 'bold',
+                                    }}
+                                >
                                     {t('Scope')}
                                     <span
                                         className='text-red'
-                                        style={{ color: 'red' }}
+                                        style={{
+                                            color: 'red',
+                                        }}
                                     >
                                         *
                                     </span>
@@ -269,11 +299,17 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label style={{ fontWeight: 'bold' }}>
+                                <Form.Label
+                                    style={{
+                                        fontWeight: 'bold',
+                                    }}
+                                >
                                     {t('Access Token Validity')}
                                     <span
                                         className='text-red'
-                                        style={{ color: 'red' }}
+                                        style={{
+                                            color: 'red',
+                                        }}
                                     >
                                         *
                                     </span>
@@ -306,11 +342,17 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                         </Col>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label style={{ fontWeight: 'bold' }}>
+                                <Form.Label
+                                    style={{
+                                        fontWeight: 'bold',
+                                    }}
+                                >
                                     {t('Refresh Token Validity')}
                                     <span
                                         className='text-red'
-                                        style={{ color: 'red' }}
+                                        style={{
+                                            color: 'red',
+                                        }}
                                     >
                                         *
                                     </span>
