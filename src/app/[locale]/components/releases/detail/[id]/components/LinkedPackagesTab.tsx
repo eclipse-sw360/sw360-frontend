@@ -9,213 +9,194 @@
 
 'use client'
 
-import { _, Table } from '@/components/sw360'
-import { HttpStatus, LinkedPackage, Release } from '@/object-types'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from '@/components/sw360'
+import { Embedded, ErrorDetails, HttpStatus, LinkedPackage } from '@/object-types'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useCallback, useEffect, useState, type JSX } from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { useEffect, useMemo, useState, type JSX } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
 interface Props {
     releaseId: string
 }
 
-type RowData = (string | string[] | undefined)[]
+type EmbeddedLinkedPackages = Embedded<LinkedPackage, 'sw360:packages'>
 
 export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<Array<RowData>>([])
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [session])
 
-    const columns = [
-        {
-            id: 'linkedPackagesData.vendor',
-            name: t('Vendor'),
-            sort: true,
-            formatter: ([vendorId, vendorName]: Array<string>) =>
-                _(<Link href={`/vendors/${vendorId}`}>{vendorName}</Link>),
-        },
-        {
-            id: 'linkedPackagesData.packageName',
-            name: t('Package Name Version'),
-            sort: true,
-            formatter: ([packageId, packageName, packageVersion]: Array<string>) =>
-                _(<Link href={`/packages/detail/${packageId}`}>{`${packageName} (${packageVersion})`}</Link>),
-        },
-        {
-            id: 'linkedPackagesData.releaseName',
-            name: t('Release Name Version'),
-            sort: true,
-            formatter: ([relId, relName, relVersion]: Array<string>) =>
-                _(
-                    <Link href={`/components/releases/detail/${relId}`}>
-                        {relName || relVersion ? `${relName} ${relVersion ? `(${relVersion})` : ''}` : 'N/A'}
-                    </Link>,
+    const columns = useMemo<ColumnDef<LinkedPackage>[]>(
+        () => [
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                cell: ({ row }) => (
+                    <Link
+                        href={`/vendors/${row.original.vendorId}`}
+                        className='text-link'
+                    >
+                        {row.original.vendorName}
+                    </Link>
                 ),
-        },
-        {
-            id: 'linkedPackagesData.releaseClearingState',
-            name: t('Release Clearing State'),
-            sort: true,
-            formatter: (releaseClearingState: string) =>
-                _(
-                    <div className='text-center'>
-                        {!releaseClearingState ? (
-                            <>{t('Not Applicable')}</>
-                        ) : (
-                            <OverlayTrigger
-                                overlay={
-                                    <Tooltip>{`${t('Release Clearing State')}: ${releaseClearingState ?? ''}`}</Tooltip>
-                                }
-                            >
-                                {releaseClearingState === 'NEW_CLEARING' || releaseClearingState === 'NEW' ? (
-                                    <span className='badge bg-danger overlay-badge'>CS</span>
-                                ) : releaseClearingState === 'REPORT_AVAILABLE' ? (
-                                    <span className='badge bg-primary overlay-badge'>CS</span>
-                                ) : releaseClearingState === 'UNDER_CLEARING' ? (
-                                    <span className='badge bg-warning overlay-badge'>CS</span>
-                                ) : releaseClearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
-                                    <span className='badge bg-info overlay-badge'>CS</span>
-                                ) : releaseClearingState === 'SENT_TO_CLEARING_TOOL' ||
-                                  releaseClearingState === 'SCAN_AVAILABLE' ? (
-                                    <span className='badge bg-info overlay-badge'>CS</span>
-                                ) : (
-                                    <span className='badge bg-success overlay-badge'>CS</span>
-                                )}
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'packageName',
+                header: t('Package Name Version'),
+                cell: ({ row }) => (
+                    <Link
+                        className='text-link'
+                        href={`/packages/detail/${row.original.id}`}
+                    >{`${row.original.name} (${row.original.version})`}</Link>
+                ),
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'licenses',
+                header: t('Licenses'),
+                cell: ({ row }) => {
+                    const { licenseIds } = row.original
+                    return (
+                        <div>
+                            {Array.isArray(licenseIds) &&
+                                licenseIds.length > 0 &&
+                                licenseIds.map((licenseId, idx) => (
+                                    <span key={licenseId}>
+                                        <Link
+                                            href={`/licenses/detail?id=${licenseId}`}
+                                            className='text-link'
+                                        >
+                                            {licenseId}
+                                        </Link>
+                                        {idx !== licenseIds.length - 1 && ', '}
+                                    </span>
+                                ))}
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'packageManager',
+                header: t('Package Manager'),
+                accessorKey: 'packageManager',
+                enableSorting: false,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    const { id } = row.original
+                    return (
+                        <span className='d-flex justify-content-evenly'>
+                            <OverlayTrigger overlay={<Tooltip>{t('Edit Package')}</Tooltip>}>
+                                <Link
+                                    href={`/packages/edit/${id}`}
+                                    className='overlay-trigger'
+                                >
+                                    <FaPencilAlt className='btn-icon' />
+                                </Link>
                             </OverlayTrigger>
-                        )}
-                    </div>,
-                ),
-        },
-        {
-            id: 'linkedPackagesData.licenses',
-            name: t('Licenses'),
-            sort: true,
-            formatter: (licenseIds: string[]) =>
-                _(
-                    <div>
-                        {Array.isArray(licenseIds) && licenseIds.length > 0 ? (
-                            licenseIds.map((licenseId, idx) => (
-                                <span key={idx}>
-                                    <Link href={`/licenses/detail?id=${licenseId}`}>{licenseId}</Link>
-                                    {idx !== licenseIds.length - 1 && ', '}
-                                </span>
-                            ))
-                        ) : (
-                            <span className='text-muted'>{t('No Licenses')}</span>
-                        )}
-                    </div>,
-                ),
-        },
-        {
-            id: 'linkedPackagesData.packageManager',
-            name: t('Package Manager'),
-            sort: true,
-        },
-        {
-            id: 'linkedPackagesData.comment',
-            name: t('Comments'),
-            sort: true,
-        },
-        {
-            id: 'linkedPackagesData.actions',
-            name: t('Actions'),
-            sort: true,
-            formatter: (packageId: string) =>
-                _(
-                    <span className='d-flex justify-content-evenly'>
-                        <OverlayTrigger overlay={<Tooltip>{t('Edit Package')}</Tooltip>}>
-                            <Link
-                                href={`/packages/edit/${packageId}`}
-                                className='overlay-trigger'
-                            >
-                                <FaPencilAlt className='btn-icon' />
-                            </Link>
-                        </OverlayTrigger>
-                    </span>,
-                ),
-        },
-    ]
+                        </span>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [t],
+    )
 
-    const fetchData = useCallback(async (url: string): Promise<Release | undefined> => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            void signOut()
-            return undefined
-        }
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            return (await response.json()) as Release
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            void signOut()
-            return undefined
-        } else {
-            return undefined
-        }
-    }, [])
+    const [packagesData, setPackagesData] = useState<LinkedPackage[]>(() => [])
+    const memoizedData = useMemo(() => packagesData, [packagesData])
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        const fetchReleaseData = async () => {
-            const linkedPackages = await fetchData(`releases/${releaseId}?embed=packages`)
-            if (!linkedPackages) return
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
 
-            const releaseClearingState = linkedPackages.clearingState ?? ''
-            const packagesArray: LinkedPackage[] =
-                (linkedPackages as Release & { _embedded?: { 'sw360:packages'?: LinkedPackage[] } })._embedded?.[
-                    'sw360:packages'
-                ] ?? []
+        const timeLimit = packagesData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
 
-            const data: RowData[] = packagesArray.map((item) => {
-                const vendorInfo: string[] = [item.vendorId ?? '', item.vendorName ?? '']
-                const packageInfo: string[] = [item.id ?? '', item.name ?? '', item.version ?? '']
-                const releaseInfo: string[] = [
-                    linkedPackages.id ?? '',
-                    linkedPackages.name ?? '',
-                    linkedPackages.version ?? '',
-                ]
-                const licenseInfo: string[] = item.licenseIds ? item.licenseIds.filter((id) => id) : []
-                const comment: string =
-                    (linkedPackages as Release & { packageIds?: Record<string, { comment?: string }> }).packageIds?.[
-                        item.id
-                    ]?.comment ?? ''
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
 
-                return [
-                    vendorInfo,
-                    packageInfo,
-                    releaseInfo,
-                    releaseClearingState,
-                    licenseInfo,
-                    item.packageManager ?? '',
-                    comment,
-                    item.id ?? '',
-                ]
-            })
+                const data = (await response.json()) as EmbeddedLinkedPackages
+                setPackagesData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:packages'])
+                        ? []
+                        : data['_embedded']['sw360:packages'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
 
-            setTableData(data)
-        }
+        return () => controller.abort()
+    }, [session])
 
-        void fetchReleaseData()
-    }, [releaseId, fetchData])
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+    })
 
     return (
-        <div className='row mb-4'>
-            <div style={{ paddingLeft: '0px' }}>
-                <Table
-                    columns={columns}
-                    data={tableData}
-                    sort={false}
-                />
-            </div>
+        <div className='mb-3'>
+            {table ? (
+                <>
+                    <ClientSidePageSizeSelector table={table} />
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                    />
+                    <ClientSideTableFooter table={table} />
+                </>
+            ) : (
+                <div className='col-12 mt-1 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            )}
         </div>
     )
 }
