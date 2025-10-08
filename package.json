@@ -66,10 +66,10 @@
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "eslint"
+      "biome check --reporter=summary"
     ],
     "**/*.{css,scss,md,html,json}": [
-      "prettier --write"
+      "biome format"
     ]
   },
   "commitlint": {

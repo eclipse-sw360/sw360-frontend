@@ -9,26 +9,26 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import {
-    ErrorDetails,
-    HttpStatus,
-    PageableQueryParam,
-    PaginationMeta,
-    UserGroupType,
-    type ECC,
-    type Embedded,
-} from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import {
+    ECCInterface,
+    type Embedded,
+    ErrorDetails,
+    HttpStatus,
+    PageableQueryParam,
+    PaginationMeta,
+    UserGroupType,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
-type EmbeddedECC = Embedded<ECC, 'sw360:releases'>
+type EmbeddedECC = Embedded<ECCInterface, 'sw360:releases'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -41,9 +41,11 @@ function ECC(): ReactNode {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
-    const columns = useMemo<ColumnDef<ECC>[]>(
+    const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
             {
                 id: 'status',
@@ -107,7 +109,9 @@ function ECC(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -120,8 +124,13 @@ function ECC(): ReactNode {
         totalPages: 0,
         number: 0,
     })
-    const [eccData, setEccData] = useState<ECC[]>(() => [])
-    const memoizedData = useMemo(() => eccData, [eccData])
+    const [eccData, setEccData] = useState<ECCInterface[]>(() => [])
+    const memoizedData = useMemo(
+        () => eccData,
+        [
+            eccData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -139,7 +148,12 @@ function ECC(): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `ecc`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== HttpStatus.OK) {
@@ -167,7 +181,10 @@ function ECC(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, session])
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -242,4 +259,6 @@ function ECC(): ReactNode {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(ECC, [UserGroupType.SECURITY_USER])
+export default AccessControl(ECC, [
+    UserGroupType.SECURITY_USER,
+])

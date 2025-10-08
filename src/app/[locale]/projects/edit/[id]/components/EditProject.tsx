@@ -9,6 +9,12 @@
 
 'use client'
 
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Breadcrumb } from 'next-sw360'
+import { type JSX, useCallback, useEffect, useState } from 'react'
+import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
@@ -34,12 +40,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Breadcrumb } from 'next-sw360'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState, type JSX } from 'react'
-import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -75,7 +75,13 @@ function EditProject({
     })
 
     const searchParams = useSearchParams()
-    const TABS = ['summary', 'administration', 'linkedProjectsAndReleases', 'attachments', 'obligations']
+    const TABS = [
+        'summary',
+        'administration',
+        'linkedProjectsAndReleases',
+        'attachments',
+        'obligations',
+    ]
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
 
@@ -87,7 +93,9 @@ function EditProject({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleDeleteProject = () => {
         setDeleteDialogOpen(true)
@@ -99,7 +107,9 @@ function EditProject({
             tab = DEFAULT_ACTIVE_TAB
         }
         setActiveKey(tab)
-    }, [searchParams])
+    }, [
+        searchParams,
+    ])
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
@@ -116,12 +126,24 @@ function EditProject({
 
     const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
 
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [securityResponsibles, setSecurityResponsibles] = useState<{ [k: string]: string }>({})
-    const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
-    const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
-    const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [securityResponsibles, setSecurityResponsibles] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectOwner, setProjectOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectManager, setProjectManager] = useState<{
+        [k: string]: string
+    }>({})
+    const [leadArchitect, setLeadArchitect] = useState<{
+        [k: string]: string
+    }>({})
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()
     const [obligations, setObligations] = useState<
         LicenseObligationData | ComponentObligationData | ProjectObligationData | OrganizationObligationData
@@ -205,7 +227,9 @@ function EditProject({
     const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
         try {
             const map = new Map<string, LinkedReleaseData>()
-            const linkedReleasesObject: { [key: string]: LinkedReleaseProps } = {}
+            const linkedReleasesObject: {
+                [key: string]: LinkedReleaseProps
+            } = {}
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             for (const l of linkedReleases) {
@@ -399,7 +423,11 @@ function EditProject({
                             }
                             return acc
                         },
-                        {} as { [key: string]: { comment?: string } },
+                        {} as {
+                            [key: string]: {
+                                comment?: string
+                            }
+                        },
                     ),
                 }
                 setProjectPayload(projectPayloadData)
@@ -407,7 +435,10 @@ function EditProject({
                 console.error(e)
             }
         })()
-    }, [projectId, setProjectPayload])
+    }, [
+        projectId,
+        setProjectPayload,
+    ])
 
     const checkUpdateEligibility = async (projectId: string) => {
         const session = await getSession()
@@ -455,7 +486,7 @@ function EditProject({
             if (Object.keys(obligations).length !== 0) {
                 for (const key in obligations) {
                     if (obligations[key]?.obligationType === ObligationLevels.LICENSE_OBLIGATION) {
-                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                        if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
@@ -466,7 +497,7 @@ function EditProject({
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.COMPONENT_OBLIGATION) {
-                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                        if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
@@ -477,7 +508,7 @@ function EditProject({
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.PROJECT_OBLIGATION) {
-                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                        if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
@@ -488,7 +519,7 @@ function EditProject({
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.ORGANISATION_OBLIGATION) {
-                        if (Object.prototype.hasOwnProperty.call(obligations[key], 'obligationType')) {
+                        if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
@@ -742,4 +773,6 @@ function EditProject({
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(EditProject, [UserGroupType.SECURITY_USER])
+export default AccessControl(EditProject, [
+    UserGroupType.SECURITY_USER,
+])

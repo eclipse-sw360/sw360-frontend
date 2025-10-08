@@ -26,9 +26,17 @@ async function send({
     data: object | null
     token: string
     signal?: unknown
-    headers?: { [key: string]: string }
+    headers?: {
+        [key: string]: string
+    }
 }): Promise<Response> {
-    const request_content: RequestContent = { method, headers: { Accept: 'application/*' }, body: null }
+    const request_content: RequestContent = {
+        method,
+        headers: {
+            Accept: 'application/*',
+        },
+        body: null,
+    }
 
     if (data) {
         if (data instanceof FormData) {
@@ -56,29 +64,69 @@ async function send({
         }
     }
 
-    return fetch(`${base}/${path}`, request_content).then((r) => r)
+    return await fetch(`${base}/${path}`, request_content).then((r) => r)
 }
 
-function GET(path: string, token: string, signal?: unknown, headers?: { [key: string]: string }): Promise<Response> {
-    return send({ method: 'GET', path, token, data: null, signal, headers })
+function GET(
+    path: string,
+    token: string,
+    signal?: unknown,
+    headers?: {
+        [key: string]: string
+    },
+): Promise<Response> {
+    return send({
+        method: 'GET',
+        path,
+        token,
+        data: null,
+        signal,
+        headers,
+    })
 }
 
 function DELETE(path: string, token: string): Promise<Response> {
-    return send({ method: 'DELETE', path, token, data: null })
+    return send({
+        method: 'DELETE',
+        path,
+        token,
+        data: null,
+    })
 }
 
 function POST(path: string, data: object, token: string): Promise<Response> {
-    return send({ method: 'POST', path, data, token })
+    return send({
+        method: 'POST',
+        path,
+        data,
+        token,
+    })
 }
 
 function PUT(path: string, data: object, token: string): Promise<Response> {
-    return send({ method: 'PUT', path, data, token })
+    return send({
+        method: 'PUT',
+        path,
+        data,
+        token,
+    })
 }
 
 function PATCH(path: string, data: object, token: string): Promise<Response> {
-    return send({ method: 'PATCH', path, data, token })
+    return send({
+        method: 'PATCH',
+        path,
+        data,
+        token,
+    })
 }
 
-const ApiUtils = { GET, DELETE, POST, PUT, PATCH }
+const ApiUtils = {
+    GET,
+    DELETE,
+    POST,
+    PUT,
+    PATCH,
+}
 
 export default ApiUtils

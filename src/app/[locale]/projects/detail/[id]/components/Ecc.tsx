@@ -8,20 +8,19 @@
 // License-Filename: LICENSE
 
 'use client'
-import { ECC, Embedded, UserGroupType } from '@/object-types'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _, Table } from 'next-sw360'
+import { type JSX, useEffect } from 'react'
+import { Button, Spinner } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ECCInterface, Embedded, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import Link from 'next/link'
-import { Button, Spinner } from 'react-bootstrap'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { useEffect, type JSX } from 'react'
-
-type EmbeddedProjectReleaseEcc = Embedded<ECC, 'sw360:releases'>
+type EmbeddedProjectReleaseEcc = Embedded<ECCInterface, 'sw360:releases'>
 
 interface Props {
     projectId: string
@@ -40,7 +39,9 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const columns = [
         {
@@ -112,7 +113,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
         return {
             url: `${SW360_API_URL}/resource/api/projects/${projectId}/releases/ecc?transitive=true`,
             then: (data: EmbeddedProjectReleaseEcc) => {
-                return data._embedded['sw360:releases'].map((elem: ECC) => [
+                return data._embedded['sw360:releases'].map((elem: ECCInterface) => [
                     Capitalize(elem.eccInformation.eccStatus),
                     {
                         version: elem.version,
@@ -130,7 +131,9 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                 ])
             },
             total: (data: EmbeddedProjectReleaseEcc) => data.page?.totalElements ?? 0,
-            headers: { Authorization: `${status === 'authenticated' ? session.user.access_token : ''}` },
+            headers: {
+                Authorization: `${status === 'authenticated' ? session.user.access_token : ''}`,
+            },
         }
     }
 
@@ -165,7 +168,9 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
             ) : (
                 <div
                     className='col-12'
-                    style={{ textAlign: 'center' }}
+                    style={{
+                        textAlign: 'center',
+                    }}
                 >
                     <Spinner className='spinner' />
                 </div>
@@ -175,4 +180,6 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(EccDetails, [UserGroupType.SECURITY_USER])
+export default AccessControl(EccDetails, [
+    UserGroupType.SECURITY_USER,
+])

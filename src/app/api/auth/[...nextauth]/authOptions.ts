@@ -9,8 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { AUTH_PROVIDER } from '@/utils/env'
 import { NextAuthOptions } from 'next-auth'
+import { AUTH_PROVIDER } from '@/utils/env'
 import basicAuthOption from './basicAuthOption'
 import keycloakAuth from './keycloakAuthOption'
 import sw360OauthOption from './sw360OauthOption'
@@ -24,7 +24,6 @@ const authOptions: NextAuthOptions = (() => {
             return keycloakAuth
         case 'oauth-password-grant':
             return sw360OauthPwdGrantTypeOption
-            break
         case 'sw360basic':
         default:
             return basicAuthOption
