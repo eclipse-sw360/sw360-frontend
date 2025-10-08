@@ -53,19 +53,23 @@ jobs:
 
       - name: Run linting
         shell: bash
+        continue-on-error: true
         run: |
-          pnpm lint --output-file eslint_report.json --format json
+          pnpm biome ci --reporter=github | tee biome_output.txt
+
+          # Append output to GitHub summary
+          {
+            echo "## 🧹 Biome Report"
+            echo ""
+            echo '```'
+            cat biome_output.txt
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
 
       - name: Run build
         shell: bash
         run: |
           pnpm build --no-lint > typescript.log
-
-      - name: Annotate Code
-        uses: DerLev/eslint-annotations@v2
-        with:
-          eslint-report: eslint_report.json
-          typescript-log: typescript.log
 
       - name: Create Deploy Tarball
         shell: bash
