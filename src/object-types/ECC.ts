@@ -10,6 +10,7 @@
 import { Links } from '@/object-types'
 
 interface ECCInterface {
+    id: string
     name: string
     version: string
     eccInformation: {
