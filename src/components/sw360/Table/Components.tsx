@@ -8,7 +8,6 @@
 // License-Filename: LICENSE
 
 import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
 import { ColumnFiltersState, Row, Table, flexRender } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
@@ -254,32 +253,43 @@ export function SW360Table<K>({
     noRecordsFoundMessage?: string
 }): ReactNode {
     const t = useTranslations('default')
+
     return (
         <div className='table-component position-relative'>
-            <table className='sw360-table table-bordered mt-3'>
+            <table
+                className='sw360-table table-bordered mt-3'
+                style={{ width: '100%', tableLayout: 'auto' }}
+            >
                 <thead>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (
                                 <th
                                     key={header.id}
+                                    colSpan={header.colSpan}
                                     style={{
                                         width: (header.column.columnDef.meta as ColumnMeta | undefined)?.width,
                                     }}
                                 >
-                                    <div className='d-flex justify-content-between'>
-                                        <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
-                                        <span onClick={(e) => header.column.getToggleSortingHandler()?.(e)}>
-                                            {header.column.getCanSort() === true &&
-                                                (header.column.getIsSorted() === 'asc' ? (
-                                                    <RiSortAsc />
-                                                ) : header.column.getIsSorted() === 'desc' ? (
-                                                    <RiSortDesc />
-                                                ) : (
-                                                    <BiSort />
-                                                ))}
-                                        </span>
-                                    </div>
+                                    {header.isPlaceholder ? null : (
+                                        <div className='d-flex justify-content-between align-items-center'>
+                                            <span>
+                                                {flexRender(header.column.columnDef.header, header.getContext())}
+                                            </span>
+
+                                            {header.column.getCanSort() && (
+                                                <span onClick={header.column.getToggleSortingHandler()}>
+                                                    {header.column.getIsSorted() === 'asc' ? (
+                                                        <RiSortAsc />
+                                                    ) : header.column.getIsSorted() === 'desc' ? (
+                                                        <RiSortDesc />
+                                                    ) : (
+                                                        <BiSort />
+                                                    )}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </th>
                             ))}
                         </tr>
@@ -296,7 +306,7 @@ export function SW360Table<K>({
                         </tr>
                     )}
                     {table.getRowModel().rows.map((row) =>
-                        !CommonUtils.isNullOrUndefined(row.meta?.isFullSpanRow) && row.meta.isFullSpanRow === true ? (
+                        row.meta?.isFullSpanRow ? (
                             <tr key={row.id}>
                                 <td colSpan={table.getVisibleLeafColumns().length}>
                                     <div className='restrict-row-height'>
