@@ -8,16 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import ConfigurationsTabs from '@/app/[locale]/admin/configurations/components/ConfigurationsTabs'
 import { Metadata } from 'next'
 import type { JSX } from 'react'
-import FeatureConfigurations from './components/FeatureConfigurations'
 
 export const metadata: Metadata = {
     title: 'Configurations',
 }
 
 const ConfigurationsPage = (): JSX.Element => {
-    return <FeatureConfigurations />
+    return <ConfigurationsTabs />
 }
 
 export default ConfigurationsPage
