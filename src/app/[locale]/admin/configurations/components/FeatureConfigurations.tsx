@@ -11,15 +11,14 @@
 
 'use client'
 
-import { ConfigKeys, Configuration, ConfigurationContainers, HttpStatus, UiConfiguration } from '@/object-types'
+import { ConfigKeys, Configuration, ConfigurationContainers, HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner } from 'next-sw360'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import AttachmentStorageConfigurations from './AttachmentStorageConfigurations'
-import FrontEndConfigs from './FrontEndConfigs'
 import MailConfigurations from './MailConfigurations'
 import OnOffSwitch from './OnOffSwitch'
 import PackageManagementConfigurations from './PackageManagementConfigurations'
@@ -28,8 +27,8 @@ import SelectUserGroup from './SelectUserGroup'
 const FeatureConfigurations = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentConfig, setCurrentConfig] = useState<Configuration | undefined>(undefined)
-    const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
     const { status } = useSession()
+    const apiEndpoint = `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -44,10 +43,7 @@ const FeatureConfigurations = (): JSX.Element => {
             signOut()
             return
         }
-        const response = await ApiUtils.GET(
-            `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`,
-            session.user.access_token,
-        )
+        const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
         if (response.status == HttpStatus.OK) {
             const data = (await response.json()) as Configuration
             setCurrentConfig(data)
@@ -58,30 +54,8 @@ const FeatureConfigurations = (): JSX.Element => {
         }
     }, [])
 
-    const fetchUiConfig = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            signOut()
-            return
-        }
-        const response = await ApiUtils.GET(
-            `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`,
-            session.user.access_token,
-        )
-        if (response.status == HttpStatus.OK) {
-            const data = (await response.json()) as UiConfiguration
-            setCurrentUiConfig(data)
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
-            await signOut()
-        } else {
-            setCurrentUiConfig({} as UiConfiguration)
-        }
-    }, [])
-
     useEffect(() => {
         fetchSw360Config()
-        fetchUiConfig()
     }, [])
 
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
@@ -93,9 +67,9 @@ const FeatureConfigurations = (): JSX.Element => {
             signOut()
             return
         }
-        const response = await ApiUtils.PATCH('configurations', currentConfig, session.user.access_token)
+        const response = await ApiUtils.PATCH(apiEndpoint, currentConfig, session.user.access_token)
         if (response.status == HttpStatus.OK) {
-            MessageService.success(t('Update configurations successfully'))
+            MessageService.success(t('Update backend configurations successfully'))
         } else if (response.status == HttpStatus.UNAUTHORIZED) {
             await signOut()
         } else {
@@ -104,16 +78,21 @@ const FeatureConfigurations = (): JSX.Element => {
         }
     }
 
-    const headerbuttons = {
-        'Update Configuration': { link: '#', onClick: updateConfig, type: 'primary', name: t('Update Configurations') },
+    const headerButtons = {
+        'Update Backend Configuration': {
+            link: '#',
+            onClick: updateConfig,
+            type: 'primary',
+            name: t('Update Backend Configurations'),
+        },
     }
 
     return (
         <>
             <div className='container page-content'>
                 <PageButtonHeader
-                    title={`${t('Configurations')}`}
-                    buttons={headerbuttons}
+                    title={`${t('Backend Configurations')}`}
+                    buttons={headerButtons}
                 />
                 {currentConfig ? (
                     <>
@@ -317,16 +296,6 @@ const FeatureConfigurations = (): JSX.Element => {
                             setCurrentConfig={setCurrentConfig}
                         />
                     </>
-                ) : (
-                    <PageSpinner />
-                )}
-            </div>
-            <div className='container page-content'>
-                {currentUiConfig ? (
-                    <FrontEndConfigs
-                        currentUiConfig={currentUiConfig}
-                        setCurrentUiConfig={setCurrentUiConfig}
-                    />
                 ) : (
                     <PageSpinner />
                 )}
