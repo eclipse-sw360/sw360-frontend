@@ -18,9 +18,9 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useRef, useState } from 'react'
-import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
+import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
 import ClearingDecision from './ClearingDecision'
 import ClearingRequestInfo from './ClearingRequestInfo'
@@ -35,6 +35,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState<boolean>(false)
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>()
     const { status } = useSession()
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const requestsPath = `/${locale}/requests`
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -95,6 +98,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                 show={showReopenClearingRequestModal}
                 setShow={setShowReopenClearingRequestModal}
             />
+            <Breadcrumb className='container page-content'>
+                <Breadcrumb.Item href={requestsPath}>{t('Requests')}</Breadcrumb.Item>
+                <Breadcrumb.Item active>{clearingRequestData?.id || clearingRequestId}</Breadcrumb.Item>
+            </Breadcrumb>
             <div className='ms-5 mt-2'>
                 <Tab.Container>
                     <Row>
