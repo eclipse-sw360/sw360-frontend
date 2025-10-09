@@ -15,9 +15,9 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
-import { ListGroup, Spinner, Tab } from 'react-bootstrap'
+import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import ChangeLog from './Changelog'
 import Summary from './Summary'
 
@@ -26,6 +26,9 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
     const router = useRouter()
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const packagesPath = `/${locale}/packages`
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -72,6 +75,12 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
 
     return (
         <>
+            <Breadcrumb className='container page-content'>
+                <Breadcrumb.Item href={packagesPath}>{t('Packages')}</Breadcrumb.Item>
+                <Breadcrumb.Item active>
+                    {summaryData ? `${summaryData.name} (${summaryData.version})` : packageId}
+                </Breadcrumb.Item>
+            </Breadcrumb>
             <div className='container page-content'>
                 <Tab.Container
                     defaultActiveKey='summary'
