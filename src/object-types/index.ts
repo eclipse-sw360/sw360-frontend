@@ -99,7 +99,6 @@ import { User, UserPayload } from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
 import VendorAdvisory from './VendorAdvisory'
-import VendorType from './VendorType'
 import VerificationStateInfo from './VerificationStateInfo'
 import Vulnerability from './Vulnerability'
 import { ProjectVulnerabilityTrackingStatus, VulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
@@ -209,7 +208,6 @@ export type {
     UserPayload,
     Vendor,
     VendorAdvisory,
-    VendorType,
     VerificationStateInfo,
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
