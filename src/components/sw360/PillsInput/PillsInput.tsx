@@ -13,23 +13,17 @@ import { useState, type JSX } from 'react'
 import { Badge, Stack } from 'react-bootstrap'
 import CloseButton from 'react-bootstrap/CloseButton'
 
-function PillsInput({
-    tags,
-    onTagsChange,
-}: {
-    tags: Set<string>
-    onTagsChange: (a: Set<string>) => void
-}): JSX.Element {
+function PillsInput({ tags, onTagsChange }: { tags: string[]; onTagsChange: (a: string[]) => void }): JSX.Element {
     const [inputValue, setInputValue] = useState('')
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' || event.key === ',') {
             event.preventDefault()
             const trimmedValue = inputValue.trim()
-            if (trimmedValue && !tags.has(trimmedValue)) {
+            if (trimmedValue && !tags.includes(trimmedValue)) {
                 const newTags = new Set(tags)
                 newTags.add(trimmedValue)
-                onTagsChange(newTags)
+                onTagsChange(Array.from(newTags.values()))
                 setInputValue('')
             }
         }
@@ -38,7 +32,7 @@ function PillsInput({
     const handleRemoveTag = (tagToRemove: string) => {
         const newTags = new Set(tags)
         newTags.delete(tagToRemove)
-        onTagsChange(newTags)
+        onTagsChange(Array.from(newTags.values()))
     }
 
     return (

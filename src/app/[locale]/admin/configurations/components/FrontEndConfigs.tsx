@@ -9,11 +9,11 @@
 
 'use client'
 import OnOffSwitch from '@/app/[locale]/admin/configurations/components/OnOffSwitch'
-import PillsInput from '@/components/sw360/PillsInput/PillsInput'
 import {
-    ArrayTypeUIConfigKeys,
     ConfigurationContainers,
     HttpStatus,
+    parseRawUiConfig,
+    ProcessedUiConfig,
     UIConfigKeys,
     UiConfiguration,
 } from '@/object-types'
@@ -21,20 +21,13 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { PageButtonHeader, PageSpinner } from 'next-sw360'
+import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 
 const FrontEndConfigs = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
-    const [arrayKeyStates, setArrayKeyStates] = useState<Record<UIConfigKeys, Set<string>>>(
-        () =>
-            Object.fromEntries(
-                ArrayTypeUIConfigKeys.map((key) => {
-                    return [key, new Set<string>()]
-                }),
-            ) as Record<UIConfigKeys, Set<string>>,
-    )
+    const [arrayKeyStates, setArrayKeyStates] = useState<ProcessedUiConfig>({} as ProcessedUiConfig)
     const { status } = useSession()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
 
@@ -99,37 +92,17 @@ const FrontEndConfigs = (): JSX.Element => {
         },
     }
 
-    const getSetForStateKey = (key: UIConfigKeys): Set<string> => {
-        let values: string[]
-        if (currentUiConfig) {
-            try {
-                values = JSON.parse(currentUiConfig[key]) as string[]
-            } catch {
-                values = []
-            }
-        } else {
-            values = []
-        }
-        return new Set(values)
-    }
-
     const updateInternalState = () => {
-        setArrayKeyStates(
-            Object.fromEntries(
-                ArrayTypeUIConfigKeys.map((key) => {
-                    return [key, getSetForStateKey(key)]
-                }),
-            ) as Record<UIConfigKeys, Set<string>>,
-        )
+        setArrayKeyStates(parseRawUiConfig(currentUiConfig ?? ({} as UiConfiguration)))
     }
 
-    const onArrayStateChangeHandler = (key: UIConfigKeys) => (newValues: Set<string>) => {
+    const onArrayStateChangeHandler = (key: UIConfigKeys) => (newValues: string[]) => {
         // Update the global state, internal state will be updated by useEffect
         setCurrentUiConfig(
             (prev) =>
                 ({
                     ...prev,
-                    [key]: JSON.stringify(Array.from(newValues)),
+                    [key]: JSON.stringify(newValues),
                 }) as UiConfiguration,
         )
     }

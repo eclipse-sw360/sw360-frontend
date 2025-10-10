@@ -77,7 +77,7 @@ import SearchDuplicatesResponse from './SearchDuplicateResponse'
 import SearchResult from './SearchResult'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
-import UiConfiguration from './UiConfiguration'
+import { ProcessedUiConfig, UiConfiguration, parseRawUiConfig } from './UiConfiguration'
 import Annotations from './spdx/Annotations'
 import CheckSum from './spdx/CheckSum'
 import Creator from './spdx/Creator'
@@ -114,6 +114,8 @@ export type {
     AttachmentUsage,
     AttachmentUsages,
     AuthToken,
+    COTSDetails,
+    CVEReference,
     Changelogs,
     CheckSum,
     ClearingDetailsCount,
@@ -125,10 +127,8 @@ export type {
     Component,
     ComponentPayload,
     Configuration,
-    COTSDetails,
     CreateClearingRequestPayload,
     Creator,
-    CVEReference,
     DocumentCreationInformation,
     DocumentState,
     ECCInterface,
@@ -177,6 +177,7 @@ export type {
     PackageVerificationCode,
     PageableQueryParam,
     PaginationMeta,
+    ProcessedUiConfig,
     Project,
     ProjectData,
     ProjectLinkedRelease,
@@ -194,14 +195,14 @@ export type {
     Resources,
     RestrictedResource,
     RolesType,
+    SPDX,
+    SPDXDocument,
     SaveUsagesPayload,
     SearchDuplicatesResponse,
     SearchResult,
     Session,
     SnippetInformation,
     SnippetRange,
-    SPDX,
-    SPDXDocument,
     SummaryDataType,
     ToastData,
     TypedEntity,
@@ -219,7 +220,7 @@ export type {
 }
 
 // Special functions for populate data
-export { NavList, Preferences }
+export { NavList, Preferences, parseRawUiConfig }
 
 // Enums + Constants
 import AttachmentTypes from './constants/AttachmentTypes'

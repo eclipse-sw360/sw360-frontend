@@ -23,6 +23,7 @@ import Logo from './Logo/Logo'
 import Navbar from './Navbar/Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import PageSpinner from './PageSpinner/PageSpinner'
+import PillsInput from './PillsInput/PillsInput'
 import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
 import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
@@ -48,7 +49,7 @@ import ToastMessage from './ToastContainer/Toast'
 // Table component
 // Strictly derived from gridjs-react with dedicated changes
 import Table from './Table/Table'
-import { ReactWrapper, _ } from './Table/wrapper'
+import { _, ReactWrapper } from './Table/wrapper'
 import TreeTable from './TreeTable/TreeTable'
 
 export {
@@ -73,6 +74,7 @@ export {
     PageButtonHeader,
     PageSizeSelector,
     PageSpinner,
+    PillsInput,
     ProfileDropdown,
     QuickFilter,
     ReactWrapper,
