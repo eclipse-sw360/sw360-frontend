@@ -9,9 +9,9 @@
 
 'use client'
 
+import DeleteItemWarning from '@/components/sw360/DeleteItemWarning/DeleteItemWarning'
 import { AddtionalDataType } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useState, type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -33,13 +33,8 @@ interface Input {
 function AddKeyValue(props: Props): JSX.Element {
     const t = useTranslations('default')
     const [inputList, setInputList] = useState<Input[]>([])
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
+    const [isDeleteItem, setIsDeleteItem] = useState<boolean>(false)
+    const [currentIndex, setCurrentIndex] = useState<number>(-1)
 
     useEffect(() => {
         setInputList(!CommonUtils.isNullOrUndefined(props.data) ? props.data : [])
@@ -60,9 +55,8 @@ function AddKeyValue(props: Props): JSX.Element {
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList]
-        list.splice(index, 1)
-        setInputList(list)
+        setCurrentIndex(index)
+        setIsDeleteItem(true)
     }
 
     const handleAddClick = () => {
@@ -71,6 +65,15 @@ function AddKeyValue(props: Props): JSX.Element {
 
     return (
         <>
+            <DeleteItemWarning
+                isDeleteItem={isDeleteItem}
+                setIsDeleteItem={setIsDeleteItem}
+                inputList={inputList}
+                setInputList={setInputList}
+                index={currentIndex}
+                setData={props.setData}
+                setObject={props.setObject}
+            />
             <div className='section-header mb-2'>
                 <span className='fw-bold'>{props.header}</span>
             </div>
