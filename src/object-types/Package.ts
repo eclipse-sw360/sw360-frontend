@@ -48,6 +48,7 @@ interface Package {
             id: string
             name: string
             version: string
+            clearingState: string
             _links: Links
         }
     }

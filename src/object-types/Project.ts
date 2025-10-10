@@ -24,7 +24,9 @@ export interface Project {
     id?: string
     name: string
     considerReleasesFromExternalList?: boolean
-    additionalData?: { [k: string]: string }
+    additionalData?: {
+        [k: string]: string
+    }
     businessUnit?: string
     clearingState?: string
     clearingSummary?: string
@@ -37,9 +39,15 @@ export interface Project {
     domain?: string
     modifiedOn?: string
     modifiedBy?: string
-    externalIds?: { [k: string]: string }
-    externalUrls?: { [k: string]: string }
-    roles?: { [k: string]: Array<string> }
+    externalIds?: {
+        [k: string]: string
+    }
+    externalUrls?: {
+        [k: string]: string
+    }
+    roles?: {
+        [k: string]: Array<string>
+    }
     ownerAccountingUnit?: string
     ownerGroup?: string
     ownerCountry?: string
@@ -76,6 +84,7 @@ export interface Project {
     packageIds?: {
         [key: string]: {
             comment?: string
+            createdOn?: string
         }
     }
     _links: Links

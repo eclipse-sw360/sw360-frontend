@@ -9,264 +9,338 @@
 
 'use client'
 
-import { _, Table } from '@/components/sw360'
-import { HttpStatus, LinkedPackage, ReleaseClearingStateMapping } from '@/object-types'
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from '@/components/sw360'
+import { ErrorDetails, HttpStatus, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useCallback, useEffect, useState, type JSX } from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
 
 interface Props {
     projectId: string
 }
 
-type RowData = (string | string[] | undefined)[]
-
 export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<Array<RowData>>([])
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
-    const [projectData, setProjectData] = useState<any>(undefined)
+    }, [
+        session,
+    ])
 
-    const columns = [
-        {
-            id: 'linkedPackagesData.vendor',
-            name: t('Vendor'),
-            sort: true,
-            formatter: ([vendorId, vendorName]: Array<string>) =>
-                _(
-                    <>
-                        <Link href={`/vendors/${vendorId}`}>{vendorName}</Link>
-                    </>,
-                ),
-        },
-        {
-            id: 'linkedPackagesData.packageName',
-            name: t('Package Name Version'),
-            sort: true,
-            formatter: ([packageId, packageName, packageVersion]: Array<string>) =>
-                _(
-                    <>
-                        <Link href={`/packages/detail/${packageId}`}>{`${packageName} (${packageVersion})`}</Link>
-                    </>,
-                ),
-        },
-        {
-            id: 'linkedPackagesData.releaseName',
-            name: t('Release Name Version'),
-            sort: true,
-            formatter: ([releaseId, releaseName, releaseVersion]: Array<string>) =>
-                _(
-                    <>
-                        <Link href={`/components/releases/detail/${releaseId}`}>
-                            {`${releaseName} (${releaseVersion})`}
+    const [packagesData, setPackagesData] = useState<Package[]>(() => [])
+    const memoizedPackagesData = useMemo(
+        () => packagesData,
+        [
+            packagesData,
+        ],
+    )
+    const [showPackagesProcessing, setShowPackagesProcessing] = useState(false)
+
+    const [projectData, setProjectData] = useState<Project | undefined>()
+    const memoizedProjectData = useMemo(
+        () => projectData,
+        [
+            projectData,
+        ],
+    )
+    const [showProjectProcessing, setShowProjectProcessing] = useState(false)
+
+    const columns = useMemo<ColumnDef<Package>[]>(
+        () => [
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'packageName',
+                header: t('Package Name Version'),
+                cell: ({ row }) => {
+                    const { id, name, version } = row.original
+                    return (
+                        <Link
+                            href={`/packages/detail/${id}`}
+                            className='text-link'
+                        >{`${name} (${version})`}</Link>
+                    )
+                },
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'releaseName',
+                header: t('Release Name Version'),
+                cell: ({ row }) => {
+                    const release = row.original._embedded?.['sw360:release']
+                    return (
+                        <Link
+                            href={`/components/releases/detail/${release?.id}`}
+                            className='text-link'
+                        >
+                            {`${release?.name} (${release?.version})`}
                         </Link>
-                    </>,
-                ),
-        },
-        {
-            id: 'linkedPackagesData.releaseClearingState',
-            name: t('Release Clearing State'),
-            sort: true,
-            formatter: (releaseClearingState: string) =>
-                _(
-                    <div className='text-center'>
-                        {releaseClearingState === '' ? (
-                            <>{t('Not Applicable')}</>
-                        ) : (
-                            <OverlayTrigger
-                                overlay={
-                                    <Tooltip>
-                                        {`${t('Release Clearing State')}: ${t(
-                                            ReleaseClearingStateMapping[
-                                                releaseClearingState as keyof typeof ReleaseClearingStateMapping
-                                            ],
-                                        )}`}
-                                    </Tooltip>
-                                }
-                            >
-                                {releaseClearingState === 'NEW_CLEARING' || releaseClearingState === 'NEW' ? (
-                                    <span className='state-box clearingStateOpen capsule-left capsule-right align-center'>
-                                        {'CS'}
-                                    </span>
-                                ) : releaseClearingState === 'REPORT_AVAILABLE' ? (
-                                    <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>
-                                        {'CS'}
-                                    </span>
-                                ) : releaseClearingState === 'UNDER_CLEARING' ? (
-                                    <span className='state-box clearingStateInProgress capsule-left capsule-right'>
-                                        {'CS'}
-                                    </span>
-                                ) : releaseClearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
-                                    <span className='state-box clearingStateUnknown capsule-left capsule-right'>
-                                        {'CS'}
-                                    </span>
-                                ) : releaseClearingState === 'SENT_TO_CLEARING_TOOL' ||
-                                  releaseClearingState === 'SCAN_AVAILABLE' ? (
-                                    <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>
-                                        {'CS'}
-                                    </span>
-                                ) : (
-                                    <span className='state-box clearingStateApproved capsule-left capsule-right'>
-                                        {'CS'}
-                                    </span>
-                                )}
-                            </OverlayTrigger>
-                        )}
-                    </div>,
-                ),
-        },
-        {
-            id: 'linkedPackagesData.licenses',
-            name: t('Licenses'),
-            sort: true,
-            formatter: (licenseIds: string[]) =>
-                _(
-                    <div>
-                        {licenseIds.map((lincenseId, index) => (
-                            <span key={index}>
-                                <Link href={`/licenses/detail?id=${lincenseId}`}>{lincenseId}</Link>
-                                {index !== licenseIds.length - 1 && ', '}
-                            </span>
-                        ))}
-                    </div>,
-                ),
-        },
-        {
-            id: 'linkedPackagesData.packageManager',
-            name: t('Package Manager'),
-            sort: true,
-        },
-        {
-            id: 'linkedPackagesData.packageLinkDate',
-            name: t('Package Link Date'),
-            sort: true,
-        },
-        {
-            id: 'linkedPackagesData.comment',
-            name: t('Comments'),
-            sort: true,
-        },
-        {
-            id: 'linkedPackagesData.actions',
-            name: t('Actions'),
-            sort: true,
-            formatter: (packageId: string) =>
-                _(
-                    <>
+                    )
+                },
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'releaseClearingState',
+                header: t('Release Clearing State'),
+                cell: ({ row }) => {
+                    const releaseClearingState = row.original._embedded?.['sw360:release']?.clearingState ?? ''
+                    return (
+                        <div className='text-center'>
+                            {releaseClearingState === '' ? (
+                                <>{t('Not Applicable')}</>
+                            ) : (
+                                <OverlayTrigger
+                                    overlay={
+                                        <Tooltip>
+                                            {`${t('Release Clearing State')}: ${t(
+                                                ReleaseClearingStateMapping[
+                                                    releaseClearingState as keyof typeof ReleaseClearingStateMapping
+                                                ],
+                                            )}`}
+                                        </Tooltip>
+                                    }
+                                >
+                                    {releaseClearingState === 'NEW_CLEARING' || releaseClearingState === 'NEW' ? (
+                                        <span className='state-box clearingStateOpen capsule-left capsule-right align-center'>
+                                            {'CS'}
+                                        </span>
+                                    ) : releaseClearingState === 'REPORT_AVAILABLE' ? (
+                                        <span className='state-box clearingStateReportAvailable capsule-left capsule-right'>
+                                            {'CS'}
+                                        </span>
+                                    ) : releaseClearingState === 'UNDER_CLEARING' ? (
+                                        <span className='state-box clearingStateInProgress capsule-left capsule-right'>
+                                            {'CS'}
+                                        </span>
+                                    ) : releaseClearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
+                                        <span className='state-box clearingStateUnknown capsule-left capsule-right'>
+                                            {'CS'}
+                                        </span>
+                                    ) : releaseClearingState === 'SENT_TO_CLEARING_TOOL' ||
+                                      releaseClearingState === 'SCAN_AVAILABLE' ? (
+                                        <span className='state-box clearingStateSentToClearingTool capsule-left capsule-right'>
+                                            {'CS'}
+                                        </span>
+                                    ) : (
+                                        <span className='state-box clearingStateApproved capsule-left capsule-right'>
+                                            {'CS'}
+                                        </span>
+                                    )}
+                                </OverlayTrigger>
+                            )}
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'licenses',
+                header: t('Licenses'),
+                cell: ({ row }) => {
+                    const { licenseIds } = row.original
+                    return (
+                        <div>
+                            {licenseIds?.map((lincenseId, index) => (
+                                <span key={index}>
+                                    <Link
+                                        href={`/licenses/detail?id=${lincenseId}`}
+                                        className='text-link'
+                                    >
+                                        {lincenseId}
+                                    </Link>
+                                    {index !== licenseIds.length - 1 && ', '}
+                                </span>
+                            ))}
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'packageManager',
+                header: t('Package Manager'),
+                accessorKey: 'packageManager',
+                cell: (info) => info.getValue(),
+                enableSorting: false,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'packageLinkDate',
+                header: t('Package Link Date'),
+                cell: ({ row }) => <>{memoizedProjectData?.packageIds?.[row.original.id ?? '']?.createdOn || ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'comment',
+                header: t('Comments'),
+                cell: ({ row }) => <>{memoizedProjectData?.packageIds?.[row.original.id ?? '']?.comment || ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    return (
                         <span className='d-flex justify-content-evenly'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit Package')}</Tooltip>}>
                                 <Link
-                                    href={`/packages/edit/${packageId}`}
+                                    href={`/packages/edit/${row.original.id}`}
                                     className='overlay-trigger'
                                 >
                                     <FaPencilAlt className='btn-icon' />
                                 </Link>
                             </OverlayTrigger>
                         </span>
-                    </>,
-                ),
-        },
-    ]
-
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            const data = await response.json()
-            return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            return undefined
-        }
-    }, [])
+                    )
+                },
+                meta: {
+                    width: '5%',
+                },
+            },
+        ],
+        [
+            t,
+            memoizedProjectData,
+        ],
+    )
 
     useEffect(() => {
-        // Check if we already have projectData, if not fetch it
-        const fetchProjectDataIfNeeded = async () => {
-            let currentProjectData = projectData
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
 
-            if (!currentProjectData) {
-                // Only fetch project data if we don't have it yet
-                currentProjectData = await fetchData(`projects/${projectId}`)
-                if (currentProjectData) {
-                    setProjectData(currentProjectData)
+        const timeLimit = packagesData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowPackagesProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/packages`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
+
+                const data = (await response.json()) as Package[]
+                setPackagesData(data)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowPackagesProcessing(false)
             }
+        })()
 
-            // Fetch linked packages data
-            const linkedPackages = await fetchData(`projects/${projectId}/packages`)
-            if (!linkedPackages) return
+        return () => controller.abort()
+    }, [
+        session,
+        projectId,
+    ])
 
-            // Handle direct array response
-            if (Array.isArray(linkedPackages)) {
-                const data = linkedPackages.map((item: LinkedPackage) => {
-                    const comment = currentProjectData?.packageIds?.[item.id]?.comment || ''
-                    const packageLinkDate = currentProjectData?.packageIds?.[item.id]?.createdOn || ''
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
 
-                    // Build vendor array with only defined values
-                    const vendorInfo = []
-                    if (item.vendorId) vendorInfo.push(item.vendorId)
-                    if (item.vendorName) vendorInfo.push(item.vendorName)
+        const timeLimit = projectData === undefined ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProjectProcessing(true)
+        }, timeLimit)
 
-                    // Build package info array with only defined values
-                    const packageInfo = []
-                    if (item.id) packageInfo.push(item.id)
-                    if (item.name) packageInfo.push(item.name)
-                    if (item.version) packageInfo.push(item.version)
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
 
-                    // Build release info array with only defined values
-                    const releaseInfo = []
-                    if (item.releaseId) releaseInfo.push(item.releaseId)
-                    if (item._embedded?.['sw360:release']?.name) releaseInfo.push(item._embedded['sw360:release'].name)
-                    if (item._embedded?.['sw360:release']?.version)
-                        releaseInfo.push(item._embedded['sw360:release'].version)
-
-                    // Build license array with only defined values
-                    const licenseInfo = item.licenseIds ? item.licenseIds.filter((id) => id) : []
-                    return [
-                        vendorInfo,
-                        packageInfo,
-                        releaseInfo,
-                        item._embedded?.['sw360:release']?.clearingState ?? '',
-                        licenseInfo,
-                        item.packageManager ?? '',
-                        packageLinkDate, // Package link date from project data
-                        comment, // Comment directly from project data
-                        item.id ?? '',
-                    ]
-                })
-
-                setTableData(data)
+                const data = (await response.json()) as Project
+                setProjectData(data)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProjectProcessing(false)
             }
-        }
+        })()
 
-        fetchProjectDataIfNeeded().catch((err) => console.error(err))
-    }, [projectId, fetchData])
+        return () => controller.abort()
+    }, [
+        session,
+        projectId,
+    ])
+
+    const table = useReactTable({
+        data: memoizedPackagesData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        getPaginationRowModel: getPaginationRowModel(),
+    })
 
     return (
-        <>
-            <div className='row mb-4'>
-                <div style={{ paddingLeft: '0px' }}>
-                    <Table
-                        columns={columns}
-                        data={tableData}
-                        sort={false}
+        <div className='mb-3'>
+            {table ? (
+                <>
+                    <ClientSidePageSizeSelector table={table} />
+                    <SW360Table
+                        table={table}
+                        showProcessing={showPackagesProcessing || showProjectProcessing}
                     />
+                    <ClientSideTableFooter table={table} />
+                </>
+            ) : (
+                <div className='col-12 mt-1 text-center'>
+                    <Spinner className='spinner' />
                 </div>
-            </div>
-        </>
+            )}
+        </div>
     )
 }
