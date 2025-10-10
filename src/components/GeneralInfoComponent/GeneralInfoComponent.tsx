@@ -12,10 +12,9 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useState } from 'react'
-
-import { ComponentPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import React, { useCallback, useState } from 'react'
+import { ComponentPayload, Vendor } from '@/object-types'
 
 interface Props {
     componentPayload: ComponentPayload
@@ -49,14 +48,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
     }
 
     const setVendorId = (vendorResponse: Vendor) => {
-        const vendorData: Vendor = {
-            id: vendorResponse.id,
-            fullName: vendorResponse.fullName,
-        }
-        setVendor(vendorData)
+        setVendor(vendorResponse)
         setComponentPayload({
             ...componentPayload,
-            defaultVendorId: vendorResponse.id,
+            defaultVendorId: vendorResponse._links?.self.href.split('/').at(-1),
         })
     }
 
@@ -76,7 +71,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
         <>
             <div
                 className='col'
-                style={{ padding: '0px 12px' }}
+                style={{
+                    padding: '0px 12px',
+                }}
             >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
@@ -91,7 +88,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 {t('Name')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -135,7 +134,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 {t('Categories')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -162,7 +163,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 {t('Component Type')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -218,7 +221,8 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             <VendorDialog
                                 show={dialogOpenVendor}
                                 setShow={setDialogOpenVendor}
-                                selectVendor={setVendorId}
+                                setVendor={setVendorId}
+                                vendor={vendor}
                             />
                             <span onClick={handleClearVendor}>x</span>
                         </div>
@@ -310,7 +314,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 placeholder={t('Enter Description')}
                                 id='description'
                                 aria-describedby='Description'
-                                style={{ height: '100px' }}
+                                style={{
+                                    height: '100px',
+                                }}
                                 name='description'
                                 onChange={updateField}
                                 value={componentPayload.description ?? ''}

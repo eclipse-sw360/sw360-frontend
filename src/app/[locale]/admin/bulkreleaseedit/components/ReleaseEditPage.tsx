@@ -9,15 +9,15 @@
 
 'use client'
 
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _, QuickFilter, Table, VendorDialog } from 'next-sw360'
+import React, { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
+import { Alert, Modal, Spinner } from 'react-bootstrap'
+import { GiCancel } from 'react-icons/gi'
 import { Embedded, ErrorDetails, HttpStatus, Release, Session, Vendor } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { QuickFilter, Table, VendorDialog, _ } from 'next-sw360'
-import React, { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
-import { Alert, Modal, Spinner } from 'react-bootstrap'
-import { GiCancel } from 'react-icons/gi'
 
 const MemoTable = React.memo(Table, () => true)
 
@@ -47,11 +47,15 @@ function UpdateReleaseModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         setVendor(release?.vendor ?? {})
-    }, [release?.vendor])
+    }, [
+        release,
+    ])
 
     function handleClose() {
         setVendor({})
@@ -112,9 +116,10 @@ function UpdateReleaseModal({
 
     const handleSetVendorData = (vendorResponse: Vendor) => {
         setVendor(vendorResponse)
+        console.log(vendorResponse)
         setRelease({
             ...release,
-            vendorId: vendorResponse.id,
+            vendorId: vendorResponse._links?.self.href.split('/').at(-1),
         })
     }
 
@@ -188,7 +193,8 @@ function UpdateReleaseModal({
                                 <VendorDialog
                                     show={selectVendor}
                                     setShow={setSelectVendor}
-                                    selectVendor={handleSetVendorData}
+                                    setVendor={handleSetVendorData}
+                                    vendor={vendor}
                                 />
                             </div>
                         </div>
@@ -350,7 +356,9 @@ export default function BulkReleaseEdit(): JSX.Element {
                 })
             },
             total: (data: Embedded<Release, 'sw360:releases'>) => (data.page ? data.page.totalElements : 0),
-            headers: { Authorization: `${session.user?.access_token}` },
+            headers: {
+                Authorization: `${session.user?.access_token}`,
+            },
         }
     }
 

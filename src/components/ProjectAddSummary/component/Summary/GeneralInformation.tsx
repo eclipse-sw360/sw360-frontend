@@ -10,11 +10,10 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useCallback, useState, type JSX } from 'react'
-import { GiCancel } from 'react-icons/gi'
-
-import { ProjectPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
+import { GiCancel } from 'react-icons/gi'
+import { ProjectPayload, Vendor } from '@/object-types'
 
 interface Param {
     vendor: Vendor
@@ -40,14 +39,10 @@ export default function GeneralInformation({
     }
 
     const setVendorData = (vendorResponse: Vendor) => {
-        const vendorData: Vendor = {
-            id: vendorResponse.id,
-            fullName: vendorResponse.fullName,
-        }
-        setVendor(vendorData)
+        setVendor(vendorResponse)
         setProjectPayload({
             ...projectPayload,
-            vendorId: vendorResponse.id,
+            vendorId: vendorResponse._links?.self.href.split('/').at(-1),
         })
     }
 
@@ -73,7 +68,14 @@ export default function GeneralInformation({
                             htmlFor='addProjects.name'
                             className='form-label fw-medium'
                         >
-                            {t('Name')} <span style={{ color: 'red' }}>*</span>
+                            {t('Name')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <input
                             type='text'
@@ -108,7 +110,14 @@ export default function GeneralInformation({
                             htmlFor='addProjects.visibility'
                             className='form-label fw-medium'
                         >
-                            {t('Visibility')} <span style={{ color: 'red' }}>*</span>
+                            {t('Visibility')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <select
                             className='form-select'
@@ -156,7 +165,14 @@ export default function GeneralInformation({
                             htmlFor='addProjects.projectType'
                             className='form-label fw-medium'
                         >
-                            {t('Project Type')} <span style={{ color: 'red' }}>*</span>
+                            {t('Project Type')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <select
                             className='form-select'
@@ -212,7 +228,9 @@ export default function GeneralInformation({
                             className='form-control'
                             id='addProjects.description'
                             placeholder={t('Enter Description')}
-                            style={{ height: '100px' }}
+                            style={{
+                                height: '100px',
+                            }}
                             name='description'
                             value={projectPayload.description}
                             onChange={updateInputField}
@@ -261,7 +279,8 @@ export default function GeneralInformation({
                         <VendorDialog
                             show={showVendorsModal}
                             setShow={setShowVendorsModal}
-                            selectVendor={setVendorData}
+                            setVendor={setVendorData}
+                            vendor={vendor}
                         />
                         <div className='form-text'>
                             <GiCancel onClick={handleClearVendorData} />
