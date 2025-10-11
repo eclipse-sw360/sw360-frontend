@@ -9,11 +9,11 @@
 
 'use client'
 
-import defaultLogo from '@/assets/images/sw360-logo.svg'
-import { useTheme } from 'next-themes'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
+import { useTheme } from 'next-themes'
 import { JSX } from 'react'
+import defaultLogo from '@/assets/images/sw360-logo.svg'
 
 export interface LogoProps {
     /** Path to a custom image (URL or local import) */
@@ -40,9 +40,22 @@ function Logo({
     const { resolvedTheme: themeFromHook } = useTheme()
     const resolvedTheme = isDefault ? 'light' : themeFromHook
 
+    // Helper to normalize src and enforce SVG
+    const getImageSrc = () => {
+        if (typeof src === 'string') {
+            let normalizedSrc = src
+            if (!normalizedSrc.startsWith('/')) {
+                normalizedSrc = '/' + normalizedSrc
+            }
+            return normalizedSrc
+        }
+        // StaticImport (local asset)
+        return src
+    }
+
     const renderImage = () => (
         <Image
-            src={src}
+            src={getImageSrc()}
             width={width}
             height={height}
             alt={alt}
