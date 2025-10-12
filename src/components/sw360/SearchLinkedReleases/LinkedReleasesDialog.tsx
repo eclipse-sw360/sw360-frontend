@@ -10,15 +10,25 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState, type JSX } from 'react'
-import { Button, Modal } from 'react-bootstrap'
-
-import { Embedded, HttpStatus, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Button, Form, Modal, Spinner } from 'react-bootstrap'
+import {
+    Embedded,
+    ErrorDetails,
+    HttpStatus,
+    PageableQueryParam,
+    PaginationMeta,
+    Release,
+    ReleaseDetail,
+    ReleaseLink,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import SelectTableLinkedReleases from './SelectTableLinkedReleases'
+import { PageSizeSelector, SW360Table, TableFooter } from '../Table/Components'
 
 interface Props {
     show: boolean
@@ -32,6 +42,9 @@ interface Props {
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
+const Capitalize = (text: string) =>
+    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+
 const LinkedReleasesDialog = ({
     show,
     setShow,
@@ -42,59 +55,169 @@ const LinkedReleasesDialog = ({
     setReleasePayload,
 }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [data, setData] = useState<(string | ReleaseDetail)[][]>([])
-    const params = useSearchParams()
-    const [linkedReleases] = useState<Array<ReleaseDetail>>([])
+    const [linkedReleases, setLinkedReleases] = useState<Array<ReleaseDetail>>([])
     const [linkedReleasesResponse, setLinkedReleasesResponse] = useState<ReleaseLink[]>([])
-    const [releases, setReleases] = useState<(string | ReleaseDetail)[][]>([])
-
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const handleCloseDialog = () => {
         setShow(!show)
     }
+    const session = useSession()
 
-    const searchLinkedReleases = () => {
-        setReleases(data)
+    const columns = useMemo<ColumnDef<ReleaseDetail>[]>(
+        () => [
+            {
+                id: 'select',
+                cell: ({ row }) => (
+                    <Form.Check
+                        type='checkbox'
+                        checked={linkedReleases.map((r) => r.id).includes(row.original.id ?? '')}
+                        onChange={() => handlSelectRelease(row.original)}
+                    ></Form.Check>
+                ),
+                meta: {
+                    width: '7%',
+                },
+            },
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                cell: ({ row }) => <div className='text-center'>{row.original.vendor?.fullName ?? ''}</div>,
+            },
+            {
+                id: 'componentName',
+                header: t('Component Name'),
+                cell: ({ row }) => <div className='text-center'>{row.original.name}</div>,
+            },
+            {
+                id: 'releaseVersion',
+                header: 'Release Version',
+                cell: ({ row }) => <div className='text-center'>{row.original.version}</div>,
+            },
+            {
+                id: 'clearingState',
+                header: t('Clearing State'),
+                cell: ({ row }) => <div className='text-center'>{Capitalize(row.original.clearingState ?? '')}</div>,
+            },
+            {
+                id: 'mainlineState',
+                header: t('Mainline State'),
+                cell: ({ row }) => <div className='text-center'>{row.original.mainlineState ?? t('OPEN')}</div>,
+            },
+        ],
+        [
+            t,
+            linkedReleases,
+        ],
+    )
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [releaseData, setVendorData] = useState<ReleaseDetail[]>(() => [])
+    const memoizedData = useMemo(
+        () => releaseData,
+        [
+            releaseData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    const searchLinkedReleases = async (signal?: AbortSignal) => {
+        try {
+            setShowProcessing(true)
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `releases`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            if (response.status !== HttpStatus.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
+
+            const data = (await response.json()) as EmbeddedReleases
+            setPaginationMeta(data.page)
+            setVendorData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
+                    ? []
+                    : data['_embedded']['sw360:releases'],
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
+        }
     }
 
     useEffect(() => {
+        if (session.status === 'loading' || searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
-
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const queryUrl = CommonUtils.createUrlWithParams(`releases`, {
-                    ...Object.fromEntries(params),
-                    allDetails: 'true',
-                })
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-                const releases = (await response.json()) as EmbeddedReleases
-                if (
-                    !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
-                ) {
-                    const data = releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
-                        item,
-                        item.vendor ? (item.vendor.fullName ?? '') : '',
-                        item.name,
-                        item.version,
-                        item.clearingState,
-                        item.mainlineState ?? 'OPEN',
-                    ])
-                    setData(data)
-                }
-            } catch (e) {
-                console.error(e)
-            }
-        })()
+        searchLinkedReleases(signal)
         return () => controller.abort()
-    }, [params])
+    }, [
+        pageableQueryParam,
+        session,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
 
     const handleClickSelectLinkedReleases = () => {
         linkedReleasesResponse.forEach((linkedRelease: ReleaseLink) => {
@@ -115,10 +238,30 @@ const LinkedReleasesDialog = ({
         onReRender()
     }
 
-    const getLinkedReleases: (releaseLink: ReleaseLink[]) => void = useCallback(
-        (releaseLink: ReleaseLink[]) => setLinkedReleasesResponse(releaseLink),
-        [],
-    )
+    const handlSelectRelease = (item: ReleaseDetail) => {
+        const releases: ReleaseDetail[] = linkedReleases
+        if (linkedReleases.map((rel) => rel.id).includes(item.id)) {
+            const index = linkedReleases.map((rel) => rel.id).indexOf(item.id)
+            releases.splice(index, 1)
+        } else {
+            releases.push(item)
+        }
+        setLinkedReleases(releases)
+        const releaseLinks: ReleaseLink[] = []
+        releases.forEach((item: ReleaseDetail) => {
+            const releaseLink: ReleaseLink = {
+                id: CommonUtils.getIdFromUrl(item._links.self.href),
+                name: item.name,
+                version: item.version,
+                mainlineState: item.mainlineState,
+                clearingState: item.clearingState,
+                vendor: item.vendor ? item.vendor.fullName : '',
+                releaseRelationship: 'CONTAINED',
+            }
+            releaseLinks.push(releaseLink)
+        })
+        setLinkedReleasesResponse(releaseLinks)
+    }
 
     return (
         <Modal
@@ -139,25 +282,46 @@ const LinkedReleasesDialog = ({
                                 type='text'
                                 className='form-control'
                                 placeholder={t('Enter search text')}
-                                aria-describedby='Link Releases'
+                                onChange={(event) => {
+                                    setSearchText(event.target.value)
+                                }}
                             />
                         </div>
                         <div className='col-lg-4'>
                             <button
                                 type='button'
                                 className={`fw-bold btn btn-secondary`}
-                                onClick={searchLinkedReleases}
+                                onClick={() => {
+                                    if (!searchText) setSearchText('')
+                                    searchLinkedReleases()
+                                }}
                             >
                                 {t('Search')}
                             </button>
                         </div>
                     </div>
-                    <div className='row mt-3'>
-                        <SelectTableLinkedReleases
-                            releases={releases}
-                            setLinkedReleases={getLinkedReleases}
-                            linkedReleases={linkedReleases}
-                        />
+                    <div className='mb-3'>
+                        {pageableQueryParam && table && paginationMeta ? (
+                            <>
+                                <PageSizeSelector
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                />
+                                <SW360Table
+                                    table={table}
+                                    showProcessing={showProcessing}
+                                />
+                                <TableFooter
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                    paginationMeta={paginationMeta}
+                                />
+                            </>
+                        ) : (
+                            <div className='col-12 mt-1 text-center'>
+                                <Spinner className='spinner' />
+                            </div>
+                        )}
                     </div>
                 </div>
             </Modal.Body>
