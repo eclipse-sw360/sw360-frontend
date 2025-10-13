@@ -832,6 +832,18 @@ input::-webkit-datetime-edit {
     background-color: #fff4ec;
 }
 
+td:has(.red-cell) {
+    background-color: #feefef;
+}
+
+td:has(.green-cell) {
+    background-color: #edf9f0;
+}
+
+td:has(.orange-cell) {
+    background-color: #fff4ec;
+}
+
 .gridjs-td:has(.red-cell) {
     background-color: #feefef;
 }

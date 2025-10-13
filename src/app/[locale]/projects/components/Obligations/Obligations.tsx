@@ -9,14 +9,13 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ActionType, ObligationEntry, UserGroupType } from '@/object-types'
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
-import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
-import CompareObligation from './CompareObligation'
+import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
+import { Dropdown, Nav, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ActionType, ObligationEntry, UserGroupType } from '@/object-types'
 import ObligationView from './ObligationsView/ObligationsView'
 import ReleaseView from './ReleaseView'
 
@@ -31,15 +30,15 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
     const router = useRouter()
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
-    const [show, setShow] = useState(false)
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
     const { status } = useSession()
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
         const isCalledFromProjectLicenseTab = false
@@ -49,11 +48,6 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
 
     return (
         <>
-            <CompareObligation
-                show={show}
-                setShow={setShow}
-                setSelectedProjectId={setSelectedProjectId}
-            />
             <Tab.Container
                 id='views-tab'
                 activeKey={key}
@@ -90,15 +84,6 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
                             </Dropdown.Menu>
                         </Dropdown>
                     )}
-                    {actionType === ActionType.EDIT && (
-                        <Button
-                            variant='secondary'
-                            className='col-auto'
-                            onClick={() => setShow(true)}
-                        >
-                            {t('Compare Obligation')}
-                        </Button>
-                    )}
                 </div>
                 <Tab.Content className='mt-4'>
                     <Tab.Pane eventKey='obligations-view'>
@@ -107,7 +92,6 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
                             actionType={actionType}
                             payload={payload}
                             setPayload={setPayload}
-                            selectedProjectId={selectedProjectId}
                         />
                     </Tab.Pane>
                     <Tab.Pane eventKey='release-view'>
@@ -120,4 +104,6 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(Obligations, [UserGroupType.SECURITY_USER])
+export default AccessControl(Obligations, [
+    UserGroupType.SECURITY_USER,
+])
