@@ -299,7 +299,7 @@ const FeatureConfigurations = (): JSX.Element => {
                                         />
                                     </td>
                                     <td className='align-middle'>
-                                        {t("Regex for domains to skip URL check in Release's Source Download URL")}
+                                        {t('Regex for domains to skip URL check in Release Source Download URL')}
                                     </td>
                                 </tr>
                             </tbody>

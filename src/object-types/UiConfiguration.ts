@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import UIConfigKeys from './enums/UIConfigKeys'
+import { UIConfigKeys } from './enums/UIConfigKeys'
 
 type UiConfiguration = {
     [key in UIConfigKeys]: string
