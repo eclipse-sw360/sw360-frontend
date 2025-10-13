@@ -10,16 +10,15 @@
 // License-Filename: LICENSE
 
 'use client'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect } from 'react'
+import { Button, Form, Modal } from 'react-bootstrap'
+import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Button, Form, Modal } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
-
-import { useEffect, type JSX } from 'react'
 
 interface Props {
     clientId: string
@@ -35,10 +34,12 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const sendOAuthClientRequest = async (clientId: string, token: string): Promise<Response> => {
-        return fetch(`${SW360_API_URL}/authorization/client-management/${clientId}`, {
+        return await fetch(`${SW360_API_URL}/authorization/client-management/${clientId}`, {
             method: 'DELETE',
             headers: {
                 Accept: 'application/*',
@@ -86,10 +87,16 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
+                    <AiOutlineQuestionCircle
+                        style={{
+                            marginBottom: '5px',
+                        }}
+                    />
                     {t('Delete Client')} ?
                 </Modal.Title>
             </Modal.Header>

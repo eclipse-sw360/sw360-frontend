@@ -11,14 +11,14 @@
 
 'use client'
 
-import { HttpStatus, OAuthClient } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { SW360_API_URL } from '@/utils/env'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import React, { ReactNode, useEffect, useState } from 'react'
+import { HttpStatus, OAuthClient } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { SW360_API_URL } from '@/utils/env'
 import AddClientDialog from './AddClientDialog'
 import DeleteClientDialog from './DeleteClientDialog'
 import OAuthClientTable from './OAuthClientTable'
@@ -38,7 +38,9 @@ function OAuthClientsList(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const addClient = () => {
         setSelectedClient(null)
@@ -71,7 +73,7 @@ function OAuthClientsList(): ReactNode {
     }
 
     const sendOAuthClientRequest = async (token: string): Promise<Response> => {
-        return fetch(`${SW360_API_URL}/authorization/client-management`, {
+        return await fetch(`${SW360_API_URL}/authorization/client-management`, {
             method: 'GET',
             headers: {
                 Accept: 'application/*',
@@ -113,7 +115,9 @@ function OAuthClientsList(): ReactNode {
 
     useEffect(() => {
         fetchClientsData()
-    }, [refreshTrigger])
+    }, [
+        refreshTrigger,
+    ])
 
     return (
         <div className='container page-content'>

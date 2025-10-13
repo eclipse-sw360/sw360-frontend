@@ -19,6 +19,7 @@ import GlobalMessages from './GlobalMessages'
 import Gravatar from './Gravatar/Gravatar'
 import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
+import Logo from './Logo/Logo'
 import Navbar from './Navbar/Navbar'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import PageSpinner from './PageSpinner/PageSpinner'
@@ -66,6 +67,7 @@ export {
     Gravatar,
     LanguageSwitcher,
     LocaleSwitcher,
+    Logo,
     Navbar,
     PaddedCell,
     PageButtonHeader,

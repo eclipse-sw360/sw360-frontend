@@ -10,14 +10,7 @@
 'use client'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import {
-    ActionType,
-    ComponentObligationData,
-    LicenseObligationData,
-    OrganizationObligationData,
-    ProjectObligationData,
-    UserGroupType,
-} from '@/object-types'
+import { ActionType, ObligationEntry, UserGroupType } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -30,12 +23,8 @@ import ReleaseView from './ReleaseView'
 interface Props {
     projectId: string
     actionType: ActionType
-    payload?: LicenseObligationData | ComponentObligationData | ProjectObligationData | OrganizationObligationData
-    setPayload?: Dispatch<
-        SetStateAction<
-            LicenseObligationData | ComponentObligationData | ProjectObligationData | OrganizationObligationData
-        >
-    >
+    payload?: ObligationEntry
+    setPayload?: Dispatch<SetStateAction<ObligationEntry>>
 }
 
 function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX.Element {

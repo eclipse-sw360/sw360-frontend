@@ -9,31 +9,19 @@
 
 'use client'
 
-import {
-    ActionType,
-    ComponentObligationData,
-    LicenseObligationData,
-    OrganizationObligationData,
-    ProjectObligationData,
-} from '@/object-types'
+import { ActionType, ObligationEntry, ObligationType } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useEffect, type JSX } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
-import ComponentObligation from './ComponentObligation'
 import LicenseObligation from './LicenseObligation'
-import OrganizationObligation from './OrganizationObligation'
-import ProjectObligation from './ProjectObligation'
+import ObligationTab from './ObligationTab'
 
 interface Props {
     projectId: string
     actionType: ActionType
-    payload?: LicenseObligationData | ComponentObligationData | ProjectObligationData | OrganizationObligationData
-    setPayload?: Dispatch<
-        SetStateAction<
-            LicenseObligationData | ComponentObligationData | ProjectObligationData | OrganizationObligationData
-        >
-    >
+    payload?: ObligationEntry
+    setPayload?: Dispatch<SetStateAction<ObligationEntry>>
     selectedProjectId: string | null
 }
 
@@ -49,7 +37,7 @@ export default function ObligationView({
 
     useEffect(() => {
         if (status === 'unauthenticated') {
-            signOut()
+            void signOut()
         }
     }, [status])
 
@@ -76,33 +64,36 @@ export default function ObligationView({
                 eventKey='component-obligation'
                 title={t('Component Obligation')}
             >
-                <ComponentObligation
+                <ObligationTab
                     projectId={projectId}
                     actionType={actionType}
                     payload={payload}
                     setPayload={setPayload}
+                    obligationType={ObligationType.COMPONENT_OBLIGATION}
                 />
             </Tab>
             <Tab
                 eventKey='project-obligation'
                 title={t('Project Obligation')}
             >
-                <ProjectObligation
+                <ObligationTab
                     projectId={projectId}
                     actionType={actionType}
                     payload={payload}
                     setPayload={setPayload}
+                    obligationType={ObligationType.PROJECT_OBLIGATION}
                 />
             </Tab>
             <Tab
                 eventKey='organisation-obligation'
                 title={t('Organisation Obligation')}
             >
-                <OrganizationObligation
+                <ObligationTab
                     projectId={projectId}
                     actionType={actionType}
                     payload={payload}
                     setPayload={setPayload}
+                    obligationType={ObligationType.ORGANISATION_OBLIGATION}
                 />
             </Tab>
         </Tabs>

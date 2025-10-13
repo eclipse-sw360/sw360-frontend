@@ -10,7 +10,7 @@
 'use client'
 
 import { Table, _ } from '@/components/sw360'
-import { LicenseObligationRelease, LicenseObligationsList } from '@/object-types'
+import { ObligationRelease, ObligationResponse } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 import { signOut, useSession } from 'next-auth/react'
@@ -23,7 +23,7 @@ import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-function ExpandableList({ previewString, releases }: { previewString: string; releases: LicenseObligationRelease[] }) {
+function ExpandableList({ previewString, releases }: { previewString: string; releases: ObligationRelease[] }) {
     const [isExpanded, setExpanded] = useState(false)
 
     return (
@@ -33,7 +33,7 @@ function ExpandableList({ previewString, releases }: { previewString: string; re
                     <span>
                         <BsCaretDownFill onClick={() => setExpanded(false)} />{' '}
                     </span>
-                    {releases.map((release: LicenseObligationRelease, index: number) => {
+                    {releases.map((release: ObligationRelease, index: number) => {
                         return (
                             <li
                                 key={release.id}
@@ -179,7 +179,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
         {
             id: 'licenseObligation.releases',
             name: t('Releases'),
-            formatter: (releases: LicenseObligationRelease[]) => {
+            formatter: (releases: ObligationRelease[]) => {
                 const previewString = releases
                     .map((r) => `${r.name} ${r.version}`)
                     .join(', ')
@@ -219,7 +219,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
         if (CommonUtils.isNullOrUndefined(session)) return
         return {
             url: `${SW360_API_URL}/resource/api/projects/${projectId}/licenseObligations`,
-            then: (data: LicenseObligationsList) => {
+            then: (data: ObligationResponse) => {
                 const tableRows = []
                 for (const [key, val] of Object.entries(data.obligations)) {
                     const row = []
@@ -242,7 +242,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                 }
                 return tableRows
             },
-            total: (data: LicenseObligationsList) => data.page?.totalElements ?? 0,
+            total: (data: ObligationResponse) => data.page?.totalElements ?? 0,
             headers: { Authorization: `${session.user.access_token}` },
         }
     }

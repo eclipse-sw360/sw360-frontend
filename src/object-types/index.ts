@@ -15,20 +15,23 @@ import AdministrationDataType from './AdministrationDataType'
 import Attachment from './Attachment'
 import { AttachmentUsage, AttachmentUsages, SaveUsagesPayload } from './AttachmentUsages'
 import AuthToken from './AuthToken'
-import COTSDetails from './COTSDetails'
-import CVEReference from './CVEReference'
 import Changelogs from './Changelogs'
 import ClearingInformation from './ClearingInformation'
 import ClearingRequest from './ClearingRequest'
 import ClearingRequestComments from './ClearingRequestComments'
 import ClearingRequestDetails from './ClearingRequestDetails'
+import COTSDetails from './COTSDetails'
 import Component from './Component'
 import ComponentPayload from './ComponentPayLoad'
 import Configuration from './Configuration'
 import CreateClearingRequestPayload from './CreateClearingRequestPayload'
-import ECC from './ECC'
+import CVEReference from './CVEReference'
+import ImportSBOMMetadata from './cyclonedx/ImportSBOMMetadata'
+import ImportSummary from './cyclonedx/ImportSummary'
+import ECCInterface from './ECC'
 import ECCInformation from './ECCInformation'
 import Embedded from './Embedded'
+import ErrorDetails from './error'
 import FossologyConfig from './FossologyConfig'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
@@ -53,15 +56,7 @@ import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import {
-    ComponentObligationData,
-    LicenseObligationData,
-    LicenseObligationRelease,
-    LicenseObligationsList,
-    Obligation,
-    OrganizationObligationData,
-    ProjectObligationData,
-} from './Obligation'
+import { Obligation, ObligationData, ObligationEntry, ObligationRelease, ObligationResponse } from './Obligation'
 import Package from './Package'
 import { ColumnMeta, FilterOption, NestedRows, PageableQueryParam, PaginationMeta, TypedEntity } from './Pageable'
 import Preferences from './Preferences'
@@ -81,19 +76,6 @@ import SearchDuplicatesResponse from './SearchDuplicateResponse'
 import SearchResult from './SearchResult'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
-import ToastData from './ToastData'
-import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
-import { User, UserPayload } from './User'
-import UserCredentialInfo from './UserCredentialInfo'
-import Vendor from './Vendor'
-import VendorAdvisory from './VendorAdvisory'
-import VendorType from './VendorType'
-import VerificationStateInfo from './VerificationStateInfo'
-import Vulnerability from './Vulnerability'
-import { ProjectVulnerabilityTrackingStatus, VulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
-import ImportSBOMMetadata from './cyclonedx/ImportSBOMMetadata'
-import ImportSummary from './cyclonedx/ImportSummary'
-import ErrorDetails from './error'
 import Annotations from './spdx/Annotations'
 import CheckSum from './spdx/CheckSum'
 import Creator from './spdx/Creator'
@@ -107,10 +89,19 @@ import PackageInformation from './spdx/PackageInformation'
 import PackageVerificationCode from './spdx/PackageVerificationCode'
 import RelationshipsBetweenSPDXElements from './spdx/RelationshipsBetweenSPDXElements'
 import RequestedAction from './spdx/RequestedAction'
-import SPDX from './spdx/SPDX'
-import SPDXDocument from './spdx/SPDXDocument'
 import SnippetInformation from './spdx/SnippetInformation'
 import SnippetRange from './spdx/SnippetRange'
+import SPDX from './spdx/SPDX'
+import SPDXDocument from './spdx/SPDXDocument'
+import ToastData from './ToastData'
+import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
+import { User, UserPayload } from './User'
+import UserCredentialInfo from './UserCredentialInfo'
+import Vendor from './Vendor'
+import VendorAdvisory from './VendorAdvisory'
+import VerificationStateInfo from './VerificationStateInfo'
+import Vulnerability from './Vulnerability'
+import { ProjectVulnerabilityTrackingStatus, VulnerabilityTrackingStatus } from './VulnerabilityTrackingStatus'
 
 export type {
     AccessToken,
@@ -129,7 +120,6 @@ export type {
     ClearingRequestDetails,
     ColumnMeta,
     Component,
-    ComponentObligationData,
     ComponentPayload,
     Configuration,
     COTSDetails,
@@ -138,7 +128,7 @@ export type {
     CVEReference,
     DocumentCreationInformation,
     DocumentState,
-    ECC,
+    ECCInterface,
     ECCInformation,
     Embedded,
     ErrorDetails,
@@ -153,9 +143,6 @@ export type {
     InputKeyValue,
     LicenseClearing,
     LicenseDetail,
-    LicenseObligationData,
-    LicenseObligationRelease,
-    LicenseObligationsList,
     LicensePayload,
     LicenseType,
     LinkedPackage,
@@ -177,7 +164,10 @@ export type {
     NodeData,
     OAuthClient,
     Obligation,
-    OrganizationObligationData,
+    ObligationData,
+    ObligationEntry,
+    ObligationRelease,
+    ObligationResponse,
     OtherLicensingInformationDetected,
     Package,
     PackageInformation,
@@ -187,7 +177,6 @@ export type {
     Project,
     ProjectData,
     ProjectLinkedRelease,
-    ProjectObligationData,
     ProjectPayload,
     ProjectVulnerability,
     ProjectVulnerabilityTrackingStatus,
@@ -219,7 +208,6 @@ export type {
     UserPayload,
     Vendor,
     VendorAdvisory,
-    VendorType,
     VerificationStateInfo,
     Vulnerability,
     VulnerabilityRatingAndActionPayload,
@@ -241,6 +229,7 @@ import ClearingRequestStates from './enums/ClearingRequestStates'
 import ConfigKeys from './enums/ConfigKeys'
 import DocumentTypes from './enums/DocumentTypes'
 import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
+import ObligationType from './enums/ObligationType'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
@@ -258,6 +247,7 @@ export {
     HttpStatus,
     LicenseTabIds,
     MergeOrSplitActionType,
+    ObligationType,
     ProjectVulnerabilityTabType,
     ReleaseClearingStateMapping,
     ReleaseTabIds,

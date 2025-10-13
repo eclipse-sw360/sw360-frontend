@@ -9,7 +9,7 @@
 
 'use client'
 
-import { LicenseObligationRelease } from '@/object-types'
+import { ObligationRelease } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { JSX, useEffect, useState } from 'react'
@@ -81,8 +81,8 @@ export function ExpandableList({
     commonReleases,
 }: {
     previewString: string
-    releases: LicenseObligationRelease[]
-    commonReleases: LicenseObligationRelease[]
+    releases: ObligationRelease[]
+    commonReleases: ObligationRelease[]
 }): JSX.Element {
     const [isExpanded, setExpanded] = useState(false)
     const { status } = useSession()
@@ -99,9 +99,9 @@ export function ExpandableList({
                     <span>
                         <BsCaretDownFill onClick={() => setExpanded(false)} />{' '}
                     </span>
-                    {releases.map((release: LicenseObligationRelease, index: number) => {
+                    {releases.map((release: ObligationRelease, index: number) => {
                         const isCommon = commonReleases.some(
-                            (commonRelease: LicenseObligationRelease) =>
+                            (commonRelease: ObligationRelease) =>
                                 commonRelease.name === release.name && commonRelease.version === release.version,
                         )
                         return (

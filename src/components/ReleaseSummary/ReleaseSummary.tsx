@@ -11,13 +11,12 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useState, type JSX } from 'react'
-import { GiCancel } from 'react-icons/gi'
-
-import { ActionType, Release, ReleaseDetail, Vendor } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import React, { type JSX, useCallback, useEffect, useState } from 'react'
+import { GiCancel } from 'react-icons/gi'
+import { ActionType, Release, ReleaseDetail, Vendor } from '@/object-types'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
@@ -26,14 +25,38 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: { [k: string]: string }
-    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses: { [k: string]: string }
-    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributors: { [k: string]: string }
-    setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    moderators: { [k: string]: string }
-    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    mainLicenses: {
+        [k: string]: string
+    }
+    setMainLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    otherLicenses: {
+        [k: string]: string
+    }
+    setOtherLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    contributors: {
+        [k: string]: string
+    }
+    setContributors: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    moderators: {
+        [k: string]: string
+    }
+    setModerators: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
     releaseDetail?: ReleaseDetail
 }
 
@@ -71,7 +94,9 @@ const ReleaseSummary = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const setMainLicensesToPayload = (mainLicenses: { [k: string]: string }) => {
         setMainLicenses(mainLicenses)
@@ -109,26 +134,18 @@ const ReleaseSummary = ({
     }
 
     const setVendorId = (vendorResponse: Vendor) => {
-        const vendorData: Vendor = {
-            id: vendorResponse.id,
-            fullName: vendorResponse.fullName,
-        }
-        setVendor(vendorData)
+        setVendor(vendorResponse)
         setReleasePayload({
             ...releasePayload,
-            vendorId: vendorResponse.id,
+            vendorId: vendorResponse._links?.self.href.split('/').at(-1),
         })
     }
 
     const handleClearVendor = () => {
-        const vendorData: Vendor = {
-            id: '',
-            fullName: '',
-        }
-        setVendor(vendorData)
+        setVendor({})
         setReleasePayload({
             ...releasePayload,
-            vendorId: '',
+            vendorId: undefined,
         })
     }
 
@@ -162,7 +179,9 @@ const ReleaseSummary = ({
         <>
             <div
                 className='col'
-                style={{ padding: '0px 12px' }}
+                style={{
+                    padding: '0px 12px',
+                }}
             >
                 <div className='row mb-4'>
                     <div className='section-header'>
@@ -190,10 +209,12 @@ const ReleaseSummary = ({
                                     onClick={handleClickSearchVendor}
                                     value={vendor.fullName ?? ''}
                                 />
+
                                 <VendorDialog
                                     show={dialogOpenVendor}
                                     setShow={setDialogOpenVendor}
-                                    selectVendor={setVendorId}
+                                    setVendor={setVendorId}
+                                    vendor={vendor}
                                 />
                                 <div
                                     className='form-text'
@@ -211,7 +232,9 @@ const ReleaseSummary = ({
                                     {t('Name')}{' '}
                                     <span
                                         className='text-red'
-                                        style={{ color: '#F7941E' }}
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
                                     >
                                         *
                                     </span>
@@ -242,7 +265,9 @@ const ReleaseSummary = ({
                                     {t('Version')}{' '}
                                     <span
                                         className='text-red'
-                                        style={{ color: '#F7941E' }}
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
                                     >
                                         *
                                     </span>

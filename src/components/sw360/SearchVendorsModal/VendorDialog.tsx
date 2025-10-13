@@ -10,80 +10,191 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useRef, useState, type JSX } from 'react'
-import { Button, Modal } from 'react-bootstrap'
-
-import { Embedded, HttpStatus, Vendor, VendorType } from '@/object-types'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import React, { Dispatch, type JSX, SetStateAction, useCallback, useMemo, useRef, useState } from 'react'
+import { Button, Form, Modal, Spinner } from 'react-bootstrap'
+import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
 import AddVendorDialog from './AddVendor'
-import SelectTableVendor from './SelectTableVendor'
 
 interface Props {
     show: boolean
-    setShow: React.Dispatch<React.SetStateAction<boolean>>
-    selectVendor: VendorType
+    setShow: Dispatch<SetStateAction<boolean>>
+    setVendor: (vend: Vendor) => void
+    vendor: Vendor
 }
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
-type RowData = (string | Vendor)[]
-
-const VendorDialog = ({ show, setShow, selectVendor }: Props): JSX.Element => {
+const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [showAddVendor, setShowAddVendor] = useState(false)
-    const txtSearch = useRef<HTMLInputElement | null>(null)
-    const [vendor, setVendor] = useState<Vendor | undefined>(undefined)
-    const [vendors, setVendors] = useState<RowData[]>([])
+    const [searchText, setSearchText] = useState('')
     const handleCloseDialog = () => {
         setShow(!show)
+        setSelectedVendor(vendor)
     }
+    const session = useSession()
+    const [selectedVendor, setSelectedVendor] = useState<Vendor>(vendor)
+
+    const columns = useMemo<ColumnDef<Vendor>[]>(
+        () => [
+            {
+                id: 'select',
+                cell: ({ row }) => (
+                    <Form.Check
+                        type='radio'
+                        checked={
+                            selectedVendor !== null &&
+                            row.original._links?.self.href.split('/').at(-1) ===
+                                selectedVendor._links?.self.href.split('/').at(-1)
+                        }
+                        onChange={() => setSelectedVendor(row.original)}
+                    ></Form.Check>
+                ),
+                meta: {
+                    width: '7%',
+                },
+            },
+            {
+                id: 'fullName',
+                accessorKey: 'fullName',
+                header: t('Full Name'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '43%',
+                },
+            },
+            {
+                id: 'shortName',
+                accessorKey: 'shortName',
+                header: t('Short Name'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'url',
+                header: t('URL'),
+                accessorKey: 'url',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '25%',
+                },
+            },
+        ],
+        [
+            t,
+            selectedVendor,
+        ],
+    )
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [vendorData, setVendorData] = useState<Vendor[]>(() => [])
+    const memoizedData = useMemo(
+        () => vendorData,
+        [
+            vendorData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
 
     const searchVendor = async () => {
-        if (txtSearch.current === null) return
         try {
-            // TODO: The search vendors endpoint does not exist. Temporarily search all vendors
-            const queryUrl = CommonUtils.createUrlWithParams('vendors', {})
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return signOut()
+            setShowProcessing(true)
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `vendors`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                              }
+                            : {}),
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token)
+            if (response.status !== HttpStatus.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
             }
-            const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                MessageService.error(t('Session has expired'))
+
+            const data = (await response.json()) as EmbeddedVendors
+            setPaginationMeta(data.page)
+            setVendorData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:vendors'])
+                    ? []
+                    : data['_embedded']['sw360:vendors'],
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
                 return
-            } else if (response.status !== HttpStatus.OK) {
-                return
             }
-            const vendors = (await response.json()) as EmbeddedVendors
-            if (
-                !CommonUtils.isNullOrUndefined(vendors['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(vendors['_embedded']['sw360:vendors'])
-            ) {
-                const data = vendors['_embedded']['sw360:vendors'].map((item: Vendor) => [
-                    item,
-                    item.fullName ?? '',
-                    item.shortName ?? '',
-                    item.url ?? '',
-                    '',
-                ])
-                setVendors(data)
-            }
-        } catch (e) {
-            console.error(e)
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
         }
     }
 
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
+
     const handleClickSelectVendor = () => {
-        if (vendor === undefined) return
-        selectVendor(vendor)
+        setVendor(selectedVendor)
         setShow(!show)
     }
-
-    const getVendor: VendorType = useCallback((Vendor: Vendor) => setVendor(Vendor), [])
 
     return (
         <>
@@ -110,7 +221,10 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props): JSX.Element => {
                                     className='form-control'
                                     placeholder={t('Enter search text')}
                                     aria-describedby='Search Vendor'
-                                    ref={txtSearch}
+                                    value={searchText}
+                                    onChange={(event) => {
+                                        setSearchText(event.target.value)
+                                    }}
                                 />
                             </div>
                             <div className='col-lg-4'>
@@ -124,16 +238,34 @@ const VendorDialog = ({ show, setShow, selectVendor }: Props): JSX.Element => {
                                 <button
                                     type='button'
                                     className='btn btn-secondary me-2'
+                                    onClick={() => setSearchText('')}
                                 >
                                     {t('Reset')}
                                 </button>
                             </div>
                         </div>
-                        <div className='row mt-3'>
-                            <SelectTableVendor
-                                vendors={vendors}
-                                setVendor={getVendor}
-                            />
+                        <div className='mb-3'>
+                            {pageableQueryParam && table && paginationMeta ? (
+                                <>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing}
+                                    />
+                                    <TableFooter
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        paginationMeta={paginationMeta}
+                                    />
+                                </>
+                            ) : (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </Modal.Body>

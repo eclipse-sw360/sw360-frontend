@@ -9,15 +9,15 @@
 
 'use client'
 
-import { HttpStatus, SaveUsagesPayload } from '@/object-types'
-import DownloadService from '@/services/download.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { notFound, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useSearchParams } from 'next/navigation'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { HttpStatus, SaveUsagesPayload } from '@/object-types'
+import DownloadService from '@/services/download.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 export default function DownloadLicenseInfoModal({
     show,
@@ -45,12 +45,14 @@ export default function DownloadLicenseInfoModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
             const searchParams = Object.fromEntries(params)
-            if (Object.prototype.hasOwnProperty.call(searchParams, 'withSubProjects') === false) {
+            if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                 return
             }
             const session = await getSession()
@@ -90,7 +92,10 @@ export default function DownloadLicenseInfoModal({
                 scrollable
             >
                 <Modal.Header
-                    style={{ backgroundColor: '#eef2fa', color: '#2e5aac' }}
+                    style={{
+                        backgroundColor: '#eef2fa',
+                        color: '#2e5aac',
+                    }}
                     closeButton
                 >
                     <Modal.Title id='generate-license-info-modal'>

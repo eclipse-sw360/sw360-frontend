@@ -9,6 +9,13 @@
 
 'use client'
 
+import Link from 'next/link'
+import { notFound, useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _, TreeTable } from 'next-sw360'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Button, Form, Nav, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     AttachmentUsage,
@@ -23,13 +30,6 @@ import {
     UserGroupType,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { TreeTable, _ } from 'next-sw360'
-import Link from 'next/link'
-import { notFound, useSearchParams } from 'next/navigation'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Button, Form, Nav, Spinner, Tab } from 'react-bootstrap'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 
@@ -83,7 +83,11 @@ const setExpandedFieldsOfNewData = (prevState: NodeData[], newState: NodeData[])
     }
 }
 
-function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): ReactNode {
+function GenerateLicenseInfo({
+    projectId,
+}: Readonly<{
+    projectId: string
+}>): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [project, setProject] = useState<Project>()
@@ -109,7 +113,9 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const formatReleaseAndAttachments = (projectPath: string, r: Release, level: number): NodeData | undefined => {
         if (!r.attachments) {
@@ -153,14 +159,20 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
                                 if (saveUsagesPayload.selected.indexOf(val) === -1) {
                                     setSaveUsagesPayload({
                                         ...saveUsagesPayload,
-                                        selected: [...saveUsagesPayload.selected, val],
+                                        selected: [
+                                            ...saveUsagesPayload.selected,
+                                            val,
+                                        ],
                                         deselected: saveUsagesPayload.deselected.filter((item) => item !== val),
                                     })
                                 } else {
                                     setSaveUsagesPayload({
                                         ...saveUsagesPayload,
                                         selected: saveUsagesPayload.selected.filter((item) => item !== val),
-                                        deselected: [...saveUsagesPayload.deselected, val],
+                                        deselected: [
+                                            ...saveUsagesPayload.deselected,
+                                            val,
+                                        ],
                                     })
                                 }
                             }}
@@ -276,7 +288,7 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
         ;(async () => {
             try {
                 const searchParams = Object.fromEntries(params)
-                setWithSubProjects(Object.prototype.hasOwnProperty.call(searchParams, 'withSubProjects'))
+                setWithSubProjects(Object.hasOwn(searchParams, 'withSubProjects'))
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const requests = [
@@ -360,7 +372,10 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
             }
         })()
         return () => controller.abort()
-    }, [projectId, params])
+    }, [
+        projectId,
+        params,
+    ])
 
     useEffect(() => {
         if (attachmentUsagesAndLinkedProjects === undefined) return
@@ -474,7 +489,11 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
             if (prevState !== undefined) setExpandedFieldsOfNewData(prevState, tableData)
             return tableData
         })
-    }, [attachmentUsagesAndLinkedProjects, saveUsagesPayload, key])
+    }, [
+        attachmentUsagesAndLinkedProjects,
+        saveUsagesPayload,
+        key,
+    ])
 
     const columns = [
         {
@@ -588,7 +607,11 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
                                     </div>
                                     <div
                                         className='subscriptionBox my-2'
-                                        style={{ maxWidth: '98vw', textAlign: 'left', fontSize: '15px' }}
+                                        style={{
+                                            maxWidth: '98vw',
+                                            textAlign: 'left',
+                                            fontSize: '15px',
+                                        }}
                                     >
                                         {t(
                                             'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
@@ -629,4 +652,6 @@ function GenerateLicenseInfo({ projectId }: Readonly<{ projectId: string }>): Re
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(GenerateLicenseInfo, [UserGroupType.SECURITY_USER])
+export default AccessControl(GenerateLicenseInfo, [
+    UserGroupType.SECURITY_USER,
+])

@@ -50,3 +50,5 @@ output
 /cypress/screenshots
 /cypress/downloads
 dist
+public
+uploads
