@@ -9,18 +9,17 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ClearingRequest, Embedded, HttpStatus, ModerationRequest, UserGroupType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch } from 'next-sw360'
-import { notFound } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
-import ClosedClearingRequest from './ClosedClearingRequest'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ClearingRequest, Embedded, HttpStatus, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import ClearingRequestComponent from './ClearingRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
-import OpenClearingRequest from './OpenClearingRequest'
 import OpenModerationRequest from './OpenModerationRequest'
 
 type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -38,7 +37,9 @@ function Requests(): ReactNode | undefined {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const advancedSearch = [
         {
@@ -153,7 +154,10 @@ function Requests(): ReactNode | undefined {
                 const moderationRequestsPrmosies = ApiUtils.GET('moderationrequest', session.user.access_token, signal)
                 const clearingRequestsPromises = ApiUtils.GET('clearingrequests', session.user.access_token, signal)
 
-                const responses = await Promise.all([moderationRequestsPrmosies, clearingRequestsPromises])
+                const responses = await Promise.all([
+                    moderationRequestsPrmosies,
+                    clearingRequestsPromises,
+                ])
                 if (responses[0].status !== HttpStatus.OK || responses[1].status !== HttpStatus.OK) {
                     return notFound()
                 }
@@ -250,7 +254,9 @@ function Requests(): ReactNode | undefined {
                         <Col>
                             <Row
                                 className='mt-3'
-                                style={{ marginRight: '0px' }}
+                                style={{
+                                    marginRight: '0px',
+                                }}
                             >
                                 <Tab.Content>
                                     <Tab.Pane eventKey='openModerationrequests'>
@@ -275,7 +281,7 @@ function Requests(): ReactNode | undefined {
                                                 `(${openClearingRequestCount}/
                                             ${closedClearingRequestCount})`}
                                         </Row>
-                                        <OpenClearingRequest />
+                                        <ClearingRequestComponent requestType={RequestType.OPEN} />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='closedClearingRequests'>
                                         <Row className='text-truncate buttonheader-title '>
@@ -283,7 +289,7 @@ function Requests(): ReactNode | undefined {
                                                 `(${openClearingRequestCount}/
                                             ${closedClearingRequestCount})`}
                                         </Row>
-                                        <ClosedClearingRequest />
+                                        <ClearingRequestComponent requestType={RequestType.CLOSED} />
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Row>
@@ -296,4 +302,6 @@ function Requests(): ReactNode | undefined {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(Requests, [UserGroupType.SECURITY_USER])
+export default AccessControl(Requests, [
+    UserGroupType.SECURITY_USER,
+])

@@ -233,6 +233,7 @@ import ObligationType from './enums/ObligationType'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
+import RequestType from './enums/RequestType'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 
@@ -254,4 +255,5 @@ export {
     RequestDocumentTypes,
     UserGroupType,
     VulnerabilitiesVerificationState,
+    RequestType,
 }
