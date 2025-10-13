@@ -9,6 +9,7 @@
     "ignoreUnknown": false,
     "includes": [
       "src/**",
+      "messages/*.json",
       "Dockerfile",
       "tsconfig.json",
       "package.json"
