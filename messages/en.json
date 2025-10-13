@@ -1063,7 +1063,7 @@
     "Refresh Token Validity": "Refresh Token Validity",
     "Refresh Token Validity cannot be negative": "Refresh Token Validity cannot be negative",
     "Refresh Token Validity is required": "Refresh Token Validity is required",
-    "Regex for domains to skip URL check in Release's Source Download URL": "Regex for domains to skip URL check in Release's Source Download URL",
+    "Regex for domains to skip URL check in Release Source Download URL": "Regex for domains to skip URL check in Release Source Download URL",
     "Registration Folder Path": "Registration Folder Path",
     "Related": "Related",
     "Relation": "Relation",
@@ -1587,6 +1587,5 @@
     "use_license_info_from_file_description": "Use license info from files",
     "vector": "vector",
     "wrong_spdx_information": "If the wrong SPDX is entered, the information will not be registered correctly"
-  },
-  "showing page entries": "Showing {entryStart} to {entryEnd} of {totalElements} entries"
+  }
 }
