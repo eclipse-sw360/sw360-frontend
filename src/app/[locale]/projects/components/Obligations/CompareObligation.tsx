@@ -9,15 +9,14 @@
 
 'use client'
 
+import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-
-import { notFound } from 'next/navigation'
-import { useEffect, useRef, useState, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
-import { Table, _ } from '@/components/sw360'
+import { _, Table } from '@/components/sw360'
 import { HttpStatus, Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -36,7 +35,7 @@ export default function CompareObligation({
 }: {
     show: boolean
     setShow: (show: boolean) => void
-    setSelectedProjectId: (id: string | null) => void
+    setSelectedProjectId: Dispatch<SetStateAction<string | undefined>>
 }): JSX.Element {
     const t = useTranslations('default')
     const [projectData, setProjectData] = useState<(object | string)[][] | null>(null)
@@ -51,10 +50,15 @@ export default function CompareObligation({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const scrollToTop = () => {
-        ;(topRef.current as HTMLDivElement | null)?.scrollTo({ top: 0, left: 0 })
+        ;(topRef.current as HTMLDivElement | null)?.scrollTo({
+            top: 0,
+            left: 0,
+        })
     }
 
     const columns = [
@@ -99,14 +103,18 @@ export default function CompareObligation({
                             {state === 'ACTIVE' ? (
                                 <span
                                     className='badge bg-success capsule-left'
-                                    style={{ fontSize: '0.8rem' }}
+                                    style={{
+                                        fontSize: '0.8rem',
+                                    }}
                                 >
                                     {'PS'}
                                 </span>
                             ) : (
                                 <span
                                     className='badge bg-secondary capsule-left'
-                                    style={{ fontSize: '0.8rem' }}
+                                    style={{
+                                        fontSize: '0.8rem',
+                                    }}
                                 >
                                     {'PS'}
                                 </span>
@@ -121,21 +129,27 @@ export default function CompareObligation({
                             {clearingState === 'OPEN' ? (
                                 <span
                                     className='badge bg-danger capsule-right'
-                                    style={{ fontSize: '0.8rem' }}
+                                    style={{
+                                        fontSize: '0.8rem',
+                                    }}
                                 >
                                     {'CS'}
                                 </span>
                             ) : clearingState === 'IN_PROGRESS' ? (
                                 <span
                                     className='badge bg-warning capsule-right'
-                                    style={{ fontSize: '0.8rem' }}
+                                    style={{
+                                        fontSize: '0.8rem',
+                                    }}
                                 >
                                     {'CS'}
                                 </span>
                             ) : (
                                 <span
                                     className='badge bg-success capsule-right'
-                                    style={{ fontSize: '0.8rem' }}
+                                    style={{
+                                        fontSize: '0.8rem',
+                                    }}
                                 >
                                     {'CS'}
                                 </span>
@@ -180,7 +194,10 @@ export default function CompareObligation({
                           elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
                           elem.name,
                           elem.version ?? '',
-                          { state: elem.state ?? '', clearingState: elem.clearingState ?? '' },
+                          {
+                              state: elem.state ?? '',
+                              clearingState: elem.clearingState ?? '',
+                          },
                           elem.projectResponsible ?? '',
                           elem.description ?? '',
                       ]
@@ -198,7 +215,10 @@ export default function CompareObligation({
             m.delete(projectId)
         } else {
             m.clear()
-            m.set(projectId, { enableSvm: true, projectRelationship: 'CONTAINED' })
+            m.set(projectId, {
+                enableSvm: true,
+                projectRelationship: 'CONTAINED',
+            })
         }
         setCompareProject(m)
     }
@@ -261,7 +281,9 @@ export default function CompareObligation({
                                     <Button
                                         variant='secondary'
                                         onClick={() => {
-                                            void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })
+                                            void handleSearch({
+                                                searchValue: searchValueRef.current?.value ?? '',
+                                            })
                                         }}
                                     >
                                         {t('Search')}
@@ -296,7 +318,10 @@ export default function CompareObligation({
                         variant='primary'
                         onClick={() => {
                             scrollToTop()
-                            setAlert({ variant: 'success', message: <>{t('Comparing')}</> })
+                            setAlert({
+                                variant: 'success',
+                                message: <>{t('Comparing')}</>,
+                            })
                             setSelectedProjectId(pid)
                         }}
                         disabled={compareProject.size === 0}

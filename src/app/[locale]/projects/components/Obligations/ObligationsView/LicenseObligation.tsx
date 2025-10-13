@@ -9,22 +9,29 @@
 
 'use client'
 
-import { Table, _ } from '@/components/sw360'
+import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { _, PaddedCell, PageSizeSelector, SW360Table, Table, TableFooter } from '@/components/sw360'
 import {
     ActionType,
     ErrorDetails,
     HttpStatus,
+    NestedRows,
+    ObligationData,
     ObligationEntry,
     ObligationRelease,
     ObligationResponse,
+    PageableQueryParam,
+    PaginationMeta,
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
+import CompareObligation from '../CompareObligation'
 import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
 import UpdateCommentModal from './UpdateCommentModal'
@@ -42,457 +49,608 @@ interface Props {
     actionType: ActionType
     payload?: ObligationEntry
     setPayload?: Dispatch<SetStateAction<ObligationEntry>>
-    selectedProjectId: string | null
 }
 
-export default function LicenseObligation({
-    projectId,
-    actionType,
-    payload,
-    setPayload,
-    selectedProjectId,
-}: Props): JSX.Element {
+export default function LicenseObligation({ projectId, actionType, payload, setPayload }: Props): JSX.Element {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<(object | string | string[])[][] | null>(null)
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
-    const [projectLicenseOligations, setProjectLicenseObligations] = useState<null | ObligationResponse>(null)
-    const [selectedProjectLicenseOligations, setSelectedProjectLicenseObligations] =
-        useState<null | ObligationResponse>(null)
     const [showLicenseDbObligationsModal, setShowLicenseDbObligationsModal] = useState(false)
+    const [showCompareObligationsModal, setShowCompareObligationsModal] = useState(false)
     const [refresh, setRefresh] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-
-    const columns =
-        actionType === ActionType.DETAIL
-            ? [
-                  {
-                      id: 'licenseObligation.expand',
-                      formatter: ({ id, infoText }: { id: string; infoText: string }) =>
-                          _(
-                              <ShowObligationTextOnExpand
-                                  id={id}
-                                  infoText={infoText}
-                                  colLength={columns.length}
-                              />,
-                          ),
-                      width: '4%',
-                  },
-                  {
-                      id: 'licenseObligation.licenseObligation',
-                      name: t('License Obligation'),
-                      formatter: ({ oblTitle }: { oblTitle: string }) =>
-                          _(
-                              <div className='text-center'>
-                                  <span>{oblTitle}</span>
-                              </div>,
-                          ),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.licenses',
-                      name: t('Licenses'),
-                      formatter: (licenseIds: string[]) =>
-                          _(
-                              <div className='text-center'>
-                                  {
-                                      <ul className='px-0'>
-                                          {licenseIds.map((licenseId: string, index: number) => {
-                                              return (
-                                                  <li
-                                                      key={licenseId}
-                                                      style={{ display: 'inline' }}
-                                                  >
-                                                      <Link
-                                                          href={`/licenses/${licenseId}`}
-                                                          className='text-link'
-                                                      >
-                                                          {licenseId}
-                                                      </Link>
-                                                      {index >= licenseIds.length - 1 ? '' : ', '}{' '}
-                                                  </li>
-                                              )
-                                          })}
-                                      </ul>
-                                  }
-                              </div>,
-                          ),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.releases',
-                      name: t('Releases'),
-                      formatter: ({ releases }: { releases: ObligationRelease[] }) =>
-                          _(
-                              <>
-                                  {Array.isArray(releases) && releases.length > 0 ? (
-                                      <ExpandableList
-                                          releases={releases}
-                                          previewString={releases
-                                              .map((r) => `${r.name} ${r.version}`)
-                                              .join(', ')
-                                              .substring(0, 10)}
-                                          commonReleases={[]}
-                                      />
-                                  ) : null}
-                              </>,
-                          ),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.status',
-                      name: t('Status'),
-                      formatter: ({ status }: { status: string }) => {
-                          return _(<>{Capitalize(status)}</>)
-                      },
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.type',
-                      name: t('Type'),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.id',
-                      name: t('Id'),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.comment',
-                      name: t('Comment'),
-                      formatter: ({ comment }: { comment: string }) => _(<p>{comment}</p>),
-                      sort: true,
-                  },
-              ]
-            : [
-                  {
-                      id: 'licenseObligation.expand',
-                      formatter: (param: { id?: string; infoText?: string }) => {
-                          const { id, infoText } = param
-                          return _(
-                              <>
-                                  {id !== undefined && infoText !== undefined ? (
-                                      <ShowObligationTextOnExpand
-                                          id={id}
-                                          infoText={infoText}
-                                          colLength={columns.length}
-                                      />
-                                  ) : (
-                                      ''
-                                  )}
-                              </>,
-                          )
-                      },
-                      width: '4%',
-                  },
-                  {
-                      id: 'licenseObligation.licenseObligation',
-                      name: t('License Obligation'),
-                      formatter: ({
-                          oblTitle,
-                          oblStatus,
-                          oblComment,
-                          match,
-                      }: {
-                          oblTitle: string
-                          oblStatus: string
-                          oblComment: string
-                          match: boolean
-                      }) =>
-                          _(
-                              <div className='text-center'>
-                                  <OverlayTrigger
-                                      overlay={
-                                          selectedProjectId === null ? (
-                                              <Tooltip>
-                                                  {`${t('Status')}: ${oblStatus}`}
-                                                  <br />
-                                                  {`${t('Comment')}: ${oblComment}`}
-                                              </Tooltip>
-                                          ) : (
-                                              <></>
-                                          )
-                                      }
-                                  >
-                                      <span style={{ color: match ? 'green' : 'inherit' }}>{oblTitle}</span>
-                                  </OverlayTrigger>
-                              </div>,
-                          ),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.licenses',
-                      name: t('Licenses'),
-                      formatter: (licenseIds: string[]) =>
-                          _(
-                              <>
-                                  {Array.isArray(licenseIds) && licenseIds.length > 0 ? (
-                                      <div className='text-center'>
-                                          <ul className='px-0'>
-                                              {licenseIds.map((licenseId: string, index: number) => (
-                                                  <li
-                                                      key={licenseId}
-                                                      style={{ display: 'inline' }}
-                                                  >
-                                                      <Link
-                                                          href={`/licenses/detail?id=${licenseId}`}
-                                                          className='text-link'
-                                                      >
-                                                          {licenseId}
-                                                      </Link>
-                                                      {index >= licenseIds.length - 1 ? '' : ', '}
-                                                  </li>
-                                              ))}
-                                          </ul>
-                                      </div>
-                                  ) : null}
-                              </>,
-                          ),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.releases',
-                      name: t('Releases'),
-                      formatter: ({
-                          releases,
-                          commonReleases,
-                      }: {
-                          releases: ObligationRelease[]
-                          commonReleases: ObligationRelease[]
-                      }) =>
-                          _(
-                              <>
-                                  {Array.isArray(releases) && releases.length > 0 ? (
-                                      <ExpandableList
-                                          releases={releases}
-                                          previewString={releases
-                                              .map((r) => `${r.name} ${r.version}`)
-                                              .join(', ')
-                                              .substring(0, 10)}
-                                          commonReleases={commonReleases}
-                                      />
-                                  ) : null}
-                              </>,
-                          ),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.status',
-                      name: t('Status'),
-                      formatter: ({ obligation, status }: { status: string; obligation: string }) => {
-                          return _(
-                              <select
-                                  className='form-select'
-                                  id='licenseObligation.edit.status'
-                                  name='status'
-                                  value={payload?.[obligation]?.status ?? (status && status === '' ? 'OPEN' : status)}
-                                  onChange={(e) => {
-                                      if (setPayload) {
-                                          let obligationValue = payload?.[obligation] ?? {}
-                                          obligationValue = {
-                                              ...obligationValue,
-                                              status: e.target.value,
-                                              obligationType: ObligationLevels.LICENSE_OBLIGATION,
-                                          }
-                                          setPayload((payload: ObligationEntry) => ({
-                                              ...payload,
-                                              [obligation]: obligationValue,
-                                          }))
-                                      }
-                                  }}
-                              >
-                                  <option value='OPEN'>{t('Open')}</option>
-                                  <option value='ACKNOWLEDGED_OR_FULFILLED'>{t('Acknowledged or Fulfilled')}</option>
-                                  <option value='WILL_BE_FULFILLED_BEFORE_RELEASE'>
-                                      {t('Will be fulfilled before release')}
-                                  </option>
-                                  <option value='NOT_APPLICABLE'>{t('Not Applicable')}</option>
-                                  <option value='DEFERRED_TO_PARENT_PROJECT'>{t('Deferred to parent project')}</option>
-                                  <option value='FULFILLED_AND_PARENT_MUST_ALSO_FULFILL'>
-                                      {t('Fulfilled and parent must also fulfill')}
-                                  </option>
-                                  <option value='ESCALATED'>{t('Escalated')}</option>
-                              </select>,
-                          )
-                      },
-                      width: '10%',
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.type',
-                      name: t('Type'),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.id',
-                      name: t('Id'),
-                      sort: true,
-                  },
-                  {
-                      id: 'licenseObligation.comment',
-                      name: t('Comment'),
-                      formatter: ({ obligation, comment }: { comment: string; obligation: string }) => {
-                          return _(
-                              <input
-                                  type='text'
-                                  value={payload?.[obligation]?.comment ?? comment}
-                                  onClick={() => {
-                                      setUpdateCommentModalData({
-                                          comment: payload?.[obligation]?.comment ?? comment,
-                                          obligation,
-                                      })
-                                  }}
-                                  className='form-control'
-                                  placeholder={t('Enter comments')}
-                                  readOnly
-                              />,
-                          )
-                      },
-                      sort: true,
-                  },
-              ]
+    const session = useSession()
 
     useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
+
+    const detailColumns = useMemo<
+        ColumnDef<
+            NestedRows<
+                [
+                    string,
+                    ObligationData,
+                ]
+            >
+        >[]
+    >(
+        () => [
+            {
+                id: 'expand',
+                cell: ({ row }) => {
+                    if (row.depth > 0) {
+                        return <p>{row.original.node[1].text ?? ''}</p>
+                    } else {
+                        return <PaddedCell row={row}></PaddedCell>
+                    }
+                },
+                meta: {
+                    width: '3%',
+                },
+            },
+            {
+                id: 'title',
+                header: t('License Obligation'),
+                cell: ({ row }) => (
+                    <div className='text-center'>
+                        <span>{row.original.node[0]}</span>
+                    </div>
+                ),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'licenses',
+                header: t('Licenses'),
+                cell: ({ row }) => {
+                    const licenseIds = row.original.node[1].licenseIds ?? []
+                    return (
+                        <div className='text-center'>
+                            {
+                                <ul className='px-0'>
+                                    {licenseIds.map((licenseId: string, index: number) => {
+                                        return (
+                                            <li
+                                                key={licenseId}
+                                                style={{
+                                                    display: 'inline',
+                                                }}
+                                            >
+                                                <Link
+                                                    href={`/licenses/${licenseId}`}
+                                                    className='text-link'
+                                                >
+                                                    {licenseId}
+                                                </Link>
+                                                {index >= licenseIds.length - 1 ? '' : ', '}{' '}
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            }
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '13%',
+                },
+            },
+            {
+                id: 'releases',
+                header: t('Releases'),
+                cell: ({ row }) => {
+                    const releases = row.original.node[1].releases ?? []
+                    return (
+                        <>
+                            {Array.isArray(releases) && releases.length > 0 ? (
+                                <ExpandableList
+                                    releases={releases}
+                                    previewString={releases
+                                        .map((r) => `${r.name} ${r.version}`)
+                                        .join(', ')
+                                        .substring(0, 10)}
+                                    commonReleases={[]}
+                                />
+                            ) : null}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '13%',
+                },
+            },
+            {
+                id: 'status',
+                header: t('Status'),
+                cell: ({ row }) => <>{Capitalize(row.original.node[1].status ?? '')}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Type'),
+                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'id',
+                header: t('Id'),
+                cell: ({ row }) => <>{row.original.node[1].id ?? ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'comment',
+                header: t('Comment'),
+                cell: ({ row }) => <>{row.original.node[1].comment ?? ''}</>,
+                meta: {
+                    width: '20%',
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
+
+    const [selectedProjectId, setSelectedProjectId] = useState<string>()
+    const [selectedProjectObligationData, setSelectedProjectObligationData] = useState<ObligationResponse>()
+
+    const editColumns = useMemo<
+        ColumnDef<
+            NestedRows<
+                [
+                    string,
+                    ObligationData,
+                ]
+            >
+        >[]
+    >(
+        () => [
+            {
+                id: 'expand',
+                cell: ({ row }) => {
+                    if (row.depth > 0) {
+                        return <p>{row.original.node[1].text ?? ''}</p>
+                    } else {
+                        return <PaddedCell row={row}></PaddedCell>
+                    }
+                },
+                meta: {
+                    width: '3%',
+                },
+            },
+            {
+                id: 'title',
+                header: t('License Obligation'),
+                cell: ({ row }) => {
+                    let releaseMatch = true,
+                        licensesMatch = true
+                    const obligationMatch =
+                        selectedProjectObligationData?.obligations?.[row.original.node[0]] !== undefined
+
+                    const licenseIds =
+                        selectedProjectObligationData?.obligations?.[row.original.node[0]]?.licenseIds ?? []
+                    for (const lic of row.original.node[1].licenseIds ?? []) {
+                        if (licenseIds.indexOf(lic) === -1) {
+                            licensesMatch = false
+                            break
+                        }
+                    }
+
+                    const releases = selectedProjectObligationData?.obligations?.[row.original.node[0]]?.releases ?? []
+                    for (const rel of row.original.node[1].releases ?? []) {
+                        if (releases.filter((r) => rel.id === r.id)) {
+                            releaseMatch = false
+                            break
+                        }
+                    }
+
+                    return (
+                        <div
+                            className={`text-center ${selectedProjectObligationData ? (obligationMatch && releaseMatch && licensesMatch ? 'green-cell' : 'red-cell') : ''}`}
+                        >
+                            <span>{row.original.node[0]}</span>
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'licenses',
+                header: t('Licenses'),
+                cell: ({ row }) => {
+                    const licenseIds = row.original.node[1].licenseIds ?? []
+                    return (
+                        <div className='text-center'>
+                            {
+                                <ul className='px-0'>
+                                    {licenseIds.map((licenseId: string, index: number) => {
+                                        return (
+                                            <li
+                                                key={licenseId}
+                                                style={{
+                                                    display: 'inline',
+                                                }}
+                                            >
+                                                <Link
+                                                    href={`/licenses/${licenseId}`}
+                                                    className='text-link'
+                                                >
+                                                    {licenseId}
+                                                </Link>
+                                                {index >= licenseIds.length - 1 ? '' : ', '}{' '}
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            }
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '13%',
+                },
+            },
+            {
+                id: 'releases',
+                header: t('Releases'),
+                cell: ({ row }) => {
+                    const releases = row.original.node[1].releases ?? []
+                    return (
+                        <>
+                            {Array.isArray(releases) && releases.length > 0 ? (
+                                <ExpandableList
+                                    releases={releases}
+                                    previewString={releases
+                                        .map((r) => `${r.name} ${r.version}`)
+                                        .join(', ')
+                                        .substring(0, 10)}
+                                    commonReleases={[]}
+                                />
+                            ) : null}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '13%',
+                },
+            },
+            {
+                id: 'status',
+                header: t('Status'),
+                cell: ({ row }) => (
+                    <select
+                        className='form-select'
+                        id='organizationObligation.edit.status'
+                        name='status'
+                        value={payload?.[row.original.node[0]]?.status ?? row.original.node[1].status ?? 'OPEN'}
+                        onChange={(e) => {
+                            if (setPayload) {
+                                let obligationValue = payload?.[row.original.node[0]] ?? {}
+                                obligationValue = {
+                                    ...obligationValue,
+                                    status: e.target.value,
+                                    obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                                }
+                                setPayload((payload: ObligationEntry) => ({
+                                    ...payload,
+                                    [row.original.node[0]]: obligationValue,
+                                }))
+                            }
+                        }}
+                    >
+                        <option value='OPEN'>{t('Open')}</option>
+                        <option value='ACKNOWLEDGED_OR_FULFILLED'>{t('Acknowledged or Fulfilled')}</option>
+                        <option value='WILL_BE_FULFILLED_BEFORE_RELEASE'>
+                            {t('Will be fulfilled before release')}
+                        </option>
+                        <option value='NOT_APPLICABLE'>{t('Not Applicable')}</option>
+                        <option value='DEFERRED_TO_PARENT_PROJECT'>{t('Deferred to parent project')}</option>
+                        <option value='FULFILLED_AND_PARENT_MUST_ALSO_FULFILL'>
+                            {t('Fulfilled and parent must also fulfill')}
+                        </option>
+                        <option value='ESCALATED'>{t('Escalated')}</option>
+                    </select>
+                ),
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Type'),
+                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'id',
+                header: t('Id'),
+                cell: ({ row }) => <>{row.original.node[1].id ?? ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'comment',
+                header: t('Comment'),
+                cell: ({ row }) => (
+                    <input
+                        type='text'
+                        value={payload?.[row.original.node[0]]?.comment ?? row.original.node[1].comment ?? ''}
+                        onClick={() => {
+                            setUpdateCommentModalData({
+                                comment: payload?.[row.original.node[0]]?.comment ?? row.original.node[1].comment ?? '',
+                                obligation: row.original.node[0],
+                            })
+                        }}
+                        className='form-control'
+                        placeholder={t('Enter comments')}
+                        readOnly
+                    />
+                ),
+                meta: {
+                    width: '20%',
+                },
+            },
+        ],
+        [
+            t,
+            payload,
+            selectedProjectObligationData,
+        ],
+    )
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [obligationData, setObligationData] = useState<
+        NestedRows<
+            [
+                string,
+                ObligationData,
+            ]
+        >[]
+    >(() => [])
+    const memoizedData = useMemo(
+        () => obligationData,
+        [
+            obligationData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        const timeLimit = obligationData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/licenseObligations`,
-                    session.user.access_token,
-                    signal,
+                    Object.fromEntries(
+                        Object.entries({
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
-                if (response.status === HttpStatus.OK) {
-                    setProjectLicenseObligations((await response.json()) as ObligationResponse)
-                } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else {
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== HttpStatus.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
-            } catch (error: unknown) {
+
+                const data = (await response.json()) as ObligationResponse
+                setPaginationMeta(data.page)
+                setObligationData(
+                    Object.entries(data.obligations).map(
+                        (o) =>
+                            ({
+                                node: o,
+                                children: [
+                                    {
+                                        node: o,
+                                    },
+                                ],
+                            }) as NestedRows<
+                                [
+                                    string,
+                                    ObligationData,
+                                ]
+                            >,
+                    ),
+                )
+            } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                setError(message)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
             }
         })()
 
         return () => controller.abort()
-    }, [projectId, refresh])
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
     useEffect(() => {
+        if (session.status === 'loading' || !selectedProjectId) return
         const controller = new AbortController()
         const signal = controller.signal
-        if (selectedProjectId === null) {
-            setSelectedProjectLicenseObligations({ obligations: {} } as ObligationResponse)
-            return
-        }
-        ;(async () => {
+
+        void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                setShowProcessing(true)
                 const response = await ApiUtils.GET(
                     `projects/${selectedProjectId}/licenseObligations`,
-                    session.user.access_token,
+                    session.data.user.access_token,
                     signal,
                 )
-                if (response.status === HttpStatus.OK) {
-                    setProjectLicenseObligations((await response.json()) as ObligationResponse)
-                } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else {
+                if (response.status !== HttpStatus.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
-            } catch (error: unknown) {
+
+                const data = (await response.json()) as ObligationResponse
+                setSelectedProjectObligationData(data)
+            } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                setError(message)
+                MessageService.error(message)
+            } finally {
+                setShowProcessing(false)
             }
         })()
-    }, [selectedProjectId, refresh])
 
-    useEffect(() => {
-        if (!projectLicenseOligations || !selectedProjectLicenseOligations) return
-        const tableRows = []
-        for (const [key, val] of Object.entries(projectLicenseOligations.obligations)) {
-            const obl = val
-            let isMatchingKey = false,
-                status = '',
-                comment = '',
-                selectedProjOblReleases: ObligationRelease[] = []
+        return () => controller.abort()
+    }, [
+        session,
+        selectedProjectId,
+    ])
 
-            if (selectedProjectId !== null) {
-                isMatchingKey = key in selectedProjectLicenseOligations.obligations
-                status = isMatchingKey
-                    ? (selectedProjectLicenseOligations.obligations[key].status ?? 'New Obligation')
-                    : 'New Obligation'
-                comment = isMatchingKey
-                    ? (selectedProjectLicenseOligations.obligations[key].comment ?? 'New Obligation')
-                    : 'New Obligation'
-                selectedProjOblReleases = isMatchingKey
-                    ? (selectedProjectLicenseOligations.obligations[key].releases ?? [])
-                    : []
+    const detailTable = useReactTable({
+        data: memoizedData,
+        columns: detailColumns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => {
+            if (row.depth === 1) {
+                row.meta = {
+                    isFullSpanRow: true,
+                }
             }
+            return row.depth === 0
+        },
+    })
 
-            const projOblReleases = obl.releases ?? []
-            const commonReleases = projOblReleases.filter((release: ObligationRelease) =>
-                selectedProjOblReleases.some(
-                    (r: ObligationRelease) => r.name === release.name && r.version === release.version,
-                ),
-            )
-
-            let match = false
-            if (selectedProjOblReleases.length > 0 && selectedProjOblReleases.length === projOblReleases.length) {
-                match = selectedProjOblReleases.every((selectedProjRelease: ObligationRelease) =>
-                    projOblReleases.some(
-                        (projRelease: ObligationRelease) =>
-                            projRelease.name === selectedProjRelease.name &&
-                            projRelease.version === selectedProjRelease.version,
-                    ),
-                )
+    detailTable.getRowModel().rows.forEach((row) => {
+        if (row.depth === 1) {
+            row.meta = {
+                isFullSpanRow: true,
             }
-            tableRows.push([
-                {
-                    id: key.split(' ').join('_'),
-                    infoText: obl.text ?? '',
-                },
-                {
-                    oblTitle: key,
-                    oblStatus: status,
-                    oblComment: comment,
-                    match: match,
-                },
-                obl.licenseIds ?? [],
-                {
-                    releases: obl.releases ?? [],
-                    commonReleases: commonReleases,
-                },
-                { status: obl.status ?? '', obligation: key, payload },
-                Capitalize(val.obligationType ?? ''),
-                obl.id ?? '',
-                { comment: obl.comment ?? '', obligation: key, payload },
-            ])
         }
-        setTableData(tableRows)
-    }, [payload, selectedProjectLicenseOligations, projectLicenseOligations])
+    })
 
-    if (error !== null) {
-        return (
-            <div
-                className='alert alert-danger'
-                role='alert'
-            >
-                {error}
-            </div>
-        )
-    }
+    const editTable = useReactTable({
+        data: memoizedData,
+        columns: editColumns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => {
+            if (row.depth === 1) {
+                row.meta = {
+                    isFullSpanRow: true,
+                }
+            }
+            return row.depth === 0
+        },
+    })
+
+    editTable.getRowModel().rows.forEach((row) => {
+        if (row.depth === 1) {
+            row.meta = {
+                isFullSpanRow: true,
+            }
+        }
+    })
 
     return (
         <>
@@ -510,27 +668,52 @@ export default function LicenseObligation({
                 refresh={refresh}
                 setRefresh={setRefresh}
             />
+            <CompareObligation
+                show={showCompareObligationsModal}
+                setShow={setShowCompareObligationsModal}
+                setSelectedProjectId={setSelectedProjectId}
+            />
             <div className='d-flex justify-content-end'>
                 {actionType === ActionType.EDIT && (
-                    <button
-                        className='btn btn-primary'
-                        onClick={() => setShowLicenseDbObligationsModal(true)}
-                    >
-                        {t('Add Obligations from License Database')}
-                    </button>
+                    <>
+                        <button
+                            className='btn btn-primary me-2'
+                            onClick={() => setShowLicenseDbObligationsModal(true)}
+                        >
+                            {t('Add Obligations from License Database')}
+                        </button>
+                        <button
+                            className='btn btn-secondary col-auto'
+                            onClick={() => setShowCompareObligationsModal(true)}
+                        >
+                            {t('Compare Obligation')}
+                        </button>
+                    </>
                 )}
             </div>
-            {tableData ? (
-                <Table
-                    columns={columns}
-                    data={tableData}
-                    selector={true}
-                />
-            ) : (
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <Spinner className='spinner' />
-                </div>
-            )}
+            <div className='mb-3'>
+                {pageableQueryParam && paginationMeta && detailTable && editTable ? (
+                    <>
+                        <PageSizeSelector
+                            pageableQueryParam={pageableQueryParam}
+                            setPageableQueryParam={setPageableQueryParam}
+                        />
+                        <SW360Table
+                            table={actionType === ActionType.DETAIL ? detailTable : editTable}
+                            showProcessing={showProcessing}
+                        />
+                        <TableFooter
+                            pageableQueryParam={pageableQueryParam}
+                            setPageableQueryParam={setPageableQueryParam}
+                            paginationMeta={paginationMeta}
+                        />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
         </>
     )
 }

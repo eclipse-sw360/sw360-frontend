@@ -9,11 +9,11 @@
 
 'use client'
 
-import { ActionType, ObligationEntry, ObligationType } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useEffect, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
+import { ActionType, ObligationEntry, ObligationType } from '@/object-types'
 import LicenseObligation from './LicenseObligation'
 import ObligationTab from './ObligationTab'
 
@@ -22,16 +22,9 @@ interface Props {
     actionType: ActionType
     payload?: ObligationEntry
     setPayload?: Dispatch<SetStateAction<ObligationEntry>>
-    selectedProjectId: string | null
 }
 
-export default function ObligationView({
-    projectId,
-    actionType,
-    payload,
-    setPayload,
-    selectedProjectId,
-}: Props): JSX.Element {
+export default function ObligationView({ projectId, actionType, payload, setPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
 
@@ -39,7 +32,9 @@ export default function ObligationView({
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <Tabs
@@ -57,7 +52,6 @@ export default function ObligationView({
                     actionType={actionType}
                     payload={payload}
                     setPayload={setPayload}
-                    selectedProjectId={selectedProjectId}
                 />
             </Tab>
             <Tab
