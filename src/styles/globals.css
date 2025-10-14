@@ -80,6 +80,9 @@ code {
     --card-background: #ebf0f5;
     --placeholder-foreground: #2728336d;
     --sw360-primary-hover-color: #df7f17;
+    /* Overriding bootstrap variables for theming */
+    --bs-body-bg: var(--primary-color) !important;
+    --bs-body-bg-rgb: 255, 255, 255 !important;
 }
 
 [data-theme='dark'] {
@@ -94,6 +97,9 @@ code {
     --link-color: #7bbee3;
     --link-hover-color: #f7941e;
     --placeholder-foreground: #c6d1dc6d;
+    /* Overriding bootstrap variables for theming */
+    --bs-body-bg: var(--background) !important;
+    --bs-body-bg-rgb: 34, 39, 46 !important;
 }
 
 .header {
@@ -692,7 +698,7 @@ body {
     font-size: 0.8rem;
 }
 
-.overlay-trugger {
+.overlay-trigger {
     font-size: 18px;
     color: gray !important;
 }
@@ -1642,4 +1648,32 @@ input[checked] + .slider:before {
 }
 .logo-sw360text-light {
     color: rgb(0, 0, 0);
+}
+
+.autocomplete-wrapper {
+    position: relative;
+}
+
+.suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    list-style: none;
+    border-top: none;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+    max-height: calc(50vh);
+    overflow-y: auto;
+}
+
+.suggestions-list li {
+    padding: 0.5em;
+    cursor: pointer;
+}
+
+.suggestions-list li:hover {
+    color: var(--tab-hover-foreground);
+    background-color: var(--sw360-primary-hover-color);
 }
