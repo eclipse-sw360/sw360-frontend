@@ -15,9 +15,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
+import React, { type JSX, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { Embedded, ReleaseDetail } from '@/object-types'
+import type { Embedded, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
@@ -28,16 +28,18 @@ function RecentReleasesWidget(): ReactNode {
 
     const [recentRelease, setRecentRelease] = useState<Array<JSX.Element[]>>([])
     const [loading, setLoading] = useState(true)
-    const [reload, setReload] = useState(false)
+    const [_, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            return signOut()
+        }
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == StatusCodes.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedReleases
             return data
-        } else if (response.status == StatusCodes.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -75,15 +77,11 @@ function RecentReleasesWidget(): ReactNode {
                     setRecentRelease([])
                 }
             })
-            .catch((err: Error) => {
-                throw new Error(err.message)
-            })
             .finally(() => {
                 setLoading(false)
             })
     }, [
         fetchData,
-        reload,
     ])
 
     return (
@@ -92,7 +90,7 @@ function RecentReleasesWidget(): ReactNode {
                 title={t('Recent Releases')}
                 setReload={setReload}
             />
-            {loading == false ? (
+            {loading === false ? (
                 <ul
                     style={{
                         listStyleType: 'disc',
@@ -106,11 +104,7 @@ function RecentReleasesWidget(): ReactNode {
                     <Spinner className='spinner' />
                 </div>
             )}
-            {recentRelease.length === 0 && (
-                <>
-                    <div className='subscriptionBox'>{t('No recent releases available')}</div>
-                </>
-            )}
+            {recentRelease.length === 0 && <div className='subscriptionBox'>{t('No recent releases available')}</div>}
         </div>
     )
 }

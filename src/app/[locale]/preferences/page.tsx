@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Metadata } from 'next'
-import { ReactNode } from 'react'
+import type { Metadata } from 'next'
+import type { JSX } from 'react'
 import NotificationSettingForm from './components/NotificationSettingForm'
 import UserAccessToken from './components/UserAccessToken'
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     title: 'Preferences',
 }
 
-const PreferencesPage = (): ReactNode => {
+function PreferencesPage(): JSX.Element {
     return (
         <div className='container page-content'>
             <NotificationSettingForm />

@@ -21,6 +21,7 @@ import LanguageSwitcher from './LanguageSwitcher/LanguageSwitcher'
 import LocaleSwitcher from './LocaleSwitcher/LocaleSwitcher'
 import Logo from './Logo/Logo'
 import Navbar from './Navbar/Navbar'
+import NavItems from './Navbar/NavItems'
 import PageButtonHeader from './PageButtonHeader/PageButtonHeader'
 import PageSpinner from './PageSpinner/PageSpinner'
 import PillsInput from './PillsInput/PillsInput'
@@ -43,13 +44,11 @@ import {
     TableFooter,
     TableSearch,
 } from './Table/Components'
-import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
-import ToastMessage from './ToastContainer/Toast'
-
 // Table component
 // Strictly derived from gridjs-react with dedicated changes
 import Table from './Table/Table'
 import { _, ReactWrapper } from './Table/wrapper'
+import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import TreeTable from './TreeTable/TreeTable'
 
 export {
@@ -70,6 +69,7 @@ export {
     LocaleSwitcher,
     Logo,
     Navbar,
+    NavItems,
     PaddedCell,
     PageButtonHeader,
     PageSizeSelector,
@@ -89,7 +89,7 @@ export {
     TableFooter,
     TableSearch,
     ThemeSwitcher,
-    ToastMessage,
+    type ToastMessage,
     TreeTable,
     VendorDialog,
     _,

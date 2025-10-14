@@ -11,15 +11,15 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import type { ReactNode } from 'react'
 import { Alert } from 'react-bootstrap'
-import styles from '../preferences.module.css'
-
-import { ReactNode } from 'react'
 import NotificationSettings from './NotificationSettings'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
-    notificationPreferences: { [key: string]: boolean }
+    notificationPreferences: {
+        [key: string]: boolean
+    }
 }
 
 interface Props {
@@ -32,12 +32,12 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
 
     return (
         <>
-            <div id={styles['preferences-tittle']}>{t('E-Mail Notification Preferences')}</div>
+            <div>{t('E-Mail Notification Preferences')}</div>
             <div className='form-group'>
                 <div className='form-check'>
                     <input
                         type='checkbox'
-                        className={`form-check-input ${styles.checkbox}`}
+                        className='form-check-input checkbox'
                         id='wants_mail_notification'
                         name='wantsMailNotification'
                         checked={notificationSetting.wantsMailNotification}
@@ -49,7 +49,7 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
                         }
                     />
                     <label
-                        className={`form-check-label ${styles.label}`}
+                        className={'form-check-label label'}
                         htmlFor='wants_mail_notification'
                     >
                         {t('Enable E-Mail Notifications')}

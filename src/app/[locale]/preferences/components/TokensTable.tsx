@@ -10,14 +10,14 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { type ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import React, { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Spinner } from 'react-bootstrap'
-import { AccessToken, Embedded, ErrorDetails } from '@/object-types'
+import type { AccessToken, Embedded, ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 

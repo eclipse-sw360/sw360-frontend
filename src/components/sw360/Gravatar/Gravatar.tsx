@@ -10,8 +10,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 'use client'
 
-import { MD5 } from 'crypto-js'
-import { useCallback, useEffect, type JSX } from 'react'
+import { type JSX, useCallback, useEffect } from 'react'
 import { Form, Image } from 'react-bootstrap'
 import { BsArrowCounterclockwise } from 'react-icons/bs'
 
@@ -21,64 +20,70 @@ import { useLocalStorage } from '@/hooks'
 import styles from './Gravatar.module.css'
 
 function Gravatar({ email }: { email: string }): JSX.Element {
-    const [gravatarImage, setGravatarImage] = useLocalStorage<string | undefined | null>('gravatarImage', null)
+    const [gravatarImage, setGravatarImage] = useLocalStorage<string>('gravatarImage', null)
     const [useGravatar, setUseGravatar] = useLocalStorage<boolean>('useGravatar', false)
 
-    function handleCheckboxChange() {
-        setUseGravatar((prevValue: boolean) => {
-            const newValue = !prevValue
-            return newValue
-        })
+    function handleCheckboxChange(event: React.ChangeEvent<HTMLInputElement>) {
+        const checked = event.target.checked
+        setUseGravatar(checked)
+
+        if (checked) {
+            downloadGravatarImage()
+        } else {
+            setGravatarImage(sw360ProfileIcon.src as string)
+        }
+        console.log(`GRAVATAR_IMAGE: ${gravatarImage}`)
     }
 
     const downloadGravatarImage = useCallback(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const gravatarUrl = `https://www.gravatar.com/avatar/${MD5(email)}?d=404`
-
+        const gravatarUrl = `/api/gravatar?email=${encodeURIComponent(email)}`
+        console.log(`LOCAL URL: ${gravatarUrl}`)
         fetch(gravatarUrl)
             .then((response) => response.blob())
             .then((blob) => {
                 const imageUrl = URL.createObjectURL(blob)
-                setGravatarImage(gravatarUrl)
-                console.log(imageUrl)
+                setGravatarImage(imageUrl)
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
-    }, [email, setGravatarImage])
+    }, [
+        email,
+        setGravatarImage,
+    ])
 
     useEffect(() => {
-        if (useGravatar) {
-            if (gravatarImage === null) {
-                downloadGravatarImage()
-            }
+        if (useGravatar && !gravatarImage) {
+            downloadGravatarImage()
         }
-    }, [useGravatar, gravatarImage, setGravatarImage, downloadGravatarImage])
+    }, [
+        useGravatar,
+        downloadGravatarImage,
+        gravatarImage,
+    ])
 
     const iconSize = 64
 
     return (
-        <>
-            <div className={styles.gravatar}>
-                <div>
-                    <Form.Check
-                        type='checkbox'
-                        checked={useGravatar}
-                        id='gravatar'
-                        onChange={handleCheckboxChange}
-                        label='Use Gravatar Profile Images'
-                    />
-                </div>
-                <div className='gap-2 d-flex align-items-center justify-contents-end'>
-                    <Image
-                        src={useGravatar ? (gravatarImage ?? '') : (sw360ProfileIcon.src as string)}
-                        width={iconSize}
-                        height={iconSize}
-                        alt='Gravatar'
-                        roundedCircle
-                    />
-                    {useGravatar && <BsArrowCounterclockwise onClick={downloadGravatarImage} />}
-                </div>
+        <div className={styles.gravatar}>
+            <div>
+                <Form.Check
+                    type='checkbox'
+                    checked={useGravatar}
+                    id='gravatar'
+                    onChange={handleCheckboxChange}
+                    label='Use Gravatar Profile Images'
+                />
             </div>
-        </>
+            <div className='gap-2 d-flex align-items-center justify-contents-end'>
+                <Image
+                    src={gravatarImage}
+                    width={iconSize}
+                    height={iconSize}
+                    alt='Gravatar'
+                    roundedCircle
+                />
+                {useGravatar && <BsArrowCounterclockwise onClick={downloadGravatarImage} />}
+            </div>
+        </div>
     )
 }
 

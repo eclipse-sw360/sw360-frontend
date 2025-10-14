@@ -9,7 +9,13 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import {
+    type ColumnDef,
+    getCoreRowModel,
+    getSortedRowModel,
+    type SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -17,11 +23,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import React, { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import { TfiFiles } from 'react-icons/tfi'
-import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
+import type { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
@@ -73,20 +79,25 @@ export default function UserAdminstration(): JSX.Element {
             })
     }
 
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
-            const data = await response.json()
-            return data
-        } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.error(t('Unauthorized request'))
-            return
-        } else {
-            return undefined
-        }
-    }, [])
+    const fetchData = useCallback(
+        async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === StatusCodes.OK) {
+                const data = await response.json()
+                return data
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
+                MessageService.error(t('Unauthorized request'))
+                return
+            } else {
+                return undefined
+            }
+        },
+        [
+            t,
+        ],
+    )
 
     useEffect(() => {
         void fetchData('users/departments')
@@ -105,7 +116,9 @@ export default function UserAdminstration(): JSX.Element {
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
             })
-    }, [])
+    }, [
+        fetchData,
+    ])
 
     const handleEditSecondaryDepartmentAndRoles = (id: string) => {
         setEditingUserId(id)
@@ -477,13 +490,13 @@ export default function UserAdminstration(): JSX.Element {
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between ms-1'>
                             <div className='col-auto px-0'>
-                                <button
+                              <button type="button"
                                     className='btn btn-primary me-2'
                                     onClick={handleAddUsers}
                                 >
                                     {t('Add User')}
                                 </button>
-                                <button
+                                <button type="button"
                                     className='btn btn-primary'
                                     onClick={downloadUsers}
                                 >

@@ -8,39 +8,24 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-// app/components/ThemeSwitcher.tsx
 'use client'
 
-import { useEffect, useState, type JSX } from 'react'
+import { useTheme } from 'next-themes'
 import { Nav } from 'react-bootstrap'
 import { BsSun, BsSunFill } from 'react-icons/bs'
 
-function ThemeSwitcher(): JSX.Element {
-    const [userTheme, setUserTheme] = useState('')
-    function setTheme(theme: string) {
-        setUserTheme(theme)
-        localStorage.setItem('theme', theme)
-        document.documentElement.setAttribute('data-theme', theme)
-    }
+function ThemeSwitcher() {
+  const { theme, setTheme } = useTheme()
 
-    useEffect(() => {
-        const storedTheme = localStorage.getItem('theme')
-        if (storedTheme === null) {
-            setTheme('light')
-        } else {
-            setTheme(storedTheme)
-        }
-    }, [])
-
-    return (
-        <Nav.Item>
-            {userTheme === 'dark' ? (
-                <BsSunFill onClick={() => setTheme('light')} />
-            ) : (
-                <BsSun onClick={() => setTheme('dark')} />
-            )}
-        </Nav.Item>
-    )
+  return (
+    <Nav.Item>
+      {theme === 'dark' ? (
+        <BsSunFill onClick={() => setTheme('light')} />
+      ) : (
+        <BsSun onClick={() => setTheme('dark')} />
+      )}
+    </Nav.Item>
+  )
 }
 
 export default ThemeSwitcher

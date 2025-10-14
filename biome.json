@@ -1,9 +1,9 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
     "ignoreUnknown": false,
@@ -31,7 +31,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false,
+      "recommended": true,
       "complexity": {
         "noAdjacentSpacesInRegex": "error",
         "noExtraBooleanCast": "error",
@@ -63,7 +63,8 @@
         "useIsNan": "error",
         "useValidForDirection": "error",
         "useValidTypeof": "error",
-        "useYield": "error"
+        "useYield": "error",
+        "useUniqueElementIds": "off"
       },
       "style": {
         "noCommonJs": "error",
@@ -146,7 +147,6 @@
     }
   },
   "assist": {
-    "enabled": true,
     "actions": {
       "source": {
         "organizeImports": "on"

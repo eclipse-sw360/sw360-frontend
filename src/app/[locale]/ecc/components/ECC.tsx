@@ -14,11 +14,11 @@ import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
-    ECCInterface,
+    type ECCInterface,
     type Embedded,
     ErrorDetails,
     PageableQueryParam,

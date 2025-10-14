@@ -15,13 +15,13 @@ import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { ReactNode, useEffect, useState } from 'react'
+import type React from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
 import { UIConfigKeys } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import styles from '../preferences.module.css'
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -114,7 +114,7 @@ const UserAccessToken = (): ReactNode => {
         <>
             <div className='row'>
                 <div className='col'>
-                    <h4 className={styles.decorator}>{t('REST API Tokens')}</h4>
+                    <h4 className='mt-3 mb-1 ms-1 header-underlined'>{t('REST API Tokens')}</h4>
                     <Form
                         noValidate
                         validated={validated}
@@ -127,11 +127,6 @@ const UserAccessToken = (): ReactNode => {
                             className='table summary-table'
                             id='restInfoTable'
                         >
-                            <thead>
-                                <tr>
-                                    <th colSpan={2}>{t('REST API Token')}</th>
-                                </tr>
-                            </thead>
                             <tbody>
                                 <tr>
                                     <td>{t('Name')}:</td>

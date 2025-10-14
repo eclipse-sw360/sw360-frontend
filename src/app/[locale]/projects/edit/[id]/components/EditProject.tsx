@@ -34,9 +34,9 @@ import {
     ProjectPayload,
     ReleaseDetail,
     User,
-    UserGroupType,
     Vendor,
 } from '@/object-types'
+import { ActionType, DocumentTypes, HttpStatus, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
@@ -337,7 +337,7 @@ function EditProject({
 
                 if (project['_embedded']?.['sw360:moderators'] !== undefined) {
                     const moderatorMap = new Map<string, string>()
-                    project['_embedded']['sw360:moderators'].map((moderator) => {
+                    project['_embedded']['sw360:moderators'].forEach((moderator) => {
                         moderatorMap.set(moderator.email, moderator.fullName ?? '')
                     })
                     setModerators(Object.fromEntries(moderatorMap))
@@ -345,7 +345,7 @@ function EditProject({
 
                 if (project['_embedded']?.['sw360:contributors'] !== undefined) {
                     const contributorMap = new Map<string, string>()
-                    project['_embedded']['sw360:contributors'].map((contributor) => {
+                    project['_embedded']['sw360:contributors'].forEach((contributor) => {
                         contributorMap.set(contributor.email, contributor.fullName ?? '')
                     })
                     setContributors(Object.fromEntries(contributorMap))
@@ -457,6 +457,8 @@ function EditProject({
     }, [
         projectId,
         setProjectPayload,
+        fetchUserData,
+        projectPayload.linkedReleases,
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {

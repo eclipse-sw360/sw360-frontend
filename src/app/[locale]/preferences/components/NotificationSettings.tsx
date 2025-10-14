@@ -10,14 +10,15 @@
 
 'use client'
 
-import { Preferences } from '@/object-types'
-import { ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Accordion, Form } from 'react-bootstrap'
-import styles from '../preferences.module.css'
+import { Preferences } from '@/object-types'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
-    notificationPreferences: { [key: string]: boolean }
+    notificationPreferences: {
+        [key: string]: boolean
+    }
 }
 
 interface Props {
@@ -52,12 +53,10 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
                         <Accordion.Item
                             eventKey={value.key}
                             key={value.key}
-                            className={styles['accordion-item']}
+                            className='accordion-item'
                         >
-                            <Accordion.Header className={styles['accordion-header']}>
-                                {value.documentType}
-                            </Accordion.Header>
-                            <Accordion.Body className={styles['accordion-body']}>
+                            <Accordion.Header className='accordion-header'>{value.documentType}</Accordion.Header>
+                            <Accordion.Body className='accordion-body'>
                                 {value.entries.map((entry) => (
                                     <Form.Check
                                         type='checkbox'
