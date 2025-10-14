@@ -18,7 +18,7 @@ import { FaPencilAlt } from 'react-icons/fa'
 interface Props<T> {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    updateEntity: () => Promise<void>
+    updateEntity: (payload?: T) => Promise<void>
     setEntityPayload: React.Dispatch<React.SetStateAction<T>>
 }
 
@@ -50,11 +50,17 @@ export default function CreateMRCommentDialog<T>({
 
     const handleSubmit = async () => {
         setLoading(true)
-        setEntityPayload((prev) => ({
-            ...prev,
-            comment: userComment,
-        }))
-        await updateEntity()
+        let updatedPayload: T | undefined
+        setEntityPayload((prev) => {
+            if (!prev) return prev
+                updatedPayload = { ...prev, comment: userComment }
+                return updatedPayload
+            }
+        )
+
+        if (updatedPayload) {
+            await updateEntity(updatedPayload)
+        }
         setLoading(false)
         setShow(!show)
         setUserComment('')
