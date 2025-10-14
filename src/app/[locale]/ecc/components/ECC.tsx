@@ -9,20 +9,20 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { type ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
-    ECCInterface,
+    type ECCInterface,
     type Embedded,
-    ErrorDetails,
+    type ErrorDetails,
     HttpStatus,
-    PageableQueryParam,
-    PaginationMeta,
+    type PageableQueryParam,
+    type PaginationMeta,
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'

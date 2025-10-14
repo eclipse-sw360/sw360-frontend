@@ -15,12 +15,12 @@ import '@/styles/auth.css'
 import '@/styles/globals.css'
 import '@/styles/gridjs/sw360.css'
 
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { ReactNode, type JSX } from 'react'
-
 import { Footer, GlobalMessages, Navbar } from 'next-sw360'
+import { ThemeProvider } from 'next-themes'
+import type { JSX, ReactNode } from 'react'
 import { Providers } from '../provider'
 
 export const metadata: Metadata = {
@@ -41,21 +41,26 @@ async function RootLayout({ children }: Props): Promise<JSX.Element> {
     const messages = await getMessages()
 
     return (
-        <html lang={locale}>
+        <html
+            lang={locale}
+            suppressHydrationWarning
+        >
             <body>
-                <Providers>
-                    <NextIntlClientProvider messages={messages}>
-                        <div
-                            id='container'
-                            className='d-flex flex-column min-vh-100'
-                        >
-                            <GlobalMessages />
-                            <Navbar />
-                            {children}
-                            <Footer />
-                        </div>
-                    </NextIntlClientProvider>
-                </Providers>
+                <ThemeProvider attribute='class'>
+                    <Providers>
+                        <NextIntlClientProvider messages={messages}>
+                            <div
+                                id='sw360-container'
+                                className='d-flex flex-column min-vh-100'
+                            >
+                                <GlobalMessages />
+                                <Navbar />
+                                {children}
+                                <Footer />
+                            </div>
+                        </NextIntlClientProvider>
+                    </Providers>
+                </ThemeProvider>
             </body>
         </html>
     )

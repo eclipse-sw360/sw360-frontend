@@ -22,19 +22,16 @@ import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import {
-    ActionType,
-    DocumentTypes,
-    HttpStatus,
+import type {
     InputKeyValue,
     ObligationEntry,
     Project,
     ProjectPayload,
     ReleaseDetail,
     User,
-    UserGroupType,
     Vendor,
 } from '@/object-types'
+import { ActionType, DocumentTypes, HttpStatus, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
@@ -255,20 +252,25 @@ function EditProject({
         }
     }
 
-    const fetchUserData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            const data = (await response.json()) as User
-            return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            MessageService.error(t('Unauthorized request'))
-            return
-        } else {
-            return undefined
-        }
-    }, [])
+    const fetchUserData = useCallback(
+        async (url: string) => {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status === HttpStatus.OK) {
+                const data = (await response.json()) as User
+                return data
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                MessageService.error(t('Unauthorized request'))
+                return
+            } else {
+                return undefined
+            }
+        },
+        [
+            t,
+        ],
+    )
 
     useEffect(() => {
         void (async () => {
@@ -335,7 +337,7 @@ function EditProject({
 
                 if (project['_embedded']?.['sw360:moderators'] !== undefined) {
                     const moderatorMap = new Map<string, string>()
-                    project['_embedded']['sw360:moderators'].map((moderator) => {
+                    project['_embedded']['sw360:moderators'].forEach((moderator) => {
                         moderatorMap.set(moderator.email, moderator.fullName ?? '')
                     })
                     setModerators(Object.fromEntries(moderatorMap))
@@ -343,7 +345,7 @@ function EditProject({
 
                 if (project['_embedded']?.['sw360:contributors'] !== undefined) {
                     const contributorMap = new Map<string, string>()
-                    project['_embedded']['sw360:contributors'].map((contributor) => {
+                    project['_embedded']['sw360:contributors'].forEach((contributor) => {
                         contributorMap.set(contributor.email, contributor.fullName ?? '')
                     })
                     setContributors(Object.fromEntries(contributorMap))
@@ -433,6 +435,8 @@ function EditProject({
     }, [
         projectId,
         setProjectPayload,
+        fetchUserData,
+        projectPayload.linkedReleases,
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {

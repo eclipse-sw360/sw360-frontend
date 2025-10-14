@@ -12,7 +12,7 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { JSX } from 'react'
+import type { JSX } from 'react'
 import sw360logo from '@/assets/images/sw360-logo.svg'
 
 function SW360Error({ error, reset }: { error: Error; reset: () => void }): JSX.Element {
@@ -33,12 +33,13 @@ function SW360Error({ error, reset }: { error: Error; reset: () => void }): JSX.
                 <p className='lead my-3'>{error.message}</p>
                 <div className='d-flex justify-content-center gap-3'>
                     <button
+                        type='button'
                         onClick={() => reset()}
                         className='px-4 py-2 btn btn-secondary'
                     >
                         {t('Retry')}
                     </button>
-                    <button
+                    <button type='button'
                         className='btn btn-secondary px-4 py-2'
                         onClick={() => router.push('/')}
                     >

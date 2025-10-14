@@ -57,7 +57,7 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
             if (response.status === HttpStatus.OK) {
                 MessageService.success(t('Client deleted successfully'))
                 setShow(false)
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === HttpStatus.UNAUTHORIZED) {
                 await signOut()
             } else {
                 MessageService.error(t('Error when processing'))

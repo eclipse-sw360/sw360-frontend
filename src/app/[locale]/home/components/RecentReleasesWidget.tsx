@@ -10,15 +10,14 @@
 
 'used-client'
 
-import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
-
-import { Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { type Embedded, HttpStatus, type ReleaseDetail } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
@@ -28,16 +27,16 @@ function RecentReleasesWidget(): ReactNode {
 
     const [recentRelease, setRecentRelease] = useState<Array<JSX.Element[]>>([])
     const [loading, setLoading] = useState(true)
-    const [reload, setReload] = useState(false)
+    const [_, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status === HttpStatus.OK) {
             const data = (await response.json()) as EmbeddedReleases
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === HttpStatus.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -60,8 +59,11 @@ function RecentReleasesWidget(): ReactNode {
                         releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
                             <li key={item.name}>
                                 <Link
-                                    href={'components/releases/detail/' + item.id}
-                                    style={{ color: 'orange', textDecoration: 'none' }}
+                                    href={`components/releases/detail/${item.id}`}
+                                    style={{
+                                        color: 'orange',
+                                        textDecoration: 'none',
+                                    }}
                                 >
                                     {item.name}
                                 </Link>
@@ -72,13 +74,12 @@ function RecentReleasesWidget(): ReactNode {
                     setRecentRelease([])
                 }
             })
-            .catch((err: Error) => {
-                throw new Error(err.message)
-            })
             .finally(() => {
                 setLoading(false)
             })
-    }, [fetchData, reload])
+    }, [
+        fetchData,
+    ])
 
     return (
         <div className='content-container'>
@@ -86,18 +87,21 @@ function RecentReleasesWidget(): ReactNode {
                 title={t('Recent Releases')}
                 setReload={setReload}
             />
-            {loading == false ? (
-                <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentRelease}</ul>
+            {loading === false ? (
+                <ul
+                    style={{
+                        listStyleType: 'disc',
+                        color: 'black',
+                    }}
+                >
+                    {recentRelease}
+                </ul>
             ) : (
                 <div className='col-12'>
                     <Spinner className='spinner' />
                 </div>
             )}
-            {recentRelease.length === 0 && (
-                <>
-                    <div className='subscriptionBox'>{t('No recent releases available')}</div>
-                </>
-            )}
+            {recentRelease.length === 0 && <div className='subscriptionBox'>{t('No recent releases available')}</div>}
         </div>
     )
 }

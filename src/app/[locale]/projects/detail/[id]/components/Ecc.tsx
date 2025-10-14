@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { type ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -16,15 +16,8 @@ import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import {
-    ECCInterface,
-    Embedded,
-    ErrorDetails,
-    HttpStatus,
-    PageableQueryParam,
-    PaginationMeta,
-    UserGroupType,
-} from '@/object-types'
+import type { ECCInterface, Embedded, ErrorDetails } from '@/object-types'
+import { HttpStatus, type PageableQueryParam, type PaginationMeta, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'

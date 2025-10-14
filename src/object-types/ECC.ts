@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Links } from '@/object-types'
+import type { Links } from '@/object-types'
 
 interface ECCInterface {
     id: string
