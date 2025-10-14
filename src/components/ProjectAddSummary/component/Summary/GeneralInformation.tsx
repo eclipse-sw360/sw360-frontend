@@ -13,7 +13,9 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
-import { ProjectPayload, Vendor } from '@/object-types'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
+import { useConfigValue } from '@/contexts'
+import { ProjectPayload, UIConfigKeys, Vendor } from '@/object-types'
 
 interface Param {
     vendor: Vendor
@@ -31,10 +33,22 @@ export default function GeneralInformation({
     const t = useTranslations('default')
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
     const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
+
+    // Input suggestions from config
+    const projectDomains = useConfigValue(UIConfigKeys.UI_DOMAINS) as string[] | null
+    const projectTags = useConfigValue(UIConfigKeys.UI_PROJECT_TAG) as string[] | null
+
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
             [event.target.name]: event.target.value,
+        })
+    }
+
+    const onSuggestChangeHandler = (key: string) => (newValue: string | string[]) => {
+        setProjectPayload({
+            ...projectPayload,
+            [key]: newValue,
         })
     }
 
@@ -204,14 +218,22 @@ export default function GeneralInformation({
                         >
                             {t('Tag')}
                         </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            id='addProjects.tag'
-                            placeholder={t('Enter one word tag')}
-                            name='tag'
-                            value={projectPayload.tag}
-                            onChange={updateInputField}
+                        <SuggestionBox
+                            initialValues={projectPayload.tag}
+                            possibleValues={
+                                projectTags === null
+                                    ? [
+                                          '',
+                                      ]
+                                    : projectTags
+                            }
+                            placeHolder={t('Enter one word tag')}
+                            onValueChange={onSuggestChangeHandler('tag')}
+                            inputProps={{
+                                id: 'addProjects.tag',
+                                name: 'tag',
+                            }}
+                            isMultiValue={false}
                         />
                     </div>
                 </div>
@@ -252,11 +274,15 @@ export default function GeneralInformation({
                             onChange={updateInputField}
                         >
                             <option value=''>-- {t('Select Domain')} --</option>
-                            <option value='Application Software'>{t('Application Software')}</option>
-                            <option value='Documentation'>{t('Documentation')}</option>
-                            <option value='Embedded Software'>{t('Embedded Software')}</option>
-                            <option value='Hardware'>{t('Hardware')}</option>
-                            <option value='Test and Diagnostics'>{t('Test and Diagnostics')}</option>
+                            {projectDomains &&
+                                projectDomains.map((domain) => (
+                                    <option
+                                        value={domain}
+                                        selected={projectPayload.domain === domain}
+                                    >
+                                        {domain}
+                                    </option>
+                                ))}
                         </select>
                     </div>
                     <div className='col-lg-4 mb-3'>
