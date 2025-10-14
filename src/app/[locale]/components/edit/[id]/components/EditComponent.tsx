@@ -148,12 +148,13 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         return () => controller.abort()
     }, [params, componentId])
 
-    const updateComponent = async () => {
+    const updateComponent = async (payload?: ComponentPayload) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.PATCH(`components/${componentId}`, componentPayload, session.user.access_token)
+        const dataToUpdate = payload ?? componentPayload
+        const response = await ApiUtils.PATCH(`components/${componentId}`, dataToUpdate, session.user.access_token)
         if (response.status === HttpStatus.OK) {
-            MessageService.success(`Component ${componentPayload.name}  updated successfully!`)
+            MessageService.success(`Component ${dataToUpdate.name}  updated successfully!`)
             router.push('/components/detail/' + componentId)
         } else if (response.status === HttpStatus.ACCEPTED) {
             MessageService.success(t('Moderation request is created'))
@@ -172,32 +173,42 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
             entityId: componentId,
         })
         const response = await ApiUtils.POST(url, {}, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
-            MessageService.warn(t('Unauthorized request'))
-            return false
-        } else if (response.status === HttpStatus.FORBIDDEN) {
-            MessageService.warn(t('Access Denied'))
-            return false
-        } else if (response.status === HttpStatus.BAD_REQUEST) {
-            MessageService.warn(t('Invalid input or missing required parameters'))
-            return false
-        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
-            MessageService.error(t('Internal server error'))
-            return false
-        } else if (response.status === HttpStatus.OK) {
-            MessageService.info(t('You can write to the entity'))
-            return true
-        } else if (response.status !== HttpStatus.ACCEPTED) {
-            MessageService.info(t('You are allowed to perform write with MR'))
-            setShowCommentModal(true)
-            return true
+        switch (response.status) {
+            case HttpStatus.UNAUTHORIZED:
+                MessageService.warn(t('Unauthorized request'))
+                return 'DENIED'
+            case HttpStatus.FORBIDDEN:
+                MessageService.warn(t('Access Denied'))
+                return 'DENIED'
+            case HttpStatus.BAD_REQUEST:
+                MessageService.warn(t('Invalid input or missing required parameters'))
+                return 'DENIED'
+            case HttpStatus.INTERNAL_SERVER_ERROR:
+                MessageService.error(t('Internal server error'))
+                return 'DENIED'
+            case HttpStatus.OK:
+                MessageService.info(t('You can write to the entity'))
+                return 'OK'
+            case HttpStatus.ACCEPTED:
+                MessageService.info(t('You are allowed to perform write with MR'))
+                return 'ACCEPTED'
+            default:
+                MessageService.error(t('Error when processing'))
+                return 'DENIED'
         }
     }
 
     const checkPreRequisite = async () => {
         const isEligible = await checkUpdateEligibility(componentId)
-        if (!isEligible) return
-        await updateComponent()
+        if (isEligible === 'OK') {
+            await updateComponent()
+        }
+        else if (isEligible === 'ACCEPTED') {
+            setShowCommentModal(true)
+        }
+        else if (isEligible === 'DENIED') {
+            return
+        }
     }
 
     const handleDeleteComponent = () => {
