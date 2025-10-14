@@ -407,6 +407,7 @@ function EditProject({
                     projectResponsible: project.projectResponsible ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
+                    comment: projectPayload.comment ?? '',
                     packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
                         (acc, singlePackage) => {
                             if (singlePackage.id) {
@@ -443,38 +444,42 @@ function EditProject({
             entityId: projectId,
         })
         const response = await ApiUtils.POST(url, {}, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
-            MessageService.warn(t('Unauthorized request'))
-            return false
-        } else if (response.status === HttpStatus.FORBIDDEN) {
-            MessageService.warn(t('Access Denied'))
-            return false
-        } else if (response.status === HttpStatus.BAD_REQUEST) {
-            MessageService.warn(t('Invalid input or missing required parameters'))
-            return false
-        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
-            MessageService.error(t('Internal server error'))
-            return false
-        } else if (response.status === HttpStatus.OK) {
-            MessageService.info(t('You can write to the entity'))
-            return true
-        } else if (response.status !== HttpStatus.ACCEPTED) {
-            MessageService.info(t('You are allowed to perform write with MR'))
-            setShowCommentModal(true)
-            return true
+        switch (response.status) {
+            case HttpStatus.UNAUTHORIZED:
+                MessageService.warn(t('Unauthorized request'))
+                return 'DENIED'
+            case HttpStatus.FORBIDDEN:
+                MessageService.warn(t('Access Denied'))
+                return 'DENIED'
+            case HttpStatus.BAD_REQUEST:
+                MessageService.warn(t('Invalid input or missing required parameters'))
+                return 'DENIED'
+            case HttpStatus.INTERNAL_SERVER_ERROR:
+                MessageService.error(t('Internal server error'))
+                return 'DENIED'
+            case HttpStatus.OK:
+                MessageService.info(t('You can write to the entity'))
+                return 'OK'
+            case HttpStatus.ACCEPTED:
+                MessageService.info(t('You are allowed to perform write with MR'))
+                return 'ACCEPTED'
+            default:
+                MessageService.error(t('Error when processing'))
+                return 'DENIED'
         }
     }
 
-    const updateProject = async () => {
+    const updateProject = async (payload?: ProjectPayload) => {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const dataToUpdate = payload ?? projectPayload
             const requests = [
                 ApiUtils.PATCH(
                     isDependencyNetworkFeatureEnabled === true
                         ? `projects/network/${projectId}`
                         : `projects/${projectId}`,
-                    projectPayload,
+                    dataToUpdate,
                     session.user.access_token,
                 ),
             ]
@@ -530,20 +535,22 @@ function EditProject({
             const responses = await Promise.all(requests)
             let allOk = true
             for (const r of responses) {
-                if (!(r.status === HttpStatus.OK || r.status === HttpStatus.CREATED)) {
+                if (!(r.status === HttpStatus.OK ||
+                        r.status === HttpStatus.CREATED ||
+                        r.status === HttpStatus.ACCEPTED)) {
                     allOk = false
                     break
                 }
             }
             if (allOk) {
                 MessageService.success(
-                    t('Project') + ` ${projectPayload.name} (${projectPayload.version}) ` + t('updated successfully'),
+                    t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
                 )
                 router.push(`/projects/detail/${projectId}`)
             } else {
                 MessageService.error(
                     t('There are some errors while updating project') +
-                        ` ${projectPayload.name} (${projectPayload.version})!`,
+                        ` ${dataToUpdate.name} (${dataToUpdate.version})!`,
                 )
             }
         } catch (error: unknown) {
@@ -557,8 +564,15 @@ function EditProject({
 
     const preRequisite = async () => {
         const isEligible = await checkUpdateEligibility(projectId)
-        if (!isEligible) return
-        await updateProject()
+        if (isEligible === 'OK') {
+            await updateProject()
+        }
+        else if (isEligible === 'ACCEPTED') {
+            setShowCommentModal(true)
+        }
+        else if (isEligible === 'DENIED') {
+            return
+        } 
     }
 
     const handleCancelClick = () => {
