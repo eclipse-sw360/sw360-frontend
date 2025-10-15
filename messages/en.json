@@ -676,6 +676,7 @@
     "Homepage Url": "Homepage Url",
     "How it works": "How it works",
     "I could not delete the release, since it is used by another component (release) or project": "I could not delete the release, since it is used by another component (release) or project",
+    "I could not delete the package, since it is used by another project. Please unlink it before deleting.": "I could not delete the package, since it is used by another project. Please unlink it before deleting.",
     "IBM Rational Synergy": "IBM Rational Synergy",
     "INCORRECT": "Incorrect",
     "INITIAL_SCAN_REPORT": "Initial Scan Report",
