@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -19,7 +20,6 @@ import { _, PaddedCell, PageSizeSelector, SW360Table, Table, TableFooter } from 
 import {
     ActionType,
     ErrorDetails,
-    HttpStatus,
     NestedRows,
     ObligationData,
     ObligationEntry,
@@ -465,7 +465,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -522,7 +522,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                     session.data.user.access_token,
                     signal,
                 )
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

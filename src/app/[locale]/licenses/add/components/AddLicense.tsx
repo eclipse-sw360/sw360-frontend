@@ -11,6 +11,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -19,7 +20,9 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { HttpStatus, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
+
+import { LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
+
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import AddLicenseSummary from './AddLicenseSummary'
@@ -99,10 +102,10 @@ function AddLicense(): ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.POST('licenses', licensePayload, session.user.access_token)
-        if (response.status == HttpStatus.CREATED) {
+        if (response.status == StatusCodes.CREATED) {
             MessageService.success(t('License added successfully'))
             router.push('/licenses')
-        } else if (response.status == HttpStatus.CONFLICT) {
+        } else if (response.status == StatusCodes.CONFLICT) {
             MessageService.error(t('License shortname has already taken'))
         } else {
             MessageService.error(t('Create license failed'))

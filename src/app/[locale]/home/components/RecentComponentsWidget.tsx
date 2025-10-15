@@ -10,15 +10,15 @@
 
 'use-client'
 
-import React, { ReactNode, useCallback, useEffect, useState, type JSX } from 'react'
-
-import { Component, Embedded, HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import React, { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { Component, Embedded } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
@@ -32,10 +32,10 @@ function RecentComponentsWidget(): ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedComponents
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -59,7 +59,10 @@ function RecentComponentsWidget(): ReactNode {
                             <li key={item.name}>
                                 <Link
                                     href={'components/detail/' + item.id}
-                                    style={{ color: 'orange', textDecoration: 'none' }}
+                                    style={{
+                                        color: 'orange',
+                                        textDecoration: 'none',
+                                    }}
                                 >
                                     {item.name}
                                 </Link>
@@ -76,7 +79,10 @@ function RecentComponentsWidget(): ReactNode {
             .finally(() => {
                 setLoading(false)
             })
-    }, [fetchData, reload])
+    }, [
+        fetchData,
+        reload,
+    ])
 
     return (
         <div className='content-container'>
@@ -85,7 +91,14 @@ function RecentComponentsWidget(): ReactNode {
                 setReload={setReload}
             />
             {loading == false ? (
-                <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentComponent}</ul>
+                <ul
+                    style={{
+                        listStyleType: 'disc',
+                        color: 'black',
+                    }}
+                >
+                    {recentComponent}
+                </ul>
             ) : (
                 <div className='col-12'>
                     <Spinner className='spinner' />

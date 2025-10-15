@@ -11,16 +11,16 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState, type JSX } from 'react'
+import { type JSX, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
-
+import { PiCheckBold } from 'react-icons/pi'
 import { _ } from '@/components/sw360'
-import { Embedded, HttpStatus, Project, Release } from '@/object-types'
+import { Embedded, Project, Release } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PiCheckBold } from 'react-icons/pi'
 import ProjectTable from './ProjectTable'
 
 interface Props {
@@ -48,7 +48,9 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleCloseDialog = () => {
         linkedProjectIds.current = []
@@ -66,7 +68,13 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
             return signOut()
         }
         if (selectedProjectId !== undefined) {
-            ApiUtils.PATCH(`projects/${selectedProjectId}/releases`, [releaseId], session.user.access_token)
+            ApiUtils.PATCH(
+                `projects/${selectedProjectId}/releases`,
+                [
+                    releaseId,
+                ],
+                session.user.access_token,
+            )
                 .then(() => {
                     setShowMessage(true)
                 })
@@ -80,7 +88,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
             return signOut()
         }
         const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedProjects
             if (!CommonUtils.isNullOrUndefined(data._embedded['sw360:projects'])) {
                 data._embedded['sw360:projects'].forEach((project: Project) => {
@@ -151,7 +159,10 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                 setLinkingReleaseName(`${release.name}(${release.version})`)
             })
             .catch((err) => console.error(err))
-    }, [releaseId, session])
+    }, [
+        releaseId,
+        session,
+    ])
 
     const columns: {
         id: string
@@ -198,7 +209,11 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                     <Modal.Header closeButton>
                         <Modal.Title>{t('Link Release to Project')}</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body style={{ overflow: 'scroll' }}>
+                    <Modal.Body
+                        style={{
+                            overflow: 'scroll',
+                        }}
+                    >
                         <Alert
                             variant='success'
                             show={showMessage}
@@ -247,7 +262,9 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                         type='checkbox'
                                         id='show-linked-project'
                                         label={t('Show already linked projects')}
-                                        style={{ fontWeight: 'bold' }}
+                                        style={{
+                                            fontWeight: 'bold',
+                                        }}
                                         defaultChecked={withLinkedProject}
                                         onClick={() => setWithLinkedProject(!withLinkedProject)}
                                     />

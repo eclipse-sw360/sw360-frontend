@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -17,7 +18,7 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
+import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
@@ -81,10 +82,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ModerationRequestDetails
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -127,11 +128,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     updatedAcceptPayload,
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have accepted the moderation request'))
                     router.push('/requests')
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
@@ -161,11 +162,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     updatedRejectPayload,
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have rejected the moderation request'))
                     router.push('/requests')
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
@@ -195,11 +196,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     updatedPostponePayload,
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have postponed the moderation request'))
                     router.push('/requests')
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
@@ -227,15 +228,15 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 updatedUnassignPayload,
                 session.user.access_token,
             )
-            if (response.status == HttpStatus.ACCEPTED) {
+            if (response.status == StatusCodes.ACCEPTED) {
                 await response.json()
                 MessageService.success(t('You have unassigned yourself from the moderation request'))
                 router.push('/requests')
-            } else if (response.status == HttpStatus.CONFLICT) {
+            } else if (response.status == StatusCodes.CONFLICT) {
                 await response.json()
                 MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
                 router.push('/requests')
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 MessageService.error(t('There are some errors while updating moderation request'))

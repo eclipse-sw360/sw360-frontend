@@ -10,12 +10,13 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import { HttpStatus } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -54,10 +55,10 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await sendOAuthClientRequest(clientId, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Client deleted successfully'))
                 setShow(false)
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 MessageService.error(t('Error when processing'))

@@ -11,6 +11,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { notFound, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -19,7 +20,6 @@ import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import {
     Embedded,
     ErrorDetails,
-    HttpStatus,
     PageableQueryParam,
     PaginationMeta,
     Release,
@@ -152,7 +152,7 @@ const LinkedReleasesDialog = ({
                 ),
             )
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }

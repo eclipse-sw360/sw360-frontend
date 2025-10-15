@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -20,7 +21,7 @@ import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { ConfigKeys, HttpStatus, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
+import { ConfigKeys, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -110,9 +111,9 @@ function AddProjects(): JSX.Element {
                     return signOut()
                 }
                 const response = await ApiUtils.GET('configurations', session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     setDependencyNetworkFeatureEnabled(false)
                     return
                 }
@@ -157,7 +158,7 @@ function AddProjects(): JSX.Element {
             const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
 
-            if (response.status == HttpStatus.CREATED) {
+            if (response.status == StatusCodes.CREATED) {
                 const data = (await response.json()) as Project
                 MessageService.success(t('Your project is created'))
                 router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)

@@ -11,13 +11,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
-import { ActionType, Component, HttpStatus } from '@/object-types'
+import { ActionType, Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 const DEFAULT_COMPONENT_INFO: Component = {
@@ -85,28 +86,28 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         })
         const response = await ApiUtils.DELETE(url, session.user.access_token)
         try {
-            if (response.status === HttpStatus.MULTIPLE_STATUS) {
+            if (response.status === StatusCodes.MULTI_STATUS) {
                 const body = (await response.json()) as Array<DeleteResponse>
                 const deleteStatus = body[0].status
-                if (deleteStatus === HttpStatus.OK) {
+                if (deleteStatus === StatusCodes.OK) {
                     displayMessage('success', t('Delete component success!'))
                     if (actionType === ActionType.EDIT) {
                         router.push('/components')
                     }
                     setReloadPage(true)
-                } else if (deleteStatus === HttpStatus.CONFLICT) {
+                } else if (deleteStatus === StatusCodes.CONFLICT) {
                     displayMessage(
                         'danger',
                         t(
                             'The component cannot be deleted, since it contains releases Please delete the releases first',
                         ),
                     )
-                } else if (deleteStatus === HttpStatus.ACCEPTED) {
+                } else if (deleteStatus === StatusCodes.ACCEPTED) {
                     displayMessage('success', t('Created moderation request'))
                 } else {
                     displayMessage('danger', t('Error when processing'))
                 }
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 handleError()
@@ -126,7 +127,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 session.user.access_token,
                 signal,
             )
-            if (componentsResponse.status === HttpStatus.OK) {
+            if (componentsResponse.status === StatusCodes.OK) {
                 const component = (await componentsResponse.json()) as Component
                 setComponent(component)
                 setDependencies({
@@ -136,7 +137,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                             ? component._embedded['sw360:attachments'].length
                             : 0,
                 })
-            } else if (componentsResponse.status === HttpStatus.UNAUTHORIZED) {
+            } else if (componentsResponse.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 setComponent(DEFAULT_COMPONENT_INFO)

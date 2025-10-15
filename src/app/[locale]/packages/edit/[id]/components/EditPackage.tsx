@@ -9,15 +9,16 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { HttpStatus, Package, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Package, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
 
 function EditPackage({ packageId }: { packageId: string }): ReactNode {
@@ -31,7 +32,9 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         void (async () => {
@@ -39,7 +42,7 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token)
-                if (response.status === HttpStatus.OK) {
+                if (response.status === StatusCodes.OK) {
                     setPackagePayload((await response.json()) as Package)
                 } else {
                     notFound()
@@ -63,10 +66,10 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
                 },
                 session.user.access_token,
             )
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 MessageService.success(t('Package updated successfully'))
                 router.push(`/packages/detail/${packageId}`)
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 const res = (await response.json()) as Record<string, string>
@@ -123,4 +126,6 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(EditPackage, [UserGroupType.SECURITY_USER])
+export default AccessControl(EditPackage, [
+    UserGroupType.SECURITY_USER,
+])

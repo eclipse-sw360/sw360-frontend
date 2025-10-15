@@ -11,12 +11,13 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-import { Embedded, HttpStatus, User } from '@/object-types'
+import { Embedded, User } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import UsersTable from './UsersTable'
@@ -25,7 +26,9 @@ interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
     setSelectedUsers: (users: { [k: string]: string }) => void
-    selectedUsers: { [k: string]: string }
+    selectedUsers: {
+        [k: string]: string
+    }
     multiple: boolean
 }
 
@@ -50,7 +53,9 @@ const SelectUsersDialog = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleCloseDialog = () => {
         setShow(!show)
@@ -59,13 +64,16 @@ const SelectUsersDialog = ({
 
     const searchUsers = async (text: string) => {
         const session = await getSession()
-        const queryUrl = CommonUtils.createUrlWithParams(`users`, { givenname: text, luceneSearch: 'true' })
+        const queryUrl = CommonUtils.createUrlWithParams(`users`, {
+            givenname: text,
+            luceneSearch: 'true',
+        })
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
         const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }

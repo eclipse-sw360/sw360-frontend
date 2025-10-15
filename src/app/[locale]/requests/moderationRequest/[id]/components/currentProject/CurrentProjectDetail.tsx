@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -21,7 +22,7 @@ import EccDetails from '@/app/[locale]/projects/detail/[id]/components/Ecc'
 import LicenseClearing from '@/app/[locale]/projects/detail/[id]/components/LicenseClearing'
 import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
-import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
+import { AdministrationDataType, SummaryDataType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 export default function CurrentProjectDetail({
@@ -55,9 +56,9 @@ export default function CurrentProjectDetail({
                     session.user.access_token,
                     signal,
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
 

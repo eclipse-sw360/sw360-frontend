@@ -9,13 +9,20 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
-import { ActionType, AdministrationDataType, ClearingDetailsCount, HttpStatus, SummaryDataType, UserGroupType } from '@/object-types'
+import {
+    ActionType,
+    AdministrationDataType,
+    ClearingDetailsCount,
+    SummaryDataType,
+    UserGroupType,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
@@ -84,9 +91,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                     session.user.access_token,
                     signal,
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
 
@@ -116,11 +123,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/clearingDetailsCount`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const data = (await response.json()) as ClearingDetailsCount
@@ -131,9 +138,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 }
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
-            }})()
-            return () => controller.abort()
-    }, [projectId, session])
+            }
+        })()
+        return () => controller.abort()
+    }, [
+        projectId,
+        session,
+    ])
 
     const handleEditProject = (projectId: string) => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -415,8 +426,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 <Spinner className='spinner' />
                                             </div>
                                         ) : (
-                                            <Administration data={administrationData}
-                                                            clearingDetailCount={clearingDetailCount}
+                                            <Administration
+                                                data={administrationData}
+                                                clearingDetailCount={clearingDetailCount}
                                             />
                                         )}
                                     </Tab.Pane>

@@ -11,6 +11,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -31,7 +32,6 @@ import {
     DocumentTypes,
     Embedded,
     ErrorDetails,
-    HttpStatus,
     LinkedVulnerability,
     PageableQueryParam,
     PaginationMeta,
@@ -75,10 +75,10 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         async (url: string) => {
             if (CommonUtils.isNullOrUndefined(session.data)) return
             const response = await ApiUtils.GET(url, session.data.user.access_token)
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
                 return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 return undefined
@@ -253,7 +253,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

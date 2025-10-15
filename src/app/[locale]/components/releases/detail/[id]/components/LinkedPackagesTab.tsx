@@ -9,18 +9,19 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from '@/components/sw360'
-import { Embedded, ErrorDetails, HttpStatus, LinkedPackage } from '@/object-types'
+import { Embedded, ErrorDetails, LinkedPackage } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useEffect, useMemo, useState, type JSX } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
 
 interface Props {
     releaseId: string
@@ -36,7 +37,9 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const columns = useMemo<ColumnDef<LinkedPackage>[]>(
         () => [
@@ -128,11 +131,18 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [packagesData, setPackagesData] = useState<LinkedPackage[]>(() => [])
-    const memoizedData = useMemo(() => packagesData, [packagesData])
+    const memoizedData = useMemo(
+        () => packagesData,
+        [
+            packagesData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -149,7 +159,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -173,7 +183,9 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [session])
+    }, [
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

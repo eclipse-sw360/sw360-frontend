@@ -10,12 +10,13 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useRef, useState, type JSX } from 'react'
+import React, { type JSX, useRef, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 
-import { Attachment, Embedded, HttpStatus } from '@/object-types'
+import { Attachment, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import CommonUtils from '@/utils/common.utils'
@@ -65,12 +66,12 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const uploadAttachmentResponse = await ApiUtils.POST('attachments', formData, session.user.access_token)
-        if (uploadAttachmentResponse.status === HttpStatus.UNAUTHORIZED) {
+        if (uploadAttachmentResponse.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
 
-        if (uploadAttachmentResponse.status !== HttpStatus.OK) {
+        if (uploadAttachmentResponse.status !== StatusCodes.OK) {
             MessageService.error(t('Something went wrong'))
             return
         }
@@ -93,13 +94,17 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                 isAddedNew: true,
             })
         })
-        setAttachmentsData([...attachmentsData])
+        setAttachmentsData([
+            ...attachmentsData,
+        ])
         handleCloseDialog()
         setUploading(false)
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...files]
+        const list = [
+            ...files,
+        ]
         list.splice(index, 1)
         setFiles(list)
     }

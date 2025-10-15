@@ -10,14 +10,14 @@
 
 'use-client'
 
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-
-import { Component, Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
-import Link from 'next/link'
 import { Spinner } from 'react-bootstrap'
+import { Component, Embedded, ReleaseDetail } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
@@ -34,10 +34,10 @@ function MySubscriptionsWidget(): ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedComponents & EmbeddedReleases
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined
@@ -77,7 +77,10 @@ function MySubscriptionsWidget(): ReactNode {
             .finally(() => {
                 setLoading(false)
             })
-    }, [fetchData, reload])
+    }, [
+        fetchData,
+        reload,
+    ])
 
     return (
         <div className='content-container'>
@@ -90,7 +93,12 @@ function MySubscriptionsWidget(): ReactNode {
                     {componentData.length > 0 && (
                         <>
                             <h3 className='fw-bold titleSubSideBar'>{t('Components')}</h3>
-                            <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                            <ul
+                                style={{
+                                    listStyleType: 'disc',
+                                    color: 'black',
+                                }}
+                            >
                                 {componentData.map((item: Component) => (
                                     <li key={item.id}>
                                         <Link
@@ -110,7 +118,12 @@ function MySubscriptionsWidget(): ReactNode {
                     {releaseData.length > 0 && (
                         <>
                             <h3 className='fw-bold titleSubSideBar'>{t('Releases')}</h3>
-                            <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                            <ul
+                                style={{
+                                    listStyleType: 'disc',
+                                    color: 'black',
+                                }}
+                            >
                                 {releaseData.map((item: ReleaseDetail) => (
                                     <li key={item.id}>
                                         <Link

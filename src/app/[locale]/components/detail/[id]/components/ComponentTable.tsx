@@ -9,31 +9,45 @@
 
 'use client'
 
-import { Component, Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
+import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
 
 export default function ComponentTable({
     component,
     setComponent,
-}: Readonly<{ component: Component | null; setComponent: Dispatch<SetStateAction<null | Component>> }>): ReactNode {
+}: Readonly<{
+    component: Component | null
+    setComponent: Dispatch<SetStateAction<null | Component>>
+}>): ReactNode {
     const t = useTranslations('default')
     const session = useSession()
-    const [search, setSearch] = useState<{ name: string; lucenseSearch?: boolean }>({ name: '' })
+    const [search, setSearch] = useState<{
+        name: string
+        lucenseSearch?: boolean
+    }>({
+        name: '',
+    })
 
     const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.currentTarget.value === '') {
-            setSearch({ name: '' })
+            setSearch({
+                name: '',
+            })
         } else {
-            setSearch({ name: event.currentTarget.value, lucenseSearch: true })
+            setSearch({
+                name: event.currentTarget.value,
+                lucenseSearch: true,
+            })
         }
     }
 
@@ -41,7 +55,9 @@ export default function ComponentTable({
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const columns = useMemo<ColumnDef<Component>[]>(
         () => [
@@ -85,7 +101,10 @@ export default function ComponentTable({
                 },
             },
         ],
-        [t, component],
+        [
+            t,
+            component,
+        ],
     )
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -100,7 +119,12 @@ export default function ComponentTable({
         number: 0,
     })
     const [componentData, setComponentData] = useState<Component[]>(() => [])
-    const memoizedData = useMemo(() => componentData, [componentData])
+    const memoizedData = useMemo(
+        () => componentData,
+        [
+            componentData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -119,14 +143,18 @@ export default function ComponentTable({
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components`,
                     Object.fromEntries(
-                        Object.entries({ ...search, ...pageableQueryParam, allDetails: true }).map(([key, value]) => [
+                        Object.entries({
+                            ...search,
+                            ...pageableQueryParam,
+                            allDetails: true,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -151,7 +179,11 @@ export default function ComponentTable({
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, session, search])
+    }, [
+        pageableQueryParam,
+        session,
+        search,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

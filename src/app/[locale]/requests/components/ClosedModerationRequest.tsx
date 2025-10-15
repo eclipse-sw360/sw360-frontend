@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -17,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { _, ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { Embedded, ErrorDetails, HttpStatus, ModerationRequest, RequestType } from '@/object-types'
+import { Embedded, ErrorDetails, ModerationRequest, RequestType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
@@ -166,7 +167,7 @@ function ClosedModerationRequest(): ReactNode {
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

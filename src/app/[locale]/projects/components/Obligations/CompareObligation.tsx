@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -17,7 +18,7 @@ import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'r
 import { FaInfoCircle } from 'react-icons/fa'
 
 import { _, Table } from '@/components/sw360'
-import { HttpStatus, Project } from '@/object-types'
+import { Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 const Capitalize = (text: string) =>
@@ -179,9 +180,9 @@ export default function CompareObligation({
                 `projects?name=${searchValue}&luceneSearch=false`,
                 session.user.access_token,
             )
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
-            } else if (response.status !== HttpStatus.OK) {
+            } else if (response.status !== StatusCodes.OK) {
                 return notFound()
             }
             const data = (await response.json()) as Project

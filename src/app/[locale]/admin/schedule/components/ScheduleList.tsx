@@ -10,12 +10,13 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { JSX, useEffect } from 'react'
 import { useConfigValue } from '@/contexts'
-import { ErrorDetails, HttpStatus, UIConfigKeys } from '@/object-types'
+import { ErrorDetails, UIConfigKeys } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import { ScheduleItem } from './ScheduleItem'
@@ -39,10 +40,10 @@ export default function VendorsList(): JSX.Element {
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
             const response = await ApiUtils.POST('schedule/unscheduleAllServices', {}, session.user.access_token)
-            if (response.status == HttpStatus.ACCEPTED) {
+            if (response.status == StatusCodes.ACCEPTED) {
                 MessageService.success(t('Every task unscheduled successfully'))
                 router.push('/admin/schedule')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails
@@ -75,10 +76,10 @@ export default function VendorsList(): JSX.Element {
                 response = await ApiUtils.POST(serviceEndpoint, {}, session.user.access_token)
             }
 
-            if (response.status == HttpStatus.ACCEPTED) {
+            if (response.status == StatusCodes.ACCEPTED) {
                 MessageService.success(successMessage)
                 router.push('/admin/schedule')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails

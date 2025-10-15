@@ -9,21 +9,25 @@
 // License-Filename: LICENSE
 
 'use client'
-import UserEditForm from '@/components/UserEditForm/UserEditForm'
-import UserOperationType from '@/components/UserEditForm/UserOperationType'
-import { HttpStatus, User, UserPayload } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
-import { notFound, useParams, useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
+import UserEditForm from '@/components/UserEditForm/UserEditForm'
+import UserOperationType from '@/components/UserEditForm/UserOperationType'
+import { User, UserPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import ToggleUserActiveModal from './components/ToggleUserActiveModal'
 
 const AdminEditUserPage = (): JSX.Element => {
     const router = useRouter()
-    const params = useParams<{ id: string }>()
+    const params = useParams<{
+        id: string
+    }>()
     const t = useTranslations('default')
     const [userPayload, setUserPayload] = useState<UserPayload>({
         email: '',
@@ -47,9 +51,9 @@ const AdminEditUserPage = (): JSX.Element => {
 
                 const queryUrl = `users/byid/${params.id}`
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const user = (await response.json()) as User
@@ -82,13 +86,13 @@ const AdminEditUserPage = (): JSX.Element => {
                 delete userPayload.password
             }
             const response = await ApiUtils.PATCH(`users/${params.id}`, userPayload, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 router.push(`/admin/users/details/${params.id}`)
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
                 return signOut()
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('User with the same email already exists'))
             } else {
                 MessageService.error(t('Something went wrong'))
@@ -99,7 +103,10 @@ const AdminEditUserPage = (): JSX.Element => {
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setUserPayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+        setUserPayload((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }))
     }
 
     const handleCancel = () => {

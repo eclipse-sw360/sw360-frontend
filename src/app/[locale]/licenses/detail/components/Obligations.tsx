@@ -11,16 +11,17 @@
 
 'use client'
 
-import TableLicense from '@/components/LinkedObligations/TableLicense'
-import { ErrorDetails, HttpStatus, LicenseDetail, Obligation } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
+import { useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _ } from 'next-sw360'
-import { useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
+import TableLicense from '@/components/LinkedObligations/TableLicense'
+import { ErrorDetails, LicenseDetail, Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import styles from '../detail.module.css'
 
 interface Props {
@@ -43,7 +44,9 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const buildAttachmentDetail = (item: Obligation) => {
         return (event: React.MouseEvent<HTMLElement>) => {
@@ -91,7 +94,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -138,7 +141,10 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             }
         })()
         return () => controller.abort()
-    }, [params, licenseId])
+    }, [
+        params,
+        licenseId,
+    ])
 
     const columns = [
         {
@@ -196,7 +202,9 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             formatter: (item: Obligation) =>
                 _(
                     <Form.Check
-                        style={{ textAlign: 'center' }}
+                        style={{
+                            textAlign: 'center',
+                        }}
                         name='obligationId'
                         type='checkbox'
                         defaultChecked={!CommonUtils.isNullEmptyOrUndefinedArray(item.whitelist)}

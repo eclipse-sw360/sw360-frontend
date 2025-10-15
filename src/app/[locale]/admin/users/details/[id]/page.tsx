@@ -11,16 +11,19 @@
 
 'use client'
 
-import { PageButtonHeader, PageSpinner } from '@/components/sw360'
-import { HttpStatus, User } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useParams } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
+import { PageButtonHeader, PageSpinner } from '@/components/sw360'
+import { User } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 const UserDetailPage = (): JSX.Element => {
-    const params = useParams<{ id: string }>()
+    const params = useParams<{
+        id: string
+    }>()
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
     const { status } = useSession()
@@ -29,7 +32,9 @@ const UserDetailPage = (): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         ;(async () => {
@@ -37,9 +42,9 @@ const UserDetailPage = (): JSX.Element => {
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
             const response = await ApiUtils.GET(`users/byid/${params.id}`, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
-            } else if (response.status !== HttpStatus.OK) {
+            } else if (response.status !== StatusCodes.OK) {
                 return notFound()
             }
             const user = (await response.json()) as User
@@ -47,7 +52,11 @@ const UserDetailPage = (): JSX.Element => {
         })()
     }, [])
     const headerbuttons = {
-        'Edit User': { link: `/admin/users/edit/${params.id}`, type: 'primary', name: t('Edit User') },
+        'Edit User': {
+            link: `/admin/users/edit/${params.id}`,
+            type: 'primary',
+            name: t('Edit User'),
+        },
     }
 
     return user === undefined ? (
@@ -66,7 +75,13 @@ const UserDetailPage = (): JSX.Element => {
                 </thead>
                 <tbody>
                     <tr>
-                        <td style={{ width: '30%' }}>{t('Given Name')}:</td>
+                        <td
+                            style={{
+                                width: '30%',
+                            }}
+                        >
+                            {t('Given Name')}:
+                        </td>
                         <td>{user.givenName}</td>
                     </tr>
                     <tr>

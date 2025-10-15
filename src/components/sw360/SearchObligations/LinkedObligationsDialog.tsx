@@ -12,13 +12,14 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table, TableSearch } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
-import { Embedded, ErrorDetails, HttpStatus, LicensePayload, NestedRows, Obligation } from '@/object-types'
+import { Embedded, ErrorDetails, LicensePayload, NestedRows, Obligation } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import styles from './CssButton.module.css'
@@ -199,7 +200,7 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

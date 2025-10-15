@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
@@ -20,7 +21,6 @@ import {
     ECCInterface,
     type Embedded,
     ErrorDetails,
-    HttpStatus,
     PageableQueryParam,
     PaginationMeta,
     UserGroupType,
@@ -156,7 +156,7 @@ function ECC(): ReactNode {
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

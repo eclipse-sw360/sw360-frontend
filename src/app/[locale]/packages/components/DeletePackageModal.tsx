@@ -9,15 +9,15 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState, type JSX } from 'react'
+import { Dispatch, type JSX, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -52,7 +52,9 @@ export default function DeletePackageModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -72,7 +74,7 @@ export default function DeletePackageModal({
 
             const response = await ApiUtils.DELETE(`packages/${modalMetaData.packageId}`, session.user.access_token)
 
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 if (isEditPage) {
                     MessageService.success(t('Package deleted successfully'))
                     setModalMetaData({
@@ -101,12 +103,17 @@ export default function DeletePackageModal({
                         onDeleteSuccess(modalMetaData.packageId)
                     }
                 }
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 if (isEditPage) {
                     MessageService.error(t('Package cannot be deleted'))
-                    setModalMetaData({ show: false, packageId: '', packageName: '', packageVersion: '' })
+                    setModalMetaData({
+                        show: false,
+                        packageId: '',
+                        packageName: '',
+                        packageVersion: '',
+                    })
                     router.push(`/packages/edit/${modalMetaData.packageId}`)
                 } else {
                     setAlert({
@@ -145,7 +152,10 @@ export default function DeletePackageModal({
             scrollable
         >
             <Modal.Header
-                style={{ backgroundColor: '#feefef', color: '#da1414' }}
+                style={{
+                    backgroundColor: '#feefef',
+                    color: '#da1414',
+                }}
                 closeButton
             >
                 <Modal.Title id='delete-all-license-info-modal'>

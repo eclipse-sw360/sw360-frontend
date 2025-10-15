@@ -9,27 +9,20 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Breadcrumb } from 'next-sw360'
+import { type JSX, useEffect, useState } from 'react'
+import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import {
-    HttpStatus,
-    InputKeyValue,
-    Project,
-    ProjectPayload,
-    ReleaseDetail,
-    UserGroupType,
-    Vendor,
-} from '@/object-types'
+import { InputKeyValue, Project, ProjectPayload, ReleaseDetail, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Breadcrumb } from 'next-sw360'
-import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
-import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 interface Props {
     projectId: string
@@ -69,12 +62,24 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
 
     const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
 
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [securityResponsibles, setSecurityResponsibles] = useState<{ [k: string]: string }>({})
-    const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
-    const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
-    const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [securityResponsibles, setSecurityResponsibles] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectOwner, setProjectOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectManager, setProjectManager] = useState<{
+        [k: string]: string
+    }>({})
+    const [leadArchitect, setLeadArchitect] = useState<{
+        [k: string]: string
+    }>({})
     const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()
     const [isDuplicateProjectFetched, setIsDuplicateProjectFetched] = useState(false)
 
@@ -122,7 +127,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
@@ -159,7 +166,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
         try {
             const map = new Map<string, LinkedReleaseData>()
-            const linkedReleasesObject: { [key: string]: LinkedReleaseProps } = {}
+            const linkedReleasesObject: {
+                [key: string]: LinkedReleaseProps
+            } = {}
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             for (const l of linkedReleases) {
@@ -196,7 +205,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const project = (await response.json()) as Project
@@ -311,7 +320,10 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 console.error(e)
             }
         })()
-    }, [projectId, setProjectPayload])
+    }, [
+        projectId,
+        setProjectPayload,
+    ])
 
     const createProject = async () => {
         const session = await getSession()
@@ -322,7 +334,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 : `projects/duplicate/${projectId}`
         const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
 
-        if (response.status == HttpStatus.CREATED) {
+        if (response.status == StatusCodes.CREATED) {
             const data = (await response.json()) as Project
             MessageService.success(t('Your project is created'))
             router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
@@ -469,4 +481,6 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(DuplicateProject, [UserGroupType.SECURITY_USER])
+export default AccessControl(DuplicateProject, [
+    UserGroupType.SECURITY_USER,
+])

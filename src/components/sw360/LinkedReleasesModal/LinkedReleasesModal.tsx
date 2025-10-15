@@ -9,16 +9,17 @@
 
 'use client'
 
-import { Embedded, HttpStatus, LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import Link from 'next/link'
-import { ChangeEvent, useRef, useState, type JSX } from 'react'
+import { _, Table } from 'next-sw360'
+import { ChangeEvent, type JSX, useRef, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
+import { Embedded, LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     setLinkedReleaseData: React.Dispatch<React.SetStateAction<Map<string, LinkedReleaseData>>>
@@ -76,13 +77,13 @@ export default function LinkedReleasesModal({
                 allDetails: 'true',
             })
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
                 setLoading(false)
                 return
             }
 
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 MessageService.error(t('Error while processing'))
                 return
             }
@@ -116,7 +117,9 @@ export default function LinkedReleasesModal({
     const projectPayloadSetter = (projectPayloadData: Map<string, ReleaseRelationship>) => {
         try {
             if (projectPayloadData.size > 0) {
-                const updatedProjectPayload = { ...projectPayload }
+                const updatedProjectPayload = {
+                    ...projectPayload,
+                }
                 if (updatedProjectPayload.linkedReleases === undefined) {
                     updatedProjectPayload.linkedReleases = {}
                 }
@@ -265,7 +268,9 @@ export default function LinkedReleasesModal({
                                     type='submit'
                                     variant='secondary'
                                     onClick={() =>
-                                        void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })
+                                        void handleSearch({
+                                            searchValue: searchValueRef.current?.value ?? '',
+                                        })
                                     }
                                 >
                                     {t('Search')}

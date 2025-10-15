@@ -9,21 +9,22 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
-import { Attachment, Embedded, ErrorDetails, HttpStatus, NestedRows, UserGroupType } from '@/object-types'
-import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
-import Link from 'next/link'
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 import { LuDownload } from 'react-icons/lu'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
+import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@/object-types'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import ImportSummary from '../../../../../../object-types/cyclonedx/ImportSummary'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
@@ -47,7 +48,7 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
                 session.user.access_token,
             )
 
-            if (res.status === HttpStatus.OK) {
+            if (res.status === StatusCodes.OK) {
                 const data = (await res.json()) as ImportSummary
                 setImportStatusData(data)
             } else {
@@ -67,7 +68,9 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const columns = useMemo<ColumnDef<NestedRows<Attachment>>[]>(
         () => [
@@ -238,11 +241,18 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [attachmentData, setAttachmentData] = useState<NestedRows<Attachment>[]>(() => [])
-    const memoizedData = useMemo(() => attachmentData, [attachmentData])
+    const memoizedData = useMemo(
+        () => attachmentData,
+        [
+            attachmentData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -262,7 +272,7 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
                     session.user.access_token,
                     signal,
                 )
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -272,7 +282,15 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:attachments'])
                         ? []
                         : data['_embedded']['sw360:attachments'].map(
-                              (att) => ({ node: att, children: [{ node: att }] }) as NestedRows<Attachment>,
+                              (att) =>
+                                  ({
+                                      node: att,
+                                      children: [
+                                          {
+                                              node: att,
+                                          },
+                                      ],
+                                  }) as NestedRows<Attachment>,
                           ),
                 )
             } catch (error) {
@@ -288,7 +306,9 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [session])
+    }, [
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -365,4 +385,6 @@ function ProjectAttachments({ projectId }: { projectId: string }): JSX.Element {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(ProjectAttachments, [UserGroupType.SECURITY_USER])
+export default AccessControl(ProjectAttachments, [
+    UserGroupType.SECURITY_USER,
+])

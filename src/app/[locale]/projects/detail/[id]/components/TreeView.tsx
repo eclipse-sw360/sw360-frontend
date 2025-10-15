@@ -17,6 +17,7 @@ import {
     getExpandedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -30,7 +31,6 @@ import {
     Embedded,
     ErrorDetails,
     FilterOption,
-    HttpStatus,
     LicenseClearing,
     NestedRows,
     Project,
@@ -674,7 +674,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     .join('&')}`
                 const response = await ApiUtils.GET(url, session.user.access_token, signal)
 
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -719,7 +719,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     signal,
                 )
 
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -20,7 +21,6 @@ import { FaInfoCircle } from 'react-icons/fa'
 import {
     Embedded,
     ErrorDetails,
-    HttpStatus,
     LinkedProjectData,
     PageableQueryParam,
     PaginationMeta,
@@ -326,7 +326,7 @@ export default function LinkProjectsModal({
                 ),
             )
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }

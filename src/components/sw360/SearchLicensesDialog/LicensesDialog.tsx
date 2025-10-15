@@ -10,28 +10,32 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRef, useState, type JSX } from 'react'
+import { type JSX, useRef, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
-
-import { Embedded, HttpStatus, LicenseDetail } from '@/object-types'
+import { Embedded, LicenseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
 import LicensesTable from './LicensesTable'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
     selectLicenses: (licenses: { [k: string]: string }) => void
-    releaseLicenses: { [k: string]: string }
+    releaseLicenses: {
+        [k: string]: string
+    }
 }
 
 type EmbeddedLicenses = Embedded<LicenseDetail, 'sw360:licenses'>
 
 const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [selectedLicenses, setSelectedLicenses] = useState<{ [k: string]: string }>(releaseLicenses)
+    const [selectedLicenses, setSelectedLicenses] = useState<{
+        [k: string]: string
+    }>(releaseLicenses)
     const [licenseDatas, setLicenseDatas] = useState<Array<(LicenseDetail | string)[]>>([])
 
     const searchText = useRef<string>('')
@@ -48,10 +52,10 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
         }
         const queryUrl = CommonUtils.createUrlWithParams(`licenses`, {})
         const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return
-        } else if (response.status !== HttpStatus.OK) {
+        } else if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Error while processing'))
             return
         }

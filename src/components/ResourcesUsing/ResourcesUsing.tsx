@@ -9,10 +9,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
-
-import { DocumentTypes, ErrorDetails, HttpStatus, Resources } from '@/object-types'
+import { DocumentTypes, ErrorDetails, Resources } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ComponentsUsing from './ComponentsUsing'
@@ -52,7 +52,7 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
                     session.data.user.access_token,
                     signal,
                 )
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

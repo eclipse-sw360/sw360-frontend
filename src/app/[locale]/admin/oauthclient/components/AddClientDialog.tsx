@@ -10,11 +10,13 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
-import { HttpStatus, OAuthClient } from '@/object-types'
+import { OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -184,7 +186,7 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await sendOAuthClientRequest(requestBody, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             MessageService.success(
                 client === null ? t('OAuth client created successfully') : t('OAuth client updated successfully'),
             )

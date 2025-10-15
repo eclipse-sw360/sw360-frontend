@@ -9,21 +9,22 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
-import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useMemo, useState, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { IoMdGitMerge } from 'react-icons/io'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
@@ -34,7 +35,7 @@ const DeleteVendor = async (vendorId: string) => {
             return signOut()
         }
         const response = await ApiUtils.DELETE(`vendors/${vendorId}`, session.user.access_token)
-        if (response.status !== HttpStatus.NO_CONTENT) {
+        if (response.status !== StatusCodes.NO_CONTENT) {
             const err = (await response.json()) as ErrorDetails
             throw new Error(err.message)
         }
@@ -62,7 +63,10 @@ function DeletionModal({
             onHide={() => setVendor(null)}
         >
             <Modal.Header
-                style={{ backgroundColor: '#feefef', color: '#da1414' }}
+                style={{
+                    backgroundColor: '#feefef',
+                    color: '#da1414',
+                }}
                 closeButton
             >
                 <Modal.Title className='fw-bold'>
@@ -111,7 +115,9 @@ export default function VendorsList(): JSX.Element {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const handleAddVendor = () => {
         router.push('/admin/vendors/add')
@@ -197,7 +203,9 @@ export default function VendorsList(): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -211,7 +219,12 @@ export default function VendorsList(): JSX.Element {
         number: 0,
     })
     const [vendorData, setVendorData] = useState<Vendor[]>(() => [])
-    const memoizedData = useMemo(() => vendorData, [vendorData])
+    const memoizedData = useMemo(
+        () => vendorData,
+        [
+            vendorData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -229,10 +242,15 @@ export default function VendorsList(): JSX.Element {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vendors`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -258,7 +276,10 @@ export default function VendorsList(): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, session])
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

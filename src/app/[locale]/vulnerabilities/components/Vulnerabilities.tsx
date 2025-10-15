@@ -9,10 +9,20 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { AdvancedSearch, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
+import { MdDeleteOutline } from 'react-icons/md'
 import {
     Embedded,
     ErrorDetails,
-    HttpStatus,
     PageableQueryParam,
     PaginationMeta,
     UserGroupType,
@@ -20,16 +30,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { AdvancedSearch, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
-import { MdDeleteOutline } from 'react-icons/md'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
 
 type EmbeddedVulnerabilities = Embedded<Vulnerability, 'sw360:vulnerabilityApiDTOes'>
@@ -58,7 +58,9 @@ function Vulnerabilities(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
@@ -118,7 +120,11 @@ function Vulnerabilities(): ReactNode {
                     const { cvss, cvssTime } = row.original
                     return (
                         <>
-                            <span style={{ color: 'red' }}>
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
                                 {cvss && <>{cvss}</>}
                                 {cvssTime && <>{` (as of: ${cvssTime.substring(0, 10)})`}</>}
                             </span>
@@ -171,7 +177,10 @@ function Vulnerabilities(): ReactNode {
                                     <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                         <Link
                                             href={`/vulnerabilities/edit/${externalId}`}
-                                            style={{ color: 'gray', fontSize: '14px' }}
+                                            style={{
+                                                color: 'gray',
+                                                fontSize: '14px',
+                                            }}
                                         >
                                             <FaPencilAlt className='btn-icon' />
                                         </Link>
@@ -196,11 +205,18 @@ function Vulnerabilities(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [vulnerabilityData, setVulnerabilityData] = useState<Vulnerability[]>(() => [])
-    const memoizedData = useMemo(() => vulnerabilityData, [vulnerabilityData])
+    const memoizedData = useMemo(
+        () => vulnerabilityData,
+        [
+            vulnerabilityData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -222,14 +238,17 @@ function Vulnerabilities(): ReactNode {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vulnerabilities`,
                     Object.fromEntries(
-                        Object.entries({ ...searchParams, ...pageableQueryParam }).map(([key, value]) => [
+                        Object.entries({
+                            ...searchParams,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -255,7 +274,11 @@ function Vulnerabilities(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, params.toString(), session])
+    }, [
+        pageableQueryParam,
+        params.toString(),
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
