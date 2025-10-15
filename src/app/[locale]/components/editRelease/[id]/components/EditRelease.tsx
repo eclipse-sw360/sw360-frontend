@@ -45,6 +45,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
+import EditLinkedPackages from './EditLinkedPackages'
 import EditSPDXDocument from './EditSPDXDocument'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
@@ -585,6 +586,16 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                 <LinkedReleases
                                     actionType={ActionType.EDIT}
                                     release={release}
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ReleaseTabIds.LINKED_PACKAGES ? true : false}
+                            >
+                                <EditLinkedPackages
+                                    releaseId={releaseId}
                                     releasePayload={releasePayload}
                                     setReleasePayload={setReleasePayload}
                                 />
