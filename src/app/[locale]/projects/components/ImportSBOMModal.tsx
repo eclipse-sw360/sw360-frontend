@@ -9,13 +9,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { JSX, useEffect, useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
-import { Attachment, AttachmentTypes, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentTypes } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
@@ -57,7 +58,9 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         selectedFile.current = e.currentTarget.files?.[0] ?? null
@@ -119,7 +122,10 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             if (!selectedFile.current) {
-                setImportError({ variant: 'danger', message: <p>{t('SBOM import failed')}</p> })
+                setImportError({
+                    variant: 'danger',
+                    message: <p>{t('SBOM import failed')}</p>,
+                })
                 return
             }
             const formData = new FormData()
@@ -135,8 +141,11 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
             )
             const responseText = await response.text()
             const responseJson = await JSON.parse(responseText)
-            if (response.status === HttpStatus.OK) {
-                setImportError({ variant: 'success', message: <p>{t('SBOM imported successfully')}</p> })
+            if (response.status === StatusCodes.OK) {
+                setImportError({
+                    variant: 'success',
+                    message: <p>{t('SBOM imported successfully')}</p>,
+                })
 
                 const projectId = responseJson?.id
                 if (projectId == null) {
@@ -155,7 +164,10 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                             ? new Date(match[1].replace(/^(\d{4}-\d{2}-\d{2})-(\d{2})-(\d{2})-(\d{2})$/, '$1T$2:$3:$4'))
                             : new Date(0) // fallback to epoch for invalid/missing dates
 
-                        return { ...att, __parsedDate: parsedDate }
+                        return {
+                            ...att,
+                            __parsedDate: parsedDate,
+                        }
                     })
                     .sort((a, b) => b.__parsedDate.getTime() - a.__parsedDate.getTime())
 
@@ -171,7 +183,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                 }
                 const endTime = Date.now()
                 setImportTime(parseFloat(((endTime - start) / 1000).toFixed(2)))
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 const match = responseText.match(/The projectId is:\s*([a-zA-Z0-9]+)/)
                 const projectId = match ? match[1] : 'Unknown'
                 setImportError({
@@ -275,7 +287,10 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
     }
 
     const closeModal = () => {
-        setImportSBOMMetadata({ show: false, importType: 'SPDX' })
+        setImportSBOMMetadata({
+            show: false,
+            importType: 'SPDX',
+        })
     }
 
     return (

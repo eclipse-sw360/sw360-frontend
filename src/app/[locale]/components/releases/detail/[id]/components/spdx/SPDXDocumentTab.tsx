@@ -11,24 +11,24 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import {
     Annotations,
     DocumentCreationInformation,
     ExternalDocumentReferences,
     ExternalReference,
-    HttpStatus,
     OtherLicensingInformationDetected,
     PackageInformation,
     RelationshipsBetweenSPDXElements,
     ReleaseDetail,
-    SPDXDocument,
     SnippetInformation,
     SnippetRange,
+    SPDXDocument,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import AnnotationInformation from './AnnotationInformation'
 import styles from './CssButton.module.css'
@@ -57,7 +57,10 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
         OtherLicensingInformationDetected[]
     >([])
 
-    const [relationshipSelection, setRelationshipSelection] = useState<{ index: number; isSPDXDocument: boolean }>({
+    const [relationshipSelection, setRelationshipSelection] = useState<{
+        index: number
+        isSPDXDocument: boolean
+    }>({
         index: 0,
         isSPDXDocument: true,
     })
@@ -69,7 +72,10 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
         RelationshipsBetweenSPDXElements[]
     >([])
 
-    const [annotationsSelection, setAnnotationsSelection] = useState<{ index: number; isSPDXDocument: boolean }>({
+    const [annotationsSelection, setAnnotationsSelection] = useState<{
+        index: number
+        isSPDXDocument: boolean
+    }>({
         index: 0,
         isSPDXDocument: true,
     })
@@ -84,16 +90,18 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined

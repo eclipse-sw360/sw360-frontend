@@ -11,6 +11,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -32,7 +33,6 @@ import {
     DocumentCreationInformation,
     DocumentTypes,
     ECCInformation,
-    HttpStatus,
     Release,
     ReleaseDetail,
     ReleaseTabIds,
@@ -103,9 +103,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const release: ReleaseDetail = (await response.json()) as ReleaseDetail
@@ -405,11 +405,14 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     SPDXPayload,
                     session.user.access_token,
                 )
-                if (responseUpdateSPDX.status === HttpStatus.UNAUTHORIZED) {
+                if (responseUpdateSPDX.status === StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Session has expired'))
                     return
                 }
-                if (responseUpdateSPDX.status !== HttpStatus.OK && responseUpdateSPDX.status !== HttpStatus.ACCEPTED) {
+                if (
+                    responseUpdateSPDX.status !== StatusCodes.OK &&
+                    responseUpdateSPDX.status !== StatusCodes.ACCEPTED
+                ) {
                     MessageService.error('Release update failed')
                     return
                 }
@@ -417,11 +420,11 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         }
 
         const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const release = (await response.json()) as ReleaseDetail
             MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
             router.push('/components/releases/detail/' + releaseId)
-        } else if (response.status === HttpStatus.ACCEPTED) {
+        } else if (response.status === StatusCodes.ACCEPTED) {
             MessageService.success(t('Moderation request is created'))
             router.push('/components/releases/detail/' + releaseId)
         } else {
@@ -438,22 +441,22 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             entityId: releaseId,
         })
         const response = await ApiUtils.POST(url, {}, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.warn(t('Unauthorized request'))
             return false
-        } else if (response.status === HttpStatus.FORBIDDEN) {
+        } else if (response.status === StatusCodes.FORBIDDEN) {
             MessageService.warn(t('Access Denied'))
             return false
-        } else if (response.status === HttpStatus.BAD_REQUEST) {
+        } else if (response.status === StatusCodes.BAD_REQUEST) {
             MessageService.warn(t('Invalid input or missing required parameters'))
             return false
-        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+        } else if (response.status === StatusCodes.INTERNAL_SERVER_ERROR) {
             MessageService.error(t('Internal server error'))
             return false
-        } else if (response.status === HttpStatus.OK) {
+        } else if (response.status === StatusCodes.OK) {
             MessageService.info(t('You can write to the entity'))
             return true
-        } else if (response.status !== HttpStatus.ACCEPTED) {
+        } else if (response.status !== StatusCodes.ACCEPTED) {
             MessageService.info(t('You are allowed to perform write with MR'))
             setShowCommentModal(true)
             return true

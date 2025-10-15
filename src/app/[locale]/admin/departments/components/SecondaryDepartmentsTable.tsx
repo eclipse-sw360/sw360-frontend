@@ -11,17 +11,18 @@
 
 'use client'
 
-import { ErrorDetails, HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
-import Link from 'next/link'
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
+import { ErrorDetails } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import SecondaryDepartments from './SecondaryDepartments'
 
 const SecondaryDepartmentsTable = (): JSX.Element => {
@@ -32,9 +33,18 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
-    const columns = useMemo<ColumnDef<[string, string[]]>[]>(
+    const columns = useMemo<
+        ColumnDef<
+            [
+                string,
+                string[],
+            ]
+        >[]
+    >(
         () => [
             {
                 id: 'department',
@@ -77,11 +87,18 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [secondaryDepartments, setSecondaryDepartments] = useState<SecondaryDepartments>(() => ({}))
-    const memoizedData = useMemo(() => secondaryDepartments, [secondaryDepartments])
+    const memoizedData = useMemo(
+        () => secondaryDepartments,
+        [
+            secondaryDepartments,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(true)
 
     useEffect(() => {
@@ -99,7 +116,7 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
                 const response = await ApiUtils.GET('departments/members', session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -119,7 +136,9 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
         })()
 
         return () => controller.abort()
-    }, [session])
+    }, [
+        session,
+    ])
 
     const table = useReactTable({
         data: Object.entries(memoizedData),

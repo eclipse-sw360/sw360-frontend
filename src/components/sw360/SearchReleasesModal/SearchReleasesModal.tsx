@@ -10,12 +10,13 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useRef, useState, type JSX } from 'react'
+import React, { type JSX, useRef, useState } from 'react'
 import { Button, Form, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 
-import { Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
+import { Embedded, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ShowInfoOnHover from '../ShowInfoOnHover/ShowInfoOnHover'
@@ -43,7 +44,9 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        const params: { [k: string]: string } = {
+        const params: {
+            [k: string]: string
+        } = {
             allDetails: 'true',
             name: searchText.current,
             luceneSearch: (!isExactMatchSearch.current).toString(),
@@ -51,11 +54,11 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
 
         const queryUrl = CommonUtils.createUrlWithParams(`releases`, params)
         const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return
         }
-        if (response.status === HttpStatus.NO_CONTENT) {
+        if (response.status === StatusCodes.NO_CONTENT) {
             setTableData([])
             return
         }
@@ -71,11 +74,11 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
             return signOut()
         }
         const response = await ApiUtils.GET(`projects/${projectId}/subProjects/releases`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return
         }
-        if (response.status === HttpStatus.NO_CONTENT) {
+        if (response.status === StatusCodes.NO_CONTENT) {
             setTableData([])
             return
         }

@@ -9,13 +9,14 @@
 
 'use client'
 
-import { HttpStatus, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
+import { Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import VendorDetailForm from './VendorDetailForm'
 
 export default function AddVendor(): JSX.Element {
@@ -32,7 +33,9 @@ export default function AddVendor(): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleCancel = () => {
         router.push('/admin/vendors')
@@ -45,12 +48,12 @@ export default function AddVendor(): JSX.Element {
             if (vendorData === null) return
             delete vendorData['_links']
             const response = await ApiUtils.POST('vendors', vendorData, session.user.access_token)
-            if (response.status == HttpStatus.CREATED) {
+            if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Vendor is created'))
                 router.push('/admin/vendors')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('A vendor with same name already exists'))
             } else {
                 MessageService.error(t('Something went wrong'))

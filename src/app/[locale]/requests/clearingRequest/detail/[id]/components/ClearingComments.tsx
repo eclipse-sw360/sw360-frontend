@@ -9,23 +9,26 @@
 
 'use client'
 
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { ClearingRequestComments, Embedded, HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
 import parse from 'html-react-parser'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { ClearingRequestComments, Embedded } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 type EmbeddedClearingRequestComments = Embedded<ClearingRequestComments, 'sw360:comments'>
 
 export default function ClearingComments({
     clearingRequestId,
-}: Readonly<{ clearingRequestId: string | undefined }>): ReactNode | undefined {
+}: Readonly<{
+    clearingRequestId: string | undefined
+}>): ReactNode | undefined {
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
     const [comments, setComments] = useState<Array<ClearingRequestComments>>([])
@@ -39,7 +42,9 @@ export default function ClearingComments({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const formatDate = (timestamp: number | undefined): string | null => {
         if (timestamp === undefined) {
@@ -54,10 +59,10 @@ export default function ClearingComments({
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedClearingRequestComments
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -100,13 +105,15 @@ export default function ClearingComments({
             commentPayload,
             session.user.access_token,
         )
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const response_data = (await response.json()) as EmbeddedClearingRequestComments
             setInputComment('')
             setComments(response_data._embedded['sw360:comments'])
             MessageService.success(t('Your comments updated successfully'))
-            setCommentPayload({ text: '' })
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            setCommentPayload({
+                text: '',
+            })
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             MessageService.error(t('There are some problem to update your comments'))
@@ -130,7 +137,11 @@ export default function ClearingComments({
                                     type='text'
                                     name='text'
                                     placeholder={t('Enter Comment')}
-                                    style={{ height: '50px', width: '100%', marginBottom: '20px' }}
+                                    style={{
+                                        height: '50px',
+                                        width: '100%',
+                                        marginBottom: '20px',
+                                    }}
                                     value={inputComment}
                                     onChange={updateInputField}
                                 />
@@ -145,7 +156,12 @@ export default function ClearingComments({
                         </tr>
                         {comments.map((item: ClearingRequestComments) => (
                             <tr key={item.commentedOn}>
-                                <td style={{ padding: '5px !important', width: '3%' }}>
+                                <td
+                                    style={{
+                                        padding: '5px !important',
+                                        width: '3%',
+                                    }}
+                                >
                                     <div>
                                         {item._embedded?.commentingUser?.fullName
                                             ?.split(' ')

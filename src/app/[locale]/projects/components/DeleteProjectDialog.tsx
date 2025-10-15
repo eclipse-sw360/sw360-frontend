@@ -9,14 +9,15 @@
 
 'use client'
 
-import { HttpStatus, Project } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { ChangeEvent, useCallback, useEffect, useState, type JSX } from 'react'
+import { ChangeEvent, type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { Project } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Data {
     attachment?: number
@@ -35,7 +36,12 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const [project, setProject] = useState<Project>()
-    const [internalData, setInternalData] = useState<Data>({ attachment: 0, project: 0, release: 0, package: 0 })
+    const [internalData, setInternalData] = useState<Data>({
+        attachment: 0,
+        project: 0,
+        release: 0,
+        package: 0,
+    })
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
@@ -48,7 +54,9 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -59,7 +67,9 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     const handleError = useCallback(() => {
         displayMessage('danger', t('Error when processing'))
         setReloadPage(true)
-    }, [t])
+    }, [
+        t,
+    ])
 
     const deleteProject = async () => {
         try {
@@ -69,17 +79,17 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
                 comment: comment,
             })
             const response = await ApiUtils.DELETE(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 displayMessage('success', t('Delete project successful'))
                 router.push('/projects')
                 setReloadPage(true)
-            } else if (response.status == HttpStatus.ACCEPTED) {
+            } else if (response.status == StatusCodes.ACCEPTED) {
                 displayMessage('info', t('Moderation request is created'))
-            } else if (response.status == HttpStatus.CONFLICT) {
+            } else if (response.status == StatusCodes.CONFLICT) {
                 displayMessage('danger', t('The project cannot be deleted'))
-            } else if (response.status == HttpStatus.FORBIDDEN) {
+            } else if (response.status == StatusCodes.FORBIDDEN) {
                 displayMessage('danger', t('Request Forbidden'))
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 displayMessage('danger', t('Error when processing'))
@@ -94,11 +104,11 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
-            if (projectsResponse.status == HttpStatus.OK) {
+            if (projectsResponse.status == StatusCodes.OK) {
                 const projectData = (await projectsResponse.json()) as Project
                 setProject(projectData)
                 handleInternalDataCount(projectData)
-            } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
+            } else if (projectsResponse.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 handleError()
@@ -108,7 +118,11 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
         fetchData(projectId).catch((err) => {
             console.error(err)
         })
-    }, [show, projectId, handleError])
+    }, [
+        show,
+        projectId,
+        handleError,
+    ])
 
     const handleSubmit = () => {
         deleteProject().catch((err) => {
@@ -161,10 +175,16 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
+                    <AiOutlineQuestionCircle
+                        style={{
+                            marginBottom: '5px',
+                        }}
+                    />
                     {t('Delete Project')} ?
                 </Modal.Title>
             </Modal.Header>
@@ -210,7 +230,11 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
                                 </Form.Group>
                                 <hr />
                                 <Form.Group className='mb-3'>
-                                    <Form.Label style={{ fontWeight: 'bold' }}>
+                                    <Form.Label
+                                        style={{
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
                                         {t('Please comment your changes')}
                                     </Form.Label>
                                     <Form.Control

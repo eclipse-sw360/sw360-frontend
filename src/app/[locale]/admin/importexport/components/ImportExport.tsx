@@ -9,14 +9,15 @@
 
 'use client'
 
-import { ErrorDetails, HttpStatus } from '@/object-types'
-import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, RefObject, useEffect, useRef } from 'react'
 import { MdOutlineFileDownload, MdOutlineFileUpload } from 'react-icons/md'
+import { ErrorDetails } from '@/object-types'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 
 export default function ImportExportComponent(): ReactNode {
     const t = useTranslations('default')
@@ -30,7 +31,9 @@ export default function ImportExportComponent(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, file: RefObject<File | undefined>) => {
         const files = e.currentTarget.files
@@ -40,7 +43,13 @@ export default function ImportExportComponent(): ReactNode {
         file.current = files[0]
     }
 
-    const handleDownload = (url: string, filename: string, headers: { [key: string]: string }) => {
+    const handleDownload = (
+        url: string,
+        filename: string,
+        headers: {
+            [key: string]: string
+        },
+    ) => {
         getSession()
             .then((session) => {
                 DownloadService.download(url, session, filename, headers)
@@ -68,7 +77,7 @@ export default function ImportExportComponent(): ReactNode {
                 return signOut()
             }
             const response = await ApiUtils.POST(url, formData, session.user.access_token)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }

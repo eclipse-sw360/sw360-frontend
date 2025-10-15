@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
@@ -19,7 +20,7 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ClearingRequestDetails, HttpStatus, UserGroupType } from '@/object-types'
+import { ClearingRequestDetails, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
 import ClearingDecision from './ClearingDecision'
@@ -55,10 +56,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ClearingRequestDetails
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()

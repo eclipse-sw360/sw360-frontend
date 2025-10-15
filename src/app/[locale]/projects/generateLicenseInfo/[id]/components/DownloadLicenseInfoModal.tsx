@@ -9,13 +9,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { notFound, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import { HttpStatus, SaveUsagesPayload } from '@/object-types'
+import { SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -64,7 +65,7 @@ export default function DownloadLicenseInfoModal({
                 saveUsagesPayload,
                 session.user.access_token,
             )
-            if (response.status !== HttpStatus.CREATED) {
+            if (response.status !== StatusCodes.CREATED) {
                 return notFound()
             }
             const currentDate = new Date().toISOString().split('T')[0]

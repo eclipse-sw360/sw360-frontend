@@ -9,18 +9,19 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, LicenseType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, QuickFilter, SW360Table } from 'next-sw360'
-import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import { Embedded, ErrorDetails, LicenseType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 import DeleteLicenseTypesModal from './DeleteLicenseTypesModal'
 
 type EmbeddedLicenseTypes = Embedded<LicenseType, 'sw360:licenseTypes'>
@@ -39,7 +40,9 @@ export default function LicenseTypesDetail(): ReactNode {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const columns = useMemo<ColumnDef<LicenseType>[]>(
         () => [
@@ -76,11 +79,18 @@ export default function LicenseTypesDetail(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [licenseTypes, setLicenseTypes] = useState<LicenseType[]>(() => [])
-    const memoizedData = useMemo(() => licenseTypes, [licenseTypes])
+    const memoizedData = useMemo(
+        () => licenseTypes,
+        [
+            licenseTypes,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(true)
 
     useEffect(() => {
@@ -98,10 +108,15 @@ export default function LicenseTypesDetail(): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     'licenseTypes',
-                    Object.fromEntries(Object.entries(quickFilter).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(quickFilter).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -127,7 +142,10 @@ export default function LicenseTypesDetail(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [session, quickFilter])
+    }, [
+        session,
+        quickFilter,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -148,7 +166,9 @@ export default function LicenseTypesDetail(): ReactNode {
     }
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        setQuickFilter({ search: event.currentTarget.value })
+        setQuickFilter({
+            search: event.currentTarget.value,
+        })
     }
 
     return (

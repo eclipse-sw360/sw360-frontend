@@ -10,15 +10,17 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, Obligation } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { notFound, useRouter } from 'next/navigation'
 import React, { ReactNode, useEffect, useState } from 'react'
+import { Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 import ObligationForm from '../../../components/AddOrEditObligation'
 
 interface props {
@@ -42,7 +44,9 @@ function EditObligation({ obligationId }: props): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         void (async () => {
@@ -52,10 +56,13 @@ function EditObligation({ obligationId }: props): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const response = await ApiUtils.GET(`obligations/${obligationId}`, session.user.access_token)
-                if (response.status === HttpStatus.OK) {
+                if (response.status === StatusCodes.OK) {
                     const data = (await response.json()) as Obligation
                     if (Object.keys(data).length > 0) {
-                        setObligation((prev) => ({ id: prev.id, ...data }))
+                        setObligation((prev) => ({
+                            id: prev.id,
+                            ...data,
+                        }))
                     } else {
                         MessageService.error(t('Failed to load obligation data'))
                     }
@@ -68,7 +75,10 @@ function EditObligation({ obligationId }: props): ReactNode {
                 setIsLoading(false)
             }
         })()
-    }, [obligationId, t])
+    }, [
+        obligationId,
+        t,
+    ])
 
     const isFieldValid = (field: string | null | undefined): boolean =>
         field !== null && field !== undefined && field.trim() !== ''
@@ -87,7 +97,7 @@ function EditObligation({ obligationId }: props): ReactNode {
             return
         }
         const response = await ApiUtils.PATCH(`obligations/${obligationId}`, obligation, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             MessageService.success(t('Obligation updated successfully'))
             router.push('/admin/obligations')
         } else {

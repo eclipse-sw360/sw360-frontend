@@ -11,14 +11,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
-
-import { Attachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus, ReleaseDetail } from '@/object-types'
+import { Attachment, FossologyProcessInfo, FossologyProcessStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import styles from './fossologyClearing.module.css'
 
 interface Props {
@@ -27,7 +27,11 @@ interface Props {
     releaseId: string
 }
 
-const clearingMessages: { [key: string]: { [key: string]: string } } = {
+const clearingMessages: {
+    [key: string]: {
+        [key: string]: string
+    }
+} = {
     NUMBER_OF_ATTACHMENTS_NOT_MATCH: {
         message: 'number_of_attachments_not_match_condition',
         variant: 'danger',
@@ -81,7 +85,9 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const resetTimeCountDown = () => {
         setTimeInterval(5)
@@ -107,10 +113,10 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
             return signOut()
         }
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return undefined
-        } else if (response.status === HttpStatus.OK) {
+        } else if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail & FossologyProcessStatus
             return data
         } else {
@@ -136,7 +142,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                 }
             })
             .catch((err) => console.error(err))
-    }, [releaseId, clearAllInterval, fetchData])
+    }, [
+        releaseId,
+        clearAllInterval,
+        fetchData,
+    ])
 
     const handleCloseDialog = () => {
         hideMessage()
@@ -150,7 +160,9 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
     }
 
     const handleOutdated = async () => {
-        await handleFossologyClearing({ markFossologyProcessOutdated: 'true' })
+        await handleFossologyClearing({
+            markFossologyProcessOutdated: 'true',
+        })
         showMessage(clearingMessages.SET_OUTDATED)
         setConfirmShow(false)
     }
@@ -161,7 +173,10 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
             const response = await fetchData(url)
             return response ? true : false
         },
-        [releaseId, fetchData],
+        [
+            releaseId,
+            fetchData,
+        ],
     )
 
     const checkFossologyProcessStatus = useCallback(async () => {
@@ -187,7 +202,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         //     clearAllInterval()
         //     startIntervalCheckFossologyProcessStatus()
         // }
-    }, [clearAllInterval, fetchData, releaseId])
+    }, [
+        clearAllInterval,
+        fetchData,
+        releaseId,
+    ])
 
     const startIntervalCheckFossologyProcessStatus = useCallback(() => {
         startCountDownt()
@@ -197,7 +216,9 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
             resetTimeCountDown()
         }, 5000)
         progressInterval.current = interval
-    }, [checkFossologyProcessStatus])
+    }, [
+        checkFossologyProcessStatus,
+    ])
 
     const reloadReport = async () => {
         hideMessage()
@@ -208,7 +229,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         }
         const url = `releases/${releaseId}/reloadFossologyReport`
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             clearAllInterval()
             setProgressStatus({
                 percent: RELOAD_ATTACHMENTS_PERCENT,
@@ -235,7 +256,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
 
             startIntervalCheckFossologyProcessStatus()
         },
-        [clearAllInterval, triggerFossologyClearing, startIntervalCheckFossologyProcessStatus],
+        [
+            clearAllInterval,
+            triggerFossologyClearing,
+            startIntervalCheckFossologyProcessStatus,
+        ],
     )
 
     const updateProgressStatus = (fossologyProcessInfo: FossologyProcessInfo) => {
@@ -390,7 +415,10 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                         <div className='col'>
                             <div
                                 className='progress'
-                                style={{ height: '40px', borderRadius: '100px' }}
+                                style={{
+                                    height: '40px',
+                                    borderRadius: '100px',
+                                }}
                             >
                                 <div
                                     className='progress-bar'
@@ -456,7 +484,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                 size='lg'
             >
                 <Modal.Header closeButton>
-                    <Modal.Title style={{ color: 'red' }}>
+                    <Modal.Title
+                        style={{
+                            color: 'red',
+                        }}
+                    >
                         <b>{t('Reset FOSSology Process')}?</b>
                     </Modal.Title>
                 </Modal.Header>

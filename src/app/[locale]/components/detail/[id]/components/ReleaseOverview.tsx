@@ -11,21 +11,21 @@
 
 'use client'
 
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { _, Table } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { HiOutlineLink } from 'react-icons/hi'
-
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import { Embedded, HttpStatus, LinkedRelease, ReleaseLink, UserGroupType } from '@/object-types'
+import { Embedded, LinkedRelease, ReleaseLink, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { Table, _ } from 'next-sw360'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
 type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
@@ -50,7 +50,9 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleClickDelete = (releaseId: string) => {
         setDeletingRelease(releaseId)
@@ -71,10 +73,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedLinkedReleases
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined
@@ -92,7 +94,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 ) {
                     const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
                         item.name,
-                        [item.id, item.version],
+                        [
+                            item.id,
+                            item.version,
+                        ],
                         t(item.clearingState as never),
                         t(item.clearingReport?.clearingReportStatus as never),
                         t(item.mainlineState as never),
@@ -102,7 +107,11 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 }
             })
             .catch((err) => console.error(err))
-    }, [componentId, fetchData, t])
+    }, [
+        componentId,
+        fetchData,
+        t,
+    ])
 
     const columns = [
         {
@@ -152,7 +161,9 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                             src={fossologyIcon as StaticImport}
                             width={15}
                             height={15}
-                            style={{ marginRight: '5px' }}
+                            style={{
+                                marginRight: '5px',
+                            }}
                             alt='Fossology'
                             onClick={() => handleFossologyClearing(id)}
                         />

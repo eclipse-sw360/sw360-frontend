@@ -9,16 +9,16 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect, useState } from 'react'
+import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
+import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useEffect, useState, type JSX } from 'react'
-import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
 
 interface Props {
     projectId: string
@@ -53,7 +53,9 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleSubmit = async (projectId: string) => {
         setIsLoading(true)
@@ -62,10 +64,10 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const createUrl = `projects/${projectId}/addLinkedReleasesLicenses`
             const response = await ApiUtils.POST(createUrl, {}, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 const data = (await response.json()) as AddLicenseInfoToReleaseData
                 setAddLicenseInfoToReleaseData(data)
-            } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+            } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                 MessageService.error(t('Error occurred while processing license information for linked releases'))
             }
         } catch (error) {
@@ -94,10 +96,16 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
         >
             <Modal.Header
                 closeButton
-                style={{ color: '#2e5aac' }}
+                style={{
+                    color: '#2e5aac',
+                }}
             >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
+                    <AiOutlineQuestionCircle
+                        style={{
+                            marginBottom: '5px',
+                        }}
+                    />
                     {t('Add License Info to Release')} ?
                 </Modal.Title>
             </Modal.Header>

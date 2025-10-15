@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -18,7 +19,7 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'n
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
-import { ClearingRequest, Embedded, ErrorDetails, HttpStatus, RequestType, UserGroupType } from '@/object-types'
+import { ClearingRequest, Embedded, ErrorDetails, RequestType, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
@@ -344,7 +345,7 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

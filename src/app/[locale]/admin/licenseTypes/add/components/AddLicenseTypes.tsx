@@ -9,13 +9,13 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useEffect, useRef, type JSX } from 'react'
+import { type JSX, useEffect, useRef } from 'react'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 export default function AddLicenseTypes(): JSX.Element {
     const router = useRouter()
@@ -27,7 +27,9 @@ export default function AddLicenseTypes(): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleAddLicenseType = async ({ addLicenseTypeTitle }: { addLicenseTypeTitle: string }) => {
         try {
@@ -37,13 +39,13 @@ export default function AddLicenseTypes(): JSX.Element {
                 licenseType: addLicenseTypeTitle,
             })
             const response = await ApiUtils.POST(url, {}, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 MessageService.success(t('License Type is created successfully'))
                 router.push('/admin/licenseTypes')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Unauthorized request'))
                 return
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('A License Type with same title already exists'))
             } else {
                 MessageService.error(t('Something went wrong'))
@@ -70,7 +72,9 @@ export default function AddLicenseTypes(): JSX.Element {
                     method='post'
                     onSubmit={(e) => {
                         e.preventDefault()
-                        void handleAddLicenseType({ addLicenseTypeTitle: searchValueRef.current?.value ?? '' })
+                        void handleAddLicenseType({
+                            addLicenseTypeTitle: searchValueRef.current?.value ?? '',
+                        })
                     }}
                 >
                     <div className='row mb-4'>
@@ -103,7 +107,9 @@ export default function AddLicenseTypes(): JSX.Element {
                                 {t('Title')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>

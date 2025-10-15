@@ -9,13 +9,13 @@
 
 'use client'
 
-import MessageService from '@/services/message.service'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
 import { PiInfoBold } from 'react-icons/pi'
-
-import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface SEARCH_STATE {
@@ -31,17 +31,39 @@ interface SEARCH_STATE {
 }
 
 type SEARCH_ACTIONS =
-    | { type: 'TOGGLE_PROJECTS' }
-    | { type: 'TOGGLE_COMPONENTS' }
-    | { type: 'TOGGLE_LICENSES' }
-    | { type: 'TOGGLE_RELEASES' }
-    | { type: 'TOGGLE_OBLIGATIONS' }
-    | { type: 'TOGGLE_USERS' }
-    | { type: 'TOGGLE_VENDORS' }
-    | { type: 'TOGGLE_PACKAGES' }
-    | { type: 'TOGGLE_ENTIRE_DOCUMENT' }
-    | { type: 'DESELECT_ALL' }
-    | { type: 'TOGGLE_ALL' }
+    | {
+          type: 'TOGGLE_PROJECTS'
+      }
+    | {
+          type: 'TOGGLE_COMPONENTS'
+      }
+    | {
+          type: 'TOGGLE_LICENSES'
+      }
+    | {
+          type: 'TOGGLE_RELEASES'
+      }
+    | {
+          type: 'TOGGLE_OBLIGATIONS'
+      }
+    | {
+          type: 'TOGGLE_USERS'
+      }
+    | {
+          type: 'TOGGLE_VENDORS'
+      }
+    | {
+          type: 'TOGGLE_PACKAGES'
+      }
+    | {
+          type: 'TOGGLE_ENTIRE_DOCUMENT'
+      }
+    | {
+          type: 'DESELECT_ALL'
+      }
+    | {
+          type: 'TOGGLE_ALL'
+      }
 
 type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 
@@ -163,7 +185,9 @@ function KeywordSearch({
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const handleSearch = async () => {
         const timeout = setTimeout(() => {
@@ -177,13 +201,26 @@ function KeywordSearch({
                 ...Object.fromEntries([
                     ...Object.entries(searchOptions)
                         .filter(([, v]) => v !== false)
-                        .map(([key]) => (key === 'entireDocument' ? ['typeMasks', 'document'] : ['typeMasks', key])),
-                    ...Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)]),
+                        .map(([key]) =>
+                            key === 'entireDocument'
+                                ? [
+                                      'typeMasks',
+                                      'document',
+                                  ]
+                                : [
+                                      'typeMasks',
+                                      key,
+                                  ],
+                        ),
+                    ...Object.entries(pageableQueryParam).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
                 ]),
             } as Record<string, string>)
 
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token)
-            if (response.status !== HttpStatus.OK || response.status !== HttpStatus.NO_CONTENT) {
+            if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
@@ -232,7 +269,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.project}
-                                onChange={() => dispatch({ type: 'TOGGLE_PROJECTS' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_PROJECTS',
+                                    })
+                                }
                                 id='keyboard-check-projects'
                             />
                             <label
@@ -254,7 +295,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.component}
-                                onChange={() => dispatch({ type: 'TOGGLE_COMPONENTS' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_COMPONENTS',
+                                    })
+                                }
                                 id='keyboard-check-components'
                             />
                             <label
@@ -276,7 +321,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.license}
-                                onChange={() => dispatch({ type: 'TOGGLE_LICENSES' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_LICENSES',
+                                    })
+                                }
                                 id='keyboard-check-licenses'
                             />
                             <label
@@ -298,7 +347,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.release}
-                                onChange={() => dispatch({ type: 'TOGGLE_RELEASES' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_RELEASES',
+                                    })
+                                }
                                 id='keyboard-check-releases'
                             />
                             <label
@@ -320,7 +373,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.package}
-                                onChange={() => dispatch({ type: 'TOGGLE_PACKAGES' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_PACKAGES',
+                                    })
+                                }
                                 id='keyboard-check-packages'
                             />
                             <label
@@ -342,7 +399,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.obligation}
-                                onChange={() => dispatch({ type: 'TOGGLE_OBLIGATIONS' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_OBLIGATIONS',
+                                    })
+                                }
                                 id='keyboard-check-obligations'
                             />
                             <label
@@ -364,7 +425,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.user}
-                                onChange={() => dispatch({ type: 'TOGGLE_USERS' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_USERS',
+                                    })
+                                }
                                 id='keyboard-check-users'
                             />
                             <label
@@ -386,7 +451,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.vendor}
-                                onChange={() => dispatch({ type: 'TOGGLE_VENDORS' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_VENDORS',
+                                    })
+                                }
                                 id='keyboard-check-vendors'
                             />
                             <label
@@ -408,7 +477,11 @@ function KeywordSearch({
                                 className='form-check-input'
                                 type='checkbox'
                                 checked={searchOptions.entireDocument}
-                                onChange={() => dispatch({ type: 'TOGGLE_ENTIRE_DOCUMENT' })}
+                                onChange={() =>
+                                    dispatch({
+                                        type: 'TOGGLE_ENTIRE_DOCUMENT',
+                                    })
+                                }
                                 id='keyboard-check-entire-document'
                             />
                             <label
@@ -427,14 +500,22 @@ function KeywordSearch({
                                 <button
                                     type='button'
                                     className='btn btn-sm btn-secondary'
-                                    onClick={() => dispatch({ type: 'TOGGLE_ALL' })}
+                                    onClick={() =>
+                                        dispatch({
+                                            type: 'TOGGLE_ALL',
+                                        })
+                                    }
                                 >
                                     {'Toggle'}
                                 </button>
                                 <button
                                     type='button'
                                     className='btn btn-sm btn-secondary'
-                                    onClick={() => dispatch({ type: 'DESELECT_ALL' })}
+                                    onClick={() =>
+                                        dispatch({
+                                            type: 'DESELECT_ALL',
+                                        })
+                                    }
                                 >
                                     {'Deselect All'}
                                 </button>

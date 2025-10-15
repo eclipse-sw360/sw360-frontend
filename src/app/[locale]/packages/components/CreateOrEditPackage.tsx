@@ -9,16 +9,17 @@
 
 'use client'
 
-import { Embedded, HttpStatus, LicenseDetail, Package } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { IoIosClose } from 'react-icons/io'
+import { Embedded, LicenseDetail, Package } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 import AddMainLicenseModal from './AddMainLicenseModal'
 import AddReleaseModal from './AddReleaseModal'
 import DeletePackageModal from './DeletePackageModal'
@@ -70,7 +71,9 @@ export default function CreateOrEditPackage({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -101,7 +104,10 @@ export default function CreateOrEditPackage({
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+        setPackagePayload((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }))
     }
 
     const fetchData = useCallback(async (url: string) => {
@@ -111,10 +117,10 @@ export default function CreateOrEditPackage({
             return signOut()
         }
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.warn(t('Unauthorized request'))
             return
-        } else if (response.status === HttpStatus.OK) {
+        } else if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedLicenses
             return data
         } else {
@@ -161,11 +167,17 @@ export default function CreateOrEditPackage({
             const message = error instanceof Error ? error.message : String(error)
             MessageService.error(message)
         }
-    }, [fetchData])
+    }, [
+        fetchData,
+    ])
 
     useEffect(() => {
         handleMainLicenseNameList()
-    }, [fetchedLicenses, packagePayload.licenseIds, isEditPage])
+    }, [
+        fetchedLicenses,
+        packagePayload.licenseIds,
+        isEditPage,
+    ])
 
     return (
         <>
@@ -240,7 +252,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.name'
                                 className='form-label fw-medium'
                             >
-                                {t('Name')} <span style={{ color: 'red' }}>*</span>
+                                {t('Name')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'
@@ -258,7 +277,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.version'
                                 className='form-label fw-medium'
                             >
-                                {t('Version')} <span style={{ color: 'red' }}>*</span>
+                                {t('Version')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'
@@ -276,7 +302,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.packageType'
                                 className='form-label fw-medium'
                             >
-                                {t('Package Type')} <span style={{ color: 'red' }}>*</span>
+                                {t('Package Type')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <select
                                 className='form-select'
@@ -312,7 +345,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.purl'
                                 className='form-label fw-medium'
                             >
-                                {`PURL (${t('Package URL')})`} <span style={{ color: 'red' }}>*</span>
+                                {`PURL (${t('Package URL')})`}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='url'
@@ -330,7 +370,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.packageManager'
                                 className='form-label fw-medium'
                             >
-                                {t('Package Manager')} <span style={{ color: 'red' }}>*</span>
+                                {t('Package Manager')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <select
                                 className='form-select'
@@ -409,7 +456,10 @@ export default function CreateOrEditPackage({
                                     className='input-group-text cursor-pointer'
                                     onClick={() => {
                                         setReleaseNameVersion('')
-                                        setPackagePayload((prev) => ({ ...prev, releaseId: '' }))
+                                        setPackagePayload((prev) => ({
+                                            ...prev,
+                                            releaseId: '',
+                                        }))
                                     }}
                                 >
                                     <IoIosClose />

@@ -9,16 +9,17 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState, type JSX } from 'react'
+import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -51,10 +52,15 @@ export default function LinkProjects({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const scrollToTop = () => {
-        topRef.current?.scrollTo({ top: 0, left: 0 })
+        topRef.current?.scrollTo({
+            top: 0,
+            left: 0,
+        })
     }
 
     const columns = useMemo<ColumnDef<Project>[]>(
@@ -175,7 +181,10 @@ export default function LinkProjects({
                 },
             },
         ],
-        [t, linkProjects],
+        [
+            t,
+            linkProjects,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -189,7 +198,12 @@ export default function LinkProjects({
         number: 0,
     })
     const [projectData, setProjectData] = useState<Project[] | undefined>(() => undefined)
-    const memoizedData = useMemo(() => projectData, [projectData])
+    const memoizedData = useMemo(
+        () => projectData,
+        [
+            projectData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     const table = useReactTable({
@@ -269,14 +283,19 @@ export default function LinkProjects({
         void handleSearch(searchValueRef.current?.value ?? '', signal)
 
         return () => controller.abort()
-    }, [pageableQueryParam])
+    }, [
+        pageableQueryParam,
+    ])
 
     const handleCheckboxes = (projectId: string) => {
         const m = new Map(linkProjects)
         if (linkProjects.has(projectId)) {
             m.delete(projectId)
         } else {
-            m.set(projectId, { enableSvm: true, projectRelationship: 'CONTAINED' })
+            m.set(projectId, {
+                enableSvm: true,
+                projectRelationship: 'CONTAINED',
+            })
         }
         setLinkProjects(m)
     }
@@ -297,13 +316,19 @@ export default function LinkProjects({
                         ...pageableQueryParam,
                         ...(CommonUtils.isNullEmptyOrUndefinedString(searchValue)
                             ? {}
-                            : { name: searchValue, luceneSearch: true }),
-                    }).map(([key, value]) => [key, String(value)]),
+                            : {
+                                  name: searchValue,
+                                  luceneSearch: true,
+                              }),
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
                 ),
             )
 
             const response = await ApiUtils.GET(url, session.user.access_token, signal)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
@@ -337,12 +362,14 @@ export default function LinkProjects({
     const handleLinkProjects = async ({ projectId }: { projectId: string }) => {
         setLinking(true)
         try {
-            const data = { linkedProjects: Object.fromEntries(linkProjects) }
+            const data = {
+                linkedProjects: Object.fromEntries(linkProjects),
+            }
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.user.access_token)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
@@ -495,7 +522,9 @@ export default function LinkProjects({
                     <Button
                         variant='primary'
                         onClick={() => {
-                            void handleLinkProjects({ projectId })
+                            void handleLinkProjects({
+                                projectId,
+                            })
                             scrollToTop()
                         }}
                         disabled={linkProjects.size === 0 || linking}

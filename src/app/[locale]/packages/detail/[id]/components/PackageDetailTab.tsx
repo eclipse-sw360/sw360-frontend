@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -16,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { HttpStatus, Package, UserGroupType } from '@/object-types'
+import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ChangeLog from './Changelog'
@@ -48,9 +49,9 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
         void (async () => {
             try {
                 const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
 

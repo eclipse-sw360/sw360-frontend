@@ -8,16 +8,11 @@
 // License-Filename: LICENSE
 
 'use client'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
-import {
-    ConfigurationContainers,
-    HttpStatus,
-    ProcessedUiConfig,
-    parseRawUiConfig,
-    UiConfiguration,
-} from '@/object-types'
+import { ConfigurationContainers, ProcessedUiConfig, parseRawUiConfig, UiConfiguration } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { useLocalStorage } from './index'
@@ -65,14 +60,14 @@ export function useUiConfig() {
             }
 
             const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 const rawData = (await response.json()) as UiConfiguration
                 const processedData = parseRawUiConfig(rawData)
                 setProcessedConfig({
                     data: processedData,
                     timestamp: Date.now(),
                 })
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 setProcessedConfig(null)

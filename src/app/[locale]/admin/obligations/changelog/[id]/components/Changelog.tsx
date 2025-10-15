@@ -9,16 +9,16 @@
 
 'use client'
 
-import MessageService from '@/services/message.service'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
-
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { Changelogs, Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta } from '@/object-types'
+import { Changelogs, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
@@ -34,7 +34,9 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -48,7 +50,12 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
         number: 0,
     })
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
-    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -66,11 +73,16 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${obligationId}`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -100,7 +112,11 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, obligationId, session])
+    }, [
+        pageableQueryParam,
+        obligationId,
+        session,
+    ])
 
     return (
         <>

@@ -9,17 +9,18 @@
 
 'use client'
 
-import { _, Table } from '@/components/sw360'
-import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { HttpStatus, LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import { _, Table } from '@/components/sw360'
+import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
+import { LinkedPackage, LinkedPackageData, ProjectPayload } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 
 interface Props {
     projectId?: string
@@ -27,7 +28,15 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-type RowData = (string | string[] | { comment?: string; key?: string } | undefined)[]
+type RowData = (
+    | string
+    | string[]
+    | {
+          comment?: string
+          key?: string
+      }
+    | undefined
+)[]
 
 export default function LinkedPackages({ projectId, projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
@@ -48,7 +57,9 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
                         setNewLinkedPackageData(new Map(linkedPackageData))
 
                         // Update project payload
-                        const updatedProjectPayload = { ...projectPayload }
+                        const updatedProjectPayload = {
+                            ...projectPayload,
+                        }
                         if (updatedProjectPayload.packageIds === undefined) {
                             updatedProjectPayload.packageIds = {}
                         }
@@ -72,7 +83,10 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
             id: 'linkedPackagesData.name',
             name: t('Package Name'),
             sort: true,
-            formatter: ([name, packageId]: [name: string, packageId: string]) =>
+            formatter: ([name, packageId]: [
+                name: string,
+                packageId: string,
+            ]) =>
                 _(
                     <>
                         <Link href={`/packages/detail/${packageId}`}>{name}</Link>
@@ -130,7 +144,10 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
                                 <FaTrashAlt
                                     className='btn-icon'
                                     onClick={() => handleDeletePackage(packageId)}
-                                    style={{ color: 'gray', fontSize: '18px' }}
+                                    style={{
+                                        color: 'gray',
+                                        fontSize: '18px',
+                                    }}
                                 />
                             </span>
                         </OverlayTrigger>
@@ -140,7 +157,9 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
     ]
 
     const handleDeletePackage = (packageId: string) => {
-        const updatedProjectPayload = { ...projectPayload }
+        const updatedProjectPayload = {
+            ...projectPayload,
+        }
         newLinkedPackageData.forEach((_, key) => {
             if (key === packageId) {
                 newLinkedPackageData.delete(key)
@@ -158,11 +177,17 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
         const extractedData: Array<RowData> = []
         linkedPackageData.forEach((value) => {
             extractedData.push([
-                [value.name, value.packageId],
+                [
+                    value.name,
+                    value.packageId,
+                ],
                 value.version,
                 value.licenseIds,
                 value.packageManager,
-                { comment: value.comment || '', key: value.packageId },
+                {
+                    comment: value.comment || '',
+                    key: value.packageId,
+                },
                 value.packageId,
             ])
         })
@@ -173,10 +198,10 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = await response.json()
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined
@@ -211,11 +236,16 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
         } else {
             setTableData([])
         }
-    }, [projectId, projectPayload.packageIds])
+    }, [
+        projectId,
+        projectPayload.packageIds,
+    ])
 
     useEffect(() => {
         setTableData(extractDataFromMap(newLinkedPackageData))
-    }, [newLinkedPackageData])
+    }, [
+        newLinkedPackageData,
+    ])
 
     return (
         <>
@@ -230,16 +260,25 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
                 <div className='row header-1'>
                     <h6
                         className='fw-medium'
-                        style={{ color: '#5D8EA9', paddingLeft: '0px' }}
+                        style={{
+                            color: '#5D8EA9',
+                            paddingLeft: '0px',
+                        }}
                     >
                         {t('LINKED PACKAGES')}
                         <hr
                             className='my-2 mb-2'
-                            style={{ color: '#5D8EA9' }}
+                            style={{
+                                color: '#5D8EA9',
+                            }}
                         />
                     </h6>
                 </div>
-                <div style={{ paddingLeft: '0px' }}>
+                <div
+                    style={{
+                        paddingLeft: '0px',
+                    }}
+                >
                     <Table
                         columns={columns}
                         data={tableData}
@@ -248,7 +287,9 @@ export default function LinkedPackages({ projectId, projectPayload, setProjectPa
                 </div>
                 <div
                     className='row'
-                    style={{ paddingLeft: '0px' }}
+                    style={{
+                        paddingLeft: '0px',
+                    }}
                 >
                     <div className='col-lg-4'>
                         <button

@@ -9,13 +9,13 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useRef, useState } from 'react'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
 export default function LicenseAdministration(): ReactNode {
@@ -28,7 +28,9 @@ export default function LicenseAdministration(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files
@@ -52,9 +54,9 @@ export default function LicenseAdministration(): ReactNode {
                 return signOut()
             }
             const response = await ApiUtils.POST('licenses/upload', formData, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
-            } else if (response.status === HttpStatus.OK) {
+            } else if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Licenses uploaded successfully'))
             } else {
                 const data = (await response.json()) as object

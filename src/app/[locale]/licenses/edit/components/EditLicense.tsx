@@ -11,6 +11,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -19,15 +20,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import {
-    Embedded,
-    HttpStatus,
-    LicenseDetail,
-    LicensePayload,
-    LicenseTabIds,
-    Obligation,
-    UserGroupType,
-} from '@/object-types'
+import { LicenseDetail, LicensePayload, LicenseTabIds, Obligation, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
@@ -81,9 +74,9 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const license = (await response.json()) as LicenseDetail
@@ -123,7 +116,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
             return signOut()
         }
         const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as LicensePayload
             MessageService.success(t('License updated successfully'))
             router.push(`/licenses/detail?id=${data.shortName}`)

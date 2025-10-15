@@ -10,16 +10,18 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, LicenseDetail } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { Button } from 'react-bootstrap'
 import { BiXCircle } from 'react-icons/bi'
 import { FiCheckCircle } from 'react-icons/fi'
+import { LicenseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import styles from '../detail.module.css'
 
 interface Props {
@@ -36,7 +38,9 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const hanldeExternalLicenseLink = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLicense({
@@ -52,7 +56,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
             return signOut()
         }
         const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as LicenseDetail
             MessageService.success(t('Update external link success'))
             router.push('/licenses/detail?id=' + data.shortName)
@@ -88,11 +92,19 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                         <td>
                             {' '}
                             {license.checked === true ? (
-                                <span style={{ color: '#287d3c' }}>
+                                <span
+                                    style={{
+                                        color: '#287d3c',
+                                    }}
+                                >
                                     <FiCheckCircle />
                                 </span>
                             ) : (
-                                <span style={{ color: 'red' }}>
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
                                     <BiXCircle color='red' />
                                 </span>
                             )}
@@ -107,11 +119,19 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                         <td>
                             {' '}
                             {license.OSIApproved === 'YES' ? (
-                                <span style={{ color: '#287d3c' }}>
+                                <span
+                                    style={{
+                                        color: '#287d3c',
+                                    }}
+                                >
                                     <FiCheckCircle /> {t('Yes')}
                                 </span>
                             ) : (
-                                <span style={{ color: 'red' }}>
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
                                     <BiXCircle color='red' /> {t('NA')}
                                 </span>
                             )}
@@ -122,11 +142,19 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                         <td>
                             {' '}
                             {license.FSFLibre === 'YES' ? (
-                                <span style={{ color: '#287d3c' }}>
+                                <span
+                                    style={{
+                                        color: '#287d3c',
+                                    }}
+                                >
                                     <FiCheckCircle /> {t('Yes')}
                                 </span>
                             ) : (
-                                <span style={{ color: 'red' }}>
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
                                     <BiXCircle color='red' /> {t('NA')}
                                 </span>
                             )}
@@ -134,12 +162,24 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                     </tr>
                     <tr>
                         <td>
-                            <p style={{ marginTop: '0.5rem' }}>{t('External link for more information')}:</p>
+                            <p
+                                style={{
+                                    marginTop: '0.5rem',
+                                }}
+                            >
+                                {t('External link for more information')}:
+                            </p>
                         </td>
                         <td>
-                            <div style={{ display: 'flex' }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                }}
+                            >
                                 <input
-                                    style={{ width: 'auto' }}
+                                    style={{
+                                        width: 'auto',
+                                    }}
                                     type='text'
                                     className='form-control'
                                     id='name'

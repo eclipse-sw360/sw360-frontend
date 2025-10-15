@@ -9,22 +9,16 @@
 
 'use client'
 
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import {
-    Component,
-    HttpStatus,
-    ModerationRequestDetails,
-    Project,
-    ReleaseDetail,
-    RequestDocumentTypes,
-} from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
 import { TDataArray } from 'gridjs/dist/src/types'
+import { StatusCodes } from 'http-status-codes'
+import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import { notFound } from 'next/navigation'
-import { ReactNode, useEffect, useState, type JSX } from 'react'
+import { _, Table } from 'next-sw360'
+import { type JSX, ReactNode, useEffect, useState } from 'react'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { Component, ModerationRequestDetails, Project, ReleaseDetail, RequestDocumentTypes } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import TableHeader from './TableHeader'
 
 interface interimDataType {
@@ -34,9 +28,15 @@ interface interimDataType {
 type ArrayType = Array<
     [
         string,
-        [string | Array<string>, boolean],
+        [
+            string | Array<string>,
+            boolean,
+        ],
         string | JSX.Element,
-        [Array<string | Array<string> | JSX.Element | Array<JSX.Element> | undefined>, boolean],
+        [
+            Array<string | Array<string> | JSX.Element | Array<JSX.Element> | undefined>,
+            boolean,
+        ],
     ]
 >
 
@@ -66,7 +66,10 @@ export default function ProposedChanges({
             id: 'proposedChanges.currentValue',
             name: t('Current Value'),
             sort: true,
-            formatter: ([currentValue, isObject]: [string[], boolean]) =>
+            formatter: ([currentValue, isObject]: [
+                string[],
+                boolean,
+            ]) =>
                 _(
                     isObject === true && currentValue.length !== 0 ? (
                         <ul>
@@ -89,7 +92,10 @@ export default function ProposedChanges({
             id: 'proposedChanges.suggestedValue',
             name: t('Suggested Value'),
             sort: true,
-            formatter: ([suggestedValue, isObject]: [string[], boolean]) =>
+            formatter: ([suggestedValue, isObject]: [
+                string[],
+                boolean,
+            ]) =>
                 _(
                     isObject === true && suggestedValue.length !== 0 ? (
                         <ul>
@@ -108,10 +114,10 @@ export default function ProposedChanges({
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = await response.json()
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -296,7 +302,9 @@ export default function ProposedChanges({
                         updatedValue.push(
                             <b
                                 key={`${key}`}
-                                style={{ color: 'green' }}
+                                style={{
+                                    color: 'green',
+                                }}
                             >
                                 {convertToReactNode(documentAdditions[key])}
                             </b>,
@@ -304,10 +312,19 @@ export default function ProposedChanges({
                         changedData.push([
                             key,
                             Object.hasOwn(interimData, key) && interimData[key as keyof PropsDataType] !== ''
-                                ? [key in interimData ? interimData[key as keyof PropsDataType] : '', isObject]
-                                : ['', isObject],
+                                ? [
+                                      key in interimData ? interimData[key as keyof PropsDataType] : '',
+                                      isObject,
+                                  ]
+                                : [
+                                      '',
+                                      isObject,
+                                  ],
                             '',
-                            [updatedValue, isObject],
+                            [
+                                updatedValue,
+                                isObject,
+                            ],
                         ])
                     }
                 }
@@ -340,7 +357,9 @@ export default function ProposedChanges({
                 dataExtractor(releaseDetail)
             })
         }
-    }, [moderationRequestData])
+    }, [
+        moderationRequestData,
+    ])
 
     if (status === 'unauthenticated') {
         return signOut()
@@ -370,7 +389,9 @@ export default function ProposedChanges({
                                     <Table
                                         columns={columns}
                                         data={proposedBasicChangesData as TDataArray}
-                                        pagination={{ limit: 5 }}
+                                        pagination={{
+                                            limit: 5,
+                                        }}
                                         selector={false}
                                     />
                                 </div>
@@ -387,7 +408,9 @@ export default function ProposedChanges({
                                 <Table
                                     columns={columns}
                                     data={proposedAttachmentChangesData}
-                                    pagination={{ limit: 5 }}
+                                    pagination={{
+                                        limit: 5,
+                                    }}
                                     selector={false}
                                 />
                             </div>

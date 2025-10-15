@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -19,7 +20,7 @@ import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
-import { HttpStatus, ModerationRequestPayload } from '@/object-types'
+import { ModerationRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
@@ -225,7 +226,7 @@ export default function BulkDeclineModerationRequestModal({
                     updatedRejectPayload,
                     session.data.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
@@ -242,7 +243,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.success(t('You have rejected the moderation request'))
-                } else if (response.status == HttpStatus.NOT_ALLOWED) {
+                } else if (response.status == StatusCodes.METHOD_NOT_ALLOWED) {
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
@@ -258,7 +259,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.warn(t('Moderation request is already closed'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
@@ -274,7 +275,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.error(t('There are internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
@@ -300,7 +301,7 @@ export default function BulkDeclineModerationRequestModal({
                     updatedAcceptPayload,
                     session.data.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
@@ -317,7 +318,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.success(t('You have accepted the moderation request'))
-                } else if (response.status == HttpStatus.NOT_ALLOWED) {
+                } else if (response.status == StatusCodes.METHOD_NOT_ALLOWED) {
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
@@ -333,7 +334,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.warn(t('Moderation request is already closed'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
@@ -349,7 +350,7 @@ export default function BulkDeclineModerationRequestModal({
                         return updatedData
                     })
                     MessageService.error(t('There are internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))

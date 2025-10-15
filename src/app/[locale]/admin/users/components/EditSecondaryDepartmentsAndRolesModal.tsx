@@ -9,15 +9,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import SecondaryDepartmentsAndRoles from '@/components/UserEditForm/SecondaryDepartmentsAndRoles'
-import { HttpStatus, User, UserPayload } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 import { HiUsers } from 'react-icons/hi2'
+import SecondaryDepartmentsAndRoles from '@/components/UserEditForm/SecondaryDepartmentsAndRoles'
+import { User, UserPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     show: boolean
@@ -39,7 +40,9 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         if (show === false) return
@@ -50,12 +53,12 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
                 return signOut()
             }
             const response = await ApiUtils.GET(`users/byid/${editingUserId}`, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
                 return
             }
 
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 MessageService.error(t('Failed to fetch user data'))
                 return
             }
@@ -65,7 +68,10 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
                 secondaryDepartmentsAndRoles: user.secondaryDepartmentsAndRoles ?? {},
             })
         })()
-    }, [editingUserId, show])
+    }, [
+        editingUserId,
+        show,
+    ])
 
     const handleUpdateUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -82,13 +88,13 @@ const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: 
                 session.user.access_token,
             )
 
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 setShowSuccess(true)
                 setIsUpdateSuccess(true)
                 return
             }
 
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
                 return signOut()
             }

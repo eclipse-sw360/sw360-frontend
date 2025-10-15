@@ -9,17 +9,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import MessageService from '@/services/message.service'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { _, Table } from 'next-sw360'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert } from 'react-bootstrap'
 import { FaDownload } from 'react-icons/fa'
 
-import { Attachment, AttachmentTypes, Embedded, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentTypes, Embedded } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { Table, _ } from 'next-sw360'
 import styles from './Attachment.module.css'
 
 interface Props {
@@ -64,7 +65,9 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const buildAttachmentDetail = (item: Attachment) => {
         return (event: React.MouseEvent<HTMLElement>) => {
@@ -120,10 +123,10 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedAttachments
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return {} as EmbeddedAttachments
@@ -189,7 +192,10 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                                       {item.projectAttachmentUsage?.restricted ?? 0}
                                   </a>,
                               ),
-                        [item.attachmentContentId ?? '', item.filename],
+                        [
+                            item.attachmentContentId ?? '',
+                            item.filename,
+                        ],
                     ])
                     setAttachmentData(attachmentData)
                     setTotalRows(attachmentData.length)
@@ -202,7 +208,11 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
             })
-    }, [documentId, documentType, fetchData])
+    }, [
+        documentId,
+        documentType,
+        fetchData,
+    ])
 
     const columns = [
         {
@@ -210,7 +220,9 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
             name: _(
                 <FaDownload
                     className={styles['download-btn']}
-                    style={{ width: '100%' }}
+                    style={{
+                        width: '100%',
+                    }}
                     onClick={downloadBundle}
                 />,
             ),
@@ -270,7 +282,9 @@ const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
                 _(
                     <FaDownload
                         className={styles['download-btn']}
-                        style={{ width: '100%' }}
+                        style={{
+                            width: '100%',
+                        }}
                         onClick={() => downloadAttachment(attachmentId, attachmentName)}
                     />,
                 ),

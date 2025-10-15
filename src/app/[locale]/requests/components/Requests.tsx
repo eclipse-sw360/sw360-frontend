@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -16,7 +17,7 @@ import { AdvancedSearch } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ClearingRequest, Embedded, HttpStatus, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
+import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import ClearingRequestComponent from './ClearingRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
@@ -158,7 +159,7 @@ function Requests(): ReactNode | undefined {
                     moderationRequestsPrmosies,
                     clearingRequestsPromises,
                 ])
-                if (responses[0].status !== HttpStatus.OK || responses[1].status !== HttpStatus.OK) {
+                if (responses[0].status !== StatusCodes.OK || responses[1].status !== StatusCodes.OK) {
                     return notFound()
                 }
 

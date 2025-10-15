@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -21,7 +22,6 @@ import {
     AttachmentUsage,
     AttachmentUsages,
     Embedded,
-    HttpStatus,
     NodeData,
     Project,
     ProjectLinkedRelease,
@@ -111,7 +111,7 @@ function GenerateSourceCodeBundle({
                 saveUsagesPayload,
                 session.user.access_token,
             )
-            if (response.status !== HttpStatus.CREATED) {
+            if (response.status !== StatusCodes.CREATED) {
                 MessageService.error(t('Something went wrong'))
                 return notFound()
             }
@@ -323,9 +323,9 @@ function GenerateSourceCodeBundle({
                     )
                 }
                 const responses = await Promise.all(requests)
-                if (responses.filter((response) => response.status === HttpStatus.UNAUTHORIZED).length !== 0) {
+                if (responses.filter((response) => response.status === StatusCodes.UNAUTHORIZED).length !== 0) {
                     return signOut()
-                } else if (responses.filter((response) => response.status !== HttpStatus.OK).length !== 0) {
+                } else if (responses.filter((response) => response.status !== StatusCodes.OK).length !== 0) {
                     return notFound()
                 }
 

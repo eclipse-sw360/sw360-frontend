@@ -12,27 +12,19 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
-
-import {
-    Component,
-    Embedded,
-    ErrorDetails,
-    HttpStatus,
-    PageableQueryParam,
-    PaginationMeta,
-    UserGroupType,
-} from '@/object-types'
+import { MdDeleteOutline } from 'react-icons/md'
+import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { MdDeleteOutline } from 'react-icons/md'
 import DeleteComponentDialog from './DeleteComponentDialog'
 
 interface Props {
@@ -53,7 +45,9 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)
@@ -175,7 +169,9 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -189,7 +185,12 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
         number: 0,
     })
     const [componentData, setComponentData] = useState<Component[]>(() => [])
-    const memoizedData = useMemo(() => componentData, [componentData])
+    const memoizedData = useMemo(
+        () => componentData,
+        [
+            componentData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -209,14 +210,17 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components`,
                     Object.fromEntries(
-                        Object.entries({ ...searchParams, ...pageableQueryParam }).map(([key, value]) => [
+                        Object.entries({
+                            ...searchParams,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -242,7 +246,11 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, params.toString(), session])
+    }, [
+        pageableQueryParam,
+        params.toString(),
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

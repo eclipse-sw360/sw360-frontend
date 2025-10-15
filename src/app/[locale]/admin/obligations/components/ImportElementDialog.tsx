@@ -32,11 +32,23 @@ function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const obligationElements: ObligationElement[] = [
-        { languageElement: 'YOU MUST NOT', action: 'Modify', object: 'License text', selected: false },
-        { languageElement: 'YOU MUST', action: 'Provide', object: 'License text', selected: false },
+        {
+            languageElement: 'YOU MUST NOT',
+            action: 'Modify',
+            object: 'License text',
+            selected: false,
+        },
+        {
+            languageElement: 'YOU MUST',
+            action: 'Provide',
+            object: 'License text',
+            selected: false,
+        },
     ]
 
     const handleClose = () => {
@@ -74,17 +86,50 @@ function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
                     hover
                 >
                     <thead>
-                        <tr style={{ backgroundColor: '#6c757d', color: 'white' }}>
-                            <th style={{ width: '10%' }}>Select</th>
-                            <th style={{ width: '30%' }}>Language Element</th>
-                            <th style={{ width: '30%' }}>Action</th>
-                            <th style={{ width: '30%' }}>Object</th>
+                        <tr
+                            style={{
+                                backgroundColor: '#6c757d',
+                                color: 'white',
+                            }}
+                        >
+                            <th
+                                style={{
+                                    width: '10%',
+                                }}
+                            >
+                                Select
+                            </th>
+                            <th
+                                style={{
+                                    width: '30%',
+                                }}
+                            >
+                                Language Element
+                            </th>
+                            <th
+                                style={{
+                                    width: '30%',
+                                }}
+                            >
+                                Action
+                            </th>
+                            <th
+                                style={{
+                                    width: '30%',
+                                }}
+                            >
+                                Object
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {obligationElements.map((element, index) => (
                             <tr key={index}>
-                                <td style={{ textAlign: 'center' }}>
+                                <td
+                                    style={{
+                                        textAlign: 'center',
+                                    }}
+                                >
                                     <Form.Check
                                         type='radio'
                                         name='obligationElement'

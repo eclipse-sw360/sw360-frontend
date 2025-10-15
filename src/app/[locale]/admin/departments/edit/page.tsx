@@ -11,16 +11,17 @@
 
 'use client'
 
-import { Embedded, HttpStatus, User } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import { Embedded, User } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import SecondaryDepartments from '../components/SecondaryDepartments'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
@@ -40,7 +41,9 @@ const EditDepartmentPage = (): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleUpdateDepartmentMembers = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -62,11 +65,11 @@ const EditDepartmentPage = (): JSX.Element => {
             memberEmails,
             session.user.access_token,
         )
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             MessageService.error('Failed to update department members')
             return
         }
@@ -85,10 +88,10 @@ const EditDepartmentPage = (): JSX.Element => {
             return signOut()
         }
         const response = await ApiUtils.GET(`departments/members`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Failed to fetch member of departments'))
             setMemberEmails([])
             return
@@ -96,7 +99,9 @@ const EditDepartmentPage = (): JSX.Element => {
         const departmentsWithEmails: SecondaryDepartments = await response.json()
         const currentMemberEmails = departmentsWithEmails[secondaryDepartmentName]
         setMemberEmails(currentMemberEmails)
-    }, [secondaryDepartmentName])
+    }, [
+        secondaryDepartmentName,
+    ])
 
     const fetchSuggestionUserEmails = useCallback(async () => {
         const session = await getSession()
@@ -104,10 +109,10 @@ const EditDepartmentPage = (): JSX.Element => {
             return signOut()
         }
         const response = await ApiUtils.GET(`users`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Failed to fetch member of departments'))
             return
         }
@@ -124,10 +129,15 @@ const EditDepartmentPage = (): JSX.Element => {
 
     const addNewUser = () => {
         if (memberEmails === undefined) {
-            setMemberEmails([''])
+            setMemberEmails([
+                '',
+            ])
             return
         }
-        setMemberEmails([...memberEmails, ''])
+        setMemberEmails([
+            ...memberEmails,
+            '',
+        ])
     }
 
     const changeEmail = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -135,7 +145,9 @@ const EditDepartmentPage = (): JSX.Element => {
         if (memberEmails === undefined) {
             return
         }
-        const newMemberEmails = [...memberEmails]
+        const newMemberEmails = [
+            ...memberEmails,
+        ]
         newMemberEmails[index] = changedEmail
         setMemberEmails(newMemberEmails)
     }
@@ -144,7 +156,9 @@ const EditDepartmentPage = (): JSX.Element => {
         if (memberEmails === undefined) {
             return
         }
-        const newMemberEmails = [...memberEmails]
+        const newMemberEmails = [
+            ...memberEmails,
+        ]
         newMemberEmails.splice(index, 1)
         setMemberEmails(newMemberEmails)
     }

@@ -11,12 +11,13 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap'
 
-import { Attachment, AttachmentTypes, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentTypes } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
@@ -38,7 +39,9 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const cliAttachmentNumber = embeddedAttachments.filter(
         (attachment) => attachment.attachmentType == AttachmentTypes.COMPONENT_LICENSE_INFO_XML,
@@ -49,12 +52,12 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as AssessmentSummaryInfo
             setAssessmentSummaryInfo(data)
-        } else if (response.status === HttpStatus.NO_CONTENT) {
+        } else if (response.status === StatusCodes.NO_CONTENT) {
             setAssessmentSummaryInfo({})
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             await signOut()
         }
     }

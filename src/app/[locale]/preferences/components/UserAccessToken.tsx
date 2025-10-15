@@ -11,13 +11,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
-import { HttpStatus, UIConfigKeys } from '@/object-types'
+import { UIConfigKeys } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import styles from '../preferences.module.css'
@@ -67,7 +68,7 @@ const UserAccessToken = (): ReactNode => {
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
 
-                if (response.status === HttpStatus.CREATED) {
+                if (response.status === StatusCodes.CREATED) {
                     const data: string = (await response.json()) as string
                     setGeneratedToken(data)
                     setTokenData({

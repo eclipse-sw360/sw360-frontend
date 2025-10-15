@@ -11,6 +11,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -26,7 +27,6 @@ import { useConfigValue } from '@/contexts'
 import {
     Embedded,
     ErrorDetails,
-    HttpStatus,
     PageableQueryParam,
     PaginationMeta,
     Project as TypeProject,
@@ -358,7 +358,7 @@ function Project(): JSX.Element {
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -465,13 +465,13 @@ function Project(): JSX.Element {
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             if (withLinkedRelease === false) {
                 const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             } else {
@@ -479,13 +479,13 @@ function Project(): JSX.Element {
                     'reports?module=PROJECTS&withLinkedRelease=true',
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             }

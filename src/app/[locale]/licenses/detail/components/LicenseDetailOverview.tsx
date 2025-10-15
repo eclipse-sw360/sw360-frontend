@@ -11,6 +11,11 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -19,7 +24,6 @@ import {
     Changelogs,
     Embedded,
     ErrorDetails,
-    HttpStatus,
     LicenseDetail,
     LicenseTabIds,
     PageableQueryParam,
@@ -28,10 +32,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useSearchParams } from 'next/navigation'
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import styles from '../detail.module.css'
 import Detail from './Detail'
 import Obligations from './Obligations'
@@ -58,7 +58,9 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const tabList = [
         {
@@ -88,7 +90,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -104,7 +106,10 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
             }
         })()
         return () => controller.abort()
-    }, [params, licenseId])
+    }, [
+        params,
+        licenseId,
+    ])
 
     const handleEditWhitelist = () => {
         setIsEditWhitelist(true)
@@ -126,7 +131,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
             whitelistObj,
             session.user.access_token,
         )
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             MessageService.success(t('License updated successfully'))
             window.location.reload()
         } else {
@@ -148,12 +153,27 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
             type: 'primary',
             name: t('Edit License'),
         },
-        'Edit Whitelist': { link: '', type: 'secondary', onClick: handleEditWhitelist, name: t('Edit Whitelist') },
+        'Edit Whitelist': {
+            link: '',
+            type: 'secondary',
+            onClick: handleEditWhitelist,
+            name: t('Edit Whitelist'),
+        },
     }
 
     const headerButtonsUpdateWhitelist = {
-        'Update whitelist': { link: '', type: 'primary', onClick: handleUpdateWhitelist, name: t('Update whitelist') },
-        Cancel: { link: '', type: 'light', onClick: handleCancel, name: t('Cancel') },
+        'Update whitelist': {
+            link: '',
+            type: 'primary',
+            onClick: handleUpdateWhitelist,
+            name: t('Update whitelist'),
+        },
+        Cancel: {
+            link: '',
+            type: 'light',
+            onClick: handleCancel,
+            name: t('Cancel'),
+        },
     }
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -168,7 +188,12 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
         number: 0,
     })
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
-    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -186,11 +211,16 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${licenseId}`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -220,7 +250,11 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, licenseId, session])
+    }, [
+        pageableQueryParam,
+        licenseId,
+        session,
+    ])
 
     return (
         license && (
@@ -347,7 +381,9 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                                     />
                                     <div
                                         id='cardScreen'
-                                        style={{ padding: '0px' }}
+                                        style={{
+                                            padding: '0px',
+                                        }}
                                     ></div>
                                 </div>
                             </div>
@@ -361,4 +397,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
 
 // export default LicenseDetailOverview
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(LicenseDetailOverview, [UserGroupType.SECURITY_USER])
+export default AccessControl(LicenseDetailOverview, [
+    UserGroupType.SECURITY_USER,
+])

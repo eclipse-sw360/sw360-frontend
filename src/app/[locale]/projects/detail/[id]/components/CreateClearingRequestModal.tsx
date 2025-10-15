@@ -9,14 +9,15 @@
 
 'use client'
 
-import { ClearingRequestDetails, CreateClearingRequestPayload, HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, SetStateAction, useCallback, useEffect, useState, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
+import { ClearingRequestDetails, CreateClearingRequestPayload } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     show: boolean
@@ -53,7 +54,9 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         const calculateMinDate = () => {
@@ -64,7 +67,9 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
             return currentDate.toISOString().split('T')[0]
         }
         setMinDate(calculateMinDate())
-    }, [isCritical])
+    }, [
+        isCritical,
+    ])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)
@@ -78,7 +83,9 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
     const handleError = useCallback(() => {
         displayMessage('danger', <>{t('Error when processing')}</>)
         setReloadPage(true)
-    }, [t])
+    }, [
+        t,
+    ])
 
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
@@ -96,7 +103,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                 session.user.access_token,
             )
             const responseData = (await response.json()) as ClearingRequestDetails
-            if (response.status == HttpStatus.CREATED) {
+            if (response.status == StatusCodes.CREATED) {
                 displayMessage(
                     'success',
                     <>
@@ -112,10 +119,10 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                 )
                 setIsDisabled(true)
                 setReloadPage(true)
-            } else if (response.status == HttpStatus.CONFLICT) {
+            } else if (response.status == StatusCodes.CONFLICT) {
                 displayMessage('danger', <>{t('Clearing request already present for project')}</>)
                 setIsDisabled(true)
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 displayMessage('danger', <>{t('Error when processing')}</>)
@@ -187,10 +194,18 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
             >
                 <Modal.Header
                     closeButton
-                    style={{ color: '#2E5AAC' }}
+                    style={{
+                        color: '#2E5AAC',
+                    }}
                 >
                     <Modal.Title id='create-clearing-request-modal'>
-                        <BsCheck2Square style={{ marginBottom: '5px', color: '#2E5AAC', fontSize: '23px' }} />{' '}
+                        <BsCheck2Square
+                            style={{
+                                marginBottom: '5px',
+                                color: '#2E5AAC',
+                                fontSize: '23px',
+                            }}
+                        />{' '}
                         {t('create clearing request')}
                     </Modal.Title>
                 </Modal.Header>
@@ -213,11 +228,17 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                         </Form.Group>
                         <hr />
                         <Form.Group className='mb-3'>
-                            <Form.Label style={{ fontWeight: 'bold' }}>
+                            <Form.Label
+                                style={{
+                                    fontWeight: 'bold',
+                                }}
+                            >
                                 {t('Please enter the clearing team email id')} :
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -246,11 +267,17 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                         <Row className='mb-3'>
                             <Col md={6}>
                                 <Form.Group className='mb-2'>
-                                    <Form.Label style={{ fontWeight: 'bold' }}>
+                                    <Form.Label
+                                        style={{
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
                                         {t('Clearing Type')} :
                                         <span
                                             className='text-red'
-                                            style={{ color: '#F7941E' }}
+                                            style={{
+                                                color: '#F7941E',
+                                            }}
                                         >
                                             *
                                         </span>
@@ -281,11 +308,17 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                             </Col>
                             <Col md={6}>
                                 <Form.Group className='mb-2'>
-                                    <Form.Label style={{ fontWeight: 'bold' }}>
+                                    <Form.Label
+                                        style={{
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
                                         {t('Preferred Clearing Date')} :
                                         <span
                                             className='text-red'
-                                            style={{ color: '#F7941E' }}
+                                            style={{
+                                                color: '#F7941E',
+                                            }}
                                         >
                                             *
                                         </span>
@@ -312,27 +345,48 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                         </Row>
                         <Form.Group
                             className='mb-1'
-                            style={{ display: 'flex', alignItems: 'left' }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'left',
+                            }}
                         >
                             <Form.Check
                                 type='checkbox'
                                 id='createClearingRequest.priority'
                                 name='priority'
                                 checked={isCritical}
-                                style={{ marginTop: '1px' }}
+                                style={{
+                                    marginTop: '1px',
+                                }}
                                 onChange={setClearingPriority}
                                 disabled={isDisabled}
                             />
-                            <Form.Label style={{ fontWeight: 'bold', marginLeft: '10px' }}>{t('Critical')}</Form.Label>
+                            <Form.Label
+                                style={{
+                                    fontWeight: 'bold',
+                                    marginLeft: '10px',
+                                }}
+                            >
+                                {t('Critical')}
+                            </Form.Label>
                         </Form.Group>
                         <div
                             className='subscriptionBox'
-                            style={{ textAlign: 'left', marginBottom: '20px' }}
+                            style={{
+                                textAlign: 'left',
+                                marginBottom: '20px',
+                            }}
                         >
                             {t('Criticality selection info')}
                         </div>
                         <Form.Group className='mb-2'>
-                            <Form.Label style={{ fontWeight: 'bold' }}>{t('Comments')} :</Form.Label>
+                            <Form.Label
+                                style={{
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                {t('Comments')} :
+                            </Form.Label>
                             <Form.Control
                                 id='createClearingRequest.requestingUserComment'
                                 type='text'
@@ -340,7 +394,10 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                                 name='requestingUserComment'
                                 value={createClearingRequestPayload.requestingUserComment}
                                 onChange={updateInputField}
-                                style={{ height: 'auto', textAlign: 'left' }}
+                                style={{
+                                    height: 'auto',
+                                    textAlign: 'left',
+                                }}
                                 disabled={isDisabled}
                             />
                         </Form.Group>

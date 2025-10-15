@@ -11,6 +11,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -25,7 +26,6 @@ import {
     Component,
     ComponentPayload,
     DocumentTypes,
-    HttpStatus,
     InputKeyValue,
     UIConfigKeys,
     UserGroupType,
@@ -122,7 +122,7 @@ function AddComponent(): ReactNode {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.POST('components', componentPayload, session.user.access_token)
 
-        if (response.status === HttpStatus.CREATED) {
+        if (response.status === StatusCodes.CREATED) {
             const data = (await response.json()) as Component
             router.push('/components/edit/' + data.id)
             MessageService.success(t('Component is created'))

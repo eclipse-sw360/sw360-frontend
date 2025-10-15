@@ -8,23 +8,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import {
-    Embedded,
-    ErrorDetails,
-    HttpStatus,
-    ModerationRequest,
-    PageableQueryParam,
-    PaginationMeta,
-} from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import type { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedTaskAssignments = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -75,7 +69,9 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -90,7 +86,12 @@ function MyTaskAssignmentsWidget(): ReactNode {
         number: 0,
     })
     const [taskAssignmentData, setTaskAssignmentData] = useState<ModerationRequest[]>(() => [])
-    const memoizedData = useMemo(() => taskAssignmentData, [taskAssignmentData])
+    const memoizedData = useMemo(
+        () => taskAssignmentData,
+        [
+            taskAssignmentData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -110,13 +111,18 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest/byState`,
                     Object.fromEntries(
-                        Object.entries({ ...pageableQueryParam, state: 'open', allDetails: false }).map(
-                            ([key, value]) => [key, String(value)],
-                        ),
+                        Object.entries({
+                            ...pageableQueryParam,
+                            state: 'open',
+                            allDetails: false,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -141,7 +147,10 @@ function MyTaskAssignmentsWidget(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, reload])
+    }, [
+        pageableQueryParam,
+        reload,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

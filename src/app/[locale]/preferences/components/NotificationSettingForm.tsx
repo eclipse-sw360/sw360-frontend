@@ -11,19 +11,22 @@
 
 'use client'
 
-import { HttpStatus, User } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { User } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
-    notificationPreferences: { [key: string]: boolean }
+    notificationPreferences: {
+        [key: string]: boolean
+    }
 }
 
 const NotificationSettingForm = (): ReactNode => {
@@ -35,7 +38,9 @@ const NotificationSettingForm = (): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
     const [notificationSetting, setNotificationSetting] = useState<NotificationSetting>({
         wantsMailNotification: false,
         notificationPreferences: {},
@@ -47,7 +52,7 @@ const NotificationSettingForm = (): ReactNode => {
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
 
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 await fetchData('users/profile')
             } else {
@@ -64,14 +69,14 @@ const NotificationSettingForm = (): ReactNode => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
 
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data: User = (await response.json()) as User
             setUser(data)
             setNotificationSetting({
                 wantsMailNotification: data.wantsMailNotification ?? false,
                 notificationPreferences: data.notificationPreferences ?? {},
             })
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
             setUser(undefined)
@@ -91,7 +96,9 @@ const NotificationSettingForm = (): ReactNode => {
         fetchData('users/profile').catch((error) => {
             console.error(error)
         })
-    }, [fetchData])
+    }, [
+        fetchData,
+    ])
 
     return (
         <form>

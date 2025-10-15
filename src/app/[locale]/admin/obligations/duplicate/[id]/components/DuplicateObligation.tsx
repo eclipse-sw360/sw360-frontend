@@ -10,15 +10,17 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, Obligation } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { notFound, useRouter } from 'next/navigation'
 import React, { ReactNode, useEffect, useState } from 'react'
+import { Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 import ObligationForm from '../../../components/AddOrEditObligation'
 
 interface props {
@@ -42,7 +44,9 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         void (async () => {
@@ -52,7 +56,7 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
                 const response = await ApiUtils.GET(`obligations/${obligationId}`, session.user.access_token)
-                if (response.status === HttpStatus.OK) {
+                if (response.status === StatusCodes.OK) {
                     const data = (await response.json()) as Obligation
                     if (Object.keys(data).length > 0) {
                         setObligation({
@@ -74,7 +78,10 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
                 setIsLoading(false)
             }
         })()
-    }, [obligationId, t])
+    }, [
+        obligationId,
+        t,
+    ])
 
     const isFieldValid = (field: string | null | undefined): boolean =>
         field !== null && field !== undefined && field.trim() !== ''
@@ -99,7 +106,7 @@ function DuplicateObligation({ obligationId }: props): ReactNode {
         }
 
         const response = await ApiUtils.POST('obligations', obligation, session.user.access_token)
-        if (response.status == HttpStatus.CREATED) {
+        if (response.status == StatusCodes.CREATED) {
             MessageService.success(t('Obligation added successfully'))
             router.push('/admin/obligations')
         } else {

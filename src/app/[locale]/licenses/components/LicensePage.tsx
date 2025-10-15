@@ -10,11 +10,20 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
+import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     Embedded,
     ErrorDetails,
-    HttpStatus,
     LicenseDetail,
     PageableQueryParam,
     PaginationMeta,
@@ -23,15 +32,6 @@ import {
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
-import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 
 function LicensePage(): ReactNode {
     const params = useSearchParams()
@@ -42,20 +42,26 @@ function LicensePage(): ReactNode {
     const deleteLicense = params.get('delete')
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        setSearch({ keyword: event.currentTarget.value })
+        setSearch({
+            keyword: event.currentTarget.value,
+        })
     }
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedString(deleteLicense)) {
             MessageService.success(t('License removed successfully'))
         }
-    }, [params])
+    }, [
+        params,
+    ])
 
     const handleExportLicense = () => {
         void DownloadService.download(`reports?module=licenses`, session, `Licenses.xlsx`)
@@ -118,7 +124,9 @@ function LicensePage(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -132,7 +140,12 @@ function LicensePage(): ReactNode {
         number: 0,
     })
     const [licenseData, setLicenseData] = useState<LicenseDetail[]>(() => [])
-    const memoizedData = useMemo(() => licenseData, [licenseData])
+    const memoizedData = useMemo(
+        () => licenseData,
+        [
+            licenseData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -151,14 +164,17 @@ function LicensePage(): ReactNode {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `licenses`,
                     Object.fromEntries(
-                        Object.entries({ ...search, ...pageableQueryParam }).map(([key, value]) => [
+                        Object.entries({
+                            ...search,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -184,7 +200,10 @@ function LicensePage(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, search])
+    }, [
+        pageableQueryParam,
+        search,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -220,7 +239,11 @@ function LicensePage(): ReactNode {
     })
 
     const headerButtons = {
-        'Add License': { link: '/licenses/add', type: 'primary', name: t('Add License') },
+        'Add License': {
+            link: '/licenses/add',
+            type: 'primary',
+            name: t('Add License'),
+        },
         'Export Spreadsheet': {
             link: '/licenses',
             onClick: handleExportLicense,
@@ -274,4 +297,6 @@ function LicensePage(): ReactNode {
 }
 // export default LicensePage
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(LicensePage, [UserGroupType.SECURITY_USER])
+export default AccessControl(LicensePage, [
+    UserGroupType.SECURITY_USER,
+])

@@ -9,16 +9,17 @@
 
 'use client'
 
-import { Embedded, HttpStatus, LinkedPackageData, Package, ProjectPayload } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import Link from 'next/link'
-import { ChangeEvent, useRef, useState, type JSX } from 'react'
+import { _, Table } from 'next-sw360'
+import { ChangeEvent, type JSX, useRef, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
+import { Embedded, LinkedPackageData, Package, ProjectPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     setLinkedPackageData: React.Dispatch<React.SetStateAction<Map<string, LinkedPackageData>>>
@@ -73,7 +74,10 @@ export default function LinkPackagesModal({
             name: t('Name'),
             width: 'auto',
             sort: true,
-            formatter: ([name, packageId]: [string, string]) =>
+            formatter: ([name, packageId]: [
+                string,
+                string,
+            ]) =>
                 _(
                     <>
                         <Link href={`/packages/detail/${packageId}`}>{name}</Link>
@@ -149,7 +153,7 @@ export default function LinkPackagesModal({
                 return signOut()
             }
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 const data = (await response.json()) as EmbeddedPackages
                 const dataTableFormat =
                     CommonUtils.isNullOrUndefined(data['_embedded']) &&
@@ -157,18 +161,23 @@ export default function LinkPackagesModal({
                         ? []
                         : data['_embedded']['sw360:packages'].map((singlePackage: Package) => [
                               CommonUtils.getIdFromUrl(singlePackage._links?.self.href),
-                              [singlePackage.name ?? '', CommonUtils.getIdFromUrl(singlePackage._links?.self.href)],
+                              [
+                                  singlePackage.name ?? '',
+                                  CommonUtils.getIdFromUrl(singlePackage._links?.self.href),
+                              ],
                               singlePackage.version ?? '',
-                              singlePackage.licenseIds ?? [''],
+                              singlePackage.licenseIds ?? [
+                                  '',
+                              ],
                               singlePackage.packageManager ?? '',
                               singlePackage.purl ?? '',
                           ])
                 setPackageData(dataTableFormat)
-            } else if (response.status == HttpStatus.FORBIDDEN) {
+            } else if (response.status == StatusCodes.FORBIDDEN) {
                 MessageService.warn(t('Access Denied'))
-            } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+            } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                 MessageService.error(t('Internal server error'))
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Unauthorized request'))
             }
         } catch (e) {
@@ -179,7 +188,9 @@ export default function LinkPackagesModal({
     const projectPayloadSetter = (linkedPackagePayloadData: Map<string, LinkedPackageData>) => {
         try {
             if (linkedPackagePayloadData.size > 0) {
-                const updatedProjectPayload = { ...projectPayload }
+                const updatedProjectPayload = {
+                    ...projectPayload,
+                }
                 if (updatedProjectPayload.packageIds === undefined) {
                     updatedProjectPayload.packageIds = {}
                 }
@@ -266,7 +277,9 @@ export default function LinkPackagesModal({
                                 <Button
                                     variant='secondary'
                                     onClick={() =>
-                                        void handleSearch({ searchValue: searchValueRef.current?.value ?? '' })
+                                        void handleSearch({
+                                            searchValue: searchValueRef.current?.value ?? '',
+                                        })
                                     }
                                 >
                                     {t('Search')}

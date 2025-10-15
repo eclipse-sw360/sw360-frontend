@@ -9,18 +9,19 @@
 
 'use client'
 
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ClearingRequestDetails, HttpStatus, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import Link from 'next/link'
-import { notFound, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import ClearingComments from './../../../detail/[id]/components/ClearingComments'
 import EditClearingDecision from './EditClearingDecision'
 import EditClearingRequestInfo from './EditClearingRequestInfo'
@@ -44,16 +45,18 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ClearingRequestDetails
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -66,7 +69,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                 setClearingRequestData(clearingRequestDetails)
             },
         )
-    }, [clearingRequestId])
+    }, [
+        clearingRequestId,
+    ])
 
     useEffect(() => {
         if (!clearingRequestData) return
@@ -79,7 +84,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
             agreedClearingDate: clearingRequestData.agreedClearingDate ?? '',
             requestingUser: clearingRequestData.requestingUser ?? '',
         })
-    }, [clearingRequestData])
+    }, [
+        clearingRequestData,
+    ])
 
     const handleUpdateClearingRequest = async () => {
         const session = await getSession()
@@ -90,12 +97,12 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                 updateClearingRequestPayload,
                 session.user.access_token,
             )
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 MessageService.success(
                     t('Clearing Request') + `${clearingRequestData?.id} ` + t('updated successfully'),
                 )
                 router.push(`/requests/clearingRequest/detail/${clearingRequestData?.id}`)
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             }
         } catch (err) {
@@ -148,7 +155,10 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                             <Card className={`${styles['card']}`}>
                                 <div
                                     onClick={() => toggleCollapse(0)}
-                                    style={{ cursor: 'pointer', padding: '0' }}
+                                    style={{
+                                        cursor: 'pointer',
+                                        padding: '0',
+                                    }}
                                 >
                                     <Card.Header
                                         className={`
@@ -212,7 +222,10 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                             <Card className={`${styles['card']}`}>
                                 <div
                                     onClick={() => toggleCollapse(1)}
-                                    style={{ cursor: 'pointer', padding: '0' }}
+                                    style={{
+                                        cursor: 'pointer',
+                                        padding: '0',
+                                    }}
                                 >
                                     <Card.Header
                                         className={`
@@ -256,4 +269,6 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(EditClearingRequest, [UserGroupType.SECURITY_USER])
+export default AccessControl(EditClearingRequest, [
+    UserGroupType.SECURITY_USER,
+])

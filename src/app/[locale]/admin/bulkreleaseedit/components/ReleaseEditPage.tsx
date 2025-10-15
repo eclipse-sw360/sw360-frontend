@@ -9,13 +9,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { _, QuickFilter, Table, VendorDialog } from 'next-sw360'
 import React, { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { GiCancel } from 'react-icons/gi'
-import { Embedded, ErrorDetails, HttpStatus, Release, Session, Vendor } from '@/object-types'
+import { Embedded, ErrorDetails, Release, Session, Vendor } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
 
@@ -72,7 +73,7 @@ function UpdateReleaseModal({
 
             const response = await ApiUtils.PATCH(`releases/${release.id}`, release, session.user.access_token)
 
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 setAlert({
                     variant: 'success',
                     message: (

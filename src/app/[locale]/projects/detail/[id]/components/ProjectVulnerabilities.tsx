@@ -9,13 +9,14 @@
 
 'use client'
 
-import { Embedded, HttpStatus, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
+import { StatusCodes } from 'http-status-codes'
+import { notFound } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { type JSX, useEffect, useState } from 'react'
+import { Tab, Tabs } from 'react-bootstrap'
+import { Embedded, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
-import { notFound } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import VulnerabilityTab from './VulnerabilityTab'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -43,7 +44,9 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         if (CommonUtils.isNullOrUndefined(session)) return
@@ -58,9 +61,9 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                     session.user.access_token,
                     signal,
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
 
@@ -82,7 +85,9 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
         })()
 
         return () => controller.abort(signal)
-    }, [session])
+    }, [
+        session,
+    ])
 
     return (
         <>

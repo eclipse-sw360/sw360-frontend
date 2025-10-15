@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -17,7 +18,7 @@ import { type JSX, useEffect, useState } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { useConfigValue } from '@/contexts'
-import { ConfigKeys, HttpStatus, UIConfigKeys, UserGroupType } from '@/object-types'
+import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
@@ -81,9 +82,9 @@ function LicenseClearing({
                     return signOut()
                 }
                 const response = await ApiUtils.GET('configurations', session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     setDependencyNetworkFeatureEnabled(false)
                     return
                 }
@@ -113,13 +114,13 @@ function LicenseClearing({
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             if (withLinkedRelease === false) {
                 const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             } else {
@@ -127,13 +128,13 @@ function LicenseClearing({
                     'reports?module=PROJECTS&withLinkedRelease=true',
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             }

@@ -8,6 +8,8 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
@@ -15,7 +17,6 @@ import { type JSX, useCallback, useEffect, useState } from 'react'
 import OnOffSwitch from '@/app/[locale]/admin/configurations/components/OnOffSwitch'
 import {
     ConfigurationContainers,
-    HttpStatus,
     ProcessedUiConfig,
     parseRawUiConfig,
     UIConfigKeys,
@@ -47,10 +48,10 @@ const FrontEndConfigs = (): JSX.Element => {
             return
         }
         const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as UiConfiguration
             setCurrentUiConfig(data)
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
             setCurrentUiConfig({} as UiConfiguration)
@@ -77,9 +78,9 @@ const FrontEndConfigs = (): JSX.Element => {
             return
         }
         const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             MessageService.success(t('Updated frontend configurations successfully'))
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
             const message = await response.json()

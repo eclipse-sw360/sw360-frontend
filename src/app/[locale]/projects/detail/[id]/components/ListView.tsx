@@ -10,30 +10,22 @@
 'use client'
 
 import {
-    Embedded,
-    ErrorDetails,
-    FilterOption,
-    HttpStatus,
-    LicenseClearing,
-    Project,
-    Release,
-    TypedEntity,
-} from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import {
     ColumnDef,
     ColumnFiltersState,
     getCoreRowModel,
     getPaginationRowModel,
     useReactTable,
 } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
-import Link from 'next/link'
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
+import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -177,7 +169,13 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
     path.push(`${projectName} (${projectVersion})`)
     for (const p of linkedProjects ?? []) {
         path.push(`${p.name} (${p.version})`)
-        finalData.push({ type: 'project', entity: { ...p, path: path.join(' -> ') } })
+        finalData.push({
+            type: 'project',
+            entity: {
+                ...p,
+                path: path.join(' -> '),
+            },
+        })
 
         for (const l of p['linkedReleases'] ?? []) {
             const release: Release | undefined = licenseClearing.filter(
@@ -186,7 +184,11 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             if (release === undefined) continue
             finalData.push({
                 type: 'release',
-                entity: { ...release, path: path.join(' -> '), releaseRelation: l.relation },
+                entity: {
+                    ...release,
+                    path: path.join(' -> '),
+                    releaseRelation: l.relation,
+                },
             })
         }
         extractLinkedProjectsAndTheirLinkedReleases(
@@ -213,7 +215,14 @@ const extractLinkedReleases = (
         const release = licenseClearing['_embedded']['sw360:release'].filter(
             (r: Release) => r.id === l.release.split('/').at(-1),
         )?.[0]
-        finalData.push({ type: 'release', entity: { ...release, path: path.join('->'), releaseRelation: l.relation } })
+        finalData.push({
+            type: 'release',
+            entity: {
+                ...release,
+                path: path.join('->'),
+                releaseRelation: l.relation,
+            },
+        })
     }
 }
 
@@ -262,7 +271,9 @@ export default function ListView({
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
@@ -270,10 +281,20 @@ export default function ListView({
     const [showProcessing, setShowProcessing] = useState(false)
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
-    const memoizedLinkedProjects = useMemo(() => linkedProjects, [linkedProjects])
+    const memoizedLinkedProjects = useMemo(
+        () => linkedProjects,
+        [
+            linkedProjects,
+        ],
+    )
 
     const [licenseClearing, setLicenseClearing] = useState<LicenseClearing | undefined>()
-    const memoizedLicenseClearing = useMemo(() => licenseClearing, [licenseClearing])
+    const memoizedLicenseClearing = useMemo(
+        () => licenseClearing,
+        [
+            licenseClearing,
+        ],
+    )
 
     const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
 
@@ -542,7 +563,11 @@ export default function ListView({
                 },
             },
         ],
-        [t, columnFilters, showFilter],
+        [
+            t,
+            columnFilters,
+            showFilter,
+        ],
     )
 
     const table = useReactTable({
@@ -580,7 +605,7 @@ export default function ListView({
                     .join('&')}`
                 const response = await ApiUtils.GET(url, session.user.access_token, signal)
 
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -600,7 +625,12 @@ export default function ListView({
         })()
 
         return () => controller.abort()
-    }, [status, projectId, session, columnFilters])
+    }, [
+        status,
+        projectId,
+        session,
+        columnFilters,
+    ])
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -620,7 +650,7 @@ export default function ListView({
                     signal,
                 )
 
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -640,13 +670,22 @@ export default function ListView({
         })()
 
         return () => controller.abort()
-    }, [status, projectId, session])
+    }, [
+        status,
+        projectId,
+        session,
+    ])
 
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) return
         const data = buildTable(memoizedLicenseClearing, memoizedLinkedProjects, projectName, projectVersion)
         setRowData(data)
-    }, [memoizedLicenseClearing, memoizedLinkedProjects, projectName, projectVersion])
+    }, [
+        memoizedLicenseClearing,
+        memoizedLinkedProjects,
+        projectName,
+        projectVersion,
+    ])
 
     return (
         <div className='mb-3'>

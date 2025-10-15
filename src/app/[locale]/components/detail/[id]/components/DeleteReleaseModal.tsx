@@ -11,12 +11,13 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState, ChangeEvent } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
-import { ActionType, HttpStatus, ReleaseDetail } from '@/object-types'
+import { ActionType, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
@@ -76,23 +77,23 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         })
         const response = await ApiUtils.DELETE(url, session.user.access_token)
         try {
-            if (response.status === HttpStatus.MULTIPLE_STATUS) {
+            if (response.status === StatusCodes.MULTI_STATUS) {
                 const body = (await response.json()) as Array<DeleteResponse>
                 const deleteStatus = body[0].status
-                if (deleteStatus === HttpStatus.OK) {
+                if (deleteStatus === StatusCodes.OK) {
                     displayMessage('success', 'Delete release success!')
                     setReloadPage(true)
-                } else if (deleteStatus === HttpStatus.CONFLICT) {
+                } else if (deleteStatus === StatusCodes.CONFLICT) {
                     displayMessage(
                         'danger',
                         'I could not delete the release, since it is used by another component (release) or project',
                     )
-                } else if (deleteStatus === HttpStatus.ACCEPTED) {
+                } else if (deleteStatus === StatusCodes.ACCEPTED) {
                     displayMessage('success', 'Created moderation request!')
                 } else {
                     displayMessage('danger', 'Error when processing!')
                 }
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 handleError()
             } else {
                 handleError()
@@ -108,7 +109,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const releaseResponse = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
-            if (releaseResponse.status === HttpStatus.OK) {
+            if (releaseResponse.status === StatusCodes.OK) {
                 const release = (await releaseResponse.json()) as ReleaseDetail
                 setRelease(release)
                 setContainsLinkedPackages(!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:packages']))
@@ -120,7 +121,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                         ? release['_embedded']['sw360:attachments'].length
                         : 0,
                 })
-            } else if (releaseResponse.status === HttpStatus.UNAUTHORIZED) {
+            } else if (releaseResponse.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 setRelease(undefined)
