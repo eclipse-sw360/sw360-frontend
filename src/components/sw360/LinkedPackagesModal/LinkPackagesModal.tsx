@@ -21,7 +21,7 @@ import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 
 interface Props {
-    setLinkedPackageData: React.Dispatch<React.SetStateAction<Map<string, LinkedPackageData>>>
+    setLinkedPackageData: (map: Map<string, LinkedPackageData>) => void
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
@@ -295,23 +295,23 @@ export default function LinkPackagesModal({
                 <Button
                     variant='primary'
                     onClick={() => {
-                        setLinkedPackageData((prevMap) => {
-                            const updatedMap = new Map(prevMap)
-                            linkPackages.forEach((item, key) => {
-                                if (!updatedMap.has(key)) {
-                                    updatedMap.set(key, {
-                                        packageId: key,
-                                        name: item.name,
-                                        version: item.version,
-                                        licenseIds: item.licenseIds,
-                                        packageManager: item.packageManager,
-                                    })
-                                }
-                            })
-                            return updatedMap
+                        const updatedMap = new Map<string, LinkedPackageData>()
+                        linkPackages.forEach((item, key) => {
+                            if (!updatedMap.has(key)) {
+                                updatedMap.set(key, {
+                                    packageId: key,
+                                    name: item.name,
+                                    version: item.version,
+                                    licenseIds: item.licenseIds,
+                                    packageManager: item.packageManager,
+                                })
+                            }
                         })
+                        setLinkedPackageData(updatedMap)
+                        if (projectPayload !== undefined && setProjectPayload !== undefined) {
+                            projectPayloadSetter(updatedMap)
+                        }
                         setShow(false)
-                        projectPayloadSetter(linkPackages)
                     }}
                     disabled={linkPackages.size === 0}
                 >
