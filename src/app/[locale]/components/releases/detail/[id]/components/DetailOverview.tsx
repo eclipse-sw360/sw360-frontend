@@ -11,10 +11,10 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { notFound, useParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
@@ -89,7 +89,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -107,7 +109,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 return undefined
             }
         },
-        [session],
+        [
+            session,
+        ],
     )
 
     const getSubcribersEmail = (release: ReleaseDetail) => {
@@ -180,7 +184,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 }
             })
             .catch((err) => console.error(err))
-    }, [fetchData, releaseId, session])
+    }, [
+        fetchData,
+        releaseId,
+        session,
+    ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -194,7 +202,12 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         number: 0,
     })
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
-    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -212,7 +225,12 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
@@ -246,7 +264,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, releaseId, session])
+    }, [
+        pageableQueryParam,
+        releaseId,
+        session,
+    ])
 
     const downloadBundle = async () => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -314,8 +336,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         release && (
             <>
                 <Breadcrumb className='container page-content'>
-                    <Breadcrumb.Item href={componentsPath}>{t('Components')}</Breadcrumb.Item>
                     <Breadcrumb.Item
+                        linkAs={Link}
+                        href={componentsPath}
+                    >
+                        {t('Components')}
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item
+                        linkAs={Link}
                         href={`${componentsPath}/detail/${release._links['sw360:component'].href.split('/').at(-1)}`}
                     >
                         {componentName}
@@ -336,7 +364,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                         <div className='col'>
                             <div
                                 className='row'
-                                style={{ marginBottom: '20px' }}
+                                style={{
+                                    marginBottom: '20px',
+                                }}
                             >
                                 <div
                                     className='col-auto pe-0 btn-group'
@@ -351,7 +381,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu>
                                             {Object.entries(releasesSameComponent).map(
-                                                ([index, item]: [string, ReleaseLink]) => (
+                                                ([index, item]: [
+                                                    string,
+                                                    ReleaseLink,
+                                                ]) => (
                                                     <Dropdown.Item
                                                         key={index}
                                                         className={styles['dropdown-item']}
@@ -404,7 +437,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 <a
                                                     className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
                                                     onClick={() => setChangelogTab('list-change')}
-                                                    style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                                    style={{
+                                                        color: '#F7941E',
+                                                        fontWeight: 'bold',
+                                                    }}
                                                 >
                                                     {t('Change Log')}
                                                 </a>
@@ -415,7 +451,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                             setChangelogTab('view-log')
                                                         }
                                                     }}
-                                                    style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                                    style={{
+                                                        color: '#F7941E',
+                                                        fontWeight: 'bold',
+                                                    }}
                                                 >
                                                     {t('Changes')}
                                                 </a>
@@ -519,7 +558,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                         />
                                         <div
                                             id='cardScreen'
-                                            style={{ padding: '0px' }}
+                                            style={{
+                                                padding: '0px',
+                                            }}
                                         ></div>
                                     </div>
                                 </div>

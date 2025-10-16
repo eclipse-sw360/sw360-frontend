@@ -9,15 +9,16 @@
 
 'use client'
 
+import Link from 'next/link'
+import { notFound, useParams, useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useState } from 'react'
+import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { HttpStatus, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { notFound, useParams, useRouter } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
-import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import ChangeLog from './Changelog'
 import Summary from './Summary'
 
@@ -34,7 +35,9 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -53,14 +56,21 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
 
                 const data = (await response.json()) as Package
 
-                setSummaryData({ id: packageId, ...data })
+                setSummaryData({
+                    id: packageId,
+                    ...data,
+                })
             } catch (e) {
                 console.error(e)
             }
         })()
 
         return () => controller.abort()
-    }, [packageId, session, status])
+    }, [
+        packageId,
+        session,
+        status,
+    ])
 
     const handleEditPackage = () => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -76,7 +86,12 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     return (
         <>
             <Breadcrumb className='container page-content'>
-                <Breadcrumb.Item href={packagesPath}>{t('Packages')}</Breadcrumb.Item>
+                <Breadcrumb.Item
+                    linkAs={Link}
+                    href={packagesPath}
+                >
+                    {t('Packages')}
+                </Breadcrumb.Item>
                 <Breadcrumb.Item active>
                     {summaryData ? `${summaryData.name} (${summaryData.version})` : packageId}
                 </Breadcrumb.Item>
@@ -123,7 +138,9 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
                                         {!summaryData ? (
                                             <div
                                                 className='col-12'
-                                                style={{ textAlign: 'center' }}
+                                                style={{
+                                                    textAlign: 'center',
+                                                }}
                                             >
                                                 <Spinner className='spinner' />
                                             </div>
@@ -145,4 +162,6 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(PackageDetailTab, [UserGroupType.SECURITY_USER])
+export default AccessControl(PackageDetailTab, [
+    UserGroupType.SECURITY_USER,
+])
