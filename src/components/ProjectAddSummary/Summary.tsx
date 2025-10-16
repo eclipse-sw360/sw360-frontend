@@ -8,12 +8,21 @@
 // License-Filename: LICENSE
 
 'use client'
-import { AddtionalDataType, DocumentTypes, InputKeyValue, ProjectPayload, RolesType, Vendor } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import type { JSX } from 'react'
-import Roles from './Roles/Roles'
+import { useConfigValue } from '@/contexts'
+import {
+    AddtionalDataType,
+    DocumentTypes,
+    InputKeyValue,
+    ProjectPayload,
+    RolesType,
+    UIConfigKeys,
+    Vendor,
+} from '@/object-types'
 import GeneralInformation from './component/Summary/GeneralInformation'
+import Roles from './Roles/Roles'
 
 interface Props {
     vendor: Vendor
@@ -32,18 +41,54 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     setAdditionalRoles?: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     setDataAdditionalRoles?: RolesType
-    moderators: { [k: string]: string }
-    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributors: { [k: string]: string }
-    setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    securityResponsibles: { [k: string]: string }
-    setSecurityResponsibles: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    projectOwner: { [k: string]: string }
-    setProjectOwner: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    projectManager: { [k: string]: string }
-    setProjectManager: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    leadArchitect: { [k: string]: string }
-    setLeadArchitect: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    moderators: {
+        [k: string]: string
+    }
+    setModerators: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    contributors: {
+        [k: string]: string
+    }
+    setContributors: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    securityResponsibles: {
+        [k: string]: string
+    }
+    setSecurityResponsibles: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    projectOwner: {
+        [k: string]: string
+    }
+    setProjectOwner: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    projectManager: {
+        [k: string]: string
+    }
+    setProjectManager: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    leadArchitect: {
+        [k: string]: string
+    }
+    setLeadArchitect: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 export default function Summary({
@@ -78,6 +123,16 @@ export default function Summary({
 }: Props): JSX.Element {
     const t = useTranslations('default')
 
+    // Configs from backend
+    const projectExternIdSuggestions =
+        useConfigValue(UIConfigKeys.UI_PROJECT_EXTERNALKEYS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_PROJECT_EXTERNALKEYS) as string[])
+            : undefined
+    const projectExternUrlSuggestions =
+        useConfigValue(UIConfigKeys.UI_PROJECT_EXTERNALURLS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_PROJECT_EXTERNALURLS) as string[])
+            : undefined
+
     return (
         <>
             <div className='ms-1'>
@@ -94,6 +149,7 @@ export default function Summary({
                         data={externalUrls}
                         setData={setExternalUrls}
                         setObject={setExternalUrlsData}
+                        keySuggestions={projectExternUrlSuggestions}
                     />
                 </div>
                 <Roles
@@ -127,6 +183,7 @@ export default function Summary({
                         data={externalIds}
                         setData={setExternalIds}
                         setObject={setExternalIdsData}
+                        keySuggestions={projectExternIdSuggestions}
                     />
                 </div>
                 <div className='row mb-4'>

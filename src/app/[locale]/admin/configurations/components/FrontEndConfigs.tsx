@@ -8,21 +8,21 @@
 // License-Filename: LICENSE
 
 'use client'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import OnOffSwitch from '@/app/[locale]/admin/configurations/components/OnOffSwitch'
 import {
     ConfigurationContainers,
     HttpStatus,
-    parseRawUiConfig,
     ProcessedUiConfig,
+    parseRawUiConfig,
     UIConfigKeys,
     UiConfiguration,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useState } from 'react'
 
 const FrontEndConfigs = (): JSX.Element => {
     const t = useTranslations('default')
@@ -35,7 +35,9 @@ const FrontEndConfigs = (): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchUiConfig = useCallback(async () => {
         const session = await getSession()
@@ -61,7 +63,9 @@ const FrontEndConfigs = (): JSX.Element => {
 
     useEffect(() => {
         updateInternalState()
-    }, [currentUiConfig])
+    }, [
+        currentUiConfig,
+    ])
 
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
@@ -397,10 +401,11 @@ const FrontEndConfigs = (): JSX.Element => {
                                             size={25}
                                             setCurrentUiConfig={setCurrentUiConfig}
                                             checked={
-                                                currentUiConfig[UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE] ===
-                                                'true'
+                                                currentUiConfig[
+                                                    UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE
+                                                ] === 'true'
                                             }
-                                            propKey={UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE}
+                                            propKey={UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE}
                                         />
                                     </td>
                                     <td>{t('ui_rest_apitoken_generator_enable')}</td>

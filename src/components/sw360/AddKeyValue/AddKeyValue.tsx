@@ -9,13 +9,14 @@
 
 'use client'
 
-import DeleteItemWarning from '@/components/sw360/DeleteItemWarning/DeleteItemWarning'
-import { AddtionalDataType } from '@/object-types'
-import { CommonUtils } from '@/utils'
 import { useTranslations } from 'next-intl'
-import React, { useEffect, useState, type JSX } from 'react'
+import React, { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import DeleteItemWarning from '@/components/sw360/DeleteItemWarning/DeleteItemWarning'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
+import { AddtionalDataType } from '@/object-types'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     header: string
@@ -23,6 +24,7 @@ interface Props {
     data?: Input[]
     setData: React.Dispatch<React.SetStateAction<Input[]>>
     setObject?: AddtionalDataType
+    keySuggestions?: string[]
 }
 
 interface Input {
@@ -38,12 +40,31 @@ function AddKeyValue(props: Props): JSX.Element {
 
     useEffect(() => {
         setInputList(!CommonUtils.isNullOrUndefined(props.data) ? props.data : [])
-    }, [props.data])
+    }, [
+        props.data,
+    ])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: Input[] = [...inputList]
+        const list: Input[] = [
+            ...inputList,
+        ]
         list[index][name as keyof Input] = value
+        props.setData(list)
+        if (props.setObject) {
+            const map = new Map<string, string>()
+            list.forEach((item) => {
+                map.set(item.key, item.value)
+            })
+            props.setObject(map)
+        }
+    }
+
+    const handleSuggestionKeyChange = (index: number) => (value: string) => {
+        const list: Input[] = [
+            ...inputList,
+        ]
+        list[index].key = value
         props.setData(list)
         if (props.setObject) {
             const map = new Map<string, string>()
@@ -60,7 +81,13 @@ function AddKeyValue(props: Props): JSX.Element {
     }
 
     const handleAddClick = () => {
-        setInputList([...inputList, { key: '', value: '' }])
+        setInputList([
+            ...inputList,
+            {
+                key: '',
+                value: '',
+            },
+        ])
     }
 
     return (
@@ -85,16 +112,35 @@ function AddKeyValue(props: Props): JSX.Element {
                             key={j}
                         >
                             <div className='col-lg-6'>
-                                <input
-                                    name='key'
-                                    value={elem.key}
-                                    type='text'
-                                    onChange={(e) => handleInputChange(e, j)}
-                                    className='form-control'
-                                    placeholder={t('Enter_Args', { args: props.keyName.toLowerCase() + ' key' })}
-                                    required
-                                    aria-describedby={`${props.keyName.toLowerCase()} key`}
-                                />
+                                {props.keySuggestions !== undefined ? (
+                                    <SuggestionBox
+                                        initialValue={elem.key}
+                                        possibleValues={props.keySuggestions}
+                                        onValueChange={handleSuggestionKeyChange(j)}
+                                        inputProps={{
+                                            id: `${props.keyName.toLowerCase()}-${j}`,
+                                            name: 'key',
+                                            placeHolder: t('Enter_Args', {
+                                                args: props.keyName.toLowerCase() + ' key',
+                                            }),
+                                            aria_describedby: `${props.keyName.toLowerCase()} key`,
+                                        }}
+                                        isMultiValue={false}
+                                    />
+                                ) : (
+                                    <input
+                                        name='key'
+                                        value={elem.key}
+                                        type='text'
+                                        onChange={(e) => handleInputChange(e, j)}
+                                        className='form-control'
+                                        placeholder={t('Enter_Args', {
+                                            args: props.keyName.toLowerCase() + ' key',
+                                        })}
+                                        required
+                                        aria-describedby={`${props.keyName.toLowerCase()} key`}
+                                    />
+                                )}
                             </div>
                             <div className='col-lg-5'>
                                 <input
@@ -103,7 +149,9 @@ function AddKeyValue(props: Props): JSX.Element {
                                     type='text'
                                     onChange={(e) => handleInputChange(e, j)}
                                     className='form-control'
-                                    placeholder={t('Enter_Args', { args: props.keyName.toLowerCase() + ' value' })}
+                                    placeholder={t('Enter_Args', {
+                                        args: props.keyName.toLowerCase() + ' value',
+                                    })}
                                     required
                                     aria-describedby={`${props.keyName.toLowerCase()} value`}
                                 />

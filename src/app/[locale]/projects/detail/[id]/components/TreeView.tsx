@@ -9,7 +9,23 @@
 
 'use client'
 
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    ExpandedState,
+    getCoreRowModel,
+    getExpandedRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
+import { useConfigValue } from '@/contexts'
 import {
     Embedded,
     ErrorDetails,
@@ -20,24 +36,10 @@ import {
     Project,
     Release,
     TypedEntity,
+    UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import {
-    ColumnDef,
-    ColumnFiltersState,
-    ExpandedState,
-    getCoreRowModel,
-    getExpandedRowModel,
-    useReactTable,
-} from '@tanstack/react-table'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
-import Link from 'next/link'
-import { Dispatch, SetStateAction, useEffect, useMemo, useState, type JSX } from 'react'
-import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
@@ -177,13 +179,19 @@ const buildTable = (
             (r: Release) => r.id === l.release.split('/').at(-1),
         )?.[0]
         const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
-            node: { type: 'release', entity: release },
+            node: {
+                type: 'release',
+                entity: release,
+            },
             children: [],
         }
         releaseRows.push(nodeRelease)
     }
 
-    setRowData([...linkedProjectRows, ...releaseRows])
+    setRowData([
+        ...linkedProjectRows,
+        ...releaseRows,
+    ])
 }
 
 const extractLinkedProjectsAndTheirLinkedReleases = (
@@ -195,7 +203,10 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
 
     for (const p of linkedProjectsData) {
         const nodeProject: NestedRows<TypedProject | TypedRelease> = {
-            node: { type: 'project', entity: p },
+            node: {
+                type: 'project',
+                entity: p,
+            },
             children: extractLinkedProjectsAndTheirLinkedReleases(
                 licenseClearingData,
                 p['_embedded']?.['sw360:linkedProjects'],
@@ -208,7 +219,10 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             )?.[0]
             if (release === undefined) continue
             const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
-                node: { type: 'release', entity: release },
+                node: {
+                    type: 'release',
+                    entity: release,
+                },
                 children: [],
             }
             if (nodeProject.children === undefined) nodeProject.children = []
@@ -238,18 +252,35 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
-    const memoizedLinkedProjects = useMemo(() => linkedProjects, [linkedProjects])
+    const memoizedLinkedProjects = useMemo(
+        () => linkedProjects,
+        [
+            linkedProjects,
+        ],
+    )
 
     const [licenseClearing, setLicenseClearing] = useState<LicenseClearing | undefined>()
-    const memoizedLicenseClearing = useMemo(() => licenseClearing, [licenseClearing])
+    const memoizedLicenseClearing = useMemo(
+        () => licenseClearing,
+        [
+            licenseClearing,
+        ],
+    )
 
     const [rowData, setRowData] = useState<NestedRows<TypedProject | TypedRelease>[]>([])
+
+    // Configs from backend
+    const showAddLicenseButton = useConfigValue(UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON) as
+        | boolean
+        | null
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const columns = useMemo<ColumnDef<NestedRows<TypedProject | TypedRelease>>[]>(
         () => [
@@ -570,7 +601,12 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 },
             },
         ],
-        [t, expandLevel, columnFilters, showFilter],
+        [
+            t,
+            expandLevel,
+            columnFilters,
+            showFilter,
+        ],
     )
 
     const table = useReactTable({
@@ -598,20 +634,28 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) return
         buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
-    }, [memoizedLicenseClearing, memoizedLinkedProjects])
+    }, [
+        memoizedLicenseClearing,
+        memoizedLinkedProjects,
+    ])
 
     useEffect(() => {
         if (expandLevel === -1) {
             return setExpandedState({})
         }
-        const _expandedState: ExpandedState = { ...(expandedState as Record<string, boolean>) }
+        const _expandedState: ExpandedState = {
+            ...(expandedState as Record<string, boolean>),
+        }
         for (const row of table.getRowModel().rows) {
             if (row.depth <= expandLevel && row.getCanExpand()) {
                 _expandedState[row.id] = true
             }
         }
         setExpandedState(_expandedState)
-    }, [table, expandLevel])
+    }, [
+        table,
+        expandLevel,
+    ])
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -650,7 +694,12 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         })()
 
         return () => controller.abort()
-    }, [status, projectId, session, columnFilters])
+    }, [
+        status,
+        projectId,
+        session,
+        columnFilters,
+    ])
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -690,31 +739,41 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         })()
 
         return () => controller.abort()
-    }, [status, projectId, session])
+    }, [
+        status,
+        projectId,
+        session,
+    ])
 
     return (
         <>
-            <AddLicenseInfoToReleaseModal
-                projectId={projectId}
-                show={show}
-                setShow={setShow}
-            />
-            <div className='col ps-0'>
-                <Button
-                    variant='secondary'
-                    className='me-2 col-auto'
-                    onClick={() => setShow(true)}
-                    hidden={
-                        !(
-                            session?.user.userGroup === UserGroupType.ADMIN ||
-                            session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
-                            session?.user.userGroup === UserGroupType.SW360_ADMIN
-                        )
-                    }
-                >
-                    {t('Add License Info to Release')}
-                </Button>
-            </div>
+            {showAddLicenseButton === null || showAddLicenseButton ? (
+                <>
+                    <AddLicenseInfoToReleaseModal
+                        projectId={projectId}
+                        show={show}
+                        setShow={setShow}
+                    />
+                    <div className='col ps-0'>
+                        <Button
+                            variant='secondary'
+                            className='me-2 col-auto'
+                            onClick={() => setShow(true)}
+                            hidden={
+                                !(
+                                    session?.user.userGroup === UserGroupType.ADMIN ||
+                                    session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
+                                    session?.user.userGroup === UserGroupType.SW360_ADMIN
+                                )
+                            }
+                        >
+                            {t('Add License Info to Release')}
+                        </Button>
+                    </div>
+                </>
+            ) : (
+                <></>
+            )}
             <div className='mb-3'>
                 {table ? (
                     <SW360Table
