@@ -9,7 +9,7 @@
 
 'use client'
 
-import { AdministrationDataType } from '@/object-types'
+import { AdministrationDataType, ClearingDetailsCount } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState, type JSX } from 'react'
@@ -20,7 +20,12 @@ const Capitalize = (text: string) => {
         : undefined
 }
 
-export default function Administration({ data }: { data: AdministrationDataType }): JSX.Element {
+interface Props {
+    clearingDetailCount?: ClearingDetailsCount
+    data: AdministrationDataType
+}
+
+export default function Administration({ data, clearingDetailCount }: Props): JSX.Element {
     const t = useTranslations('default')
     const [toggleClearing, setToggleClearing] = useState(false)
     const [toggleLifecycle, setToggleLifecycle] = useState(false)
@@ -53,7 +58,11 @@ export default function Administration({ data }: { data: AdministrationDataType 
                     </tr>
                     <tr>
                         <td>{t('Clearing Details')}:</td>
-                        <td>{data.clearingDetails}</td>
+                        <td>{t('New Releases')}: {clearingDetailCount?.newClearing},&nbsp;
+                            {t('Under Clearing')}: {clearingDetailCount?.underClearing},&nbsp;
+                            ({t('And')} {clearingDetailCount?.sentToClearingTool} {t('Already uploaded')}),&nbsp;
+                            {t('Report Available')}: {clearingDetailCount?.reportAvailable},&nbsp;
+                            {t('Approved')}: {clearingDetailCount?.approved}</td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Team')}:</td>
