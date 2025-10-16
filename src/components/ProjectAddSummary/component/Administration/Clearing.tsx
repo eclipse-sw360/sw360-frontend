@@ -24,7 +24,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
     const t = useTranslations('default')
     const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
 
+    // Configs from backend
     const projectClearingTeams = useConfigValue(UIConfigKeys.UI_CLEARING_TEAMS) as string[] | null
+    const unknownClearingTeamEnabled = useConfigValue(UIConfigKeys.UI_CLEARING_TEAM_UNKNOWN_ENABLED) as boolean | null
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -76,17 +78,28 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         <select
                             className='form-select'
                             id='addProjects.clearingTeam'
-                            defaultValue='CT'
                             aria-label='Clearing Team'
-                            name='businessUnit'
-                            value={projectPayload.businessUnit}
+                            name='clearingTeam'
+                            value={projectPayload.clearingTeam}
                             onChange={updateInputField}
                         >
+                            {unknownClearingTeamEnabled && (
+                                <option
+                                    value={'Unknown'}
+                                    selected={
+                                        projectPayload.clearingTeam === undefined ||
+                                        projectPayload.clearingTeam === null ||
+                                        projectPayload.clearingTeam.length < 1
+                                    }
+                                >
+                                    {t('Unknown')}
+                                </option>
+                            )}
                             {projectClearingTeams &&
                                 projectClearingTeams.map((team) => (
                                     <option
                                         value={team}
-                                        selected={projectPayload.businessUnit === team}
+                                        selected={projectPayload.clearingTeam === team}
                                     >
                                         {team}
                                     </option>
