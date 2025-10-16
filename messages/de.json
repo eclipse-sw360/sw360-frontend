@@ -426,7 +426,7 @@
     "Do you really want to deactivate the user": "Möchten Sie den Benutzer wirklich deaktivieren?",
     "Do you really want to delete attachment": "Möchten Sie den Anhang wirklich löschen?",
     "Do you really want to delete the License Type": "Möchten Sie den Lizenztyp <strong> {Name} </strong> wirklich löschen?",
-    "Do you really want to delete the Obligation": "Möchten Sie die Verpflichtung wirklich löschen?",
+    "Do you really want to delete the Obligation": "Möchten Sie die Verpflichtung <strong>{name}</strong> wirklich löschen?",
     "Do you really want to delete the attachment?": "Möchten Sie wirklich den Anhang löschen?",
     "Do you really want to delete the component?": "Möchten Sie wirklich die Komponente löschen <strong>{name}</strong>?",
     "Do you really want to delete the license": "Möchten Sie die Lizenz wirklich löschen?",

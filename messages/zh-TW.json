@@ -426,7 +426,7 @@
     "Do you really want to deactivate the user": "您確實要停用該使用者嗎",
     "Do you really want to delete attachment": "您確實要刪除附件嗎",
     "Do you really want to delete the License Type": "您是否真的想刪除許可類型<strong> {name} </strong>？",
-    "Do you really want to delete the Obligation": "您真的想刪除義務嗎？",
+    "Do you really want to delete the Obligation": "您確實要刪除義務<strong>{name}</strong>嗎？",
     "Do you really want to delete the attachment?": "您真的要刪除附件嗎 ?",
     "Do you really want to delete the component?": "您真的要刪除元件 <strong>{姓名}</strong>?",
     "Do you really want to delete the license": "您真的想刪除許可證嗎？",
