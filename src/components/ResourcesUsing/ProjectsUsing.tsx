@@ -9,64 +9,88 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Table, _ } from '@/components/sw360'
-import { Project, RestrictedResource } from '@/object-types'
-import { CommonUtils } from '@/utils'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useEffect, useState, type JSX } from 'react'
-import { Alert } from 'react-bootstrap'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Alert, Spinner } from 'react-bootstrap'
+import { _, SW360Table, Table } from '@/components/sw360'
+import { Project, RestrictedResource } from '@/object-types'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     projectUsings: Array<Project>
     documentName: string
     restrictedResource: RestrictedResource | null | undefined
+    showProcessing: boolean
 }
 
-const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Props): JSX.Element => {
+const ProjectsUsing = ({ projectUsings, documentName, restrictedResource, showProcessing }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<Array<(string | JSX.Element)[]>>([])
-    const { status } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
+    const columns = useMemo<ColumnDef<Project>[]>(
+        () => [
+            {
+                id: 'name',
+                header: t('Project Name'),
+                cell: ({ row }) => {
+                    const { name, version } = row.original
+                    const id = row.original['_links']['self']['href'].split('/').at(-1)
+                    return (
+                        <Link
+                            href={`/projects/detail/${id}`}
+                            className='text-link'
+                        >
+                            {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
+                        </Link>
+                    )
+                },
+            },
+            {
+                id: 'businessUnit',
+                header: t('Group'),
+                accessorKey: 'businessUnit',
+                cell: (info) => info.getValue(),
+                enableSorting: false,
+            },
+            {
+                id: 'projectResponsible',
+                header: t('Project Responsible'),
+                cell: ({ row }) => {
+                    const { projectResponsible } = row.original
+                    return (
+                        <>
+                            {projectResponsible && (
+                                <Link
+                                    href={`mailto:${projectResponsible}`}
+                                    className='text-link'
+                                >
+                                    {projectResponsible}
+                                </Link>
+                            )}
+                        </>
+                    )
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
 
-    const columns = [
-        {
-            id: 'name',
-            name: t('Name'),
-        },
-        {
-            id: 'businessUnit',
-            name: t('Group'),
-        },
-        {
-            id: 'projectResponsible',
-            name: t('Responsible'),
-        },
-    ]
+    const memoizedData = useMemo(
+        () => projectUsings,
+        [
+            projectUsings,
+        ],
+    )
 
-    useEffect(() => {
-        const data = projectUsings.map((project: Project) => [
-            _(
-                <Link
-                    key={project._links.self.href.split('/').at(-1)}
-                    href={`/projects/detail/${project._links.self.href.split('/').at(-1)}`}
-                >
-                    {CommonUtils.isNullEmptyOrUndefinedString(project.version)
-                        ? `${project.name} (${project.version})`
-                        : project.name}
-                </Link>,
-            ) as JSX.Element,
-            project.businessUnit ?? '',
-            _(<Link href={`mailTo:${project.projectResponsible}}`}>{project.projectResponsible}</Link>) as JSX.Element,
-        ])
-        setTableData(data)
-    }, [projectUsings])
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+    })
 
     return (
         <>
@@ -75,10 +99,18 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource }: Prop
                     projectUsings.length
                 } visible / ${restrictedResource?.projects ?? 0} restricted) projects.`}
             </Alert>
-            <Table
-                data={tableData}
-                columns={columns}
-            />
+            <div className='mb-3'>
+                {table ? (
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                    />
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
         </>
     )
 }
