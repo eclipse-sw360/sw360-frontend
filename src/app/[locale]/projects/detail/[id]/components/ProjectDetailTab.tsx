@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ActionType, AdministrationDataType, HttpStatus, SummaryDataType, UserGroupType } from '@/object-types'
+import { ActionType, AdministrationDataType, ClearingDetailsCount, HttpStatus, SummaryDataType, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -39,6 +39,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
+    const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
     const router = useRouter()
@@ -97,6 +98,35 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         return () => controller.abort()
     }, [projectId, session, status])
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+        void (async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/clearingDetailsCount`,
+                    session.user.access_token,
+                    signal
+                )
+                if (response.status === HttpStatus.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== HttpStatus.OK) {
+                    return notFound()
+                }
+                const data = (await response.json()) as ClearingDetailsCount
+                setClearingDetailCount(data)
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }})()
+            return () => controller.abort()
+    }, [projectId, session])
 
     const handleEditProject = (projectId: string) => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -374,7 +404,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 <Spinner className='spinner' />
                                             </div>
                                         ) : (
-                                            <Administration data={administrationData} />
+                                            <Administration data={administrationData}
+                                                            clearingDetailCount={clearingDetailCount}
+                                            />
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='licenseClearing'>
