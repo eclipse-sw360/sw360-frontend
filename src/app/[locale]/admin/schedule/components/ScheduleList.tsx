@@ -10,13 +10,14 @@
 
 'use client'
 
-import { ErrorDetails, HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import React, { JSX, useEffect } from 'react'
+import { JSX, useEffect } from 'react'
+import { useConfigValue } from '@/contexts'
+import { ErrorDetails, HttpStatus, UIConfigKeys } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import { ScheduleItem } from './ScheduleItem'
 
 export default function VendorsList(): JSX.Element {
@@ -28,7 +29,9 @@ export default function VendorsList(): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleCancelAllTasks = async () => {
         try {
@@ -90,6 +93,11 @@ export default function VendorsList(): JSX.Element {
         }
     }
 
+    const isSvmEnabled =
+        useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) === null
+            ? true
+            : (useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) as boolean)
+
     return (
         <>
             <div className='container page-content'>
@@ -132,49 +140,57 @@ export default function VendorsList(): JSX.Element {
                             handleScheduleService={handleScheduleService}
                         />
 
-                        {/* SVM Vulnerabilities Sync Service */}
-                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Vulnerabilities Sync')}</h5>
-                        <ScheduleItem
-                            scheduleUrl='schedule/scheduleSvmSync'
-                            cancelUrl='schedule/unscheduleSvmSync'
-                            scheduleLabel={t('Schedule SVM Sync')}
-                            cancelLabel={t('Cancel Scheduled SVM Sync')}
-                            status={status}
-                            handleScheduleService={handleScheduleService}
-                        />
+                        {isSvmEnabled && (
+                            <>
+                                {/* SVM Vulnerabilities Sync Service */}
+                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Vulnerabilities Sync')}</h5>
+                                <ScheduleItem
+                                    scheduleUrl='schedule/scheduleSvmSync'
+                                    cancelUrl='schedule/unscheduleSvmSync'
+                                    scheduleLabel={t('Schedule SVM Sync')}
+                                    cancelLabel={t('Cancel Scheduled SVM Sync')}
+                                    status={status}
+                                    handleScheduleService={handleScheduleService}
+                                />
 
-                        {/* SVM Vulnerabilities Reverse Match Service */}
-                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Vulnerabilities Reverse Match')}</h5>
-                        <ScheduleItem
-                            scheduleUrl='schedule/svmReverseMatch'
-                            cancelUrl='schedule/unscheduleSvmReverseMatch'
-                            scheduleLabel={t('Schedule SVM Reverse Match')}
-                            cancelLabel={t('Cancel Scheduled SVM Reverse Match')}
-                            status={status}
-                            handleScheduleService={handleScheduleService}
-                        />
+                                {/* SVM Vulnerabilities Reverse Match Service */}
+                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>
+                                    {t('SVM Vulnerabilities Reverse Match')}
+                                </h5>
+                                <ScheduleItem
+                                    scheduleUrl='schedule/svmReverseMatch'
+                                    cancelUrl='schedule/unscheduleSvmReverseMatch'
+                                    scheduleLabel={t('Schedule SVM Reverse Match')}
+                                    cancelLabel={t('Cancel Scheduled SVM Reverse Match')}
+                                    status={status}
+                                    handleScheduleService={handleScheduleService}
+                                />
 
-                        {/* SVM Monitoring List Update */}
-                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Monitoring List Update')}</h5>
-                        <ScheduleItem
-                            scheduleUrl='schedule/monitoringListUpdate'
-                            cancelUrl='schedule/cancelMonitoringListUpdate'
-                            scheduleLabel={t('Schedule SVM Monitoring List Update')}
-                            cancelLabel={t('Cancel Scheduled SVM Monitoring List Update')}
-                            status={status}
-                            handleScheduleService={handleScheduleService}
-                        />
+                                {/* SVM Monitoring List Update */}
+                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Monitoring List Update')}</h5>
+                                <ScheduleItem
+                                    scheduleUrl='schedule/monitoringListUpdate'
+                                    cancelUrl='schedule/cancelMonitoringListUpdate'
+                                    scheduleLabel={t('Schedule SVM Monitoring List Update')}
+                                    cancelLabel={t('Cancel Scheduled SVM Monitoring List Update')}
+                                    status={status}
+                                    handleScheduleService={handleScheduleService}
+                                />
 
-                        {/* SVM Release Tracking Feedback Service */}
-                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Release Tracking Feedback')}</h5>
-                        <ScheduleItem
-                            scheduleUrl='schedule/trackingFeedback'
-                            cancelUrl='schedule/cancelMonitoringListUpdate'
-                            scheduleLabel={t('Schedule SVM Release Tracking Feedback')}
-                            cancelLabel={t('Cancel Scheduled Schedule SVM Release Tracking Feedback')}
-                            status={status}
-                            handleScheduleService={handleScheduleService}
-                        />
+                                {/* SVM Release Tracking Feedback Service */}
+                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>
+                                    {t('SVM Release Tracking Feedback')}
+                                </h5>
+                                <ScheduleItem
+                                    scheduleUrl='schedule/trackingFeedback'
+                                    cancelUrl='schedule/cancelMonitoringListUpdate'
+                                    scheduleLabel={t('Schedule SVM Release Tracking Feedback')}
+                                    cancelLabel={t('Cancel Scheduled Schedule SVM Release Tracking Feedback')}
+                                    status={status}
+                                    handleScheduleService={handleScheduleService}
+                                />
+                            </>
+                        )}
 
                         {/* Attachment Deletion From Local FS Service */}
                         <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('Attachment Deletion From Local FS')}</h5>
@@ -193,45 +209,58 @@ export default function VendorsList(): JSX.Element {
                             {t('Manual triggering of scheduled services')}
                         </h5>
                         <div className='my-3 ms-1 d-flex flex-wrap gap-2'>
-                            <button
-                                className='btn btn-primary me-2 mb-2 px-5'
-                                onClick={() =>
-                                    handleScheduleService('schedule/scheduleSvmSync', 'Task performed successfully!')
-                                }
-                                disabled={status !== 'authenticated'}
-                            >
-                                {t('SVM Vulnerabilities Sync')}
-                            </button>
-                            <button
-                                className='btn btn-primary me-2 mb-2 px-5'
-                                onClick={() =>
-                                    handleScheduleService('schedule/svmReverseMatch', 'Task performed successfully!')
-                                }
-                                disabled={status !== 'authenticated'}
-                            >
-                                {t('SVM Vulnerabilities Reverse Match')}
-                            </button>
-                            <button
-                                className='btn btn-primary me-2 mb-2 px-5'
-                                onClick={() =>
-                                    handleScheduleService(
-                                        'schedule/monitoringListUpdate',
-                                        'Task performed successfully!',
-                                    )
-                                }
-                                disabled={status !== 'authenticated'}
-                            >
-                                {t('SVM Monitoring List Update')}
-                            </button>
-                            <button
-                                className='btn btn-primary me-2 mb-2 px-5'
-                                onClick={() =>
-                                    handleScheduleService('schedule/trackingFeedback', 'Task performed successfully!')
-                                }
-                                disabled={status !== 'authenticated'}
-                            >
-                                {t('SVM Release Tracking Feedback')}
-                            </button>
+                            {isSvmEnabled && (
+                                <>
+                                    <button
+                                        className='btn btn-primary me-2 mb-2 px-5'
+                                        onClick={() =>
+                                            handleScheduleService(
+                                                'schedule/scheduleSvmSync',
+                                                'Task performed successfully!',
+                                            )
+                                        }
+                                        disabled={status !== 'authenticated'}
+                                    >
+                                        {t('SVM Vulnerabilities Sync')}
+                                    </button>
+                                    <button
+                                        className='btn btn-primary me-2 mb-2 px-5'
+                                        onClick={() =>
+                                            handleScheduleService(
+                                                'schedule/svmReverseMatch',
+                                                'Task performed successfully!',
+                                            )
+                                        }
+                                        disabled={status !== 'authenticated'}
+                                    >
+                                        {t('SVM Vulnerabilities Reverse Match')}
+                                    </button>
+                                    <button
+                                        className='btn btn-primary me-2 mb-2 px-5'
+                                        onClick={() =>
+                                            handleScheduleService(
+                                                'schedule/monitoringListUpdate',
+                                                'Task performed successfully!',
+                                            )
+                                        }
+                                        disabled={status !== 'authenticated'}
+                                    >
+                                        {t('SVM Monitoring List Update')}
+                                    </button>
+                                    <button
+                                        className='btn btn-primary me-2 mb-2 px-5'
+                                        onClick={() =>
+                                            handleScheduleService(
+                                                'schedule/trackingFeedback',
+                                                'Task performed successfully!',
+                                            )
+                                        }
+                                        disabled={status !== 'authenticated'}
+                                    >
+                                        {t('SVM Release Tracking Feedback')}
+                                    </button>
+                                </>
+                            )}
                             <button
                                 className='btn btn-primary me-2 mb-2 px-5'
                                 onClick={() =>
