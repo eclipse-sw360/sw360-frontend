@@ -9,13 +9,14 @@
 
 'use client'
 
-import { DocumentTypes, InputKeyValue, RolesType } from '@/object-types'
-import { CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { MdDeleteOutline } from 'react-icons/md'
+import { useConfigValue } from '@/contexts'
+import { DocumentTypes, InputKeyValue, RolesType, UIConfigKeys } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import DeleteItemWarning from '../DeleteItemWarning/DeleteItemWarning'
 
 interface Props {
@@ -37,11 +38,45 @@ function AddAdditionalRoles({
     const [currentIndex, setCurrentIndex] = useState<number>(-1)
     const { status } = useSession()
 
+    // Configs from backend
+    const projectAdditionalRoles =
+        useConfigValue(UIConfigKeys.UI_CUSTOMMAP_PROJECT_ROLES) !== null
+            ? (useConfigValue(UIConfigKeys.UI_CUSTOMMAP_PROJECT_ROLES) as string[])
+            : [
+                  'Stakeholder',
+                  'Analyst',
+                  'Contributor',
+                  'Accountant',
+                  'End User',
+                  'Quality Manager',
+                  'Test Manager',
+                  'Technical Writer',
+                  'Key User',
+              ]
+    const componentAdditionalRoles =
+        useConfigValue(UIConfigKeys.UI_CUSTOMMAP_COMPONENT_ROLES) !== null
+            ? (useConfigValue(UIConfigKeys.UI_CUSTOMMAP_COMPONENT_ROLES) as string[])
+            : [
+                  'Committer',
+                  'Contributor',
+                  'Expert',
+              ]
+    const releaseAdditionalRoles =
+        useConfigValue(UIConfigKeys.UI_CUSTOMMAP_RELEASE_ROLES) !== null
+            ? (useConfigValue(UIConfigKeys.UI_CUSTOMMAP_RELEASE_ROLES) as string[])
+            : [
+                  'Committer',
+                  'Contributor',
+                  'Expert',
+              ]
+
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         setInputListData(
@@ -49,17 +84,24 @@ function AddAdditionalRoles({
                 ? propInputList
                 : [
                       {
-                          key: documentType === DocumentTypes.COMPONENT ? 'Committer' : 'Stakeholder',
+                          key:
+                              documentType === DocumentTypes.COMPONENT || documentType === DocumentTypes.RELEASE
+                                  ? 'Committer'
+                                  : 'Stakeholder',
                           value: '',
                       },
                   ],
         )
-    }, [propInputList])
+    }, [
+        propInputList,
+    ])
     const setInputData = propSetInputList || setInputListData
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: InputKeyValue[] = [...inputListData]
+        const list: InputKeyValue[] = [
+            ...inputListData,
+        ]
         list[index][name as keyof InputKeyValue] = value
         setInputData(list)
         if (setDataInputList) {
@@ -73,15 +115,29 @@ function AddAdditionalRoles({
     }
 
     const handleAddClick = () => {
-        if (documentType === DocumentTypes.COMPONENT) {
-            setInputData([...inputListData, { key: 'Committer', value: '' }])
+        if (documentType === DocumentTypes.COMPONENT || documentType === DocumentTypes.RELEASE) {
+            setInputData([
+                ...inputListData,
+                {
+                    key: 'Committer',
+                    value: '',
+                },
+            ])
         } else {
-            setInputData([...inputListData, { key: 'Stakeholder', value: '' }])
+            setInputData([
+                ...inputListData,
+                {
+                    key: 'Stakeholder',
+                    value: '',
+                },
+            ])
         }
     }
 
     const defaultValue = () => {
-        return documentType === DocumentTypes.COMPONENT ? 'Committer' : 'Stakeholder'
+        return documentType === DocumentTypes.COMPONENT || documentType === DocumentTypes.RELEASE
+            ? 'Committer'
+            : 'Stakeholder'
     }
 
     return (
@@ -114,25 +170,35 @@ function AddAdditionalRoles({
                                     defaultValue={defaultValue()}
                                     onChange={(e) => handleInputChange(e, j)}
                                 >
-                                    {documentType === DocumentTypes.COMPONENT ? (
-                                        <>
-                                            <option value='Committer'>{t('Committer')}</option>
-                                            <option value='Contributor'>{t('Contributor')}</option>
-                                            <option value='Expert'>{t('Expert')}</option>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <option value='Stakeholder'>{t('Stakeholder')}</option>
-                                            <option value='Analyst'>{t('Analyst')}</option>
-                                            <option value='Contributor'>{t('Contributor')}</option>
-                                            <option value='Accountant'>{t('Accountant')}</option>
-                                            <option value='EndUser'>{t('End User')}</option>
-                                            <option value='QualityManager'>{t('Quality Manager')}</option>
-                                            <option value='TestManager'>{t('Test Manager')}</option>
-                                            <option value='TechnicalWriter'>{t('Technical Writer')}</option>
-                                            <option value='KeyUser'>{t('Key User')}</option>
-                                        </>
-                                    )}
+                                    {documentType === DocumentTypes.COMPONENT
+                                        ? componentAdditionalRoles.map((value, key) => (
+                                              <option
+                                                  value={value}
+                                                  selected={elem.key === value}
+                                                  key={key}
+                                              >
+                                                  {value}
+                                              </option>
+                                          ))
+                                        : documentType === DocumentTypes.RELEASE
+                                          ? releaseAdditionalRoles.map((value, key) => (
+                                                <option
+                                                    value={value}
+                                                    key={key}
+                                                    selected={elem.key === value}
+                                                >
+                                                    {value}
+                                                </option>
+                                            ))
+                                          : projectAdditionalRoles.map((value, key) => (
+                                                <option
+                                                    value={value}
+                                                    selected={elem.key === value}
+                                                    key={key}
+                                                >
+                                                    {value}
+                                                </option>
+                                            ))}
                                 </select>
                             </div>
                             <div className='col-lg-5'>
