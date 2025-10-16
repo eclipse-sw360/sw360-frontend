@@ -423,7 +423,7 @@
     "Do you really want to deactivate the user": "Bạn có thực sự muốn vô hiệu hóa người dùng",
     "Do you really want to delete attachment": "Bạn có thực sự muốn xóa tệp đính kèm",
     "Do you really want to delete the License Type": "Bạn có thực sự muốn xóa loại giấy phép <strong> {name} </strong>?",
-    "Do you really want to delete the Obligation": "Bạn có thực sự muốn xóa nghĩa vụ?",
+    "Do you really want to delete the Obligation": "Bạn có thực sự muốn xóa Nghĩa vụ <strong>{name</strong> không?",
     "Do you really want to delete the attachment?": "Bạn có thực sự muốn xóa tệp đính kèm không?",
     "Do you really want to delete the component?": "Bạn có thực sự muốn xóa thành phần <strong>{name}</strong> không?",
     "Do you really want to delete the license": "Bạn có thực sự muốn xóa giấy phép?",

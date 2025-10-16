@@ -9,39 +9,142 @@
 // License-Filename: LICENSE
 
 'use client'
-import { LicensePayload, Obligation } from '@/object-types'
-import TableLinkedObligations from './TableLinkedObligations/TableLinkedObligations'
-
-import type { JSX } from 'react'
+import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { useTranslations } from 'next-intl'
+import { PaddedCell, SW360Table } from 'next-sw360'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { MdDeleteOutline } from 'react-icons/md'
+import { LicensePayload, NestedRows, Obligation } from '@/object-types'
+import DeleteObligationDialog from './TableLinkedObligations/DeleteObligationDialog'
 
 interface Props {
-    data: Array<(string | Obligation)[]>
-    setData: React.Dispatch<React.SetStateAction<Array<(string | Obligation)[]>>>
     licensePayload: LicensePayload
     setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
 
-const LinkedObligations = ({ data, setData, licensePayload, setLicensePayload }: Props): JSX.Element => {
-    const setObligationIdToLicensePayLoad = (obligationIds: Array<string>) => {
-        setLicensePayload({
-            ...licensePayload,
-            obligationDatabaseIds: obligationIds,
-        })
-    }
+const Capitalize = (text: string) =>
+    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+
+const LinkedObligations = ({ licensePayload, setLicensePayload }: Props): JSX.Element => {
+    const t = useTranslations('default')
+    const [obligationToBeRemoved, setObligationToBeRemoved] = useState<Obligation | undefined>()
+    const columns = useMemo<ColumnDef<NestedRows<Obligation>>[]>(
+        () => [
+            {
+                id: 'expand',
+                cell: ({ row }) => {
+                    if (row.depth > 0) {
+                        return <p>{row.original.node?.text ?? ''}</p>
+                    } else {
+                        return <PaddedCell row={row}></PaddedCell>
+                    }
+                },
+                meta: {
+                    width: '3%',
+                },
+            },
+            {
+                id: 'title',
+                header: t('Obligation Title'),
+                cell: ({ row }) => <>{row.original.node?.title ?? ''}</>,
+            },
+            {
+                id: 'type',
+                header: t('Obligation Type'),
+                cell: ({ row }) => <>{Capitalize(row.original.node?.obligationType ?? '')}</>,
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    return (
+                        <span className='d-flex justify-content-evenly'>
+                            <span className='d-inline-block'>
+                                <MdDeleteOutline
+                                    className='btn-icon'
+                                    size={25}
+                                    onClick={() => setObligationToBeRemoved(row.original.node)}
+                                />
+                            </span>
+                        </span>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
+
+    const data = useMemo(
+        () =>
+            (licensePayload.obligations ?? []).map(
+                (ob) =>
+                    ({
+                        node: ob,
+                        children: [
+                            {
+                                node: ob,
+                            },
+                        ],
+                    }) as NestedRows<Obligation>,
+            ),
+        [
+            licensePayload.obligations,
+        ],
+    )
+
+    const table = useReactTable({
+        data,
+        columns: columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => {
+            if (row.depth === 1) {
+                row.meta = {
+                    isFullSpanRow: true,
+                }
+            }
+            return row.depth === 0
+        },
+    })
+
+    table.getRowModel().rows.forEach((row) => {
+        if (row.depth === 1) {
+            row.meta = {
+                isFullSpanRow: true,
+            }
+        }
+    })
 
     return (
-        <div
-            className='col'
-            style={{ fontSize: '0.875rem' }}
-        >
-            <div>
-                <TableLinkedObligations
-                    data={data}
-                    setData={setData}
-                    setObligationIdToLicensePayLoad={setObligationIdToLicensePayLoad}
-                />
+        <>
+            <DeleteObligationDialog
+                obligation={obligationToBeRemoved}
+                setObligationToBeRemoved={setObligationToBeRemoved}
+                setLicensePayload={setLicensePayload}
+                licensePayload={licensePayload}
+            />
+            <div className='mb-3'>
+                {table ? (
+                    <SW360Table
+                        table={table}
+                        showProcessing={false}
+                    />
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
             </div>
-        </div>
+        </>
     )
 }
 

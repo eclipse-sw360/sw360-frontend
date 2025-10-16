@@ -11,4 +11,8 @@
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit",
+    "source.fixAll.biome": "explicit"
+  }
 }

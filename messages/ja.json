@@ -423,7 +423,7 @@
     "Do you really want to deactivate the user": "本当にユーザーを無効化しますか?",
     "Do you really want to delete attachment": "添付ファイルを削除したいですか",
     "Do you really want to delete the License Type": "ライセンスタイプ<strong> {name} </strong>を本当に削除したいですか？",
-    "Do you really want to delete the Obligation": "本当に義務を削除したいですか？",
+    "Do you really want to delete the Obligation": "本当に義務<strong>{name}</strong>を削除してもよろしいですか?",
     "Do you really want to delete the attachment?": "您确实要删除该附件吗？",
     "Do you really want to delete the component?": "本当にコンポーネント <strong>{name}</strong> を削除しますか？",
     "Do you really want to delete the license": "本当にライセンスを削除したいですか？",

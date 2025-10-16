@@ -423,7 +423,7 @@
     "Do you really want to deactivate the user": "您确实要停用该用户吗",
     "Do you really want to delete attachment": "你真的想删除附件吗",
     "Do you really want to delete the License Type": "您是否真的想删除许可类型<strong> {name} </strong>？",
-    "Do you really want to delete the Obligation": "您真的想删除义务吗？",
+    "Do you really want to delete the Obligation": "您确实要删除义务<strong>{name}</strong>吗？",
     "Do you really want to delete the attachment?": "您确实要删除该附件吗？",
     "Do you really want to delete the component?": "您确实要删除组件<strong>{name}</strong>吗？",
     "Do you really want to delete the license": "您真的想删除许可证吗？",
