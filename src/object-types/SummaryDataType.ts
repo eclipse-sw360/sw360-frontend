@@ -35,6 +35,7 @@ interface SummaryDataType {
     enableVulnerabilitiesDisplay?: boolean
     enableSvm?: boolean
     roles?: object
+    clearingState?: string
     clearingRequestId?: string
     _embedded?: {
         leadArchitect?: User
