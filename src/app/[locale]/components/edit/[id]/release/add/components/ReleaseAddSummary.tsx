@@ -11,25 +11,37 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
-import { DocumentTypes, InputKeyValue, Release, Vendor } from '@/object-types'
+import { useConfigValue } from '@/contexts'
+import { DocumentTypes, InputKeyValue, Release, UIConfigKeys, Vendor } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { signOut, useSession } from 'next-auth/react'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: { [k: string]: string }
-    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses: { [k: string]: string }
-    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    mainLicenses: {
+        [k: string]: string
+    }
+    setMainLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    otherLicenses: {
+        [k: string]: string
+    }
+    setOtherLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 function ReleaseAddSummary({
@@ -47,9 +59,19 @@ function ReleaseAddSummary({
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
     const [roles, setRoles] = useState<InputKeyValue[]>([])
 
+    // Configs from backend
+    const releaseExternalIdSuggestions =
+        useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) as string[])
+            : undefined
+
     // Store users data in format {'email': 'fullName'}
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
 
     const { status } = useSession()
 
@@ -57,7 +79,9 @@ function ReleaseAddSummary({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const setDataRoles = (roles: InputKeyValue[]) => {
         const roleDatas = CommonUtils.convertRoles(roles)
@@ -82,6 +106,7 @@ function ReleaseAddSummary({
             externalIds: obj,
         })
     }
+
     return (
         <>
             <form
@@ -94,7 +119,9 @@ function ReleaseAddSummary({
             >
                 <div
                     className='col'
-                    style={{ fontSize: '0.875rem' }}
+                    style={{
+                        fontSize: '0.875rem',
+                    }}
                 >
                     <ReleaseSummary
                         releasePayload={releasePayload}
@@ -112,7 +139,7 @@ function ReleaseAddSummary({
                     />
                     <div className='row mb-4'>
                         <AddAdditionalRoles
-                            documentType={DocumentTypes.COMPONENT}
+                            documentType={DocumentTypes.RELEASE}
                             inputList={roles}
                             setInputList={setRoles}
                             setDataInputList={setDataRoles}
@@ -125,6 +152,7 @@ function ReleaseAddSummary({
                             setData={setExternalIds}
                             data={externalIds}
                             setObject={setDataExternalIds}
+                            keySuggestions={releaseExternalIdSuggestions}
                         />
                     </div>
                     <div className='row mb-4'>

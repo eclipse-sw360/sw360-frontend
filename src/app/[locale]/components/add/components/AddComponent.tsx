@@ -11,13 +11,15 @@
 
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
+import { useConfigValue } from '@/contexts'
 import {
     CommonTabIds,
     Component,
@@ -25,14 +27,12 @@ import {
     DocumentTypes,
     HttpStatus,
     InputKeyValue,
+    UIConfigKeys,
     UserGroupType,
     Vendor,
 } from '@/object-types'
-
-import { AccessControl } from '@/components/AccessControl/AccessControl'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
 
 function AddComponent(): ReactNode {
     const t = useTranslations('default')
@@ -46,9 +46,13 @@ function AddComponent(): ReactNode {
         fullName: '',
     })
 
-    const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
+    const [componentOwner, setComponentOwner] = useState<{
+        [k: string]: string
+    }>({})
 
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
 
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
         name: '',
@@ -77,7 +81,9 @@ function AddComponent(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const tabList = [
         {
@@ -85,6 +91,12 @@ function AddComponent(): ReactNode {
             name: 'Summary',
         },
     ]
+
+    // Configs from backend
+    const componentExternalIdSuggestions =
+        useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) as string[])
+            : undefined
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -144,7 +156,9 @@ function AddComponent(): ReactNode {
                         <div className='col'>
                             <div
                                 className='row'
-                                style={{ marginBottom: '20px' }}
+                                style={{
+                                    marginBottom: '20px',
+                                }}
                             >
                                 <div className='col-auto'>
                                     <div
@@ -203,6 +217,7 @@ function AddComponent(): ReactNode {
                                         setData={setExternalIds}
                                         data={externalIds}
                                         setObject={setDataExternalIds}
+                                        keySuggestions={componentExternalIdSuggestions}
                                     />
                                 </div>
                                 <div className='row mb-4'>
@@ -224,4 +239,6 @@ function AddComponent(): ReactNode {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(AddComponent, [UserGroupType.SECURITY_USER])
+export default AccessControl(AddComponent, [
+    UserGroupType.SECURITY_USER,
+])
