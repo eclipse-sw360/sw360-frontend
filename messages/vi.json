@@ -161,6 +161,7 @@
     "CR Sanity Check": "Nhóm Thanh toán bù trừ đang tiến hành kiểm tra độ chính xác đối với các đầu vào do nhóm dự án cung cấp. \nỞ giai đoạn này, họ xác minh tính sẵn có của mã nguồn cho tất cả các bản phát hành được liên kết.",
     "CR Type Deep": "Kết quả quét (id giấy phép) KHÔNG được chuyên gia xóa xem xét.",
     "CR Type High": "Kết quả thanh toán bù trừ kết luận ở cấp độ hồ sơ được chuyên gia thanh toán bù trừ xem xét.",
+    "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects": "CR bị vô hiệu hóa đối với các dự án có Đơn vị kinh doanh cụ thể hoặc dự án RIÊNG TƯ hoặc ĐÓNG.",
     "CRITICAL": "Phê bình",
     "CVE ID": "ID CVE",
     "CVE Number": "Số CVE",

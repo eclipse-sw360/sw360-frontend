@@ -262,7 +262,7 @@ function Project(): JSX.Element {
                                             overlay={
                                                 <Tooltip>
                                                     {t(
-                                                        'CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects.',
+                                                        'CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects',
                                                     )}
                                                 </Tooltip>
                                             }

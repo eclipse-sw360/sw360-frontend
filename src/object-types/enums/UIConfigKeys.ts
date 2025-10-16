@@ -29,7 +29,7 @@ export enum UIConfigKeys {
     UI_CUSTOMMAP_COMPONENT_ROLES = 'ui.custommap.component.roles',
     UI_CUSTOMMAP_PROJECT_ROLES = 'ui.custommap.project.roles',
     UI_ENABLE_SECURITY_VULNERABILITY_MONITORING = 'ui.enable.security.vulnerability.monitoring',
-    UI_REST_APITOKEN_GENERATOR_ENABLE = 'ui.rest.apitoken.generator.enable',
+    UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE = 'ui.rest.apitoken.write.generator.enable',
 }
 
 export const ArrayTypeUIConfigKeys: UIConfigKeys[] = [

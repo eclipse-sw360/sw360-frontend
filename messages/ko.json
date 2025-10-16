@@ -161,6 +161,7 @@
     "CR Sanity Check": "청산팀은 프로젝트팀이 제공한 입력 내용에 대해 온전성 검사를 수행하고 있습니다. \n이 단계에서는 연결된 모든 릴리스에 대한 소스 코드의 가용성을 확인합니다.",
     "CR Type Deep": "클리어 전문가가 검토하지 않은 스캔 결과(라이센스 ID)입니다.",
     "CR Type High": "청산 전문가가 검토한 파일 수준의 최종 청산 결과입니다.",
+    "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects": "CR은 특정 사업부나 비공개 또는 폐쇄된 프로젝트가 있는 프로젝트에서는 비활성화됩니다.",
     "CRITICAL": "비판적인",
     "CVE ID": "비밀번호",
     "CVE Number": "사이트맵 이름 *",

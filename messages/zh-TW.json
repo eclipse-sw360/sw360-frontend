@@ -161,6 +161,7 @@
     "CR Sanity Check": "清算團隊正在對專案團隊提供的意見進行健全性檢查。\n在此階段，他們驗證所有連結版本的原始程式碼的可用性。",
     "CR Type Deep": "未經清算專家審核的掃描結果（許可證 ID）。",
     "CR Type High": "由清算專家審核得出的文件層級清算結果。",
+    "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects": "對於具有特定業務部門或私人或封閉項目的項目，CR 是已停用的。",
     "CRITICAL": "批判的",
     "CVE ID": "身份",
     "CVE Number": "简历 數字",

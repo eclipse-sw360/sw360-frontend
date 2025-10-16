@@ -161,6 +161,7 @@
     "CR Sanity Check": "清算チームは、プロジェクト チームから提供された入力の健全性チェックを実施しています。\nこの段階で、リンクされているすべてのリリースのソース コードが利用可能かどうかを確認します。",
     "CR Type Deep": "スキャン結果 (ライセンス ID) はクリア専門家によってレビューされていません。",
     "CR Type High": "清算専門家によってレビューされたファイルレベルでの最終清算結果。",
+    "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects": "CR は、特定のビジネス ユニットを持つプロジェクト、または PRIVATE または CLOSED プロジェクトでは無効になっています。",
     "CRITICAL": "致命的",
     "CVE ID": "CVE ID",
     "CVE Number": "CVE番号",

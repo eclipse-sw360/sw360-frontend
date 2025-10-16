@@ -161,6 +161,7 @@
     "CR Sanity Check": "L’équipe Clearing effectue un contrôle de cohérence sur les entrées fournies par l’équipe de projet. \nA ce stade, ils vérifient la disponibilité du code source pour toutes les versions liées.",
     "CR Type Deep": "Résultats de l'analyse (identifiant de licence) qui ne sont PAS examinés par un expert en compensation.",
     "CR Type High": "Résultats de compensation conclus au niveau du dossier examinés par l’expert en compensation.",
+    "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects": "CR est désactivé pour les projets avec une unité commerciale spécifique ou des projets PRIVÉS ou FERMÉS.",
     "CRITICAL": "Critique",
     "CVE ID": "Numéro CVE",
     "CVE Number": "CVE Numéro",

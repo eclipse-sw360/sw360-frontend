@@ -161,6 +161,7 @@
     "CR Sanity Check": "The Clearing team is conducting a sanity check on the inputs provided by the project team. At this stage, they verify the availability of the source code for all linked releases.",
     "CR Type Deep": "Scan results (license id) that are NOT reviewed by clearing expert.",
     "CR Type High": "Concluded clearing results at file level reviewed by the clearing expert.",
+    "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects": "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects.",
     "CRITICAL": "Critical",
     "CVE ID": "CVE ID",
     "CVE Number": "CVE Number",

@@ -161,6 +161,7 @@
     "CR Sanity Check": "El equipo de Compensación está realizando una verificación de idoneidad de los aportes proporcionados por el equipo del proyecto. \nEn esta etapa, verifican la disponibilidad del código fuente para todas las versiones vinculadas.",
     "CR Type Deep": "Resultados del escaneo (identificación de licencia) que NO son revisados ​​por un experto en compensación.",
     "CR Type High": "Resultados de compensación concluidos a nivel de expediente revisados ​​por el experto en compensación.",
+    "CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects": "CR está deshabilitado para proyectos con unidades de negocio específicas o proyectos PRIVADOS o CERRADOS.",
     "CRITICAL": "Crítico",
     "CVE ID": "CVE ID",
     "CVE Number": "CVE Número",
