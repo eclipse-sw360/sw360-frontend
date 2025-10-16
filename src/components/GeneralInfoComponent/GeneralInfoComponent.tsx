@@ -30,6 +30,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
 
+    // Configs from backend
+    const categoriesSuggestions = useConfigValue(UIConfigKeys.UI_COMPONENT_CATEGORIES) as string[] | null
+
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setComponentPayload({
             ...componentPayload,
@@ -37,8 +40,8 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
         })
     }
 
-    const setCategoriesData = (input: string[] | string) => {
-        const data: string[] = typeof input === 'string' ? splitValueCategories(input) : input
+    const setCategoriesData = (input: string) => {
+        const data: string[] = splitValueCategories(input)
         setComponentPayload({
             ...componentPayload,
             categories: data,
@@ -68,8 +71,6 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
             defaultVendorId: '',
         })
     }
-
-    const componentCategories = useConfigValue(UIConfigKeys.UI_COMPONENT_CATEGORIES) as string[] | null
 
     return (
         <>
@@ -146,20 +147,14 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 </span>
                             </label>
                             <SuggestionBox
-                                initialValues={componentPayload.categories}
-                                possibleValues={
-                                    componentCategories === null
-                                        ? [
-                                              '',
-                                          ]
-                                        : componentCategories
-                                }
-                                placeHolder={'e.g.,Library,cloud,mobile,...'}
+                                initialValue={componentPayload.categories?.join(', ')}
+                                possibleValues={categoriesSuggestions === null ? [] : categoriesSuggestions}
                                 onValueChange={setCategoriesData}
                                 inputProps={{
                                     id: 'categories',
                                     name: 'categories',
                                     required: true,
+                                    placeHolder: 'e.g.,Library,cloud,mobile,...',
                                 }}
                                 isMultiValue={true}
                             />

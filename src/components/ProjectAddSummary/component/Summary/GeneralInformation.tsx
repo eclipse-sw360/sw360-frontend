@@ -34,9 +34,13 @@ export default function GeneralInformation({
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
     const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
 
-    // Input suggestions from config
+    // Configs from backend
     const projectDomains = useConfigValue(UIConfigKeys.UI_DOMAINS) as string[] | null
     const projectTags = useConfigValue(UIConfigKeys.UI_PROJECT_TAG) as string[] | null
+    const isSvmEnabled =
+        useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) === null
+            ? true
+            : (useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) as boolean)
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -219,19 +223,14 @@ export default function GeneralInformation({
                             {t('Tag')}
                         </label>
                         <SuggestionBox
-                            initialValues={projectPayload.tag}
-                            possibleValues={
-                                projectTags === null
-                                    ? [
-                                          '',
-                                      ]
-                                    : projectTags
-                            }
-                            placeHolder={t('Enter one word tag')}
+                            initialValue={projectPayload.tag}
+                            possibleValues={projectTags === null ? [] : projectTags}
                             onValueChange={onSuggestChangeHandler('tag')}
                             inputProps={{
                                 id: 'addProjects.tag',
                                 name: 'tag',
+                                placeHolder: t('Enter one word tag'),
+                                aria_describedby: 'addProjects.tag',
                             }}
                             isMultiValue={false}
                         />
@@ -377,6 +376,7 @@ export default function GeneralInformation({
                             type='checkbox'
                             value=''
                             id='addProjects.useExternalIdList'
+                            disabled={!isSvmEnabled}
                         />
                         <label
                             className='form-check-label fw-medium ms-2'

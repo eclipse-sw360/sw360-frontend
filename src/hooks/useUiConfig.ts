@@ -99,7 +99,7 @@ export function useUiConfig() {
     useEffect(() => {
         const intervalId = setInterval(() => {
             if (status === 'authenticated' && isConfigExpired()) {
-                fetchAndProcessUiConfig()
+                fetchAndProcessUiConfig(true)
             }
         }, CACHE_TTL)
 

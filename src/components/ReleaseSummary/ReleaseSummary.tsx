@@ -16,7 +16,9 @@ import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { GiCancel } from 'react-icons/gi'
-import { ActionType, Release, ReleaseDetail, Vendor } from '@/object-types'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
+import { useConfigValue } from '@/contexts'
+import { ActionType, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
@@ -90,6 +92,11 @@ const ReleaseSummary = ({
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
     const { status } = useSession()
 
+    // Configs from backend
+    const operatingSystemSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
+    const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
+    const platformSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
+
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
@@ -121,16 +128,16 @@ const ReleaseSummary = ({
         })
     }
 
-    const setArrayData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        const data: string[] = splitValueCategories(e.target.value)
-        setReleasePayload({
-            ...releasePayload,
-            [e.target.name]: data,
-        })
+    const splitValueCategories = (valueCategories: string) => {
+        return valueCategories.split(',').map((v) => v.trim())
     }
 
-    const splitValueCategories = (valueCatergories: string) => {
-        return valueCatergories.split(',')
+    const setMultiValueSuggestionFields = (key: string) => (input: string) => {
+        const data: string[] = splitValueCategories(input)
+        setReleasePayload({
+            ...releasePayload,
+            [key]: data,
+        })
     }
 
     const setVendorId = (vendorResponse: Vendor) => {
@@ -293,15 +300,18 @@ const ReleaseSummary = ({
                                 >
                                     {t('Programming Languages')}
                                 </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    placeholder='e.g., Java,C++, C#,...'
-                                    id='programming_languages'
-                                    aria-describedby='programming_languages'
-                                    name='languages'
-                                    onChange={setArrayData}
-                                    value={releasePayload.languages ?? ''}
+                                <SuggestionBox
+                                    initialValue={releasePayload.languages?.join(', ')}
+                                    possibleValues={languagesSuggestions === null ? [] : languagesSuggestions}
+                                    onValueChange={setMultiValueSuggestionFields('languages')}
+                                    inputProps={{
+                                        id: 'programming_languages',
+                                        name: 'languages',
+                                        required: false,
+                                        placeHolder: 'e.g., Java, C++, C#,...',
+                                        aria_describedby: 'programming_languages',
+                                    }}
+                                    isMultiValue={true}
                                 />
                             </div>
                             <div className='col-lg-4'>
@@ -311,15 +321,20 @@ const ReleaseSummary = ({
                                 >
                                     {t('Operating Systems')}
                                 </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    placeholder='e.g.,Linux,MAC,Windows,...'
-                                    id='operating_systems'
-                                    aria-describedby='operating_systems'
-                                    name='operatingSystems'
-                                    onChange={setArrayData}
-                                    value={releasePayload.operatingSystems ?? ''}
+                                <SuggestionBox
+                                    initialValue={releasePayload.operatingSystems?.join(', ')}
+                                    possibleValues={
+                                        operatingSystemSuggestions === null ? [] : operatingSystemSuggestions
+                                    }
+                                    onValueChange={setMultiValueSuggestionFields('operatingSystems')}
+                                    inputProps={{
+                                        id: 'operating_systems',
+                                        name: 'operatingSystems',
+                                        required: false,
+                                        placeHolder: 'e.g.,Linux,MAC,Windows,...',
+                                        aria_describedby: 'operating_systems',
+                                    }}
+                                    isMultiValue={true}
                                 />
                             </div>
                             <div className='col-lg-4'>
@@ -351,20 +366,23 @@ const ReleaseSummary = ({
                         <div className='row pt-2 pb-2 with-divider'>
                             <div className='col-lg-4'>
                                 <label
-                                    htmlFor='blog_url'
+                                    htmlFor='software_platforms'
                                     className='form-label fw-bold'
                                 >
                                     {t('Software Platforms')}
                                 </label>
-                                <input
-                                    type='URL'
-                                    className='form-control'
-                                    placeholder='e.g.,Adobe AIR,.NET,Qt,...'
-                                    id='blog_url'
-                                    aria-describedby='blog_url'
-                                    name='softwarePlatforms'
-                                    onChange={setArrayData}
-                                    value={releasePayload.softwarePlatforms ?? ''}
+                                <SuggestionBox
+                                    initialValue={releasePayload.softwarePlatforms?.join(', ')}
+                                    possibleValues={platformSuggestions === null ? [] : platformSuggestions}
+                                    onValueChange={setMultiValueSuggestionFields('softwarePlatforms')}
+                                    inputProps={{
+                                        id: 'software_platforms',
+                                        name: 'softwarePlatforms',
+                                        required: false,
+                                        placeHolder: 'e.g.,Adobe AIR,.NET,Qt,...',
+                                        aria_describedby: 'software_platforms',
+                                    }}
+                                    isMultiValue={true}
                                 />
                             </div>
                             <div className='col-lg-4'>
