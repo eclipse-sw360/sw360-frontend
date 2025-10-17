@@ -1549,6 +1549,7 @@
     "package_management_write_access_usergroup_description": "パッケージの書き込みアクセスユーザーロールを制御します",
     "project_cannot_be_created": "プロジェクトを作成/更新できない",
     "purl": "purl",
+    "release_cannot_be_deleted_contains_linked_packages": "リリース <strong>{name}></strong> は <strong>{packageCount}></strong> 個のパッケージが含まれているため削除できません。まず、リンクされているパッケージを削除するか、リンクを解除してください。",
     "release_relation_code_snippest_tooltip": "リファレンスリリースからはフラグメントが使用されます",
     "release_relation_contained_tooltip": "動的にリンクされているかどうかだけがわからない場合",
     "release_relation_dynamic_linked_tooltip": "ソフトウェアは動的にリンクされます - 名前のとおり",

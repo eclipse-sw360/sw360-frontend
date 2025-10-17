@@ -1549,6 +1549,7 @@
     "package_management_write_access_usergroup_description": "Kiểm soát vai trò người dùng truy cập ghi cho các gói",
     "project_cannot_be_created": "Dự án không thể được tạo/cập nhật",
     "purl": "Purl",
+    "release_cannot_be_deleted_contains_linked_packages": "Không thể xóa bản phát hành <strong>{name}</strong> vì nó chứa <strong>{packageCount}</strong> gói. Vui lòng xóa hoặc hủy liên kết các gói được liên kết trước.",
     "release_relation_code_snippest_tooltip": "Từ bản phát hành tài liệu tham khảo, một đoạn được sử dụng",
     "release_relation_contained_tooltip": "Nếu bạn không biết liệu nó có được liên kết động hay không",
     "release_relation_dynamic_linked_tooltip": "Phần mềm được liên kết động - đúng như tên gọi",

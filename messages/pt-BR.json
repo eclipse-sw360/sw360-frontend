@@ -1549,6 +1549,7 @@
     "package_management_write_access_usergroup_description": "Controle a função de usuário do Write Access para pacotes",
     "project_cannot_be_created": "O projeto não pode ser criado/atualizado",
     "purl": "purl",
+    "release_cannot_be_deleted_contains_linked_packages": "A versão <strong>{name}</strong> não pode ser excluída, pois contém <strong>{packageCount}</strong> pacote(s). Exclua ou desvincule o(s) pacote(s) vinculado(s) primeiro.",
     "release_relation_code_snippest_tooltip": "Da liberação de referências, um fragmento é usado",
     "release_relation_contained_tooltip": "Se você simplesmente não sabe se ele está vinculado dinamicamente",
     "release_relation_dynamic_linked_tooltip": "Software vinculado dinamicamente - como o nome diz",
