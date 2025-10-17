@@ -188,6 +188,7 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                     <Button
                         type='button'
                         variant='primary'
+                        className='upload-btn'
                         disabled={files.length === 0}
                         onClick={() => void handleUploadFiles()}
                     >

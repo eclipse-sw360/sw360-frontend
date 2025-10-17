@@ -9,73 +9,124 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Component } from '@/object-types'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useEffect, useState, type JSX } from 'react'
-import { Table, _ } from '../sw360'
+import { type JSX, ReactNode, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { Component } from '@/object-types'
+import { _, SW360Table, Table } from '../sw360'
 import styles from './ResourceUsing.module.css'
 
 interface Props {
     componentsUsing: Array<Component>
     documentName: string
+    showProcessing: boolean
 }
 
-const ComponentsUsing = ({ componentsUsing, documentName }: Props): JSX.Element => {
+const ComponentsUsing = ({ componentsUsing, documentName, showProcessing }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<Array<(string | JSX.Element)[]>>([])
-    const { status } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
+    const columns = useMemo<ColumnDef<Component>[]>(
+        () => [
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                accessorKey: 'vendor',
+                cell: (info) => info.getValue(),
+                enableSorting: false,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'name',
+                header: t('Component Name'),
+                cell: ({ row }) => {
+                    const { name, id } = row.original
+                    return (
+                        <Link
+                            href={`/components/detail/${id}`}
+                            className='text-link'
+                        >
+                            {name}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'mainLicenses',
+                header: t('Main licenses'),
+                cell: ({ row }) => {
+                    return (
+                        <>
+                            {row.original.mainLicenseIds?.map(
+                                (lic, i): ReactNode => (
+                                    <>
+                                        <Link
+                                            key={lic}
+                                            className='link'
+                                            href={`/licenses/detail/?id=${lic}`}
+                                        >
+                                            {lic}
+                                        </Link>
+                                        {i !== (row.original.mainLicenseIds?.length ?? 0) - 1 && ', '}
+                                    </>
+                                ),
+                            )}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Component Type'),
+                cell: ({ row }) => <>{row.original.componentType}</>,
+                meta: {
+                    width: '25%',
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
 
-    const columns = [
-        {
-            id: 'vendor',
-            name: t('Vendor'),
-        },
-        {
-            id: 'name',
-            name: t('Name'),
-        },
-        {
-            id: 'mainLicenses',
-            name: t('Main Licenses'),
-        },
-        {
-            id: 'componentType',
-            name: t('Component Type'),
-        },
-    ]
+    const memoizedData = useMemo(
+        () => componentsUsing,
+        [
+            componentsUsing,
+        ],
+    )
 
-    useEffect(() => {
-        const data = componentsUsing.map((component: Component) => [
-            component.defaultVendor?.shortName ?? '',
-            _(
-                <Link
-                    key={component._links?.self.href.split('/').at(-1)}
-                    href={`/components/detail/${component._links?.self.href.split('/').at(-1)}`}
-                >
-                    {component.name}
-                </Link>,
-            ) as JSX.Element,
-            component.mainLicenseIds ? component.mainLicenseIds.join(', ') : '',
-            component.componentType ?? '',
-        ])
-        setTableData(data)
-    }, [componentsUsing])
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+    })
 
     return (
         <>
             <h5 id={styles['upper-case-title']}>{`${documentName} ${t('IS USED BY THE FOLLOWING COMPONENTS')}`}</h5>
-            <Table
-                data={tableData}
-                columns={columns}
-            />
+            <div className='mb-3'>
+                {table ? (
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                    />
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
         </>
     )
 }

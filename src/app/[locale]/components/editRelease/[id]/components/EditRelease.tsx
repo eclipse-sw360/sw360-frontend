@@ -11,12 +11,13 @@
 
 'use client'
 
+import Link from 'next/link'
+import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
-
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
@@ -24,8 +25,8 @@ import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCo
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
     ActionType,
-    COTSDetails,
     ClearingInformation,
+    COTSDetails,
     CommonTabIds,
     Creator,
     DocumentCreationInformation,
@@ -41,7 +42,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
@@ -74,7 +74,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const [SPDXPayload, setSPDXPayload] = useState<SPDX>({
         spdxDocument: null,
@@ -206,7 +208,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                             if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
                             return result
                         },
-                        {} as { [k: string]: string },
+                        {} as {
+                            [k: string]: string
+                        },
                     )
                     setMainLicenses(mainLicenses)
                 }
@@ -218,7 +222,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                             if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
                             return result
                         },
-                        {} as { [k: string]: string },
+                        {} as {
+                            [k: string]: string
+                        },
                     )
                     setOtherLicenses(otherLicenses)
                 }
@@ -231,7 +237,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 console.error(e)
             }
         })()
-    }, [releaseId])
+    }, [
+        releaseId,
+    ])
 
     const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
@@ -316,11 +324,17 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         fullName: '',
     })
 
-    const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
+    const [mainLicenses, setMainLicenses] = useState<{
+        [k: string]: string
+    }>({})
 
-    const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
+    const [otherLicenses, setOtherLicenses] = useState<{
+        [k: string]: string
+    }>({})
 
-    const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
+    const [cotsResponsible, setCotsResponsible] = useState<{
+        [k: string]: string
+    }>({})
 
     const [errorLicenseIdentifier, setErrorLicenseIdentifier] = useState(false)
     const [errorExtractedText, setErrorExtractedText] = useState(false)
@@ -458,14 +472,23 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     }
 
     const headerButtons = {
-        'Update Release': { link: '', type: 'primary', onClick: checkPreRequisite, name: t('Update Release') },
+        'Update Release': {
+            link: '',
+            type: 'primary',
+            onClick: checkPreRequisite,
+            name: t('Update Release'),
+        },
         'Delete Release': {
             link: '',
             type: 'danger',
             onClick: handleDeleteRelease,
             name: t('Delete Release'),
         },
-        Cancel: { link: '/components/releases/detail/' + releaseId, type: 'secondary', name: t('Cancel') },
+        Cancel: {
+            link: '/components/releases/detail/' + releaseId,
+            type: 'secondary',
+            name: t('Cancel'),
+        },
     }
 
     const param = useParams()
@@ -476,8 +499,18 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         release && (
             <>
                 <Breadcrumb className='container page-content'>
-                    <Breadcrumb.Item href={componentsPath}>{t('Components')}</Breadcrumb.Item>
-                    <Breadcrumb.Item href={`${componentsPath}/detail/${componentId}`}>{release.name}</Breadcrumb.Item>
+                    <Breadcrumb.Item
+                        linkAs={Link}
+                        href={componentsPath}
+                    >
+                        {t('Components')}
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item
+                        linkAs={Link}
+                        href={`${componentsPath}/detail/${componentId}`}
+                    >
+                        {release.name}
+                    </Breadcrumb.Item>
                     <Breadcrumb.Item active>{`${release.name} (${release.version})`}</Breadcrumb.Item>
                 </Breadcrumb>
                 <CreateMRCommentDialog<Release>
@@ -498,7 +531,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                         <div className='col'>
                             <div
                                 className='row'
-                                style={{ marginBottom: '20px' }}
+                                style={{
+                                    marginBottom: '20px',
+                                }}
                             >
                                 <PageButtonHeader
                                     buttons={headerButtons}
@@ -624,4 +659,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(EditRelease, [UserGroupType.SECURITY_USER])
+export default AccessControl(EditRelease, [
+    UserGroupType.SECURITY_USER,
+])

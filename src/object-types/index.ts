@@ -16,6 +16,7 @@ import Attachment from './Attachment'
 import { AttachmentUsage, AttachmentUsages, SaveUsagesPayload } from './AttachmentUsages'
 import AuthToken from './AuthToken'
 import Changelogs from './Changelogs'
+import ClearingDetailsCount from './ClearingDetailsCount'
 import ClearingInformation from './ClearingInformation'
 import ClearingRequest from './ClearingRequest'
 import ClearingRequestComments from './ClearingRequestComments'
@@ -115,6 +116,7 @@ export type {
     AuthToken,
     Changelogs,
     CheckSum,
+    ClearingDetailsCount,
     ClearingInformation,
     ClearingRequest,
     ClearingRequestComments,

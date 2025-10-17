@@ -9,22 +9,23 @@
 
 'use client'
 
+import Link from 'next/link'
+import { notFound, useParams, useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useRef, useState } from 'react'
+import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { notFound, useParams, useRouter } from 'next/navigation'
-import { ReactNode, useEffect, useRef, useState } from 'react'
-import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
-import ModerationDecision from './ModerationDecision'
-import ModerationRequestInfo from './ModerationRequestInfo'
-import ProposedChanges from './ProposedChanges'
 import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
+import ModerationDecision from './ModerationDecision'
+import ModerationRequestInfo from './ModerationRequestInfo'
+import ProposedChanges from './ProposedChanges'
 
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }): ReactNode | undefined {
     const t = useTranslations('default')
@@ -72,7 +73,9 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = async (url: string) => {
         const session = await getSession()
@@ -254,7 +257,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     return (
         <>
             <Breadcrumb className='container page-content'>
-                <Breadcrumb.Item href={requestsPath}>{t('Requests')}</Breadcrumb.Item>
+                <Breadcrumb.Item
+                    linkAs={Link}
+                    href={requestsPath}
+                >
+                    {t('Requests')}
+                </Breadcrumb.Item>
                 <Breadcrumb.Item active>
                     {moderationRequestData &&
                     (moderationRequestData.documentType === 'COMPONENT' ||
@@ -327,7 +335,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(0)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -370,7 +381,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(1)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -408,7 +422,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(2)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -466,4 +483,6 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(ModerationRequestDetail, [UserGroupType.SECURITY_USER])
+export default AccessControl(ModerationRequestDetail, [
+    UserGroupType.SECURITY_USER,
+])

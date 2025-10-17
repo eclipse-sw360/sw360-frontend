@@ -11,30 +11,23 @@
 
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { Embedded, HttpStatus, LicensePayload, LicenseTabIds, Obligation, UserGroupType } from '@/object-types'
+import { HttpStatus, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
 import AddLicenseSummary from './AddLicenseSummary'
-
-type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
 
 function AddLicense(): ReactNode {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
-    const [data, setData] = useState<Array<Array<string | Obligation>>>([])
-    const [reRender, setReRender] = useState(false)
-    const [obligations, setObligations] = useState<Array<Array<string | Obligation>>>([])
     const [addObligationDiaglog, setAddObligationDiaglog] = useState<boolean>(false)
-    const params = useSearchParams()
     const router = useRouter()
     const [errorShortName, setErrorShortName] = useState<boolean>(false)
     const [errorFullName, setErrorFullName] = useState<boolean>(false)
@@ -56,7 +49,9 @@ function AddLicense(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const tabList = [
         {
@@ -68,50 +63,6 @@ function AddLicense(): ReactNode {
             name: 'Linked Obligations',
         },
     ]
-
-    useEffect(() => {
-        MessageService.success(t('New License'))
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(
-                    `obligations?obligationLevel=LICENSE_OBLIGATION`,
-                    session.user.access_token,
-                    signal,
-                )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-
-                const obligations = (await response.json()) as EmbeddedObligations
-                if (!CommonUtils.isNullEmptyOrUndefinedArray(obligations._embedded['sw360:obligations'])) {
-                    const data = obligations._embedded['sw360:obligations'].map((item: Obligation) => [
-                        item,
-                        item,
-                        item.title ?? '',
-                        !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
-                            ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
-                            : '',
-                        item.text ?? '',
-                    ])
-                    setObligations(data)
-                }
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-        return () => controller.abort()
-    }, [params])
-
-    const handleReRender = () => {
-        setReRender(!reRender)
-    }
 
     const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
 
@@ -159,25 +110,46 @@ function AddLicense(): ReactNode {
     }
 
     const headerButtons = {
-        'Create License': { link: '', type: 'primary', onClick: submit, name: t('Create License') },
-        Cancel: { link: '/licenses', type: 'light', name: t('Cancel') },
+        'Create License': {
+            link: '',
+            type: 'primary',
+            onClick: submit,
+            name: t('Create License'),
+        },
+        Cancel: {
+            link: '/licenses',
+            type: 'light',
+            name: t('Cancel'),
+        },
     }
 
     const headerButtonAddObligations = {
-        'Create License': { link: '', type: 'primary', onClick: submit, name: t('Create License') },
+        'Create License': {
+            link: '',
+            type: 'primary',
+            onClick: submit,
+            name: t('Create License'),
+        },
         'Add Obligation': {
             link: '',
             type: 'secondary',
             onClick: handleClickAddObligations,
             name: t('Add Obligation'),
         },
-        Cancel: { link: '/licenses', type: 'light', name: t('Cancel') },
+        Cancel: {
+            link: '/licenses',
+            type: 'light',
+            name: t('Cancel'),
+        },
     }
 
     return (
         <div
             className='container'
-            style={{ maxWidth: '98vw', marginTop: '10px' }}
+            style={{
+                maxWidth: '98vw',
+                marginTop: '10px',
+            }}
         >
             <div className='row'>
                 <div className='col-2 sidebar'>
@@ -190,7 +162,9 @@ function AddLicense(): ReactNode {
                 <div className='col'>
                     <div
                         className='row'
-                        style={{ marginBottom: '20px' }}
+                        style={{
+                            marginBottom: '20px',
+                        }}
                     >
                         {selectedTab === LicenseTabIds.OBLIGATIONS ? (
                             <PageButtonHeader
@@ -226,17 +200,11 @@ function AddLicense(): ReactNode {
                     >
                         <LinkedObligationsDialog
                             show={addObligationDiaglog}
-                            data={data}
-                            setData={setData}
-                            obligations={obligations}
                             setShow={setAddObligationDiaglog}
-                            onReRender={handleReRender}
                             licensePayload={licensePayload}
                             setLicensePayload={setLicensePayload}
                         />
                         <LinkedObligations
-                            data={data}
-                            setData={setData}
                             licensePayload={licensePayload}
                             setLicensePayload={setLicensePayload}
                         />
@@ -248,4 +216,6 @@ function AddLicense(): ReactNode {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(AddLicense, [UserGroupType.SECURITY_USER])
+export default AccessControl(AddLicense, [
+    UserGroupType.SECURITY_USER,
+])
