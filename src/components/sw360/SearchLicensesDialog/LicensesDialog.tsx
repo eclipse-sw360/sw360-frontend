@@ -10,15 +10,16 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useRef, useState } from 'react'
-import { Button, Modal } from 'react-bootstrap'
-import { Embedded, LicenseDetail } from '@/object-types'
+import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
+import { Button, Form, Modal, Spinner } from 'react-bootstrap'
+import { Embedded, ErrorDetails, LicenseDetail, PageableQueryParam, PaginationMeta } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import LicensesTable from './LicensesTable'
+import { PageSizeSelector, SW360Table, TableFooter } from '../Table/Components'
 
 interface Props {
     show: boolean
@@ -36,49 +37,178 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
     const [selectedLicenses, setSelectedLicenses] = useState<{
         [k: string]: string
     }>(releaseLicenses)
-    const [licenseDatas, setLicenseDatas] = useState<Array<(LicenseDetail | string)[]>>([])
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const session = useSession()
 
-    const searchText = useRef<string>('')
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
 
-    const handleCloseDialog = () => {
-        setShow(!show)
+    const handleCheckbox = (item: LicenseDetail) => {
+        const copiedLicenses = {
+            ...selectedLicenses,
+        }
+        const licenseId = item._links?.self.href.split('/').at(-1)
+        if (licenseId === undefined) return
+        if (Object.keys(copiedLicenses).includes(licenseId)) {
+            delete copiedLicenses[licenseId]
+        } else {
+            copiedLicenses[licenseId] = item.fullName ?? ''
+        }
+        setSelectedLicenses(copiedLicenses)
     }
 
-    const searchLicenses = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        const queryUrl = CommonUtils.createUrlWithParams(`licenses`, {})
-        const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-        if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.error(t('Session has expired'))
-            return
-        } else if (response.status !== StatusCodes.OK) {
-            MessageService.error(t('Error while processing'))
-            return
-        }
-        const licenses = (await response.json()) as EmbeddedLicenses
-        if (typeof licenses == 'undefined') {
-            setLicenseDatas([])
-            return
-        }
-        if (
-            !CommonUtils.isNullOrUndefined(licenses['_embedded']) &&
-            !CommonUtils.isNullOrUndefined(licenses['_embedded']['sw360:licenses'])
-        ) {
-            const data = licenses['_embedded']['sw360:licenses'].map((item: LicenseDetail) => [
-                item,
-                item.fullName ?? '',
-            ])
-            setLicenseDatas(data)
+    const columns = useMemo<ColumnDef<LicenseDetail>[]>(
+        () => [
+            {
+                id: 'licenseId',
+                cell: ({ row }) => (
+                    <Form.Check
+                        name='licenseId'
+                        type='checkbox'
+                        checked={Object.keys(selectedLicenses).includes(
+                            row.original._links?.self.href.split('/').at(-1) ?? '',
+                        )}
+                        onClick={() => {
+                            handleCheckbox(row.original)
+                        }}
+                    ></Form.Check>
+                ),
+            },
+            {
+                id: 'license',
+                header: t('License'),
+                cell: ({ row }) => <>{row.original.fullName}</>,
+            },
+        ],
+        [
+            t,
+            selectedLicenses,
+        ],
+    )
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [licenseData, setLicenseData] = useState<LicenseDetail[]>(() => [])
+    const memoizedData = useMemo(
+        () => licenseData,
+        [
+            licenseData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    const handleSearch = async (signal?: AbortSignal) => {
+        try {
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `licenses`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
+
+            const data = (await response.json()) as EmbeddedLicenses
+            setPaginationMeta(data.page)
+            setLicenseData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:licenses'])
+                    ? []
+                    : data['_embedded']['sw360:licenses'],
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
         }
     }
+
+    useEffect(() => {
+        if (session.status === 'loading' || searchText === undefined) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        handleSearch(signal)
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
     const handleClickSelectLicenses = () => {
         selectLicenses(selectedLicenses)
         setShow(!show)
+    }
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
+
+    const handleCloseDialog = () => {
+        setShow(!show)
+        setSelectedLicenses({})
+        setLicenseData([])
     }
 
     return (
@@ -102,7 +232,7 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                                 placeholder={t('Enter search text')}
                                 aria-describedby='Search Licenses'
                                 onChange={(event) => {
-                                    searchText.current = event.target.value
+                                    setSearchText(event.target.value)
                                 }}
                             />
                         </div>
@@ -110,24 +240,48 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                             <button
                                 type='button'
                                 className={`fw-bold btn btn-light button-plain me-2`}
-                                onClick={() => void searchLicenses()}
+                                onClick={() => {
+                                    if (!searchText) setSearchText('')
+                                    handleSearch()
+                                }}
                             >
                                 {t('Search')}
                             </button>
                             <button
                                 type='button'
                                 className={`fw-bold btn btn-light button-plain me-2`}
+                                onClick={() => {
+                                    setSearchText('')
+                                    setLicenseData([])
+                                    setSelectedLicenses({})
+                                }}
                             >
                                 {t('Reset')}
                             </button>
                         </div>
                     </div>
-                    <div className='row mt-3'>
-                        <LicensesTable
-                            licenseDatas={licenseDatas}
-                            setLicenses={setSelectedLicenses}
-                            selectedLicenses={selectedLicenses}
-                        />
+                    <div className='mb-3'>
+                        {pageableQueryParam && table && paginationMeta ? (
+                            <>
+                                <PageSizeSelector
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                />
+                                <SW360Table
+                                    table={table}
+                                    showProcessing={showProcessing}
+                                />
+                                <TableFooter
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                    paginationMeta={paginationMeta}
+                                />
+                            </>
+                        ) : (
+                            <div className='col-12 mt-1 text-center'>
+                                <Spinner className='spinner' />
+                            </div>
+                        )}
                     </div>
                 </div>
             </Modal.Body>
