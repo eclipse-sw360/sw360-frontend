@@ -9,18 +9,19 @@
 
 'use client'
 
-import { HttpStatus, ModerationRequestPayload } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import Link from 'next/link'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
-import Link from 'next/link'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { _, ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, Table } from 'next-sw360'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
 import { BiCheckCircle, BiInfoCircle, BiXCircle } from 'react-icons/bi'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
+import { HttpStatus, ModerationRequestPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface propType {
     [key: string]: string
@@ -29,6 +30,7 @@ interface propType {
 interface ModerationRequestRow {
     moderationRequestId: string
     documentName: string
+    progress: number
 }
 
 export default function BulkDeclineModerationRequestModal({
@@ -41,23 +43,24 @@ export default function BulkDeclineModerationRequestModal({
     mrIdNameMap: propType
 }): ReactNode {
     const t = useTranslations('default')
-    const [loading, setLoading] = useState<boolean>(true)
     const [disableAcceptMr, setDisableAcceptMr] = useState<boolean>(false)
     const [disableDeclineMr, setDisableDeclineMr] = useState<boolean>(false)
-    const [statusCheck, setStatusCheck] = useState<number>()
-    const [tableData, setTableData] = useState<Array<(ModerationRequestRow | { progressStatus: number })[]>>([])
+    const [tableData, setTableData] = useState<Array<ModerationRequestRow>>([])
     const [hasComment, setHasComment] = useState<boolean>(false)
-    const { status } = useSession()
     const [moderationRequestPayload, setModerationRequestPayload] = useState<ModerationRequestPayload>({
         action: '',
         comment: '',
     })
 
+    const session = useSession()
+
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [
+        session,
+    ])
 
     const computeProgress = (responseCode: number) => {
         switch (responseCode) {
@@ -72,125 +75,127 @@ export default function BulkDeclineModerationRequestModal({
         }
     }
 
-    const columns = [
-        {
-            id: 'bulkModerationRequestAction.documentName',
-            name: t('Document Name'),
-            sort: true,
-            width: '50%',
-            formatter: ({ moderationRequestId, documentName }: { moderationRequestId: string; documentName: string }) =>
-                _(
-                    <>
+    const columns = useMemo<ColumnDef<ModerationRequestRow>[]>(
+        () => [
+            {
+                id: 'documentName',
+                header: t('Document Name'),
+                cell: ({ row }) => {
+                    const { documentName, moderationRequestId } = row.original
+                    return (
                         <Link
                             className='link'
                             href={`/requests/moderationRequest/${moderationRequestId}`}
                         >
                             {documentName}
                         </Link>
-                    </>,
-                ),
-        },
-        {
-            id: 'bulkModerationRequestAction.status',
-            name: t('Status'),
-            sort: true,
-            width: '50%',
-            formatter: ({ progressStatus }: { progressStatus: number }) =>
-                _(
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ marginLeft: '10px' }}>
-                            {statusCheck === HttpStatus.ACCEPTED && (
-                                <>
-                                    <BiCheckCircle
-                                        color='green'
-                                        size={15}
-                                    />
-                                </>
-                            )}
-                            {statusCheck === HttpStatus.NOT_ALLOWED && (
-                                <>
-                                    <BsFillExclamationCircleFill
-                                        color='orange'
-                                        size={15}
-                                    />
-                                </>
-                            )}
-                            {statusCheck === HttpStatus.INTERNAL_SERVER_ERROR && (
-                                <>
-                                    <BiXCircle
-                                        color='red'
-                                        size={15}
-                                    />
-                                </>
-                            )}
-                        </div>
-                        <div hidden={progressStatus === 0}>
-                            {progressStatus === 1 && (
-                                <>
-                                    <div style={{ display: 'flex', alignItems: 'center', color: 'green' }}>
-                                        &nbsp;&nbsp;{t('Success')}&nbsp;&nbsp;
+                    )
+                },
+            },
+            {
+                id: 'status',
+                header: t('Status'),
+                cell: ({ row }) => {
+                    const { progress: progressStatus } = row.original
+                    return (
+                        <div className='d-flex justify-items-center'>
+                            <div hidden={progressStatus === 0}>
+                                {progressStatus === 1 && (
+                                    <>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                color: 'green',
+                                            }}
+                                        >
+                                            &nbsp;&nbsp;{t('Success')}&nbsp;&nbsp;
+                                            <OverlayTrigger
+                                                overlay={<Tooltip>{t('Request processed successfully')}</Tooltip>}
+                                            >
+                                                <span className='d-inline-block'>
+                                                    <BiInfoCircle
+                                                        size={18}
+                                                        style={{
+                                                            color: 'black',
+                                                        }}
+                                                    />
+                                                </span>
+                                            </OverlayTrigger>
+                                        </div>
+                                    </>
+                                )}
+                                {progressStatus === 2 && (
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: 'orange',
+                                        }}
+                                    >
+                                        &nbsp;&nbsp;{t('Request Already Closed')}&nbsp;&nbsp;
                                         <OverlayTrigger
-                                            overlay={<Tooltip>{t('Request processed successfully')}</Tooltip>}
+                                            overlay={<Tooltip>{t('Moderation request is already closed')}</Tooltip>}
                                         >
                                             <span className='d-inline-block'>
                                                 <BiInfoCircle
                                                     size={18}
-                                                    style={{ color: 'black' }}
+                                                    style={{
+                                                        color: 'black',
+                                                    }}
                                                 />
                                             </span>
                                         </OverlayTrigger>
                                     </div>
-                                </>
-                            )}
-                            {progressStatus === 2 && (
-                                <div style={{ display: 'flex', alignItems: 'center', color: 'orange' }}>
-                                    &nbsp;&nbsp;{t('Request Already Closed')}&nbsp;&nbsp;
-                                    <OverlayTrigger
-                                        overlay={<Tooltip>{t('Moderation request is already closed')}</Tooltip>}
+                                )}
+                                {progressStatus === 3 && (
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: 'red',
+                                        }}
                                     >
-                                        <span className='d-inline-block'>
-                                            <BiInfoCircle
-                                                size={18}
-                                                style={{ color: 'black' }}
-                                            />
-                                        </span>
-                                    </OverlayTrigger>
-                                </div>
-                            )}
-                            {progressStatus === 3 && (
-                                <div style={{ display: 'flex', alignItems: 'center', color: 'red' }}>
-                                    &nbsp;&nbsp;{t('Failed')}&nbsp;&nbsp;
-                                    <OverlayTrigger overlay={<Tooltip>{t('There are internal server error')}</Tooltip>}>
-                                        <span className='d-inline-block'>
-                                            <BiInfoCircle
-                                                size={18}
-                                                style={{ color: 'black' }}
-                                            />
-                                        </span>
-                                    </OverlayTrigger>
-                                </div>
-                            )}
+                                        &nbsp;&nbsp;{t('Failed')}&nbsp;&nbsp;
+                                        <OverlayTrigger
+                                            overlay={<Tooltip>{t('There are internal server error')}</Tooltip>}
+                                        >
+                                            <span className='d-inline-block'>
+                                                <BiInfoCircle
+                                                    size={18}
+                                                    style={{
+                                                        color: 'black',
+                                                    }}
+                                                />
+                                            </span>
+                                        </OverlayTrigger>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>,
-                ),
-        },
-    ]
+                    )
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        setLoading(true)
         setTableData(
             Object.entries(mrIdNameMap).map(([key, value]) => {
-                return [
-                    {
-                        moderationRequestId: key,
-                        documentName: value,
-                    },
-                    { progressStatus: 0 },
-                ]
+                return {
+                    moderationRequestId: key,
+                    documentName: value,
+                    progress: 0,
+                } as ModerationRequestRow
             }),
         )
-        setLoading(false)
-    }, [mrIdNameMap])
+    }, [
+        mrIdNameMap,
+    ])
 
     const handleCommentValidation = (comment: string) => {
         if (!comment.trim()) {
@@ -210,76 +215,61 @@ export default function BulkDeclineModerationRequestModal({
     }
 
     const rejectModerationRequest = async (singleMrId: string, updatedRejectPayload: ModerationRequestPayload) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
         try {
+            setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment) {
                 const response = await ApiUtils.PATCH(
                     `moderationrequest/${singleMrId}`,
                     updatedRejectPayload,
-                    session.user.access_token,
+                    session.data.user.access_token,
                 )
                 if (response.status == HttpStatus.ACCEPTED) {
                     await response.json()
-                    setStatusCheck(HttpStatus.ACCEPTED)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            const r = row[0] as ModerationRequestRow
-                            if (r.moderationRequestId === singleMrId) {
-                                return [
-                                    {
-                                        moderationRequestId: r.moderationRequestId,
-                                        documentName: r.documentName,
-                                    },
-                                    { progressStatus },
-                                ]
-                            } else {
-                                return row
+                            if (row.moderationRequestId === singleMrId) {
+                                return {
+                                    moderationRequestId: row.moderationRequestId,
+                                    documentName: row.documentName,
+                                    progress: progressStatus,
+                                }
                             }
+                            return row
                         })
                         return updatedData
                     })
                     MessageService.success(t('You have rejected the moderation request'))
                 } else if (response.status == HttpStatus.NOT_ALLOWED) {
-                    setStatusCheck(HttpStatus.NOT_ALLOWED)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            const r = row[0] as ModerationRequestRow
-                            if (r.moderationRequestId === singleMrId) {
-                                return [
-                                    {
-                                        moderationRequestId: r.moderationRequestId,
-                                        documentName: r.documentName,
-                                    },
-                                    { progressStatus },
-                                ]
-                            } else {
-                                return row
+                            if (row.moderationRequestId === singleMrId) {
+                                return {
+                                    moderationRequestId: row.moderationRequestId,
+                                    documentName: row.documentName,
+                                    progress: progressStatus,
+                                }
                             }
+                            return row
                         })
                         return updatedData
                     })
                     MessageService.warn(t('Moderation request is already closed'))
                 } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
-                    setStatusCheck(HttpStatus.INTERNAL_SERVER_ERROR)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            const r = row[0] as ModerationRequestRow
-                            if (r.moderationRequestId === singleMrId) {
-                                return [
-                                    {
-                                        moderationRequestId: r.moderationRequestId,
-                                        documentName: r.documentName,
-                                    },
-                                    { progressStatus },
-                                ]
-                            } else {
-                                return row
+                            if (row.moderationRequestId === singleMrId) {
+                                return {
+                                    moderationRequestId: row.moderationRequestId,
+                                    documentName: row.documentName,
+                                    progress: progressStatus,
+                                }
                             }
+                            return row
                         })
                         return updatedData
                     })
@@ -294,80 +284,67 @@ export default function BulkDeclineModerationRequestModal({
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setShowProcessing(false)
         }
     }
 
     const acceptModerationRequest = async (singleMrId: string, updatedAcceptPayload: ModerationRequestPayload) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
         try {
+            setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment) {
                 const response = await ApiUtils.PATCH(
                     `moderationrequest/${singleMrId}`,
                     updatedAcceptPayload,
-                    session.user.access_token,
+                    session.data.user.access_token,
                 )
                 if (response.status == HttpStatus.ACCEPTED) {
                     await response.json()
-                    setStatusCheck(HttpStatus.ACCEPTED)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            const r = row[0] as ModerationRequestRow
-                            if (r.moderationRequestId === singleMrId) {
-                                return [
-                                    {
-                                        moderationRequestId: r.moderationRequestId,
-                                        documentName: r.documentName,
-                                    },
-                                    { progressStatus },
-                                ]
-                            } else {
-                                return row
+                            if (row.moderationRequestId === singleMrId) {
+                                return {
+                                    moderationRequestId: row.moderationRequestId,
+                                    documentName: row.documentName,
+                                    progress: progressStatus,
+                                }
                             }
+                            return row
                         })
                         return updatedData
                     })
                     MessageService.success(t('You have accepted the moderation request'))
                 } else if (response.status == HttpStatus.NOT_ALLOWED) {
-                    setStatusCheck(HttpStatus.NOT_ALLOWED)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            const r = row[0] as ModerationRequestRow
-                            if (r.moderationRequestId === singleMrId) {
-                                return [
-                                    {
-                                        moderationRequestId: r.moderationRequestId,
-                                        documentName: r.documentName,
-                                    },
-                                    { progressStatus },
-                                ]
-                            } else {
-                                return row
+                            if (row.moderationRequestId === singleMrId) {
+                                return {
+                                    moderationRequestId: row.moderationRequestId,
+                                    documentName: row.documentName,
+                                    progress: progressStatus,
+                                }
                             }
+                            return row
                         })
                         return updatedData
                     })
                     MessageService.warn(t('Moderation request is already closed'))
                 } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
-                    setStatusCheck(HttpStatus.INTERNAL_SERVER_ERROR)
                     const progressStatus = computeProgress(response.status)
                     setTableData((prevData) => {
                         const updatedData = prevData.map((row) => {
-                            const r = row[0] as ModerationRequestRow
-                            if (r.moderationRequestId === singleMrId) {
-                                return [
-                                    {
-                                        moderationRequestId: r.moderationRequestId,
-                                        documentName: r.documentName,
-                                    },
-                                    { progressStatus },
-                                ]
-                            } else {
-                                return row
+                            if (row.moderationRequestId === singleMrId) {
+                                return {
+                                    moderationRequestId: row.moderationRequestId,
+                                    documentName: row.documentName,
+                                    progress: progressStatus,
+                                }
                             }
+                            return row
                         })
                         return updatedData
                     })
@@ -382,6 +359,8 @@ export default function BulkDeclineModerationRequestModal({
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setShowProcessing(false)
         }
     }
 
@@ -409,6 +388,20 @@ export default function BulkDeclineModerationRequestModal({
         }
     }
 
+    const memoizedData = useMemo(
+        () => tableData,
+        [
+            tableData,
+        ],
+    )
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        getPaginationRowModel: getPaginationRowModel(),
+    })
+
     return (
         <>
             <Modal
@@ -418,7 +411,6 @@ export default function BulkDeclineModerationRequestModal({
                 onHide={() => {
                     setShow(false)
                     setHasComment(false)
-                    setStatusCheck(0)
                     setDisableAcceptMr(false)
                     setDisableDeclineMr(false)
                 }}
@@ -426,7 +418,10 @@ export default function BulkDeclineModerationRequestModal({
                 scrollable
             >
                 <Modal.Header
-                    style={{ backgroundColor: '#feefef', color: '#da1414' }}
+                    style={{
+                        backgroundColor: '#feefef',
+                        color: '#da1414',
+                    }}
                     closeButton
                 >
                     <Modal.Title id='delete-all-license-info-modal'>
@@ -441,33 +436,45 @@ export default function BulkDeclineModerationRequestModal({
                             <Form.Label className='mb-1'>
                                 {t.rich('Your selected Moderation requests are')}
                                 <div className='col-12 d-flex justify-content-center align-items-center'>
-                                    {loading == false ? (
-                                        <div style={{ paddingLeft: '0px' }}>
-                                            <Table
-                                                columns={columns}
-                                                data={tableData}
-                                                sort={false}
-                                                selector={true}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <Spinner className='spinner' />
-                                    )}
+                                    <div className='mb-3'>
+                                        {table ? (
+                                            <>
+                                                <ClientSidePageSizeSelector table={table} />
+                                                <SW360Table
+                                                    table={table}
+                                                    showProcessing={showProcessing}
+                                                />
+                                                <ClientSideTableFooter table={table} />
+                                            </>
+                                        ) : (
+                                            <div className='col-12 mt-1 text-center'>
+                                                <Spinner className='spinner' />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </Form.Label>
                             <br />
-                            <Form.Label style={{ fontWeight: 'bold' }}>
+                            <Form.Label
+                                style={{
+                                    fontWeight: 'bold',
+                                }}
+                            >
                                 {t('Please provide your comments')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
                             </Form.Label>
                             <p
                                 className='subscriptionBox'
-                                style={{ textAlign: 'left' }}
+                                style={{
+                                    textAlign: 'left',
+                                }}
                             >
                                 {t('Note for comments')}
                             </p>
@@ -488,7 +495,6 @@ export default function BulkDeclineModerationRequestModal({
                         onClick={() => {
                             setShow(false)
                             setHasComment(false)
-                            setStatusCheck(0)
                             setDisableAcceptMr(false)
                             setDisableDeclineMr(false)
                         }}
@@ -503,7 +509,7 @@ export default function BulkDeclineModerationRequestModal({
                         disabled={!hasComment || disableDeclineMr}
                     >
                         {t('Bulk Decline Moderation Requests')}{' '}
-                        {loading && (
+                        {showProcessing && (
                             <Spinner
                                 size='sm'
                                 className='ms-1 spinner'
@@ -518,7 +524,7 @@ export default function BulkDeclineModerationRequestModal({
                         disabled={!hasComment || disableAcceptMr}
                     >
                         {t('Bulk Accept Moderation Requests')}{' '}
-                        {loading && (
+                        {showProcessing && (
                             <Spinner
                                 size='sm'
                                 className='ms-1 spinner'

@@ -267,23 +267,21 @@ function OpenModerationRequest(): ReactNode {
                         {t('Bulk Actions')}
                     </button>
                 </div>
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <div className='mb-3'>
-                        {table ? (
-                            <>
-                                <ClientSidePageSizeSelector table={table} />
-                                <SW360Table
-                                    table={table}
-                                    showProcessing={showProcessing}
-                                />
-                                <ClientSideTableFooter table={table} />
-                            </>
-                        ) : (
-                            <div className='col-12 mt-1 text-center'>
-                                <Spinner className='spinner' />
-                            </div>
-                        )}
-                    </div>
+                <div className='mb-3'>
+                    {table ? (
+                        <>
+                            <ClientSidePageSizeSelector table={table} />
+                            <SW360Table
+                                table={table}
+                                showProcessing={showProcessing}
+                            />
+                            <ClientSideTableFooter table={table} />
+                        </>
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
                 </div>
             </div>
         </>
