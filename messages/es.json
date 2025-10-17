@@ -1556,6 +1556,7 @@
     "package_management_write_access_usergroup_description": "Controle el rol de usuario de acceso de escritura para paquetes",
     "project_cannot_be_created": "El proyecto no puede crearse ni actualizarse",
     "purl": "puntilla",
+    "release_cannot_be_deleted_contains_linked_packages": "La versión <strong>{name}</strong> no se puede eliminar, ya que contiene <strong>{packageCount}</strong> paquetes. Primero, elimine o desvincule los paquetes vinculados.",
     "release_relation_code_snippest_tooltip": "De la publicación de referencias, se utiliza un fragmento.",
     "release_relation_contained_tooltip": "Si simplemente no sabes si está vinculado dinámicamente",
     "release_relation_dynamic_linked_tooltip": "Software vinculado dinámicamente, como su nombre lo indica",

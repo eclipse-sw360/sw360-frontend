@@ -1556,6 +1556,7 @@
     "package_management_write_access_usergroup_description": "控制包装的写入访问用户角色",
     "project_cannot_be_created": "无法创建/更新项目",
     "purl": "金银丝",
+    "release_cannot_be_deleted_contains_linked_packages": "無法刪除版本 <strong>{name}</strong>，因為它包含 <strong>{packageCount}</strong> 個軟體包。請先刪除或取消連結已連結的軟體包。",
     "release_relation_code_snippest_tooltip": "从参考版本来看，使用了一个片段",
     "release_relation_contained_tooltip": "如果你只是不知道是否是动态链接的",
     "release_relation_dynamic_linked_tooltip": "软件动态链接 - 顾名思义",
