@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Attachment, ReleaseNode } from '@/object-types'
+import { Attachment, LinkedProjectData, ReleaseNode } from '@/object-types'
 
 interface ProjectPayload {
     id?: string
@@ -69,10 +69,7 @@ interface ProjectPayload {
     attachments?: Array<Attachment> | null
     comment?: string
     linkedProjects?: {
-        [key: string]: {
-            projectRelationship: string
-            enableSvm: boolean
-        }
+        [key: string]: LinkedProjectData
     }
     linkedReleases?: {
         [key: string]: {

@@ -48,13 +48,6 @@ type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-interface ProjectRelationship {
-    enableSvm: boolean
-    name: string
-    projectRelationship: string
-    version?: string
-}
-
 export default function LinkProjectsModal({
     setLinkedProjectData,
     projectPayload,
@@ -349,7 +342,7 @@ export default function LinkProjectsModal({
         }
     }
 
-    const projectPayloadSetter = (projectPayloadData: Map<string, ProjectRelationship>) => {
+    const projectPayloadSetter = (projectPayloadData: Map<string, LinkedProjectData>) => {
         if (projectPayloadData.size > 0) {
             const updatedProjectPayload = {
                 ...projectPayload,
@@ -361,6 +354,8 @@ export default function LinkProjectsModal({
                 updatedProjectPayload.linkedProjects[projectId] = {
                     projectRelationship: linkedProject.projectRelationship,
                     enableSvm: linkedProject.enableSvm,
+                    name: linkedProject.name,
+                    version: linkedProject.version,
                 }
             }
             setProjectPayload(updatedProjectPayload)

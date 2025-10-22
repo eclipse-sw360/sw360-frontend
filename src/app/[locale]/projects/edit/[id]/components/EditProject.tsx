@@ -27,6 +27,7 @@ import {
     ActionType,
     DocumentTypes,
     InputKeyValue,
+    LinkedProjectData,
     ObligationEntry,
     Project,
     ProjectPayload,
@@ -407,6 +408,24 @@ function EditProject({
                     projectResponsible: project.projectResponsible ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
+                    linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
+                        (acc, proj) => {
+                            acc[proj.id ?? ''] = {
+                                name: proj.name,
+                                version: proj.version ?? '',
+                                enableSvm:
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.enableSvm === 'true',
+                                projectRelationship:
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.relation ?? '',
+                            }
+                            return acc
+                        },
+                        {} as {
+                            [k: string]: LinkedProjectData
+                        },
+                    ),
                     comment: projectPayload.comment ?? '',
                     packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
                         (acc, singlePackage) => {

@@ -20,7 +20,15 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { InputKeyValue, Project, ProjectPayload, ReleaseDetail, UserGroupType, Vendor } from '@/object-types'
+import {
+    InputKeyValue,
+    LinkedProjectData,
+    Project,
+    ProjectPayload,
+    ReleaseDetail,
+    UserGroupType,
+    Vendor,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -313,6 +321,24 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
+                    linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
+                        (acc, proj) => {
+                            acc[proj.id ?? ''] = {
+                                name: proj.name,
+                                version: proj.version ?? '',
+                                enableSvm:
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.enableSvm === 'true',
+                                projectRelationship:
+                                    proj.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.relation ?? '',
+                            }
+                            return acc
+                        },
+                        {} as {
+                            [k: string]: LinkedProjectData
+                        },
+                    ),
                 }
                 setProjectPayload(projectPayloadData)
                 setIsDuplicateProjectFetched(true)
