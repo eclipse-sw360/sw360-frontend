@@ -12,12 +12,11 @@ name: Commit Checks
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
     paths-ignore:
       - '**.md'
 
 jobs:
-  build:
+  validate:
     name: Validade Pull Request Commits
     runs-on: ubuntu-latest
 
