@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { ChangeEvent, type JSX, useEffect, useMemo, useRef, useState } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 import {
@@ -65,7 +65,6 @@ export default function LinkProjectsModal({
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
-    const isExactMatch = useRef<boolean>(false)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
     const session = useSession()
@@ -298,11 +297,6 @@ export default function LinkProjectsModal({
         },
     })
 
-    const handleExactMatchChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const isExactMatchSelected = event.target.checked
-        isExactMatch.current = isExactMatchSelected
-    }
-
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
@@ -387,7 +381,18 @@ export default function LinkProjectsModal({
         setProjectData([])
         setAlert(null)
         setLinkProjects(new Map())
-        isExactMatch.current = false
+        setExactMatch(false)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
     }
 
     return (
@@ -433,7 +438,7 @@ export default function LinkProjectsModal({
                                         name='exact-match'
                                         type='checkbox'
                                         id='exact-match'
-                                        onChange={handleExactMatchChange}
+                                        onChange={() => setExactMatch(exactMatch)}
                                     />
                                     <Form.Label
                                         className='pt-2'
