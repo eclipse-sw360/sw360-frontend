@@ -9,15 +9,24 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
-import { ChangeEvent, type JSX, useRef, useState } from 'react'
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
-import { Embedded, LinkedPackageData, Package, ProjectPayload } from '@/object-types'
+import {
+    Embedded,
+    ErrorDetails,
+    LinkedPackageData,
+    Package,
+    PageableQueryParam,
+    PaginationMeta,
+    ProjectPayload,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -31,8 +40,6 @@ interface Props {
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
 
-type RowData = (string | string[] | string[][] | undefined)[]
-
 export default function LinkPackagesModal({
     setLinkedPackageData,
     projectPayload,
@@ -41,182 +48,244 @@ export default function LinkPackagesModal({
     setShow,
 }: Props): JSX.Element {
     const t = useTranslations('default')
-    const [packageData, setPackageData] = useState<RowData[]>([])
     const [linkPackages, setLinkPackages] = useState<Map<string, LinkedPackageData>>(new Map())
-    const searchValueRef = useRef<HTMLInputElement>(null)
-    const topRef = useRef(null)
-    const isExactMatch = useRef<boolean>(false)
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [exactMatch, setExactMatch] = useState(false)
+    const session = useSession()
 
-    const columns = [
-        {
-            id: 'linkPackages.selectPackageCheckbox',
-            name: '',
-            width: '8%',
-            formatter: (packageId: string) =>
-                _(
-                    <div className='form-check'>
-                        <input
-                            className='form-check-input'
-                            type='checkbox'
-                            name='packageId'
-                            value={packageId}
-                            id={packageId}
-                            title=''
-                            placeholder='Package Id'
-                            checked={linkPackages.has(packageId)}
-                            onChange={() => handleCheckboxes(packageId)}
-                        />
-                    </div>,
-                ),
-        },
-        {
-            id: 'linkPackages.name',
-            name: t('Name'),
-            width: 'auto',
-            sort: true,
-            formatter: ([name, packageId]: [
-                string,
-                string,
-            ]) =>
-                _(
-                    <>
-                        <Link href={`/packages/detail/${packageId}`}>{name}</Link>
-                    </>,
-                ),
-        },
-        {
-            id: 'linkPackages.version',
-            name: t('Version'),
-            width: 'auto',
-            sort: true,
-        },
-        {
-            id: 'linkPackages.license',
-            name: t('License'),
-            width: 'auto',
-            sort: true,
-            formatter: (licenseIds: string[]) =>
-                _(
-                    <div>
-                        {licenseIds.map((licenseId, index) => (
-                            <span key={index}>
-                                <Link href={`/licenses/detail?id=${licenseId}`}>{licenseId}</Link>
-                                {index !== licenseIds.length - 1 && ', '}
-                            </span>
-                        ))}
-                    </div>,
-                ),
-        },
-        {
-            id: 'linkPackages.packageManager',
-            name: t('Package Manager'),
-            width: 'auto',
-            sort: true,
-        },
-        {
-            id: 'linkPackages.purl',
-            name: t('Purl'),
-            width: 'auto',
-            sort: true,
-        },
-    ]
-
-    const extractInterimPackageData = (packageId: string) => {
-        for (let i = 0; i < packageData.length; i++) {
-            if (packageData[i][0] === packageId) {
-                return {
-                    packageId: packageData[i][0] as string,
-                    name: packageData[i][1]?.[0] as string,
-                    version: packageData[i][2] as string,
-                    licenseIds: packageData[i][3] as string[],
-                    packageManager: packageData[i][4] as string,
-                }
-            }
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-        return undefined
-    }
+    }, [
+        session,
+    ])
 
-    const handleExactMatchChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const isExactMatchSelected = event.target.checked
-        isExactMatch.current = isExactMatchSelected
-    }
+    const columns = useMemo<ColumnDef<Package>[]>(
+        () => [
+            {
+                id: 'selectPackageCheckbox',
+                cell: ({ row }) => {
+                    const packageId = CommonUtils.getIdFromUrl(row.original._links?.self.href)
+                    return (
+                        <div className='form-check'>
+                            <input
+                                className='form-check-input'
+                                type='checkbox'
+                                value={packageId}
+                                checked={linkPackages.has(packageId)}
+                                onChange={() => handleCheckboxes(row.original)}
+                            />
+                        </div>
+                    )
+                },
+            },
+            {
+                id: 'name',
+                header: t('Name'),
+                cell: ({ row }) => {
+                    const packageId = CommonUtils.getIdFromUrl(row.original._links?.self.href)
+                    const { name } = row.original
+                    return (
+                        <Link
+                            href={`/packages/detail/${packageId}`}
+                            className='text-link'
+                        >
+                            {name}
+                        </Link>
+                    )
+                },
+            },
+            {
+                id: 'version',
+                header: t('Version'),
+                accessorKey: 'version',
+                cell: (info) => info.getValue(),
+            },
+            {
+                id: 'license',
+                header: t('License'),
+                cell: ({ row }) => {
+                    const licenseIds = row.original.licenseIds ?? []
+                    return (
+                        <div>
+                            {licenseIds.map((licenseId, index) => (
+                                <span key={index}>
+                                    <Link
+                                        className='text-link'
+                                        href={`/licenses/detail?id=${licenseId}`}
+                                    >
+                                        {licenseId}
+                                    </Link>
+                                    {index !== licenseIds.length - 1 && ', '}
+                                </span>
+                            ))}
+                        </div>
+                    )
+                },
+            },
+            {
+                id: 'packageManager',
+                header: t('Package Manager'),
+                accessorKey: 'packageManager',
+                cell: (info) => info.getValue(),
+            },
+            {
+                id: 'purl',
+                header: t('Purl'),
+                accessorKey: 'purl',
+                cell: (info) => info.getValue(),
+            },
+        ],
+        [
+            t,
+            linkPackages,
+        ],
+    )
 
-    const handleSearch = async ({ searchValue }: { searchValue: string }) => {
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [packagesData, setPackagesData] = useState<Package[]>(() => [])
+    const memoizedData = useMemo(
+        () => packagesData,
+        [
+            packagesData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading' || searchText === undefined) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        handleSearch(signal)
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
+
+    const handleSearch = async (signal?: AbortSignal) => {
         try {
-            const queryUrl = CommonUtils.createUrlWithParams('packages', {
-                name: `${searchValue}`,
-                luceneSearch: `${isExactMatch.current}`,
-            })
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `packages`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                                  luceneSearch: exactMatch,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
             }
-            const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status == StatusCodes.OK) {
-                const data = (await response.json()) as EmbeddedPackages
-                const dataTableFormat =
-                    CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:packages'])
-                        ? []
-                        : data['_embedded']['sw360:packages'].map((singlePackage: Package) => [
-                              CommonUtils.getIdFromUrl(singlePackage._links?.self.href),
-                              [
-                                  singlePackage.name ?? '',
-                                  CommonUtils.getIdFromUrl(singlePackage._links?.self.href),
-                              ],
-                              singlePackage.version ?? '',
-                              singlePackage.licenseIds ?? [
-                                  '',
-                              ],
-                              singlePackage.packageManager ?? '',
-                              singlePackage.purl ?? '',
-                          ])
-                setPackageData(dataTableFormat)
-            } else if (response.status == StatusCodes.FORBIDDEN) {
-                MessageService.warn(t('Access Denied'))
-            } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
-                MessageService.error(t('Internal server error'))
-            } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                MessageService.error(t('Unauthorized request'))
+
+            const data = (await response.json()) as EmbeddedPackages
+            setPaginationMeta(data.page)
+            setPackagesData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:packages'])
+                    ? []
+                    : data['_embedded']['sw360:packages'],
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
             }
-        } catch (e) {
-            console.error(e)
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
         }
     }
 
     const projectPayloadSetter = (linkedPackagePayloadData: Map<string, LinkedPackageData>) => {
-        try {
-            if (linkedPackagePayloadData.size > 0) {
-                const updatedProjectPayload = {
-                    ...projectPayload,
-                }
-                if (updatedProjectPayload.packageIds === undefined) {
-                    updatedProjectPayload.packageIds = {}
-                }
-                for (const [packageId, packageData] of linkedPackagePayloadData) {
-                    if (!updatedProjectPayload.packageIds[packageId]) {
-                        updatedProjectPayload.packageIds[packageId] = {
-                            comment: packageData.comment || '',
-                        }
+        if (linkedPackagePayloadData.size > 0) {
+            const updatedProjectPayload = {
+                ...projectPayload,
+            }
+            if (updatedProjectPayload.packageIds === undefined) {
+                updatedProjectPayload.packageIds = {}
+            }
+            for (const [packageId, packageData] of linkedPackagePayloadData) {
+                if (!updatedProjectPayload.packageIds[packageId]) {
+                    updatedProjectPayload.packageIds[packageId] = {
+                        comment: packageData.comment || '',
                     }
                 }
-                setProjectPayload(updatedProjectPayload)
             }
-        } catch (e) {
-            console.error(e)
+            setProjectPayload(updatedProjectPayload)
         }
     }
 
-    const handleCheckboxes = (packageId: string) => {
+    const handleCheckboxes = (pkg: Package) => {
+        const packageId = CommonUtils.getIdFromUrl(pkg._links?.self.href)
         const m = new Map(linkPackages)
         if (linkPackages.has(packageId)) {
             m.delete(packageId)
         } else {
-            const interimData = extractInterimPackageData(packageId)
-            if (interimData === undefined) return
             m.set(packageId, {
-                ...interimData,
+                ...{
+                    packageId: packageId,
+                    name: pkg.name ?? '',
+                    version: pkg.version ?? '',
+                    licenseIds: pkg.licenseIds ?? [],
+                    packageManager: pkg.packageManager ?? '',
+                },
                 comment: '',
             })
         }
@@ -225,9 +294,20 @@ export default function LinkPackagesModal({
 
     const closeModal = () => {
         setShow(false)
-        setPackageData([])
+        setPackagesData([])
         setLinkPackages(new Map())
-        isExactMatch.current = false
+        setExactMatch(false)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
     }
 
     return (
@@ -244,7 +324,7 @@ export default function LinkPackagesModal({
             <Modal.Header closeButton>
                 <Modal.Title id='linked-projects-modal'>{t('Link Packages')}</Modal.Title>
             </Modal.Header>
-            <Modal.Body ref={topRef}>
+            <Modal.Body>
                 <Form>
                     <Col>
                         <Row className='mb-3'>
@@ -253,7 +333,9 @@ export default function LinkPackagesModal({
                                     type='text'
                                     placeholder={`${t('Enter Search Text')}...`}
                                     name='searchValue'
-                                    ref={searchValueRef}
+                                    onChange={(event) => {
+                                        setSearchText(event.target.value)
+                                    }}
                                 />
                             </Col>
                             <Col xs='auto'>
@@ -263,7 +345,7 @@ export default function LinkPackagesModal({
                                         name='exact-match'
                                         type='checkbox'
                                         id='exact-match'
-                                        onChange={handleExactMatchChange}
+                                        onChange={() => setExactMatch(!exactMatch)}
                                     />
                                     <Form.Label className='pt-2'>
                                         {t('Exact Match')}{' '}
@@ -276,22 +358,39 @@ export default function LinkPackagesModal({
                             <Col xs='auto'>
                                 <Button
                                     variant='secondary'
-                                    onClick={() =>
-                                        void handleSearch({
-                                            searchValue: searchValueRef.current?.value ?? '',
-                                        })
-                                    }
+                                    onClick={() => {
+                                        if (!searchText) setSearchText('')
+                                        handleSearch()
+                                    }}
                                 >
                                     {t('Search')}
                                 </Button>
                             </Col>
                         </Row>
                         <Row>
-                            <Table
-                                columns={columns}
-                                data={packageData}
-                                sort={false}
-                            />
+                            <div className='mb-3'>
+                                {pageableQueryParam && table && paginationMeta ? (
+                                    <>
+                                        <PageSizeSelector
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                        />
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                        <TableFooter
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                            paginationMeta={paginationMeta}
+                                        />
+                                    </>
+                                ) : (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )}
+                            </div>
                         </Row>
                     </Col>
                 </Form>
