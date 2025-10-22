@@ -8,47 +8,48 @@
 # License-Filename: LICENSE
 
 header:
-    license:
-        spdx-id: EPL-2.0
-        copyright-owner: SW360 Frontend Authors
-        copyright-year: '2023'
-        software-name: sw360-frontend
-        pattern: |
-            This program and the accompanying materials are made
-            available under the terms of the Eclipse Public License 2.0
-            which is available at https://www.eclipse.org/legal/epl-2.0/
+  license:
+    spdx-id: EPL-2.0
+    copyright-owner: SW360 Frontend Authors
+    copyright-year: '2023'
+    software-name: sw360-frontend
+    pattern: |
+      This program and the accompanying materials are made
+      available under the terms of the Eclipse Public License 2.0
+      which is available at https://www.eclipse.org/legal/epl-2.0/
 
-            SPDX-License-Identifier: EPL-2.0
-            License-Filename: LICENSE
+      SPDX-License-Identifier: EPL-2.0
+      License-Filename: LICENSE
 
-    paths:
-        - '**'
+  paths:
+    - '**'
 
-    paths-ignore:
-        - .dockerignore
-        - .gitignore
-        - .husky
-        - .prettierrc
-        - '.github/**'
-        - '*.code-workspace'
-        - '**/*.css'
-        - '**/*.diff'
-        - '**/*.json'
-        - '**/*.md'
-        - '**/*.svg'
-        - '**/testdata/**'
-        - 'cypress/fixtures/**'
-        - 'LICENSE'
-        - 'node_modulesw'
-        - 'NOTICE'
-        - "eslint.config.mjs"
-        - "pnpm-lock.yaml"
-        - "pnpm-workspace.yaml"
+  paths-ignore:
+    - .dockerignore
+    - .gitignore
+    - .husky
+    - .prettierrc
+    - '.github/**'
+    - '*.code-workspace'
+    - '**/*.css'
+    - '**/*.diff'
+    - '**/*.json'
+    - '**/*.md'
+    - '**/*.svg'
+    - '**/testdata/**'
+    - 'cypress/fixtures/**'
+    - 'LICENSE'
+    - 'node_modulesw'
+    - 'NOTICE'
+    - 'eslint.config.mjs'
+    - 'pnpm-lock.yaml'
+    - 'pnpm-workspace.yaml'
+    - 'docs/templates/**'
 
-    comment: on-failure
+  comment: on-failure
 
-    license-location-threshold: 80
+  license-location-threshold: 80
 
 dependency:
-    files:
-        - package.json
+  files:
+    - package.json

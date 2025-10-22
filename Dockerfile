@@ -24,12 +24,8 @@ ARG NEXT_PUBLIC_SW360_API_URL
 ARG NEXTAUTH_URL
 ARG AUTH_SECRET
 
-# export them as env vars so Next.js build can see them
-ENV NEXT_PUBLIC_SW360_API_URL=$NEXT_PUBLIC_SW360_API_URL
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
-ENV AUTH_SECRET=$AUTH_SECRET
-
-RUN pnpm install && pnpm build
+RUN pnpm install
+RUN pnpm build -d
 
 # Runtime
 ARG VARIANT=22-slim

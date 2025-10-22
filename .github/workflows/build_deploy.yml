@@ -7,15 +7,12 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-name: Build Frontend
-on:
-  push:
-    tags:
-      - 'v*'
+name: Build
 
-  pull_request:
-    branches:
-      - main
+on:
+  workflow_run:
+    workflows: ['Commit Checks']
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -25,6 +22,8 @@ permissions:
 
 jobs:
   build:
+    name: Build Frontend
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
