@@ -22,6 +22,7 @@ import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedRele
 import Summary from '@/components/ProjectAddSummary/Summary'
 import {
     InputKeyValue,
+    LinkedPackageData,
     LinkedProjectData,
     Project,
     ProjectPayload,
@@ -337,6 +338,26 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                         },
                         {} as {
                             [k: string]: LinkedProjectData
+                        },
+                    ),
+                    packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
+                        (acc, singlePackage) => {
+                            if (singlePackage.id) {
+                                // Get comment from project's packageIds if it exists, otherwise empty string
+                                const existingComment = project.packageIds?.[singlePackage.id]?.comment || ''
+                                acc[singlePackage.id] = {
+                                    packageId: singlePackage._links?.self.href.split('/').at(-1) ?? '',
+                                    name: singlePackage.name ?? '',
+                                    version: singlePackage.version ?? '',
+                                    licenseIds: singlePackage.licenseIds ?? [],
+                                    packageManager: singlePackage.packageManager ?? '',
+                                    comment: existingComment,
+                                }
+                            }
+                            return acc
+                        },
+                        {} as {
+                            [key: string]: LinkedPackageData
                         },
                     ),
                 }

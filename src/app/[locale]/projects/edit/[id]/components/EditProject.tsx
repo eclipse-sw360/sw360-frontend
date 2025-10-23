@@ -27,6 +27,7 @@ import {
     ActionType,
     DocumentTypes,
     InputKeyValue,
+    LinkedPackageData,
     LinkedProjectData,
     ObligationEntry,
     Project,
@@ -433,15 +434,18 @@ function EditProject({
                                 // Get comment from project's packageIds if it exists, otherwise empty string
                                 const existingComment = project.packageIds?.[singlePackage.id]?.comment || ''
                                 acc[singlePackage.id] = {
+                                    packageId: singlePackage._links?.self.href.split('/').at(-1) ?? '',
+                                    name: singlePackage.name ?? '',
+                                    version: singlePackage.version ?? '',
+                                    licenseIds: singlePackage.licenseIds ?? [],
+                                    packageManager: singlePackage.packageManager ?? '',
                                     comment: existingComment,
                                 }
                             }
                             return acc
                         },
                         {} as {
-                            [key: string]: {
-                                comment?: string
-                            }
+                            [key: string]: LinkedPackageData
                         },
                     ),
                 }
