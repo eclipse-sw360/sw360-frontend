@@ -13,7 +13,7 @@
 
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 
 import MessageService from '@/services/message.service'
@@ -22,7 +22,6 @@ import { ApiUtils, CommonUtils } from '@/utils'
 interface SelectedVulnerability {
     releaseId: string
     vulnerExternalId: string
-    index: string
 }
 
 interface Props {
@@ -51,7 +50,9 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleCloseDialog = () => {
         setShow(!show)
@@ -106,7 +107,13 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX
                     : <b>{t(state as never)}</b>.
                     <hr />
                     <Form.Group className='mb-3'>
-                        <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
+                        <Form.Label
+                            style={{
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {t('Please comment your changes')}
+                        </Form.Label>
                         <Form.Control
                             as='textarea'
                             aria-label='With textarea'
