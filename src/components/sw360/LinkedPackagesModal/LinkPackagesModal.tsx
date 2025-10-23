@@ -264,6 +264,7 @@ export default function LinkPackagesModal({
             for (const [packageId, packageData] of linkedPackagePayloadData) {
                 if (!updatedProjectPayload.packageIds[packageId]) {
                     updatedProjectPayload.packageIds[packageId] = {
+                        ...packageData,
                         comment: packageData.comment || '',
                     }
                 }
