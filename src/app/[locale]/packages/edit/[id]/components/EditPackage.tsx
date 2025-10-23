@@ -110,6 +110,7 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
                                         }}
                                         isPending={updatingPackage}
                                         isEditPage={true}
+                                        packageId={packageId}
                                     />
                                 ) : (
                                     <div className='col-12 mt-1 text-center'>
