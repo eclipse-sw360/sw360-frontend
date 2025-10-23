@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useRouter } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
@@ -38,6 +38,12 @@ interface Props {
     handleSubmit: () => void
     isPending: boolean
     isEditPage: boolean
+    packageId?: string
+}
+
+interface IsPackageUsed {
+    isUsed: boolean
+    count: number
 }
 
 type EmbeddedLicenses = Embedded<LicenseDetail, 'sw360:licenses'>
@@ -50,6 +56,7 @@ export default function CreateOrEditPackage({
     handleSubmit,
     isPending,
     isEditPage,
+    packageId,
 }: Props): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
@@ -65,6 +72,7 @@ export default function CreateOrEditPackage({
     const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
     const [existingMainLicense, setExistingMainLicense] = useState<Array<string>>([])
     const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
+    const [isPackageUsed, setIsPackageUsed] = useState(false)
     const { status } = useSession()
 
     useEffect(() => {
@@ -179,6 +187,32 @@ export default function CreateOrEditPackage({
         isEditPage,
     ])
 
+    useEffect(() => {
+        if (isEditPage && !CommonUtils.isNullOrUndefined(packageId)) {
+            void (async () => {
+                try {
+                    const session = await getSession()
+                    if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                    const response = await ApiUtils.GET(`packages/${packageId}/usage`, session.user.access_token)
+                    if (response.status === StatusCodes.OK) {
+                        const data = await response.json() as IsPackageUsed
+                        setIsPackageUsed(data.isUsed)
+                    } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                        return signOut()
+                    } else {
+                        notFound()
+                    }
+                } catch (error) {
+                    if (error instanceof DOMException && error.name === 'AbortError') {
+                        return
+                    }
+                    const message = error instanceof Error ? error.message : String(error)
+                    MessageService.error(message)
+                }
+            })()
+        }
+    }, [packageId])
+
     return (
         <>
             <DeletePackageModal
@@ -220,6 +254,7 @@ export default function CreateOrEditPackage({
                         <button
                             type='button'
                             className='mb-3 me-1 col-auto btn btn-danger'
+                            disabled={isPackageUsed}
                             onClick={() =>
                                 setDeletePackageModalMetaData({
                                     show: true,
