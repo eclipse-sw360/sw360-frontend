@@ -11,17 +11,26 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useRef, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
+import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
+import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { PiCheckBold } from 'react-icons/pi'
-import { _ } from '@/components/sw360'
-import { Embedded, Project, Release } from '@/object-types'
+import { _, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
+import {
+    Embedded,
+    ErrorDetails,
+    PageableQueryParam,
+    PaginationMeta,
+    Project,
+    Release,
+    ReleaseDetail,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import ProjectTable from './ProjectTable'
 
 interface Props {
     releaseId?: string
@@ -31,174 +40,423 @@ interface Props {
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
+const Capitalize = (text: string) =>
+    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+
 const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const { status, data: session } = useSession()
-    const searchText = useRef('')
-    const linkedProjectIds = useRef<Array<string>>([])
-
-    const [tableData, setTableData] = useState<Array<(string | JSX.Element)[]>>([])
     const [linkingReleaseName, setLinkingReleaseName] = useState('')
     const [withLinkedProject, setWithLinkedProject] = useState(true)
-    const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined)
-    const [selectedProjectName, setSelectedProjectName] = useState<string>('')
     const [showMessage, setShowMessage] = useState(false)
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [selectedProject, setSelectedProject] = useState<Project>()
+    const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
     }, [
-        status,
-    ])
-
-    const handleCloseDialog = () => {
-        linkedProjectIds.current = []
-        setShow(false)
-        setTableData([])
-        setWithLinkedProject(true)
-        setSelectedProjectId(undefined)
-        setShowMessage(false)
-        setSelectedProjectName('')
-    }
-
-    const handleLinkToProject = () => {
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        if (selectedProjectId !== undefined) {
-            ApiUtils.PATCH(
-                `projects/${selectedProjectId}/releases`,
-                [
-                    releaseId,
-                ],
-                session.user.access_token,
-            )
-                .then(() => {
-                    setShowMessage(true)
-                })
-                .catch((err) => console.error(err))
-        }
-    }
-
-    const getLinkedProjects = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as EmbeddedProjects
-            if (!CommonUtils.isNullOrUndefined(data._embedded['sw360:projects'])) {
-                data._embedded['sw360:projects'].forEach((project: Project) => {
-                    linkedProjectIds.current.push(project._links.self.href.split('/').at(-1) ?? '')
-                })
-            }
-        }
-    }
-
-    const changeSelection = (projectName: string, id: string) => {
-        setSelectedProjectId(id)
-        setSelectedProjectName(projectName)
-    }
-
-    const handleSearchProject = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        await getLinkedProjects()
-
-        const url = searchText.current.trim().length === 0 ? 'projects' : `projects?name=${searchText.current.trim()}`
-        const projectsData: Array<(string | JSX.Element)[]> = []
-        ApiUtils.GET(url, session.user.access_token)
-            .then((response) => response.json())
-            .then((projects: EmbeddedProjects) => {
-                projects._embedded['sw360:projects'].forEach((project: Project) => {
-                    if (linkedProjectIds.current.includes(project._links.self.href.split('/').at(-1) ?? '')) {
-                        if (withLinkedProject === true) {
-                            projectsData.push([
-                                _(<PiCheckBold color='green' />) as JSX.Element,
-                                project.name,
-                                project.version ?? '',
-                                project.state ?? '',
-                                project.projectResponsible ?? '',
-                                project.description ?? '',
-                            ])
-                        }
-                    } else {
-                        projectsData.push([
-                            _(
-                                <Form.Check
-                                    type='radio'
-                                    name='project'
-                                    onClick={() =>
-                                        changeSelection(project.name, project._links.self.href.split('/').at(-1) ?? '')
-                                    }
-                                />,
-                            ),
-                            project.name,
-                            project.version ?? '',
-                            project.state ?? '',
-                            project.projectResponsible ?? '',
-                            project.description ?? '',
-                        ])
-                    }
-                })
-                setTableData(projectsData)
-            })
-            .catch((err) => console.error(err))
-    }
-
-    useEffect(() => {
-        if (session === null) return
-        ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
-            .then((response) => response.json())
-            .then((release: Release) => {
-                setLinkingReleaseName(`${release.name}(${release.version})`)
-            })
-            .catch((err) => console.error(err))
-    }, [
-        releaseId,
         session,
     ])
 
-    const columns: {
-        id: string
-        name: string
-        sort?: boolean
-    }[] = [
-        {
-            id: 'select',
-            name: '',
-            sort: false,
+    const columns = useMemo<ColumnDef<Project>[]>(
+        () => [
+            {
+                id: 'select',
+                cell: ({ row }) => {
+                    if (
+                        withLinkedProject &&
+                        selectedProjectIds.indexOf(row.original._links.self.href.split('/').at(-1) ?? '') !== -1
+                    ) {
+                        return <PiCheckBold color='green' />
+                    } else {
+                        return (
+                            <div className='form-check'>
+                                <input
+                                    className='form-check-input'
+                                    type='radio'
+                                    name='projectId'
+                                    checked={
+                                        selectedProject?._links.self.href.split('/').at(-1) ===
+                                        row.original._links.self.href.split('/').at(-1)
+                                    }
+                                    onChange={() => setSelectedProject(row.original)}
+                                />
+                            </div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '7%',
+                },
+            },
+            {
+                id: 'name',
+                header: t('Name'),
+                accessorKey: 'name',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'version',
+                header: t('Version'),
+                accessorKey: 'version',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'state',
+                header: t('State'),
+                accessorKey: 'state',
+                cell: ({ row }) => {
+                    const { state, clearingState } = row.original
+                    return (
+                        <>
+                            {state && clearingState && (
+                                <div className='text-center'>
+                                    <OverlayTrigger
+                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
+                                    >
+                                        {state === 'ACTIVE' ? (
+                                            <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
+                                        ) : (
+                                            <span className='badge bg-secondary capsule-left overlay-badge'>
+                                                {'PS'}
+                                            </span>
+                                        )}
+                                    </OverlayTrigger>
+                                    <OverlayTrigger
+                                        overlay={
+                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
+                                        }
+                                    >
+                                        {clearingState === 'OPEN' ? (
+                                            <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
+                                        ) : clearingState === 'IN_PROGRESS' ? (
+                                            <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
+                                        ) : (
+                                            <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
+                                        )}
+                                    </OverlayTrigger>
+                                </div>
+                            )}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'projectResponsible',
+                header: t('Project Responsible'),
+                accessorKey: 'projectResponsible',
+                cell: ({ row }) => {
+                    const { projectResponsible } = row.original
+                    return (
+                        <>
+                            {projectResponsible && (
+                                <Link
+                                    href={`mailto:${projectResponsible}`}
+                                    className='text-link'
+                                >
+                                    {projectResponsible}
+                                </Link>
+                            )}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '13%',
+                },
+            },
+            {
+                id: 'description',
+                header: t('Description'),
+                accessorKey: 'description',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '40%',
+                },
+            },
+        ],
+        [
+            t,
+            selectedProjectIds,
+            selectedProject,
+            withLinkedProject,
+        ],
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [projectData, setProjectData] = useState<Project[]>(() => [])
+    const memoizedData = useMemo(
+        () => projectData,
+        [
+            projectData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading' || searchText === undefined) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        handleSearch(signal)
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
         },
-        {
-            id: 'name',
-            name: t('Project Name'),
+
+        // server side sorting config
+        manualSorting: true,
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
         },
-        {
-            id: 'version',
-            name: t('Version'),
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
         },
-        {
-            id: 'state',
-            name: t('State'),
-        },
-        {
-            id: 'responsible',
-            name: t('Responsible'),
-        },
-        {
-            id: 'description',
-            name: t('Description'),
-        },
-    ]
+    })
+
+    const handleSearch = async (signal?: AbortSignal) => {
+        try {
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `projects`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
+
+            const data = (await response.json()) as EmbeddedProjects
+            setPaginationMeta(data.page)
+            setProjectData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                    ? []
+                    : data['_embedded']['sw360:projects'],
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
+        }
+    }
+
+    const handleCloseDialog = () => {
+        setShow(false)
+        setSelectedProjectIds([])
+        setProjectData([])
+        setWithLinkedProject(true)
+        setSelectedProject(undefined)
+        setShowMessage(false)
+        setSearchText(undefined)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setLinkingReleaseName('')
+    }
+
+    const handleLinkToProject = async () => {
+        try {
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const response = await ApiUtils.PATCH(
+                `projects/${selectedProject?._links.self.href.split('/').at(-1)}/releases`,
+                [
+                    releaseId,
+                ],
+                session.data.user.access_token,
+            )
+            if (response.status !== StatusCodes.CREATED) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
+
+            setShowMessage(true)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
+    }
+
+    const [showLinkedProjectsProcessing, setShowLinkedProjectsProcessing] = useState(false)
+
+    const getLinkedProjects = async (signal: AbortSignal) => {
+        setShowLinkedProjectsProcessing(true)
+        try {
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.data.user.access_token, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
+
+            const data = (await response.json()) as EmbeddedProjects
+            setSelectedProjectIds(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                    ? []
+                    : data['_embedded']['sw360:projects'].map((p) => p._links.self.href.split('/').at(-1) ?? ''),
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowLinkedProjectsProcessing(false)
+        }
+    }
+
+    useEffect(() => {
+        if (session.status === 'loading' || !withLinkedProject || !show) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        void getLinkedProjects(signal)
+        return () => controller.abort()
+    }, [
+        withLinkedProject,
+        show,
+    ])
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as ReleaseDetail
+                setLinkingReleaseName(data.name)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }
+        })()
+        return () => controller.abort()
+    }, [
+        releaseId,
+    ])
 
     return (
         <>
-            {status === 'authenticated' && (
+            {session.status === 'authenticated' && (
                 <Modal
                     show={show}
                     onHide={handleCloseDialog}
@@ -220,7 +478,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                         >
                             {t.rich('The release has been successfully linked to project', {
                                 releaseName: linkingReleaseName,
-                                projectName: selectedProjectName,
+                                projectName: selectedProject?.name ?? '',
                                 strong: (chunks) => <b>{chunks}</b>,
                             })}
                             <br />
@@ -228,12 +486,12 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                 'Click here to edit the release relation as well as the project mainline state in the project',
                                 {
                                     link: (chunks) => (
-                                        <a
-                                            className='link'
-                                            href={`/projects/detail/${selectedProjectId}`}
+                                        <Link
+                                            className='text-link'
+                                            href={`/projects/detail/${selectedProject?._links.self.href.split('/').at(-1)}`}
                                         >
                                             {chunks}
-                                        </a>
+                                        </Link>
                                     ),
                                 },
                             )}
@@ -244,15 +502,18 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                     <Form.Control
                                         type='text'
                                         placeholder={`${t('Enter text search')}...`}
-                                        onChange={(e) => {
-                                            searchText.current = e.target.value
+                                        onChange={(event) => {
+                                            setSearchText(event.target.value)
                                         }}
                                     />
                                 </Col>
                                 <Col lg='3'>
                                     <Button
                                         variant='secondary'
-                                        onClick={() => void handleSearchProject()}
+                                        onClick={() => {
+                                            if (!searchText) setSearchText('')
+                                            handleSearch()
+                                        }}
                                     >
                                         {t('Search')}
                                     </Button>
@@ -265,17 +526,36 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                         style={{
                                             fontWeight: 'bold',
                                         }}
-                                        defaultChecked={withLinkedProject}
-                                        onClick={() => setWithLinkedProject(!withLinkedProject)}
+                                        checked={withLinkedProject}
+                                        onChange={() => setWithLinkedProject(!withLinkedProject)}
                                     />
                                 </Col>
                             </Row>
                         </Form>
                         <br />
-                        <ProjectTable
-                            data={tableData}
-                            columns={columns}
-                        />
+                        <div className='mb-3'>
+                            {pageableQueryParam && table && paginationMeta ? (
+                                <>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing || showLinkedProjectsProcessing}
+                                    />
+                                    <TableFooter
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        paginationMeta={paginationMeta}
+                                    />
+                                </>
+                            ) : (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+                        </div>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
                         {showMessage === true ? (
@@ -301,7 +581,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                     className='login-btn'
                                     variant='primary'
                                     onClick={handleLinkToProject}
-                                    disabled={selectedProjectId === undefined}
+                                    disabled={selectedProject === undefined}
                                 >
                                     {t('Link To Project')}
                                 </Button>

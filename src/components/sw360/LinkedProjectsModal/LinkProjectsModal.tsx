@@ -388,6 +388,7 @@ export default function LinkProjectsModal({
             page_entries: 10,
             sort: '',
         })
+        setSearchText(undefined)
     }
 
     return (
