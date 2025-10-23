@@ -433,12 +433,11 @@ export default function LinkProjectsModal({
                                         name='exact-match'
                                         type='checkbox'
                                         id='exact-match'
-                                        onChange={() => setExactMatch(exactMatch)}
+                                        onChange={() => setExactMatch(!exactMatch)}
                                     />
                                     <Form.Label
                                         className='pt-2'
                                         value={exactMatch}
-                                        onClick={() => setExactMatch((prev) => !prev)}
                                     >
                                         {t('Exact Match')}{' '}
                                         <sup>
