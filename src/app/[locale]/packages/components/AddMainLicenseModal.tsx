@@ -9,90 +9,215 @@
 
 'use client'
 
-import { LicenseDetail, Package } from '@/object-types'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
-import { useEffect, useRef, useState, type JSX } from 'react'
-import { Button, Modal } from 'react-bootstrap'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Button, Modal, Spinner } from 'react-bootstrap'
+import { Embedded, ErrorDetails, LicenseDetail, Package, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     showMainLicenseModal: boolean
-    fetchedLicenses: Array<RowData>
-    existingMainLicense: Array<string>
     setPackagePayload: React.Dispatch<React.SetStateAction<Package>>
     setShowMainLicenseModal: React.Dispatch<React.SetStateAction<boolean>>
+    packagePayload: Package
 }
 
-type RowData = (string | LicenseDetail)[]
-
 export default function AddMainLicenseModal({
-    existingMainLicense,
-    fetchedLicenses,
+    packagePayload,
     showMainLicenseModal,
     setPackagePayload,
     setShowMainLicenseModal,
 }: Props): JSX.Element {
     const t = useTranslations('default')
-    const searchText = useRef<string>('')
-    const [tableData, setTableData] = useState<Array<RowData>>([])
-    const [newMainLicense, setNewMainLicense] = useState<Array<string>>([])
-    const { status } = useSession()
+    const [newMainLicense, setNewMainLicense] = useState<Array<string>>()
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [
+        session,
+    ])
 
     useEffect(() => {
-        if (fetchedLicenses.length > 0) {
-            setTableData(fetchedLicenses)
+        if (packagePayload.licenseIds && packagePayload.licenseIds.length !== 0 && newMainLicense === undefined) {
+            setNewMainLicense(packagePayload.licenseIds)
         }
-    }, [fetchedLicenses])
+    }, [
+        packagePayload,
+    ])
+
+    const columns = useMemo<ColumnDef<LicenseDetail>[]>(
+        () => [
+            {
+                id: 'select',
+                cell: ({ row }) => (
+                    <div className='form-check'>
+                        <input
+                            className='form-check-input'
+                            type='checkbox'
+                            value={row.original._links?.self.href.split('/').at(-1) ?? ''}
+                            checked={
+                                newMainLicense &&
+                                newMainLicense.indexOf(row.original._links?.self.href.split('/').at(-1) ?? '') !== -1
+                            }
+                            onChange={() => handleCheckboxes(row.original._links?.self.href.split('/').at(-1) ?? '')}
+                        />
+                    </div>
+                ),
+                meta: {
+                    width: '7%',
+                },
+            },
+            {
+                id: 'fullName',
+                accessorKey: 'fullName',
+                header: t('License Fullname'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '60%',
+                },
+            },
+        ],
+        [
+            t,
+            newMainLicense,
+        ],
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [licenseData, setLicenseData] = useState<LicenseDetail[]>(() => [])
+    const memoizedData = useMemo(
+        () => licenseData,
+        [
+            licenseData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (existingMainLicense.length > 0) {
-            setNewMainLicense(existingMainLicense)
-        }
-    }, [existingMainLicense])
+        if (session.status === 'loading' || searchText === undefined) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        handleSearch(signal)
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
-    const searchLicenses = (searchText: string, licenses: Array<RowData>): Array<RowData> => {
-        if (!searchText.trim()) {
-            return licenses
-        }
-        const normalizedSearchText = searchText.toLowerCase().trim()
-        return licenses.filter((row) => {
-            const license = row[0] as LicenseDetail
-            const fullName = (row[1] as string) || ''
-            const licenseId = license.id ?? ''
-            return (
-                licenseId.toLowerCase().includes(normalizedSearchText) ||
-                fullName.toLowerCase().includes(normalizedSearchText)
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
+
+    const handleSearch = async (signal?: AbortSignal) => {
+        try {
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `licenses`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
             )
-        })
-    }
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
 
-    const handleSearch = (searchText: string) => {
-        const filteredResults = searchLicenses(searchText, fetchedLicenses)
-        setTableData(filteredResults)
+            const data = (await response.json()) as Embedded<LicenseDetail, 'sw360:licenses'>
+            setPaginationMeta(data.page)
+            setLicenseData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:licenses'])
+                    ? []
+                    : data['_embedded']['sw360:licenses'],
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
+        }
     }
 
     const handleCheckboxes = (licenseId: string) => {
-        setNewMainLicense((prevLicenseIds: string[]) => {
-            const index = prevLicenseIds.indexOf(licenseId)
-            if (index !== -1) {
-                const newIds = [...prevLicenseIds]
-                newIds.splice(index, 1)
-                return newIds
-            } else {
-                return [...prevLicenseIds, licenseId]
-            }
-        })
+        const lics = [
+            ...(newMainLicense ?? []),
+        ]
+        const index = lics.indexOf(licenseId)
+        if (index === -1) {
+            setNewMainLicense([
+                ...lics,
+                licenseId,
+            ])
+        } else {
+            lics.splice(index, 1)
+            setNewMainLicense(lics)
+        }
     }
 
     const handleSelectLicense = () => {
-        if (newMainLicense.length > 0) {
+        if (newMainLicense && newMainLicense.length > 0) {
             setPackagePayload((prevState: Package) => ({
                 ...prevState,
                 licenseIds: newMainLicense,
@@ -101,45 +226,37 @@ export default function AddMainLicenseModal({
     }
 
     const resetSelection = () => {
-        setTableData(fetchedLicenses)
+        setNewMainLicense([])
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
     }
 
     const handleCloseDialog = () => {
         setShowMainLicenseModal(false)
-        setNewMainLicense(existingMainLicense)
-        setTableData(fetchedLicenses)
+        setNewMainLicense([])
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
     }
-
-    const columns = [
-        {
-            id: 'license-selection',
-            name: '',
-            formatter: (licenseId: string) =>
-                _(
-                    <div className='form-check'>
-                        <input
-                            className='form-check-input'
-                            type='checkbox'
-                            name='licenseId'
-                            value={licenseId}
-                            id={licenseId}
-                            title=''
-                            placeholder='License Id'
-                            checked={newMainLicense.includes(licenseId)}
-                            onChange={() => handleCheckboxes(licenseId)}
-                        />
-                    </div>,
-                ),
-            width: '7%',
-            sort: false,
-        },
-        {
-            id: 'fullName',
-            name: 'Full Name',
-            width: 'auto',
-            sort: true,
-        },
-    ]
 
     return (
         <Modal
@@ -161,7 +278,7 @@ export default function AddMainLicenseModal({
                             placeholder={t('Enter search text')}
                             aria-describedby='Search Licenses'
                             onChange={(event) => {
-                                searchText.current = event.target.value
+                                setSearchText(event.target.value)
                             }}
                         />
                     </div>
@@ -169,7 +286,10 @@ export default function AddMainLicenseModal({
                         <button
                             type='button'
                             className='btn btn-secondary me-2'
-                            onClick={() => void handleSearch(searchText.current)}
+                            onClick={() => {
+                                if (!searchText) setSearchText('')
+                                handleSearch()
+                            }}
                         >
                             {t('Search')}
                         </button>
@@ -182,11 +302,28 @@ export default function AddMainLicenseModal({
                         </button>
                     </div>
                 </div>
-                <div className='mt-3'>
-                    <Table
-                        columns={columns}
-                        data={tableData}
-                    />
+                <div className='mb-3'>
+                    {pageableQueryParam && table && paginationMeta ? (
+                        <>
+                            <PageSizeSelector
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                            />
+                            <SW360Table
+                                table={table}
+                                showProcessing={showProcessing}
+                            />
+                            <TableFooter
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                                paginationMeta={paginationMeta}
+                            />
+                        </>
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
                 </div>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
