@@ -16,12 +16,12 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Administration from '@/app/[locale]/projects/detail/[id]/components/Administration'
-import ProjectAttachments from '@/app/[locale]/projects/detail/[id]/components/Attachments'
 import ChangeLog from '@/app/[locale]/projects/detail/[id]/components/Changelog'
 import EccDetails from '@/app/[locale]/projects/detail/[id]/components/Ecc'
 import LicenseClearing from '@/app/[locale]/projects/detail/[id]/components/LicenseClearing'
 import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
+import Attachments from '@/components/Attachments/Attachments'
 import { AdministrationDataType, SummaryDataType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -199,7 +199,10 @@ export default function CurrentProjectDetail({
                                     )}
                                 </Tab.Pane>
                                 <Tab.Pane eventKey='attachments'>
-                                    <ProjectAttachments projectId={projectId} />
+                                    <Attachments
+                                        documentId={projectId}
+                                        documentType={'projects'}
+                                    />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey='changeLog'>
                                     <ChangeLog

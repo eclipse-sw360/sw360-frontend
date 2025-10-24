@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
+import Attachments from '@/components/Attachments/Attachments'
 import {
     ActionType,
     AdministrationDataType,
@@ -30,7 +31,6 @@ import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import LinkProjects from '../../../components/LinkProjects'
 import Obligations from '../../../components/Obligations/Obligations'
 import Administration from './Administration'
-import ProjectAttachments from './Attachments'
 import AttachmentUsages from './AttachmentUsages'
 import ChangeLog from './Changelog'
 import EccDetails from './Ecc'
@@ -477,7 +477,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='attachments'>
-                                        <ProjectAttachments projectId={projectId} />
+                                        <Attachments
+                                            documentId={projectId}
+                                            documentType={'projects'}
+                                        />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='attachmentUsages'>
                                         <AttachmentUsages projectId={projectId} />
