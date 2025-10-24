@@ -9,314 +9,386 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useState } from 'react'
-import { Alert } from 'react-bootstrap'
-import { FaDownload } from 'react-icons/fa'
+'use client'
 
-import { Attachment, AttachmentTypes, Embedded } from '@/object-types'
+import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { PaddedCell, SW360Table } from 'next-sw360'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Button, Modal, Spinner } from 'react-bootstrap'
+import { FaInfoCircle } from 'react-icons/fa'
+import { LuDownload } from 'react-icons/lu'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
+import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from './Attachment.module.css'
-
-interface Props {
-    documentId: string
-    documentType: string
-}
+import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
-const AttachmentTypeShortName = {
-    [AttachmentTypes.DOCUMENT]: 'DOC',
-    [AttachmentTypes.SOURCE]: 'SRC',
-    [AttachmentTypes.DESIGN]: 'DSN',
-    [AttachmentTypes.REQUIREMENT]: 'RDT',
-    [AttachmentTypes.CLEARING_REPORT]: 'CRT',
-    [AttachmentTypes.COMPONENT_LICENSE_INFO_XML]: 'CLX',
-    [AttachmentTypes.COMPONENT_LICENSE_INFO_COMBINED]: 'CLI',
-    [AttachmentTypes.SCAN_RESULT_REPORT]: 'SRR',
-    [AttachmentTypes.SCAN_RESULT_REPORT_XML]: 'SRX',
-    [AttachmentTypes.SOURCE_SELF]: 'SRS',
-    [AttachmentTypes.BINARY]: 'BIN',
-    [AttachmentTypes.BINARY_SELF]: 'BIS',
-    [AttachmentTypes.DECISION_REPORT]: 'DRT',
-    [AttachmentTypes.LEGAL_EVALUATION]: 'LRT',
-    [AttachmentTypes.LICENSE_AGREEMENT]: 'LAT',
-    [AttachmentTypes.SCREENSHOT]: 'SCR',
-    [AttachmentTypes.OTHER]: 'OTH',
-    [AttachmentTypes.README_OSS]: 'RDM',
-    [AttachmentTypes.SECURITY_ASSESSMENT]: 'SECA',
-    [AttachmentTypes.INITIAL_SCAN_REPORT]: 'ISR',
-    [AttachmentTypes.SBOM]: 'SBOM',
-    [AttachmentTypes.INTERNAL_USE_SCAN]: 'IUS',
-}
-
-const Attachments = ({ documentId, documentType }: Props): JSX.Element => {
+function Attachments({ documentId, documentType }: { documentId: string; documentType: string }): JSX.Element {
     const t = useTranslations('default')
-    const { status } = useSession()
-    const [attachmentData, setAttachmentData] = useState<(string | Attachment | string[] | JSX.Element)[][]>([])
-    const [totalRows, setTotalRows] = useState(0)
+    const [importStatusData, setImportStatusData] = useState<ImportSummary | null>(null)
+    const session = useSession()
+
+    const handleAttachmentDownload = async (attachmentId: string, attachmentName: string) => {
+        if (CommonUtils.isNullOrUndefined(session.data)) return
+        await DownloadService.download(
+            `${documentType}/${documentId}/attachments/${attachmentId}`,
+            session.data,
+            attachmentName,
+        )
+    }
+
+    const handleImportStatusView = async (attachmentId: string) => {
+        try {
+            if (CommonUtils.isNullOrUndefined(session.data)) return
+
+            const res = await ApiUtils.GET(
+                `${documentType}/${documentId}/attachments/${attachmentId}`,
+                session.data.user.access_token,
+            )
+
+            if (res.status === StatusCodes.OK) {
+                const data = (await res.json()) as ImportSummary
+                setImportStatusData(data)
+            } else {
+                const err = (await res.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        }
+    }
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
     }, [
-        status,
+        session,
     ])
 
-    const buildAttachmentDetail = (item: Attachment) => {
-        return (event: React.MouseEvent<HTMLElement>) => {
-            if ((event.target as HTMLElement).className == styles.expand) {
-                ;(event.target as HTMLElement).className = styles.collapse
-            } else {
-                ;(event.target as HTMLElement).className = styles.expand
-            }
-            const attachmentId = CommonUtils.getIdFromUrl(item._links?.self.href)
-            const attachmentDetail = document.getElementById(attachmentId)
-            if (!attachmentDetail) {
-                const parent = (event.target as HTMLElement).parentElement?.parentElement?.parentElement
-                const html = `<td colspan="10">
-                    <table class="table table-borderless">
-                        <tbody>
-                            <tr>
-                            <td>SHA1 : </td>
-                            <td>${item.sha1}</td>
-                            <td>${t('Uploaded On')} : </td>
-                            <td>${item.createdOn}</td>
-                            <td>${t('Uploaded Comment')} : </td>
-                            <td>${item.createdComment}</td>
-                            </tr>
-                            <tr>
-                            </tr>
-                            <tr>
-                            <td>${t('Checked On')} : </td>
-                            <td>${item.checkedOn ?? ''}</td>
-                            <td>${t('Checked Comment')} : </td>
-                            <td>${item.checkedComment}</td>
-                            <td></td>
-                            <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </td>`
-                const tr = document.createElement('tr')
-                tr.id = attachmentId
-                tr.innerHTML = html
+    const columns = useMemo<ColumnDef<NestedRows<Attachment>>[]>(
+        () => [
+            {
+                id: 'expand',
+                cell: ({ row }) => {
+                    if (row.depth > 0) {
+                        return (
+                            <>
+                                <div className='row justify-content-between mx-5 my-2'>
+                                    <div className='col'>{`SHA1: ${row.original.node.sha1 ?? ''}`}</div>
+                                    <div className='col'>{`${t('Uploaded On')}: ${row.original.node.createdOn ?? ''}`}</div>
+                                    <div className='col'>{`${t('Uploaded Comment')}: ${row.original.node.createdComment ?? ''}`}</div>
+                                </div>
+                                <div className='row justify-content-between mx-5 my-2'>
+                                    <div className='col'>{`${t('Checked On')}: ${row.original.node.checkedOn ?? ''}`}</div>
+                                    <div className='col'>{`${t('Checked Comment')}: ${row.original.node.checkedComment ?? ''}`}</div>
+                                </div>
+                            </>
+                        )
+                    } else {
+                        return <PaddedCell row={row}></PaddedCell>
+                    }
+                },
+                meta: {
+                    width: '3%',
+                },
+            },
+            {
+                id: 'fileName',
+                header: t('File name'),
+                meta: {
+                    width: '20%',
+                },
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    const { filename, attachmentContentId } = row.original.node
+                    const isImportStatus = filename.includes('ImportStatus_') && filename.endsWith('.json')
 
-                parent?.parentNode?.insertBefore(tr, parent.nextSibling)
-            } else {
-                if (attachmentDetail.hidden == true) {
-                    attachmentDetail.hidden = false
-                } else {
-                    attachmentDetail.hidden = true
-                }
-            }
-        }
-    }
+                    if (!isImportStatus) {
+                        return <p>{filename}</p>
+                    }
 
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as EmbeddedAttachments
-            return data
-        } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            return {} as EmbeddedAttachments
-        }
-    }, [])
+                    return (
+                        <span className='d-inline-flex align-items-center gap-1'>
+                            {filename}
+                            <span
+                                role='button'
+                                style={{
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    color: 'black',
+                                }}
+                                onClick={() => void handleImportStatusView(attachmentContentId ?? '')}
+                                title={t('Click to view SBOM import result')}
+                            >
+                                <FaInfoCircle size={14} />
+                            </span>
+                        </span>
+                    )
+                },
+            },
+            {
+                id: 'size',
+                header: t('Size'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.size ?? 'n/a'}</p>
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Type'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.attachmentType ?? ''}</p>
+                },
+            },
+            {
+                id: 'createdTeam',
+                header: t('Group'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.createdTeam ?? ''}</p>
+                },
+            },
+            {
+                id: 'createdBy',
+                header: t('Uploaded by'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.createdBy ?? ''}</p>
+                },
+            },
+            {
+                id: 'checkedTeam',
+                header: t('Group'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return <p className='text-center'>{row.original.node.checkedTeam ?? ''}</p>
+                },
+            },
+            {
+                id: 'checkedBy',
+                header: t('Checked By'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    return (
+                        <Link
+                            href={`mailto:${row.original.node.checkedBy ?? ''}`}
+                            className='text-link w-100 text-center'
+                        >
+                            {row.original.node.checkedBy ?? ''}
+                        </Link>
+                    )
+                },
+            },
+            {
+                id: 'usages',
+                header: t('Usages'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    const { projectAttachmentUsage } = row.original.node
+                    if (projectAttachmentUsage?.visible === 0 && projectAttachmentUsage.restricted === 0) {
+                        return <p className='text-center'>{'n/a'}</p>
+                    } else {
+                        return (
+                            <Link
+                                href='#'
+                                title='visible / restricted'
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                }}
+                                className='text-center'
+                            >
+                                {projectAttachmentUsage?.visible ?? 0} / {projectAttachmentUsage?.restricted ?? 0}
+                            </Link>
+                        )
+                    }
+                },
+                meta: {
+                    width: '5%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    if (row.depth > 0) return
+                    const { attachmentContentId, filename } = row.original.node
+                    return (
+                        <LuDownload
+                            className='btn-icon text-center w-100'
+                            size={18}
+                            onClick={() => void handleAttachmentDownload(attachmentContentId ?? '', filename)}
+                        />
+                    )
+                },
+                meta: {
+                    width: '5%',
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
 
-    const downloadAttachment = async (attachmentId: string, attachmentName: string) => {
-        try {
-            const session = await getSession()
-            DownloadService.download(
-                `${documentType}/${documentId}/attachments/${attachmentId}`,
-                session,
-                attachmentName,
-            )
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        }
-    }
-
-    const downloadBundle = async () => {
-        try {
-            const session = await getSession()
-            await DownloadService.download(
-                `${documentType}/${documentId}/attachments/download`,
-                session,
-                'AttachmentBundle.zip',
-            )
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        }
-    }
+    const [attachmentData, setAttachmentData] = useState<NestedRows<Attachment>[]>(() => [])
+    const memoizedData = useMemo(
+        () => attachmentData,
+        [
+            attachmentData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        fetchData(`${documentType}/${documentId}/attachments`)
-            .then((attachments: EmbeddedAttachments | undefined) => {
-                if (attachments === undefined) return
-                if (
-                    !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachments'])
-                ) {
-                    const attachmentData = attachments['_embedded']['sw360:attachments'].map((item: Attachment) => [
-                        item,
-                        item.filename,
-                        'n/a',
-                        AttachmentTypeShortName[item.attachmentType],
-                        item.createdTeam ?? '',
-                        item.createdBy ?? '',
-                        item.checkedTeam ?? '',
-                        item.checkedBy ?? '',
-                        item.projectAttachmentUsage?.visible === 0 && item.projectAttachmentUsage.restricted === 0
-                            ? 'n/a'
-                            : _(
-                                  <a
-                                      href='#'
-                                      title='visible / restricted'
-                                      onClick={(e) => {
-                                          e.preventDefault()
-                                      }}
-                                  >
-                                      {item.projectAttachmentUsage?.visible ?? 0} /{' '}
-                                      {item.projectAttachmentUsage?.restricted ?? 0}
-                                  </a>,
-                              ),
-                        [
-                            item.attachmentContentId ?? '',
-                            item.filename,
-                        ],
-                    ])
-                    setAttachmentData(attachmentData)
-                    setTotalRows(attachmentData.length)
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = attachmentData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return
+                const response = await ApiUtils.GET(
+                    `${documentType}/${documentId}/attachments`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-            })
-            .catch((error) => {
+
+                const data = (await response.json()) as EmbeddedAttachments
+                setAttachmentData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:attachments'])
+                        ? []
+                        : data['_embedded']['sw360:attachments'].map(
+                              (att) =>
+                                  ({
+                                      node: att,
+                                      children: [
+                                          {
+                                              node: att,
+                                          },
+                                      ],
+                                  }) as NestedRows<Attachment>,
+                          ),
+                )
+            } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
-            })
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
     }, [
-        documentId,
-        documentType,
-        fetchData,
+        session,
     ])
 
-    const columns = [
-        {
-            id: 'check',
-            name: _(
-                <FaDownload
-                    className={styles['download-btn']}
-                    style={{
-                        width: '100%',
-                    }}
-                    onClick={downloadBundle}
-                />,
-            ),
-            formatter: (item: Attachment) =>
-                _(
-                    <i
-                        className={styles.collapse}
-                        onClick={buildAttachmentDetail(item)}
-                    ></i>,
-                ),
-            sort: false,
-            width: '60px',
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => {
+            if (row.depth === 1) {
+                row.meta = {
+                    isFullSpanRow: true,
+                }
+            }
+            return row.depth === 0
         },
-        {
-            id: 'fileName',
-            name: t('File name'),
-            sort: true,
-        },
-        {
-            id: 'size',
-            name: t('Size'),
-            sort: true,
-        },
-        {
-            id: 'type',
-            name: t('Type'),
-            sort: true,
-        },
-        {
-            id: 'group',
-            name: t('Group'),
-            sort: true,
-        },
-        {
-            id: 'uploadedBy',
-            name: t('Uploaded By'),
-            sort: true,
-        },
-        {
-            id: 'group',
-            name: t('Group'),
-            sort: true,
-        },
-        {
-            id: 'checkedBy',
-            name: t('Checked By'),
-            sort: true,
-        },
-        {
-            id: 'usage',
-            name: t('Usage'),
-        },
-        {
-            id: 'action',
-            name: t('Action'),
-            formatter: ([attachmentId, attachmentName]: Array<string>) =>
-                _(
-                    <FaDownload
-                        className={styles['download-btn']}
-                        style={{
-                            width: '100%',
-                        }}
-                        onClick={() => downloadAttachment(attachmentId, attachmentName)}
-                    />,
-                ),
-            sort: false,
-            width: '90px',
-        },
-    ]
+    })
+
+    table.getRowModel().rows.forEach((row) => {
+        if (row.depth === 1) {
+            row.meta = {
+                isFullSpanRow: true,
+            }
+        }
+    })
 
     return (
         <>
-            {status === 'authenticated' && (
-                <>
-                    {totalRows ? (
-                        <>
-                            <div className={`row ${styles['attachment-table']}`}>
-                                <Table
-                                    data={attachmentData}
-                                    columns={columns}
-                                    selector={true}
-                                    sort={false}
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <div className='col'>
-                            <Alert variant='primary'>{t('No attachments yet')}</Alert>
-                        </div>
-                    )}
-                </>
+            <div className='mb-3'>
+                {table ? (
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                    />
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
+            {importStatusData != null && (
+                <Modal
+                    show={true}
+                    onHide={() => setImportStatusData(null)}
+                    size='lg'
+                    centered
+                    scrollable
+                >
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            <span className='text-primary'>{t('SBOM Import Statistics for')}:</span>{' '}
+                            <span className='text-warning'>{importStatusData.fileName}</span>
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <CDXImportStatus
+                            data={importStatusData}
+                            isNewProject={false}
+                        />
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button
+                            variant='secondary'
+                            onClick={() => setImportStatusData(null)}
+                        >
+                            {t('Close')}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             )}
         </>
     )
 }
 
-export default Attachments
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(Attachments, [
+    UserGroupType.SECURITY_USER,
+])
