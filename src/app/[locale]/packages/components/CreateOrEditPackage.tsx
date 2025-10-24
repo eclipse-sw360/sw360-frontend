@@ -9,17 +9,13 @@
 
 'use client'
 
-import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { IoIosClose } from 'react-icons/io'
-import { Embedded, LicenseDetail, Package } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { Package } from '@/object-types'
 import AddMainLicenseModal from './AddMainLicenseModal'
 import AddReleaseModal from './AddReleaseModal'
 import DeletePackageModal from './DeletePackageModal'
@@ -40,10 +36,6 @@ interface Props {
     isEditPage: boolean
 }
 
-type EmbeddedLicenses = Embedded<LicenseDetail, 'sw360:licenses'>
-
-type RowData = (string | LicenseDetail)[]
-
 export default function CreateOrEditPackage({
     packagePayload,
     setPackagePayload,
@@ -62,9 +54,6 @@ export default function CreateOrEditPackage({
         packageName: '',
         packageVersion: '',
     })
-    const [fetchedLicenses, setFetchedLicenses] = useState<Array<RowData>>([])
-    const [existingMainLicense, setExistingMainLicense] = useState<Array<string>>([])
-    const [mainLicenseNameList, setMainLicenseNameList] = useState<Array<string>>([])
     const { status } = useSession()
 
     useEffect(() => {
@@ -110,75 +99,6 @@ export default function CreateOrEditPackage({
         }))
     }
 
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.warn(t('Unauthorized request'))
-            return
-        } else if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as EmbeddedLicenses
-            return data
-        } else {
-            return undefined
-        }
-    }, [])
-
-    const handleMainLicenseNameList = () => {
-        if (isEditPage) {
-            const existingIds = packagePayload.licenseIds ?? []
-            if (existingIds.length > 0) {
-                const newMainLicenseNameList = fetchedLicenses
-                    .filter((license) => existingIds.includes(license[0] as string))
-                    .map((license) => license[1] as string)
-                setMainLicenseNameList(newMainLicenseNameList)
-            }
-        } else {
-            setMainLicenseNameList([])
-        }
-    }
-
-    useEffect(() => {
-        try {
-            fetchData('licenses').then((mainLicenses: EmbeddedLicenses | undefined) => {
-                if (mainLicenses === undefined) return
-                if (
-                    !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(mainLicenses['_embedded']['sw360:licenses'])
-                ) {
-                    const data = mainLicenses['_embedded']['sw360:licenses'].map((license: LicenseDetail) => [
-                        CommonUtils.getIdFromUrl(license._links?.self.href),
-                        license.fullName ?? '',
-                    ])
-                    setFetchedLicenses(data)
-                } else {
-                    setFetchedLicenses([])
-                }
-                setExistingMainLicense(packagePayload.licenseIds ?? [])
-            })
-        } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-        }
-    }, [
-        fetchData,
-    ])
-
-    useEffect(() => {
-        handleMainLicenseNameList()
-    }, [
-        fetchedLicenses,
-        packagePayload.licenseIds,
-        isEditPage,
-    ])
-
     return (
         <>
             <DeletePackageModal
@@ -196,8 +116,7 @@ export default function CreateOrEditPackage({
                 showMainLicenseModal={showMainLicenseModal}
                 setShowMainLicenseModal={setShowMainLicenseModal}
                 setPackagePayload={setPackagePayload}
-                fetchedLicenses={fetchedLicenses}
-                existingMainLicense={existingMainLicense}
+                packagePayload={packagePayload}
             />
             <form
                 id='add_or_edit_package_form_submit'
@@ -430,7 +349,7 @@ export default function CreateOrEditPackage({
                                 className='form-control'
                                 id='createOrEditPackage.licenseIds'
                                 placeholder={t('Click to set Licenses')}
-                                value={mainLicenseNameList.length ? mainLicenseNameList.join(', ') : ''}
+                                value={packagePayload.licenseIds?.join(', ') ?? ''}
                                 onClick={() => setShowMainLicenseModal(true)}
                                 readOnly
                             />
