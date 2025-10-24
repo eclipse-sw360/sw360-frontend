@@ -99,16 +99,15 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                         <>
                             {row.original.mainLicenseIds?.map(
                                 (lic, i): ReactNode => (
-                                    <>
+                                    <div key={lic}>
                                         <Link
-                                            key={lic}
                                             className='link'
                                             href={`/licenses/detail/?id=${lic}`}
                                         >
                                             {lic}
                                         </Link>
                                         {i !== (row.original.mainLicenseIds?.length ?? 0) - 1 && ', '}
-                                    </>
+                                    </div>
                                 ),
                             )}
                         </>
