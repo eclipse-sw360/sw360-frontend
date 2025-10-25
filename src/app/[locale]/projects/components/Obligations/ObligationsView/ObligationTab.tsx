@@ -134,7 +134,7 @@ export default function ObligationTab({
                 },
             },
             {
-                id: 'id',
+                id: 'comment',
                 header: t('Comment'),
                 cell: ({ row }) => <>{row.original.node[1].comment ?? ''}</>,
                 meta: {

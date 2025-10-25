@@ -9,19 +9,26 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
 import { GrCheckboxSelected } from 'react-icons/gr'
-import { _, Table } from '@/components/sw360'
-import { ErrorDetails, ObligationRelease, ObligationResponse } from '@/object-types'
+import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
+import {
+    ErrorDetails,
+    NestedRows,
+    ObligationData,
+    ObligationResponse,
+    PageableQueryParam,
+    PaginationMeta,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { SW360_API_URL } from '@/utils/env'
-import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
+import { ExpandableList } from './ExpandableComponents'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -40,16 +47,16 @@ export default function LicenseDbObligationsModal({
     setRefresh: Dispatch<SetStateAction<boolean>>
 }): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [obligationIds, setObligationIds] = useState<string[]>([])
+    const session = useSession()
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     const addObligationsToLicense = async () => {
@@ -80,158 +87,330 @@ export default function LicenseDbObligationsModal({
         }
     }
 
-    const columns = [
-        {
-            id: 'licenseDbObligation.expand',
-            formatter: ({ id, infoText }: { id: string; infoText: string }) =>
-                _(
-                    <ShowObligationTextOnExpand
-                        id={id}
-                        infoText={infoText}
-                        colLength={columns.length}
-                    />,
-                ),
-            width: '4%',
-        },
-        {
-            id: 'licenseDbObligation.select',
-            name: _(
-                <input
-                    id='licenseDbObligation.selectAll'
-                    type='checkbox'
-                    className='form-check-input'
-                />,
-            ),
-            formatter: (id: string) => {
-                return _(
-                    <input
-                        id={id}
-                        type='checkbox'
-                        className='form-check-input'
-                        checked={obligationIds.indexOf(id) !== -1}
-                        onChange={(e) => {
-                            if (!e.target.checked) {
-                                setObligationIds(obligationIds.filter((ob) => ob !== id))
-                            } else {
-                                setObligationIds([
-                                    ...obligationIds,
-                                    id,
-                                ])
-                            }
-                        }}
-                    />,
-                )
-            },
-            sort: true,
-            width: '4%',
-        },
-        {
-            id: 'licenseDbObligation.licenseObligation',
-            name: t('License Obligation'),
-            formatter: (oblTitle: string) =>
-                _(
-                    <div className='text-center'>
-                        <span>{oblTitle}</span>
-                    </div>,
-                ),
-            sort: true,
-            width: '25%',
-        },
-        {
-            id: 'licenseDbObligation.licenses',
-            name: t('Licenses'),
-            formatter: (licenseIds: string[]) =>
-                _(
-                    <div className='text-center'>
-                        {
-                            <ul className='px-0'>
-                                {licenseIds.map((licenseId: string, index: number) => {
-                                    return (
-                                        <li
-                                            key={licenseId}
-                                            style={{
-                                                display: 'inline',
-                                            }}
-                                        >
-                                            <Link
-                                                href={`/licenses/${licenseId}`}
-                                                className='text-link'
-                                            >
-                                                {licenseId}
-                                            </Link>
-                                            {index >= licenseIds.length - 1 ? '' : ', '}{' '}
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        }
-                    </div>,
-                ),
-            sort: true,
-            width: '15%',
-        },
-        {
-            id: 'licenseDbObligation.releases',
-            name: t('Releases'),
-            formatter: (releases: ObligationRelease[]) =>
-                _(
-                    <>
-                        {Array.isArray(releases) && releases.length > 0 ? (
-                            <ExpandableList
-                                releases={releases}
-                                previewString={releases
-                                    .map((r) => `${r.name} ${r.version}`)
-                                    .join(', ')
-                                    .substring(0, 10)}
-                                commonReleases={[]}
-                            />
-                        ) : null}
-                    </>,
-                ),
-            sort: true,
-            width: '15%',
-        },
-        {
-            id: 'licenseDbObligation.id',
-            name: t('Id'),
-            sort: true,
-            width: '8%',
-        },
-        {
-            id: 'licenseDbObligation.type',
-            name: t('Type'),
-            sort: true,
-            width: '8%',
-        },
-    ]
-
-    const initServerPaginationConfig = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
-        return {
-            url: `${SW360_API_URL}/resource/api/projects/${projectId}/licenseDbObligations`,
-            then: (data: ObligationResponse) => {
-                const tableData = []
-                for (const [key, val] of Object.entries(data.obligations)) {
-                    tableData.push([
-                        {
-                            id: key,
-                            infoText: val.text ?? '',
-                        },
-                        val.id,
-                        key,
-                        val.licenseIds ?? [],
-                        val.releases ?? [],
-                        '',
-                        Capitalize(val.obligationType ?? ''),
-                    ])
-                }
-                return tableData
-            },
-            total: (data: ObligationResponse) => data.page?.totalElements ?? 0,
-            headers: {
-                Authorization: session.user.access_token,
-            },
+    const handleCheckboxes = (obId: string) => {
+        const obs = [
+            ...(obligationIds ?? []),
+        ]
+        const index = obs.indexOf(obId)
+        if (index === -1) {
+            setObligationIds([
+                ...obs,
+                obId,
+            ])
+        } else {
+            obs.splice(index, 1)
+            setObligationIds(obs)
         }
+    }
+
+    const columns = useMemo<
+        ColumnDef<
+            NestedRows<
+                [
+                    string,
+                    ObligationData,
+                ]
+            >
+        >[]
+    >(
+        () => [
+            {
+                id: 'expand',
+                cell: ({ row }) => {
+                    if (row.depth > 0) {
+                        return <p>{row.original.node[1].text ?? ''}</p>
+                    } else {
+                        return <PaddedCell row={row}></PaddedCell>
+                    }
+                },
+                meta: {
+                    width: '3%',
+                },
+            },
+            {
+                id: 'select',
+                cell: ({ row }) => (
+                    <div className='form-check'>
+                        <input
+                            className='form-check-input'
+                            type='checkbox'
+                            value={row.original.node[0] ?? ''}
+                            checked={obligationIds.indexOf(row.original.node[0] ?? '') !== -1}
+                            onChange={() => handleCheckboxes(row.original.node[0] ?? '')}
+                        />
+                    </div>
+                ),
+                meta: {
+                    width: '7%',
+                },
+            },
+            {
+                id: 'title',
+                header: t('License Obligation'),
+                cell: ({ row }) => (
+                    <div className='text-center'>
+                        <span>{row.original.node[0]}</span>
+                    </div>
+                ),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'licenses',
+                header: t('Licenses'),
+                cell: ({ row }) => {
+                    const licenseIds = row.original.node[1].licenseIds ?? []
+                    return (
+                        <div className='text-center'>
+                            {
+                                <ul className='px-0'>
+                                    {licenseIds.map((licenseId: string, index: number) => {
+                                        return (
+                                            <li
+                                                key={licenseId}
+                                                style={{
+                                                    display: 'inline',
+                                                }}
+                                            >
+                                                <Link
+                                                    href={`/licenses/${licenseId}`}
+                                                    className='text-link'
+                                                >
+                                                    {licenseId}
+                                                </Link>
+                                                {index >= licenseIds.length - 1 ? '' : ', '}{' '}
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            }
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '16%',
+                },
+            },
+            {
+                id: 'releases',
+                header: t('Releases'),
+                cell: ({ row }) => {
+                    const releases = row.original.node[1].releases ?? []
+                    return (
+                        <>
+                            {Array.isArray(releases) && releases.length > 0 ? (
+                                <ExpandableList
+                                    releases={releases}
+                                    previewString={releases
+                                        .map((r) => `${r.name} ${r.version}`)
+                                        .join(', ')
+                                        .substring(0, 10)}
+                                    commonReleases={[]}
+                                />
+                            ) : null}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '23%',
+                },
+            },
+            {
+                id: 'status',
+                header: t('Status'),
+                cell: ({ row }) => <>{Capitalize(row.original.node[1].status ?? '')}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Type'),
+                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'id',
+                header: t('Id'),
+                cell: ({ row }) => <>{row.original.node[1].id ?? ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [
+            t,
+            obligationIds,
+        ],
+    )
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [obligationData, setObligationData] = useState<
+        NestedRows<
+            [
+                string,
+                ObligationData,
+            ]
+        >[]
+    >(() => [])
+    const memoizedData = useMemo(
+        () => obligationData,
+        [
+            obligationData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = obligationData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `projects/${projectId}/licenseDbObligations`,
+                    Object.fromEntries(
+                        Object.entries({
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                if (response.status === StatusCodes.NO_CONTENT) {
+                    return
+                }
+                const data = (await response.json()) as ObligationResponse
+                setPaginationMeta(data.page)
+                setObligationData(
+                    Object.entries(data.obligations).map(
+                        (o) =>
+                            ({
+                                node: o,
+                                children: [
+                                    {
+                                        node: o,
+                                    },
+                                ],
+                            }) as NestedRows<
+                                [
+                                    string,
+                                    ObligationData,
+                                ]
+                            >,
+                    ),
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns: columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => {
+            if (row.depth === 1) {
+                row.meta = {
+                    isFullSpanRow: true,
+                }
+            }
+            return row.depth === 0
+        },
+    })
+
+    table.getRowModel().rows.forEach((row) => {
+        if (row.depth === 1) {
+            row.meta = {
+                isFullSpanRow: true,
+            }
+        }
+    })
+
+    const handleCloseDialog = () => {
+        setShow(false)
+        setObligationIds([])
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
     }
 
     return (
@@ -239,7 +418,7 @@ export default function LicenseDbObligationsModal({
             size='lg'
             centered
             show={show}
-            onHide={() => setShow(false)}
+            onHide={() => handleCloseDialog()}
             scrollable
         >
             <Modal.Header
@@ -254,23 +433,34 @@ export default function LicenseDbObligationsModal({
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {status === 'authenticated' ? (
-                    <Table
-                        columns={columns}
-                        server={initServerPaginationConfig()}
-                        selector={true}
-                        sort={false}
-                    />
-                ) : (
-                    <div className='col-12 d-flex justify-content-center align-items-center'>
-                        <Spinner className='spinner' />
-                    </div>
-                )}
+                <div className='mb-3'>
+                    {pageableQueryParam && paginationMeta && table ? (
+                        <>
+                            <PageSizeSelector
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                            />
+                            <SW360Table
+                                table={table}
+                                showProcessing={showProcessing}
+                            />
+                            <TableFooter
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                                paginationMeta={paginationMeta}
+                            />
+                        </>
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
+                </div>
             </Modal.Body>
             <Modal.Footer>
                 <button
                     className='btn btn-dark'
-                    onClick={() => setShow(false)}
+                    onClick={() => handleCloseDialog()}
                 >
                     {t('Cancel')}
                 </button>
@@ -278,9 +468,7 @@ export default function LicenseDbObligationsModal({
                     className='btn btn-primary'
                     onClick={async () => {
                         await addObligationsToLicense()
-                        setShow(false)
-                        setObligationIds([])
-                        setRefresh(!refresh)
+                        handleCloseDialog()
                     }}
                     disabled={loading}
                 >
