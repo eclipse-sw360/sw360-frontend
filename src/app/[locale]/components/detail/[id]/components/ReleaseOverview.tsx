@@ -11,24 +11,32 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, Table } from 'next-sw360'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaClipboard, FaPencilAlt } from 'react-icons/fa'
 import { HiOutlineLink } from 'react-icons/hi'
+import { IoMdGitMerge } from 'react-icons/io'
+import { MdDeleteOutline } from 'react-icons/md'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import { Embedded, LinkedRelease, ReleaseLink, UserGroupType } from '@/object-types'
+import { Embedded, ErrorDetails, ReleaseLink, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
-type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
+type EmbeddedLinkedReleases = Embedded<ReleaseLink, 'sw360:releaseLinks'>
+
+const Capitalize = (text: string) =>
+    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface Props {
     componentId: string
@@ -37,21 +45,20 @@ interface Props {
 
 const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props): ReactNode => {
     const t = useTranslations('default')
-    const [data, setData] = useState<Array<Array<string | string[]>>>([])
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [clearingReleaseId, setClearingReleaseId] = useState<string | undefined>(undefined)
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
     const [linkingReleaseId, setLinkingReleaseId] = useState<string | undefined>(undefined)
     const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
-    const { data: session, status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     const handleClickDelete = (releaseId: string) => {
@@ -69,170 +76,213 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         setLinkingReleaseId(releaseId)
     }
 
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as EmbeddedLinkedReleases
-            return data
-        } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            return undefined
-        }
-    }, [])
+    const columns = useMemo<ColumnDef<ReleaseLink>[]>(
+        () => [
+            {
+                id: 'name',
+                header: t('Name'),
+                accessorKey: 'name',
+                enableSorting: false,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'version',
+                header: t('Version'),
+                cell: ({ row }) => {
+                    const { version, id } = row.original
+                    return (
+                        <Link
+                            href={'/components/releases/detail/' + id}
+                            className='link'
+                        >
+                            {version}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'clearingState',
+                header: t('Clearing State'),
+                cell: ({ row }) => <>{Capitalize(row.original.clearingState ?? '')}</>,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'mainlineState',
+                header: t('Release Mainline State'),
+                accessorKey: 'mainlineState',
+                enableSorting: false,
+                cell: ({ row }) => <>{Capitalize(row.original.mainlineState ?? '')}</>,
+                meta: {
+                    width: '20%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const { id } = row.original
+                    return (
+                        <span className='d-flex justify-content-evenly'>
+                            <Image
+                                src={fossologyIcon as StaticImport}
+                                width={20}
+                                height={20}
+                                style={{
+                                    marginRight: '5px',
+                                }}
+                                alt='Fossology'
+                                onClick={() => handleFossologyClearing(id)}
+                            />
+                            <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                <Link href={`/components/editRelease/${id}`}>
+                                    <FaPencilAlt
+                                        size={16}
+                                        className='btn-icon'
+                                    />
+                                </Link>
+                            </OverlayTrigger>
+                            <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
+                                <FaClipboard
+                                    className='btn-icon'
+                                    size={18}
+                                />
+                            </OverlayTrigger>
+                            <OverlayTrigger overlay={<Tooltip>{t('Link Project')}</Tooltip>}>
+                                <HiOutlineLink
+                                    className='btn-icon'
+                                    size={18}
+                                    onClick={() => handleLinkToProject(id)}
+                                />
+                            </OverlayTrigger>
+                            <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
+                                <IoMdGitMerge
+                                    size={18}
+                                    className='btn-icon'
+                                />
+                            </OverlayTrigger>
+                            <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                <span className='d-inline-block'>
+                                    <MdDeleteOutline
+                                        className='btn-icon'
+                                        size={20}
+                                        onClick={() => handleClickDelete(id)}
+                                    />
+                                </span>
+                            </OverlayTrigger>
+                        </span>
+                    )
+                },
+                meta: {
+                    width: '20%',
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
+
+    const [releaseData, setReleaseData] = useState<ReleaseLink[]>(() => [])
+    const memoizedData = useMemo(
+        () => releaseData,
+        [
+            releaseData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        fetchData(`components/${componentId}/releases`)
-            .then((releaseLinks: EmbeddedLinkedReleases | undefined) => {
-                if (releaseLinks === undefined) return
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
 
-                if (
-                    !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(releaseLinks['_embedded']['sw360:releaseLinks'])
-                ) {
-                    const data = releaseLinks['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
-                        item.name,
-                        [
-                            item.id,
-                            item.version,
-                        ],
-                        t(item.clearingState as never),
-                        t(item.clearingReport?.clearingReportStatus as never),
-                        t(item.mainlineState as never),
-                        item.id,
-                    ])
-                    setData(data)
+        const timeLimit = releaseData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(
+                    `components/${componentId}/releases`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-            })
-            .catch((err) => console.error(err))
+
+                const data = (await response.json()) as EmbeddedLinkedReleases
+                setReleaseData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
+                        ? []
+                        : data['_embedded']['sw360:releaseLinks'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
     }, [
+        session,
         componentId,
-        fetchData,
-        t,
     ])
 
-    const columns = [
-        {
-            id: 'name',
-            name: t('Name'),
-            sort: true,
-        },
-        {
-            id: 'version',
-            name: t('Version'),
-            formatter: ([id, version]: Array<string>) =>
-                _(
-                    <Link
-                        href={'/components/releases/detail/' + id}
-                        className='link'
-                    >
-                        {version}
-                    </Link>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'clearingState',
-            name: t('Clearing State'),
-            sort: true,
-        },
-        {
-            id: 'clearingReport',
-            name: t('CLEARING_REPORT'),
-            sort: true,
-        },
-        {
-            id: 'mainlineState',
-            name: t('Release Mainline State'),
-            sort: true,
-        },
-        {
-            id: 'action',
-            name: t('Actions'),
-            hidden: () => {
-                return session?.user?.userGroup === UserGroupType.SECURITY_USER
-            },
-            formatter: (id: string) =>
-                _(
-                    <span>
-                        <Image
-                            src={fossologyIcon as StaticImport}
-                            width={15}
-                            height={15}
-                            style={{
-                                marginRight: '5px',
-                            }}
-                            alt='Fossology'
-                            onClick={() => handleFossologyClearing(id)}
-                        />
-                        <Link href={`/components/editRelease/${id}`}>
-                            <FaPencilAlt className='btn-icon' />
-                        </Link>
-                        <HiOutlineLink
-                            className='btn-icon'
-                            onClick={() => handleLinkToProject(id)}
-                        />
-                        <FaTrashAlt
-                            className='btn-icon'
-                            onClick={() => handleClickDelete(id)}
-                        />
-                    </span>,
-                ),
-        },
-    ]
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
 
-    const moderationRequestCurrentComponentReleaseColumns = [
-        {
-            id: 'name',
-            name: t('Name'),
-            sort: true,
+        // table state config
+        state: {
+            columnVisibility: {
+                actions:
+                    !(session?.data?.user?.userGroup === UserGroupType.SECURITY_USER) ||
+                    calledFromModerationRequestDetail === undefined ||
+                    calledFromModerationRequestDetail === false,
+            },
         },
-        {
-            id: 'version',
-            name: t('Version'),
-            formatter: ([id, version]: Array<string>) =>
-                _(
-                    <Link
-                        href={'/components/releases/detail/' + id}
-                        className='link'
-                    >
-                        {version}
-                    </Link>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'clearingState',
-            name: t('Clearing State'),
-            sort: true,
-        },
-        {
-            id: 'clearingReport',
-            name: t('CLEARING_REPORT'),
-            sort: true,
-        },
-        {
-            id: 'mainlineState',
-            name: t('Release Mainline State'),
-            sort: true,
-        },
-    ]
+
+        // client side pagination
+        getPaginationRowModel: getPaginationRowModel(),
+    })
 
     return (
         <>
-            <div className='row'>
-                <Table
-                    data={data}
-                    search={true}
-                    columns={
-                        calledFromModerationRequestDetail !== undefined && calledFromModerationRequestDetail
-                            ? moderationRequestCurrentComponentReleaseColumns
-                            : columns
-                    }
-                    selector={true}
-                />
+            <div className='mb-3'>
+                {table ? (
+                    <>
+                        <ClientSidePageSizeSelector table={table} />
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                        />
+                        <ClientSideTableFooter table={table} />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
             </div>
             <DeleteReleaseModal
                 releaseId={deletingRelease}
