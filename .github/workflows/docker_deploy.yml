@@ -46,7 +46,7 @@ jobs:
           echo "GIT_REVISION=$(git describe --abbrev=6 --always --tags --match=[0-9]*)" >> $GITHUB_ENV
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22' # or your required version
 
